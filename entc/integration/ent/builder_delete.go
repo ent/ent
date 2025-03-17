@@ -24,56 +24,56 @@ type BuilderDelete struct {
 }
 
 // Where appends a list predicates to the BuilderDelete builder.
-func (bd *BuilderDelete) Where(ps ...predicate.Builder) *BuilderDelete {
-	bd.mutation.Where(ps...)
-	return bd
+func (d *BuilderDelete) Where(ps ...predicate.Builder) *BuilderDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (bd *BuilderDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, bd.sqlExec, bd.mutation, bd.hooks)
+func (d *BuilderDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bd *BuilderDelete) ExecX(ctx context.Context) int {
-	n, err := bd.Exec(ctx)
+func (d *BuilderDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (bd *BuilderDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *BuilderDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(builder.Table, sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt))
-	if ps := bd.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, bd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	bd.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // BuilderDeleteOne is the builder for deleting a single Builder entity.
 type BuilderDeleteOne struct {
-	bd *BuilderDelete
+	d *BuilderDelete
 }
 
 // Where appends a list predicates to the BuilderDelete builder.
-func (bdo *BuilderDeleteOne) Where(ps ...predicate.Builder) *BuilderDeleteOne {
-	bdo.bd.mutation.Where(ps...)
-	return bdo
+func (d *BuilderDeleteOne) Where(ps ...predicate.Builder) *BuilderDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (bdo *BuilderDeleteOne) Exec(ctx context.Context) error {
-	n, err := bdo.bd.Exec(ctx)
+func (d *BuilderDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (bdo *BuilderDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bdo *BuilderDeleteOne) ExecX(ctx context.Context) {
-	if err := bdo.Exec(ctx); err != nil {
+func (d *BuilderDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

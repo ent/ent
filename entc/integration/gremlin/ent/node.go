@@ -84,42 +84,42 @@ func (n *Node) FromResponse(res *gremlin.Response) error {
 }
 
 // QueryPrev queries the "prev" edge of the Node entity.
-func (n *Node) QueryPrev() *NodeQuery {
-	return NewNodeClient(n.config).QueryPrev(n)
+func (m *Node) QueryPrev() *NodeQuery {
+	return NewNodeClient(m.config).QueryPrev(m)
 }
 
 // QueryNext queries the "next" edge of the Node entity.
-func (n *Node) QueryNext() *NodeQuery {
-	return NewNodeClient(n.config).QueryNext(n)
+func (m *Node) QueryNext() *NodeQuery {
+	return NewNodeClient(m.config).QueryNext(m)
 }
 
 // Update returns a builder for updating this Node.
 // Note that you need to call Node.Unwrap() before calling this method if this Node
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (n *Node) Update() *NodeUpdateOne {
-	return NewNodeClient(n.config).UpdateOne(n)
+func (m *Node) Update() *NodeUpdateOne {
+	return NewNodeClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Node entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (n *Node) Unwrap() *Node {
-	_tx, ok := n.config.driver.(*txDriver)
+func (m *Node) Unwrap() *Node {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Node is not a transactional entity")
 	}
-	n.config.driver = _tx.drv
-	return n
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (n *Node) String() string {
+func (m *Node) String() string {
 	var builder strings.Builder
 	builder.WriteString("Node(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", n.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("value=")
-	builder.WriteString(fmt.Sprintf("%v", n.Value))
+	builder.WriteString(fmt.Sprintf("%v", m.Value))
 	builder.WriteString(", ")
-	if v := n.UpdatedAt; v != nil {
+	if v := m.UpdatedAt; v != nil {
 		builder.WriteString("updated_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}

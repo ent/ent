@@ -39,9 +39,9 @@ func (*Goods) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Goods fields.
-func (_go *Goods) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Goods) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -50,9 +50,9 @@ func (_go *Goods) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			_go.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		default:
-			_go.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -60,33 +60,33 @@ func (_go *Goods) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Goods.
 // This includes values selected through modifiers, order, etc.
-func (_go *Goods) Value(name string) (ent.Value, error) {
-	return _go.selectValues.Get(name)
+func (m *Goods) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Goods.
 // Note that you need to call Goods.Unwrap() before calling this method if this Goods
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_go *Goods) Update() *GoodsUpdateOne {
-	return NewGoodsClient(_go.config).UpdateOne(_go)
+func (m *Goods) Update() *GoodsUpdateOne {
+	return NewGoodsClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Goods entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_go *Goods) Unwrap() *Goods {
-	_tx, ok := _go.config.driver.(*txDriver)
+func (m *Goods) Unwrap() *Goods {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Goods is not a transactional entity")
 	}
-	_go.config.driver = _tx.drv
-	return _go
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (_go *Goods) String() string {
+func (m *Goods) String() string {
 	var builder strings.Builder
 	builder.WriteString("Goods(")
-	builder.WriteString(fmt.Sprintf("id=%v", _go.ID))
+	builder.WriteString(fmt.Sprintf("id=%v", m.ID))
 	builder.WriteByte(')')
 	return builder.String()
 }

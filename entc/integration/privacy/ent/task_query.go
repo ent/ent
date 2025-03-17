@@ -39,44 +39,44 @@ type TaskQuery struct {
 }
 
 // Where adds a new predicate for the TaskQuery builder.
-func (tq *TaskQuery) Where(ps ...predicate.Task) *TaskQuery {
-	tq.predicates = append(tq.predicates, ps...)
-	return tq
+func (q *TaskQuery) Where(ps ...predicate.Task) *TaskQuery {
+	q.predicates = append(q.predicates, ps...)
+	return q
 }
 
 // Limit the number of records to be returned by this query.
-func (tq *TaskQuery) Limit(limit int) *TaskQuery {
-	tq.ctx.Limit = &limit
-	return tq
+func (q *TaskQuery) Limit(limit int) *TaskQuery {
+	q.ctx.Limit = &limit
+	return q
 }
 
 // Offset to start from.
-func (tq *TaskQuery) Offset(offset int) *TaskQuery {
-	tq.ctx.Offset = &offset
-	return tq
+func (q *TaskQuery) Offset(offset int) *TaskQuery {
+	q.ctx.Offset = &offset
+	return q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (tq *TaskQuery) Unique(unique bool) *TaskQuery {
-	tq.ctx.Unique = &unique
-	return tq
+func (q *TaskQuery) Unique(unique bool) *TaskQuery {
+	q.ctx.Unique = &unique
+	return q
 }
 
 // Order specifies how the records should be ordered.
-func (tq *TaskQuery) Order(o ...task.OrderOption) *TaskQuery {
-	tq.order = append(tq.order, o...)
-	return tq
+func (q *TaskQuery) Order(o ...task.OrderOption) *TaskQuery {
+	q.order = append(q.order, o...)
+	return q
 }
 
 // QueryTeams chains the current query on the "teams" edge.
-func (tq *TaskQuery) QueryTeams() *TeamQuery {
-	query := (&TeamClient{config: tq.config}).Query()
+func (q *TaskQuery) QueryTeams() *TeamQuery {
+	query := (&TeamClient{config: q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
+		if err := q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := tq.sqlQuery(ctx)
+		selector := q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -85,20 +85,20 @@ func (tq *TaskQuery) QueryTeams() *TeamQuery {
 			sqlgraph.To(team.Table, team.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, task.TeamsTable, task.TeamsPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryOwner chains the current query on the "owner" edge.
-func (tq *TaskQuery) QueryOwner() *UserQuery {
-	query := (&UserClient{config: tq.config}).Query()
+func (q *TaskQuery) QueryOwner() *UserQuery {
+	query := (&UserClient{config: q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
+		if err := q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := tq.sqlQuery(ctx)
+		selector := q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -107,7 +107,7 @@ func (tq *TaskQuery) QueryOwner() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, task.OwnerTable, task.OwnerColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -115,8 +115,8 @@ func (tq *TaskQuery) QueryOwner() *UserQuery {
 
 // First returns the first Task entity from the query.
 // Returns a *NotFoundError when no Task was found.
-func (tq *TaskQuery) First(ctx context.Context) (*Task, error) {
-	nodes, err := tq.Limit(1).All(setContextOp(ctx, tq.ctx, ent.OpQueryFirst))
+func (q *TaskQuery) First(ctx context.Context) (*Task, error) {
+	nodes, err := q.Limit(1).All(setContextOp(ctx, q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -127,8 +127,8 @@ func (tq *TaskQuery) First(ctx context.Context) (*Task, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (tq *TaskQuery) FirstX(ctx context.Context) *Task {
-	node, err := tq.First(ctx)
+func (q *TaskQuery) FirstX(ctx context.Context) *Task {
+	node, err := q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -137,9 +137,9 @@ func (tq *TaskQuery) FirstX(ctx context.Context) *Task {
 
 // FirstID returns the first Task ID from the query.
 // Returns a *NotFoundError when no Task ID was found.
-func (tq *TaskQuery) FirstID(ctx context.Context) (id int, err error) {
+func (q *TaskQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = tq.Limit(1).IDs(setContextOp(ctx, tq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = q.Limit(1).IDs(setContextOp(ctx, q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -150,8 +150,8 @@ func (tq *TaskQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (tq *TaskQuery) FirstIDX(ctx context.Context) int {
-	id, err := tq.FirstID(ctx)
+func (q *TaskQuery) FirstIDX(ctx context.Context) int {
+	id, err := q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -161,8 +161,8 @@ func (tq *TaskQuery) FirstIDX(ctx context.Context) int {
 // Only returns a single Task entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Task entity is found.
 // Returns a *NotFoundError when no Task entities are found.
-func (tq *TaskQuery) Only(ctx context.Context) (*Task, error) {
-	nodes, err := tq.Limit(2).All(setContextOp(ctx, tq.ctx, ent.OpQueryOnly))
+func (q *TaskQuery) Only(ctx context.Context) (*Task, error) {
+	nodes, err := q.Limit(2).All(setContextOp(ctx, q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -177,8 +177,8 @@ func (tq *TaskQuery) Only(ctx context.Context) (*Task, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (tq *TaskQuery) OnlyX(ctx context.Context) *Task {
-	node, err := tq.Only(ctx)
+func (q *TaskQuery) OnlyX(ctx context.Context) *Task {
+	node, err := q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -188,9 +188,9 @@ func (tq *TaskQuery) OnlyX(ctx context.Context) *Task {
 // OnlyID is like Only, but returns the only Task ID in the query.
 // Returns a *NotSingularError when more than one Task ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (tq *TaskQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (q *TaskQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = tq.Limit(2).IDs(setContextOp(ctx, tq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = q.Limit(2).IDs(setContextOp(ctx, q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -205,8 +205,8 @@ func (tq *TaskQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (tq *TaskQuery) OnlyIDX(ctx context.Context) int {
-	id, err := tq.OnlyID(ctx)
+func (q *TaskQuery) OnlyIDX(ctx context.Context) int {
+	id, err := q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -214,18 +214,18 @@ func (tq *TaskQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Tasks.
-func (tq *TaskQuery) All(ctx context.Context) ([]*Task, error) {
-	ctx = setContextOp(ctx, tq.ctx, ent.OpQueryAll)
-	if err := tq.prepareQuery(ctx); err != nil {
+func (q *TaskQuery) All(ctx context.Context) ([]*Task, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryAll)
+	if err := q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Task, *TaskQuery]()
-	return withInterceptors[[]*Task](ctx, tq, qr, tq.inters)
+	return withInterceptors[[]*Task](ctx, q, qr, q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (tq *TaskQuery) AllX(ctx context.Context) []*Task {
-	nodes, err := tq.All(ctx)
+func (q *TaskQuery) AllX(ctx context.Context) []*Task {
+	nodes, err := q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -233,20 +233,20 @@ func (tq *TaskQuery) AllX(ctx context.Context) []*Task {
 }
 
 // IDs executes the query and returns a list of Task IDs.
-func (tq *TaskQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if tq.ctx.Unique == nil && tq.path != nil {
-		tq.Unique(true)
+func (q *TaskQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if q.ctx.Unique == nil && q.path != nil {
+		q.Unique(true)
 	}
-	ctx = setContextOp(ctx, tq.ctx, ent.OpQueryIDs)
-	if err = tq.Select(task.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryIDs)
+	if err = q.Select(task.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (tq *TaskQuery) IDsX(ctx context.Context) []int {
-	ids, err := tq.IDs(ctx)
+func (q *TaskQuery) IDsX(ctx context.Context) []int {
+	ids, err := q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -254,17 +254,17 @@ func (tq *TaskQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (tq *TaskQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, tq.ctx, ent.OpQueryCount)
-	if err := tq.prepareQuery(ctx); err != nil {
+func (q *TaskQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryCount)
+	if err := q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, tq, querierCount[*TaskQuery](), tq.inters)
+	return withInterceptors[int](ctx, q, querierCount[*TaskQuery](), q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (tq *TaskQuery) CountX(ctx context.Context) int {
-	count, err := tq.Count(ctx)
+func (q *TaskQuery) CountX(ctx context.Context) int {
+	count, err := q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -272,9 +272,9 @@ func (tq *TaskQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (tq *TaskQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, tq.ctx, ent.OpQueryExist)
-	switch _, err := tq.FirstID(ctx); {
+func (q *TaskQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryExist)
+	switch _, err := q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -285,8 +285,8 @@ func (tq *TaskQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (tq *TaskQuery) ExistX(ctx context.Context) bool {
-	exist, err := tq.Exist(ctx)
+func (q *TaskQuery) ExistX(ctx context.Context) bool {
+	exist, err := q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -295,44 +295,44 @@ func (tq *TaskQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the TaskQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (tq *TaskQuery) Clone() *TaskQuery {
-	if tq == nil {
+func (q *TaskQuery) Clone() *TaskQuery {
+	if q == nil {
 		return nil
 	}
 	return &TaskQuery{
-		config:     tq.config,
-		ctx:        tq.ctx.Clone(),
-		order:      append([]task.OrderOption{}, tq.order...),
-		inters:     append([]Interceptor{}, tq.inters...),
-		predicates: append([]predicate.Task{}, tq.predicates...),
-		withTeams:  tq.withTeams.Clone(),
-		withOwner:  tq.withOwner.Clone(),
+		config:     q.config,
+		ctx:        q.ctx.Clone(),
+		order:      append([]task.OrderOption{}, q.order...),
+		inters:     append([]Interceptor{}, q.inters...),
+		predicates: append([]predicate.Task{}, q.predicates...),
+		withTeams:  q.withTeams.Clone(),
+		withOwner:  q.withOwner.Clone(),
 		// clone intermediate query.
-		sql:  tq.sql.Clone(),
-		path: tq.path,
+		sql:  q.sql.Clone(),
+		path: q.path,
 	}
 }
 
 // WithTeams tells the query-builder to eager-load the nodes that are connected to
 // the "teams" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TaskQuery) WithTeams(opts ...func(*TeamQuery)) *TaskQuery {
-	query := (&TeamClient{config: tq.config}).Query()
+func (q *TaskQuery) WithTeams(opts ...func(*TeamQuery)) *TaskQuery {
+	query := (&TeamClient{config: q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	tq.withTeams = query
-	return tq
+	q.withTeams = query
+	return q
 }
 
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TaskQuery) WithOwner(opts ...func(*UserQuery)) *TaskQuery {
-	query := (&UserClient{config: tq.config}).Query()
+func (q *TaskQuery) WithOwner(opts ...func(*UserQuery)) *TaskQuery {
+	query := (&UserClient{config: q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	tq.withOwner = query
-	return tq
+	q.withOwner = query
+	return q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -349,10 +349,10 @@ func (tq *TaskQuery) WithOwner(opts ...func(*UserQuery)) *TaskQuery {
 //		GroupBy(task.FieldTitle).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (tq *TaskQuery) GroupBy(field string, fields ...string) *TaskGroupBy {
-	tq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &TaskGroupBy{build: tq}
-	grbuild.flds = &tq.ctx.Fields
+func (q *TaskQuery) GroupBy(field string, fields ...string) *TaskGroupBy {
+	q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &TaskGroupBy{build: q}
+	grbuild.flds = &q.ctx.Fields
 	grbuild.label = task.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -370,62 +370,62 @@ func (tq *TaskQuery) GroupBy(field string, fields ...string) *TaskGroupBy {
 //	client.Task.Query().
 //		Select(task.FieldTitle).
 //		Scan(ctx, &v)
-func (tq *TaskQuery) Select(fields ...string) *TaskSelect {
-	tq.ctx.Fields = append(tq.ctx.Fields, fields...)
-	sbuild := &TaskSelect{TaskQuery: tq}
+func (q *TaskQuery) Select(fields ...string) *TaskSelect {
+	q.ctx.Fields = append(q.ctx.Fields, fields...)
+	sbuild := &TaskSelect{TaskQuery: q}
 	sbuild.label = task.Label
-	sbuild.flds, sbuild.scan = &tq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a TaskSelect configured with the given aggregations.
-func (tq *TaskQuery) Aggregate(fns ...AggregateFunc) *TaskSelect {
-	return tq.Select().Aggregate(fns...)
+func (q *TaskQuery) Aggregate(fns ...AggregateFunc) *TaskSelect {
+	return q.Select().Aggregate(fns...)
 }
 
-func (tq *TaskQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range tq.inters {
+func (q *TaskQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, tq); err != nil {
+			if err := trv.Traverse(ctx, q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range tq.ctx.Fields {
+	for _, f := range q.ctx.Fields {
 		if !task.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if tq.path != nil {
-		prev, err := tq.path(ctx)
+	if q.path != nil {
+		prev, err := q.path(ctx)
 		if err != nil {
 			return err
 		}
-		tq.sql = prev
+		q.sql = prev
 	}
 	if task.Policy == nil {
 		return errors.New("ent: uninitialized task.Policy (forgotten import ent/runtime?)")
 	}
-	if err := task.Policy.EvalQuery(ctx, tq); err != nil {
+	if err := task.Policy.EvalQuery(ctx, q); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (tq *TaskQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Task, error) {
+func (q *TaskQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Task, error) {
 	var (
 		nodes       = []*Task{}
-		withFKs     = tq.withFKs
-		_spec       = tq.querySpec()
+		withFKs     = q.withFKs
+		_spec       = q.querySpec()
 		loadedTypes = [2]bool{
-			tq.withTeams != nil,
-			tq.withOwner != nil,
+			q.withTeams != nil,
+			q.withOwner != nil,
 		}
 	)
-	if tq.withOwner != nil {
+	if q.withOwner != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -435,7 +435,7 @@ func (tq *TaskQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Task, e
 		return (*Task).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Task{config: tq.config}
+		node := &Task{config: q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -443,21 +443,21 @@ func (tq *TaskQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Task, e
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, tq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := tq.withTeams; query != nil {
-		if err := tq.loadTeams(ctx, query, nodes,
+	if query := q.withTeams; query != nil {
+		if err := q.loadTeams(ctx, query, nodes,
 			func(n *Task) { n.Edges.Teams = []*Team{} },
 			func(n *Task, e *Team) { n.Edges.Teams = append(n.Edges.Teams, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := tq.withOwner; query != nil {
-		if err := tq.loadOwner(ctx, query, nodes, nil,
+	if query := q.withOwner; query != nil {
+		if err := q.loadOwner(ctx, query, nodes, nil,
 			func(n *Task, e *User) { n.Edges.Owner = e }); err != nil {
 			return nil, err
 		}
@@ -465,7 +465,7 @@ func (tq *TaskQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Task, e
 	return nodes, nil
 }
 
-func (tq *TaskQuery) loadTeams(ctx context.Context, query *TeamQuery, nodes []*Task, init func(*Task), assign func(*Task, *Team)) error {
+func (q *TaskQuery) loadTeams(ctx context.Context, query *TeamQuery, nodes []*Task, init func(*Task), assign func(*Task, *Team)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[int]*Task)
 	nids := make(map[int]map[*Task]struct{})
@@ -526,7 +526,7 @@ func (tq *TaskQuery) loadTeams(ctx context.Context, query *TeamQuery, nodes []*T
 	}
 	return nil
 }
-func (tq *TaskQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Task, init func(*Task), assign func(*Task, *User)) error {
+func (q *TaskQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Task, init func(*Task), assign func(*Task, *User)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Task)
 	for i := range nodes {
@@ -559,24 +559,24 @@ func (tq *TaskQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*T
 	return nil
 }
 
-func (tq *TaskQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := tq.querySpec()
-	_spec.Node.Columns = tq.ctx.Fields
-	if len(tq.ctx.Fields) > 0 {
-		_spec.Unique = tq.ctx.Unique != nil && *tq.ctx.Unique
+func (q *TaskQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := q.querySpec()
+	_spec.Node.Columns = q.ctx.Fields
+	if len(q.ctx.Fields) > 0 {
+		_spec.Unique = q.ctx.Unique != nil && *q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, tq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, q.driver, _spec)
 }
 
-func (tq *TaskQuery) querySpec() *sqlgraph.QuerySpec {
+func (q *TaskQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(task.Table, task.Columns, sqlgraph.NewFieldSpec(task.FieldID, field.TypeInt))
-	_spec.From = tq.sql
-	if unique := tq.ctx.Unique; unique != nil {
+	_spec.From = q.sql
+	if unique := q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if tq.path != nil {
+	} else if q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := tq.ctx.Fields; len(fields) > 0 {
+	if fields := q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, task.FieldID)
 		for i := range fields {
@@ -585,20 +585,20 @@ func (tq *TaskQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := tq.predicates; len(ps) > 0 {
+	if ps := q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := tq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := tq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := tq.order; len(ps) > 0 {
+	if ps := q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -608,33 +608,33 @@ func (tq *TaskQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (tq *TaskQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(tq.driver.Dialect())
+func (q *TaskQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(q.driver.Dialect())
 	t1 := builder.Table(task.Table)
-	columns := tq.ctx.Fields
+	columns := q.ctx.Fields
 	if len(columns) == 0 {
 		columns = task.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if tq.sql != nil {
-		selector = tq.sql
+	if q.sql != nil {
+		selector = q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if tq.ctx.Unique != nil && *tq.ctx.Unique {
+	if q.ctx.Unique != nil && *q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range tq.predicates {
+	for _, p := range q.predicates {
 		p(selector)
 	}
-	for _, p := range tq.order {
+	for _, p := range q.order {
 		p(selector)
 	}
-	if offset := tq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := tq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -661,27 +661,27 @@ func (tgb *TaskGroupBy) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*TaskQuery, *TaskGroupBy](ctx, tgb.build, tgb, tgb.build.inters, v)
 }
 
-func (tgb *TaskGroupBy) sqlScan(ctx context.Context, root *TaskQuery, v any) error {
+func (q *TaskGroupBy) sqlScan(ctx context.Context, root *TaskQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(tgb.fns))
-	for _, fn := range tgb.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*tgb.flds)+len(tgb.fns))
-		for _, f := range *tgb.flds {
+		columns := make([]string, 0, len(*q.flds)+len(q.fns))
+		for _, f := range *q.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*tgb.flds...)...)
+	selector.GroupBy(selector.Columns(*q.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := tgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -709,13 +709,13 @@ func (ts *TaskSelect) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*TaskQuery, *TaskSelect](ctx, ts.TaskQuery, ts, ts.inters, v)
 }
 
-func (ts *TaskSelect) sqlScan(ctx context.Context, root *TaskQuery, v any) error {
+func (q *TaskSelect) sqlScan(ctx context.Context, root *TaskQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(ts.fns))
-	for _, fn := range ts.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*ts.selector.flds); {
+	switch n := len(*q.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -723,7 +723,7 @@ func (ts *TaskSelect) sqlScan(ctx context.Context, root *TaskQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ts.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

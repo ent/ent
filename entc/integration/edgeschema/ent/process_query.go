@@ -37,44 +37,44 @@ type ProcessQuery struct {
 }
 
 // Where adds a new predicate for the ProcessQuery builder.
-func (pq *ProcessQuery) Where(ps ...predicate.Process) *ProcessQuery {
-	pq.predicates = append(pq.predicates, ps...)
-	return pq
+func (q *ProcessQuery) Where(ps ...predicate.Process) *ProcessQuery {
+	q.predicates = append(q.predicates, ps...)
+	return q
 }
 
 // Limit the number of records to be returned by this query.
-func (pq *ProcessQuery) Limit(limit int) *ProcessQuery {
-	pq.ctx.Limit = &limit
-	return pq
+func (q *ProcessQuery) Limit(limit int) *ProcessQuery {
+	q.ctx.Limit = &limit
+	return q
 }
 
 // Offset to start from.
-func (pq *ProcessQuery) Offset(offset int) *ProcessQuery {
-	pq.ctx.Offset = &offset
-	return pq
+func (q *ProcessQuery) Offset(offset int) *ProcessQuery {
+	q.ctx.Offset = &offset
+	return q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (pq *ProcessQuery) Unique(unique bool) *ProcessQuery {
-	pq.ctx.Unique = &unique
-	return pq
+func (q *ProcessQuery) Unique(unique bool) *ProcessQuery {
+	q.ctx.Unique = &unique
+	return q
 }
 
 // Order specifies how the records should be ordered.
-func (pq *ProcessQuery) Order(o ...process.OrderOption) *ProcessQuery {
-	pq.order = append(pq.order, o...)
-	return pq
+func (q *ProcessQuery) Order(o ...process.OrderOption) *ProcessQuery {
+	q.order = append(q.order, o...)
+	return q
 }
 
 // QueryFiles chains the current query on the "files" edge.
-func (pq *ProcessQuery) QueryFiles() *FileQuery {
-	query := (&FileClient{config: pq.config}).Query()
+func (q *ProcessQuery) QueryFiles() *FileQuery {
+	query := (&FileClient{config: q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := pq.prepareQuery(ctx); err != nil {
+		if err := q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := pq.sqlQuery(ctx)
+		selector := q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -83,20 +83,20 @@ func (pq *ProcessQuery) QueryFiles() *FileQuery {
 			sqlgraph.To(file.Table, file.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, process.FilesTable, process.FilesPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryAttachedFiles chains the current query on the "attached_files" edge.
-func (pq *ProcessQuery) QueryAttachedFiles() *AttachedFileQuery {
-	query := (&AttachedFileClient{config: pq.config}).Query()
+func (q *ProcessQuery) QueryAttachedFiles() *AttachedFileQuery {
+	query := (&AttachedFileClient{config: q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := pq.prepareQuery(ctx); err != nil {
+		if err := q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := pq.sqlQuery(ctx)
+		selector := q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -105,7 +105,7 @@ func (pq *ProcessQuery) QueryAttachedFiles() *AttachedFileQuery {
 			sqlgraph.To(attachedfile.Table, attachedfile.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, process.AttachedFilesTable, process.AttachedFilesColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -113,8 +113,8 @@ func (pq *ProcessQuery) QueryAttachedFiles() *AttachedFileQuery {
 
 // First returns the first Process entity from the query.
 // Returns a *NotFoundError when no Process was found.
-func (pq *ProcessQuery) First(ctx context.Context) (*Process, error) {
-	nodes, err := pq.Limit(1).All(setContextOp(ctx, pq.ctx, ent.OpQueryFirst))
+func (q *ProcessQuery) First(ctx context.Context) (*Process, error) {
+	nodes, err := q.Limit(1).All(setContextOp(ctx, q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -125,8 +125,8 @@ func (pq *ProcessQuery) First(ctx context.Context) (*Process, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (pq *ProcessQuery) FirstX(ctx context.Context) *Process {
-	node, err := pq.First(ctx)
+func (q *ProcessQuery) FirstX(ctx context.Context) *Process {
+	node, err := q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -135,9 +135,9 @@ func (pq *ProcessQuery) FirstX(ctx context.Context) *Process {
 
 // FirstID returns the first Process ID from the query.
 // Returns a *NotFoundError when no Process ID was found.
-func (pq *ProcessQuery) FirstID(ctx context.Context) (id int, err error) {
+func (q *ProcessQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = pq.Limit(1).IDs(setContextOp(ctx, pq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = q.Limit(1).IDs(setContextOp(ctx, q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -148,8 +148,8 @@ func (pq *ProcessQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (pq *ProcessQuery) FirstIDX(ctx context.Context) int {
-	id, err := pq.FirstID(ctx)
+func (q *ProcessQuery) FirstIDX(ctx context.Context) int {
+	id, err := q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -159,8 +159,8 @@ func (pq *ProcessQuery) FirstIDX(ctx context.Context) int {
 // Only returns a single Process entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Process entity is found.
 // Returns a *NotFoundError when no Process entities are found.
-func (pq *ProcessQuery) Only(ctx context.Context) (*Process, error) {
-	nodes, err := pq.Limit(2).All(setContextOp(ctx, pq.ctx, ent.OpQueryOnly))
+func (q *ProcessQuery) Only(ctx context.Context) (*Process, error) {
+	nodes, err := q.Limit(2).All(setContextOp(ctx, q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -175,8 +175,8 @@ func (pq *ProcessQuery) Only(ctx context.Context) (*Process, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (pq *ProcessQuery) OnlyX(ctx context.Context) *Process {
-	node, err := pq.Only(ctx)
+func (q *ProcessQuery) OnlyX(ctx context.Context) *Process {
+	node, err := q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -186,9 +186,9 @@ func (pq *ProcessQuery) OnlyX(ctx context.Context) *Process {
 // OnlyID is like Only, but returns the only Process ID in the query.
 // Returns a *NotSingularError when more than one Process ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (pq *ProcessQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (q *ProcessQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = pq.Limit(2).IDs(setContextOp(ctx, pq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = q.Limit(2).IDs(setContextOp(ctx, q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -203,8 +203,8 @@ func (pq *ProcessQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (pq *ProcessQuery) OnlyIDX(ctx context.Context) int {
-	id, err := pq.OnlyID(ctx)
+func (q *ProcessQuery) OnlyIDX(ctx context.Context) int {
+	id, err := q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -212,18 +212,18 @@ func (pq *ProcessQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Processes.
-func (pq *ProcessQuery) All(ctx context.Context) ([]*Process, error) {
-	ctx = setContextOp(ctx, pq.ctx, ent.OpQueryAll)
-	if err := pq.prepareQuery(ctx); err != nil {
+func (q *ProcessQuery) All(ctx context.Context) ([]*Process, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryAll)
+	if err := q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Process, *ProcessQuery]()
-	return withInterceptors[[]*Process](ctx, pq, qr, pq.inters)
+	return withInterceptors[[]*Process](ctx, q, qr, q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (pq *ProcessQuery) AllX(ctx context.Context) []*Process {
-	nodes, err := pq.All(ctx)
+func (q *ProcessQuery) AllX(ctx context.Context) []*Process {
+	nodes, err := q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -231,20 +231,20 @@ func (pq *ProcessQuery) AllX(ctx context.Context) []*Process {
 }
 
 // IDs executes the query and returns a list of Process IDs.
-func (pq *ProcessQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if pq.ctx.Unique == nil && pq.path != nil {
-		pq.Unique(true)
+func (q *ProcessQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if q.ctx.Unique == nil && q.path != nil {
+		q.Unique(true)
 	}
-	ctx = setContextOp(ctx, pq.ctx, ent.OpQueryIDs)
-	if err = pq.Select(process.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryIDs)
+	if err = q.Select(process.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pq *ProcessQuery) IDsX(ctx context.Context) []int {
-	ids, err := pq.IDs(ctx)
+func (q *ProcessQuery) IDsX(ctx context.Context) []int {
+	ids, err := q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -252,17 +252,17 @@ func (pq *ProcessQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (pq *ProcessQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, pq.ctx, ent.OpQueryCount)
-	if err := pq.prepareQuery(ctx); err != nil {
+func (q *ProcessQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryCount)
+	if err := q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, pq, querierCount[*ProcessQuery](), pq.inters)
+	return withInterceptors[int](ctx, q, querierCount[*ProcessQuery](), q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (pq *ProcessQuery) CountX(ctx context.Context) int {
-	count, err := pq.Count(ctx)
+func (q *ProcessQuery) CountX(ctx context.Context) int {
+	count, err := q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -270,9 +270,9 @@ func (pq *ProcessQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (pq *ProcessQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, pq.ctx, ent.OpQueryExist)
-	switch _, err := pq.FirstID(ctx); {
+func (q *ProcessQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryExist)
+	switch _, err := q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -283,8 +283,8 @@ func (pq *ProcessQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (pq *ProcessQuery) ExistX(ctx context.Context) bool {
-	exist, err := pq.Exist(ctx)
+func (q *ProcessQuery) ExistX(ctx context.Context) bool {
+	exist, err := q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -293,52 +293,52 @@ func (pq *ProcessQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the ProcessQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (pq *ProcessQuery) Clone() *ProcessQuery {
-	if pq == nil {
+func (q *ProcessQuery) Clone() *ProcessQuery {
+	if q == nil {
 		return nil
 	}
 	return &ProcessQuery{
-		config:            pq.config,
-		ctx:               pq.ctx.Clone(),
-		order:             append([]process.OrderOption{}, pq.order...),
-		inters:            append([]Interceptor{}, pq.inters...),
-		predicates:        append([]predicate.Process{}, pq.predicates...),
-		withFiles:         pq.withFiles.Clone(),
-		withAttachedFiles: pq.withAttachedFiles.Clone(),
+		config:            q.config,
+		ctx:               q.ctx.Clone(),
+		order:             append([]process.OrderOption{}, q.order...),
+		inters:            append([]Interceptor{}, q.inters...),
+		predicates:        append([]predicate.Process{}, q.predicates...),
+		withFiles:         q.withFiles.Clone(),
+		withAttachedFiles: q.withAttachedFiles.Clone(),
 		// clone intermediate query.
-		sql:  pq.sql.Clone(),
-		path: pq.path,
+		sql:  q.sql.Clone(),
+		path: q.path,
 	}
 }
 
 // WithFiles tells the query-builder to eager-load the nodes that are connected to
 // the "files" edge. The optional arguments are used to configure the query builder of the edge.
-func (pq *ProcessQuery) WithFiles(opts ...func(*FileQuery)) *ProcessQuery {
-	query := (&FileClient{config: pq.config}).Query()
+func (q *ProcessQuery) WithFiles(opts ...func(*FileQuery)) *ProcessQuery {
+	query := (&FileClient{config: q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	pq.withFiles = query
-	return pq
+	q.withFiles = query
+	return q
 }
 
 // WithAttachedFiles tells the query-builder to eager-load the nodes that are connected to
 // the "attached_files" edge. The optional arguments are used to configure the query builder of the edge.
-func (pq *ProcessQuery) WithAttachedFiles(opts ...func(*AttachedFileQuery)) *ProcessQuery {
-	query := (&AttachedFileClient{config: pq.config}).Query()
+func (q *ProcessQuery) WithAttachedFiles(opts ...func(*AttachedFileQuery)) *ProcessQuery {
+	query := (&AttachedFileClient{config: q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	pq.withAttachedFiles = query
-	return pq
+	q.withAttachedFiles = query
+	return q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
-func (pq *ProcessQuery) GroupBy(field string, fields ...string) *ProcessGroupBy {
-	pq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &ProcessGroupBy{build: pq}
-	grbuild.flds = &pq.ctx.Fields
+func (q *ProcessQuery) GroupBy(field string, fields ...string) *ProcessGroupBy {
+	q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &ProcessGroupBy{build: q}
+	grbuild.flds = &q.ctx.Fields
 	grbuild.label = process.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -346,59 +346,59 @@ func (pq *ProcessQuery) GroupBy(field string, fields ...string) *ProcessGroupBy 
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (pq *ProcessQuery) Select(fields ...string) *ProcessSelect {
-	pq.ctx.Fields = append(pq.ctx.Fields, fields...)
-	sbuild := &ProcessSelect{ProcessQuery: pq}
+func (q *ProcessQuery) Select(fields ...string) *ProcessSelect {
+	q.ctx.Fields = append(q.ctx.Fields, fields...)
+	sbuild := &ProcessSelect{ProcessQuery: q}
 	sbuild.label = process.Label
-	sbuild.flds, sbuild.scan = &pq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a ProcessSelect configured with the given aggregations.
-func (pq *ProcessQuery) Aggregate(fns ...AggregateFunc) *ProcessSelect {
-	return pq.Select().Aggregate(fns...)
+func (q *ProcessQuery) Aggregate(fns ...AggregateFunc) *ProcessSelect {
+	return q.Select().Aggregate(fns...)
 }
 
-func (pq *ProcessQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range pq.inters {
+func (q *ProcessQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, pq); err != nil {
+			if err := trv.Traverse(ctx, q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range pq.ctx.Fields {
+	for _, f := range q.ctx.Fields {
 		if !process.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if pq.path != nil {
-		prev, err := pq.path(ctx)
+	if q.path != nil {
+		prev, err := q.path(ctx)
 		if err != nil {
 			return err
 		}
-		pq.sql = prev
+		q.sql = prev
 	}
 	return nil
 }
 
-func (pq *ProcessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Process, error) {
+func (q *ProcessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Process, error) {
 	var (
 		nodes       = []*Process{}
-		_spec       = pq.querySpec()
+		_spec       = q.querySpec()
 		loadedTypes = [2]bool{
-			pq.withFiles != nil,
-			pq.withAttachedFiles != nil,
+			q.withFiles != nil,
+			q.withAttachedFiles != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Process).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Process{config: pq.config}
+		node := &Process{config: q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -406,21 +406,21 @@ func (pq *ProcessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Proc
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, pq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := pq.withFiles; query != nil {
-		if err := pq.loadFiles(ctx, query, nodes,
+	if query := q.withFiles; query != nil {
+		if err := q.loadFiles(ctx, query, nodes,
 			func(n *Process) { n.Edges.Files = []*File{} },
 			func(n *Process, e *File) { n.Edges.Files = append(n.Edges.Files, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := pq.withAttachedFiles; query != nil {
-		if err := pq.loadAttachedFiles(ctx, query, nodes,
+	if query := q.withAttachedFiles; query != nil {
+		if err := q.loadAttachedFiles(ctx, query, nodes,
 			func(n *Process) { n.Edges.AttachedFiles = []*AttachedFile{} },
 			func(n *Process, e *AttachedFile) { n.Edges.AttachedFiles = append(n.Edges.AttachedFiles, e) }); err != nil {
 			return nil, err
@@ -429,7 +429,7 @@ func (pq *ProcessQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Proc
 	return nodes, nil
 }
 
-func (pq *ProcessQuery) loadFiles(ctx context.Context, query *FileQuery, nodes []*Process, init func(*Process), assign func(*Process, *File)) error {
+func (q *ProcessQuery) loadFiles(ctx context.Context, query *FileQuery, nodes []*Process, init func(*Process), assign func(*Process, *File)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[int]*Process)
 	nids := make(map[int]map[*Process]struct{})
@@ -490,7 +490,7 @@ func (pq *ProcessQuery) loadFiles(ctx context.Context, query *FileQuery, nodes [
 	}
 	return nil
 }
-func (pq *ProcessQuery) loadAttachedFiles(ctx context.Context, query *AttachedFileQuery, nodes []*Process, init func(*Process), assign func(*Process, *AttachedFile)) error {
+func (q *ProcessQuery) loadAttachedFiles(ctx context.Context, query *AttachedFileQuery, nodes []*Process, init func(*Process), assign func(*Process, *AttachedFile)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Process)
 	for i := range nodes {
@@ -521,24 +521,24 @@ func (pq *ProcessQuery) loadAttachedFiles(ctx context.Context, query *AttachedFi
 	return nil
 }
 
-func (pq *ProcessQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := pq.querySpec()
-	_spec.Node.Columns = pq.ctx.Fields
-	if len(pq.ctx.Fields) > 0 {
-		_spec.Unique = pq.ctx.Unique != nil && *pq.ctx.Unique
+func (q *ProcessQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := q.querySpec()
+	_spec.Node.Columns = q.ctx.Fields
+	if len(q.ctx.Fields) > 0 {
+		_spec.Unique = q.ctx.Unique != nil && *q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, pq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, q.driver, _spec)
 }
 
-func (pq *ProcessQuery) querySpec() *sqlgraph.QuerySpec {
+func (q *ProcessQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(process.Table, process.Columns, sqlgraph.NewFieldSpec(process.FieldID, field.TypeInt))
-	_spec.From = pq.sql
-	if unique := pq.ctx.Unique; unique != nil {
+	_spec.From = q.sql
+	if unique := q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if pq.path != nil {
+	} else if q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := pq.ctx.Fields; len(fields) > 0 {
+	if fields := q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, process.FieldID)
 		for i := range fields {
@@ -547,20 +547,20 @@ func (pq *ProcessQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := pq.predicates; len(ps) > 0 {
+	if ps := q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := pq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := pq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := pq.order; len(ps) > 0 {
+	if ps := q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -570,33 +570,33 @@ func (pq *ProcessQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (pq *ProcessQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(pq.driver.Dialect())
+func (q *ProcessQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(q.driver.Dialect())
 	t1 := builder.Table(process.Table)
-	columns := pq.ctx.Fields
+	columns := q.ctx.Fields
 	if len(columns) == 0 {
 		columns = process.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if pq.sql != nil {
-		selector = pq.sql
+	if q.sql != nil {
+		selector = q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if pq.ctx.Unique != nil && *pq.ctx.Unique {
+	if q.ctx.Unique != nil && *q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range pq.predicates {
+	for _, p := range q.predicates {
 		p(selector)
 	}
-	for _, p := range pq.order {
+	for _, p := range q.order {
 		p(selector)
 	}
-	if offset := pq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := pq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -623,27 +623,27 @@ func (pgb *ProcessGroupBy) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*ProcessQuery, *ProcessGroupBy](ctx, pgb.build, pgb, pgb.build.inters, v)
 }
 
-func (pgb *ProcessGroupBy) sqlScan(ctx context.Context, root *ProcessQuery, v any) error {
+func (q *ProcessGroupBy) sqlScan(ctx context.Context, root *ProcessQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(pgb.fns))
-	for _, fn := range pgb.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*pgb.flds)+len(pgb.fns))
-		for _, f := range *pgb.flds {
+		columns := make([]string, 0, len(*q.flds)+len(q.fns))
+		for _, f := range *q.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*pgb.flds...)...)
+	selector.GroupBy(selector.Columns(*q.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := pgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -671,13 +671,13 @@ func (ps *ProcessSelect) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*ProcessQuery, *ProcessSelect](ctx, ps.ProcessQuery, ps, ps.inters, v)
 }
 
-func (ps *ProcessSelect) sqlScan(ctx context.Context, root *ProcessQuery, v any) error {
+func (q *ProcessSelect) sqlScan(ctx context.Context, root *ProcessQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(ps.fns))
-	for _, fn := range ps.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*ps.selector.flds); {
+	switch n := len(*q.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -685,7 +685,7 @@ func (ps *ProcessSelect) sqlScan(ctx context.Context, root *ProcessQuery, v any)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ps.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

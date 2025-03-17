@@ -39,26 +39,26 @@ func (a *Api) FromResponse(res *gremlin.Response) error {
 // Update returns a builder for updating this Api.
 // Note that you need to call Api.Unwrap() before calling this method if this Api
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (a *Api) Update() *APIUpdateOne {
-	return NewAPIClient(a.config).UpdateOne(a)
+func (m *Api) Update() *APIUpdateOne {
+	return NewAPIClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Api entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (a *Api) Unwrap() *Api {
-	_tx, ok := a.config.driver.(*txDriver)
+func (m *Api) Unwrap() *Api {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Api is not a transactional entity")
 	}
-	a.config.driver = _tx.drv
-	return a
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (a *Api) String() string {
+func (m *Api) String() string {
 	var builder strings.Builder
 	builder.WriteString("Api(")
-	builder.WriteString(fmt.Sprintf("id=%v", a.ID))
+	builder.WriteString(fmt.Sprintf("id=%v", m.ID))
 	builder.WriteByte(')')
 	return builder.String()
 }

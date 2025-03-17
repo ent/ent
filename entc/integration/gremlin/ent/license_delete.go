@@ -25,38 +25,38 @@ type LicenseDelete struct {
 }
 
 // Where appends a list predicates to the LicenseDelete builder.
-func (ld *LicenseDelete) Where(ps ...predicate.License) *LicenseDelete {
-	ld.mutation.Where(ps...)
-	return ld
+func (d *LicenseDelete) Where(ps ...predicate.License) *LicenseDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (ld *LicenseDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, ld.gremlinExec, ld.mutation, ld.hooks)
+func (d *LicenseDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.gremlinExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ld *LicenseDelete) ExecX(ctx context.Context) int {
-	n, err := ld.Exec(ctx)
+func (d *LicenseDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (ld *LicenseDelete) gremlinExec(ctx context.Context) (int, error) {
+func (d *LicenseDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := ld.gremlin().Query()
-	if err := ld.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := d.gremlin().Query()
+	if err := d.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
-	ld.mutation.done = true
+	d.mutation.done = true
 	return res.ReadInt()
 }
 
-func (ld *LicenseDelete) gremlin() *dsl.Traversal {
+func (d *LicenseDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(license.Label)
-	for _, p := range ld.mutation.predicates {
+	for _, p := range d.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()
@@ -64,18 +64,18 @@ func (ld *LicenseDelete) gremlin() *dsl.Traversal {
 
 // LicenseDeleteOne is the builder for deleting a single License entity.
 type LicenseDeleteOne struct {
-	ld *LicenseDelete
+	d *LicenseDelete
 }
 
 // Where appends a list predicates to the LicenseDelete builder.
-func (ldo *LicenseDeleteOne) Where(ps ...predicate.License) *LicenseDeleteOne {
-	ldo.ld.mutation.Where(ps...)
-	return ldo
+func (d *LicenseDeleteOne) Where(ps ...predicate.License) *LicenseDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (ldo *LicenseDeleteOne) Exec(ctx context.Context) error {
-	n, err := ldo.ld.Exec(ctx)
+func (d *LicenseDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -87,8 +87,8 @@ func (ldo *LicenseDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ldo *LicenseDeleteOne) ExecX(ctx context.Context) {
-	if err := ldo.Exec(ctx); err != nil {
+func (d *LicenseDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

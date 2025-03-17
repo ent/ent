@@ -24,56 +24,56 @@ type BlogDelete struct {
 }
 
 // Where appends a list predicates to the BlogDelete builder.
-func (bd *BlogDelete) Where(ps ...predicate.Blog) *BlogDelete {
-	bd.mutation.Where(ps...)
-	return bd
+func (d *BlogDelete) Where(ps ...predicate.Blog) *BlogDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (bd *BlogDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, bd.sqlExec, bd.mutation, bd.hooks)
+func (d *BlogDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bd *BlogDelete) ExecX(ctx context.Context) int {
-	n, err := bd.Exec(ctx)
+func (d *BlogDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (bd *BlogDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *BlogDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(blog.Table, sqlgraph.NewFieldSpec(blog.FieldID, field.TypeInt))
-	if ps := bd.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, bd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	bd.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // BlogDeleteOne is the builder for deleting a single Blog entity.
 type BlogDeleteOne struct {
-	bd *BlogDelete
+	d *BlogDelete
 }
 
 // Where appends a list predicates to the BlogDelete builder.
-func (bdo *BlogDeleteOne) Where(ps ...predicate.Blog) *BlogDeleteOne {
-	bdo.bd.mutation.Where(ps...)
-	return bdo
+func (d *BlogDeleteOne) Where(ps ...predicate.Blog) *BlogDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (bdo *BlogDeleteOne) Exec(ctx context.Context) error {
-	n, err := bdo.bd.Exec(ctx)
+func (d *BlogDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (bdo *BlogDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bdo *BlogDeleteOne) ExecX(ctx context.Context) {
-	if err := bdo.Exec(ctx); err != nil {
+func (d *BlogDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

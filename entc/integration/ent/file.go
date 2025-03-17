@@ -121,9 +121,9 @@ func (*File) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the File fields.
-func (f *File) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *File) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -132,79 +132,79 @@ func (f *File) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			f.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case file.FieldSetID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field set_id", values[i])
 			} else if value.Valid {
-				f.SetID = int(value.Int64)
+				m.SetID = int(value.Int64)
 			}
 		case file.FieldSize:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field size", values[i])
 			} else if value.Valid {
-				f.Size = int(value.Int64)
+				m.Size = int(value.Int64)
 			}
 		case file.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				f.Name = value.String
+				m.Name = value.String
 			}
 		case file.FieldUser:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field user", values[i])
 			} else if value.Valid {
-				f.User = new(string)
-				*f.User = value.String
+				m.User = new(string)
+				*m.User = value.String
 			}
 		case file.FieldGroup:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field group", values[i])
 			} else if value.Valid {
-				f.Group = value.String
+				m.Group = value.String
 			}
 		case file.FieldOp:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field op", values[i])
 			} else if value.Valid {
-				f.Op = value.Bool
+				m.Op = value.Bool
 			}
 		case file.FieldFieldID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field field_id", values[i])
 			} else if value.Valid {
-				f.FieldID = int(value.Int64)
+				m.FieldID = int(value.Int64)
 			}
 		case file.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				f.CreateTime = value.Time
+				m.CreateTime = value.Time
 			}
 		case file.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field file_type_files", value)
 			} else if value.Valid {
-				f.file_type_files = new(int)
-				*f.file_type_files = int(value.Int64)
+				m.file_type_files = new(int)
+				*m.file_type_files = int(value.Int64)
 			}
 		case file.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field group_files", value)
 			} else if value.Valid {
-				f.group_files = new(int)
-				*f.group_files = int(value.Int64)
+				m.group_files = new(int)
+				*m.group_files = int(value.Int64)
 			}
 		case file.ForeignKeys[2]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field user_files", value)
 			} else if value.Valid {
-				f.user_files = new(int)
-				*f.user_files = int(value.Int64)
+				m.user_files = new(int)
+				*m.user_files = int(value.Int64)
 			}
 		default:
-			f.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -212,98 +212,98 @@ func (f *File) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the File.
 // This includes values selected through modifiers, order, etc.
-func (f *File) Value(name string) (ent.Value, error) {
-	return f.selectValues.Get(name)
+func (m *File) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryOwner queries the "owner" edge of the File entity.
-func (f *File) QueryOwner() *UserQuery {
-	return NewFileClient(f.config).QueryOwner(f)
+func (m *File) QueryOwner() *UserQuery {
+	return NewFileClient(m.config).QueryOwner(m)
 }
 
 // QueryType queries the "type" edge of the File entity.
-func (f *File) QueryType() *FileTypeQuery {
-	return NewFileClient(f.config).QueryType(f)
+func (m *File) QueryType() *FileTypeQuery {
+	return NewFileClient(m.config).QueryType(m)
 }
 
 // QueryField queries the "field" edge of the File entity.
-func (f *File) QueryField() *FieldTypeQuery {
-	return NewFileClient(f.config).QueryField(f)
+func (m *File) QueryField() *FieldTypeQuery {
+	return NewFileClient(m.config).QueryField(m)
 }
 
 // Update returns a builder for updating this File.
 // Note that you need to call File.Unwrap() before calling this method if this File
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (f *File) Update() *FileUpdateOne {
-	return NewFileClient(f.config).UpdateOne(f)
+func (m *File) Update() *FileUpdateOne {
+	return NewFileClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the File entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (f *File) Unwrap() *File {
-	_tx, ok := f.config.driver.(*txDriver)
+func (m *File) Unwrap() *File {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: File is not a transactional entity")
 	}
-	f.config.driver = _tx.drv
-	return f
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (f *File) String() string {
+func (m *File) String() string {
 	var builder strings.Builder
 	builder.WriteString("File(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", f.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("set_id=")
-	builder.WriteString(fmt.Sprintf("%v", f.SetID))
+	builder.WriteString(fmt.Sprintf("%v", m.SetID))
 	builder.WriteString(", ")
 	builder.WriteString("size=")
-	builder.WriteString(fmt.Sprintf("%v", f.Size))
+	builder.WriteString(fmt.Sprintf("%v", m.Size))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(f.Name)
+	builder.WriteString(m.Name)
 	builder.WriteString(", ")
-	if v := f.User; v != nil {
+	if v := m.User; v != nil {
 		builder.WriteString("user=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
 	builder.WriteString("group=")
-	builder.WriteString(f.Group)
+	builder.WriteString(m.Group)
 	builder.WriteString(", ")
 	builder.WriteString("op=")
-	builder.WriteString(fmt.Sprintf("%v", f.Op))
+	builder.WriteString(fmt.Sprintf("%v", m.Op))
 	builder.WriteString(", ")
 	builder.WriteString("field_id=")
-	builder.WriteString(fmt.Sprintf("%v", f.FieldID))
+	builder.WriteString(fmt.Sprintf("%v", m.FieldID))
 	builder.WriteString(", ")
 	builder.WriteString("create_time=")
-	builder.WriteString(f.CreateTime.Format(time.ANSIC))
+	builder.WriteString(m.CreateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedField returns the Field named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (f *File) NamedField(name string) ([]*FieldType, error) {
-	if f.Edges.namedField == nil {
+func (m *File) NamedField(name string) ([]*FieldType, error) {
+	if m.Edges.namedField == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := f.Edges.namedField[name]
+	nodes, ok := m.Edges.namedField[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (f *File) appendNamedField(name string, edges ...*FieldType) {
-	if f.Edges.namedField == nil {
-		f.Edges.namedField = make(map[string][]*FieldType)
+func (m *File) appendNamedField(name string, edges ...*FieldType) {
+	if m.Edges.namedField == nil {
+		m.Edges.namedField = make(map[string][]*FieldType)
 	}
 	if len(edges) == 0 {
-		f.Edges.namedField[name] = []*FieldType{}
+		m.Edges.namedField[name] = []*FieldType{}
 	} else {
-		f.Edges.namedField[name] = append(f.Edges.namedField[name], edges...)
+		m.Edges.namedField[name] = append(m.Edges.namedField[name], edges...)
 	}
 }
 

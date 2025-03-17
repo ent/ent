@@ -24,56 +24,56 @@ type TagDelete struct {
 }
 
 // Where appends a list predicates to the TagDelete builder.
-func (td *TagDelete) Where(ps ...predicate.Tag) *TagDelete {
-	td.mutation.Where(ps...)
-	return td
+func (d *TagDelete) Where(ps ...predicate.Tag) *TagDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (td *TagDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, td.sqlExec, td.mutation, td.hooks)
+func (d *TagDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (td *TagDelete) ExecX(ctx context.Context) int {
-	n, err := td.Exec(ctx)
+func (d *TagDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (td *TagDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *TagDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(tag.Table, sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt))
-	if ps := td.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, td.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	td.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // TagDeleteOne is the builder for deleting a single Tag entity.
 type TagDeleteOne struct {
-	td *TagDelete
+	d *TagDelete
 }
 
 // Where appends a list predicates to the TagDelete builder.
-func (tdo *TagDeleteOne) Where(ps ...predicate.Tag) *TagDeleteOne {
-	tdo.td.mutation.Where(ps...)
-	return tdo
+func (d *TagDeleteOne) Where(ps ...predicate.Tag) *TagDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (tdo *TagDeleteOne) Exec(ctx context.Context) error {
-	n, err := tdo.td.Exec(ctx)
+func (d *TagDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (tdo *TagDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tdo *TagDeleteOne) ExecX(ctx context.Context) {
-	if err := tdo.Exec(ctx); err != nil {
+func (d *TagDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

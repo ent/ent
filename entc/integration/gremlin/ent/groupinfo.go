@@ -66,38 +66,38 @@ func (gi *GroupInfo) FromResponse(res *gremlin.Response) error {
 }
 
 // QueryGroups queries the "groups" edge of the GroupInfo entity.
-func (gi *GroupInfo) QueryGroups() *GroupQuery {
-	return NewGroupInfoClient(gi.config).QueryGroups(gi)
+func (m *GroupInfo) QueryGroups() *GroupQuery {
+	return NewGroupInfoClient(m.config).QueryGroups(m)
 }
 
 // Update returns a builder for updating this GroupInfo.
 // Note that you need to call GroupInfo.Unwrap() before calling this method if this GroupInfo
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (gi *GroupInfo) Update() *GroupInfoUpdateOne {
-	return NewGroupInfoClient(gi.config).UpdateOne(gi)
+func (m *GroupInfo) Update() *GroupInfoUpdateOne {
+	return NewGroupInfoClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the GroupInfo entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (gi *GroupInfo) Unwrap() *GroupInfo {
-	_tx, ok := gi.config.driver.(*txDriver)
+func (m *GroupInfo) Unwrap() *GroupInfo {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: GroupInfo is not a transactional entity")
 	}
-	gi.config.driver = _tx.drv
-	return gi
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (gi *GroupInfo) String() string {
+func (m *GroupInfo) String() string {
 	var builder strings.Builder
 	builder.WriteString("GroupInfo(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", gi.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("desc=")
-	builder.WriteString(gi.Desc)
+	builder.WriteString(m.Desc)
 	builder.WriteString(", ")
 	builder.WriteString("max_users=")
-	builder.WriteString(fmt.Sprintf("%v", gi.MaxUsers))
+	builder.WriteString(fmt.Sprintf("%v", m.MaxUsers))
 	builder.WriteByte(')')
 	return builder.String()
 }

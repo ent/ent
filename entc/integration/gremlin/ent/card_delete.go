@@ -25,38 +25,38 @@ type CardDelete struct {
 }
 
 // Where appends a list predicates to the CardDelete builder.
-func (cd *CardDelete) Where(ps ...predicate.Card) *CardDelete {
-	cd.mutation.Where(ps...)
-	return cd
+func (d *CardDelete) Where(ps ...predicate.Card) *CardDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (cd *CardDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, cd.gremlinExec, cd.mutation, cd.hooks)
+func (d *CardDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.gremlinExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cd *CardDelete) ExecX(ctx context.Context) int {
-	n, err := cd.Exec(ctx)
+func (d *CardDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (cd *CardDelete) gremlinExec(ctx context.Context) (int, error) {
+func (d *CardDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := cd.gremlin().Query()
-	if err := cd.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := d.gremlin().Query()
+	if err := d.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
-	cd.mutation.done = true
+	d.mutation.done = true
 	return res.ReadInt()
 }
 
-func (cd *CardDelete) gremlin() *dsl.Traversal {
+func (d *CardDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(card.Label)
-	for _, p := range cd.mutation.predicates {
+	for _, p := range d.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()
@@ -64,18 +64,18 @@ func (cd *CardDelete) gremlin() *dsl.Traversal {
 
 // CardDeleteOne is the builder for deleting a single Card entity.
 type CardDeleteOne struct {
-	cd *CardDelete
+	d *CardDelete
 }
 
 // Where appends a list predicates to the CardDelete builder.
-func (cdo *CardDeleteOne) Where(ps ...predicate.Card) *CardDeleteOne {
-	cdo.cd.mutation.Where(ps...)
-	return cdo
+func (d *CardDeleteOne) Where(ps ...predicate.Card) *CardDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (cdo *CardDeleteOne) Exec(ctx context.Context) error {
-	n, err := cdo.cd.Exec(ctx)
+func (d *CardDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -87,8 +87,8 @@ func (cdo *CardDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cdo *CardDeleteOne) ExecX(ctx context.Context) {
-	if err := cdo.Exec(ctx); err != nil {
+func (d *CardDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

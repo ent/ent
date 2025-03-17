@@ -39,9 +39,9 @@ func (*Api) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Api fields.
-func (a *Api) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Api) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -50,9 +50,9 @@ func (a *Api) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			a.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		default:
-			a.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -60,33 +60,33 @@ func (a *Api) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Api.
 // This includes values selected through modifiers, order, etc.
-func (a *Api) Value(name string) (ent.Value, error) {
-	return a.selectValues.Get(name)
+func (m *Api) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Api.
 // Note that you need to call Api.Unwrap() before calling this method if this Api
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (a *Api) Update() *APIUpdateOne {
-	return NewAPIClient(a.config).UpdateOne(a)
+func (m *Api) Update() *APIUpdateOne {
+	return NewAPIClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Api entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (a *Api) Unwrap() *Api {
-	_tx, ok := a.config.driver.(*txDriver)
+func (m *Api) Unwrap() *Api {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Api is not a transactional entity")
 	}
-	a.config.driver = _tx.drv
-	return a
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (a *Api) String() string {
+func (m *Api) String() string {
 	var builder strings.Builder
 	builder.WriteString("Api(")
-	builder.WriteString(fmt.Sprintf("id=%v", a.ID))
+	builder.WriteString(fmt.Sprintf("id=%v", m.ID))
 	builder.WriteByte(')')
 	return builder.String()
 }

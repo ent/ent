@@ -41,44 +41,44 @@ type TagQuery struct {
 }
 
 // Where adds a new predicate for the TagQuery builder.
-func (tq *TagQuery) Where(ps ...predicate.Tag) *TagQuery {
-	tq.predicates = append(tq.predicates, ps...)
-	return tq
+func (q *TagQuery) Where(ps ...predicate.Tag) *TagQuery {
+	q.predicates = append(q.predicates, ps...)
+	return q
 }
 
 // Limit the number of records to be returned by this query.
-func (tq *TagQuery) Limit(limit int) *TagQuery {
-	tq.ctx.Limit = &limit
-	return tq
+func (q *TagQuery) Limit(limit int) *TagQuery {
+	q.ctx.Limit = &limit
+	return q
 }
 
 // Offset to start from.
-func (tq *TagQuery) Offset(offset int) *TagQuery {
-	tq.ctx.Offset = &offset
-	return tq
+func (q *TagQuery) Offset(offset int) *TagQuery {
+	q.ctx.Offset = &offset
+	return q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (tq *TagQuery) Unique(unique bool) *TagQuery {
-	tq.ctx.Unique = &unique
-	return tq
+func (q *TagQuery) Unique(unique bool) *TagQuery {
+	q.ctx.Unique = &unique
+	return q
 }
 
 // Order specifies how the records should be ordered.
-func (tq *TagQuery) Order(o ...tag.OrderOption) *TagQuery {
-	tq.order = append(tq.order, o...)
-	return tq
+func (q *TagQuery) Order(o ...tag.OrderOption) *TagQuery {
+	q.order = append(q.order, o...)
+	return q
 }
 
 // QueryTweets chains the current query on the "tweets" edge.
-func (tq *TagQuery) QueryTweets() *TweetQuery {
-	query := (&TweetClient{config: tq.config}).Query()
+func (q *TagQuery) QueryTweets() *TweetQuery {
+	query := (&TweetClient{config: q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
+		if err := q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := tq.sqlQuery(ctx)
+		selector := q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -87,20 +87,20 @@ func (tq *TagQuery) QueryTweets() *TweetQuery {
 			sqlgraph.To(tweet.Table, tweet.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, tag.TweetsTable, tag.TweetsPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryGroups chains the current query on the "groups" edge.
-func (tq *TagQuery) QueryGroups() *GroupQuery {
-	query := (&GroupClient{config: tq.config}).Query()
+func (q *TagQuery) QueryGroups() *GroupQuery {
+	query := (&GroupClient{config: q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
+		if err := q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := tq.sqlQuery(ctx)
+		selector := q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -109,20 +109,20 @@ func (tq *TagQuery) QueryGroups() *GroupQuery {
 			sqlgraph.To(group.Table, group.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, tag.GroupsTable, tag.GroupsPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryTweetTags chains the current query on the "tweet_tags" edge.
-func (tq *TagQuery) QueryTweetTags() *TweetTagQuery {
-	query := (&TweetTagClient{config: tq.config}).Query()
+func (q *TagQuery) QueryTweetTags() *TweetTagQuery {
+	query := (&TweetTagClient{config: q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
+		if err := q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := tq.sqlQuery(ctx)
+		selector := q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -131,20 +131,20 @@ func (tq *TagQuery) QueryTweetTags() *TweetTagQuery {
 			sqlgraph.To(tweettag.Table, tweettag.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, tag.TweetTagsTable, tag.TweetTagsColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryGroupTags chains the current query on the "group_tags" edge.
-func (tq *TagQuery) QueryGroupTags() *GroupTagQuery {
-	query := (&GroupTagClient{config: tq.config}).Query()
+func (q *TagQuery) QueryGroupTags() *GroupTagQuery {
+	query := (&GroupTagClient{config: q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
+		if err := q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := tq.sqlQuery(ctx)
+		selector := q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -153,7 +153,7 @@ func (tq *TagQuery) QueryGroupTags() *GroupTagQuery {
 			sqlgraph.To(grouptag.Table, grouptag.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, tag.GroupTagsTable, tag.GroupTagsColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -161,8 +161,8 @@ func (tq *TagQuery) QueryGroupTags() *GroupTagQuery {
 
 // First returns the first Tag entity from the query.
 // Returns a *NotFoundError when no Tag was found.
-func (tq *TagQuery) First(ctx context.Context) (*Tag, error) {
-	nodes, err := tq.Limit(1).All(setContextOp(ctx, tq.ctx, ent.OpQueryFirst))
+func (q *TagQuery) First(ctx context.Context) (*Tag, error) {
+	nodes, err := q.Limit(1).All(setContextOp(ctx, q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -173,8 +173,8 @@ func (tq *TagQuery) First(ctx context.Context) (*Tag, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (tq *TagQuery) FirstX(ctx context.Context) *Tag {
-	node, err := tq.First(ctx)
+func (q *TagQuery) FirstX(ctx context.Context) *Tag {
+	node, err := q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -183,9 +183,9 @@ func (tq *TagQuery) FirstX(ctx context.Context) *Tag {
 
 // FirstID returns the first Tag ID from the query.
 // Returns a *NotFoundError when no Tag ID was found.
-func (tq *TagQuery) FirstID(ctx context.Context) (id int, err error) {
+func (q *TagQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = tq.Limit(1).IDs(setContextOp(ctx, tq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = q.Limit(1).IDs(setContextOp(ctx, q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -196,8 +196,8 @@ func (tq *TagQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (tq *TagQuery) FirstIDX(ctx context.Context) int {
-	id, err := tq.FirstID(ctx)
+func (q *TagQuery) FirstIDX(ctx context.Context) int {
+	id, err := q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -207,8 +207,8 @@ func (tq *TagQuery) FirstIDX(ctx context.Context) int {
 // Only returns a single Tag entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Tag entity is found.
 // Returns a *NotFoundError when no Tag entities are found.
-func (tq *TagQuery) Only(ctx context.Context) (*Tag, error) {
-	nodes, err := tq.Limit(2).All(setContextOp(ctx, tq.ctx, ent.OpQueryOnly))
+func (q *TagQuery) Only(ctx context.Context) (*Tag, error) {
+	nodes, err := q.Limit(2).All(setContextOp(ctx, q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -223,8 +223,8 @@ func (tq *TagQuery) Only(ctx context.Context) (*Tag, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (tq *TagQuery) OnlyX(ctx context.Context) *Tag {
-	node, err := tq.Only(ctx)
+func (q *TagQuery) OnlyX(ctx context.Context) *Tag {
+	node, err := q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -234,9 +234,9 @@ func (tq *TagQuery) OnlyX(ctx context.Context) *Tag {
 // OnlyID is like Only, but returns the only Tag ID in the query.
 // Returns a *NotSingularError when more than one Tag ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (tq *TagQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (q *TagQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = tq.Limit(2).IDs(setContextOp(ctx, tq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = q.Limit(2).IDs(setContextOp(ctx, q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -251,8 +251,8 @@ func (tq *TagQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (tq *TagQuery) OnlyIDX(ctx context.Context) int {
-	id, err := tq.OnlyID(ctx)
+func (q *TagQuery) OnlyIDX(ctx context.Context) int {
+	id, err := q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -260,18 +260,18 @@ func (tq *TagQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Tags.
-func (tq *TagQuery) All(ctx context.Context) ([]*Tag, error) {
-	ctx = setContextOp(ctx, tq.ctx, ent.OpQueryAll)
-	if err := tq.prepareQuery(ctx); err != nil {
+func (q *TagQuery) All(ctx context.Context) ([]*Tag, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryAll)
+	if err := q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Tag, *TagQuery]()
-	return withInterceptors[[]*Tag](ctx, tq, qr, tq.inters)
+	return withInterceptors[[]*Tag](ctx, q, qr, q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (tq *TagQuery) AllX(ctx context.Context) []*Tag {
-	nodes, err := tq.All(ctx)
+func (q *TagQuery) AllX(ctx context.Context) []*Tag {
+	nodes, err := q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -279,20 +279,20 @@ func (tq *TagQuery) AllX(ctx context.Context) []*Tag {
 }
 
 // IDs executes the query and returns a list of Tag IDs.
-func (tq *TagQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if tq.ctx.Unique == nil && tq.path != nil {
-		tq.Unique(true)
+func (q *TagQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if q.ctx.Unique == nil && q.path != nil {
+		q.Unique(true)
 	}
-	ctx = setContextOp(ctx, tq.ctx, ent.OpQueryIDs)
-	if err = tq.Select(tag.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryIDs)
+	if err = q.Select(tag.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (tq *TagQuery) IDsX(ctx context.Context) []int {
-	ids, err := tq.IDs(ctx)
+func (q *TagQuery) IDsX(ctx context.Context) []int {
+	ids, err := q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -300,17 +300,17 @@ func (tq *TagQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (tq *TagQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, tq.ctx, ent.OpQueryCount)
-	if err := tq.prepareQuery(ctx); err != nil {
+func (q *TagQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryCount)
+	if err := q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, tq, querierCount[*TagQuery](), tq.inters)
+	return withInterceptors[int](ctx, q, querierCount[*TagQuery](), q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (tq *TagQuery) CountX(ctx context.Context) int {
-	count, err := tq.Count(ctx)
+func (q *TagQuery) CountX(ctx context.Context) int {
+	count, err := q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -318,9 +318,9 @@ func (tq *TagQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (tq *TagQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, tq.ctx, ent.OpQueryExist)
-	switch _, err := tq.FirstID(ctx); {
+func (q *TagQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryExist)
+	switch _, err := q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -331,8 +331,8 @@ func (tq *TagQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (tq *TagQuery) ExistX(ctx context.Context) bool {
-	exist, err := tq.Exist(ctx)
+func (q *TagQuery) ExistX(ctx context.Context) bool {
+	exist, err := q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -341,68 +341,68 @@ func (tq *TagQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the TagQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (tq *TagQuery) Clone() *TagQuery {
-	if tq == nil {
+func (q *TagQuery) Clone() *TagQuery {
+	if q == nil {
 		return nil
 	}
 	return &TagQuery{
-		config:        tq.config,
-		ctx:           tq.ctx.Clone(),
-		order:         append([]tag.OrderOption{}, tq.order...),
-		inters:        append([]Interceptor{}, tq.inters...),
-		predicates:    append([]predicate.Tag{}, tq.predicates...),
-		withTweets:    tq.withTweets.Clone(),
-		withGroups:    tq.withGroups.Clone(),
-		withTweetTags: tq.withTweetTags.Clone(),
-		withGroupTags: tq.withGroupTags.Clone(),
+		config:        q.config,
+		ctx:           q.ctx.Clone(),
+		order:         append([]tag.OrderOption{}, q.order...),
+		inters:        append([]Interceptor{}, q.inters...),
+		predicates:    append([]predicate.Tag{}, q.predicates...),
+		withTweets:    q.withTweets.Clone(),
+		withGroups:    q.withGroups.Clone(),
+		withTweetTags: q.withTweetTags.Clone(),
+		withGroupTags: q.withGroupTags.Clone(),
 		// clone intermediate query.
-		sql:  tq.sql.Clone(),
-		path: tq.path,
+		sql:  q.sql.Clone(),
+		path: q.path,
 	}
 }
 
 // WithTweets tells the query-builder to eager-load the nodes that are connected to
 // the "tweets" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TagQuery) WithTweets(opts ...func(*TweetQuery)) *TagQuery {
-	query := (&TweetClient{config: tq.config}).Query()
+func (q *TagQuery) WithTweets(opts ...func(*TweetQuery)) *TagQuery {
+	query := (&TweetClient{config: q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	tq.withTweets = query
-	return tq
+	q.withTweets = query
+	return q
 }
 
 // WithGroups tells the query-builder to eager-load the nodes that are connected to
 // the "groups" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TagQuery) WithGroups(opts ...func(*GroupQuery)) *TagQuery {
-	query := (&GroupClient{config: tq.config}).Query()
+func (q *TagQuery) WithGroups(opts ...func(*GroupQuery)) *TagQuery {
+	query := (&GroupClient{config: q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	tq.withGroups = query
-	return tq
+	q.withGroups = query
+	return q
 }
 
 // WithTweetTags tells the query-builder to eager-load the nodes that are connected to
 // the "tweet_tags" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TagQuery) WithTweetTags(opts ...func(*TweetTagQuery)) *TagQuery {
-	query := (&TweetTagClient{config: tq.config}).Query()
+func (q *TagQuery) WithTweetTags(opts ...func(*TweetTagQuery)) *TagQuery {
+	query := (&TweetTagClient{config: q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	tq.withTweetTags = query
-	return tq
+	q.withTweetTags = query
+	return q
 }
 
 // WithGroupTags tells the query-builder to eager-load the nodes that are connected to
 // the "group_tags" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TagQuery) WithGroupTags(opts ...func(*GroupTagQuery)) *TagQuery {
-	query := (&GroupTagClient{config: tq.config}).Query()
+func (q *TagQuery) WithGroupTags(opts ...func(*GroupTagQuery)) *TagQuery {
+	query := (&GroupTagClient{config: q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	tq.withGroupTags = query
-	return tq
+	q.withGroupTags = query
+	return q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -419,10 +419,10 @@ func (tq *TagQuery) WithGroupTags(opts ...func(*GroupTagQuery)) *TagQuery {
 //		GroupBy(tag.FieldValue).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (tq *TagQuery) GroupBy(field string, fields ...string) *TagGroupBy {
-	tq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &TagGroupBy{build: tq}
-	grbuild.flds = &tq.ctx.Fields
+func (q *TagQuery) GroupBy(field string, fields ...string) *TagGroupBy {
+	q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &TagGroupBy{build: q}
+	grbuild.flds = &q.ctx.Fields
 	grbuild.label = tag.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -440,61 +440,61 @@ func (tq *TagQuery) GroupBy(field string, fields ...string) *TagGroupBy {
 //	client.Tag.Query().
 //		Select(tag.FieldValue).
 //		Scan(ctx, &v)
-func (tq *TagQuery) Select(fields ...string) *TagSelect {
-	tq.ctx.Fields = append(tq.ctx.Fields, fields...)
-	sbuild := &TagSelect{TagQuery: tq}
+func (q *TagQuery) Select(fields ...string) *TagSelect {
+	q.ctx.Fields = append(q.ctx.Fields, fields...)
+	sbuild := &TagSelect{TagQuery: q}
 	sbuild.label = tag.Label
-	sbuild.flds, sbuild.scan = &tq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a TagSelect configured with the given aggregations.
-func (tq *TagQuery) Aggregate(fns ...AggregateFunc) *TagSelect {
-	return tq.Select().Aggregate(fns...)
+func (q *TagQuery) Aggregate(fns ...AggregateFunc) *TagSelect {
+	return q.Select().Aggregate(fns...)
 }
 
-func (tq *TagQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range tq.inters {
+func (q *TagQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, tq); err != nil {
+			if err := trv.Traverse(ctx, q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range tq.ctx.Fields {
+	for _, f := range q.ctx.Fields {
 		if !tag.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if tq.path != nil {
-		prev, err := tq.path(ctx)
+	if q.path != nil {
+		prev, err := q.path(ctx)
 		if err != nil {
 			return err
 		}
-		tq.sql = prev
+		q.sql = prev
 	}
 	return nil
 }
 
-func (tq *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, error) {
+func (q *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, error) {
 	var (
 		nodes       = []*Tag{}
-		_spec       = tq.querySpec()
+		_spec       = q.querySpec()
 		loadedTypes = [4]bool{
-			tq.withTweets != nil,
-			tq.withGroups != nil,
-			tq.withTweetTags != nil,
-			tq.withGroupTags != nil,
+			q.withTweets != nil,
+			q.withGroups != nil,
+			q.withTweetTags != nil,
+			q.withGroupTags != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Tag).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Tag{config: tq.config}
+		node := &Tag{config: q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -502,35 +502,35 @@ func (tq *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, err
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, tq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := tq.withTweets; query != nil {
-		if err := tq.loadTweets(ctx, query, nodes,
+	if query := q.withTweets; query != nil {
+		if err := q.loadTweets(ctx, query, nodes,
 			func(n *Tag) { n.Edges.Tweets = []*Tweet{} },
 			func(n *Tag, e *Tweet) { n.Edges.Tweets = append(n.Edges.Tweets, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := tq.withGroups; query != nil {
-		if err := tq.loadGroups(ctx, query, nodes,
+	if query := q.withGroups; query != nil {
+		if err := q.loadGroups(ctx, query, nodes,
 			func(n *Tag) { n.Edges.Groups = []*Group{} },
 			func(n *Tag, e *Group) { n.Edges.Groups = append(n.Edges.Groups, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := tq.withTweetTags; query != nil {
-		if err := tq.loadTweetTags(ctx, query, nodes,
+	if query := q.withTweetTags; query != nil {
+		if err := q.loadTweetTags(ctx, query, nodes,
 			func(n *Tag) { n.Edges.TweetTags = []*TweetTag{} },
 			func(n *Tag, e *TweetTag) { n.Edges.TweetTags = append(n.Edges.TweetTags, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := tq.withGroupTags; query != nil {
-		if err := tq.loadGroupTags(ctx, query, nodes,
+	if query := q.withGroupTags; query != nil {
+		if err := q.loadGroupTags(ctx, query, nodes,
 			func(n *Tag) { n.Edges.GroupTags = []*GroupTag{} },
 			func(n *Tag, e *GroupTag) { n.Edges.GroupTags = append(n.Edges.GroupTags, e) }); err != nil {
 			return nil, err
@@ -539,7 +539,7 @@ func (tq *TagQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Tag, err
 	return nodes, nil
 }
 
-func (tq *TagQuery) loadTweets(ctx context.Context, query *TweetQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *Tweet)) error {
+func (q *TagQuery) loadTweets(ctx context.Context, query *TweetQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *Tweet)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[int]*Tag)
 	nids := make(map[int]map[*Tag]struct{})
@@ -600,7 +600,7 @@ func (tq *TagQuery) loadTweets(ctx context.Context, query *TweetQuery, nodes []*
 	}
 	return nil
 }
-func (tq *TagQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *Group)) error {
+func (q *TagQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *Group)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[int]*Tag)
 	nids := make(map[int]map[*Tag]struct{})
@@ -661,7 +661,7 @@ func (tq *TagQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []*
 	}
 	return nil
 }
-func (tq *TagQuery) loadTweetTags(ctx context.Context, query *TweetTagQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *TweetTag)) error {
+func (q *TagQuery) loadTweetTags(ctx context.Context, query *TweetTagQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *TweetTag)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Tag)
 	for i := range nodes {
@@ -691,7 +691,7 @@ func (tq *TagQuery) loadTweetTags(ctx context.Context, query *TweetTagQuery, nod
 	}
 	return nil
 }
-func (tq *TagQuery) loadGroupTags(ctx context.Context, query *GroupTagQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *GroupTag)) error {
+func (q *TagQuery) loadGroupTags(ctx context.Context, query *GroupTagQuery, nodes []*Tag, init func(*Tag), assign func(*Tag, *GroupTag)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Tag)
 	for i := range nodes {
@@ -722,24 +722,24 @@ func (tq *TagQuery) loadGroupTags(ctx context.Context, query *GroupTagQuery, nod
 	return nil
 }
 
-func (tq *TagQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := tq.querySpec()
-	_spec.Node.Columns = tq.ctx.Fields
-	if len(tq.ctx.Fields) > 0 {
-		_spec.Unique = tq.ctx.Unique != nil && *tq.ctx.Unique
+func (q *TagQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := q.querySpec()
+	_spec.Node.Columns = q.ctx.Fields
+	if len(q.ctx.Fields) > 0 {
+		_spec.Unique = q.ctx.Unique != nil && *q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, tq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, q.driver, _spec)
 }
 
-func (tq *TagQuery) querySpec() *sqlgraph.QuerySpec {
+func (q *TagQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(tag.Table, tag.Columns, sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt))
-	_spec.From = tq.sql
-	if unique := tq.ctx.Unique; unique != nil {
+	_spec.From = q.sql
+	if unique := q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if tq.path != nil {
+	} else if q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := tq.ctx.Fields; len(fields) > 0 {
+	if fields := q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, tag.FieldID)
 		for i := range fields {
@@ -748,20 +748,20 @@ func (tq *TagQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := tq.predicates; len(ps) > 0 {
+	if ps := q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := tq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := tq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := tq.order; len(ps) > 0 {
+	if ps := q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -771,33 +771,33 @@ func (tq *TagQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (tq *TagQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(tq.driver.Dialect())
+func (q *TagQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(q.driver.Dialect())
 	t1 := builder.Table(tag.Table)
-	columns := tq.ctx.Fields
+	columns := q.ctx.Fields
 	if len(columns) == 0 {
 		columns = tag.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if tq.sql != nil {
-		selector = tq.sql
+	if q.sql != nil {
+		selector = q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if tq.ctx.Unique != nil && *tq.ctx.Unique {
+	if q.ctx.Unique != nil && *q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range tq.predicates {
+	for _, p := range q.predicates {
 		p(selector)
 	}
-	for _, p := range tq.order {
+	for _, p := range q.order {
 		p(selector)
 	}
-	if offset := tq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := tq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -824,27 +824,27 @@ func (tgb *TagGroupBy) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*TagQuery, *TagGroupBy](ctx, tgb.build, tgb, tgb.build.inters, v)
 }
 
-func (tgb *TagGroupBy) sqlScan(ctx context.Context, root *TagQuery, v any) error {
+func (q *TagGroupBy) sqlScan(ctx context.Context, root *TagQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(tgb.fns))
-	for _, fn := range tgb.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*tgb.flds)+len(tgb.fns))
-		for _, f := range *tgb.flds {
+		columns := make([]string, 0, len(*q.flds)+len(q.fns))
+		for _, f := range *q.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*tgb.flds...)...)
+	selector.GroupBy(selector.Columns(*q.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := tgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -872,13 +872,13 @@ func (ts *TagSelect) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*TagQuery, *TagSelect](ctx, ts.TagQuery, ts, ts.inters, v)
 }
 
-func (ts *TagSelect) sqlScan(ctx context.Context, root *TagQuery, v any) error {
+func (q *TagSelect) sqlScan(ctx context.Context, root *TagQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(ts.fns))
-	for _, fn := range ts.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*ts.selector.flds); {
+	switch n := len(*q.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -886,7 +886,7 @@ func (ts *TagSelect) sqlScan(ctx context.Context, root *TagQuery, v any) error {
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ts.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

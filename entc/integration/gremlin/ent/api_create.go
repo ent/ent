@@ -23,18 +23,18 @@ type APICreate struct {
 }
 
 // Mutation returns the APIMutation object of the builder.
-func (ac *APICreate) Mutation() *APIMutation {
-	return ac.mutation
+func (m *APICreate) Mutation() *APIMutation {
+	return m.mutation
 }
 
 // Save creates the Api in the database.
-func (ac *APICreate) Save(ctx context.Context) (*Api, error) {
-	return withHooks(ctx, ac.gremlinSave, ac.mutation, ac.hooks)
+func (c *APICreate) Save(ctx context.Context) (*Api, error) {
+	return withHooks(ctx, c.gremlinSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (ac *APICreate) SaveX(ctx context.Context) *Api {
-	v, err := ac.Save(ctx)
+func (c *APICreate) SaveX(ctx context.Context) *Api {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -42,45 +42,45 @@ func (ac *APICreate) SaveX(ctx context.Context) *Api {
 }
 
 // Exec executes the query.
-func (ac *APICreate) Exec(ctx context.Context) error {
-	_, err := ac.Save(ctx)
+func (c *APICreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ac *APICreate) ExecX(ctx context.Context) {
-	if err := ac.Exec(ctx); err != nil {
+func (c *APICreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ac *APICreate) check() error {
+func (c *APICreate) check() error {
 	return nil
 }
 
-func (ac *APICreate) gremlinSave(ctx context.Context) (*Api, error) {
-	if err := ac.check(); err != nil {
+func (c *APICreate) gremlinSave(ctx context.Context) (*Api, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := ac.gremlin().Query()
-	if err := ac.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := c.gremlin().Query()
+	if err := c.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	rnode := &Api{config: ac.config}
+	rnode := &Api{config: c.config}
 	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	ac.mutation.id = &rnode.ID
-	ac.mutation.done = true
+	c.mutation.id = &rnode.ID
+	c.mutation.done = true
 	return rnode, nil
 }
 
-func (ac *APICreate) gremlin() *dsl.Traversal {
+func (c *APICreate) gremlin() *dsl.Traversal {
 	v := g.AddV(api.Label)
 	return v.ValueMap(true)
 }

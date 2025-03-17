@@ -25,58 +25,58 @@ type GroupDelete struct {
 }
 
 // Where appends a list predicates to the GroupDelete builder.
-func (gd *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
-	gd.mutation.Where(ps...)
-	return gd
+func (d *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (gd *GroupDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, gd.sqlExec, gd.mutation, gd.hooks)
+func (d *GroupDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gd *GroupDelete) ExecX(ctx context.Context) int {
-	n, err := gd.Exec(ctx)
+func (d *GroupDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (gd *GroupDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *GroupDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(group.Table, sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt))
-	_spec.Node.Schema = gd.schemaConfig.Group
-	ctx = internal.NewSchemaConfigContext(ctx, gd.schemaConfig)
-	if ps := gd.mutation.predicates; len(ps) > 0 {
+	_spec.Node.Schema = d.schemaConfig.Group
+	ctx = internal.NewSchemaConfigContext(ctx, d.schemaConfig)
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, gd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	gd.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // GroupDeleteOne is the builder for deleting a single Group entity.
 type GroupDeleteOne struct {
-	gd *GroupDelete
+	d *GroupDelete
 }
 
 // Where appends a list predicates to the GroupDelete builder.
-func (gdo *GroupDeleteOne) Where(ps ...predicate.Group) *GroupDeleteOne {
-	gdo.gd.mutation.Where(ps...)
-	return gdo
+func (d *GroupDeleteOne) Where(ps ...predicate.Group) *GroupDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (gdo *GroupDeleteOne) Exec(ctx context.Context) error {
-	n, err := gdo.gd.Exec(ctx)
+func (d *GroupDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -88,8 +88,8 @@ func (gdo *GroupDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gdo *GroupDeleteOne) ExecX(ctx context.Context) {
-	if err := gdo.Exec(ctx); err != nil {
+func (d *GroupDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

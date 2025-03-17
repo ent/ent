@@ -27,33 +27,33 @@ type SpecCreate struct {
 }
 
 // AddCardIDs adds the "card" edge to the Card entity by IDs.
-func (sc *SpecCreate) AddCardIDs(ids ...int) *SpecCreate {
-	sc.mutation.AddCardIDs(ids...)
-	return sc
+func (m *SpecCreate) AddCardIDs(ids ...int) *SpecCreate {
+	m.mutation.AddCardIDs(ids...)
+	return m
 }
 
 // AddCard adds the "card" edges to the Card entity.
-func (sc *SpecCreate) AddCard(c ...*Card) *SpecCreate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (m *SpecCreate) AddCard(v ...*Card) *SpecCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return sc.AddCardIDs(ids...)
+	return m.AddCardIDs(ids...)
 }
 
 // Mutation returns the SpecMutation object of the builder.
-func (sc *SpecCreate) Mutation() *SpecMutation {
-	return sc.mutation
+func (m *SpecCreate) Mutation() *SpecMutation {
+	return m.mutation
 }
 
 // Save creates the Spec in the database.
-func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
-	return withHooks(ctx, sc.sqlSave, sc.mutation, sc.hooks)
+func (c *SpecCreate) Save(ctx context.Context) (*Spec, error) {
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (sc *SpecCreate) SaveX(ctx context.Context) *Spec {
-	v, err := sc.Save(ctx)
+func (c *SpecCreate) SaveX(ctx context.Context) *Spec {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -61,29 +61,29 @@ func (sc *SpecCreate) SaveX(ctx context.Context) *Spec {
 }
 
 // Exec executes the query.
-func (sc *SpecCreate) Exec(ctx context.Context) error {
-	_, err := sc.Save(ctx)
+func (c *SpecCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (sc *SpecCreate) ExecX(ctx context.Context) {
-	if err := sc.Exec(ctx); err != nil {
+func (c *SpecCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (sc *SpecCreate) check() error {
+func (c *SpecCreate) check() error {
 	return nil
 }
 
-func (sc *SpecCreate) sqlSave(ctx context.Context) (*Spec, error) {
-	if err := sc.check(); err != nil {
+func (c *SpecCreate) sqlSave(ctx context.Context) (*Spec, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := sc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, sc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -91,18 +91,18 @@ func (sc *SpecCreate) sqlSave(ctx context.Context) (*Spec, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	sc.mutation.id = &_node.ID
-	sc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (sc *SpecCreate) createSpec() (*Spec, *sqlgraph.CreateSpec) {
+func (c *SpecCreate) createSpec() (*Spec, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Spec{config: sc.config}
+		_node = &Spec{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(spec.Table, sqlgraph.NewFieldSpec(spec.FieldID, field.TypeInt))
 	)
-	_spec.OnConflict = sc.conflict
-	if nodes := sc.mutation.CardIDs(); len(nodes) > 0 {
+	_spec.OnConflict = c.conflict
+	if nodes := c.mutation.CardIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -131,11 +131,9 @@ func (sc *SpecCreate) createSpec() (*Spec, *sqlgraph.CreateSpec) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-func (sc *SpecCreate) OnConflict(opts ...sql.ConflictOption) *SpecUpsertOne {
-	sc.conflict = opts
-	return &SpecUpsertOne{
-		create: sc,
-	}
+func (c *SpecCreate) OnConflict(opts ...sql.ConflictOption) *SpecUpsertOne {
+	c.conflict = opts
+	return &SpecUpsertOne{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -144,11 +142,9 @@ func (sc *SpecCreate) OnConflict(opts ...sql.ConflictOption) *SpecUpsertOne {
 //	client.Spec.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (sc *SpecCreate) OnConflictColumns(columns ...string) *SpecUpsertOne {
-	sc.conflict = append(sc.conflict, sql.ConflictColumns(columns...))
-	return &SpecUpsertOne{
-		create: sc,
-	}
+func (c *SpecCreate) OnConflictColumns(columns ...string) *SpecUpsertOne {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &SpecUpsertOne{create: c}
 }
 
 type (
@@ -246,16 +242,16 @@ type SpecCreateBulk struct {
 }
 
 // Save creates the Spec entities in the database.
-func (scb *SpecCreateBulk) Save(ctx context.Context) ([]*Spec, error) {
-	if scb.err != nil {
-		return nil, scb.err
+func (c *SpecCreateBulk) Save(ctx context.Context) ([]*Spec, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(scb.builders))
-	nodes := make([]*Spec, len(scb.builders))
-	mutators := make([]Mutator, len(scb.builders))
-	for i := range scb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Spec, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := scb.builders[i]
+			builder := c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SpecMutation)
 				if !ok {
@@ -268,12 +264,12 @@ func (scb *SpecCreateBulk) Save(ctx context.Context) ([]*Spec, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, scb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = scb.conflict
+					spec.OnConflict = c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, scb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -297,7 +293,7 @@ func (scb *SpecCreateBulk) Save(ctx context.Context) ([]*Spec, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, scb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -305,8 +301,8 @@ func (scb *SpecCreateBulk) Save(ctx context.Context) ([]*Spec, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (scb *SpecCreateBulk) SaveX(ctx context.Context) []*Spec {
-	v, err := scb.Save(ctx)
+func (c *SpecCreateBulk) SaveX(ctx context.Context) []*Spec {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -314,14 +310,14 @@ func (scb *SpecCreateBulk) SaveX(ctx context.Context) []*Spec {
 }
 
 // Exec executes the query.
-func (scb *SpecCreateBulk) Exec(ctx context.Context) error {
-	_, err := scb.Save(ctx)
+func (c *SpecCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (scb *SpecCreateBulk) ExecX(ctx context.Context) {
-	if err := scb.Exec(ctx); err != nil {
+func (c *SpecCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -336,11 +332,9 @@ func (scb *SpecCreateBulk) ExecX(ctx context.Context) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-func (scb *SpecCreateBulk) OnConflict(opts ...sql.ConflictOption) *SpecUpsertBulk {
-	scb.conflict = opts
-	return &SpecUpsertBulk{
-		create: scb,
-	}
+func (c *SpecCreateBulk) OnConflict(opts ...sql.ConflictOption) *SpecUpsertBulk {
+	c.conflict = opts
+	return &SpecUpsertBulk{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -349,11 +343,9 @@ func (scb *SpecCreateBulk) OnConflict(opts ...sql.ConflictOption) *SpecUpsertBul
 //	client.Spec.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (scb *SpecCreateBulk) OnConflictColumns(columns ...string) *SpecUpsertBulk {
-	scb.conflict = append(scb.conflict, sql.ConflictColumns(columns...))
-	return &SpecUpsertBulk{
-		create: scb,
-	}
+func (c *SpecCreateBulk) OnConflictColumns(columns ...string) *SpecUpsertBulk {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &SpecUpsertBulk{create: c}
 }
 
 // SpecUpsertBulk is the builder for "upsert"-ing

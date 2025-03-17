@@ -28,76 +28,76 @@ type RelationshipCreate struct {
 }
 
 // SetWeight sets the "weight" field.
-func (rc *RelationshipCreate) SetWeight(i int) *RelationshipCreate {
-	rc.mutation.SetWeight(i)
-	return rc
+func (m *RelationshipCreate) SetWeight(v int) *RelationshipCreate {
+	m.mutation.SetWeight(v)
+	return m
 }
 
 // SetNillableWeight sets the "weight" field if the given value is not nil.
-func (rc *RelationshipCreate) SetNillableWeight(i *int) *RelationshipCreate {
-	if i != nil {
-		rc.SetWeight(*i)
+func (m *RelationshipCreate) SetNillableWeight(v *int) *RelationshipCreate {
+	if v != nil {
+		m.SetWeight(*v)
 	}
-	return rc
+	return m
 }
 
 // SetUserID sets the "user_id" field.
-func (rc *RelationshipCreate) SetUserID(i int) *RelationshipCreate {
-	rc.mutation.SetUserID(i)
-	return rc
+func (m *RelationshipCreate) SetUserID(v int) *RelationshipCreate {
+	m.mutation.SetUserID(v)
+	return m
 }
 
 // SetRelativeID sets the "relative_id" field.
-func (rc *RelationshipCreate) SetRelativeID(i int) *RelationshipCreate {
-	rc.mutation.SetRelativeID(i)
-	return rc
+func (m *RelationshipCreate) SetRelativeID(v int) *RelationshipCreate {
+	m.mutation.SetRelativeID(v)
+	return m
 }
 
 // SetInfoID sets the "info_id" field.
-func (rc *RelationshipCreate) SetInfoID(i int) *RelationshipCreate {
-	rc.mutation.SetInfoID(i)
-	return rc
+func (m *RelationshipCreate) SetInfoID(v int) *RelationshipCreate {
+	m.mutation.SetInfoID(v)
+	return m
 }
 
 // SetNillableInfoID sets the "info_id" field if the given value is not nil.
-func (rc *RelationshipCreate) SetNillableInfoID(i *int) *RelationshipCreate {
-	if i != nil {
-		rc.SetInfoID(*i)
+func (m *RelationshipCreate) SetNillableInfoID(v *int) *RelationshipCreate {
+	if v != nil {
+		m.SetInfoID(*v)
 	}
-	return rc
+	return m
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (rc *RelationshipCreate) SetUser(u *User) *RelationshipCreate {
-	return rc.SetUserID(u.ID)
+func (m *RelationshipCreate) SetUser(v *User) *RelationshipCreate {
+	return m.SetUserID(v.ID)
 }
 
 // SetRelative sets the "relative" edge to the User entity.
-func (rc *RelationshipCreate) SetRelative(u *User) *RelationshipCreate {
-	return rc.SetRelativeID(u.ID)
+func (m *RelationshipCreate) SetRelative(v *User) *RelationshipCreate {
+	return m.SetRelativeID(v.ID)
 }
 
 // SetInfo sets the "info" edge to the RelationshipInfo entity.
-func (rc *RelationshipCreate) SetInfo(r *RelationshipInfo) *RelationshipCreate {
-	return rc.SetInfoID(r.ID)
+func (m *RelationshipCreate) SetInfo(v *RelationshipInfo) *RelationshipCreate {
+	return m.SetInfoID(v.ID)
 }
 
 // Mutation returns the RelationshipMutation object of the builder.
-func (rc *RelationshipCreate) Mutation() *RelationshipMutation {
-	return rc.mutation
+func (m *RelationshipCreate) Mutation() *RelationshipMutation {
+	return m.mutation
 }
 
 // Save creates the Relationship in the database.
-func (rc *RelationshipCreate) Save(ctx context.Context) (*Relationship, error) {
-	if err := rc.defaults(); err != nil {
+func (c *RelationshipCreate) Save(ctx context.Context) (*Relationship, error) {
+	if err := c.defaults(); err != nil {
 		return nil, err
 	}
-	return withHooks(ctx, rc.sqlSave, rc.mutation, rc.hooks)
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (rc *RelationshipCreate) SaveX(ctx context.Context) *Relationship {
-	v, err := rc.Save(ctx)
+func (c *RelationshipCreate) SaveX(ctx context.Context) *Relationship {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -105,53 +105,53 @@ func (rc *RelationshipCreate) SaveX(ctx context.Context) *Relationship {
 }
 
 // Exec executes the query.
-func (rc *RelationshipCreate) Exec(ctx context.Context) error {
-	_, err := rc.Save(ctx)
+func (c *RelationshipCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rc *RelationshipCreate) ExecX(ctx context.Context) {
-	if err := rc.Exec(ctx); err != nil {
+func (c *RelationshipCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (rc *RelationshipCreate) defaults() error {
-	if _, ok := rc.mutation.Weight(); !ok {
+func (c *RelationshipCreate) defaults() error {
+	if _, ok := c.mutation.Weight(); !ok {
 		v := relationship.DefaultWeight
-		rc.mutation.SetWeight(v)
+		c.mutation.SetWeight(v)
 	}
 	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (rc *RelationshipCreate) check() error {
-	if _, ok := rc.mutation.Weight(); !ok {
+func (c *RelationshipCreate) check() error {
+	if _, ok := c.mutation.Weight(); !ok {
 		return &ValidationError{Name: "weight", err: errors.New(`ent: missing required field "Relationship.weight"`)}
 	}
-	if _, ok := rc.mutation.UserID(); !ok {
+	if _, ok := c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Relationship.user_id"`)}
 	}
-	if _, ok := rc.mutation.RelativeID(); !ok {
+	if _, ok := c.mutation.RelativeID(); !ok {
 		return &ValidationError{Name: "relative_id", err: errors.New(`ent: missing required field "Relationship.relative_id"`)}
 	}
-	if len(rc.mutation.UserIDs()) == 0 {
+	if len(c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Relationship.user"`)}
 	}
-	if len(rc.mutation.RelativeIDs()) == 0 {
+	if len(c.mutation.RelativeIDs()) == 0 {
 		return &ValidationError{Name: "relative", err: errors.New(`ent: missing required edge "Relationship.relative"`)}
 	}
 	return nil
 }
 
-func (rc *RelationshipCreate) sqlSave(ctx context.Context) (*Relationship, error) {
-	if err := rc.check(); err != nil {
+func (c *RelationshipCreate) sqlSave(ctx context.Context) (*Relationship, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := rc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, rc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -160,17 +160,17 @@ func (rc *RelationshipCreate) sqlSave(ctx context.Context) (*Relationship, error
 	return _node, nil
 }
 
-func (rc *RelationshipCreate) createSpec() (*Relationship, *sqlgraph.CreateSpec) {
+func (c *RelationshipCreate) createSpec() (*Relationship, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Relationship{config: rc.config}
+		_node = &Relationship{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(relationship.Table, nil)
 	)
-	_spec.OnConflict = rc.conflict
-	if value, ok := rc.mutation.Weight(); ok {
+	_spec.OnConflict = c.conflict
+	if value, ok := c.mutation.Weight(); ok {
 		_spec.SetField(relationship.FieldWeight, field.TypeInt, value)
 		_node.Weight = value
 	}
-	if nodes := rc.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -187,7 +187,7 @@ func (rc *RelationshipCreate) createSpec() (*Relationship, *sqlgraph.CreateSpec)
 		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := rc.mutation.RelativeIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.RelativeIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -204,7 +204,7 @@ func (rc *RelationshipCreate) createSpec() (*Relationship, *sqlgraph.CreateSpec)
 		_node.RelativeID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := rc.mutation.InfoIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.InfoIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -240,11 +240,9 @@ func (rc *RelationshipCreate) createSpec() (*Relationship, *sqlgraph.CreateSpec)
 //			SetWeight(v+v).
 //		}).
 //		Exec(ctx)
-func (rc *RelationshipCreate) OnConflict(opts ...sql.ConflictOption) *RelationshipUpsertOne {
-	rc.conflict = opts
-	return &RelationshipUpsertOne{
-		create: rc,
-	}
+func (c *RelationshipCreate) OnConflict(opts ...sql.ConflictOption) *RelationshipUpsertOne {
+	c.conflict = opts
+	return &RelationshipUpsertOne{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -253,11 +251,9 @@ func (rc *RelationshipCreate) OnConflict(opts ...sql.ConflictOption) *Relationsh
 //	client.Relationship.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (rc *RelationshipCreate) OnConflictColumns(columns ...string) *RelationshipUpsertOne {
-	rc.conflict = append(rc.conflict, sql.ConflictColumns(columns...))
-	return &RelationshipUpsertOne{
-		create: rc,
-	}
+func (c *RelationshipCreate) OnConflictColumns(columns ...string) *RelationshipUpsertOne {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &RelationshipUpsertOne{create: c}
 }
 
 type (
@@ -467,16 +463,16 @@ type RelationshipCreateBulk struct {
 }
 
 // Save creates the Relationship entities in the database.
-func (rcb *RelationshipCreateBulk) Save(ctx context.Context) ([]*Relationship, error) {
-	if rcb.err != nil {
-		return nil, rcb.err
+func (c *RelationshipCreateBulk) Save(ctx context.Context) ([]*Relationship, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(rcb.builders))
-	nodes := make([]*Relationship, len(rcb.builders))
-	mutators := make([]Mutator, len(rcb.builders))
-	for i := range rcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Relationship, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := rcb.builders[i]
+			builder := c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*RelationshipMutation)
@@ -490,12 +486,12 @@ func (rcb *RelationshipCreateBulk) Save(ctx context.Context) ([]*Relationship, e
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, rcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = rcb.conflict
+					spec.OnConflict = c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, rcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -514,7 +510,7 @@ func (rcb *RelationshipCreateBulk) Save(ctx context.Context) ([]*Relationship, e
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, rcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -522,8 +518,8 @@ func (rcb *RelationshipCreateBulk) Save(ctx context.Context) ([]*Relationship, e
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (rcb *RelationshipCreateBulk) SaveX(ctx context.Context) []*Relationship {
-	v, err := rcb.Save(ctx)
+func (c *RelationshipCreateBulk) SaveX(ctx context.Context) []*Relationship {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -531,14 +527,14 @@ func (rcb *RelationshipCreateBulk) SaveX(ctx context.Context) []*Relationship {
 }
 
 // Exec executes the query.
-func (rcb *RelationshipCreateBulk) Exec(ctx context.Context) error {
-	_, err := rcb.Save(ctx)
+func (c *RelationshipCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rcb *RelationshipCreateBulk) ExecX(ctx context.Context) {
-	if err := rcb.Exec(ctx); err != nil {
+func (c *RelationshipCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -558,11 +554,9 @@ func (rcb *RelationshipCreateBulk) ExecX(ctx context.Context) {
 //			SetWeight(v+v).
 //		}).
 //		Exec(ctx)
-func (rcb *RelationshipCreateBulk) OnConflict(opts ...sql.ConflictOption) *RelationshipUpsertBulk {
-	rcb.conflict = opts
-	return &RelationshipUpsertBulk{
-		create: rcb,
-	}
+func (c *RelationshipCreateBulk) OnConflict(opts ...sql.ConflictOption) *RelationshipUpsertBulk {
+	c.conflict = opts
+	return &RelationshipUpsertBulk{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -571,11 +565,9 @@ func (rcb *RelationshipCreateBulk) OnConflict(opts ...sql.ConflictOption) *Relat
 //	client.Relationship.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (rcb *RelationshipCreateBulk) OnConflictColumns(columns ...string) *RelationshipUpsertBulk {
-	rcb.conflict = append(rcb.conflict, sql.ConflictColumns(columns...))
-	return &RelationshipUpsertBulk{
-		create: rcb,
-	}
+func (c *RelationshipCreateBulk) OnConflictColumns(columns ...string) *RelationshipUpsertBulk {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &RelationshipUpsertBulk{create: c}
 }
 
 // RelationshipUpsertBulk is the builder for "upsert"-ing

@@ -36,44 +36,45 @@ type PetQuery struct {
 }
 
 // Where adds a new predicate for the PetQuery builder.
-func (pq *PetQuery) Where(ps ...predicate.Pet) *PetQuery {
-	pq.predicates = append(pq.predicates, ps...)
-	return pq
+func (q *PetQuery) Where(ps ...predicate.Pet) *PetQuery {
+	q.predicates = append(q.predicates, ps...)
+	return q
 }
 
 // Limit the number of records to be returned by this query.
-func (pq *PetQuery) Limit(limit int) *PetQuery {
-	pq.ctx.Limit = &limit
-	return pq
+func (q *PetQuery) Limit(limit int) *PetQuery {
+	q.ctx.Limit = &limit
+	return q
 }
 
 // Offset to start from.
-func (pq *PetQuery) Offset(offset int) *PetQuery {
-	pq.ctx.Offset = &offset
-	return pq
+func (q *PetQuery) Offset(offset int) *PetQuery {
+	q.ctx.Offset = &offset
+	return q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (pq *PetQuery) Unique(unique bool) *PetQuery {
-	pq.ctx.Unique = &unique
-	return pq
+func (q *PetQuery) Unique(unique bool) *PetQuery {
+	q.ctx.Unique = &unique
+	return q
 }
 
 // Order specifies how the records should be ordered.
-func (pq *PetQuery) Order(o ...pet.OrderOption) *PetQuery {
-	pq.order = append(pq.order, o...)
-	return pq
+func (q *PetQuery) Order(o ...pet.OrderOption) *PetQuery {
+	q.order = append(q.order, o...)
+	return q
 }
 
 // QueryTeam chains the current query on the "team" edge.
-func (pq *PetQuery) QueryTeam() *UserQuery {
-	query := (&UserClient{config: pq.config}).Query()
+func (q *PetQuery) QueryTeam() *UserQuery {
+	query := (&UserClient{config: q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
-		if err := pq.prepareQuery(ctx); err != nil {
+		if err := q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := pq.gremlinQuery(ctx)
+
+		gremlin := q.gremlinQuery(ctx)
 		fromU = gremlin.InE(user.TeamLabel).OutV()
 		return fromU, nil
 	}
@@ -81,13 +82,14 @@ func (pq *PetQuery) QueryTeam() *UserQuery {
 }
 
 // QueryOwner chains the current query on the "owner" edge.
-func (pq *PetQuery) QueryOwner() *UserQuery {
-	query := (&UserClient{config: pq.config}).Query()
+func (q *PetQuery) QueryOwner() *UserQuery {
+	query := (&UserClient{config: q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
-		if err := pq.prepareQuery(ctx); err != nil {
+		if err := q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := pq.gremlinQuery(ctx)
+
+		gremlin := q.gremlinQuery(ctx)
 		fromU = gremlin.InE(user.PetsLabel).OutV()
 		return fromU, nil
 	}
@@ -96,8 +98,8 @@ func (pq *PetQuery) QueryOwner() *UserQuery {
 
 // First returns the first Pet entity from the query.
 // Returns a *NotFoundError when no Pet was found.
-func (pq *PetQuery) First(ctx context.Context) (*Pet, error) {
-	nodes, err := pq.Limit(1).All(setContextOp(ctx, pq.ctx, ent.OpQueryFirst))
+func (q *PetQuery) First(ctx context.Context) (*Pet, error) {
+	nodes, err := q.Limit(1).All(setContextOp(ctx, q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -108,8 +110,8 @@ func (pq *PetQuery) First(ctx context.Context) (*Pet, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (pq *PetQuery) FirstX(ctx context.Context) *Pet {
-	node, err := pq.First(ctx)
+func (q *PetQuery) FirstX(ctx context.Context) *Pet {
+	node, err := q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -118,9 +120,9 @@ func (pq *PetQuery) FirstX(ctx context.Context) *Pet {
 
 // FirstID returns the first Pet ID from the query.
 // Returns a *NotFoundError when no Pet ID was found.
-func (pq *PetQuery) FirstID(ctx context.Context) (id string, err error) {
+func (q *PetQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = pq.Limit(1).IDs(setContextOp(ctx, pq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = q.Limit(1).IDs(setContextOp(ctx, q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -131,8 +133,8 @@ func (pq *PetQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (pq *PetQuery) FirstIDX(ctx context.Context) string {
-	id, err := pq.FirstID(ctx)
+func (q *PetQuery) FirstIDX(ctx context.Context) string {
+	id, err := q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -142,8 +144,8 @@ func (pq *PetQuery) FirstIDX(ctx context.Context) string {
 // Only returns a single Pet entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Pet entity is found.
 // Returns a *NotFoundError when no Pet entities are found.
-func (pq *PetQuery) Only(ctx context.Context) (*Pet, error) {
-	nodes, err := pq.Limit(2).All(setContextOp(ctx, pq.ctx, ent.OpQueryOnly))
+func (q *PetQuery) Only(ctx context.Context) (*Pet, error) {
+	nodes, err := q.Limit(2).All(setContextOp(ctx, q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -158,8 +160,8 @@ func (pq *PetQuery) Only(ctx context.Context) (*Pet, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (pq *PetQuery) OnlyX(ctx context.Context) *Pet {
-	node, err := pq.Only(ctx)
+func (q *PetQuery) OnlyX(ctx context.Context) *Pet {
+	node, err := q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -169,9 +171,9 @@ func (pq *PetQuery) OnlyX(ctx context.Context) *Pet {
 // OnlyID is like Only, but returns the only Pet ID in the query.
 // Returns a *NotSingularError when more than one Pet ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (pq *PetQuery) OnlyID(ctx context.Context) (id string, err error) {
+func (q *PetQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = pq.Limit(2).IDs(setContextOp(ctx, pq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = q.Limit(2).IDs(setContextOp(ctx, q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -186,8 +188,8 @@ func (pq *PetQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (pq *PetQuery) OnlyIDX(ctx context.Context) string {
-	id, err := pq.OnlyID(ctx)
+func (q *PetQuery) OnlyIDX(ctx context.Context) string {
+	id, err := q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -195,18 +197,18 @@ func (pq *PetQuery) OnlyIDX(ctx context.Context) string {
 }
 
 // All executes the query and returns a list of Pets.
-func (pq *PetQuery) All(ctx context.Context) ([]*Pet, error) {
-	ctx = setContextOp(ctx, pq.ctx, ent.OpQueryAll)
-	if err := pq.prepareQuery(ctx); err != nil {
+func (q *PetQuery) All(ctx context.Context) ([]*Pet, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryAll)
+	if err := q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Pet, *PetQuery]()
-	return withInterceptors[[]*Pet](ctx, pq, qr, pq.inters)
+	return withInterceptors[[]*Pet](ctx, q, qr, q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (pq *PetQuery) AllX(ctx context.Context) []*Pet {
-	nodes, err := pq.All(ctx)
+func (q *PetQuery) AllX(ctx context.Context) []*Pet {
+	nodes, err := q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -214,20 +216,20 @@ func (pq *PetQuery) AllX(ctx context.Context) []*Pet {
 }
 
 // IDs executes the query and returns a list of Pet IDs.
-func (pq *PetQuery) IDs(ctx context.Context) (ids []string, err error) {
-	if pq.ctx.Unique == nil && pq.path != nil {
-		pq.Unique(true)
+func (q *PetQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if q.ctx.Unique == nil && q.path != nil {
+		q.Unique(true)
 	}
-	ctx = setContextOp(ctx, pq.ctx, ent.OpQueryIDs)
-	if err = pq.Select(pet.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryIDs)
+	if err = q.Select(pet.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pq *PetQuery) IDsX(ctx context.Context) []string {
-	ids, err := pq.IDs(ctx)
+func (q *PetQuery) IDsX(ctx context.Context) []string {
+	ids, err := q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -235,17 +237,17 @@ func (pq *PetQuery) IDsX(ctx context.Context) []string {
 }
 
 // Count returns the count of the given query.
-func (pq *PetQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, pq.ctx, ent.OpQueryCount)
-	if err := pq.prepareQuery(ctx); err != nil {
+func (q *PetQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryCount)
+	if err := q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, pq, querierCount[*PetQuery](), pq.inters)
+	return withInterceptors[int](ctx, q, querierCount[*PetQuery](), q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (pq *PetQuery) CountX(ctx context.Context) int {
-	count, err := pq.Count(ctx)
+func (q *PetQuery) CountX(ctx context.Context) int {
+	count, err := q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -253,9 +255,9 @@ func (pq *PetQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (pq *PetQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, pq.ctx, ent.OpQueryExist)
-	switch _, err := pq.FirstID(ctx); {
+func (q *PetQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryExist)
+	switch _, err := q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -266,8 +268,8 @@ func (pq *PetQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (pq *PetQuery) ExistX(ctx context.Context) bool {
-	exist, err := pq.Exist(ctx)
+func (q *PetQuery) ExistX(ctx context.Context) bool {
+	exist, err := q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -276,44 +278,44 @@ func (pq *PetQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the PetQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (pq *PetQuery) Clone() *PetQuery {
-	if pq == nil {
+func (q *PetQuery) Clone() *PetQuery {
+	if q == nil {
 		return nil
 	}
 	return &PetQuery{
-		config:     pq.config,
-		ctx:        pq.ctx.Clone(),
-		order:      append([]pet.OrderOption{}, pq.order...),
-		inters:     append([]Interceptor{}, pq.inters...),
-		predicates: append([]predicate.Pet{}, pq.predicates...),
-		withTeam:   pq.withTeam.Clone(),
-		withOwner:  pq.withOwner.Clone(),
+		config:     q.config,
+		ctx:        q.ctx.Clone(),
+		order:      append([]pet.OrderOption{}, q.order...),
+		inters:     append([]Interceptor{}, q.inters...),
+		predicates: append([]predicate.Pet{}, q.predicates...),
+		withTeam:   q.withTeam.Clone(),
+		withOwner:  q.withOwner.Clone(),
 		// clone intermediate query.
-		gremlin: pq.gremlin.Clone(),
-		path:    pq.path,
+		gremlin: q.gremlin.Clone(),
+		path:    q.path,
 	}
 }
 
 // WithTeam tells the query-builder to eager-load the nodes that are connected to
 // the "team" edge. The optional arguments are used to configure the query builder of the edge.
-func (pq *PetQuery) WithTeam(opts ...func(*UserQuery)) *PetQuery {
-	query := (&UserClient{config: pq.config}).Query()
+func (q *PetQuery) WithTeam(opts ...func(*UserQuery)) *PetQuery {
+	query := (&UserClient{config: q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	pq.withTeam = query
-	return pq
+	q.withTeam = query
+	return q
 }
 
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
-func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
-	query := (&UserClient{config: pq.config}).Query()
+func (q *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
+	query := (&UserClient{config: q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	pq.withOwner = query
-	return pq
+	q.withOwner = query
+	return q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -330,10 +332,10 @@ func (pq *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
 //		GroupBy(pet.FieldAge).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
-	pq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &PetGroupBy{build: pq}
-	grbuild.flds = &pq.ctx.Fields
+func (q *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
+	q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &PetGroupBy{build: q}
+	grbuild.flds = &q.ctx.Fields
 	grbuild.label = pet.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -351,46 +353,46 @@ func (pq *PetQuery) GroupBy(field string, fields ...string) *PetGroupBy {
 //	client.Pet.Query().
 //		Select(pet.FieldAge).
 //		Scan(ctx, &v)
-func (pq *PetQuery) Select(fields ...string) *PetSelect {
-	pq.ctx.Fields = append(pq.ctx.Fields, fields...)
-	sbuild := &PetSelect{PetQuery: pq}
+func (q *PetQuery) Select(fields ...string) *PetSelect {
+	q.ctx.Fields = append(q.ctx.Fields, fields...)
+	sbuild := &PetSelect{PetQuery: q}
 	sbuild.label = pet.Label
-	sbuild.flds, sbuild.scan = &pq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a PetSelect configured with the given aggregations.
-func (pq *PetQuery) Aggregate(fns ...AggregateFunc) *PetSelect {
-	return pq.Select().Aggregate(fns...)
+func (q *PetQuery) Aggregate(fns ...AggregateFunc) *PetSelect {
+	return q.Select().Aggregate(fns...)
 }
 
-func (pq *PetQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range pq.inters {
+func (q *PetQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, pq); err != nil {
+			if err := trv.Traverse(ctx, q); err != nil {
 				return err
 			}
 		}
 	}
-	if pq.path != nil {
-		prev, err := pq.path(ctx)
+	if q.path != nil {
+		prev, err := q.path(ctx)
 		if err != nil {
 			return err
 		}
-		pq.gremlin = prev
+		q.gremlin = prev
 	}
 	return nil
 }
 
-func (pq *PetQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Pet, error) {
+func (q *PetQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Pet, error) {
 	res := &gremlin.Response{}
-	traversal := pq.gremlinQuery(ctx)
-	if len(pq.ctx.Fields) > 0 {
-		fields := make([]any, len(pq.ctx.Fields))
-		for i, f := range pq.ctx.Fields {
+	traversal := q.gremlinQuery(ctx)
+	if len(q.ctx.Fields) > 0 {
+		fields := make([]any, len(q.ctx.Fields))
+		for i, f := range q.ctx.Fields {
 			fields[i] = f
 		}
 		traversal.ValueMap(fields...)
@@ -398,43 +400,43 @@ func (pq *PetQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Pet,
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := pq.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
-	var pes Pets
-	if err := pes.FromResponse(res); err != nil {
+	var results Pets
+	if err := results.FromResponse(res); err != nil {
 		return nil, err
 	}
-	for i := range pes {
-		pes[i].config = pq.config
+	for i := range results {
+		results[i].config = q.config
 	}
-	return pes, nil
+	return results, nil
 }
 
-func (pq *PetQuery) gremlinCount(ctx context.Context) (int, error) {
+func (q *PetQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := pq.gremlinQuery(ctx).Count().Query()
-	if err := pq.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := q.gremlinQuery(ctx).Count().Query()
+	if err := q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
 }
 
-func (pq *PetQuery) gremlinQuery(context.Context) *dsl.Traversal {
+func (q *PetQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(pet.Label)
-	if pq.gremlin != nil {
-		v = pq.gremlin.Clone()
+	if q.gremlin != nil {
+		v = q.gremlin.Clone()
 	}
-	for _, p := range pq.predicates {
+	for _, p := range q.predicates {
 		p(v)
 	}
-	if len(pq.order) > 0 {
+	if len(q.order) > 0 {
 		v.Order()
-		for _, p := range pq.order {
+		for _, p := range q.order {
 			p(v)
 		}
 	}
-	switch limit, offset := pq.ctx.Limit, pq.ctx.Offset; {
+	switch limit, offset := q.ctx.Limit, q.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset+*limit)
 	case offset != nil:
@@ -442,7 +444,7 @@ func (pq *PetQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := pq.ctx.Unique; unique == nil || *unique {
+	if unique := q.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v

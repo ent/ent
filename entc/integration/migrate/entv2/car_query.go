@@ -35,44 +35,44 @@ type CarQuery struct {
 }
 
 // Where adds a new predicate for the CarQuery builder.
-func (cq *CarQuery) Where(ps ...predicate.Car) *CarQuery {
-	cq.predicates = append(cq.predicates, ps...)
-	return cq
+func (q *CarQuery) Where(ps ...predicate.Car) *CarQuery {
+	q.predicates = append(q.predicates, ps...)
+	return q
 }
 
 // Limit the number of records to be returned by this query.
-func (cq *CarQuery) Limit(limit int) *CarQuery {
-	cq.ctx.Limit = &limit
-	return cq
+func (q *CarQuery) Limit(limit int) *CarQuery {
+	q.ctx.Limit = &limit
+	return q
 }
 
 // Offset to start from.
-func (cq *CarQuery) Offset(offset int) *CarQuery {
-	cq.ctx.Offset = &offset
-	return cq
+func (q *CarQuery) Offset(offset int) *CarQuery {
+	q.ctx.Offset = &offset
+	return q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (cq *CarQuery) Unique(unique bool) *CarQuery {
-	cq.ctx.Unique = &unique
-	return cq
+func (q *CarQuery) Unique(unique bool) *CarQuery {
+	q.ctx.Unique = &unique
+	return q
 }
 
 // Order specifies how the records should be ordered.
-func (cq *CarQuery) Order(o ...car.OrderOption) *CarQuery {
-	cq.order = append(cq.order, o...)
-	return cq
+func (q *CarQuery) Order(o ...car.OrderOption) *CarQuery {
+	q.order = append(q.order, o...)
+	return q
 }
 
 // QueryOwner chains the current query on the "owner" edge.
-func (cq *CarQuery) QueryOwner() *UserQuery {
-	query := (&UserClient{config: cq.config}).Query()
+func (q *CarQuery) QueryOwner() *UserQuery {
+	query := (&UserClient{config: q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := cq.prepareQuery(ctx); err != nil {
+		if err := q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := cq.sqlQuery(ctx)
+		selector := q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -81,7 +81,7 @@ func (cq *CarQuery) QueryOwner() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, car.OwnerTable, car.OwnerColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -89,8 +89,8 @@ func (cq *CarQuery) QueryOwner() *UserQuery {
 
 // First returns the first Car entity from the query.
 // Returns a *NotFoundError when no Car was found.
-func (cq *CarQuery) First(ctx context.Context) (*Car, error) {
-	nodes, err := cq.Limit(1).All(setContextOp(ctx, cq.ctx, ent.OpQueryFirst))
+func (q *CarQuery) First(ctx context.Context) (*Car, error) {
+	nodes, err := q.Limit(1).All(setContextOp(ctx, q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -101,8 +101,8 @@ func (cq *CarQuery) First(ctx context.Context) (*Car, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (cq *CarQuery) FirstX(ctx context.Context) *Car {
-	node, err := cq.First(ctx)
+func (q *CarQuery) FirstX(ctx context.Context) *Car {
+	node, err := q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -111,9 +111,9 @@ func (cq *CarQuery) FirstX(ctx context.Context) *Car {
 
 // FirstID returns the first Car ID from the query.
 // Returns a *NotFoundError when no Car ID was found.
-func (cq *CarQuery) FirstID(ctx context.Context) (id int, err error) {
+func (q *CarQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = cq.Limit(1).IDs(setContextOp(ctx, cq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = q.Limit(1).IDs(setContextOp(ctx, q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -124,8 +124,8 @@ func (cq *CarQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (cq *CarQuery) FirstIDX(ctx context.Context) int {
-	id, err := cq.FirstID(ctx)
+func (q *CarQuery) FirstIDX(ctx context.Context) int {
+	id, err := q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -135,8 +135,8 @@ func (cq *CarQuery) FirstIDX(ctx context.Context) int {
 // Only returns a single Car entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Car entity is found.
 // Returns a *NotFoundError when no Car entities are found.
-func (cq *CarQuery) Only(ctx context.Context) (*Car, error) {
-	nodes, err := cq.Limit(2).All(setContextOp(ctx, cq.ctx, ent.OpQueryOnly))
+func (q *CarQuery) Only(ctx context.Context) (*Car, error) {
+	nodes, err := q.Limit(2).All(setContextOp(ctx, q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -151,8 +151,8 @@ func (cq *CarQuery) Only(ctx context.Context) (*Car, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (cq *CarQuery) OnlyX(ctx context.Context) *Car {
-	node, err := cq.Only(ctx)
+func (q *CarQuery) OnlyX(ctx context.Context) *Car {
+	node, err := q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -162,9 +162,9 @@ func (cq *CarQuery) OnlyX(ctx context.Context) *Car {
 // OnlyID is like Only, but returns the only Car ID in the query.
 // Returns a *NotSingularError when more than one Car ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (cq *CarQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (q *CarQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = cq.Limit(2).IDs(setContextOp(ctx, cq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = q.Limit(2).IDs(setContextOp(ctx, q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -179,8 +179,8 @@ func (cq *CarQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (cq *CarQuery) OnlyIDX(ctx context.Context) int {
-	id, err := cq.OnlyID(ctx)
+func (q *CarQuery) OnlyIDX(ctx context.Context) int {
+	id, err := q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -188,18 +188,18 @@ func (cq *CarQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Cars.
-func (cq *CarQuery) All(ctx context.Context) ([]*Car, error) {
-	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryAll)
-	if err := cq.prepareQuery(ctx); err != nil {
+func (q *CarQuery) All(ctx context.Context) ([]*Car, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryAll)
+	if err := q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Car, *CarQuery]()
-	return withInterceptors[[]*Car](ctx, cq, qr, cq.inters)
+	return withInterceptors[[]*Car](ctx, q, qr, q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (cq *CarQuery) AllX(ctx context.Context) []*Car {
-	nodes, err := cq.All(ctx)
+func (q *CarQuery) AllX(ctx context.Context) []*Car {
+	nodes, err := q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -207,20 +207,20 @@ func (cq *CarQuery) AllX(ctx context.Context) []*Car {
 }
 
 // IDs executes the query and returns a list of Car IDs.
-func (cq *CarQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if cq.ctx.Unique == nil && cq.path != nil {
-		cq.Unique(true)
+func (q *CarQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if q.ctx.Unique == nil && q.path != nil {
+		q.Unique(true)
 	}
-	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryIDs)
-	if err = cq.Select(car.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryIDs)
+	if err = q.Select(car.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (cq *CarQuery) IDsX(ctx context.Context) []int {
-	ids, err := cq.IDs(ctx)
+func (q *CarQuery) IDsX(ctx context.Context) []int {
+	ids, err := q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -228,17 +228,17 @@ func (cq *CarQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (cq *CarQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryCount)
-	if err := cq.prepareQuery(ctx); err != nil {
+func (q *CarQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryCount)
+	if err := q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, cq, querierCount[*CarQuery](), cq.inters)
+	return withInterceptors[int](ctx, q, querierCount[*CarQuery](), q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (cq *CarQuery) CountX(ctx context.Context) int {
-	count, err := cq.Count(ctx)
+func (q *CarQuery) CountX(ctx context.Context) int {
+	count, err := q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -246,9 +246,9 @@ func (cq *CarQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (cq *CarQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryExist)
-	switch _, err := cq.FirstID(ctx); {
+func (q *CarQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryExist)
+	switch _, err := q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -259,8 +259,8 @@ func (cq *CarQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (cq *CarQuery) ExistX(ctx context.Context) bool {
-	exist, err := cq.Exist(ctx)
+func (q *CarQuery) ExistX(ctx context.Context) bool {
+	exist, err := q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -269,32 +269,32 @@ func (cq *CarQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the CarQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (cq *CarQuery) Clone() *CarQuery {
-	if cq == nil {
+func (q *CarQuery) Clone() *CarQuery {
+	if q == nil {
 		return nil
 	}
 	return &CarQuery{
-		config:     cq.config,
-		ctx:        cq.ctx.Clone(),
-		order:      append([]car.OrderOption{}, cq.order...),
-		inters:     append([]Interceptor{}, cq.inters...),
-		predicates: append([]predicate.Car{}, cq.predicates...),
-		withOwner:  cq.withOwner.Clone(),
+		config:     q.config,
+		ctx:        q.ctx.Clone(),
+		order:      append([]car.OrderOption{}, q.order...),
+		inters:     append([]Interceptor{}, q.inters...),
+		predicates: append([]predicate.Car{}, q.predicates...),
+		withOwner:  q.withOwner.Clone(),
 		// clone intermediate query.
-		sql:  cq.sql.Clone(),
-		path: cq.path,
+		sql:  q.sql.Clone(),
+		path: q.path,
 	}
 }
 
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
-func (cq *CarQuery) WithOwner(opts ...func(*UserQuery)) *CarQuery {
-	query := (&UserClient{config: cq.config}).Query()
+func (q *CarQuery) WithOwner(opts ...func(*UserQuery)) *CarQuery {
+	query := (&UserClient{config: q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	cq.withOwner = query
-	return cq
+	q.withOwner = query
+	return q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -311,10 +311,10 @@ func (cq *CarQuery) WithOwner(opts ...func(*UserQuery)) *CarQuery {
 //		GroupBy(car.FieldName).
 //		Aggregate(entv2.Count()).
 //		Scan(ctx, &v)
-func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
-	cq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &CarGroupBy{build: cq}
-	grbuild.flds = &cq.ctx.Fields
+func (q *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
+	q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &CarGroupBy{build: q}
+	grbuild.flds = &q.ctx.Fields
 	grbuild.label = car.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -332,55 +332,55 @@ func (cq *CarQuery) GroupBy(field string, fields ...string) *CarGroupBy {
 //	client.Car.Query().
 //		Select(car.FieldName).
 //		Scan(ctx, &v)
-func (cq *CarQuery) Select(fields ...string) *CarSelect {
-	cq.ctx.Fields = append(cq.ctx.Fields, fields...)
-	sbuild := &CarSelect{CarQuery: cq}
+func (q *CarQuery) Select(fields ...string) *CarSelect {
+	q.ctx.Fields = append(q.ctx.Fields, fields...)
+	sbuild := &CarSelect{CarQuery: q}
 	sbuild.label = car.Label
-	sbuild.flds, sbuild.scan = &cq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a CarSelect configured with the given aggregations.
-func (cq *CarQuery) Aggregate(fns ...AggregateFunc) *CarSelect {
-	return cq.Select().Aggregate(fns...)
+func (q *CarQuery) Aggregate(fns ...AggregateFunc) *CarSelect {
+	return q.Select().Aggregate(fns...)
 }
 
-func (cq *CarQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range cq.inters {
+func (q *CarQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range q.inters {
 		if inter == nil {
 			return fmt.Errorf("entv2: uninitialized interceptor (forgotten import entv2/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, cq); err != nil {
+			if err := trv.Traverse(ctx, q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range cq.ctx.Fields {
+	for _, f := range q.ctx.Fields {
 		if !car.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("entv2: invalid field %q for query", f)}
 		}
 	}
-	if cq.path != nil {
-		prev, err := cq.path(ctx)
+	if q.path != nil {
+		prev, err := q.path(ctx)
 		if err != nil {
 			return err
 		}
-		cq.sql = prev
+		q.sql = prev
 	}
 	return nil
 }
 
-func (cq *CarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Car, error) {
+func (q *CarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Car, error) {
 	var (
 		nodes       = []*Car{}
-		withFKs     = cq.withFKs
-		_spec       = cq.querySpec()
+		withFKs     = q.withFKs
+		_spec       = q.querySpec()
 		loadedTypes = [1]bool{
-			cq.withOwner != nil,
+			q.withOwner != nil,
 		}
 	)
-	if cq.withOwner != nil {
+	if q.withOwner != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -390,7 +390,7 @@ func (cq *CarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Car, err
 		return (*Car).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Car{config: cq.config}
+		node := &Car{config: q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -398,14 +398,14 @@ func (cq *CarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Car, err
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, cq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := cq.withOwner; query != nil {
-		if err := cq.loadOwner(ctx, query, nodes, nil,
+	if query := q.withOwner; query != nil {
+		if err := q.loadOwner(ctx, query, nodes, nil,
 			func(n *Car, e *User) { n.Edges.Owner = e }); err != nil {
 			return nil, err
 		}
@@ -413,7 +413,7 @@ func (cq *CarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Car, err
 	return nodes, nil
 }
 
-func (cq *CarQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Car, init func(*Car), assign func(*Car, *User)) error {
+func (q *CarQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Car, init func(*Car), assign func(*Car, *User)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Car)
 	for i := range nodes {
@@ -446,24 +446,24 @@ func (cq *CarQuery) loadOwner(ctx context.Context, query *UserQuery, nodes []*Ca
 	return nil
 }
 
-func (cq *CarQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := cq.querySpec()
-	_spec.Node.Columns = cq.ctx.Fields
-	if len(cq.ctx.Fields) > 0 {
-		_spec.Unique = cq.ctx.Unique != nil && *cq.ctx.Unique
+func (q *CarQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := q.querySpec()
+	_spec.Node.Columns = q.ctx.Fields
+	if len(q.ctx.Fields) > 0 {
+		_spec.Unique = q.ctx.Unique != nil && *q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, cq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, q.driver, _spec)
 }
 
-func (cq *CarQuery) querySpec() *sqlgraph.QuerySpec {
+func (q *CarQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(car.Table, car.Columns, sqlgraph.NewFieldSpec(car.FieldID, field.TypeInt))
-	_spec.From = cq.sql
-	if unique := cq.ctx.Unique; unique != nil {
+	_spec.From = q.sql
+	if unique := q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if cq.path != nil {
+	} else if q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := cq.ctx.Fields; len(fields) > 0 {
+	if fields := q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, car.FieldID)
 		for i := range fields {
@@ -472,20 +472,20 @@ func (cq *CarQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := cq.predicates; len(ps) > 0 {
+	if ps := q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := cq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := cq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := cq.order; len(ps) > 0 {
+	if ps := q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -495,33 +495,33 @@ func (cq *CarQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (cq *CarQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(cq.driver.Dialect())
+func (q *CarQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(q.driver.Dialect())
 	t1 := builder.Table(car.Table)
-	columns := cq.ctx.Fields
+	columns := q.ctx.Fields
 	if len(columns) == 0 {
 		columns = car.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if cq.sql != nil {
-		selector = cq.sql
+	if q.sql != nil {
+		selector = q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if cq.ctx.Unique != nil && *cq.ctx.Unique {
+	if q.ctx.Unique != nil && *q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range cq.predicates {
+	for _, p := range q.predicates {
 		p(selector)
 	}
-	for _, p := range cq.order {
+	for _, p := range q.order {
 		p(selector)
 	}
-	if offset := cq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := cq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -548,27 +548,27 @@ func (cgb *CarGroupBy) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*CarQuery, *CarGroupBy](ctx, cgb.build, cgb, cgb.build.inters, v)
 }
 
-func (cgb *CarGroupBy) sqlScan(ctx context.Context, root *CarQuery, v any) error {
+func (q *CarGroupBy) sqlScan(ctx context.Context, root *CarQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(cgb.fns))
-	for _, fn := range cgb.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*cgb.flds)+len(cgb.fns))
-		for _, f := range *cgb.flds {
+		columns := make([]string, 0, len(*q.flds)+len(q.fns))
+		for _, f := range *q.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*cgb.flds...)...)
+	selector.GroupBy(selector.Columns(*q.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := cgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -596,13 +596,13 @@ func (cs *CarSelect) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*CarQuery, *CarSelect](ctx, cs.CarQuery, cs, cs.inters, v)
 }
 
-func (cs *CarSelect) sqlScan(ctx context.Context, root *CarQuery, v any) error {
+func (q *CarSelect) sqlScan(ctx context.Context, root *CarQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(cs.fns))
-	for _, fn := range cs.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*cs.selector.flds); {
+	switch n := len(*q.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -610,7 +610,7 @@ func (cs *CarSelect) sqlScan(ctx context.Context, root *CarQuery, v any) error {
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := cs.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

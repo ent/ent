@@ -27,47 +27,47 @@ type ItemCreate struct {
 }
 
 // SetText sets the "text" field.
-func (ic *ItemCreate) SetText(s string) *ItemCreate {
-	ic.mutation.SetText(s)
-	return ic
+func (m *ItemCreate) SetText(v string) *ItemCreate {
+	m.mutation.SetText(v)
+	return m
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (ic *ItemCreate) SetNillableText(s *string) *ItemCreate {
-	if s != nil {
-		ic.SetText(*s)
+func (m *ItemCreate) SetNillableText(v *string) *ItemCreate {
+	if v != nil {
+		m.SetText(*v)
 	}
-	return ic
+	return m
 }
 
 // SetID sets the "id" field.
-func (ic *ItemCreate) SetID(s string) *ItemCreate {
-	ic.mutation.SetID(s)
-	return ic
+func (m *ItemCreate) SetID(v string) *ItemCreate {
+	m.mutation.SetID(v)
+	return m
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (ic *ItemCreate) SetNillableID(s *string) *ItemCreate {
-	if s != nil {
-		ic.SetID(*s)
+func (m *ItemCreate) SetNillableID(v *string) *ItemCreate {
+	if v != nil {
+		m.SetID(*v)
 	}
-	return ic
+	return m
 }
 
 // Mutation returns the ItemMutation object of the builder.
-func (ic *ItemCreate) Mutation() *ItemMutation {
-	return ic.mutation
+func (m *ItemCreate) Mutation() *ItemMutation {
+	return m.mutation
 }
 
 // Save creates the Item in the database.
-func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
-	ic.defaults()
-	return withHooks(ctx, ic.sqlSave, ic.mutation, ic.hooks)
+func (c *ItemCreate) Save(ctx context.Context) (*Item, error) {
+	c.defaults()
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (ic *ItemCreate) SaveX(ctx context.Context) *Item {
-	v, err := ic.Save(ctx)
+func (c *ItemCreate) SaveX(ctx context.Context) *Item {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -75,34 +75,34 @@ func (ic *ItemCreate) SaveX(ctx context.Context) *Item {
 }
 
 // Exec executes the query.
-func (ic *ItemCreate) Exec(ctx context.Context) error {
-	_, err := ic.Save(ctx)
+func (c *ItemCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ic *ItemCreate) ExecX(ctx context.Context) {
-	if err := ic.Exec(ctx); err != nil {
+func (c *ItemCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (ic *ItemCreate) defaults() {
-	if _, ok := ic.mutation.ID(); !ok {
+func (c *ItemCreate) defaults() {
+	if _, ok := c.mutation.ID(); !ok {
 		v := item.DefaultID()
-		ic.mutation.SetID(v)
+		c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ic *ItemCreate) check() error {
-	if v, ok := ic.mutation.Text(); ok {
+func (c *ItemCreate) check() error {
+	if v, ok := c.mutation.Text(); ok {
 		if err := item.TextValidator(v); err != nil {
 			return &ValidationError{Name: "text", err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
 		}
 	}
-	if v, ok := ic.mutation.ID(); ok {
+	if v, ok := c.mutation.ID(); ok {
 		if err := item.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Item.id": %w`, err)}
 		}
@@ -110,12 +110,12 @@ func (ic *ItemCreate) check() error {
 	return nil
 }
 
-func (ic *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
-	if err := ic.check(); err != nil {
+func (c *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := ic.createSpec()
-	if err := sqlgraph.CreateNode(ctx, ic.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -128,22 +128,22 @@ func (ic *ItemCreate) sqlSave(ctx context.Context) (*Item, error) {
 			return nil, fmt.Errorf("unexpected Item.ID type: %T", _spec.ID.Value)
 		}
 	}
-	ic.mutation.id = &_node.ID
-	ic.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (ic *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
+func (c *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Item{config: ic.config}
+		_node = &Item{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(item.Table, sqlgraph.NewFieldSpec(item.FieldID, field.TypeString))
 	)
-	_spec.OnConflict = ic.conflict
-	if id, ok := ic.mutation.ID(); ok {
+	_spec.OnConflict = c.conflict
+	if id, ok := c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := ic.mutation.Text(); ok {
+	if value, ok := c.mutation.Text(); ok {
 		_spec.SetField(item.FieldText, field.TypeString, value)
 		_node.Text = value
 	}
@@ -166,11 +166,9 @@ func (ic *ItemCreate) createSpec() (*Item, *sqlgraph.CreateSpec) {
 //			SetText(v+v).
 //		}).
 //		Exec(ctx)
-func (ic *ItemCreate) OnConflict(opts ...sql.ConflictOption) *ItemUpsertOne {
-	ic.conflict = opts
-	return &ItemUpsertOne{
-		create: ic,
-	}
+func (c *ItemCreate) OnConflict(opts ...sql.ConflictOption) *ItemUpsertOne {
+	c.conflict = opts
+	return &ItemUpsertOne{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -179,11 +177,9 @@ func (ic *ItemCreate) OnConflict(opts ...sql.ConflictOption) *ItemUpsertOne {
 //	client.Item.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (ic *ItemCreate) OnConflictColumns(columns ...string) *ItemUpsertOne {
-	ic.conflict = append(ic.conflict, sql.ConflictColumns(columns...))
-	return &ItemUpsertOne{
-		create: ic,
-	}
+func (c *ItemCreate) OnConflictColumns(columns ...string) *ItemUpsertOne {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &ItemUpsertOne{create: c}
 }
 
 type (
@@ -333,16 +329,16 @@ type ItemCreateBulk struct {
 }
 
 // Save creates the Item entities in the database.
-func (icb *ItemCreateBulk) Save(ctx context.Context) ([]*Item, error) {
-	if icb.err != nil {
-		return nil, icb.err
+func (c *ItemCreateBulk) Save(ctx context.Context) ([]*Item, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(icb.builders))
-	nodes := make([]*Item, len(icb.builders))
-	mutators := make([]Mutator, len(icb.builders))
-	for i := range icb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Item, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := icb.builders[i]
+			builder := c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ItemMutation)
@@ -356,12 +352,12 @@ func (icb *ItemCreateBulk) Save(ctx context.Context) ([]*Item, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, icb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = icb.conflict
+					spec.OnConflict = c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, icb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -381,7 +377,7 @@ func (icb *ItemCreateBulk) Save(ctx context.Context) ([]*Item, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, icb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -389,8 +385,8 @@ func (icb *ItemCreateBulk) Save(ctx context.Context) ([]*Item, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (icb *ItemCreateBulk) SaveX(ctx context.Context) []*Item {
-	v, err := icb.Save(ctx)
+func (c *ItemCreateBulk) SaveX(ctx context.Context) []*Item {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -398,14 +394,14 @@ func (icb *ItemCreateBulk) SaveX(ctx context.Context) []*Item {
 }
 
 // Exec executes the query.
-func (icb *ItemCreateBulk) Exec(ctx context.Context) error {
-	_, err := icb.Save(ctx)
+func (c *ItemCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (icb *ItemCreateBulk) ExecX(ctx context.Context) {
-	if err := icb.Exec(ctx); err != nil {
+func (c *ItemCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -425,11 +421,9 @@ func (icb *ItemCreateBulk) ExecX(ctx context.Context) {
 //			SetText(v+v).
 //		}).
 //		Exec(ctx)
-func (icb *ItemCreateBulk) OnConflict(opts ...sql.ConflictOption) *ItemUpsertBulk {
-	icb.conflict = opts
-	return &ItemUpsertBulk{
-		create: icb,
-	}
+func (c *ItemCreateBulk) OnConflict(opts ...sql.ConflictOption) *ItemUpsertBulk {
+	c.conflict = opts
+	return &ItemUpsertBulk{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -438,11 +432,9 @@ func (icb *ItemCreateBulk) OnConflict(opts ...sql.ConflictOption) *ItemUpsertBul
 //	client.Item.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (icb *ItemCreateBulk) OnConflictColumns(columns ...string) *ItemUpsertBulk {
-	icb.conflict = append(icb.conflict, sql.ConflictColumns(columns...))
-	return &ItemUpsertBulk{
-		create: icb,
-	}
+func (c *ItemCreateBulk) OnConflictColumns(columns ...string) *ItemUpsertBulk {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &ItemUpsertBulk{create: c}
 }
 
 // ItemUpsertBulk is the builder for "upsert"-ing

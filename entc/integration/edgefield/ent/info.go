@@ -68,28 +68,28 @@ func (*Info) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Info fields.
-func (i *Info) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Info) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
-	for j := range columns {
-		switch columns[j] {
+	for i := range columns {
+		switch columns[i] {
 		case info.FieldID:
-			value, ok := values[j].(*sql.NullInt64)
+			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			i.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case info.FieldContent:
-			if value, ok := values[j].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field content", values[j])
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field content", values[i])
 			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &i.Content); err != nil {
+				if err := json.Unmarshal(*value, &m.Content); err != nil {
 					return fmt.Errorf("unmarshal field content: %w", err)
 				}
 			}
 		default:
-			i.selectValues.Set(columns[j], values[j])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -97,40 +97,40 @@ func (i *Info) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Info.
 // This includes values selected through modifiers, order, etc.
-func (i *Info) Value(name string) (ent.Value, error) {
-	return i.selectValues.Get(name)
+func (m *Info) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryUser queries the "user" edge of the Info entity.
-func (i *Info) QueryUser() *UserQuery {
-	return NewInfoClient(i.config).QueryUser(i)
+func (m *Info) QueryUser() *UserQuery {
+	return NewInfoClient(m.config).QueryUser(m)
 }
 
 // Update returns a builder for updating this Info.
 // Note that you need to call Info.Unwrap() before calling this method if this Info
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (i *Info) Update() *InfoUpdateOne {
-	return NewInfoClient(i.config).UpdateOne(i)
+func (m *Info) Update() *InfoUpdateOne {
+	return NewInfoClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Info entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (i *Info) Unwrap() *Info {
-	_tx, ok := i.config.driver.(*txDriver)
+func (m *Info) Unwrap() *Info {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Info is not a transactional entity")
 	}
-	i.config.driver = _tx.drv
-	return i
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (i *Info) String() string {
+func (m *Info) String() string {
 	var builder strings.Builder
 	builder.WriteString("Info(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", i.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("content=")
-	builder.WriteString(fmt.Sprintf("%v", i.Content))
+	builder.WriteString(fmt.Sprintf("%v", m.Content))
 	builder.WriteByte(')')
 	return builder.String()
 }

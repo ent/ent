@@ -92,9 +92,9 @@ func (*Doc) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Doc fields.
-func (d *Doc) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Doc) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -102,23 +102,23 @@ func (d *Doc) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*schema.DocID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				d.ID = *value
+				m.ID = *value
 			}
 		case doc.FieldText:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field text", values[i])
 			} else if value.Valid {
-				d.Text = value.String
+				m.Text = value.String
 			}
 		case doc.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field doc_children", values[i])
 			} else if value.Valid {
-				d.doc_children = new(schema.DocID)
-				*d.doc_children = *value.S.(*schema.DocID)
+				m.doc_children = new(schema.DocID)
+				*m.doc_children = *value.S.(*schema.DocID)
 			}
 		default:
-			d.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -126,50 +126,50 @@ func (d *Doc) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Doc.
 // This includes values selected through modifiers, order, etc.
-func (d *Doc) Value(name string) (ent.Value, error) {
-	return d.selectValues.Get(name)
+func (m *Doc) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryParent queries the "parent" edge of the Doc entity.
-func (d *Doc) QueryParent() *DocQuery {
-	return NewDocClient(d.config).QueryParent(d)
+func (m *Doc) QueryParent() *DocQuery {
+	return NewDocClient(m.config).QueryParent(m)
 }
 
 // QueryChildren queries the "children" edge of the Doc entity.
-func (d *Doc) QueryChildren() *DocQuery {
-	return NewDocClient(d.config).QueryChildren(d)
+func (m *Doc) QueryChildren() *DocQuery {
+	return NewDocClient(m.config).QueryChildren(m)
 }
 
 // QueryRelated queries the "related" edge of the Doc entity.
-func (d *Doc) QueryRelated() *DocQuery {
-	return NewDocClient(d.config).QueryRelated(d)
+func (m *Doc) QueryRelated() *DocQuery {
+	return NewDocClient(m.config).QueryRelated(m)
 }
 
 // Update returns a builder for updating this Doc.
 // Note that you need to call Doc.Unwrap() before calling this method if this Doc
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (d *Doc) Update() *DocUpdateOne {
-	return NewDocClient(d.config).UpdateOne(d)
+func (m *Doc) Update() *DocUpdateOne {
+	return NewDocClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Doc entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (d *Doc) Unwrap() *Doc {
-	_tx, ok := d.config.driver.(*txDriver)
+func (m *Doc) Unwrap() *Doc {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Doc is not a transactional entity")
 	}
-	d.config.driver = _tx.drv
-	return d
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (d *Doc) String() string {
+func (m *Doc) String() string {
 	var builder strings.Builder
 	builder.WriteString("Doc(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", d.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("text=")
-	builder.WriteString(d.Text)
+	builder.WriteString(m.Text)
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -34,40 +34,40 @@ type APIQuery struct {
 }
 
 // Where adds a new predicate for the APIQuery builder.
-func (aq *APIQuery) Where(ps ...predicate.Api) *APIQuery {
-	aq.predicates = append(aq.predicates, ps...)
-	return aq
+func (q *APIQuery) Where(ps ...predicate.Api) *APIQuery {
+	q.predicates = append(q.predicates, ps...)
+	return q
 }
 
 // Limit the number of records to be returned by this query.
-func (aq *APIQuery) Limit(limit int) *APIQuery {
-	aq.ctx.Limit = &limit
-	return aq
+func (q *APIQuery) Limit(limit int) *APIQuery {
+	q.ctx.Limit = &limit
+	return q
 }
 
 // Offset to start from.
-func (aq *APIQuery) Offset(offset int) *APIQuery {
-	aq.ctx.Offset = &offset
-	return aq
+func (q *APIQuery) Offset(offset int) *APIQuery {
+	q.ctx.Offset = &offset
+	return q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (aq *APIQuery) Unique(unique bool) *APIQuery {
-	aq.ctx.Unique = &unique
-	return aq
+func (q *APIQuery) Unique(unique bool) *APIQuery {
+	q.ctx.Unique = &unique
+	return q
 }
 
 // Order specifies how the records should be ordered.
-func (aq *APIQuery) Order(o ...api.OrderOption) *APIQuery {
-	aq.order = append(aq.order, o...)
-	return aq
+func (q *APIQuery) Order(o ...api.OrderOption) *APIQuery {
+	q.order = append(q.order, o...)
+	return q
 }
 
 // First returns the first Api entity from the query.
 // Returns a *NotFoundError when no Api was found.
-func (aq *APIQuery) First(ctx context.Context) (*Api, error) {
-	nodes, err := aq.Limit(1).All(setContextOp(ctx, aq.ctx, ent.OpQueryFirst))
+func (q *APIQuery) First(ctx context.Context) (*Api, error) {
+	nodes, err := q.Limit(1).All(setContextOp(ctx, q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -78,8 +78,8 @@ func (aq *APIQuery) First(ctx context.Context) (*Api, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (aq *APIQuery) FirstX(ctx context.Context) *Api {
-	node, err := aq.First(ctx)
+func (q *APIQuery) FirstX(ctx context.Context) *Api {
+	node, err := q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -88,9 +88,9 @@ func (aq *APIQuery) FirstX(ctx context.Context) *Api {
 
 // FirstID returns the first Api ID from the query.
 // Returns a *NotFoundError when no Api ID was found.
-func (aq *APIQuery) FirstID(ctx context.Context) (id int, err error) {
+func (q *APIQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = aq.Limit(1).IDs(setContextOp(ctx, aq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = q.Limit(1).IDs(setContextOp(ctx, q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -101,8 +101,8 @@ func (aq *APIQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (aq *APIQuery) FirstIDX(ctx context.Context) int {
-	id, err := aq.FirstID(ctx)
+func (q *APIQuery) FirstIDX(ctx context.Context) int {
+	id, err := q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -112,8 +112,8 @@ func (aq *APIQuery) FirstIDX(ctx context.Context) int {
 // Only returns a single Api entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Api entity is found.
 // Returns a *NotFoundError when no Api entities are found.
-func (aq *APIQuery) Only(ctx context.Context) (*Api, error) {
-	nodes, err := aq.Limit(2).All(setContextOp(ctx, aq.ctx, ent.OpQueryOnly))
+func (q *APIQuery) Only(ctx context.Context) (*Api, error) {
+	nodes, err := q.Limit(2).All(setContextOp(ctx, q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -128,8 +128,8 @@ func (aq *APIQuery) Only(ctx context.Context) (*Api, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (aq *APIQuery) OnlyX(ctx context.Context) *Api {
-	node, err := aq.Only(ctx)
+func (q *APIQuery) OnlyX(ctx context.Context) *Api {
+	node, err := q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -139,9 +139,9 @@ func (aq *APIQuery) OnlyX(ctx context.Context) *Api {
 // OnlyID is like Only, but returns the only Api ID in the query.
 // Returns a *NotSingularError when more than one Api ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (aq *APIQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (q *APIQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = aq.Limit(2).IDs(setContextOp(ctx, aq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = q.Limit(2).IDs(setContextOp(ctx, q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -156,8 +156,8 @@ func (aq *APIQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (aq *APIQuery) OnlyIDX(ctx context.Context) int {
-	id, err := aq.OnlyID(ctx)
+func (q *APIQuery) OnlyIDX(ctx context.Context) int {
+	id, err := q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -165,18 +165,18 @@ func (aq *APIQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Apis.
-func (aq *APIQuery) All(ctx context.Context) ([]*Api, error) {
-	ctx = setContextOp(ctx, aq.ctx, ent.OpQueryAll)
-	if err := aq.prepareQuery(ctx); err != nil {
+func (q *APIQuery) All(ctx context.Context) ([]*Api, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryAll)
+	if err := q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Api, *APIQuery]()
-	return withInterceptors[[]*Api](ctx, aq, qr, aq.inters)
+	return withInterceptors[[]*Api](ctx, q, qr, q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (aq *APIQuery) AllX(ctx context.Context) []*Api {
-	nodes, err := aq.All(ctx)
+func (q *APIQuery) AllX(ctx context.Context) []*Api {
+	nodes, err := q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -184,20 +184,20 @@ func (aq *APIQuery) AllX(ctx context.Context) []*Api {
 }
 
 // IDs executes the query and returns a list of Api IDs.
-func (aq *APIQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if aq.ctx.Unique == nil && aq.path != nil {
-		aq.Unique(true)
+func (q *APIQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if q.ctx.Unique == nil && q.path != nil {
+		q.Unique(true)
 	}
-	ctx = setContextOp(ctx, aq.ctx, ent.OpQueryIDs)
-	if err = aq.Select(api.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryIDs)
+	if err = q.Select(api.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (aq *APIQuery) IDsX(ctx context.Context) []int {
-	ids, err := aq.IDs(ctx)
+func (q *APIQuery) IDsX(ctx context.Context) []int {
+	ids, err := q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -205,17 +205,17 @@ func (aq *APIQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (aq *APIQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, aq.ctx, ent.OpQueryCount)
-	if err := aq.prepareQuery(ctx); err != nil {
+func (q *APIQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryCount)
+	if err := q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, aq, querierCount[*APIQuery](), aq.inters)
+	return withInterceptors[int](ctx, q, querierCount[*APIQuery](), q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (aq *APIQuery) CountX(ctx context.Context) int {
-	count, err := aq.Count(ctx)
+func (q *APIQuery) CountX(ctx context.Context) int {
+	count, err := q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -223,9 +223,9 @@ func (aq *APIQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (aq *APIQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, aq.ctx, ent.OpQueryExist)
-	switch _, err := aq.FirstID(ctx); {
+func (q *APIQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryExist)
+	switch _, err := q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -236,8 +236,8 @@ func (aq *APIQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (aq *APIQuery) ExistX(ctx context.Context) bool {
-	exist, err := aq.Exist(ctx)
+func (q *APIQuery) ExistX(ctx context.Context) bool {
+	exist, err := q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -246,29 +246,29 @@ func (aq *APIQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the APIQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (aq *APIQuery) Clone() *APIQuery {
-	if aq == nil {
+func (q *APIQuery) Clone() *APIQuery {
+	if q == nil {
 		return nil
 	}
 	return &APIQuery{
-		config:     aq.config,
-		ctx:        aq.ctx.Clone(),
-		order:      append([]api.OrderOption{}, aq.order...),
-		inters:     append([]Interceptor{}, aq.inters...),
-		predicates: append([]predicate.Api{}, aq.predicates...),
+		config:     q.config,
+		ctx:        q.ctx.Clone(),
+		order:      append([]api.OrderOption{}, q.order...),
+		inters:     append([]Interceptor{}, q.inters...),
+		predicates: append([]predicate.Api{}, q.predicates...),
 		// clone intermediate query.
-		sql:       aq.sql.Clone(),
-		path:      aq.path,
-		modifiers: append([]func(*sql.Selector){}, aq.modifiers...),
+		sql:       q.sql.Clone(),
+		path:      q.path,
+		modifiers: append([]func(*sql.Selector){}, q.modifiers...),
 	}
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
-func (aq *APIQuery) GroupBy(field string, fields ...string) *APIGroupBy {
-	aq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &APIGroupBy{build: aq}
-	grbuild.flds = &aq.ctx.Fields
+func (q *APIQuery) GroupBy(field string, fields ...string) *APIGroupBy {
+	q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &APIGroupBy{build: q}
+	grbuild.flds = &q.ctx.Fields
 	grbuild.label = api.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -276,65 +276,65 @@ func (aq *APIQuery) GroupBy(field string, fields ...string) *APIGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (aq *APIQuery) Select(fields ...string) *APISelect {
-	aq.ctx.Fields = append(aq.ctx.Fields, fields...)
-	sbuild := &APISelect{APIQuery: aq}
+func (q *APIQuery) Select(fields ...string) *APISelect {
+	q.ctx.Fields = append(q.ctx.Fields, fields...)
+	sbuild := &APISelect{APIQuery: q}
 	sbuild.label = api.Label
-	sbuild.flds, sbuild.scan = &aq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a APISelect configured with the given aggregations.
-func (aq *APIQuery) Aggregate(fns ...AggregateFunc) *APISelect {
-	return aq.Select().Aggregate(fns...)
+func (q *APIQuery) Aggregate(fns ...AggregateFunc) *APISelect {
+	return q.Select().Aggregate(fns...)
 }
 
-func (aq *APIQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range aq.inters {
+func (q *APIQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, aq); err != nil {
+			if err := trv.Traverse(ctx, q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range aq.ctx.Fields {
+	for _, f := range q.ctx.Fields {
 		if !api.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if aq.path != nil {
-		prev, err := aq.path(ctx)
+	if q.path != nil {
+		prev, err := q.path(ctx)
 		if err != nil {
 			return err
 		}
-		aq.sql = prev
+		q.sql = prev
 	}
 	return nil
 }
 
-func (aq *APIQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Api, error) {
+func (q *APIQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Api, error) {
 	var (
 		nodes = []*Api{}
-		_spec = aq.querySpec()
+		_spec = q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Api).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Api{config: aq.config}
+		node := &Api{config: q.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
-	if len(aq.modifiers) > 0 {
-		_spec.Modifiers = aq.modifiers
+	if len(q.modifiers) > 0 {
+		_spec.Modifiers = q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, aq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -343,27 +343,27 @@ func (aq *APIQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Api, err
 	return nodes, nil
 }
 
-func (aq *APIQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := aq.querySpec()
-	if len(aq.modifiers) > 0 {
-		_spec.Modifiers = aq.modifiers
+func (q *APIQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := q.querySpec()
+	if len(q.modifiers) > 0 {
+		_spec.Modifiers = q.modifiers
 	}
-	_spec.Node.Columns = aq.ctx.Fields
-	if len(aq.ctx.Fields) > 0 {
-		_spec.Unique = aq.ctx.Unique != nil && *aq.ctx.Unique
+	_spec.Node.Columns = q.ctx.Fields
+	if len(q.ctx.Fields) > 0 {
+		_spec.Unique = q.ctx.Unique != nil && *q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, aq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, q.driver, _spec)
 }
 
-func (aq *APIQuery) querySpec() *sqlgraph.QuerySpec {
+func (q *APIQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(api.Table, api.Columns, sqlgraph.NewFieldSpec(api.FieldID, field.TypeInt))
-	_spec.From = aq.sql
-	if unique := aq.ctx.Unique; unique != nil {
+	_spec.From = q.sql
+	if unique := q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if aq.path != nil {
+	} else if q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := aq.ctx.Fields; len(fields) > 0 {
+	if fields := q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, api.FieldID)
 		for i := range fields {
@@ -372,20 +372,20 @@ func (aq *APIQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := aq.predicates; len(ps) > 0 {
+	if ps := q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := aq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := aq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := aq.order; len(ps) > 0 {
+	if ps := q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -395,36 +395,36 @@ func (aq *APIQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (aq *APIQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(aq.driver.Dialect())
+func (q *APIQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(q.driver.Dialect())
 	t1 := builder.Table(api.Table)
-	columns := aq.ctx.Fields
+	columns := q.ctx.Fields
 	if len(columns) == 0 {
 		columns = api.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if aq.sql != nil {
-		selector = aq.sql
+	if q.sql != nil {
+		selector = q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if aq.ctx.Unique != nil && *aq.ctx.Unique {
+	if q.ctx.Unique != nil && *q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, m := range aq.modifiers {
+	for _, m := range q.modifiers {
 		m(selector)
 	}
-	for _, p := range aq.predicates {
+	for _, p := range q.predicates {
 		p(selector)
 	}
-	for _, p := range aq.order {
+	for _, p := range q.order {
 		p(selector)
 	}
-	if offset := aq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := aq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -457,9 +457,9 @@ func (aq *APIQuery) ForShare(opts ...sql.LockOption) *APIQuery {
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (aq *APIQuery) Modify(modifiers ...func(s *sql.Selector)) *APISelect {
-	aq.modifiers = append(aq.modifiers, modifiers...)
-	return aq.Select()
+func (q *APIQuery) Modify(modifiers ...func(s *sql.Selector)) *APISelect {
+	q.modifiers = append(q.modifiers, modifiers...)
+	return q.Select()
 }
 
 // APIGroupBy is the group-by builder for Api entities.
@@ -483,27 +483,27 @@ func (agb *APIGroupBy) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*APIQuery, *APIGroupBy](ctx, agb.build, agb, agb.build.inters, v)
 }
 
-func (agb *APIGroupBy) sqlScan(ctx context.Context, root *APIQuery, v any) error {
+func (q *APIGroupBy) sqlScan(ctx context.Context, root *APIQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(agb.fns))
-	for _, fn := range agb.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*agb.flds)+len(agb.fns))
-		for _, f := range *agb.flds {
+		columns := make([]string, 0, len(*q.flds)+len(q.fns))
+		for _, f := range *q.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*agb.flds...)...)
+	selector.GroupBy(selector.Columns(*q.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := agb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -531,13 +531,13 @@ func (as *APISelect) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*APIQuery, *APISelect](ctx, as.APIQuery, as, as.inters, v)
 }
 
-func (as *APISelect) sqlScan(ctx context.Context, root *APIQuery, v any) error {
+func (q *APISelect) sqlScan(ctx context.Context, root *APIQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(as.fns))
-	for _, fn := range as.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*as.selector.flds); {
+	switch n := len(*q.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -545,7 +545,7 @@ func (as *APISelect) sqlScan(ctx context.Context, root *APIQuery, v any) error {
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := as.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -553,7 +553,7 @@ func (as *APISelect) sqlScan(ctx context.Context, root *APIQuery, v any) error {
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (as *APISelect) Modify(modifiers ...func(s *sql.Selector)) *APISelect {
-	as.modifiers = append(as.modifiers, modifiers...)
-	return as
+func (q *APISelect) Modify(modifiers ...func(s *sql.Selector)) *APISelect {
+	q.modifiers = append(q.modifiers, modifiers...)
+	return q
 }

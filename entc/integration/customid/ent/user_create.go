@@ -28,88 +28,88 @@ type UserCreate struct {
 }
 
 // SetID sets the "id" field.
-func (uc *UserCreate) SetID(i int) *UserCreate {
-	uc.mutation.SetID(i)
-	return uc
+func (m *UserCreate) SetID(v int) *UserCreate {
+	m.mutation.SetID(v)
+	return m
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (uc *UserCreate) AddGroupIDs(ids ...int) *UserCreate {
-	uc.mutation.AddGroupIDs(ids...)
-	return uc
+func (m *UserCreate) AddGroupIDs(ids ...int) *UserCreate {
+	m.mutation.AddGroupIDs(ids...)
+	return m
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (uc *UserCreate) AddGroups(g ...*Group) *UserCreate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (m *UserCreate) AddGroups(v ...*Group) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uc.AddGroupIDs(ids...)
+	return m.AddGroupIDs(ids...)
 }
 
 // SetParentID sets the "parent" edge to the User entity by ID.
-func (uc *UserCreate) SetParentID(id int) *UserCreate {
-	uc.mutation.SetParentID(id)
-	return uc
+func (m *UserCreate) SetParentID(id int) *UserCreate {
+	m.mutation.SetParentID(id)
+	return m
 }
 
 // SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
-func (uc *UserCreate) SetNillableParentID(id *int) *UserCreate {
+func (m *UserCreate) SetNillableParentID(id *int) *UserCreate {
 	if id != nil {
-		uc = uc.SetParentID(*id)
+		m = m.SetParentID(*id)
 	}
-	return uc
+	return m
 }
 
 // SetParent sets the "parent" edge to the User entity.
-func (uc *UserCreate) SetParent(u *User) *UserCreate {
-	return uc.SetParentID(u.ID)
+func (m *UserCreate) SetParent(v *User) *UserCreate {
+	return m.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
-func (uc *UserCreate) AddChildIDs(ids ...int) *UserCreate {
-	uc.mutation.AddChildIDs(ids...)
-	return uc
+func (m *UserCreate) AddChildIDs(ids ...int) *UserCreate {
+	m.mutation.AddChildIDs(ids...)
+	return m
 }
 
 // AddChildren adds the "children" edges to the User entity.
-func (uc *UserCreate) AddChildren(u ...*User) *UserCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (m *UserCreate) AddChildren(v ...*User) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uc.AddChildIDs(ids...)
+	return m.AddChildIDs(ids...)
 }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
-func (uc *UserCreate) AddPetIDs(ids ...string) *UserCreate {
-	uc.mutation.AddPetIDs(ids...)
-	return uc
+func (m *UserCreate) AddPetIDs(ids ...string) *UserCreate {
+	m.mutation.AddPetIDs(ids...)
+	return m
 }
 
 // AddPets adds the "pets" edges to the Pet entity.
-func (uc *UserCreate) AddPets(p ...*Pet) *UserCreate {
-	ids := make([]string, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (m *UserCreate) AddPets(v ...*Pet) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uc.AddPetIDs(ids...)
+	return m.AddPetIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uc *UserCreate) Mutation() *UserMutation {
-	return uc.mutation
+func (m *UserCreate) Mutation() *UserMutation {
+	return m.mutation
 }
 
 // Save creates the User in the database.
-func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
-	return withHooks(ctx, uc.sqlSave, uc.mutation, uc.hooks)
+func (c *UserCreate) Save(ctx context.Context) (*User, error) {
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (uc *UserCreate) SaveX(ctx context.Context) *User {
-	v, err := uc.Save(ctx)
+func (c *UserCreate) SaveX(ctx context.Context) *User {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -117,29 +117,29 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 }
 
 // Exec executes the query.
-func (uc *UserCreate) Exec(ctx context.Context) error {
-	_, err := uc.Save(ctx)
+func (c *UserCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uc *UserCreate) ExecX(ctx context.Context) {
-	if err := uc.Exec(ctx); err != nil {
+func (c *UserCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uc *UserCreate) check() error {
+func (c *UserCreate) check() error {
 	return nil
 }
 
-func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
-	if err := uc.check(); err != nil {
+func (c *UserCreate) sqlSave(ctx context.Context) (*User, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := uc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, uc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -149,22 +149,22 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int(id)
 	}
-	uc.mutation.id = &_node.ID
-	uc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
+func (c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	var (
-		_node = &User{config: uc.config}
+		_node = &User{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	)
-	_spec.OnConflict = uc.conflict
-	if id, ok := uc.mutation.ID(); ok {
+	_spec.OnConflict = c.conflict
+	if id, ok := c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if nodes := uc.mutation.GroupsIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.GroupsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -180,7 +180,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -197,7 +197,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node.user_children = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.ChildrenIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.ChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -213,7 +213,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.PetsIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.PetsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -242,11 +242,9 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-func (uc *UserCreate) OnConflict(opts ...sql.ConflictOption) *UserUpsertOne {
-	uc.conflict = opts
-	return &UserUpsertOne{
-		create: uc,
-	}
+func (c *UserCreate) OnConflict(opts ...sql.ConflictOption) *UserUpsertOne {
+	c.conflict = opts
+	return &UserUpsertOne{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -255,11 +253,9 @@ func (uc *UserCreate) OnConflict(opts ...sql.ConflictOption) *UserUpsertOne {
 //	client.User.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (uc *UserCreate) OnConflictColumns(columns ...string) *UserUpsertOne {
-	uc.conflict = append(uc.conflict, sql.ConflictColumns(columns...))
-	return &UserUpsertOne{
-		create: uc,
-	}
+func (c *UserCreate) OnConflictColumns(columns ...string) *UserUpsertOne {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &UserUpsertOne{create: c}
 }
 
 type (
@@ -365,16 +361,16 @@ type UserCreateBulk struct {
 }
 
 // Save creates the User entities in the database.
-func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
-	if ucb.err != nil {
-		return nil, ucb.err
+func (c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(ucb.builders))
-	nodes := make([]*User, len(ucb.builders))
-	mutators := make([]Mutator, len(ucb.builders))
-	for i := range ucb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*User, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := ucb.builders[i]
+			builder := c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UserMutation)
 				if !ok {
@@ -387,12 +383,12 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, ucb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = ucb.conflict
+					spec.OnConflict = c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ucb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -416,7 +412,7 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, ucb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -424,8 +420,8 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
-	v, err := ucb.Save(ctx)
+func (c *UserCreateBulk) SaveX(ctx context.Context) []*User {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -433,14 +429,14 @@ func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
 }
 
 // Exec executes the query.
-func (ucb *UserCreateBulk) Exec(ctx context.Context) error {
-	_, err := ucb.Save(ctx)
+func (c *UserCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ucb *UserCreateBulk) ExecX(ctx context.Context) {
-	if err := ucb.Exec(ctx); err != nil {
+func (c *UserCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -455,11 +451,9 @@ func (ucb *UserCreateBulk) ExecX(ctx context.Context) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-func (ucb *UserCreateBulk) OnConflict(opts ...sql.ConflictOption) *UserUpsertBulk {
-	ucb.conflict = opts
-	return &UserUpsertBulk{
-		create: ucb,
-	}
+func (c *UserCreateBulk) OnConflict(opts ...sql.ConflictOption) *UserUpsertBulk {
+	c.conflict = opts
+	return &UserUpsertBulk{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -468,11 +462,9 @@ func (ucb *UserCreateBulk) OnConflict(opts ...sql.ConflictOption) *UserUpsertBul
 //	client.User.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (ucb *UserCreateBulk) OnConflictColumns(columns ...string) *UserUpsertBulk {
-	ucb.conflict = append(ucb.conflict, sql.ConflictColumns(columns...))
-	return &UserUpsertBulk{
-		create: ucb,
-	}
+func (c *UserCreateBulk) OnConflictColumns(columns ...string) *UserUpsertBulk {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &UserUpsertBulk{create: c}
 }
 
 // UserUpsertBulk is the builder for "upsert"-ing

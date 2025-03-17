@@ -75,9 +75,9 @@ func (*Team) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Team fields.
-func (t *Team) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Team) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -86,15 +86,15 @@ func (t *Team) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			t.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case team.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				t.Name = value.String
+				m.Name = value.String
 			}
 		default:
-			t.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -102,45 +102,45 @@ func (t *Team) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Team.
 // This includes values selected through modifiers, order, etc.
-func (t *Team) Value(name string) (ent.Value, error) {
-	return t.selectValues.Get(name)
+func (m *Team) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryTasks queries the "tasks" edge of the Team entity.
-func (t *Team) QueryTasks() *TaskQuery {
-	return NewTeamClient(t.config).QueryTasks(t)
+func (m *Team) QueryTasks() *TaskQuery {
+	return NewTeamClient(m.config).QueryTasks(m)
 }
 
 // QueryUsers queries the "users" edge of the Team entity.
-func (t *Team) QueryUsers() *UserQuery {
-	return NewTeamClient(t.config).QueryUsers(t)
+func (m *Team) QueryUsers() *UserQuery {
+	return NewTeamClient(m.config).QueryUsers(m)
 }
 
 // Update returns a builder for updating this Team.
 // Note that you need to call Team.Unwrap() before calling this method if this Team
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (t *Team) Update() *TeamUpdateOne {
-	return NewTeamClient(t.config).UpdateOne(t)
+func (m *Team) Update() *TeamUpdateOne {
+	return NewTeamClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Team entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (t *Team) Unwrap() *Team {
-	_tx, ok := t.config.driver.(*txDriver)
+func (m *Team) Unwrap() *Team {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Team is not a transactional entity")
 	}
-	t.config.driver = _tx.drv
-	return t
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (t *Team) String() string {
+func (m *Team) String() string {
 	var builder strings.Builder
 	builder.WriteString("Team(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("name=")
-	builder.WriteString(t.Name)
+	builder.WriteString(m.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }

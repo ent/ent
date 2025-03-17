@@ -69,9 +69,9 @@ func (*Comment) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Comment fields.
-func (c *Comment) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Comment) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -80,21 +80,21 @@ func (c *Comment) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			c.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case comment.FieldText:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field text", values[i])
 			} else if value.Valid {
-				c.Text = value.String
+				m.Text = value.String
 			}
 		case comment.FieldPostID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field post_id", values[i])
 			} else if value.Valid {
-				c.PostID = int(value.Int64)
+				m.PostID = int(value.Int64)
 			}
 		default:
-			c.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -102,43 +102,43 @@ func (c *Comment) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Comment.
 // This includes values selected through modifiers, order, etc.
-func (c *Comment) Value(name string) (ent.Value, error) {
-	return c.selectValues.Get(name)
+func (m *Comment) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryPost queries the "post" edge of the Comment entity.
-func (c *Comment) QueryPost() *PostQuery {
-	return NewCommentClient(c.config).QueryPost(c)
+func (m *Comment) QueryPost() *PostQuery {
+	return NewCommentClient(m.config).QueryPost(m)
 }
 
 // Update returns a builder for updating this Comment.
 // Note that you need to call Comment.Unwrap() before calling this method if this Comment
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (c *Comment) Update() *CommentUpdateOne {
-	return NewCommentClient(c.config).UpdateOne(c)
+func (m *Comment) Update() *CommentUpdateOne {
+	return NewCommentClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Comment entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (c *Comment) Unwrap() *Comment {
-	_tx, ok := c.config.driver.(*txDriver)
+func (m *Comment) Unwrap() *Comment {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Comment is not a transactional entity")
 	}
-	c.config.driver = _tx.drv
-	return c
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (c *Comment) String() string {
+func (m *Comment) String() string {
 	var builder strings.Builder
 	builder.WriteString("Comment(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("text=")
-	builder.WriteString(c.Text)
+	builder.WriteString(m.Text)
 	builder.WriteString(", ")
 	builder.WriteString("post_id=")
-	builder.WriteString(fmt.Sprintf("%v", c.PostID))
+	builder.WriteString(fmt.Sprintf("%v", m.PostID))
 	builder.WriteByte(')')
 	return builder.String()
 }

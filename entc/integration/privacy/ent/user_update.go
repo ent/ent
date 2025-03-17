@@ -28,123 +28,123 @@ type UserUpdate struct {
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	uu.mutation.Where(ps...)
-	return uu
+func (u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetAge sets the "age" field.
-func (uu *UserUpdate) SetAge(u uint) *UserUpdate {
-	uu.mutation.ResetAge()
-	uu.mutation.SetAge(u)
-	return uu
+func (m *UserUpdate) SetAge(v uint) *UserUpdate {
+	m.mutation.ResetAge()
+	m.mutation.SetAge(v)
+	return m
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableAge(u *uint) *UserUpdate {
-	if u != nil {
-		uu.SetAge(*u)
+func (m *UserUpdate) SetNillableAge(v *uint) *UserUpdate {
+	if v != nil {
+		m.SetAge(*v)
 	}
-	return uu
+	return m
 }
 
-// AddAge adds u to the "age" field.
-func (uu *UserUpdate) AddAge(u int) *UserUpdate {
-	uu.mutation.AddAge(u)
-	return uu
+// AddAge adds value to the "age" field.
+func (m *UserUpdate) AddAge(v int) *UserUpdate {
+	m.mutation.AddAge(v)
+	return m
 }
 
 // ClearAge clears the value of the "age" field.
-func (uu *UserUpdate) ClearAge() *UserUpdate {
-	uu.mutation.ClearAge()
-	return uu
+func (m *UserUpdate) ClearAge() *UserUpdate {
+	m.mutation.ClearAge()
+	return m
 }
 
 // AddTeamIDs adds the "teams" edge to the Team entity by IDs.
-func (uu *UserUpdate) AddTeamIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddTeamIDs(ids...)
-	return uu
+func (m *UserUpdate) AddTeamIDs(ids ...int) *UserUpdate {
+	m.mutation.AddTeamIDs(ids...)
+	return m
 }
 
 // AddTeams adds the "teams" edges to the Team entity.
-func (uu *UserUpdate) AddTeams(t ...*Team) *UserUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (m *UserUpdate) AddTeams(v ...*Team) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uu.AddTeamIDs(ids...)
+	return m.AddTeamIDs(ids...)
 }
 
 // AddTaskIDs adds the "tasks" edge to the Task entity by IDs.
-func (uu *UserUpdate) AddTaskIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddTaskIDs(ids...)
-	return uu
+func (m *UserUpdate) AddTaskIDs(ids ...int) *UserUpdate {
+	m.mutation.AddTaskIDs(ids...)
+	return m
 }
 
 // AddTasks adds the "tasks" edges to the Task entity.
-func (uu *UserUpdate) AddTasks(t ...*Task) *UserUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (m *UserUpdate) AddTasks(v ...*Task) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uu.AddTaskIDs(ids...)
+	return m.AddTaskIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uu *UserUpdate) Mutation() *UserMutation {
-	return uu.mutation
+func (m *UserUpdate) Mutation() *UserMutation {
+	return m.mutation
 }
 
 // ClearTeams clears all "teams" edges to the Team entity.
-func (uu *UserUpdate) ClearTeams() *UserUpdate {
-	uu.mutation.ClearTeams()
-	return uu
+func (u *UserUpdate) ClearTeams() *UserUpdate {
+	u.mutation.ClearTeams()
+	return u
 }
 
 // RemoveTeamIDs removes the "teams" edge to Team entities by IDs.
-func (uu *UserUpdate) RemoveTeamIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveTeamIDs(ids...)
-	return uu
+func (u *UserUpdate) RemoveTeamIDs(ids ...int) *UserUpdate {
+	u.mutation.RemoveTeamIDs(ids...)
+	return u
 }
 
 // RemoveTeams removes "teams" edges to Team entities.
-func (uu *UserUpdate) RemoveTeams(t ...*Team) *UserUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (u *UserUpdate) RemoveTeams(v ...*Team) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uu.RemoveTeamIDs(ids...)
+	return u.RemoveTeamIDs(ids...)
 }
 
 // ClearTasks clears all "tasks" edges to the Task entity.
-func (uu *UserUpdate) ClearTasks() *UserUpdate {
-	uu.mutation.ClearTasks()
-	return uu
+func (u *UserUpdate) ClearTasks() *UserUpdate {
+	u.mutation.ClearTasks()
+	return u
 }
 
 // RemoveTaskIDs removes the "tasks" edge to Task entities by IDs.
-func (uu *UserUpdate) RemoveTaskIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveTaskIDs(ids...)
-	return uu
+func (u *UserUpdate) RemoveTaskIDs(ids ...int) *UserUpdate {
+	u.mutation.RemoveTaskIDs(ids...)
+	return u
 }
 
 // RemoveTasks removes "tasks" edges to Task entities.
-func (uu *UserUpdate) RemoveTasks(t ...*Task) *UserUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (u *UserUpdate) RemoveTasks(v ...*Task) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uu.RemoveTaskIDs(ids...)
+	return u.RemoveTaskIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, uu.sqlSave, uu.mutation, uu.hooks)
+func (u *UserUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uu *UserUpdate) SaveX(ctx context.Context) int {
-	affected, err := uu.Save(ctx)
+func (u *UserUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -152,37 +152,37 @@ func (uu *UserUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (uu *UserUpdate) Exec(ctx context.Context) error {
-	_, err := uu.Save(ctx)
+func (u *UserUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uu *UserUpdate) ExecX(ctx context.Context) {
-	if err := uu.Exec(ctx); err != nil {
+func (u *UserUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (u *UserUpdate) sqlSave(ctx context.Context) (_n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
-	if ps := uu.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uu.mutation.Age(); ok {
+	if value, ok := u.mutation.Age(); ok {
 		_spec.SetField(user.FieldAge, field.TypeUint, value)
 	}
-	if value, ok := uu.mutation.AddedAge(); ok {
+	if value, ok := u.mutation.AddedAge(); ok {
 		_spec.AddField(user.FieldAge, field.TypeUint, value)
 	}
-	if uu.mutation.AgeCleared() {
+	if u.mutation.AgeCleared() {
 		_spec.ClearField(user.FieldAge, field.TypeUint)
 	}
-	if uu.mutation.TeamsCleared() {
+	if u.mutation.TeamsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -195,7 +195,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedTeamsIDs(); len(nodes) > 0 && !uu.mutation.TeamsCleared() {
+	if nodes := u.mutation.RemovedTeamsIDs(); len(nodes) > 0 && !u.mutation.TeamsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -211,7 +211,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.TeamsIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.TeamsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -227,7 +227,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.TasksCleared() {
+	if u.mutation.TasksCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -240,7 +240,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedTasksIDs(); len(nodes) > 0 && !uu.mutation.TasksCleared() {
+	if nodes := u.mutation.RemovedTasksIDs(); len(nodes) > 0 && !u.mutation.TasksCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -256,7 +256,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.TasksIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.TasksIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -272,7 +272,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -280,8 +280,8 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	uu.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -293,130 +293,130 @@ type UserUpdateOne struct {
 }
 
 // SetAge sets the "age" field.
-func (uuo *UserUpdateOne) SetAge(u uint) *UserUpdateOne {
-	uuo.mutation.ResetAge()
-	uuo.mutation.SetAge(u)
-	return uuo
+func (m *UserUpdateOne) SetAge(v uint) *UserUpdateOne {
+	m.mutation.ResetAge()
+	m.mutation.SetAge(v)
+	return m
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableAge(u *uint) *UserUpdateOne {
-	if u != nil {
-		uuo.SetAge(*u)
+func (m *UserUpdateOne) SetNillableAge(v *uint) *UserUpdateOne {
+	if v != nil {
+		m.SetAge(*v)
 	}
-	return uuo
+	return m
 }
 
-// AddAge adds u to the "age" field.
-func (uuo *UserUpdateOne) AddAge(u int) *UserUpdateOne {
-	uuo.mutation.AddAge(u)
-	return uuo
+// AddAge adds value to the "age" field.
+func (m *UserUpdateOne) AddAge(v int) *UserUpdateOne {
+	m.mutation.AddAge(v)
+	return m
 }
 
 // ClearAge clears the value of the "age" field.
-func (uuo *UserUpdateOne) ClearAge() *UserUpdateOne {
-	uuo.mutation.ClearAge()
-	return uuo
+func (m *UserUpdateOne) ClearAge() *UserUpdateOne {
+	m.mutation.ClearAge()
+	return m
 }
 
 // AddTeamIDs adds the "teams" edge to the Team entity by IDs.
-func (uuo *UserUpdateOne) AddTeamIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddTeamIDs(ids...)
-	return uuo
+func (m *UserUpdateOne) AddTeamIDs(ids ...int) *UserUpdateOne {
+	m.mutation.AddTeamIDs(ids...)
+	return m
 }
 
 // AddTeams adds the "teams" edges to the Team entity.
-func (uuo *UserUpdateOne) AddTeams(t ...*Team) *UserUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (m *UserUpdateOne) AddTeams(v ...*Team) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uuo.AddTeamIDs(ids...)
+	return m.AddTeamIDs(ids...)
 }
 
 // AddTaskIDs adds the "tasks" edge to the Task entity by IDs.
-func (uuo *UserUpdateOne) AddTaskIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddTaskIDs(ids...)
-	return uuo
+func (m *UserUpdateOne) AddTaskIDs(ids ...int) *UserUpdateOne {
+	m.mutation.AddTaskIDs(ids...)
+	return m
 }
 
 // AddTasks adds the "tasks" edges to the Task entity.
-func (uuo *UserUpdateOne) AddTasks(t ...*Task) *UserUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (m *UserUpdateOne) AddTasks(v ...*Task) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uuo.AddTaskIDs(ids...)
+	return m.AddTaskIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uuo *UserUpdateOne) Mutation() *UserMutation {
-	return uuo.mutation
+func (m *UserUpdateOne) Mutation() *UserMutation {
+	return m.mutation
 }
 
 // ClearTeams clears all "teams" edges to the Team entity.
-func (uuo *UserUpdateOne) ClearTeams() *UserUpdateOne {
-	uuo.mutation.ClearTeams()
-	return uuo
+func (u *UserUpdateOne) ClearTeams() *UserUpdateOne {
+	u.mutation.ClearTeams()
+	return u
 }
 
 // RemoveTeamIDs removes the "teams" edge to Team entities by IDs.
-func (uuo *UserUpdateOne) RemoveTeamIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveTeamIDs(ids...)
-	return uuo
+func (u *UserUpdateOne) RemoveTeamIDs(ids ...int) *UserUpdateOne {
+	u.mutation.RemoveTeamIDs(ids...)
+	return u
 }
 
 // RemoveTeams removes "teams" edges to Team entities.
-func (uuo *UserUpdateOne) RemoveTeams(t ...*Team) *UserUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (u *UserUpdateOne) RemoveTeams(v ...*Team) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uuo.RemoveTeamIDs(ids...)
+	return u.RemoveTeamIDs(ids...)
 }
 
 // ClearTasks clears all "tasks" edges to the Task entity.
-func (uuo *UserUpdateOne) ClearTasks() *UserUpdateOne {
-	uuo.mutation.ClearTasks()
-	return uuo
+func (u *UserUpdateOne) ClearTasks() *UserUpdateOne {
+	u.mutation.ClearTasks()
+	return u
 }
 
 // RemoveTaskIDs removes the "tasks" edge to Task entities by IDs.
-func (uuo *UserUpdateOne) RemoveTaskIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveTaskIDs(ids...)
-	return uuo
+func (u *UserUpdateOne) RemoveTaskIDs(ids ...int) *UserUpdateOne {
+	u.mutation.RemoveTaskIDs(ids...)
+	return u
 }
 
 // RemoveTasks removes "tasks" edges to Task entities.
-func (uuo *UserUpdateOne) RemoveTasks(t ...*Task) *UserUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (u *UserUpdateOne) RemoveTasks(v ...*Task) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uuo.RemoveTaskIDs(ids...)
+	return u.RemoveTaskIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uuo *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
-	uuo.mutation.Where(ps...)
-	return uuo
+func (u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
-	uuo.fields = append([]string{field}, fields...)
-	return uuo
+func (u *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated User entity.
-func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	return withHooks(ctx, uuo.sqlSave, uuo.mutation, uuo.hooks)
+func (u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
-	node, err := uuo.Save(ctx)
+func (u *UserUpdateOne) SaveX(ctx context.Context) *User {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -424,26 +424,26 @@ func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
 }
 
 // Exec executes the query on the entity.
-func (uuo *UserUpdateOne) Exec(ctx context.Context) error {
-	_, err := uuo.Save(ctx)
+func (u *UserUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
-	if err := uuo.Exec(ctx); err != nil {
+func (u *UserUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
+func (u *UserUpdateOne) sqlSave(ctx context.Context) (_n *User, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
-	id, ok := uuo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := uuo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, user.FieldID)
 		for _, f := range fields {
@@ -455,23 +455,23 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			}
 		}
 	}
-	if ps := uuo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uuo.mutation.Age(); ok {
+	if value, ok := u.mutation.Age(); ok {
 		_spec.SetField(user.FieldAge, field.TypeUint, value)
 	}
-	if value, ok := uuo.mutation.AddedAge(); ok {
+	if value, ok := u.mutation.AddedAge(); ok {
 		_spec.AddField(user.FieldAge, field.TypeUint, value)
 	}
-	if uuo.mutation.AgeCleared() {
+	if u.mutation.AgeCleared() {
 		_spec.ClearField(user.FieldAge, field.TypeUint)
 	}
-	if uuo.mutation.TeamsCleared() {
+	if u.mutation.TeamsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -484,7 +484,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedTeamsIDs(); len(nodes) > 0 && !uuo.mutation.TeamsCleared() {
+	if nodes := u.mutation.RemovedTeamsIDs(); len(nodes) > 0 && !u.mutation.TeamsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -500,7 +500,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.TeamsIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.TeamsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -516,7 +516,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.TasksCleared() {
+	if u.mutation.TasksCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -529,7 +529,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedTasksIDs(); len(nodes) > 0 && !uuo.mutation.TasksCleared() {
+	if nodes := u.mutation.RemovedTasksIDs(); len(nodes) > 0 && !u.mutation.TasksCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -545,7 +545,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.TasksIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.TasksIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -561,10 +561,10 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &User{config: uuo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, uuo.driver, _spec); err != nil {
+	_n = &User{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -572,6 +572,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		return nil, err
 	}
-	uuo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

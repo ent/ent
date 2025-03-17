@@ -26,24 +26,24 @@ type OtherUpdate struct {
 }
 
 // Where appends a list predicates to the OtherUpdate builder.
-func (ou *OtherUpdate) Where(ps ...predicate.Other) *OtherUpdate {
-	ou.mutation.Where(ps...)
-	return ou
+func (u *OtherUpdate) Where(ps ...predicate.Other) *OtherUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Mutation returns the OtherMutation object of the builder.
-func (ou *OtherUpdate) Mutation() *OtherMutation {
-	return ou.mutation
+func (m *OtherUpdate) Mutation() *OtherMutation {
+	return m.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (ou *OtherUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, ou.sqlSave, ou.mutation, ou.hooks)
+func (u *OtherUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ou *OtherUpdate) SaveX(ctx context.Context) int {
-	affected, err := ou.Save(ctx)
+func (u *OtherUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -51,28 +51,28 @@ func (ou *OtherUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (ou *OtherUpdate) Exec(ctx context.Context) error {
-	_, err := ou.Save(ctx)
+func (u *OtherUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ou *OtherUpdate) ExecX(ctx context.Context) {
-	if err := ou.Exec(ctx); err != nil {
+func (u *OtherUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (ou *OtherUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (u *OtherUpdate) sqlSave(ctx context.Context) (_n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(other.Table, other.Columns, sqlgraph.NewFieldSpec(other.FieldID, field.TypeOther))
-	if ps := ou.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, ou.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{other.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -80,8 +80,8 @@ func (ou *OtherUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	ou.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // OtherUpdateOne is the builder for updating a single Other entity.
@@ -93,31 +93,31 @@ type OtherUpdateOne struct {
 }
 
 // Mutation returns the OtherMutation object of the builder.
-func (ouo *OtherUpdateOne) Mutation() *OtherMutation {
-	return ouo.mutation
+func (m *OtherUpdateOne) Mutation() *OtherMutation {
+	return m.mutation
 }
 
 // Where appends a list predicates to the OtherUpdate builder.
-func (ouo *OtherUpdateOne) Where(ps ...predicate.Other) *OtherUpdateOne {
-	ouo.mutation.Where(ps...)
-	return ouo
+func (u *OtherUpdateOne) Where(ps ...predicate.Other) *OtherUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (ouo *OtherUpdateOne) Select(field string, fields ...string) *OtherUpdateOne {
-	ouo.fields = append([]string{field}, fields...)
-	return ouo
+func (u *OtherUpdateOne) Select(field string, fields ...string) *OtherUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated Other entity.
-func (ouo *OtherUpdateOne) Save(ctx context.Context) (*Other, error) {
-	return withHooks(ctx, ouo.sqlSave, ouo.mutation, ouo.hooks)
+func (u *OtherUpdateOne) Save(ctx context.Context) (*Other, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ouo *OtherUpdateOne) SaveX(ctx context.Context) *Other {
-	node, err := ouo.Save(ctx)
+func (u *OtherUpdateOne) SaveX(ctx context.Context) *Other {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -125,26 +125,26 @@ func (ouo *OtherUpdateOne) SaveX(ctx context.Context) *Other {
 }
 
 // Exec executes the query on the entity.
-func (ouo *OtherUpdateOne) Exec(ctx context.Context) error {
-	_, err := ouo.Save(ctx)
+func (u *OtherUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ouo *OtherUpdateOne) ExecX(ctx context.Context) {
-	if err := ouo.Exec(ctx); err != nil {
+func (u *OtherUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (ouo *OtherUpdateOne) sqlSave(ctx context.Context) (_node *Other, err error) {
+func (u *OtherUpdateOne) sqlSave(ctx context.Context) (_n *Other, err error) {
 	_spec := sqlgraph.NewUpdateSpec(other.Table, other.Columns, sqlgraph.NewFieldSpec(other.FieldID, field.TypeOther))
-	id, ok := ouo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Other.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := ouo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, other.FieldID)
 		for _, f := range fields {
@@ -156,17 +156,17 @@ func (ouo *OtherUpdateOne) sqlSave(ctx context.Context) (_node *Other, err error
 			}
 		}
 	}
-	if ps := ouo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	_node = &Other{config: ouo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, ouo.driver, _spec); err != nil {
+	_n = &Other{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{other.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -174,6 +174,6 @@ func (ouo *OtherUpdateOne) sqlSave(ctx context.Context) (_node *Other, err error
 		}
 		return nil, err
 	}
-	ouo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

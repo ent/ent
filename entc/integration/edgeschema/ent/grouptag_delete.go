@@ -24,56 +24,56 @@ type GroupTagDelete struct {
 }
 
 // Where appends a list predicates to the GroupTagDelete builder.
-func (gtd *GroupTagDelete) Where(ps ...predicate.GroupTag) *GroupTagDelete {
-	gtd.mutation.Where(ps...)
-	return gtd
+func (d *GroupTagDelete) Where(ps ...predicate.GroupTag) *GroupTagDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (gtd *GroupTagDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, gtd.sqlExec, gtd.mutation, gtd.hooks)
+func (d *GroupTagDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gtd *GroupTagDelete) ExecX(ctx context.Context) int {
-	n, err := gtd.Exec(ctx)
+func (d *GroupTagDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (gtd *GroupTagDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *GroupTagDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(grouptag.Table, sqlgraph.NewFieldSpec(grouptag.FieldID, field.TypeInt))
-	if ps := gtd.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, gtd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	gtd.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // GroupTagDeleteOne is the builder for deleting a single GroupTag entity.
 type GroupTagDeleteOne struct {
-	gtd *GroupTagDelete
+	d *GroupTagDelete
 }
 
 // Where appends a list predicates to the GroupTagDelete builder.
-func (gtdo *GroupTagDeleteOne) Where(ps ...predicate.GroupTag) *GroupTagDeleteOne {
-	gtdo.gtd.mutation.Where(ps...)
-	return gtdo
+func (d *GroupTagDeleteOne) Where(ps ...predicate.GroupTag) *GroupTagDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (gtdo *GroupTagDeleteOne) Exec(ctx context.Context) error {
-	n, err := gtdo.gtd.Exec(ctx)
+func (d *GroupTagDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (gtdo *GroupTagDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gtdo *GroupTagDeleteOne) ExecX(ctx context.Context) {
-	if err := gtdo.Exec(ctx); err != nil {
+func (d *GroupTagDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

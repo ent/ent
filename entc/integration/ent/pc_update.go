@@ -27,24 +27,24 @@ type PCUpdate struct {
 }
 
 // Where appends a list predicates to the PCUpdate builder.
-func (pu *PCUpdate) Where(ps ...predicate.PC) *PCUpdate {
-	pu.mutation.Where(ps...)
-	return pu
+func (u *PCUpdate) Where(ps ...predicate.PC) *PCUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Mutation returns the PCMutation object of the builder.
-func (pu *PCUpdate) Mutation() *PCMutation {
-	return pu.mutation
+func (m *PCUpdate) Mutation() *PCMutation {
+	return m.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (pu *PCUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, pu.sqlSave, pu.mutation, pu.hooks)
+func (u *PCUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (pu *PCUpdate) SaveX(ctx context.Context) int {
-	affected, err := pu.Save(ctx)
+func (u *PCUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -52,35 +52,35 @@ func (pu *PCUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (pu *PCUpdate) Exec(ctx context.Context) error {
-	_, err := pu.Save(ctx)
+func (u *PCUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pu *PCUpdate) ExecX(ctx context.Context) {
-	if err := pu.Exec(ctx); err != nil {
+func (u *PCUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (pu *PCUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *PCUpdate {
-	pu.modifiers = append(pu.modifiers, modifiers...)
-	return pu
+func (u *PCUpdate) Modify(modifiers ...func(*sql.UpdateBuilder)) *PCUpdate {
+	u.modifiers = append(u.modifiers, modifiers...)
+	return u
 }
 
-func (pu *PCUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (u *PCUpdate) sqlSave(ctx context.Context) (_n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(pc.Table, pc.Columns, sqlgraph.NewFieldSpec(pc.FieldID, field.TypeInt))
-	if ps := pu.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	_spec.AddModifiers(pu.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
+	_spec.AddModifiers(u.modifiers...)
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{pc.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -88,8 +88,8 @@ func (pu *PCUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	pu.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // PCUpdateOne is the builder for updating a single PC entity.
@@ -102,31 +102,31 @@ type PCUpdateOne struct {
 }
 
 // Mutation returns the PCMutation object of the builder.
-func (puo *PCUpdateOne) Mutation() *PCMutation {
-	return puo.mutation
+func (m *PCUpdateOne) Mutation() *PCMutation {
+	return m.mutation
 }
 
 // Where appends a list predicates to the PCUpdate builder.
-func (puo *PCUpdateOne) Where(ps ...predicate.PC) *PCUpdateOne {
-	puo.mutation.Where(ps...)
-	return puo
+func (u *PCUpdateOne) Where(ps ...predicate.PC) *PCUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (puo *PCUpdateOne) Select(field string, fields ...string) *PCUpdateOne {
-	puo.fields = append([]string{field}, fields...)
-	return puo
+func (u *PCUpdateOne) Select(field string, fields ...string) *PCUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated PC entity.
-func (puo *PCUpdateOne) Save(ctx context.Context) (*PC, error) {
-	return withHooks(ctx, puo.sqlSave, puo.mutation, puo.hooks)
+func (u *PCUpdateOne) Save(ctx context.Context) (*PC, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (puo *PCUpdateOne) SaveX(ctx context.Context) *PC {
-	node, err := puo.Save(ctx)
+func (u *PCUpdateOne) SaveX(ctx context.Context) *PC {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -134,32 +134,32 @@ func (puo *PCUpdateOne) SaveX(ctx context.Context) *PC {
 }
 
 // Exec executes the query on the entity.
-func (puo *PCUpdateOne) Exec(ctx context.Context) error {
-	_, err := puo.Save(ctx)
+func (u *PCUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (puo *PCUpdateOne) ExecX(ctx context.Context) {
-	if err := puo.Exec(ctx); err != nil {
+func (u *PCUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (puo *PCUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *PCUpdateOne {
-	puo.modifiers = append(puo.modifiers, modifiers...)
-	return puo
+func (u *PCUpdateOne) Modify(modifiers ...func(*sql.UpdateBuilder)) *PCUpdateOne {
+	u.modifiers = append(u.modifiers, modifiers...)
+	return u
 }
 
-func (puo *PCUpdateOne) sqlSave(ctx context.Context) (_node *PC, err error) {
+func (u *PCUpdateOne) sqlSave(ctx context.Context) (_n *PC, err error) {
 	_spec := sqlgraph.NewUpdateSpec(pc.Table, pc.Columns, sqlgraph.NewFieldSpec(pc.FieldID, field.TypeInt))
-	id, ok := puo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "PC.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := puo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, pc.FieldID)
 		for _, f := range fields {
@@ -171,18 +171,18 @@ func (puo *PCUpdateOne) sqlSave(ctx context.Context) (_node *PC, err error) {
 			}
 		}
 	}
-	if ps := puo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	_spec.AddModifiers(puo.modifiers...)
-	_node = &PC{config: puo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, puo.driver, _spec); err != nil {
+	_spec.AddModifiers(u.modifiers...)
+	_n = &PC{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{pc.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -190,6 +190,6 @@ func (puo *PCUpdateOne) sqlSave(ctx context.Context) (_node *PC, err error) {
 		}
 		return nil, err
 	}
-	puo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

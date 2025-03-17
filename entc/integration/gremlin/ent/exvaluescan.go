@@ -73,49 +73,49 @@ func (evs *ExValueScan) FromResponse(res *gremlin.Response) error {
 // Update returns a builder for updating this ExValueScan.
 // Note that you need to call ExValueScan.Unwrap() before calling this method if this ExValueScan
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (evs *ExValueScan) Update() *ExValueScanUpdateOne {
-	return NewExValueScanClient(evs.config).UpdateOne(evs)
+func (m *ExValueScan) Update() *ExValueScanUpdateOne {
+	return NewExValueScanClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the ExValueScan entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (evs *ExValueScan) Unwrap() *ExValueScan {
-	_tx, ok := evs.config.driver.(*txDriver)
+func (m *ExValueScan) Unwrap() *ExValueScan {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: ExValueScan is not a transactional entity")
 	}
-	evs.config.driver = _tx.drv
-	return evs
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (evs *ExValueScan) String() string {
+func (m *ExValueScan) String() string {
 	var builder strings.Builder
 	builder.WriteString("ExValueScan(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", evs.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("binary=")
-	builder.WriteString(fmt.Sprintf("%v", evs.Binary))
+	builder.WriteString(fmt.Sprintf("%v", m.Binary))
 	builder.WriteString(", ")
 	builder.WriteString("binary_bytes=")
-	builder.WriteString(fmt.Sprintf("%v", evs.BinaryBytes))
+	builder.WriteString(fmt.Sprintf("%v", m.BinaryBytes))
 	builder.WriteString(", ")
 	builder.WriteString("binary_optional=")
-	builder.WriteString(fmt.Sprintf("%v", evs.BinaryOptional))
+	builder.WriteString(fmt.Sprintf("%v", m.BinaryOptional))
 	builder.WriteString(", ")
 	builder.WriteString("text=")
-	builder.WriteString(fmt.Sprintf("%v", evs.Text))
+	builder.WriteString(fmt.Sprintf("%v", m.Text))
 	builder.WriteString(", ")
 	builder.WriteString("text_optional=")
-	builder.WriteString(fmt.Sprintf("%v", evs.TextOptional))
+	builder.WriteString(fmt.Sprintf("%v", m.TextOptional))
 	builder.WriteString(", ")
 	builder.WriteString("base64=")
-	builder.WriteString(evs.Base64)
+	builder.WriteString(m.Base64)
 	builder.WriteString(", ")
 	builder.WriteString("custom=")
-	builder.WriteString(evs.Custom)
+	builder.WriteString(m.Custom)
 	builder.WriteString(", ")
 	builder.WriteString("custom_optional=")
-	builder.WriteString(evs.CustomOptional)
+	builder.WriteString(m.CustomOptional)
 	builder.WriteByte(')')
 	return builder.String()
 }

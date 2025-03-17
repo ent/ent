@@ -115,64 +115,64 @@ func (gr *Group) FromResponse(res *gremlin.Response) error {
 }
 
 // QueryFiles queries the "files" edge of the Group entity.
-func (gr *Group) QueryFiles() *FileQuery {
-	return NewGroupClient(gr.config).QueryFiles(gr)
+func (m *Group) QueryFiles() *FileQuery {
+	return NewGroupClient(m.config).QueryFiles(m)
 }
 
 // QueryBlocked queries the "blocked" edge of the Group entity.
-func (gr *Group) QueryBlocked() *UserQuery {
-	return NewGroupClient(gr.config).QueryBlocked(gr)
+func (m *Group) QueryBlocked() *UserQuery {
+	return NewGroupClient(m.config).QueryBlocked(m)
 }
 
 // QueryUsers queries the "users" edge of the Group entity.
-func (gr *Group) QueryUsers() *UserQuery {
-	return NewGroupClient(gr.config).QueryUsers(gr)
+func (m *Group) QueryUsers() *UserQuery {
+	return NewGroupClient(m.config).QueryUsers(m)
 }
 
 // QueryInfo queries the "info" edge of the Group entity.
-func (gr *Group) QueryInfo() *GroupInfoQuery {
-	return NewGroupClient(gr.config).QueryInfo(gr)
+func (m *Group) QueryInfo() *GroupInfoQuery {
+	return NewGroupClient(m.config).QueryInfo(m)
 }
 
 // Update returns a builder for updating this Group.
 // Note that you need to call Group.Unwrap() before calling this method if this Group
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (gr *Group) Update() *GroupUpdateOne {
-	return NewGroupClient(gr.config).UpdateOne(gr)
+func (m *Group) Update() *GroupUpdateOne {
+	return NewGroupClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Group entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (gr *Group) Unwrap() *Group {
-	_tx, ok := gr.config.driver.(*txDriver)
+func (m *Group) Unwrap() *Group {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Group is not a transactional entity")
 	}
-	gr.config.driver = _tx.drv
-	return gr
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (gr *Group) String() string {
+func (m *Group) String() string {
 	var builder strings.Builder
 	builder.WriteString("Group(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", gr.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("active=")
-	builder.WriteString(fmt.Sprintf("%v", gr.Active))
+	builder.WriteString(fmt.Sprintf("%v", m.Active))
 	builder.WriteString(", ")
 	builder.WriteString("expire=")
-	builder.WriteString(gr.Expire.Format(time.ANSIC))
+	builder.WriteString(m.Expire.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := gr.Type; v != nil {
+	if v := m.Type; v != nil {
 		builder.WriteString("type=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
 	builder.WriteString("max_users=")
-	builder.WriteString(fmt.Sprintf("%v", gr.MaxUsers))
+	builder.WriteString(fmt.Sprintf("%v", m.MaxUsers))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(gr.Name)
+	builder.WriteString(m.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -25,38 +25,38 @@ type FileDelete struct {
 }
 
 // Where appends a list predicates to the FileDelete builder.
-func (fd *FileDelete) Where(ps ...predicate.File) *FileDelete {
-	fd.mutation.Where(ps...)
-	return fd
+func (d *FileDelete) Where(ps ...predicate.File) *FileDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (fd *FileDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, fd.gremlinExec, fd.mutation, fd.hooks)
+func (d *FileDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.gremlinExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (fd *FileDelete) ExecX(ctx context.Context) int {
-	n, err := fd.Exec(ctx)
+func (d *FileDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (fd *FileDelete) gremlinExec(ctx context.Context) (int, error) {
+func (d *FileDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := fd.gremlin().Query()
-	if err := fd.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := d.gremlin().Query()
+	if err := d.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
-	fd.mutation.done = true
+	d.mutation.done = true
 	return res.ReadInt()
 }
 
-func (fd *FileDelete) gremlin() *dsl.Traversal {
+func (d *FileDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(file.Label)
-	for _, p := range fd.mutation.predicates {
+	for _, p := range d.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()
@@ -64,18 +64,18 @@ func (fd *FileDelete) gremlin() *dsl.Traversal {
 
 // FileDeleteOne is the builder for deleting a single File entity.
 type FileDeleteOne struct {
-	fd *FileDelete
+	d *FileDelete
 }
 
 // Where appends a list predicates to the FileDelete builder.
-func (fdo *FileDeleteOne) Where(ps ...predicate.File) *FileDeleteOne {
-	fdo.fd.mutation.Where(ps...)
-	return fdo
+func (d *FileDeleteOne) Where(ps ...predicate.File) *FileDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (fdo *FileDeleteOne) Exec(ctx context.Context) error {
-	n, err := fdo.fd.Exec(ctx)
+func (d *FileDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -87,8 +87,8 @@ func (fdo *FileDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (fdo *FileDeleteOne) ExecX(ctx context.Context) {
-	if err := fdo.Exec(ctx); err != nil {
+func (d *FileDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

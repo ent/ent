@@ -32,777 +32,777 @@ type FieldTypeCreate struct {
 }
 
 // SetInt sets the "int" field.
-func (ftc *FieldTypeCreate) SetInt(i int) *FieldTypeCreate {
-	ftc.mutation.SetInt(i)
-	return ftc
+func (m *FieldTypeCreate) SetInt(v int) *FieldTypeCreate {
+	m.mutation.SetInt(v)
+	return m
 }
 
 // SetInt8 sets the "int8" field.
-func (ftc *FieldTypeCreate) SetInt8(i int8) *FieldTypeCreate {
-	ftc.mutation.SetInt8(i)
-	return ftc
+func (m *FieldTypeCreate) SetInt8(v int8) *FieldTypeCreate {
+	m.mutation.SetInt8(v)
+	return m
 }
 
 // SetInt16 sets the "int16" field.
-func (ftc *FieldTypeCreate) SetInt16(i int16) *FieldTypeCreate {
-	ftc.mutation.SetInt16(i)
-	return ftc
+func (m *FieldTypeCreate) SetInt16(v int16) *FieldTypeCreate {
+	m.mutation.SetInt16(v)
+	return m
 }
 
 // SetInt32 sets the "int32" field.
-func (ftc *FieldTypeCreate) SetInt32(i int32) *FieldTypeCreate {
-	ftc.mutation.SetInt32(i)
-	return ftc
+func (m *FieldTypeCreate) SetInt32(v int32) *FieldTypeCreate {
+	m.mutation.SetInt32(v)
+	return m
 }
 
 // SetInt64 sets the "int64" field.
-func (ftc *FieldTypeCreate) SetInt64(i int64) *FieldTypeCreate {
-	ftc.mutation.SetInt64(i)
-	return ftc
+func (m *FieldTypeCreate) SetInt64(v int64) *FieldTypeCreate {
+	m.mutation.SetInt64(v)
+	return m
 }
 
 // SetOptionalInt sets the "optional_int" field.
-func (ftc *FieldTypeCreate) SetOptionalInt(i int) *FieldTypeCreate {
-	ftc.mutation.SetOptionalInt(i)
-	return ftc
+func (m *FieldTypeCreate) SetOptionalInt(v int) *FieldTypeCreate {
+	m.mutation.SetOptionalInt(v)
+	return m
 }
 
 // SetNillableOptionalInt sets the "optional_int" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableOptionalInt(i *int) *FieldTypeCreate {
-	if i != nil {
-		ftc.SetOptionalInt(*i)
+func (m *FieldTypeCreate) SetNillableOptionalInt(v *int) *FieldTypeCreate {
+	if v != nil {
+		m.SetOptionalInt(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetOptionalInt8 sets the "optional_int8" field.
-func (ftc *FieldTypeCreate) SetOptionalInt8(i int8) *FieldTypeCreate {
-	ftc.mutation.SetOptionalInt8(i)
-	return ftc
+func (m *FieldTypeCreate) SetOptionalInt8(v int8) *FieldTypeCreate {
+	m.mutation.SetOptionalInt8(v)
+	return m
 }
 
 // SetNillableOptionalInt8 sets the "optional_int8" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableOptionalInt8(i *int8) *FieldTypeCreate {
-	if i != nil {
-		ftc.SetOptionalInt8(*i)
+func (m *FieldTypeCreate) SetNillableOptionalInt8(v *int8) *FieldTypeCreate {
+	if v != nil {
+		m.SetOptionalInt8(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetOptionalInt16 sets the "optional_int16" field.
-func (ftc *FieldTypeCreate) SetOptionalInt16(i int16) *FieldTypeCreate {
-	ftc.mutation.SetOptionalInt16(i)
-	return ftc
+func (m *FieldTypeCreate) SetOptionalInt16(v int16) *FieldTypeCreate {
+	m.mutation.SetOptionalInt16(v)
+	return m
 }
 
 // SetNillableOptionalInt16 sets the "optional_int16" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableOptionalInt16(i *int16) *FieldTypeCreate {
-	if i != nil {
-		ftc.SetOptionalInt16(*i)
+func (m *FieldTypeCreate) SetNillableOptionalInt16(v *int16) *FieldTypeCreate {
+	if v != nil {
+		m.SetOptionalInt16(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetOptionalInt32 sets the "optional_int32" field.
-func (ftc *FieldTypeCreate) SetOptionalInt32(i int32) *FieldTypeCreate {
-	ftc.mutation.SetOptionalInt32(i)
-	return ftc
+func (m *FieldTypeCreate) SetOptionalInt32(v int32) *FieldTypeCreate {
+	m.mutation.SetOptionalInt32(v)
+	return m
 }
 
 // SetNillableOptionalInt32 sets the "optional_int32" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableOptionalInt32(i *int32) *FieldTypeCreate {
-	if i != nil {
-		ftc.SetOptionalInt32(*i)
+func (m *FieldTypeCreate) SetNillableOptionalInt32(v *int32) *FieldTypeCreate {
+	if v != nil {
+		m.SetOptionalInt32(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetOptionalInt64 sets the "optional_int64" field.
-func (ftc *FieldTypeCreate) SetOptionalInt64(i int64) *FieldTypeCreate {
-	ftc.mutation.SetOptionalInt64(i)
-	return ftc
+func (m *FieldTypeCreate) SetOptionalInt64(v int64) *FieldTypeCreate {
+	m.mutation.SetOptionalInt64(v)
+	return m
 }
 
 // SetNillableOptionalInt64 sets the "optional_int64" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableOptionalInt64(i *int64) *FieldTypeCreate {
-	if i != nil {
-		ftc.SetOptionalInt64(*i)
+func (m *FieldTypeCreate) SetNillableOptionalInt64(v *int64) *FieldTypeCreate {
+	if v != nil {
+		m.SetOptionalInt64(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetNillableInt sets the "nillable_int" field.
-func (ftc *FieldTypeCreate) SetNillableInt(i int) *FieldTypeCreate {
-	ftc.mutation.SetNillableInt(i)
-	return ftc
+func (m *FieldTypeCreate) SetNillableInt(v int) *FieldTypeCreate {
+	m.mutation.SetNillableInt(v)
+	return m
 }
 
 // SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNillableInt(i *int) *FieldTypeCreate {
-	if i != nil {
-		ftc.SetNillableInt(*i)
+func (m *FieldTypeCreate) SetNillableNillableInt(v *int) *FieldTypeCreate {
+	if v != nil {
+		m.SetNillableInt(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetNillableInt8 sets the "nillable_int8" field.
-func (ftc *FieldTypeCreate) SetNillableInt8(i int8) *FieldTypeCreate {
-	ftc.mutation.SetNillableInt8(i)
-	return ftc
+func (m *FieldTypeCreate) SetNillableInt8(v int8) *FieldTypeCreate {
+	m.mutation.SetNillableInt8(v)
+	return m
 }
 
 // SetNillableNillableInt8 sets the "nillable_int8" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNillableInt8(i *int8) *FieldTypeCreate {
-	if i != nil {
-		ftc.SetNillableInt8(*i)
+func (m *FieldTypeCreate) SetNillableNillableInt8(v *int8) *FieldTypeCreate {
+	if v != nil {
+		m.SetNillableInt8(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetNillableInt16 sets the "nillable_int16" field.
-func (ftc *FieldTypeCreate) SetNillableInt16(i int16) *FieldTypeCreate {
-	ftc.mutation.SetNillableInt16(i)
-	return ftc
+func (m *FieldTypeCreate) SetNillableInt16(v int16) *FieldTypeCreate {
+	m.mutation.SetNillableInt16(v)
+	return m
 }
 
 // SetNillableNillableInt16 sets the "nillable_int16" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNillableInt16(i *int16) *FieldTypeCreate {
-	if i != nil {
-		ftc.SetNillableInt16(*i)
+func (m *FieldTypeCreate) SetNillableNillableInt16(v *int16) *FieldTypeCreate {
+	if v != nil {
+		m.SetNillableInt16(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetNillableInt32 sets the "nillable_int32" field.
-func (ftc *FieldTypeCreate) SetNillableInt32(i int32) *FieldTypeCreate {
-	ftc.mutation.SetNillableInt32(i)
-	return ftc
+func (m *FieldTypeCreate) SetNillableInt32(v int32) *FieldTypeCreate {
+	m.mutation.SetNillableInt32(v)
+	return m
 }
 
 // SetNillableNillableInt32 sets the "nillable_int32" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNillableInt32(i *int32) *FieldTypeCreate {
-	if i != nil {
-		ftc.SetNillableInt32(*i)
+func (m *FieldTypeCreate) SetNillableNillableInt32(v *int32) *FieldTypeCreate {
+	if v != nil {
+		m.SetNillableInt32(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetNillableInt64 sets the "nillable_int64" field.
-func (ftc *FieldTypeCreate) SetNillableInt64(i int64) *FieldTypeCreate {
-	ftc.mutation.SetNillableInt64(i)
-	return ftc
+func (m *FieldTypeCreate) SetNillableInt64(v int64) *FieldTypeCreate {
+	m.mutation.SetNillableInt64(v)
+	return m
 }
 
 // SetNillableNillableInt64 sets the "nillable_int64" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNillableInt64(i *int64) *FieldTypeCreate {
-	if i != nil {
-		ftc.SetNillableInt64(*i)
+func (m *FieldTypeCreate) SetNillableNillableInt64(v *int64) *FieldTypeCreate {
+	if v != nil {
+		m.SetNillableInt64(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetValidateOptionalInt32 sets the "validate_optional_int32" field.
-func (ftc *FieldTypeCreate) SetValidateOptionalInt32(i int32) *FieldTypeCreate {
-	ftc.mutation.SetValidateOptionalInt32(i)
-	return ftc
+func (m *FieldTypeCreate) SetValidateOptionalInt32(v int32) *FieldTypeCreate {
+	m.mutation.SetValidateOptionalInt32(v)
+	return m
 }
 
 // SetNillableValidateOptionalInt32 sets the "validate_optional_int32" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableValidateOptionalInt32(i *int32) *FieldTypeCreate {
-	if i != nil {
-		ftc.SetValidateOptionalInt32(*i)
+func (m *FieldTypeCreate) SetNillableValidateOptionalInt32(v *int32) *FieldTypeCreate {
+	if v != nil {
+		m.SetValidateOptionalInt32(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetOptionalUint sets the "optional_uint" field.
-func (ftc *FieldTypeCreate) SetOptionalUint(u uint) *FieldTypeCreate {
-	ftc.mutation.SetOptionalUint(u)
-	return ftc
+func (m *FieldTypeCreate) SetOptionalUint(v uint) *FieldTypeCreate {
+	m.mutation.SetOptionalUint(v)
+	return m
 }
 
 // SetNillableOptionalUint sets the "optional_uint" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableOptionalUint(u *uint) *FieldTypeCreate {
-	if u != nil {
-		ftc.SetOptionalUint(*u)
+func (m *FieldTypeCreate) SetNillableOptionalUint(v *uint) *FieldTypeCreate {
+	if v != nil {
+		m.SetOptionalUint(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetOptionalUint8 sets the "optional_uint8" field.
-func (ftc *FieldTypeCreate) SetOptionalUint8(u uint8) *FieldTypeCreate {
-	ftc.mutation.SetOptionalUint8(u)
-	return ftc
+func (m *FieldTypeCreate) SetOptionalUint8(v uint8) *FieldTypeCreate {
+	m.mutation.SetOptionalUint8(v)
+	return m
 }
 
 // SetNillableOptionalUint8 sets the "optional_uint8" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableOptionalUint8(u *uint8) *FieldTypeCreate {
-	if u != nil {
-		ftc.SetOptionalUint8(*u)
+func (m *FieldTypeCreate) SetNillableOptionalUint8(v *uint8) *FieldTypeCreate {
+	if v != nil {
+		m.SetOptionalUint8(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetOptionalUint16 sets the "optional_uint16" field.
-func (ftc *FieldTypeCreate) SetOptionalUint16(u uint16) *FieldTypeCreate {
-	ftc.mutation.SetOptionalUint16(u)
-	return ftc
+func (m *FieldTypeCreate) SetOptionalUint16(v uint16) *FieldTypeCreate {
+	m.mutation.SetOptionalUint16(v)
+	return m
 }
 
 // SetNillableOptionalUint16 sets the "optional_uint16" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableOptionalUint16(u *uint16) *FieldTypeCreate {
-	if u != nil {
-		ftc.SetOptionalUint16(*u)
+func (m *FieldTypeCreate) SetNillableOptionalUint16(v *uint16) *FieldTypeCreate {
+	if v != nil {
+		m.SetOptionalUint16(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetOptionalUint32 sets the "optional_uint32" field.
-func (ftc *FieldTypeCreate) SetOptionalUint32(u uint32) *FieldTypeCreate {
-	ftc.mutation.SetOptionalUint32(u)
-	return ftc
+func (m *FieldTypeCreate) SetOptionalUint32(v uint32) *FieldTypeCreate {
+	m.mutation.SetOptionalUint32(v)
+	return m
 }
 
 // SetNillableOptionalUint32 sets the "optional_uint32" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableOptionalUint32(u *uint32) *FieldTypeCreate {
-	if u != nil {
-		ftc.SetOptionalUint32(*u)
+func (m *FieldTypeCreate) SetNillableOptionalUint32(v *uint32) *FieldTypeCreate {
+	if v != nil {
+		m.SetOptionalUint32(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetOptionalUint64 sets the "optional_uint64" field.
-func (ftc *FieldTypeCreate) SetOptionalUint64(u uint64) *FieldTypeCreate {
-	ftc.mutation.SetOptionalUint64(u)
-	return ftc
+func (m *FieldTypeCreate) SetOptionalUint64(v uint64) *FieldTypeCreate {
+	m.mutation.SetOptionalUint64(v)
+	return m
 }
 
 // SetNillableOptionalUint64 sets the "optional_uint64" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableOptionalUint64(u *uint64) *FieldTypeCreate {
-	if u != nil {
-		ftc.SetOptionalUint64(*u)
+func (m *FieldTypeCreate) SetNillableOptionalUint64(v *uint64) *FieldTypeCreate {
+	if v != nil {
+		m.SetOptionalUint64(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetState sets the "state" field.
-func (ftc *FieldTypeCreate) SetState(f fieldtype.State) *FieldTypeCreate {
-	ftc.mutation.SetState(f)
-	return ftc
+func (m *FieldTypeCreate) SetState(v fieldtype.State) *FieldTypeCreate {
+	m.mutation.SetState(v)
+	return m
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableState(f *fieldtype.State) *FieldTypeCreate {
-	if f != nil {
-		ftc.SetState(*f)
+func (m *FieldTypeCreate) SetNillableState(v *fieldtype.State) *FieldTypeCreate {
+	if v != nil {
+		m.SetState(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetOptionalFloat sets the "optional_float" field.
-func (ftc *FieldTypeCreate) SetOptionalFloat(f float64) *FieldTypeCreate {
-	ftc.mutation.SetOptionalFloat(f)
-	return ftc
+func (m *FieldTypeCreate) SetOptionalFloat(v float64) *FieldTypeCreate {
+	m.mutation.SetOptionalFloat(v)
+	return m
 }
 
 // SetNillableOptionalFloat sets the "optional_float" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableOptionalFloat(f *float64) *FieldTypeCreate {
-	if f != nil {
-		ftc.SetOptionalFloat(*f)
+func (m *FieldTypeCreate) SetNillableOptionalFloat(v *float64) *FieldTypeCreate {
+	if v != nil {
+		m.SetOptionalFloat(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetOptionalFloat32 sets the "optional_float32" field.
-func (ftc *FieldTypeCreate) SetOptionalFloat32(f float32) *FieldTypeCreate {
-	ftc.mutation.SetOptionalFloat32(f)
-	return ftc
+func (m *FieldTypeCreate) SetOptionalFloat32(v float32) *FieldTypeCreate {
+	m.mutation.SetOptionalFloat32(v)
+	return m
 }
 
 // SetNillableOptionalFloat32 sets the "optional_float32" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableOptionalFloat32(f *float32) *FieldTypeCreate {
-	if f != nil {
-		ftc.SetOptionalFloat32(*f)
+func (m *FieldTypeCreate) SetNillableOptionalFloat32(v *float32) *FieldTypeCreate {
+	if v != nil {
+		m.SetOptionalFloat32(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetText sets the "text" field.
-func (ftc *FieldTypeCreate) SetText(s string) *FieldTypeCreate {
-	ftc.mutation.SetText(s)
-	return ftc
+func (m *FieldTypeCreate) SetText(v string) *FieldTypeCreate {
+	m.mutation.SetText(v)
+	return m
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableText(s *string) *FieldTypeCreate {
-	if s != nil {
-		ftc.SetText(*s)
+func (m *FieldTypeCreate) SetNillableText(v *string) *FieldTypeCreate {
+	if v != nil {
+		m.SetText(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetDatetime sets the "datetime" field.
-func (ftc *FieldTypeCreate) SetDatetime(t time.Time) *FieldTypeCreate {
-	ftc.mutation.SetDatetime(t)
-	return ftc
+func (m *FieldTypeCreate) SetDatetime(v time.Time) *FieldTypeCreate {
+	m.mutation.SetDatetime(v)
+	return m
 }
 
 // SetNillableDatetime sets the "datetime" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableDatetime(t *time.Time) *FieldTypeCreate {
-	if t != nil {
-		ftc.SetDatetime(*t)
+func (m *FieldTypeCreate) SetNillableDatetime(v *time.Time) *FieldTypeCreate {
+	if v != nil {
+		m.SetDatetime(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetDecimal sets the "decimal" field.
-func (ftc *FieldTypeCreate) SetDecimal(f float64) *FieldTypeCreate {
-	ftc.mutation.SetDecimal(f)
-	return ftc
+func (m *FieldTypeCreate) SetDecimal(v float64) *FieldTypeCreate {
+	m.mutation.SetDecimal(v)
+	return m
 }
 
 // SetNillableDecimal sets the "decimal" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableDecimal(f *float64) *FieldTypeCreate {
-	if f != nil {
-		ftc.SetDecimal(*f)
+func (m *FieldTypeCreate) SetNillableDecimal(v *float64) *FieldTypeCreate {
+	if v != nil {
+		m.SetDecimal(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetLinkOther sets the "link_other" field.
-func (ftc *FieldTypeCreate) SetLinkOther(s *schema.Link) *FieldTypeCreate {
-	ftc.mutation.SetLinkOther(s)
-	return ftc
+func (m *FieldTypeCreate) SetLinkOther(v *schema.Link) *FieldTypeCreate {
+	m.mutation.SetLinkOther(v)
+	return m
 }
 
 // SetLinkOtherFunc sets the "link_other_func" field.
-func (ftc *FieldTypeCreate) SetLinkOtherFunc(s *schema.Link) *FieldTypeCreate {
-	ftc.mutation.SetLinkOtherFunc(s)
-	return ftc
+func (m *FieldTypeCreate) SetLinkOtherFunc(v *schema.Link) *FieldTypeCreate {
+	m.mutation.SetLinkOtherFunc(v)
+	return m
 }
 
 // SetMAC sets the "mac" field.
-func (ftc *FieldTypeCreate) SetMAC(s schema.MAC) *FieldTypeCreate {
-	ftc.mutation.SetMAC(s)
-	return ftc
+func (m *FieldTypeCreate) SetMAC(v schema.MAC) *FieldTypeCreate {
+	m.mutation.SetMAC(v)
+	return m
 }
 
 // SetNillableMAC sets the "mac" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableMAC(s *schema.MAC) *FieldTypeCreate {
-	if s != nil {
-		ftc.SetMAC(*s)
+func (m *FieldTypeCreate) SetNillableMAC(v *schema.MAC) *FieldTypeCreate {
+	if v != nil {
+		m.SetMAC(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetStringArray sets the "string_array" field.
-func (ftc *FieldTypeCreate) SetStringArray(s schema.Strings) *FieldTypeCreate {
-	ftc.mutation.SetStringArray(s)
-	return ftc
+func (m *FieldTypeCreate) SetStringArray(v schema.Strings) *FieldTypeCreate {
+	m.mutation.SetStringArray(v)
+	return m
 }
 
 // SetPassword sets the "password" field.
-func (ftc *FieldTypeCreate) SetPassword(s string) *FieldTypeCreate {
-	ftc.mutation.SetPassword(s)
-	return ftc
+func (m *FieldTypeCreate) SetPassword(v string) *FieldTypeCreate {
+	m.mutation.SetPassword(v)
+	return m
 }
 
 // SetNillablePassword sets the "password" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillablePassword(s *string) *FieldTypeCreate {
-	if s != nil {
-		ftc.SetPassword(*s)
+func (m *FieldTypeCreate) SetNillablePassword(v *string) *FieldTypeCreate {
+	if v != nil {
+		m.SetPassword(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetStringScanner sets the "string_scanner" field.
-func (ftc *FieldTypeCreate) SetStringScanner(ss schema.StringScanner) *FieldTypeCreate {
-	ftc.mutation.SetStringScanner(ss)
-	return ftc
+func (m *FieldTypeCreate) SetStringScanner(v schema.StringScanner) *FieldTypeCreate {
+	m.mutation.SetStringScanner(v)
+	return m
 }
 
 // SetNillableStringScanner sets the "string_scanner" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableStringScanner(ss *schema.StringScanner) *FieldTypeCreate {
-	if ss != nil {
-		ftc.SetStringScanner(*ss)
+func (m *FieldTypeCreate) SetNillableStringScanner(v *schema.StringScanner) *FieldTypeCreate {
+	if v != nil {
+		m.SetStringScanner(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetDuration sets the "duration" field.
-func (ftc *FieldTypeCreate) SetDuration(t time.Duration) *FieldTypeCreate {
-	ftc.mutation.SetDuration(t)
-	return ftc
+func (m *FieldTypeCreate) SetDuration(v time.Duration) *FieldTypeCreate {
+	m.mutation.SetDuration(v)
+	return m
 }
 
 // SetNillableDuration sets the "duration" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableDuration(t *time.Duration) *FieldTypeCreate {
-	if t != nil {
-		ftc.SetDuration(*t)
+func (m *FieldTypeCreate) SetNillableDuration(v *time.Duration) *FieldTypeCreate {
+	if v != nil {
+		m.SetDuration(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetDir sets the "dir" field.
-func (ftc *FieldTypeCreate) SetDir(h http.Dir) *FieldTypeCreate {
-	ftc.mutation.SetDir(h)
-	return ftc
+func (m *FieldTypeCreate) SetDir(v http.Dir) *FieldTypeCreate {
+	m.mutation.SetDir(v)
+	return m
 }
 
 // SetNillableDir sets the "dir" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableDir(h *http.Dir) *FieldTypeCreate {
-	if h != nil {
-		ftc.SetDir(*h)
+func (m *FieldTypeCreate) SetNillableDir(v *http.Dir) *FieldTypeCreate {
+	if v != nil {
+		m.SetDir(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetNdir sets the "ndir" field.
-func (ftc *FieldTypeCreate) SetNdir(h http.Dir) *FieldTypeCreate {
-	ftc.mutation.SetNdir(h)
-	return ftc
+func (m *FieldTypeCreate) SetNdir(v http.Dir) *FieldTypeCreate {
+	m.mutation.SetNdir(v)
+	return m
 }
 
 // SetNillableNdir sets the "ndir" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNdir(h *http.Dir) *FieldTypeCreate {
-	if h != nil {
-		ftc.SetNdir(*h)
+func (m *FieldTypeCreate) SetNillableNdir(v *http.Dir) *FieldTypeCreate {
+	if v != nil {
+		m.SetNdir(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetStr sets the "str" field.
-func (ftc *FieldTypeCreate) SetStr(ss sql.NullString) *FieldTypeCreate {
-	ftc.mutation.SetStr(ss)
-	return ftc
+func (m *FieldTypeCreate) SetStr(v sql.NullString) *FieldTypeCreate {
+	m.mutation.SetStr(v)
+	return m
 }
 
 // SetNillableStr sets the "str" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableStr(ss *sql.NullString) *FieldTypeCreate {
-	if ss != nil {
-		ftc.SetStr(*ss)
+func (m *FieldTypeCreate) SetNillableStr(v *sql.NullString) *FieldTypeCreate {
+	if v != nil {
+		m.SetStr(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetNullStr sets the "null_str" field.
-func (ftc *FieldTypeCreate) SetNullStr(ss *sql.NullString) *FieldTypeCreate {
-	ftc.mutation.SetNullStr(ss)
-	return ftc
+func (m *FieldTypeCreate) SetNullStr(v *sql.NullString) *FieldTypeCreate {
+	m.mutation.SetNullStr(v)
+	return m
 }
 
 // SetLink sets the "link" field.
-func (ftc *FieldTypeCreate) SetLink(s schema.Link) *FieldTypeCreate {
-	ftc.mutation.SetLink(s)
-	return ftc
+func (m *FieldTypeCreate) SetLink(v schema.Link) *FieldTypeCreate {
+	m.mutation.SetLink(v)
+	return m
 }
 
 // SetNillableLink sets the "link" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableLink(s *schema.Link) *FieldTypeCreate {
-	if s != nil {
-		ftc.SetLink(*s)
+func (m *FieldTypeCreate) SetNillableLink(v *schema.Link) *FieldTypeCreate {
+	if v != nil {
+		m.SetLink(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetNullLink sets the "null_link" field.
-func (ftc *FieldTypeCreate) SetNullLink(s *schema.Link) *FieldTypeCreate {
-	ftc.mutation.SetNullLink(s)
-	return ftc
+func (m *FieldTypeCreate) SetNullLink(v *schema.Link) *FieldTypeCreate {
+	m.mutation.SetNullLink(v)
+	return m
 }
 
 // SetActive sets the "active" field.
-func (ftc *FieldTypeCreate) SetActive(s schema.Status) *FieldTypeCreate {
-	ftc.mutation.SetActive(s)
-	return ftc
+func (m *FieldTypeCreate) SetActive(v schema.Status) *FieldTypeCreate {
+	m.mutation.SetActive(v)
+	return m
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableActive(s *schema.Status) *FieldTypeCreate {
-	if s != nil {
-		ftc.SetActive(*s)
+func (m *FieldTypeCreate) SetNillableActive(v *schema.Status) *FieldTypeCreate {
+	if v != nil {
+		m.SetActive(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetNullActive sets the "null_active" field.
-func (ftc *FieldTypeCreate) SetNullActive(s schema.Status) *FieldTypeCreate {
-	ftc.mutation.SetNullActive(s)
-	return ftc
+func (m *FieldTypeCreate) SetNullActive(v schema.Status) *FieldTypeCreate {
+	m.mutation.SetNullActive(v)
+	return m
 }
 
 // SetNillableNullActive sets the "null_active" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNullActive(s *schema.Status) *FieldTypeCreate {
-	if s != nil {
-		ftc.SetNullActive(*s)
+func (m *FieldTypeCreate) SetNillableNullActive(v *schema.Status) *FieldTypeCreate {
+	if v != nil {
+		m.SetNullActive(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetDeleted sets the "deleted" field.
-func (ftc *FieldTypeCreate) SetDeleted(sb *sql.NullBool) *FieldTypeCreate {
-	ftc.mutation.SetDeleted(sb)
-	return ftc
+func (m *FieldTypeCreate) SetDeleted(v *sql.NullBool) *FieldTypeCreate {
+	m.mutation.SetDeleted(v)
+	return m
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (ftc *FieldTypeCreate) SetDeletedAt(st *sql.NullTime) *FieldTypeCreate {
-	ftc.mutation.SetDeletedAt(st)
-	return ftc
+func (m *FieldTypeCreate) SetDeletedAt(v *sql.NullTime) *FieldTypeCreate {
+	m.mutation.SetDeletedAt(v)
+	return m
 }
 
 // SetRawData sets the "raw_data" field.
-func (ftc *FieldTypeCreate) SetRawData(b []byte) *FieldTypeCreate {
-	ftc.mutation.SetRawData(b)
-	return ftc
+func (m *FieldTypeCreate) SetRawData(v []byte) *FieldTypeCreate {
+	m.mutation.SetRawData(v)
+	return m
 }
 
 // SetSensitive sets the "sensitive" field.
-func (ftc *FieldTypeCreate) SetSensitive(b []byte) *FieldTypeCreate {
-	ftc.mutation.SetSensitive(b)
-	return ftc
+func (m *FieldTypeCreate) SetSensitive(v []byte) *FieldTypeCreate {
+	m.mutation.SetSensitive(v)
+	return m
 }
 
 // SetIP sets the "ip" field.
-func (ftc *FieldTypeCreate) SetIP(n net.IP) *FieldTypeCreate {
-	ftc.mutation.SetIP(n)
-	return ftc
+func (m *FieldTypeCreate) SetIP(v net.IP) *FieldTypeCreate {
+	m.mutation.SetIP(v)
+	return m
 }
 
 // SetNullInt64 sets the "null_int64" field.
-func (ftc *FieldTypeCreate) SetNullInt64(si *sql.NullInt64) *FieldTypeCreate {
-	ftc.mutation.SetNullInt64(si)
-	return ftc
+func (m *FieldTypeCreate) SetNullInt64(v *sql.NullInt64) *FieldTypeCreate {
+	m.mutation.SetNullInt64(v)
+	return m
 }
 
 // SetSchemaInt sets the "schema_int" field.
-func (ftc *FieldTypeCreate) SetSchemaInt(s schema.Int) *FieldTypeCreate {
-	ftc.mutation.SetSchemaInt(s)
-	return ftc
+func (m *FieldTypeCreate) SetSchemaInt(v schema.Int) *FieldTypeCreate {
+	m.mutation.SetSchemaInt(v)
+	return m
 }
 
 // SetNillableSchemaInt sets the "schema_int" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableSchemaInt(s *schema.Int) *FieldTypeCreate {
-	if s != nil {
-		ftc.SetSchemaInt(*s)
+func (m *FieldTypeCreate) SetNillableSchemaInt(v *schema.Int) *FieldTypeCreate {
+	if v != nil {
+		m.SetSchemaInt(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetSchemaInt8 sets the "schema_int8" field.
-func (ftc *FieldTypeCreate) SetSchemaInt8(s schema.Int8) *FieldTypeCreate {
-	ftc.mutation.SetSchemaInt8(s)
-	return ftc
+func (m *FieldTypeCreate) SetSchemaInt8(v schema.Int8) *FieldTypeCreate {
+	m.mutation.SetSchemaInt8(v)
+	return m
 }
 
 // SetNillableSchemaInt8 sets the "schema_int8" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableSchemaInt8(s *schema.Int8) *FieldTypeCreate {
-	if s != nil {
-		ftc.SetSchemaInt8(*s)
+func (m *FieldTypeCreate) SetNillableSchemaInt8(v *schema.Int8) *FieldTypeCreate {
+	if v != nil {
+		m.SetSchemaInt8(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetSchemaInt64 sets the "schema_int64" field.
-func (ftc *FieldTypeCreate) SetSchemaInt64(s schema.Int64) *FieldTypeCreate {
-	ftc.mutation.SetSchemaInt64(s)
-	return ftc
+func (m *FieldTypeCreate) SetSchemaInt64(v schema.Int64) *FieldTypeCreate {
+	m.mutation.SetSchemaInt64(v)
+	return m
 }
 
 // SetNillableSchemaInt64 sets the "schema_int64" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableSchemaInt64(s *schema.Int64) *FieldTypeCreate {
-	if s != nil {
-		ftc.SetSchemaInt64(*s)
+func (m *FieldTypeCreate) SetNillableSchemaInt64(v *schema.Int64) *FieldTypeCreate {
+	if v != nil {
+		m.SetSchemaInt64(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetSchemaFloat sets the "schema_float" field.
-func (ftc *FieldTypeCreate) SetSchemaFloat(s schema.Float64) *FieldTypeCreate {
-	ftc.mutation.SetSchemaFloat(s)
-	return ftc
+func (m *FieldTypeCreate) SetSchemaFloat(v schema.Float64) *FieldTypeCreate {
+	m.mutation.SetSchemaFloat(v)
+	return m
 }
 
 // SetNillableSchemaFloat sets the "schema_float" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableSchemaFloat(s *schema.Float64) *FieldTypeCreate {
-	if s != nil {
-		ftc.SetSchemaFloat(*s)
+func (m *FieldTypeCreate) SetNillableSchemaFloat(v *schema.Float64) *FieldTypeCreate {
+	if v != nil {
+		m.SetSchemaFloat(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetSchemaFloat32 sets the "schema_float32" field.
-func (ftc *FieldTypeCreate) SetSchemaFloat32(s schema.Float32) *FieldTypeCreate {
-	ftc.mutation.SetSchemaFloat32(s)
-	return ftc
+func (m *FieldTypeCreate) SetSchemaFloat32(v schema.Float32) *FieldTypeCreate {
+	m.mutation.SetSchemaFloat32(v)
+	return m
 }
 
 // SetNillableSchemaFloat32 sets the "schema_float32" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableSchemaFloat32(s *schema.Float32) *FieldTypeCreate {
-	if s != nil {
-		ftc.SetSchemaFloat32(*s)
+func (m *FieldTypeCreate) SetNillableSchemaFloat32(v *schema.Float32) *FieldTypeCreate {
+	if v != nil {
+		m.SetSchemaFloat32(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetNullFloat sets the "null_float" field.
-func (ftc *FieldTypeCreate) SetNullFloat(sf *sql.NullFloat64) *FieldTypeCreate {
-	ftc.mutation.SetNullFloat(sf)
-	return ftc
+func (m *FieldTypeCreate) SetNullFloat(v *sql.NullFloat64) *FieldTypeCreate {
+	m.mutation.SetNullFloat(v)
+	return m
 }
 
 // SetRole sets the "role" field.
-func (ftc *FieldTypeCreate) SetRole(r role.Role) *FieldTypeCreate {
-	ftc.mutation.SetRole(r)
-	return ftc
+func (m *FieldTypeCreate) SetRole(v role.Role) *FieldTypeCreate {
+	m.mutation.SetRole(v)
+	return m
 }
 
 // SetNillableRole sets the "role" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableRole(r *role.Role) *FieldTypeCreate {
-	if r != nil {
-		ftc.SetRole(*r)
+func (m *FieldTypeCreate) SetNillableRole(v *role.Role) *FieldTypeCreate {
+	if v != nil {
+		m.SetRole(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetPriority sets the "priority" field.
-func (ftc *FieldTypeCreate) SetPriority(r role.Priority) *FieldTypeCreate {
-	ftc.mutation.SetPriority(r)
-	return ftc
+func (m *FieldTypeCreate) SetPriority(v role.Priority) *FieldTypeCreate {
+	m.mutation.SetPriority(v)
+	return m
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillablePriority(r *role.Priority) *FieldTypeCreate {
-	if r != nil {
-		ftc.SetPriority(*r)
+func (m *FieldTypeCreate) SetNillablePriority(v *role.Priority) *FieldTypeCreate {
+	if v != nil {
+		m.SetPriority(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetOptionalUUID sets the "optional_uuid" field.
-func (ftc *FieldTypeCreate) SetOptionalUUID(u uuid.UUID) *FieldTypeCreate {
-	ftc.mutation.SetOptionalUUID(u)
-	return ftc
+func (m *FieldTypeCreate) SetOptionalUUID(v uuid.UUID) *FieldTypeCreate {
+	m.mutation.SetOptionalUUID(v)
+	return m
 }
 
 // SetNillableOptionalUUID sets the "optional_uuid" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableOptionalUUID(u *uuid.UUID) *FieldTypeCreate {
-	if u != nil {
-		ftc.SetOptionalUUID(*u)
+func (m *FieldTypeCreate) SetNillableOptionalUUID(v *uuid.UUID) *FieldTypeCreate {
+	if v != nil {
+		m.SetOptionalUUID(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetNillableUUID sets the "nillable_uuid" field.
-func (ftc *FieldTypeCreate) SetNillableUUID(u uuid.UUID) *FieldTypeCreate {
-	ftc.mutation.SetNillableUUID(u)
-	return ftc
+func (m *FieldTypeCreate) SetNillableUUID(v uuid.UUID) *FieldTypeCreate {
+	m.mutation.SetNillableUUID(v)
+	return m
 }
 
 // SetNillableNillableUUID sets the "nillable_uuid" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableNillableUUID(u *uuid.UUID) *FieldTypeCreate {
-	if u != nil {
-		ftc.SetNillableUUID(*u)
+func (m *FieldTypeCreate) SetNillableNillableUUID(v *uuid.UUID) *FieldTypeCreate {
+	if v != nil {
+		m.SetNillableUUID(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetStrings sets the "strings" field.
-func (ftc *FieldTypeCreate) SetStrings(s []string) *FieldTypeCreate {
-	ftc.mutation.SetStrings(s)
-	return ftc
+func (m *FieldTypeCreate) SetStrings(v []string) *FieldTypeCreate {
+	m.mutation.SetStrings(v)
+	return m
 }
 
 // SetPair sets the "pair" field.
-func (ftc *FieldTypeCreate) SetPair(s schema.Pair) *FieldTypeCreate {
-	ftc.mutation.SetPair(s)
-	return ftc
+func (m *FieldTypeCreate) SetPair(v schema.Pair) *FieldTypeCreate {
+	m.mutation.SetPair(v)
+	return m
 }
 
 // SetNillablePair sets the "pair" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillablePair(s *schema.Pair) *FieldTypeCreate {
-	if s != nil {
-		ftc.SetPair(*s)
+func (m *FieldTypeCreate) SetNillablePair(v *schema.Pair) *FieldTypeCreate {
+	if v != nil {
+		m.SetPair(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetNilPair sets the "nil_pair" field.
-func (ftc *FieldTypeCreate) SetNilPair(s *schema.Pair) *FieldTypeCreate {
-	ftc.mutation.SetNilPair(s)
-	return ftc
+func (m *FieldTypeCreate) SetNilPair(v *schema.Pair) *FieldTypeCreate {
+	m.mutation.SetNilPair(v)
+	return m
 }
 
 // SetVstring sets the "vstring" field.
-func (ftc *FieldTypeCreate) SetVstring(ss schema.VString) *FieldTypeCreate {
-	ftc.mutation.SetVstring(ss)
-	return ftc
+func (m *FieldTypeCreate) SetVstring(v schema.VString) *FieldTypeCreate {
+	m.mutation.SetVstring(v)
+	return m
 }
 
 // SetNillableVstring sets the "vstring" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableVstring(ss *schema.VString) *FieldTypeCreate {
-	if ss != nil {
-		ftc.SetVstring(*ss)
+func (m *FieldTypeCreate) SetNillableVstring(v *schema.VString) *FieldTypeCreate {
+	if v != nil {
+		m.SetVstring(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetTriple sets the "triple" field.
-func (ftc *FieldTypeCreate) SetTriple(s schema.Triple) *FieldTypeCreate {
-	ftc.mutation.SetTriple(s)
-	return ftc
+func (m *FieldTypeCreate) SetTriple(v schema.Triple) *FieldTypeCreate {
+	m.mutation.SetTriple(v)
+	return m
 }
 
 // SetNillableTriple sets the "triple" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableTriple(s *schema.Triple) *FieldTypeCreate {
-	if s != nil {
-		ftc.SetTriple(*s)
+func (m *FieldTypeCreate) SetNillableTriple(v *schema.Triple) *FieldTypeCreate {
+	if v != nil {
+		m.SetTriple(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetBigInt sets the "big_int" field.
-func (ftc *FieldTypeCreate) SetBigInt(si schema.BigInt) *FieldTypeCreate {
-	ftc.mutation.SetBigInt(si)
-	return ftc
+func (m *FieldTypeCreate) SetBigInt(v schema.BigInt) *FieldTypeCreate {
+	m.mutation.SetBigInt(v)
+	return m
 }
 
 // SetNillableBigInt sets the "big_int" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillableBigInt(si *schema.BigInt) *FieldTypeCreate {
-	if si != nil {
-		ftc.SetBigInt(*si)
+func (m *FieldTypeCreate) SetNillableBigInt(v *schema.BigInt) *FieldTypeCreate {
+	if v != nil {
+		m.SetBigInt(*v)
 	}
-	return ftc
+	return m
 }
 
 // SetPasswordOther sets the "password_other" field.
-func (ftc *FieldTypeCreate) SetPasswordOther(s schema.Password) *FieldTypeCreate {
-	ftc.mutation.SetPasswordOther(s)
-	return ftc
+func (m *FieldTypeCreate) SetPasswordOther(v schema.Password) *FieldTypeCreate {
+	m.mutation.SetPasswordOther(v)
+	return m
 }
 
 // SetNillablePasswordOther sets the "password_other" field if the given value is not nil.
-func (ftc *FieldTypeCreate) SetNillablePasswordOther(s *schema.Password) *FieldTypeCreate {
-	if s != nil {
-		ftc.SetPasswordOther(*s)
+func (m *FieldTypeCreate) SetNillablePasswordOther(v *schema.Password) *FieldTypeCreate {
+	if v != nil {
+		m.SetPasswordOther(*v)
 	}
-	return ftc
+	return m
 }
 
 // Mutation returns the FieldTypeMutation object of the builder.
-func (ftc *FieldTypeCreate) Mutation() *FieldTypeMutation {
-	return ftc.mutation
+func (m *FieldTypeCreate) Mutation() *FieldTypeMutation {
+	return m.mutation
 }
 
 // Save creates the FieldType in the database.
-func (ftc *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
-	ftc.defaults()
-	return withHooks(ctx, ftc.gremlinSave, ftc.mutation, ftc.hooks)
+func (c *FieldTypeCreate) Save(ctx context.Context) (*FieldType, error) {
+	c.defaults()
+	return withHooks(ctx, c.gremlinSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (ftc *FieldTypeCreate) SaveX(ctx context.Context) *FieldType {
-	v, err := ftc.Save(ctx)
+func (c *FieldTypeCreate) SaveX(ctx context.Context) *FieldType {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -810,362 +810,362 @@ func (ftc *FieldTypeCreate) SaveX(ctx context.Context) *FieldType {
 }
 
 // Exec executes the query.
-func (ftc *FieldTypeCreate) Exec(ctx context.Context) error {
-	_, err := ftc.Save(ctx)
+func (c *FieldTypeCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ftc *FieldTypeCreate) ExecX(ctx context.Context) {
-	if err := ftc.Exec(ctx); err != nil {
+func (c *FieldTypeCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (ftc *FieldTypeCreate) defaults() {
-	if _, ok := ftc.mutation.LinkOther(); !ok {
+func (c *FieldTypeCreate) defaults() {
+	if _, ok := c.mutation.LinkOther(); !ok {
 		v := fieldtype.DefaultLinkOther
-		ftc.mutation.SetLinkOther(v)
+		c.mutation.SetLinkOther(v)
 	}
-	if _, ok := ftc.mutation.LinkOtherFunc(); !ok {
+	if _, ok := c.mutation.LinkOtherFunc(); !ok {
 		v := fieldtype.DefaultLinkOtherFunc()
-		ftc.mutation.SetLinkOtherFunc(v)
+		c.mutation.SetLinkOtherFunc(v)
 	}
-	if _, ok := ftc.mutation.Dir(); !ok {
+	if _, ok := c.mutation.Dir(); !ok {
 		v := fieldtype.DefaultDir()
-		ftc.mutation.SetDir(v)
+		c.mutation.SetDir(v)
 	}
-	if _, ok := ftc.mutation.Str(); !ok {
+	if _, ok := c.mutation.Str(); !ok {
 		v := fieldtype.DefaultStr()
-		ftc.mutation.SetStr(v)
+		c.mutation.SetStr(v)
 	}
-	if _, ok := ftc.mutation.NullStr(); !ok {
+	if _, ok := c.mutation.NullStr(); !ok {
 		v := fieldtype.DefaultNullStr()
-		ftc.mutation.SetNullStr(v)
+		c.mutation.SetNullStr(v)
 	}
-	if _, ok := ftc.mutation.DeletedAt(); !ok {
+	if _, ok := c.mutation.DeletedAt(); !ok {
 		v := fieldtype.DefaultDeletedAt()
-		ftc.mutation.SetDeletedAt(v)
+		c.mutation.SetDeletedAt(v)
 	}
-	if _, ok := ftc.mutation.IP(); !ok {
+	if _, ok := c.mutation.IP(); !ok {
 		v := fieldtype.DefaultIP()
-		ftc.mutation.SetIP(v)
+		c.mutation.SetIP(v)
 	}
-	if _, ok := ftc.mutation.Role(); !ok {
+	if _, ok := c.mutation.Role(); !ok {
 		v := fieldtype.DefaultRole
-		ftc.mutation.SetRole(v)
+		c.mutation.SetRole(v)
 	}
-	if _, ok := ftc.mutation.Pair(); !ok {
+	if _, ok := c.mutation.Pair(); !ok {
 		v := fieldtype.DefaultPair()
-		ftc.mutation.SetPair(v)
+		c.mutation.SetPair(v)
 	}
-	if _, ok := ftc.mutation.Vstring(); !ok {
+	if _, ok := c.mutation.Vstring(); !ok {
 		v := fieldtype.DefaultVstring()
-		ftc.mutation.SetVstring(v)
+		c.mutation.SetVstring(v)
 	}
-	if _, ok := ftc.mutation.Triple(); !ok {
+	if _, ok := c.mutation.Triple(); !ok {
 		v := fieldtype.DefaultTriple()
-		ftc.mutation.SetTriple(v)
+		c.mutation.SetTriple(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ftc *FieldTypeCreate) check() error {
-	if _, ok := ftc.mutation.Int(); !ok {
+func (c *FieldTypeCreate) check() error {
+	if _, ok := c.mutation.Int(); !ok {
 		return &ValidationError{Name: "int", err: errors.New(`ent: missing required field "FieldType.int"`)}
 	}
-	if _, ok := ftc.mutation.Int8(); !ok {
+	if _, ok := c.mutation.Int8(); !ok {
 		return &ValidationError{Name: "int8", err: errors.New(`ent: missing required field "FieldType.int8"`)}
 	}
-	if _, ok := ftc.mutation.Int16(); !ok {
+	if _, ok := c.mutation.Int16(); !ok {
 		return &ValidationError{Name: "int16", err: errors.New(`ent: missing required field "FieldType.int16"`)}
 	}
-	if _, ok := ftc.mutation.Int32(); !ok {
+	if _, ok := c.mutation.Int32(); !ok {
 		return &ValidationError{Name: "int32", err: errors.New(`ent: missing required field "FieldType.int32"`)}
 	}
-	if _, ok := ftc.mutation.Int64(); !ok {
+	if _, ok := c.mutation.Int64(); !ok {
 		return &ValidationError{Name: "int64", err: errors.New(`ent: missing required field "FieldType.int64"`)}
 	}
-	if v, ok := ftc.mutation.ValidateOptionalInt32(); ok {
+	if v, ok := c.mutation.ValidateOptionalInt32(); ok {
 		if err := fieldtype.ValidateOptionalInt32Validator(v); err != nil {
 			return &ValidationError{Name: "validate_optional_int32", err: fmt.Errorf(`ent: validator failed for field "FieldType.validate_optional_int32": %w`, err)}
 		}
 	}
-	if v, ok := ftc.mutation.State(); ok {
+	if v, ok := c.mutation.State(); ok {
 		if err := fieldtype.StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "FieldType.state": %w`, err)}
 		}
 	}
-	if v, ok := ftc.mutation.MAC(); ok {
+	if v, ok := c.mutation.MAC(); ok {
 		if err := fieldtype.MACValidator(v.String()); err != nil {
 			return &ValidationError{Name: "mac", err: fmt.Errorf(`ent: validator failed for field "FieldType.mac": %w`, err)}
 		}
 	}
-	if _, ok := ftc.mutation.Dir(); !ok {
+	if _, ok := c.mutation.Dir(); !ok {
 		return &ValidationError{Name: "dir", err: errors.New(`ent: missing required field "FieldType.dir"`)}
 	}
-	if v, ok := ftc.mutation.Ndir(); ok {
+	if v, ok := c.mutation.Ndir(); ok {
 		if err := fieldtype.NdirValidator(string(v)); err != nil {
 			return &ValidationError{Name: "ndir", err: fmt.Errorf(`ent: validator failed for field "FieldType.ndir": %w`, err)}
 		}
 	}
-	if v, ok := ftc.mutation.Link(); ok {
+	if v, ok := c.mutation.Link(); ok {
 		if err := fieldtype.LinkValidator(v.String()); err != nil {
 			return &ValidationError{Name: "link", err: fmt.Errorf(`ent: validator failed for field "FieldType.link": %w`, err)}
 		}
 	}
-	if v, ok := ftc.mutation.RawData(); ok {
+	if v, ok := c.mutation.RawData(); ok {
 		if err := fieldtype.RawDataValidator(v); err != nil {
 			return &ValidationError{Name: "raw_data", err: fmt.Errorf(`ent: validator failed for field "FieldType.raw_data": %w`, err)}
 		}
 	}
-	if v, ok := ftc.mutation.IP(); ok {
+	if v, ok := c.mutation.IP(); ok {
 		if err := fieldtype.IPValidator([]byte(v)); err != nil {
 			return &ValidationError{Name: "ip", err: fmt.Errorf(`ent: validator failed for field "FieldType.ip": %w`, err)}
 		}
 	}
-	if _, ok := ftc.mutation.Role(); !ok {
+	if _, ok := c.mutation.Role(); !ok {
 		return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "FieldType.role"`)}
 	}
-	if v, ok := ftc.mutation.Role(); ok {
+	if v, ok := c.mutation.Role(); ok {
 		if err := fieldtype.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "FieldType.role": %w`, err)}
 		}
 	}
-	if v, ok := ftc.mutation.Priority(); ok {
+	if v, ok := c.mutation.Priority(); ok {
 		if err := fieldtype.PriorityValidator(v); err != nil {
 			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "FieldType.priority": %w`, err)}
 		}
 	}
-	if _, ok := ftc.mutation.Pair(); !ok {
+	if _, ok := c.mutation.Pair(); !ok {
 		return &ValidationError{Name: "pair", err: errors.New(`ent: missing required field "FieldType.pair"`)}
 	}
-	if _, ok := ftc.mutation.Vstring(); !ok {
+	if _, ok := c.mutation.Vstring(); !ok {
 		return &ValidationError{Name: "vstring", err: errors.New(`ent: missing required field "FieldType.vstring"`)}
 	}
-	if _, ok := ftc.mutation.Triple(); !ok {
+	if _, ok := c.mutation.Triple(); !ok {
 		return &ValidationError{Name: "triple", err: errors.New(`ent: missing required field "FieldType.triple"`)}
 	}
 	return nil
 }
 
-func (ftc *FieldTypeCreate) gremlinSave(ctx context.Context) (*FieldType, error) {
-	if err := ftc.check(); err != nil {
+func (c *FieldTypeCreate) gremlinSave(ctx context.Context) (*FieldType, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := ftc.gremlin().Query()
-	if err := ftc.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := c.gremlin().Query()
+	if err := c.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	rnode := &FieldType{config: ftc.config}
+	rnode := &FieldType{config: c.config}
 	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	ftc.mutation.id = &rnode.ID
-	ftc.mutation.done = true
+	c.mutation.id = &rnode.ID
+	c.mutation.done = true
 	return rnode, nil
 }
 
-func (ftc *FieldTypeCreate) gremlin() *dsl.Traversal {
+func (c *FieldTypeCreate) gremlin() *dsl.Traversal {
 	v := g.AddV(fieldtype.Label)
-	if value, ok := ftc.mutation.Int(); ok {
+	if value, ok := c.mutation.Int(); ok {
 		v.Property(dsl.Single, fieldtype.FieldInt, value)
 	}
-	if value, ok := ftc.mutation.Int8(); ok {
+	if value, ok := c.mutation.Int8(); ok {
 		v.Property(dsl.Single, fieldtype.FieldInt8, value)
 	}
-	if value, ok := ftc.mutation.Int16(); ok {
+	if value, ok := c.mutation.Int16(); ok {
 		v.Property(dsl.Single, fieldtype.FieldInt16, value)
 	}
-	if value, ok := ftc.mutation.Int32(); ok {
+	if value, ok := c.mutation.Int32(); ok {
 		v.Property(dsl.Single, fieldtype.FieldInt32, value)
 	}
-	if value, ok := ftc.mutation.Int64(); ok {
+	if value, ok := c.mutation.Int64(); ok {
 		v.Property(dsl.Single, fieldtype.FieldInt64, value)
 	}
-	if value, ok := ftc.mutation.OptionalInt(); ok {
+	if value, ok := c.mutation.OptionalInt(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalInt, value)
 	}
-	if value, ok := ftc.mutation.OptionalInt8(); ok {
+	if value, ok := c.mutation.OptionalInt8(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalInt8, value)
 	}
-	if value, ok := ftc.mutation.OptionalInt16(); ok {
+	if value, ok := c.mutation.OptionalInt16(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalInt16, value)
 	}
-	if value, ok := ftc.mutation.OptionalInt32(); ok {
+	if value, ok := c.mutation.OptionalInt32(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalInt32, value)
 	}
-	if value, ok := ftc.mutation.OptionalInt64(); ok {
+	if value, ok := c.mutation.OptionalInt64(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalInt64, value)
 	}
-	if value, ok := ftc.mutation.NillableInt(); ok {
+	if value, ok := c.mutation.NillableInt(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNillableInt, value)
 	}
-	if value, ok := ftc.mutation.NillableInt8(); ok {
+	if value, ok := c.mutation.NillableInt8(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNillableInt8, value)
 	}
-	if value, ok := ftc.mutation.NillableInt16(); ok {
+	if value, ok := c.mutation.NillableInt16(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNillableInt16, value)
 	}
-	if value, ok := ftc.mutation.NillableInt32(); ok {
+	if value, ok := c.mutation.NillableInt32(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNillableInt32, value)
 	}
-	if value, ok := ftc.mutation.NillableInt64(); ok {
+	if value, ok := c.mutation.NillableInt64(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNillableInt64, value)
 	}
-	if value, ok := ftc.mutation.ValidateOptionalInt32(); ok {
+	if value, ok := c.mutation.ValidateOptionalInt32(); ok {
 		v.Property(dsl.Single, fieldtype.FieldValidateOptionalInt32, value)
 	}
-	if value, ok := ftc.mutation.OptionalUint(); ok {
+	if value, ok := c.mutation.OptionalUint(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalUint, value)
 	}
-	if value, ok := ftc.mutation.OptionalUint8(); ok {
+	if value, ok := c.mutation.OptionalUint8(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalUint8, value)
 	}
-	if value, ok := ftc.mutation.OptionalUint16(); ok {
+	if value, ok := c.mutation.OptionalUint16(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalUint16, value)
 	}
-	if value, ok := ftc.mutation.OptionalUint32(); ok {
+	if value, ok := c.mutation.OptionalUint32(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalUint32, value)
 	}
-	if value, ok := ftc.mutation.OptionalUint64(); ok {
+	if value, ok := c.mutation.OptionalUint64(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalUint64, value)
 	}
-	if value, ok := ftc.mutation.State(); ok {
+	if value, ok := c.mutation.State(); ok {
 		v.Property(dsl.Single, fieldtype.FieldState, value)
 	}
-	if value, ok := ftc.mutation.OptionalFloat(); ok {
+	if value, ok := c.mutation.OptionalFloat(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalFloat, value)
 	}
-	if value, ok := ftc.mutation.OptionalFloat32(); ok {
+	if value, ok := c.mutation.OptionalFloat32(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalFloat32, value)
 	}
-	if value, ok := ftc.mutation.Text(); ok {
+	if value, ok := c.mutation.Text(); ok {
 		v.Property(dsl.Single, fieldtype.FieldText, value)
 	}
-	if value, ok := ftc.mutation.Datetime(); ok {
+	if value, ok := c.mutation.Datetime(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDatetime, value)
 	}
-	if value, ok := ftc.mutation.Decimal(); ok {
+	if value, ok := c.mutation.Decimal(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDecimal, value)
 	}
-	if value, ok := ftc.mutation.LinkOther(); ok {
+	if value, ok := c.mutation.LinkOther(); ok {
 		v.Property(dsl.Single, fieldtype.FieldLinkOther, value)
 	}
-	if value, ok := ftc.mutation.LinkOtherFunc(); ok {
+	if value, ok := c.mutation.LinkOtherFunc(); ok {
 		v.Property(dsl.Single, fieldtype.FieldLinkOtherFunc, value)
 	}
-	if value, ok := ftc.mutation.MAC(); ok {
+	if value, ok := c.mutation.MAC(); ok {
 		v.Property(dsl.Single, fieldtype.FieldMAC, value)
 	}
-	if value, ok := ftc.mutation.StringArray(); ok {
+	if value, ok := c.mutation.StringArray(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStringArray, value)
 	}
-	if value, ok := ftc.mutation.Password(); ok {
+	if value, ok := c.mutation.Password(); ok {
 		v.Property(dsl.Single, fieldtype.FieldPassword, value)
 	}
-	if value, ok := ftc.mutation.StringScanner(); ok {
+	if value, ok := c.mutation.StringScanner(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStringScanner, value)
 	}
-	if value, ok := ftc.mutation.Duration(); ok {
+	if value, ok := c.mutation.Duration(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDuration, value)
 	}
-	if value, ok := ftc.mutation.Dir(); ok {
+	if value, ok := c.mutation.Dir(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDir, value)
 	}
-	if value, ok := ftc.mutation.Ndir(); ok {
+	if value, ok := c.mutation.Ndir(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNdir, value)
 	}
-	if value, ok := ftc.mutation.Str(); ok {
+	if value, ok := c.mutation.Str(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStr, value)
 	}
-	if value, ok := ftc.mutation.NullStr(); ok {
+	if value, ok := c.mutation.NullStr(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNullStr, value)
 	}
-	if value, ok := ftc.mutation.Link(); ok {
+	if value, ok := c.mutation.Link(); ok {
 		v.Property(dsl.Single, fieldtype.FieldLink, value)
 	}
-	if value, ok := ftc.mutation.NullLink(); ok {
+	if value, ok := c.mutation.NullLink(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNullLink, value)
 	}
-	if value, ok := ftc.mutation.Active(); ok {
+	if value, ok := c.mutation.Active(); ok {
 		v.Property(dsl.Single, fieldtype.FieldActive, value)
 	}
-	if value, ok := ftc.mutation.NullActive(); ok {
+	if value, ok := c.mutation.NullActive(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNullActive, value)
 	}
-	if value, ok := ftc.mutation.Deleted(); ok {
+	if value, ok := c.mutation.Deleted(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDeleted, value)
 	}
-	if value, ok := ftc.mutation.DeletedAt(); ok {
+	if value, ok := c.mutation.DeletedAt(); ok {
 		v.Property(dsl.Single, fieldtype.FieldDeletedAt, value)
 	}
-	if value, ok := ftc.mutation.RawData(); ok {
+	if value, ok := c.mutation.RawData(); ok {
 		v.Property(dsl.Single, fieldtype.FieldRawData, value)
 	}
-	if value, ok := ftc.mutation.Sensitive(); ok {
+	if value, ok := c.mutation.Sensitive(); ok {
 		v.Property(dsl.Single, fieldtype.FieldSensitive, value)
 	}
-	if value, ok := ftc.mutation.IP(); ok {
+	if value, ok := c.mutation.IP(); ok {
 		v.Property(dsl.Single, fieldtype.FieldIP, value)
 	}
-	if value, ok := ftc.mutation.NullInt64(); ok {
+	if value, ok := c.mutation.NullInt64(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNullInt64, value)
 	}
-	if value, ok := ftc.mutation.SchemaInt(); ok {
+	if value, ok := c.mutation.SchemaInt(); ok {
 		v.Property(dsl.Single, fieldtype.FieldSchemaInt, value)
 	}
-	if value, ok := ftc.mutation.SchemaInt8(); ok {
+	if value, ok := c.mutation.SchemaInt8(); ok {
 		v.Property(dsl.Single, fieldtype.FieldSchemaInt8, value)
 	}
-	if value, ok := ftc.mutation.SchemaInt64(); ok {
+	if value, ok := c.mutation.SchemaInt64(); ok {
 		v.Property(dsl.Single, fieldtype.FieldSchemaInt64, value)
 	}
-	if value, ok := ftc.mutation.SchemaFloat(); ok {
+	if value, ok := c.mutation.SchemaFloat(); ok {
 		v.Property(dsl.Single, fieldtype.FieldSchemaFloat, value)
 	}
-	if value, ok := ftc.mutation.SchemaFloat32(); ok {
+	if value, ok := c.mutation.SchemaFloat32(); ok {
 		v.Property(dsl.Single, fieldtype.FieldSchemaFloat32, value)
 	}
-	if value, ok := ftc.mutation.NullFloat(); ok {
+	if value, ok := c.mutation.NullFloat(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNullFloat, value)
 	}
-	if value, ok := ftc.mutation.Role(); ok {
+	if value, ok := c.mutation.Role(); ok {
 		v.Property(dsl.Single, fieldtype.FieldRole, value)
 	}
-	if value, ok := ftc.mutation.Priority(); ok {
+	if value, ok := c.mutation.Priority(); ok {
 		v.Property(dsl.Single, fieldtype.FieldPriority, value)
 	}
-	if value, ok := ftc.mutation.OptionalUUID(); ok {
+	if value, ok := c.mutation.OptionalUUID(); ok {
 		v.Property(dsl.Single, fieldtype.FieldOptionalUUID, value)
 	}
-	if value, ok := ftc.mutation.NillableUUID(); ok {
+	if value, ok := c.mutation.NillableUUID(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNillableUUID, value)
 	}
-	if value, ok := ftc.mutation.Strings(); ok {
+	if value, ok := c.mutation.Strings(); ok {
 		v.Property(dsl.Single, fieldtype.FieldStrings, value)
 	}
-	if value, ok := ftc.mutation.Pair(); ok {
+	if value, ok := c.mutation.Pair(); ok {
 		v.Property(dsl.Single, fieldtype.FieldPair, value)
 	}
-	if value, ok := ftc.mutation.NilPair(); ok {
+	if value, ok := c.mutation.NilPair(); ok {
 		v.Property(dsl.Single, fieldtype.FieldNilPair, value)
 	}
-	if value, ok := ftc.mutation.Vstring(); ok {
+	if value, ok := c.mutation.Vstring(); ok {
 		v.Property(dsl.Single, fieldtype.FieldVstring, value)
 	}
-	if value, ok := ftc.mutation.Triple(); ok {
+	if value, ok := c.mutation.Triple(); ok {
 		v.Property(dsl.Single, fieldtype.FieldTriple, value)
 	}
-	if value, ok := ftc.mutation.BigInt(); ok {
+	if value, ok := c.mutation.BigInt(); ok {
 		v.Property(dsl.Single, fieldtype.FieldBigInt, value)
 	}
-	if value, ok := ftc.mutation.PasswordOther(); ok {
+	if value, ok := c.mutation.PasswordOther(); ok {
 		v.Property(dsl.Single, fieldtype.FieldPasswordOther, value)
 	}
 	return v.ValueMap(true)

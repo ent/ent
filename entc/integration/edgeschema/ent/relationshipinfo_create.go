@@ -26,24 +26,24 @@ type RelationshipInfoCreate struct {
 }
 
 // SetText sets the "text" field.
-func (ric *RelationshipInfoCreate) SetText(s string) *RelationshipInfoCreate {
-	ric.mutation.SetText(s)
-	return ric
+func (m *RelationshipInfoCreate) SetText(v string) *RelationshipInfoCreate {
+	m.mutation.SetText(v)
+	return m
 }
 
 // Mutation returns the RelationshipInfoMutation object of the builder.
-func (ric *RelationshipInfoCreate) Mutation() *RelationshipInfoMutation {
-	return ric.mutation
+func (m *RelationshipInfoCreate) Mutation() *RelationshipInfoMutation {
+	return m.mutation
 }
 
 // Save creates the RelationshipInfo in the database.
-func (ric *RelationshipInfoCreate) Save(ctx context.Context) (*RelationshipInfo, error) {
-	return withHooks(ctx, ric.sqlSave, ric.mutation, ric.hooks)
+func (c *RelationshipInfoCreate) Save(ctx context.Context) (*RelationshipInfo, error) {
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (ric *RelationshipInfoCreate) SaveX(ctx context.Context) *RelationshipInfo {
-	v, err := ric.Save(ctx)
+func (c *RelationshipInfoCreate) SaveX(ctx context.Context) *RelationshipInfo {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -51,32 +51,32 @@ func (ric *RelationshipInfoCreate) SaveX(ctx context.Context) *RelationshipInfo 
 }
 
 // Exec executes the query.
-func (ric *RelationshipInfoCreate) Exec(ctx context.Context) error {
-	_, err := ric.Save(ctx)
+func (c *RelationshipInfoCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ric *RelationshipInfoCreate) ExecX(ctx context.Context) {
-	if err := ric.Exec(ctx); err != nil {
+func (c *RelationshipInfoCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ric *RelationshipInfoCreate) check() error {
-	if _, ok := ric.mutation.Text(); !ok {
+func (c *RelationshipInfoCreate) check() error {
+	if _, ok := c.mutation.Text(); !ok {
 		return &ValidationError{Name: "text", err: errors.New(`ent: missing required field "RelationshipInfo.text"`)}
 	}
 	return nil
 }
 
-func (ric *RelationshipInfoCreate) sqlSave(ctx context.Context) (*RelationshipInfo, error) {
-	if err := ric.check(); err != nil {
+func (c *RelationshipInfoCreate) sqlSave(ctx context.Context) (*RelationshipInfo, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := ric.createSpec()
-	if err := sqlgraph.CreateNode(ctx, ric.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -84,18 +84,18 @@ func (ric *RelationshipInfoCreate) sqlSave(ctx context.Context) (*RelationshipIn
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	ric.mutation.id = &_node.ID
-	ric.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (ric *RelationshipInfoCreate) createSpec() (*RelationshipInfo, *sqlgraph.CreateSpec) {
+func (c *RelationshipInfoCreate) createSpec() (*RelationshipInfo, *sqlgraph.CreateSpec) {
 	var (
-		_node = &RelationshipInfo{config: ric.config}
+		_node = &RelationshipInfo{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(relationshipinfo.Table, sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt))
 	)
-	_spec.OnConflict = ric.conflict
-	if value, ok := ric.mutation.Text(); ok {
+	_spec.OnConflict = c.conflict
+	if value, ok := c.mutation.Text(); ok {
 		_spec.SetField(relationshipinfo.FieldText, field.TypeString, value)
 		_node.Text = value
 	}
@@ -118,11 +118,9 @@ func (ric *RelationshipInfoCreate) createSpec() (*RelationshipInfo, *sqlgraph.Cr
 //			SetText(v+v).
 //		}).
 //		Exec(ctx)
-func (ric *RelationshipInfoCreate) OnConflict(opts ...sql.ConflictOption) *RelationshipInfoUpsertOne {
-	ric.conflict = opts
-	return &RelationshipInfoUpsertOne{
-		create: ric,
-	}
+func (c *RelationshipInfoCreate) OnConflict(opts ...sql.ConflictOption) *RelationshipInfoUpsertOne {
+	c.conflict = opts
+	return &RelationshipInfoUpsertOne{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -131,11 +129,9 @@ func (ric *RelationshipInfoCreate) OnConflict(opts ...sql.ConflictOption) *Relat
 //	client.RelationshipInfo.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (ric *RelationshipInfoCreate) OnConflictColumns(columns ...string) *RelationshipInfoUpsertOne {
-	ric.conflict = append(ric.conflict, sql.ConflictColumns(columns...))
-	return &RelationshipInfoUpsertOne{
-		create: ric,
-	}
+func (c *RelationshipInfoCreate) OnConflictColumns(columns ...string) *RelationshipInfoUpsertOne {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &RelationshipInfoUpsertOne{create: c}
 }
 
 type (
@@ -259,16 +255,16 @@ type RelationshipInfoCreateBulk struct {
 }
 
 // Save creates the RelationshipInfo entities in the database.
-func (ricb *RelationshipInfoCreateBulk) Save(ctx context.Context) ([]*RelationshipInfo, error) {
-	if ricb.err != nil {
-		return nil, ricb.err
+func (c *RelationshipInfoCreateBulk) Save(ctx context.Context) ([]*RelationshipInfo, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(ricb.builders))
-	nodes := make([]*RelationshipInfo, len(ricb.builders))
-	mutators := make([]Mutator, len(ricb.builders))
-	for i := range ricb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*RelationshipInfo, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := ricb.builders[i]
+			builder := c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*RelationshipInfoMutation)
 				if !ok {
@@ -281,12 +277,12 @@ func (ricb *RelationshipInfoCreateBulk) Save(ctx context.Context) ([]*Relationsh
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, ricb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = ricb.conflict
+					spec.OnConflict = c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ricb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -310,7 +306,7 @@ func (ricb *RelationshipInfoCreateBulk) Save(ctx context.Context) ([]*Relationsh
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, ricb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -318,8 +314,8 @@ func (ricb *RelationshipInfoCreateBulk) Save(ctx context.Context) ([]*Relationsh
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ricb *RelationshipInfoCreateBulk) SaveX(ctx context.Context) []*RelationshipInfo {
-	v, err := ricb.Save(ctx)
+func (c *RelationshipInfoCreateBulk) SaveX(ctx context.Context) []*RelationshipInfo {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -327,14 +323,14 @@ func (ricb *RelationshipInfoCreateBulk) SaveX(ctx context.Context) []*Relationsh
 }
 
 // Exec executes the query.
-func (ricb *RelationshipInfoCreateBulk) Exec(ctx context.Context) error {
-	_, err := ricb.Save(ctx)
+func (c *RelationshipInfoCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ricb *RelationshipInfoCreateBulk) ExecX(ctx context.Context) {
-	if err := ricb.Exec(ctx); err != nil {
+func (c *RelationshipInfoCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -354,11 +350,9 @@ func (ricb *RelationshipInfoCreateBulk) ExecX(ctx context.Context) {
 //			SetText(v+v).
 //		}).
 //		Exec(ctx)
-func (ricb *RelationshipInfoCreateBulk) OnConflict(opts ...sql.ConflictOption) *RelationshipInfoUpsertBulk {
-	ricb.conflict = opts
-	return &RelationshipInfoUpsertBulk{
-		create: ricb,
-	}
+func (c *RelationshipInfoCreateBulk) OnConflict(opts ...sql.ConflictOption) *RelationshipInfoUpsertBulk {
+	c.conflict = opts
+	return &RelationshipInfoUpsertBulk{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -367,11 +361,9 @@ func (ricb *RelationshipInfoCreateBulk) OnConflict(opts ...sql.ConflictOption) *
 //	client.RelationshipInfo.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (ricb *RelationshipInfoCreateBulk) OnConflictColumns(columns ...string) *RelationshipInfoUpsertBulk {
-	ricb.conflict = append(ricb.conflict, sql.ConflictColumns(columns...))
-	return &RelationshipInfoUpsertBulk{
-		create: ricb,
-	}
+func (c *RelationshipInfoCreateBulk) OnConflictColumns(columns ...string) *RelationshipInfoUpsertBulk {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &RelationshipInfoUpsertBulk{create: c}
 }
 
 // RelationshipInfoUpsertBulk is the builder for "upsert"-ing

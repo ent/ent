@@ -27,54 +27,54 @@ type GroupInfoCreate struct {
 }
 
 // SetDesc sets the "desc" field.
-func (gic *GroupInfoCreate) SetDesc(s string) *GroupInfoCreate {
-	gic.mutation.SetDesc(s)
-	return gic
+func (m *GroupInfoCreate) SetDesc(v string) *GroupInfoCreate {
+	m.mutation.SetDesc(v)
+	return m
 }
 
 // SetMaxUsers sets the "max_users" field.
-func (gic *GroupInfoCreate) SetMaxUsers(i int) *GroupInfoCreate {
-	gic.mutation.SetMaxUsers(i)
-	return gic
+func (m *GroupInfoCreate) SetMaxUsers(v int) *GroupInfoCreate {
+	m.mutation.SetMaxUsers(v)
+	return m
 }
 
 // SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (gic *GroupInfoCreate) SetNillableMaxUsers(i *int) *GroupInfoCreate {
-	if i != nil {
-		gic.SetMaxUsers(*i)
+func (m *GroupInfoCreate) SetNillableMaxUsers(v *int) *GroupInfoCreate {
+	if v != nil {
+		m.SetMaxUsers(*v)
 	}
-	return gic
+	return m
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (gic *GroupInfoCreate) AddGroupIDs(ids ...int) *GroupInfoCreate {
-	gic.mutation.AddGroupIDs(ids...)
-	return gic
+func (m *GroupInfoCreate) AddGroupIDs(ids ...int) *GroupInfoCreate {
+	m.mutation.AddGroupIDs(ids...)
+	return m
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (gic *GroupInfoCreate) AddGroups(g ...*Group) *GroupInfoCreate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (m *GroupInfoCreate) AddGroups(v ...*Group) *GroupInfoCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return gic.AddGroupIDs(ids...)
+	return m.AddGroupIDs(ids...)
 }
 
 // Mutation returns the GroupInfoMutation object of the builder.
-func (gic *GroupInfoCreate) Mutation() *GroupInfoMutation {
-	return gic.mutation
+func (m *GroupInfoCreate) Mutation() *GroupInfoMutation {
+	return m.mutation
 }
 
 // Save creates the GroupInfo in the database.
-func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
-	gic.defaults()
-	return withHooks(ctx, gic.sqlSave, gic.mutation, gic.hooks)
+func (c *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
+	c.defaults()
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (gic *GroupInfoCreate) SaveX(ctx context.Context) *GroupInfo {
-	v, err := gic.Save(ctx)
+func (c *GroupInfoCreate) SaveX(ctx context.Context) *GroupInfo {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -82,43 +82,43 @@ func (gic *GroupInfoCreate) SaveX(ctx context.Context) *GroupInfo {
 }
 
 // Exec executes the query.
-func (gic *GroupInfoCreate) Exec(ctx context.Context) error {
-	_, err := gic.Save(ctx)
+func (c *GroupInfoCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gic *GroupInfoCreate) ExecX(ctx context.Context) {
-	if err := gic.Exec(ctx); err != nil {
+func (c *GroupInfoCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (gic *GroupInfoCreate) defaults() {
-	if _, ok := gic.mutation.MaxUsers(); !ok {
+func (c *GroupInfoCreate) defaults() {
+	if _, ok := c.mutation.MaxUsers(); !ok {
 		v := groupinfo.DefaultMaxUsers
-		gic.mutation.SetMaxUsers(v)
+		c.mutation.SetMaxUsers(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (gic *GroupInfoCreate) check() error {
-	if _, ok := gic.mutation.Desc(); !ok {
+func (c *GroupInfoCreate) check() error {
+	if _, ok := c.mutation.Desc(); !ok {
 		return &ValidationError{Name: "desc", err: errors.New(`ent: missing required field "GroupInfo.desc"`)}
 	}
-	if _, ok := gic.mutation.MaxUsers(); !ok {
+	if _, ok := c.mutation.MaxUsers(); !ok {
 		return &ValidationError{Name: "max_users", err: errors.New(`ent: missing required field "GroupInfo.max_users"`)}
 	}
 	return nil
 }
 
-func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
-	if err := gic.check(); err != nil {
+func (c *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := gic.createSpec()
-	if err := sqlgraph.CreateNode(ctx, gic.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -126,26 +126,26 @@ func (gic *GroupInfoCreate) sqlSave(ctx context.Context) (*GroupInfo, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	gic.mutation.id = &_node.ID
-	gic.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
+func (c *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 	var (
-		_node = &GroupInfo{config: gic.config}
+		_node = &GroupInfo{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(groupinfo.Table, sqlgraph.NewFieldSpec(groupinfo.FieldID, field.TypeInt))
 	)
-	_spec.OnConflict = gic.conflict
-	if value, ok := gic.mutation.Desc(); ok {
+	_spec.OnConflict = c.conflict
+	if value, ok := c.mutation.Desc(); ok {
 		_spec.SetField(groupinfo.FieldDesc, field.TypeString, value)
 		_node.Desc = value
 	}
-	if value, ok := gic.mutation.MaxUsers(); ok {
+	if value, ok := c.mutation.MaxUsers(); ok {
 		_spec.SetField(groupinfo.FieldMaxUsers, field.TypeInt, value)
 		_node.MaxUsers = value
 	}
-	if nodes := gic.mutation.GroupsIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.GroupsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -180,11 +180,9 @@ func (gic *GroupInfoCreate) createSpec() (*GroupInfo, *sqlgraph.CreateSpec) {
 //			SetDesc(v+v).
 //		}).
 //		Exec(ctx)
-func (gic *GroupInfoCreate) OnConflict(opts ...sql.ConflictOption) *GroupInfoUpsertOne {
-	gic.conflict = opts
-	return &GroupInfoUpsertOne{
-		create: gic,
-	}
+func (c *GroupInfoCreate) OnConflict(opts ...sql.ConflictOption) *GroupInfoUpsertOne {
+	c.conflict = opts
+	return &GroupInfoUpsertOne{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -193,11 +191,9 @@ func (gic *GroupInfoCreate) OnConflict(opts ...sql.ConflictOption) *GroupInfoUps
 //	client.GroupInfo.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (gic *GroupInfoCreate) OnConflictColumns(columns ...string) *GroupInfoUpsertOne {
-	gic.conflict = append(gic.conflict, sql.ConflictColumns(columns...))
-	return &GroupInfoUpsertOne{
-		create: gic,
-	}
+func (c *GroupInfoCreate) OnConflictColumns(columns ...string) *GroupInfoUpsertOne {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &GroupInfoUpsertOne{create: c}
 }
 
 type (
@@ -360,16 +356,16 @@ type GroupInfoCreateBulk struct {
 }
 
 // Save creates the GroupInfo entities in the database.
-func (gicb *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error) {
-	if gicb.err != nil {
-		return nil, gicb.err
+func (c *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(gicb.builders))
-	nodes := make([]*GroupInfo, len(gicb.builders))
-	mutators := make([]Mutator, len(gicb.builders))
-	for i := range gicb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*GroupInfo, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := gicb.builders[i]
+			builder := c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*GroupInfoMutation)
@@ -383,12 +379,12 @@ func (gicb *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error)
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, gicb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = gicb.conflict
+					spec.OnConflict = c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, gicb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -412,7 +408,7 @@ func (gicb *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error)
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, gicb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -420,8 +416,8 @@ func (gicb *GroupInfoCreateBulk) Save(ctx context.Context) ([]*GroupInfo, error)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (gicb *GroupInfoCreateBulk) SaveX(ctx context.Context) []*GroupInfo {
-	v, err := gicb.Save(ctx)
+func (c *GroupInfoCreateBulk) SaveX(ctx context.Context) []*GroupInfo {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -429,14 +425,14 @@ func (gicb *GroupInfoCreateBulk) SaveX(ctx context.Context) []*GroupInfo {
 }
 
 // Exec executes the query.
-func (gicb *GroupInfoCreateBulk) Exec(ctx context.Context) error {
-	_, err := gicb.Save(ctx)
+func (c *GroupInfoCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gicb *GroupInfoCreateBulk) ExecX(ctx context.Context) {
-	if err := gicb.Exec(ctx); err != nil {
+func (c *GroupInfoCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -456,11 +452,9 @@ func (gicb *GroupInfoCreateBulk) ExecX(ctx context.Context) {
 //			SetDesc(v+v).
 //		}).
 //		Exec(ctx)
-func (gicb *GroupInfoCreateBulk) OnConflict(opts ...sql.ConflictOption) *GroupInfoUpsertBulk {
-	gicb.conflict = opts
-	return &GroupInfoUpsertBulk{
-		create: gicb,
-	}
+func (c *GroupInfoCreateBulk) OnConflict(opts ...sql.ConflictOption) *GroupInfoUpsertBulk {
+	c.conflict = opts
+	return &GroupInfoUpsertBulk{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -469,11 +463,9 @@ func (gicb *GroupInfoCreateBulk) OnConflict(opts ...sql.ConflictOption) *GroupIn
 //	client.GroupInfo.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (gicb *GroupInfoCreateBulk) OnConflictColumns(columns ...string) *GroupInfoUpsertBulk {
-	gicb.conflict = append(gicb.conflict, sql.ConflictColumns(columns...))
-	return &GroupInfoUpsertBulk{
-		create: gicb,
-	}
+func (c *GroupInfoCreateBulk) OnConflictColumns(columns ...string) *GroupInfoUpsertBulk {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &GroupInfoUpsertBulk{create: c}
 }
 
 // GroupInfoUpsertBulk is the builder for "upsert"-ing

@@ -41,9 +41,9 @@ func (*Group) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Group fields.
-func (gr *Group) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Group) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -52,15 +52,15 @@ func (gr *Group) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			gr.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case group.FieldMaxUsers:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field max_users", values[i])
 			} else if value.Valid {
-				gr.MaxUsers = int(value.Int64)
+				m.MaxUsers = int(value.Int64)
 			}
 		default:
-			gr.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -68,26 +68,26 @@ func (gr *Group) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Group.
 // This includes values selected through modifiers, order, etc.
-func (gr *Group) Value(name string) (ent.Value, error) {
-	return gr.selectValues.Get(name)
+func (m *Group) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Group.
 // Note that you need to call Group.Unwrap() before calling this method if this Group
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (gr *Group) Update() *GroupUpdateOne {
-	return NewGroupClient(gr.config).UpdateOne(gr)
+func (m *Group) Update() *GroupUpdateOne {
+	return NewGroupClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Group entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (gr *Group) Unwrap() *Group {
-	_tx, ok := gr.config.driver.(*txDriver)
+func (m *Group) Unwrap() *Group {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Group is not a transactional entity")
 	}
-	gr.config.driver = _tx.drv
-	return gr
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.

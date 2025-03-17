@@ -27,80 +27,80 @@ type CarUpdate struct {
 }
 
 // Where appends a list predicates to the CarUpdate builder.
-func (cu *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
-	cu.mutation.Where(ps...)
-	return cu
+func (u *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetNumber sets the "number" field.
-func (cu *CarUpdate) SetNumber(s string) *CarUpdate {
-	cu.mutation.SetNumber(s)
-	return cu
+func (m *CarUpdate) SetNumber(v string) *CarUpdate {
+	m.mutation.SetNumber(v)
+	return m
 }
 
 // SetNillableNumber sets the "number" field if the given value is not nil.
-func (cu *CarUpdate) SetNillableNumber(s *string) *CarUpdate {
-	if s != nil {
-		cu.SetNumber(*s)
+func (m *CarUpdate) SetNillableNumber(v *string) *CarUpdate {
+	if v != nil {
+		m.SetNumber(*v)
 	}
-	return cu
+	return m
 }
 
 // ClearNumber clears the value of the "number" field.
-func (cu *CarUpdate) ClearNumber() *CarUpdate {
-	cu.mutation.ClearNumber()
-	return cu
+func (m *CarUpdate) ClearNumber() *CarUpdate {
+	m.mutation.ClearNumber()
+	return m
 }
 
 // AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
-func (cu *CarUpdate) AddRentalIDs(ids ...int) *CarUpdate {
-	cu.mutation.AddRentalIDs(ids...)
-	return cu
+func (m *CarUpdate) AddRentalIDs(ids ...int) *CarUpdate {
+	m.mutation.AddRentalIDs(ids...)
+	return m
 }
 
 // AddRentals adds the "rentals" edges to the Rental entity.
-func (cu *CarUpdate) AddRentals(r ...*Rental) *CarUpdate {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (m *CarUpdate) AddRentals(v ...*Rental) *CarUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return cu.AddRentalIDs(ids...)
+	return m.AddRentalIDs(ids...)
 }
 
 // Mutation returns the CarMutation object of the builder.
-func (cu *CarUpdate) Mutation() *CarMutation {
-	return cu.mutation
+func (m *CarUpdate) Mutation() *CarMutation {
+	return m.mutation
 }
 
 // ClearRentals clears all "rentals" edges to the Rental entity.
-func (cu *CarUpdate) ClearRentals() *CarUpdate {
-	cu.mutation.ClearRentals()
-	return cu
+func (u *CarUpdate) ClearRentals() *CarUpdate {
+	u.mutation.ClearRentals()
+	return u
 }
 
 // RemoveRentalIDs removes the "rentals" edge to Rental entities by IDs.
-func (cu *CarUpdate) RemoveRentalIDs(ids ...int) *CarUpdate {
-	cu.mutation.RemoveRentalIDs(ids...)
-	return cu
+func (u *CarUpdate) RemoveRentalIDs(ids ...int) *CarUpdate {
+	u.mutation.RemoveRentalIDs(ids...)
+	return u
 }
 
 // RemoveRentals removes "rentals" edges to Rental entities.
-func (cu *CarUpdate) RemoveRentals(r ...*Rental) *CarUpdate {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (u *CarUpdate) RemoveRentals(v ...*Rental) *CarUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return cu.RemoveRentalIDs(ids...)
+	return u.RemoveRentalIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (cu *CarUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, cu.sqlSave, cu.mutation, cu.hooks)
+func (u *CarUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cu *CarUpdate) SaveX(ctx context.Context) int {
-	affected, err := cu.Save(ctx)
+func (u *CarUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -108,34 +108,34 @@ func (cu *CarUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (cu *CarUpdate) Exec(ctx context.Context) error {
-	_, err := cu.Save(ctx)
+func (u *CarUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cu *CarUpdate) ExecX(ctx context.Context) {
-	if err := cu.Exec(ctx); err != nil {
+func (u *CarUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (u *CarUpdate) sqlSave(ctx context.Context) (_n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(car.Table, car.Columns, sqlgraph.NewFieldSpec(car.FieldID, field.TypeUUID))
-	if ps := cu.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := cu.mutation.Number(); ok {
+	if value, ok := u.mutation.Number(); ok {
 		_spec.SetField(car.FieldNumber, field.TypeString, value)
 	}
-	if cu.mutation.NumberCleared() {
+	if u.mutation.NumberCleared() {
 		_spec.ClearField(car.FieldNumber, field.TypeString)
 	}
-	if cu.mutation.RentalsCleared() {
+	if u.mutation.RentalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -148,7 +148,7 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.RemovedRentalsIDs(); len(nodes) > 0 && !cu.mutation.RentalsCleared() {
+	if nodes := u.mutation.RemovedRentalsIDs(); len(nodes) > 0 && !u.mutation.RentalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -164,7 +164,7 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.RentalsIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.RentalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -180,7 +180,7 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{car.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -188,8 +188,8 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	cu.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // CarUpdateOne is the builder for updating a single Car entity.
@@ -201,87 +201,87 @@ type CarUpdateOne struct {
 }
 
 // SetNumber sets the "number" field.
-func (cuo *CarUpdateOne) SetNumber(s string) *CarUpdateOne {
-	cuo.mutation.SetNumber(s)
-	return cuo
+func (m *CarUpdateOne) SetNumber(v string) *CarUpdateOne {
+	m.mutation.SetNumber(v)
+	return m
 }
 
 // SetNillableNumber sets the "number" field if the given value is not nil.
-func (cuo *CarUpdateOne) SetNillableNumber(s *string) *CarUpdateOne {
-	if s != nil {
-		cuo.SetNumber(*s)
+func (m *CarUpdateOne) SetNillableNumber(v *string) *CarUpdateOne {
+	if v != nil {
+		m.SetNumber(*v)
 	}
-	return cuo
+	return m
 }
 
 // ClearNumber clears the value of the "number" field.
-func (cuo *CarUpdateOne) ClearNumber() *CarUpdateOne {
-	cuo.mutation.ClearNumber()
-	return cuo
+func (m *CarUpdateOne) ClearNumber() *CarUpdateOne {
+	m.mutation.ClearNumber()
+	return m
 }
 
 // AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
-func (cuo *CarUpdateOne) AddRentalIDs(ids ...int) *CarUpdateOne {
-	cuo.mutation.AddRentalIDs(ids...)
-	return cuo
+func (m *CarUpdateOne) AddRentalIDs(ids ...int) *CarUpdateOne {
+	m.mutation.AddRentalIDs(ids...)
+	return m
 }
 
 // AddRentals adds the "rentals" edges to the Rental entity.
-func (cuo *CarUpdateOne) AddRentals(r ...*Rental) *CarUpdateOne {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (m *CarUpdateOne) AddRentals(v ...*Rental) *CarUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return cuo.AddRentalIDs(ids...)
+	return m.AddRentalIDs(ids...)
 }
 
 // Mutation returns the CarMutation object of the builder.
-func (cuo *CarUpdateOne) Mutation() *CarMutation {
-	return cuo.mutation
+func (m *CarUpdateOne) Mutation() *CarMutation {
+	return m.mutation
 }
 
 // ClearRentals clears all "rentals" edges to the Rental entity.
-func (cuo *CarUpdateOne) ClearRentals() *CarUpdateOne {
-	cuo.mutation.ClearRentals()
-	return cuo
+func (u *CarUpdateOne) ClearRentals() *CarUpdateOne {
+	u.mutation.ClearRentals()
+	return u
 }
 
 // RemoveRentalIDs removes the "rentals" edge to Rental entities by IDs.
-func (cuo *CarUpdateOne) RemoveRentalIDs(ids ...int) *CarUpdateOne {
-	cuo.mutation.RemoveRentalIDs(ids...)
-	return cuo
+func (u *CarUpdateOne) RemoveRentalIDs(ids ...int) *CarUpdateOne {
+	u.mutation.RemoveRentalIDs(ids...)
+	return u
 }
 
 // RemoveRentals removes "rentals" edges to Rental entities.
-func (cuo *CarUpdateOne) RemoveRentals(r ...*Rental) *CarUpdateOne {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (u *CarUpdateOne) RemoveRentals(v ...*Rental) *CarUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return cuo.RemoveRentalIDs(ids...)
+	return u.RemoveRentalIDs(ids...)
 }
 
 // Where appends a list predicates to the CarUpdate builder.
-func (cuo *CarUpdateOne) Where(ps ...predicate.Car) *CarUpdateOne {
-	cuo.mutation.Where(ps...)
-	return cuo
+func (u *CarUpdateOne) Where(ps ...predicate.Car) *CarUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (cuo *CarUpdateOne) Select(field string, fields ...string) *CarUpdateOne {
-	cuo.fields = append([]string{field}, fields...)
-	return cuo
+func (u *CarUpdateOne) Select(field string, fields ...string) *CarUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated Car entity.
-func (cuo *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
-	return withHooks(ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
+func (u *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cuo *CarUpdateOne) SaveX(ctx context.Context) *Car {
-	node, err := cuo.Save(ctx)
+func (u *CarUpdateOne) SaveX(ctx context.Context) *Car {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -289,26 +289,26 @@ func (cuo *CarUpdateOne) SaveX(ctx context.Context) *Car {
 }
 
 // Exec executes the query on the entity.
-func (cuo *CarUpdateOne) Exec(ctx context.Context) error {
-	_, err := cuo.Save(ctx)
+func (u *CarUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cuo *CarUpdateOne) ExecX(ctx context.Context) {
-	if err := cuo.Exec(ctx); err != nil {
+func (u *CarUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
+func (u *CarUpdateOne) sqlSave(ctx context.Context) (_n *Car, err error) {
 	_spec := sqlgraph.NewUpdateSpec(car.Table, car.Columns, sqlgraph.NewFieldSpec(car.FieldID, field.TypeUUID))
-	id, ok := cuo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Car.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := cuo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, car.FieldID)
 		for _, f := range fields {
@@ -320,20 +320,20 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 			}
 		}
 	}
-	if ps := cuo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := cuo.mutation.Number(); ok {
+	if value, ok := u.mutation.Number(); ok {
 		_spec.SetField(car.FieldNumber, field.TypeString, value)
 	}
-	if cuo.mutation.NumberCleared() {
+	if u.mutation.NumberCleared() {
 		_spec.ClearField(car.FieldNumber, field.TypeString)
 	}
-	if cuo.mutation.RentalsCleared() {
+	if u.mutation.RentalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -346,7 +346,7 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.RemovedRentalsIDs(); len(nodes) > 0 && !cuo.mutation.RentalsCleared() {
+	if nodes := u.mutation.RemovedRentalsIDs(); len(nodes) > 0 && !u.mutation.RentalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -362,7 +362,7 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.RentalsIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.RentalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -378,10 +378,10 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Car{config: cuo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
+	_n = &Car{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{car.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -389,6 +389,6 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 		}
 		return nil, err
 	}
-	cuo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

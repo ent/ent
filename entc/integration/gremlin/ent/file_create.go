@@ -30,176 +30,176 @@ type FileCreate struct {
 }
 
 // SetSetID sets the "set_id" field.
-func (fc *FileCreate) SetSetID(i int) *FileCreate {
-	fc.mutation.SetSetID(i)
-	return fc
+func (m *FileCreate) SetSetID(v int) *FileCreate {
+	m.mutation.SetSetID(v)
+	return m
 }
 
 // SetNillableSetID sets the "set_id" field if the given value is not nil.
-func (fc *FileCreate) SetNillableSetID(i *int) *FileCreate {
-	if i != nil {
-		fc.SetSetID(*i)
+func (m *FileCreate) SetNillableSetID(v *int) *FileCreate {
+	if v != nil {
+		m.SetSetID(*v)
 	}
-	return fc
+	return m
 }
 
 // SetSize sets the "size" field.
-func (fc *FileCreate) SetSize(i int) *FileCreate {
-	fc.mutation.SetSize(i)
-	return fc
+func (m *FileCreate) SetSize(v int) *FileCreate {
+	m.mutation.SetSize(v)
+	return m
 }
 
 // SetNillableSize sets the "size" field if the given value is not nil.
-func (fc *FileCreate) SetNillableSize(i *int) *FileCreate {
-	if i != nil {
-		fc.SetSize(*i)
+func (m *FileCreate) SetNillableSize(v *int) *FileCreate {
+	if v != nil {
+		m.SetSize(*v)
 	}
-	return fc
+	return m
 }
 
 // SetName sets the "name" field.
-func (fc *FileCreate) SetName(s string) *FileCreate {
-	fc.mutation.SetName(s)
-	return fc
+func (m *FileCreate) SetName(v string) *FileCreate {
+	m.mutation.SetName(v)
+	return m
 }
 
 // SetUser sets the "user" field.
-func (fc *FileCreate) SetUser(s string) *FileCreate {
-	fc.mutation.SetUser(s)
-	return fc
+func (m *FileCreate) SetUser(v string) *FileCreate {
+	m.mutation.SetUser(v)
+	return m
 }
 
 // SetNillableUser sets the "user" field if the given value is not nil.
-func (fc *FileCreate) SetNillableUser(s *string) *FileCreate {
-	if s != nil {
-		fc.SetUser(*s)
+func (m *FileCreate) SetNillableUser(v *string) *FileCreate {
+	if v != nil {
+		m.SetUser(*v)
 	}
-	return fc
+	return m
 }
 
 // SetGroup sets the "group" field.
-func (fc *FileCreate) SetGroup(s string) *FileCreate {
-	fc.mutation.SetGroup(s)
-	return fc
+func (m *FileCreate) SetGroup(v string) *FileCreate {
+	m.mutation.SetGroup(v)
+	return m
 }
 
 // SetNillableGroup sets the "group" field if the given value is not nil.
-func (fc *FileCreate) SetNillableGroup(s *string) *FileCreate {
-	if s != nil {
-		fc.SetGroup(*s)
+func (m *FileCreate) SetNillableGroup(v *string) *FileCreate {
+	if v != nil {
+		m.SetGroup(*v)
 	}
-	return fc
+	return m
 }
 
 // SetOp sets the "op" field.
-func (fc *FileCreate) SetOp(b bool) *FileCreate {
-	fc.mutation.SetOpField(b)
-	return fc
+func (m *FileCreate) SetOp(v bool) *FileCreate {
+	m.mutation.SetOpField(v)
+	return m
 }
 
 // SetNillableOp sets the "op" field if the given value is not nil.
-func (fc *FileCreate) SetNillableOp(b *bool) *FileCreate {
-	if b != nil {
-		fc.SetOp(*b)
+func (m *FileCreate) SetNillableOp(v *bool) *FileCreate {
+	if v != nil {
+		m.SetOp(*v)
 	}
-	return fc
+	return m
 }
 
 // SetFieldID sets the "field_id" field.
-func (fc *FileCreate) SetFieldID(i int) *FileCreate {
-	fc.mutation.SetFieldID(i)
-	return fc
+func (m *FileCreate) SetFieldID(v int) *FileCreate {
+	m.mutation.SetFieldID(v)
+	return m
 }
 
 // SetNillableFieldID sets the "field_id" field if the given value is not nil.
-func (fc *FileCreate) SetNillableFieldID(i *int) *FileCreate {
-	if i != nil {
-		fc.SetFieldID(*i)
+func (m *FileCreate) SetNillableFieldID(v *int) *FileCreate {
+	if v != nil {
+		m.SetFieldID(*v)
 	}
-	return fc
+	return m
 }
 
 // SetCreateTime sets the "create_time" field.
-func (fc *FileCreate) SetCreateTime(t time.Time) *FileCreate {
-	fc.mutation.SetCreateTime(t)
-	return fc
+func (m *FileCreate) SetCreateTime(v time.Time) *FileCreate {
+	m.mutation.SetCreateTime(v)
+	return m
 }
 
 // SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (fc *FileCreate) SetNillableCreateTime(t *time.Time) *FileCreate {
-	if t != nil {
-		fc.SetCreateTime(*t)
+func (m *FileCreate) SetNillableCreateTime(v *time.Time) *FileCreate {
+	if v != nil {
+		m.SetCreateTime(*v)
 	}
-	return fc
+	return m
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
-func (fc *FileCreate) SetOwnerID(id string) *FileCreate {
-	fc.mutation.SetOwnerID(id)
-	return fc
+func (m *FileCreate) SetOwnerID(id string) *FileCreate {
+	m.mutation.SetOwnerID(id)
+	return m
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (fc *FileCreate) SetNillableOwnerID(id *string) *FileCreate {
+func (m *FileCreate) SetNillableOwnerID(id *string) *FileCreate {
 	if id != nil {
-		fc = fc.SetOwnerID(*id)
+		m = m.SetOwnerID(*id)
 	}
-	return fc
+	return m
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (fc *FileCreate) SetOwner(u *User) *FileCreate {
-	return fc.SetOwnerID(u.ID)
+func (m *FileCreate) SetOwner(v *User) *FileCreate {
+	return m.SetOwnerID(v.ID)
 }
 
 // SetTypeID sets the "type" edge to the FileType entity by ID.
-func (fc *FileCreate) SetTypeID(id string) *FileCreate {
-	fc.mutation.SetTypeID(id)
-	return fc
+func (m *FileCreate) SetTypeID(id string) *FileCreate {
+	m.mutation.SetTypeID(id)
+	return m
 }
 
 // SetNillableTypeID sets the "type" edge to the FileType entity by ID if the given value is not nil.
-func (fc *FileCreate) SetNillableTypeID(id *string) *FileCreate {
+func (m *FileCreate) SetNillableTypeID(id *string) *FileCreate {
 	if id != nil {
-		fc = fc.SetTypeID(*id)
+		m = m.SetTypeID(*id)
 	}
-	return fc
+	return m
 }
 
 // SetType sets the "type" edge to the FileType entity.
-func (fc *FileCreate) SetType(f *FileType) *FileCreate {
-	return fc.SetTypeID(f.ID)
+func (m *FileCreate) SetType(v *FileType) *FileCreate {
+	return m.SetTypeID(v.ID)
 }
 
 // AddFieldIDs adds the "field" edge to the FieldType entity by IDs.
-func (fc *FileCreate) AddFieldIDs(ids ...string) *FileCreate {
-	fc.mutation.AddFieldIDs(ids...)
-	return fc
+func (m *FileCreate) AddFieldIDs(ids ...string) *FileCreate {
+	m.mutation.AddFieldIDs(ids...)
+	return m
 }
 
 // AddField adds the "field" edges to the FieldType entity.
-func (fc *FileCreate) AddField(f ...*FieldType) *FileCreate {
-	ids := make([]string, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (m *FileCreate) AddField(v ...*FieldType) *FileCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return fc.AddFieldIDs(ids...)
+	return m.AddFieldIDs(ids...)
 }
 
 // Mutation returns the FileMutation object of the builder.
-func (fc *FileCreate) Mutation() *FileMutation {
-	return fc.mutation
+func (m *FileCreate) Mutation() *FileMutation {
+	return m.mutation
 }
 
 // Save creates the File in the database.
-func (fc *FileCreate) Save(ctx context.Context) (*File, error) {
-	fc.defaults()
-	return withHooks(ctx, fc.gremlinSave, fc.mutation, fc.hooks)
+func (c *FileCreate) Save(ctx context.Context) (*File, error) {
+	c.defaults()
+	return withHooks(ctx, c.gremlinSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (fc *FileCreate) SaveX(ctx context.Context) *File {
-	v, err := fc.Save(ctx)
+func (c *FileCreate) SaveX(ctx context.Context) *File {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -207,110 +207,110 @@ func (fc *FileCreate) SaveX(ctx context.Context) *File {
 }
 
 // Exec executes the query.
-func (fc *FileCreate) Exec(ctx context.Context) error {
-	_, err := fc.Save(ctx)
+func (c *FileCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (fc *FileCreate) ExecX(ctx context.Context) {
-	if err := fc.Exec(ctx); err != nil {
+func (c *FileCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (fc *FileCreate) defaults() {
-	if _, ok := fc.mutation.Size(); !ok {
+func (c *FileCreate) defaults() {
+	if _, ok := c.mutation.Size(); !ok {
 		v := file.DefaultSize
-		fc.mutation.SetSize(v)
+		c.mutation.SetSize(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (fc *FileCreate) check() error {
-	if v, ok := fc.mutation.SetID(); ok {
+func (c *FileCreate) check() error {
+	if v, ok := c.mutation.SetID(); ok {
 		if err := file.SetIDValidator(v); err != nil {
 			return &ValidationError{Name: "set_id", err: fmt.Errorf(`ent: validator failed for field "File.set_id": %w`, err)}
 		}
 	}
-	if _, ok := fc.mutation.Size(); !ok {
+	if _, ok := c.mutation.Size(); !ok {
 		return &ValidationError{Name: "size", err: errors.New(`ent: missing required field "File.size"`)}
 	}
-	if v, ok := fc.mutation.Size(); ok {
+	if v, ok := c.mutation.Size(); ok {
 		if err := file.SizeValidator(v); err != nil {
 			return &ValidationError{Name: "size", err: fmt.Errorf(`ent: validator failed for field "File.size": %w`, err)}
 		}
 	}
-	if _, ok := fc.mutation.Name(); !ok {
+	if _, ok := c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "File.name"`)}
 	}
 	return nil
 }
 
-func (fc *FileCreate) gremlinSave(ctx context.Context) (*File, error) {
-	if err := fc.check(); err != nil {
+func (c *FileCreate) gremlinSave(ctx context.Context) (*File, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := fc.gremlin().Query()
-	if err := fc.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := c.gremlin().Query()
+	if err := c.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	rnode := &File{config: fc.config}
+	rnode := &File{config: c.config}
 	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	fc.mutation.id = &rnode.ID
-	fc.mutation.done = true
+	c.mutation.id = &rnode.ID
+	c.mutation.done = true
 	return rnode, nil
 }
 
-func (fc *FileCreate) gremlin() *dsl.Traversal {
+func (c *FileCreate) gremlin() *dsl.Traversal {
 	type constraint struct {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
 	constraints := make([]*constraint, 0, 2)
 	v := g.AddV(file.Label)
-	if value, ok := fc.mutation.SetID(); ok {
+	if value, ok := c.mutation.SetID(); ok {
 		v.Property(dsl.Single, file.FieldSetID, value)
 	}
-	if value, ok := fc.mutation.Size(); ok {
+	if value, ok := c.mutation.Size(); ok {
 		v.Property(dsl.Single, file.FieldSize, value)
 	}
-	if value, ok := fc.mutation.Name(); ok {
+	if value, ok := c.mutation.Name(); ok {
 		v.Property(dsl.Single, file.FieldName, value)
 	}
-	if value, ok := fc.mutation.User(); ok {
+	if value, ok := c.mutation.User(); ok {
 		v.Property(dsl.Single, file.FieldUser, value)
 	}
-	if value, ok := fc.mutation.Group(); ok {
+	if value, ok := c.mutation.Group(); ok {
 		v.Property(dsl.Single, file.FieldGroup, value)
 	}
-	if value, ok := fc.mutation.GetOp(); ok {
+	if value, ok := c.mutation.GetOp(); ok {
 		v.Property(dsl.Single, file.FieldOp, value)
 	}
-	if value, ok := fc.mutation.FieldID(); ok {
+	if value, ok := c.mutation.FieldID(); ok {
 		v.Property(dsl.Single, file.FieldFieldID, value)
 	}
-	if value, ok := fc.mutation.CreateTime(); ok {
+	if value, ok := c.mutation.CreateTime(); ok {
 		constraints = append(constraints, &constraint{
 			pred: g.V().Has(file.Label, file.FieldCreateTime, value).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(file.Label, file.FieldCreateTime, value)),
 		})
 		v.Property(dsl.Single, file.FieldCreateTime, value)
 	}
-	for _, id := range fc.mutation.OwnerIDs() {
+	for _, id := range c.mutation.OwnerIDs() {
 		v.AddE(user.FilesLabel).From(g.V(id)).InV()
 	}
-	for _, id := range fc.mutation.TypeIDs() {
+	for _, id := range c.mutation.TypeIDs() {
 		v.AddE(filetype.FilesLabel).From(g.V(id)).InV()
 	}
-	for _, id := range fc.mutation.FieldIDs() {
+	for _, id := range c.mutation.FieldIDs() {
 		v.AddE(file.FieldLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(file.FieldLabel).InV().HasID(id).Count(),

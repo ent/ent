@@ -39,26 +39,26 @@ func (_go *Goods) FromResponse(res *gremlin.Response) error {
 // Update returns a builder for updating this Goods.
 // Note that you need to call Goods.Unwrap() before calling this method if this Goods
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_go *Goods) Update() *GoodsUpdateOne {
-	return NewGoodsClient(_go.config).UpdateOne(_go)
+func (m *Goods) Update() *GoodsUpdateOne {
+	return NewGoodsClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Goods entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_go *Goods) Unwrap() *Goods {
-	_tx, ok := _go.config.driver.(*txDriver)
+func (m *Goods) Unwrap() *Goods {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Goods is not a transactional entity")
 	}
-	_go.config.driver = _tx.drv
-	return _go
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (_go *Goods) String() string {
+func (m *Goods) String() string {
 	var builder strings.Builder
 	builder.WriteString("Goods(")
-	builder.WriteString(fmt.Sprintf("id=%v", _go.ID))
+	builder.WriteString(fmt.Sprintf("id=%v", m.ID))
 	builder.WriteByte(')')
 	return builder.String()
 }

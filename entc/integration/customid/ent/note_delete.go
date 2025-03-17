@@ -24,56 +24,56 @@ type NoteDelete struct {
 }
 
 // Where appends a list predicates to the NoteDelete builder.
-func (nd *NoteDelete) Where(ps ...predicate.Note) *NoteDelete {
-	nd.mutation.Where(ps...)
-	return nd
+func (d *NoteDelete) Where(ps ...predicate.Note) *NoteDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (nd *NoteDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, nd.sqlExec, nd.mutation, nd.hooks)
+func (d *NoteDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (nd *NoteDelete) ExecX(ctx context.Context) int {
-	n, err := nd.Exec(ctx)
+func (d *NoteDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (nd *NoteDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *NoteDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(note.Table, sqlgraph.NewFieldSpec(note.FieldID, field.TypeString))
-	if ps := nd.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, nd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	nd.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // NoteDeleteOne is the builder for deleting a single Note entity.
 type NoteDeleteOne struct {
-	nd *NoteDelete
+	d *NoteDelete
 }
 
 // Where appends a list predicates to the NoteDelete builder.
-func (ndo *NoteDeleteOne) Where(ps ...predicate.Note) *NoteDeleteOne {
-	ndo.nd.mutation.Where(ps...)
-	return ndo
+func (d *NoteDeleteOne) Where(ps ...predicate.Note) *NoteDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (ndo *NoteDeleteOne) Exec(ctx context.Context) error {
-	n, err := ndo.nd.Exec(ctx)
+func (d *NoteDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (ndo *NoteDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ndo *NoteDeleteOne) ExecX(ctx context.Context) {
-	if err := ndo.Exec(ctx); err != nil {
+func (d *NoteDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

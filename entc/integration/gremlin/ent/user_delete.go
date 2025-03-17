@@ -25,38 +25,38 @@ type UserDelete struct {
 }
 
 // Where appends a list predicates to the UserDelete builder.
-func (ud *UserDelete) Where(ps ...predicate.User) *UserDelete {
-	ud.mutation.Where(ps...)
-	return ud
+func (d *UserDelete) Where(ps ...predicate.User) *UserDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (ud *UserDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, ud.gremlinExec, ud.mutation, ud.hooks)
+func (d *UserDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.gremlinExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ud *UserDelete) ExecX(ctx context.Context) int {
-	n, err := ud.Exec(ctx)
+func (d *UserDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (ud *UserDelete) gremlinExec(ctx context.Context) (int, error) {
+func (d *UserDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := ud.gremlin().Query()
-	if err := ud.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := d.gremlin().Query()
+	if err := d.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
-	ud.mutation.done = true
+	d.mutation.done = true
 	return res.ReadInt()
 }
 
-func (ud *UserDelete) gremlin() *dsl.Traversal {
+func (d *UserDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(user.Label)
-	for _, p := range ud.mutation.predicates {
+	for _, p := range d.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()
@@ -64,18 +64,18 @@ func (ud *UserDelete) gremlin() *dsl.Traversal {
 
 // UserDeleteOne is the builder for deleting a single User entity.
 type UserDeleteOne struct {
-	ud *UserDelete
+	d *UserDelete
 }
 
 // Where appends a list predicates to the UserDelete builder.
-func (udo *UserDeleteOne) Where(ps ...predicate.User) *UserDeleteOne {
-	udo.ud.mutation.Where(ps...)
-	return udo
+func (d *UserDeleteOne) Where(ps ...predicate.User) *UserDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (udo *UserDeleteOne) Exec(ctx context.Context) error {
-	n, err := udo.ud.Exec(ctx)
+func (d *UserDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -87,8 +87,8 @@ func (udo *UserDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (udo *UserDeleteOne) ExecX(ctx context.Context) {
-	if err := udo.Exec(ctx); err != nil {
+func (d *UserDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

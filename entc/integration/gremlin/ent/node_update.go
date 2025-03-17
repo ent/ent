@@ -28,114 +28,114 @@ type NodeUpdate struct {
 }
 
 // Where appends a list predicates to the NodeUpdate builder.
-func (nu *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate {
-	nu.mutation.Where(ps...)
-	return nu
+func (u *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetValue sets the "value" field.
-func (nu *NodeUpdate) SetValue(i int) *NodeUpdate {
-	nu.mutation.ResetValue()
-	nu.mutation.SetValue(i)
-	return nu
+func (m *NodeUpdate) SetValue(v int) *NodeUpdate {
+	m.mutation.ResetValue()
+	m.mutation.SetValue(v)
+	return m
 }
 
 // SetNillableValue sets the "value" field if the given value is not nil.
-func (nu *NodeUpdate) SetNillableValue(i *int) *NodeUpdate {
-	if i != nil {
-		nu.SetValue(*i)
+func (m *NodeUpdate) SetNillableValue(v *int) *NodeUpdate {
+	if v != nil {
+		m.SetValue(*v)
 	}
-	return nu
+	return m
 }
 
-// AddValue adds i to the "value" field.
-func (nu *NodeUpdate) AddValue(i int) *NodeUpdate {
-	nu.mutation.AddValue(i)
-	return nu
+// AddValue adds value to the "value" field.
+func (m *NodeUpdate) AddValue(v int) *NodeUpdate {
+	m.mutation.AddValue(v)
+	return m
 }
 
 // ClearValue clears the value of the "value" field.
-func (nu *NodeUpdate) ClearValue() *NodeUpdate {
-	nu.mutation.ClearValue()
-	return nu
+func (m *NodeUpdate) ClearValue() *NodeUpdate {
+	m.mutation.ClearValue()
+	return m
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (nu *NodeUpdate) SetUpdatedAt(t time.Time) *NodeUpdate {
-	nu.mutation.SetUpdatedAt(t)
-	return nu
+func (m *NodeUpdate) SetUpdatedAt(v time.Time) *NodeUpdate {
+	m.mutation.SetUpdatedAt(v)
+	return m
 }
 
 // ClearUpdatedAt clears the value of the "updated_at" field.
-func (nu *NodeUpdate) ClearUpdatedAt() *NodeUpdate {
-	nu.mutation.ClearUpdatedAt()
-	return nu
+func (m *NodeUpdate) ClearUpdatedAt() *NodeUpdate {
+	m.mutation.ClearUpdatedAt()
+	return m
 }
 
 // SetPrevID sets the "prev" edge to the Node entity by ID.
-func (nu *NodeUpdate) SetPrevID(id string) *NodeUpdate {
-	nu.mutation.SetPrevID(id)
-	return nu
+func (m *NodeUpdate) SetPrevID(id string) *NodeUpdate {
+	m.mutation.SetPrevID(id)
+	return m
 }
 
 // SetNillablePrevID sets the "prev" edge to the Node entity by ID if the given value is not nil.
-func (nu *NodeUpdate) SetNillablePrevID(id *string) *NodeUpdate {
+func (m *NodeUpdate) SetNillablePrevID(id *string) *NodeUpdate {
 	if id != nil {
-		nu = nu.SetPrevID(*id)
+		m = m.SetPrevID(*id)
 	}
-	return nu
+	return m
 }
 
 // SetPrev sets the "prev" edge to the Node entity.
-func (nu *NodeUpdate) SetPrev(n *Node) *NodeUpdate {
-	return nu.SetPrevID(n.ID)
+func (m *NodeUpdate) SetPrev(v *Node) *NodeUpdate {
+	return m.SetPrevID(v.ID)
 }
 
 // SetNextID sets the "next" edge to the Node entity by ID.
-func (nu *NodeUpdate) SetNextID(id string) *NodeUpdate {
-	nu.mutation.SetNextID(id)
-	return nu
+func (m *NodeUpdate) SetNextID(id string) *NodeUpdate {
+	m.mutation.SetNextID(id)
+	return m
 }
 
 // SetNillableNextID sets the "next" edge to the Node entity by ID if the given value is not nil.
-func (nu *NodeUpdate) SetNillableNextID(id *string) *NodeUpdate {
+func (m *NodeUpdate) SetNillableNextID(id *string) *NodeUpdate {
 	if id != nil {
-		nu = nu.SetNextID(*id)
+		m = m.SetNextID(*id)
 	}
-	return nu
+	return m
 }
 
 // SetNext sets the "next" edge to the Node entity.
-func (nu *NodeUpdate) SetNext(n *Node) *NodeUpdate {
-	return nu.SetNextID(n.ID)
+func (m *NodeUpdate) SetNext(v *Node) *NodeUpdate {
+	return m.SetNextID(v.ID)
 }
 
 // Mutation returns the NodeMutation object of the builder.
-func (nu *NodeUpdate) Mutation() *NodeMutation {
-	return nu.mutation
+func (m *NodeUpdate) Mutation() *NodeMutation {
+	return m.mutation
 }
 
 // ClearPrev clears the "prev" edge to the Node entity.
-func (nu *NodeUpdate) ClearPrev() *NodeUpdate {
-	nu.mutation.ClearPrev()
-	return nu
+func (u *NodeUpdate) ClearPrev() *NodeUpdate {
+	u.mutation.ClearPrev()
+	return u
 }
 
 // ClearNext clears the "next" edge to the Node entity.
-func (nu *NodeUpdate) ClearNext() *NodeUpdate {
-	nu.mutation.ClearNext()
-	return nu
+func (u *NodeUpdate) ClearNext() *NodeUpdate {
+	u.mutation.ClearNext()
+	return u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (nu *NodeUpdate) Save(ctx context.Context) (int, error) {
-	nu.defaults()
-	return withHooks(ctx, nu.gremlinSave, nu.mutation, nu.hooks)
+func (u *NodeUpdate) Save(ctx context.Context) (int, error) {
+	u.defaults()
+	return withHooks(ctx, u.gremlinSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (nu *NodeUpdate) SaveX(ctx context.Context) int {
-	affected, err := nu.Save(ctx)
+func (u *NodeUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -143,47 +143,47 @@ func (nu *NodeUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (nu *NodeUpdate) Exec(ctx context.Context) error {
-	_, err := nu.Save(ctx)
+func (u *NodeUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (nu *NodeUpdate) ExecX(ctx context.Context) {
-	if err := nu.Exec(ctx); err != nil {
+func (u *NodeUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (nu *NodeUpdate) defaults() {
-	if _, ok := nu.mutation.UpdatedAt(); !ok && !nu.mutation.UpdatedAtCleared() {
+func (u *NodeUpdate) defaults() {
+	if _, ok := u.mutation.UpdatedAt(); !ok && !u.mutation.UpdatedAtCleared() {
 		v := node.UpdateDefaultUpdatedAt()
-		nu.mutation.SetUpdatedAt(v)
+		u.mutation.SetUpdatedAt(v)
 	}
 }
 
-func (nu *NodeUpdate) gremlinSave(ctx context.Context) (int, error) {
+func (u *NodeUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := nu.gremlin().Query()
-	if err := nu.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := u.gremlin().Query()
+	if err := u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return 0, err
 	}
-	nu.mutation.done = true
+	u.mutation.done = true
 	return res.ReadInt()
 }
 
-func (nu *NodeUpdate) gremlin() *dsl.Traversal {
+func (u *NodeUpdate) gremlin() *dsl.Traversal {
 	type constraint struct {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
 	constraints := make([]*constraint, 0, 2)
 	v := g.V().HasLabel(node.Label)
-	for _, p := range nu.mutation.predicates {
+	for _, p := range u.mutation.predicates {
 		p(v)
 	}
 	var (
@@ -192,41 +192,41 @@ func (nu *NodeUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value, ok := nu.mutation.Value(); ok {
+	if value, ok := u.mutation.Value(); ok {
 		v.Property(dsl.Single, node.FieldValue, value)
 	}
-	if value, ok := nu.mutation.AddedValue(); ok {
+	if value, ok := u.mutation.AddedValue(); ok {
 		v.Property(dsl.Single, node.FieldValue, __.Union(__.Values(node.FieldValue), __.Constant(value)).Sum())
 	}
-	if value, ok := nu.mutation.UpdatedAt(); ok {
+	if value, ok := u.mutation.UpdatedAt(); ok {
 		v.Property(dsl.Single, node.FieldUpdatedAt, value)
 	}
 	var properties []any
-	if nu.mutation.ValueCleared() {
+	if u.mutation.ValueCleared() {
 		properties = append(properties, node.FieldValue)
 	}
-	if nu.mutation.UpdatedAtCleared() {
+	if u.mutation.UpdatedAtCleared() {
 		properties = append(properties, node.FieldUpdatedAt)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
 	}
-	if nu.mutation.PrevCleared() {
+	if u.mutation.PrevCleared() {
 		tr := rv.Clone().InE(node.NextLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for _, id := range nu.mutation.PrevIDs() {
+	for _, id := range u.mutation.PrevIDs() {
 		v.AddE(node.NextLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(node.NextLabel).OutV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(node.Label, node.NextLabel, id)),
 		})
 	}
-	if nu.mutation.NextCleared() {
+	if u.mutation.NextCleared() {
 		tr := rv.Clone().OutE(node.NextLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for _, id := range nu.mutation.NextIDs() {
+	for _, id := range u.mutation.NextIDs() {
 		v.AddE(node.NextLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(node.NextLabel).InV().HasID(id).Count(),
@@ -257,121 +257,121 @@ type NodeUpdateOne struct {
 }
 
 // SetValue sets the "value" field.
-func (nuo *NodeUpdateOne) SetValue(i int) *NodeUpdateOne {
-	nuo.mutation.ResetValue()
-	nuo.mutation.SetValue(i)
-	return nuo
+func (m *NodeUpdateOne) SetValue(v int) *NodeUpdateOne {
+	m.mutation.ResetValue()
+	m.mutation.SetValue(v)
+	return m
 }
 
 // SetNillableValue sets the "value" field if the given value is not nil.
-func (nuo *NodeUpdateOne) SetNillableValue(i *int) *NodeUpdateOne {
-	if i != nil {
-		nuo.SetValue(*i)
+func (m *NodeUpdateOne) SetNillableValue(v *int) *NodeUpdateOne {
+	if v != nil {
+		m.SetValue(*v)
 	}
-	return nuo
+	return m
 }
 
-// AddValue adds i to the "value" field.
-func (nuo *NodeUpdateOne) AddValue(i int) *NodeUpdateOne {
-	nuo.mutation.AddValue(i)
-	return nuo
+// AddValue adds value to the "value" field.
+func (m *NodeUpdateOne) AddValue(v int) *NodeUpdateOne {
+	m.mutation.AddValue(v)
+	return m
 }
 
 // ClearValue clears the value of the "value" field.
-func (nuo *NodeUpdateOne) ClearValue() *NodeUpdateOne {
-	nuo.mutation.ClearValue()
-	return nuo
+func (m *NodeUpdateOne) ClearValue() *NodeUpdateOne {
+	m.mutation.ClearValue()
+	return m
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (nuo *NodeUpdateOne) SetUpdatedAt(t time.Time) *NodeUpdateOne {
-	nuo.mutation.SetUpdatedAt(t)
-	return nuo
+func (m *NodeUpdateOne) SetUpdatedAt(v time.Time) *NodeUpdateOne {
+	m.mutation.SetUpdatedAt(v)
+	return m
 }
 
 // ClearUpdatedAt clears the value of the "updated_at" field.
-func (nuo *NodeUpdateOne) ClearUpdatedAt() *NodeUpdateOne {
-	nuo.mutation.ClearUpdatedAt()
-	return nuo
+func (m *NodeUpdateOne) ClearUpdatedAt() *NodeUpdateOne {
+	m.mutation.ClearUpdatedAt()
+	return m
 }
 
 // SetPrevID sets the "prev" edge to the Node entity by ID.
-func (nuo *NodeUpdateOne) SetPrevID(id string) *NodeUpdateOne {
-	nuo.mutation.SetPrevID(id)
-	return nuo
+func (m *NodeUpdateOne) SetPrevID(id string) *NodeUpdateOne {
+	m.mutation.SetPrevID(id)
+	return m
 }
 
 // SetNillablePrevID sets the "prev" edge to the Node entity by ID if the given value is not nil.
-func (nuo *NodeUpdateOne) SetNillablePrevID(id *string) *NodeUpdateOne {
+func (m *NodeUpdateOne) SetNillablePrevID(id *string) *NodeUpdateOne {
 	if id != nil {
-		nuo = nuo.SetPrevID(*id)
+		m = m.SetPrevID(*id)
 	}
-	return nuo
+	return m
 }
 
 // SetPrev sets the "prev" edge to the Node entity.
-func (nuo *NodeUpdateOne) SetPrev(n *Node) *NodeUpdateOne {
-	return nuo.SetPrevID(n.ID)
+func (m *NodeUpdateOne) SetPrev(v *Node) *NodeUpdateOne {
+	return m.SetPrevID(v.ID)
 }
 
 // SetNextID sets the "next" edge to the Node entity by ID.
-func (nuo *NodeUpdateOne) SetNextID(id string) *NodeUpdateOne {
-	nuo.mutation.SetNextID(id)
-	return nuo
+func (m *NodeUpdateOne) SetNextID(id string) *NodeUpdateOne {
+	m.mutation.SetNextID(id)
+	return m
 }
 
 // SetNillableNextID sets the "next" edge to the Node entity by ID if the given value is not nil.
-func (nuo *NodeUpdateOne) SetNillableNextID(id *string) *NodeUpdateOne {
+func (m *NodeUpdateOne) SetNillableNextID(id *string) *NodeUpdateOne {
 	if id != nil {
-		nuo = nuo.SetNextID(*id)
+		m = m.SetNextID(*id)
 	}
-	return nuo
+	return m
 }
 
 // SetNext sets the "next" edge to the Node entity.
-func (nuo *NodeUpdateOne) SetNext(n *Node) *NodeUpdateOne {
-	return nuo.SetNextID(n.ID)
+func (m *NodeUpdateOne) SetNext(v *Node) *NodeUpdateOne {
+	return m.SetNextID(v.ID)
 }
 
 // Mutation returns the NodeMutation object of the builder.
-func (nuo *NodeUpdateOne) Mutation() *NodeMutation {
-	return nuo.mutation
+func (m *NodeUpdateOne) Mutation() *NodeMutation {
+	return m.mutation
 }
 
 // ClearPrev clears the "prev" edge to the Node entity.
-func (nuo *NodeUpdateOne) ClearPrev() *NodeUpdateOne {
-	nuo.mutation.ClearPrev()
-	return nuo
+func (u *NodeUpdateOne) ClearPrev() *NodeUpdateOne {
+	u.mutation.ClearPrev()
+	return u
 }
 
 // ClearNext clears the "next" edge to the Node entity.
-func (nuo *NodeUpdateOne) ClearNext() *NodeUpdateOne {
-	nuo.mutation.ClearNext()
-	return nuo
+func (u *NodeUpdateOne) ClearNext() *NodeUpdateOne {
+	u.mutation.ClearNext()
+	return u
 }
 
 // Where appends a list predicates to the NodeUpdate builder.
-func (nuo *NodeUpdateOne) Where(ps ...predicate.Node) *NodeUpdateOne {
-	nuo.mutation.Where(ps...)
-	return nuo
+func (u *NodeUpdateOne) Where(ps ...predicate.Node) *NodeUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (nuo *NodeUpdateOne) Select(field string, fields ...string) *NodeUpdateOne {
-	nuo.fields = append([]string{field}, fields...)
-	return nuo
+func (u *NodeUpdateOne) Select(field string, fields ...string) *NodeUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated Node entity.
-func (nuo *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
-	nuo.defaults()
-	return withHooks(ctx, nuo.gremlinSave, nuo.mutation, nuo.hooks)
+func (u *NodeUpdateOne) Save(ctx context.Context) (*Node, error) {
+	u.defaults()
+	return withHooks(ctx, u.gremlinSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (nuo *NodeUpdateOne) SaveX(ctx context.Context) *Node {
-	node, err := nuo.Save(ctx)
+func (u *NodeUpdateOne) SaveX(ctx context.Context) *Node {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -379,48 +379,48 @@ func (nuo *NodeUpdateOne) SaveX(ctx context.Context) *Node {
 }
 
 // Exec executes the query on the entity.
-func (nuo *NodeUpdateOne) Exec(ctx context.Context) error {
-	_, err := nuo.Save(ctx)
+func (u *NodeUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (nuo *NodeUpdateOne) ExecX(ctx context.Context) {
-	if err := nuo.Exec(ctx); err != nil {
+func (u *NodeUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (nuo *NodeUpdateOne) defaults() {
-	if _, ok := nuo.mutation.UpdatedAt(); !ok && !nuo.mutation.UpdatedAtCleared() {
+func (u *NodeUpdateOne) defaults() {
+	if _, ok := u.mutation.UpdatedAt(); !ok && !u.mutation.UpdatedAtCleared() {
 		v := node.UpdateDefaultUpdatedAt()
-		nuo.mutation.SetUpdatedAt(v)
+		u.mutation.SetUpdatedAt(v)
 	}
 }
 
-func (nuo *NodeUpdateOne) gremlinSave(ctx context.Context) (*Node, error) {
+func (u *NodeUpdateOne) gremlinSave(ctx context.Context) (*Node, error) {
 	res := &gremlin.Response{}
-	id, ok := nuo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Node.id" for update`)}
 	}
-	query, bindings := nuo.gremlin(id).Query()
-	if err := nuo.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := u.gremlin(id).Query()
+	if err := u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	nuo.mutation.done = true
-	n := &Node{config: nuo.config}
-	if err := n.FromResponse(res); err != nil {
+	u.mutation.done = true
+	m := &Node{config: u.config}
+	if err := m.FromResponse(res); err != nil {
 		return nil, err
 	}
-	return n, nil
+	return m, nil
 }
 
-func (nuo *NodeUpdateOne) gremlin(id string) *dsl.Traversal {
+func (u *NodeUpdateOne) gremlin(id string) *dsl.Traversal {
 	type constraint struct {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
@@ -433,51 +433,51 @@ func (nuo *NodeUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value, ok := nuo.mutation.Value(); ok {
+	if value, ok := u.mutation.Value(); ok {
 		v.Property(dsl.Single, node.FieldValue, value)
 	}
-	if value, ok := nuo.mutation.AddedValue(); ok {
+	if value, ok := u.mutation.AddedValue(); ok {
 		v.Property(dsl.Single, node.FieldValue, __.Union(__.Values(node.FieldValue), __.Constant(value)).Sum())
 	}
-	if value, ok := nuo.mutation.UpdatedAt(); ok {
+	if value, ok := u.mutation.UpdatedAt(); ok {
 		v.Property(dsl.Single, node.FieldUpdatedAt, value)
 	}
 	var properties []any
-	if nuo.mutation.ValueCleared() {
+	if u.mutation.ValueCleared() {
 		properties = append(properties, node.FieldValue)
 	}
-	if nuo.mutation.UpdatedAtCleared() {
+	if u.mutation.UpdatedAtCleared() {
 		properties = append(properties, node.FieldUpdatedAt)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
 	}
-	if nuo.mutation.PrevCleared() {
+	if u.mutation.PrevCleared() {
 		tr := rv.Clone().InE(node.NextLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for _, id := range nuo.mutation.PrevIDs() {
+	for _, id := range u.mutation.PrevIDs() {
 		v.AddE(node.NextLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(node.NextLabel).OutV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(node.Label, node.NextLabel, id)),
 		})
 	}
-	if nuo.mutation.NextCleared() {
+	if u.mutation.NextCleared() {
 		tr := rv.Clone().OutE(node.NextLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for _, id := range nuo.mutation.NextIDs() {
+	for _, id := range u.mutation.NextIDs() {
 		v.AddE(node.NextLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(node.NextLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(node.Label, node.NextLabel, id)),
 		})
 	}
-	if len(nuo.fields) > 0 {
-		fields := make([]any, 0, len(nuo.fields)+1)
+	if len(u.fields) > 0 {
+		fields := make([]any, 0, len(u.fields)+1)
 		fields = append(fields, true)
-		for _, f := range nuo.fields {
+		for _, f := range u.fields {
 			fields = append(fields, f)
 		}
 		v.ValueMap(fields...)

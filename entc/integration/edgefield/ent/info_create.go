@@ -26,49 +26,49 @@ type InfoCreate struct {
 }
 
 // SetContent sets the "content" field.
-func (ic *InfoCreate) SetContent(jm json.RawMessage) *InfoCreate {
-	ic.mutation.SetContent(jm)
-	return ic
+func (m *InfoCreate) SetContent(v json.RawMessage) *InfoCreate {
+	m.mutation.SetContent(v)
+	return m
 }
 
 // SetID sets the "id" field.
-func (ic *InfoCreate) SetID(i int) *InfoCreate {
-	ic.mutation.SetID(i)
-	return ic
+func (m *InfoCreate) SetID(v int) *InfoCreate {
+	m.mutation.SetID(v)
+	return m
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (ic *InfoCreate) SetUserID(id int) *InfoCreate {
-	ic.mutation.SetUserID(id)
-	return ic
+func (m *InfoCreate) SetUserID(id int) *InfoCreate {
+	m.mutation.SetUserID(id)
+	return m
 }
 
 // SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (ic *InfoCreate) SetNillableUserID(id *int) *InfoCreate {
+func (m *InfoCreate) SetNillableUserID(id *int) *InfoCreate {
 	if id != nil {
-		ic = ic.SetUserID(*id)
+		m = m.SetUserID(*id)
 	}
-	return ic
+	return m
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (ic *InfoCreate) SetUser(u *User) *InfoCreate {
-	return ic.SetUserID(u.ID)
+func (m *InfoCreate) SetUser(v *User) *InfoCreate {
+	return m.SetUserID(v.ID)
 }
 
 // Mutation returns the InfoMutation object of the builder.
-func (ic *InfoCreate) Mutation() *InfoMutation {
-	return ic.mutation
+func (m *InfoCreate) Mutation() *InfoMutation {
+	return m.mutation
 }
 
 // Save creates the Info in the database.
-func (ic *InfoCreate) Save(ctx context.Context) (*Info, error) {
-	return withHooks(ctx, ic.sqlSave, ic.mutation, ic.hooks)
+func (c *InfoCreate) Save(ctx context.Context) (*Info, error) {
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (ic *InfoCreate) SaveX(ctx context.Context) *Info {
-	v, err := ic.Save(ctx)
+func (c *InfoCreate) SaveX(ctx context.Context) *Info {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -76,32 +76,32 @@ func (ic *InfoCreate) SaveX(ctx context.Context) *Info {
 }
 
 // Exec executes the query.
-func (ic *InfoCreate) Exec(ctx context.Context) error {
-	_, err := ic.Save(ctx)
+func (c *InfoCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ic *InfoCreate) ExecX(ctx context.Context) {
-	if err := ic.Exec(ctx); err != nil {
+func (c *InfoCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ic *InfoCreate) check() error {
-	if _, ok := ic.mutation.Content(); !ok {
+func (c *InfoCreate) check() error {
+	if _, ok := c.mutation.Content(); !ok {
 		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "Info.content"`)}
 	}
 	return nil
 }
 
-func (ic *InfoCreate) sqlSave(ctx context.Context) (*Info, error) {
-	if err := ic.check(); err != nil {
+func (c *InfoCreate) sqlSave(ctx context.Context) (*Info, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := ic.createSpec()
-	if err := sqlgraph.CreateNode(ctx, ic.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -111,25 +111,25 @@ func (ic *InfoCreate) sqlSave(ctx context.Context) (*Info, error) {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int(id)
 	}
-	ic.mutation.id = &_node.ID
-	ic.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (ic *InfoCreate) createSpec() (*Info, *sqlgraph.CreateSpec) {
+func (c *InfoCreate) createSpec() (*Info, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Info{config: ic.config}
+		_node = &Info{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(info.Table, sqlgraph.NewFieldSpec(info.FieldID, field.TypeInt))
 	)
-	if id, ok := ic.mutation.ID(); ok {
+	if id, ok := c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := ic.mutation.Content(); ok {
+	if value, ok := c.mutation.Content(); ok {
 		_spec.SetField(info.FieldContent, field.TypeJSON, value)
 		_node.Content = value
 	}
-	if nodes := ic.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -157,16 +157,16 @@ type InfoCreateBulk struct {
 }
 
 // Save creates the Info entities in the database.
-func (icb *InfoCreateBulk) Save(ctx context.Context) ([]*Info, error) {
-	if icb.err != nil {
-		return nil, icb.err
+func (c *InfoCreateBulk) Save(ctx context.Context) ([]*Info, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(icb.builders))
-	nodes := make([]*Info, len(icb.builders))
-	mutators := make([]Mutator, len(icb.builders))
-	for i := range icb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Info, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := icb.builders[i]
+			builder := c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*InfoMutation)
 				if !ok {
@@ -179,11 +179,11 @@ func (icb *InfoCreateBulk) Save(ctx context.Context) ([]*Info, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, icb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, icb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -207,7 +207,7 @@ func (icb *InfoCreateBulk) Save(ctx context.Context) ([]*Info, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, icb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -215,8 +215,8 @@ func (icb *InfoCreateBulk) Save(ctx context.Context) ([]*Info, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (icb *InfoCreateBulk) SaveX(ctx context.Context) []*Info {
-	v, err := icb.Save(ctx)
+func (c *InfoCreateBulk) SaveX(ctx context.Context) []*Info {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -224,14 +224,14 @@ func (icb *InfoCreateBulk) SaveX(ctx context.Context) []*Info {
 }
 
 // Exec executes the query.
-func (icb *InfoCreateBulk) Exec(ctx context.Context) error {
-	_, err := icb.Save(ctx)
+func (c *InfoCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (icb *InfoCreateBulk) ExecX(ctx context.Context) {
-	if err := icb.Exec(ctx); err != nil {
+func (c *InfoCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

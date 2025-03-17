@@ -26,69 +26,69 @@ type FriendshipCreate struct {
 }
 
 // SetWeight sets the "weight" field.
-func (fc *FriendshipCreate) SetWeight(i int) *FriendshipCreate {
-	fc.mutation.SetWeight(i)
-	return fc
+func (m *FriendshipCreate) SetWeight(v int) *FriendshipCreate {
+	m.mutation.SetWeight(v)
+	return m
 }
 
 // SetNillableWeight sets the "weight" field if the given value is not nil.
-func (fc *FriendshipCreate) SetNillableWeight(i *int) *FriendshipCreate {
-	if i != nil {
-		fc.SetWeight(*i)
+func (m *FriendshipCreate) SetNillableWeight(v *int) *FriendshipCreate {
+	if v != nil {
+		m.SetWeight(*v)
 	}
-	return fc
+	return m
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (fc *FriendshipCreate) SetCreatedAt(t time.Time) *FriendshipCreate {
-	fc.mutation.SetCreatedAt(t)
-	return fc
+func (m *FriendshipCreate) SetCreatedAt(v time.Time) *FriendshipCreate {
+	m.mutation.SetCreatedAt(v)
+	return m
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (fc *FriendshipCreate) SetNillableCreatedAt(t *time.Time) *FriendshipCreate {
-	if t != nil {
-		fc.SetCreatedAt(*t)
+func (m *FriendshipCreate) SetNillableCreatedAt(v *time.Time) *FriendshipCreate {
+	if v != nil {
+		m.SetCreatedAt(*v)
 	}
-	return fc
+	return m
 }
 
 // SetUserID sets the "user_id" field.
-func (fc *FriendshipCreate) SetUserID(i int) *FriendshipCreate {
-	fc.mutation.SetUserID(i)
-	return fc
+func (m *FriendshipCreate) SetUserID(v int) *FriendshipCreate {
+	m.mutation.SetUserID(v)
+	return m
 }
 
 // SetFriendID sets the "friend_id" field.
-func (fc *FriendshipCreate) SetFriendID(i int) *FriendshipCreate {
-	fc.mutation.SetFriendID(i)
-	return fc
+func (m *FriendshipCreate) SetFriendID(v int) *FriendshipCreate {
+	m.mutation.SetFriendID(v)
+	return m
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (fc *FriendshipCreate) SetUser(u *User) *FriendshipCreate {
-	return fc.SetUserID(u.ID)
+func (m *FriendshipCreate) SetUser(v *User) *FriendshipCreate {
+	return m.SetUserID(v.ID)
 }
 
 // SetFriend sets the "friend" edge to the User entity.
-func (fc *FriendshipCreate) SetFriend(u *User) *FriendshipCreate {
-	return fc.SetFriendID(u.ID)
+func (m *FriendshipCreate) SetFriend(v *User) *FriendshipCreate {
+	return m.SetFriendID(v.ID)
 }
 
 // Mutation returns the FriendshipMutation object of the builder.
-func (fc *FriendshipCreate) Mutation() *FriendshipMutation {
-	return fc.mutation
+func (m *FriendshipCreate) Mutation() *FriendshipMutation {
+	return m.mutation
 }
 
 // Save creates the Friendship in the database.
-func (fc *FriendshipCreate) Save(ctx context.Context) (*Friendship, error) {
-	fc.defaults()
-	return withHooks(ctx, fc.sqlSave, fc.mutation, fc.hooks)
+func (c *FriendshipCreate) Save(ctx context.Context) (*Friendship, error) {
+	c.defaults()
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (fc *FriendshipCreate) SaveX(ctx context.Context) *Friendship {
-	v, err := fc.Save(ctx)
+func (c *FriendshipCreate) SaveX(ctx context.Context) *Friendship {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -96,59 +96,59 @@ func (fc *FriendshipCreate) SaveX(ctx context.Context) *Friendship {
 }
 
 // Exec executes the query.
-func (fc *FriendshipCreate) Exec(ctx context.Context) error {
-	_, err := fc.Save(ctx)
+func (c *FriendshipCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (fc *FriendshipCreate) ExecX(ctx context.Context) {
-	if err := fc.Exec(ctx); err != nil {
+func (c *FriendshipCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (fc *FriendshipCreate) defaults() {
-	if _, ok := fc.mutation.Weight(); !ok {
+func (c *FriendshipCreate) defaults() {
+	if _, ok := c.mutation.Weight(); !ok {
 		v := friendship.DefaultWeight
-		fc.mutation.SetWeight(v)
+		c.mutation.SetWeight(v)
 	}
-	if _, ok := fc.mutation.CreatedAt(); !ok {
+	if _, ok := c.mutation.CreatedAt(); !ok {
 		v := friendship.DefaultCreatedAt()
-		fc.mutation.SetCreatedAt(v)
+		c.mutation.SetCreatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (fc *FriendshipCreate) check() error {
-	if _, ok := fc.mutation.Weight(); !ok {
+func (c *FriendshipCreate) check() error {
+	if _, ok := c.mutation.Weight(); !ok {
 		return &ValidationError{Name: "weight", err: errors.New(`versioned: missing required field "Friendship.weight"`)}
 	}
-	if _, ok := fc.mutation.CreatedAt(); !ok {
+	if _, ok := c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`versioned: missing required field "Friendship.created_at"`)}
 	}
-	if _, ok := fc.mutation.UserID(); !ok {
+	if _, ok := c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`versioned: missing required field "Friendship.user_id"`)}
 	}
-	if _, ok := fc.mutation.FriendID(); !ok {
+	if _, ok := c.mutation.FriendID(); !ok {
 		return &ValidationError{Name: "friend_id", err: errors.New(`versioned: missing required field "Friendship.friend_id"`)}
 	}
-	if len(fc.mutation.UserIDs()) == 0 {
+	if len(c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`versioned: missing required edge "Friendship.user"`)}
 	}
-	if len(fc.mutation.FriendIDs()) == 0 {
+	if len(c.mutation.FriendIDs()) == 0 {
 		return &ValidationError{Name: "friend", err: errors.New(`versioned: missing required edge "Friendship.friend"`)}
 	}
 	return nil
 }
 
-func (fc *FriendshipCreate) sqlSave(ctx context.Context) (*Friendship, error) {
-	if err := fc.check(); err != nil {
+func (c *FriendshipCreate) sqlSave(ctx context.Context) (*Friendship, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := fc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, fc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -156,26 +156,26 @@ func (fc *FriendshipCreate) sqlSave(ctx context.Context) (*Friendship, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	fc.mutation.id = &_node.ID
-	fc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (fc *FriendshipCreate) createSpec() (*Friendship, *sqlgraph.CreateSpec) {
+func (c *FriendshipCreate) createSpec() (*Friendship, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Friendship{config: fc.config}
+		_node = &Friendship{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(friendship.Table, sqlgraph.NewFieldSpec(friendship.FieldID, field.TypeInt))
 	)
-	_spec.Schema = fc.schemaConfig.Friendship
-	if value, ok := fc.mutation.Weight(); ok {
+	_spec.Schema = c.schemaConfig.Friendship
+	if value, ok := c.mutation.Weight(); ok {
 		_spec.SetField(friendship.FieldWeight, field.TypeInt, value)
 		_node.Weight = value
 	}
-	if value, ok := fc.mutation.CreatedAt(); ok {
+	if value, ok := c.mutation.CreatedAt(); ok {
 		_spec.SetField(friendship.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if nodes := fc.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -186,14 +186,14 @@ func (fc *FriendshipCreate) createSpec() (*Friendship, *sqlgraph.CreateSpec) {
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
-		edge.Schema = fc.schemaConfig.Friendship
+		edge.Schema = c.schemaConfig.Friendship
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := fc.mutation.FriendIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.FriendIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -204,7 +204,7 @@ func (fc *FriendshipCreate) createSpec() (*Friendship, *sqlgraph.CreateSpec) {
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
-		edge.Schema = fc.schemaConfig.Friendship
+		edge.Schema = c.schemaConfig.Friendship
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
@@ -222,16 +222,16 @@ type FriendshipCreateBulk struct {
 }
 
 // Save creates the Friendship entities in the database.
-func (fcb *FriendshipCreateBulk) Save(ctx context.Context) ([]*Friendship, error) {
-	if fcb.err != nil {
-		return nil, fcb.err
+func (c *FriendshipCreateBulk) Save(ctx context.Context) ([]*Friendship, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(fcb.builders))
-	nodes := make([]*Friendship, len(fcb.builders))
-	mutators := make([]Mutator, len(fcb.builders))
-	for i := range fcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Friendship, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := fcb.builders[i]
+			builder := c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*FriendshipMutation)
@@ -245,11 +245,11 @@ func (fcb *FriendshipCreateBulk) Save(ctx context.Context) ([]*Friendship, error
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, fcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, fcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -273,7 +273,7 @@ func (fcb *FriendshipCreateBulk) Save(ctx context.Context) ([]*Friendship, error
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, fcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -281,8 +281,8 @@ func (fcb *FriendshipCreateBulk) Save(ctx context.Context) ([]*Friendship, error
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (fcb *FriendshipCreateBulk) SaveX(ctx context.Context) []*Friendship {
-	v, err := fcb.Save(ctx)
+func (c *FriendshipCreateBulk) SaveX(ctx context.Context) []*Friendship {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -290,14 +290,14 @@ func (fcb *FriendshipCreateBulk) SaveX(ctx context.Context) []*Friendship {
 }
 
 // Exec executes the query.
-func (fcb *FriendshipCreateBulk) Exec(ctx context.Context) error {
-	_, err := fcb.Save(ctx)
+func (c *FriendshipCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (fcb *FriendshipCreateBulk) ExecX(ctx context.Context) {
-	if err := fcb.Exec(ctx); err != nil {
+func (c *FriendshipCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

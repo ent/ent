@@ -86,9 +86,9 @@ func (*UserTweet) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the UserTweet fields.
-func (ut *UserTweet) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *UserTweet) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -97,27 +97,27 @@ func (ut *UserTweet) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			ut.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case usertweet.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				ut.CreatedAt = value.Time
+				m.CreatedAt = value.Time
 			}
 		case usertweet.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				ut.UserID = int(value.Int64)
+				m.UserID = int(value.Int64)
 			}
 		case usertweet.FieldTweetID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field tweet_id", values[i])
 			} else if value.Valid {
-				ut.TweetID = int(value.Int64)
+				m.TweetID = int(value.Int64)
 			}
 		default:
-			ut.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -125,51 +125,51 @@ func (ut *UserTweet) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the UserTweet.
 // This includes values selected through modifiers, order, etc.
-func (ut *UserTweet) Value(name string) (ent.Value, error) {
-	return ut.selectValues.Get(name)
+func (m *UserTweet) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryUser queries the "user" edge of the UserTweet entity.
-func (ut *UserTweet) QueryUser() *UserQuery {
-	return NewUserTweetClient(ut.config).QueryUser(ut)
+func (m *UserTweet) QueryUser() *UserQuery {
+	return NewUserTweetClient(m.config).QueryUser(m)
 }
 
 // QueryTweet queries the "tweet" edge of the UserTweet entity.
-func (ut *UserTweet) QueryTweet() *TweetQuery {
-	return NewUserTweetClient(ut.config).QueryTweet(ut)
+func (m *UserTweet) QueryTweet() *TweetQuery {
+	return NewUserTweetClient(m.config).QueryTweet(m)
 }
 
 // Update returns a builder for updating this UserTweet.
 // Note that you need to call UserTweet.Unwrap() before calling this method if this UserTweet
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (ut *UserTweet) Update() *UserTweetUpdateOne {
-	return NewUserTweetClient(ut.config).UpdateOne(ut)
+func (m *UserTweet) Update() *UserTweetUpdateOne {
+	return NewUserTweetClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the UserTweet entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (ut *UserTweet) Unwrap() *UserTweet {
-	_tx, ok := ut.config.driver.(*txDriver)
+func (m *UserTweet) Unwrap() *UserTweet {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: UserTweet is not a transactional entity")
 	}
-	ut.config.driver = _tx.drv
-	return ut
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (ut *UserTweet) String() string {
+func (m *UserTweet) String() string {
 	var builder strings.Builder
 	builder.WriteString("UserTweet(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", ut.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("created_at=")
-	builder.WriteString(ut.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", ut.UserID))
+	builder.WriteString(fmt.Sprintf("%v", m.UserID))
 	builder.WriteString(", ")
 	builder.WriteString("tweet_id=")
-	builder.WriteString(fmt.Sprintf("%v", ut.TweetID))
+	builder.WriteString(fmt.Sprintf("%v", m.TweetID))
 	builder.WriteByte(')')
 	return builder.String()
 }

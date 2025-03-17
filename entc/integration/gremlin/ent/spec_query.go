@@ -34,44 +34,45 @@ type SpecQuery struct {
 }
 
 // Where adds a new predicate for the SpecQuery builder.
-func (sq *SpecQuery) Where(ps ...predicate.Spec) *SpecQuery {
-	sq.predicates = append(sq.predicates, ps...)
-	return sq
+func (q *SpecQuery) Where(ps ...predicate.Spec) *SpecQuery {
+	q.predicates = append(q.predicates, ps...)
+	return q
 }
 
 // Limit the number of records to be returned by this query.
-func (sq *SpecQuery) Limit(limit int) *SpecQuery {
-	sq.ctx.Limit = &limit
-	return sq
+func (q *SpecQuery) Limit(limit int) *SpecQuery {
+	q.ctx.Limit = &limit
+	return q
 }
 
 // Offset to start from.
-func (sq *SpecQuery) Offset(offset int) *SpecQuery {
-	sq.ctx.Offset = &offset
-	return sq
+func (q *SpecQuery) Offset(offset int) *SpecQuery {
+	q.ctx.Offset = &offset
+	return q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (sq *SpecQuery) Unique(unique bool) *SpecQuery {
-	sq.ctx.Unique = &unique
-	return sq
+func (q *SpecQuery) Unique(unique bool) *SpecQuery {
+	q.ctx.Unique = &unique
+	return q
 }
 
 // Order specifies how the records should be ordered.
-func (sq *SpecQuery) Order(o ...spec.OrderOption) *SpecQuery {
-	sq.order = append(sq.order, o...)
-	return sq
+func (q *SpecQuery) Order(o ...spec.OrderOption) *SpecQuery {
+	q.order = append(q.order, o...)
+	return q
 }
 
 // QueryCard chains the current query on the "card" edge.
-func (sq *SpecQuery) QueryCard() *CardQuery {
-	query := (&CardClient{config: sq.config}).Query()
+func (q *SpecQuery) QueryCard() *CardQuery {
+	query := (&CardClient{config: q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
-		if err := sq.prepareQuery(ctx); err != nil {
+		if err := q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := sq.gremlinQuery(ctx)
+
+		gremlin := q.gremlinQuery(ctx)
 		fromU = gremlin.OutE(spec.CardLabel).InV()
 		return fromU, nil
 	}
@@ -80,8 +81,8 @@ func (sq *SpecQuery) QueryCard() *CardQuery {
 
 // First returns the first Spec entity from the query.
 // Returns a *NotFoundError when no Spec was found.
-func (sq *SpecQuery) First(ctx context.Context) (*Spec, error) {
-	nodes, err := sq.Limit(1).All(setContextOp(ctx, sq.ctx, ent.OpQueryFirst))
+func (q *SpecQuery) First(ctx context.Context) (*Spec, error) {
+	nodes, err := q.Limit(1).All(setContextOp(ctx, q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -92,8 +93,8 @@ func (sq *SpecQuery) First(ctx context.Context) (*Spec, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (sq *SpecQuery) FirstX(ctx context.Context) *Spec {
-	node, err := sq.First(ctx)
+func (q *SpecQuery) FirstX(ctx context.Context) *Spec {
+	node, err := q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -102,9 +103,9 @@ func (sq *SpecQuery) FirstX(ctx context.Context) *Spec {
 
 // FirstID returns the first Spec ID from the query.
 // Returns a *NotFoundError when no Spec ID was found.
-func (sq *SpecQuery) FirstID(ctx context.Context) (id string, err error) {
+func (q *SpecQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = sq.Limit(1).IDs(setContextOp(ctx, sq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = q.Limit(1).IDs(setContextOp(ctx, q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -115,8 +116,8 @@ func (sq *SpecQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (sq *SpecQuery) FirstIDX(ctx context.Context) string {
-	id, err := sq.FirstID(ctx)
+func (q *SpecQuery) FirstIDX(ctx context.Context) string {
+	id, err := q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -126,8 +127,8 @@ func (sq *SpecQuery) FirstIDX(ctx context.Context) string {
 // Only returns a single Spec entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Spec entity is found.
 // Returns a *NotFoundError when no Spec entities are found.
-func (sq *SpecQuery) Only(ctx context.Context) (*Spec, error) {
-	nodes, err := sq.Limit(2).All(setContextOp(ctx, sq.ctx, ent.OpQueryOnly))
+func (q *SpecQuery) Only(ctx context.Context) (*Spec, error) {
+	nodes, err := q.Limit(2).All(setContextOp(ctx, q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -142,8 +143,8 @@ func (sq *SpecQuery) Only(ctx context.Context) (*Spec, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (sq *SpecQuery) OnlyX(ctx context.Context) *Spec {
-	node, err := sq.Only(ctx)
+func (q *SpecQuery) OnlyX(ctx context.Context) *Spec {
+	node, err := q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -153,9 +154,9 @@ func (sq *SpecQuery) OnlyX(ctx context.Context) *Spec {
 // OnlyID is like Only, but returns the only Spec ID in the query.
 // Returns a *NotSingularError when more than one Spec ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (sq *SpecQuery) OnlyID(ctx context.Context) (id string, err error) {
+func (q *SpecQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = sq.Limit(2).IDs(setContextOp(ctx, sq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = q.Limit(2).IDs(setContextOp(ctx, q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -170,8 +171,8 @@ func (sq *SpecQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (sq *SpecQuery) OnlyIDX(ctx context.Context) string {
-	id, err := sq.OnlyID(ctx)
+func (q *SpecQuery) OnlyIDX(ctx context.Context) string {
+	id, err := q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -179,18 +180,18 @@ func (sq *SpecQuery) OnlyIDX(ctx context.Context) string {
 }
 
 // All executes the query and returns a list of Specs.
-func (sq *SpecQuery) All(ctx context.Context) ([]*Spec, error) {
-	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryAll)
-	if err := sq.prepareQuery(ctx); err != nil {
+func (q *SpecQuery) All(ctx context.Context) ([]*Spec, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryAll)
+	if err := q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Spec, *SpecQuery]()
-	return withInterceptors[[]*Spec](ctx, sq, qr, sq.inters)
+	return withInterceptors[[]*Spec](ctx, q, qr, q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (sq *SpecQuery) AllX(ctx context.Context) []*Spec {
-	nodes, err := sq.All(ctx)
+func (q *SpecQuery) AllX(ctx context.Context) []*Spec {
+	nodes, err := q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -198,20 +199,20 @@ func (sq *SpecQuery) AllX(ctx context.Context) []*Spec {
 }
 
 // IDs executes the query and returns a list of Spec IDs.
-func (sq *SpecQuery) IDs(ctx context.Context) (ids []string, err error) {
-	if sq.ctx.Unique == nil && sq.path != nil {
-		sq.Unique(true)
+func (q *SpecQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if q.ctx.Unique == nil && q.path != nil {
+		q.Unique(true)
 	}
-	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryIDs)
-	if err = sq.Select(spec.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryIDs)
+	if err = q.Select(spec.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (sq *SpecQuery) IDsX(ctx context.Context) []string {
-	ids, err := sq.IDs(ctx)
+func (q *SpecQuery) IDsX(ctx context.Context) []string {
+	ids, err := q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -219,17 +220,17 @@ func (sq *SpecQuery) IDsX(ctx context.Context) []string {
 }
 
 // Count returns the count of the given query.
-func (sq *SpecQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryCount)
-	if err := sq.prepareQuery(ctx); err != nil {
+func (q *SpecQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryCount)
+	if err := q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, sq, querierCount[*SpecQuery](), sq.inters)
+	return withInterceptors[int](ctx, q, querierCount[*SpecQuery](), q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (sq *SpecQuery) CountX(ctx context.Context) int {
-	count, err := sq.Count(ctx)
+func (q *SpecQuery) CountX(ctx context.Context) int {
+	count, err := q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -237,9 +238,9 @@ func (sq *SpecQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (sq *SpecQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryExist)
-	switch _, err := sq.FirstID(ctx); {
+func (q *SpecQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryExist)
+	switch _, err := q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -250,8 +251,8 @@ func (sq *SpecQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (sq *SpecQuery) ExistX(ctx context.Context) bool {
-	exist, err := sq.Exist(ctx)
+func (q *SpecQuery) ExistX(ctx context.Context) bool {
+	exist, err := q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -260,40 +261,40 @@ func (sq *SpecQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the SpecQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (sq *SpecQuery) Clone() *SpecQuery {
-	if sq == nil {
+func (q *SpecQuery) Clone() *SpecQuery {
+	if q == nil {
 		return nil
 	}
 	return &SpecQuery{
-		config:     sq.config,
-		ctx:        sq.ctx.Clone(),
-		order:      append([]spec.OrderOption{}, sq.order...),
-		inters:     append([]Interceptor{}, sq.inters...),
-		predicates: append([]predicate.Spec{}, sq.predicates...),
-		withCard:   sq.withCard.Clone(),
+		config:     q.config,
+		ctx:        q.ctx.Clone(),
+		order:      append([]spec.OrderOption{}, q.order...),
+		inters:     append([]Interceptor{}, q.inters...),
+		predicates: append([]predicate.Spec{}, q.predicates...),
+		withCard:   q.withCard.Clone(),
 		// clone intermediate query.
-		gremlin: sq.gremlin.Clone(),
-		path:    sq.path,
+		gremlin: q.gremlin.Clone(),
+		path:    q.path,
 	}
 }
 
 // WithCard tells the query-builder to eager-load the nodes that are connected to
 // the "card" edge. The optional arguments are used to configure the query builder of the edge.
-func (sq *SpecQuery) WithCard(opts ...func(*CardQuery)) *SpecQuery {
-	query := (&CardClient{config: sq.config}).Query()
+func (q *SpecQuery) WithCard(opts ...func(*CardQuery)) *SpecQuery {
+	query := (&CardClient{config: q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	sq.withCard = query
-	return sq
+	q.withCard = query
+	return q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
-func (sq *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
-	sq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &SpecGroupBy{build: sq}
-	grbuild.flds = &sq.ctx.Fields
+func (q *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
+	q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &SpecGroupBy{build: q}
+	grbuild.flds = &q.ctx.Fields
 	grbuild.label = spec.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -301,46 +302,46 @@ func (sq *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (sq *SpecQuery) Select(fields ...string) *SpecSelect {
-	sq.ctx.Fields = append(sq.ctx.Fields, fields...)
-	sbuild := &SpecSelect{SpecQuery: sq}
+func (q *SpecQuery) Select(fields ...string) *SpecSelect {
+	q.ctx.Fields = append(q.ctx.Fields, fields...)
+	sbuild := &SpecSelect{SpecQuery: q}
 	sbuild.label = spec.Label
-	sbuild.flds, sbuild.scan = &sq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a SpecSelect configured with the given aggregations.
-func (sq *SpecQuery) Aggregate(fns ...AggregateFunc) *SpecSelect {
-	return sq.Select().Aggregate(fns...)
+func (q *SpecQuery) Aggregate(fns ...AggregateFunc) *SpecSelect {
+	return q.Select().Aggregate(fns...)
 }
 
-func (sq *SpecQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range sq.inters {
+func (q *SpecQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, sq); err != nil {
+			if err := trv.Traverse(ctx, q); err != nil {
 				return err
 			}
 		}
 	}
-	if sq.path != nil {
-		prev, err := sq.path(ctx)
+	if q.path != nil {
+		prev, err := q.path(ctx)
 		if err != nil {
 			return err
 		}
-		sq.gremlin = prev
+		q.gremlin = prev
 	}
 	return nil
 }
 
-func (sq *SpecQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Spec, error) {
+func (q *SpecQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Spec, error) {
 	res := &gremlin.Response{}
-	traversal := sq.gremlinQuery(ctx)
-	if len(sq.ctx.Fields) > 0 {
-		fields := make([]any, len(sq.ctx.Fields))
-		for i, f := range sq.ctx.Fields {
+	traversal := q.gremlinQuery(ctx)
+	if len(q.ctx.Fields) > 0 {
+		fields := make([]any, len(q.ctx.Fields))
+		for i, f := range q.ctx.Fields {
 			fields[i] = f
 		}
 		traversal.ValueMap(fields...)
@@ -348,43 +349,43 @@ func (sq *SpecQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Spe
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := sq.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
-	var sSlice Specs
-	if err := sSlice.FromResponse(res); err != nil {
+	var results Specs
+	if err := results.FromResponse(res); err != nil {
 		return nil, err
 	}
-	for i := range sSlice {
-		sSlice[i].config = sq.config
+	for i := range results {
+		results[i].config = q.config
 	}
-	return sSlice, nil
+	return results, nil
 }
 
-func (sq *SpecQuery) gremlinCount(ctx context.Context) (int, error) {
+func (q *SpecQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := sq.gremlinQuery(ctx).Count().Query()
-	if err := sq.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := q.gremlinQuery(ctx).Count().Query()
+	if err := q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
 }
 
-func (sq *SpecQuery) gremlinQuery(context.Context) *dsl.Traversal {
+func (q *SpecQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(spec.Label)
-	if sq.gremlin != nil {
-		v = sq.gremlin.Clone()
+	if q.gremlin != nil {
+		v = q.gremlin.Clone()
 	}
-	for _, p := range sq.predicates {
+	for _, p := range q.predicates {
 		p(v)
 	}
-	if len(sq.order) > 0 {
+	if len(q.order) > 0 {
 		v.Order()
-		for _, p := range sq.order {
+		for _, p := range q.order {
 			p(v)
 		}
 	}
-	switch limit, offset := sq.ctx.Limit, sq.ctx.Offset; {
+	switch limit, offset := q.ctx.Limit, q.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset+*limit)
 	case offset != nil:
@@ -392,7 +393,7 @@ func (sq *SpecQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := sq.ctx.Unique; unique == nil || *unique {
+	if unique := q.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v

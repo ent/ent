@@ -25,92 +25,92 @@ type MetadataCreate struct {
 }
 
 // SetAge sets the "age" field.
-func (mc *MetadataCreate) SetAge(i int) *MetadataCreate {
-	mc.mutation.SetAge(i)
-	return mc
+func (m *MetadataCreate) SetAge(v int) *MetadataCreate {
+	m.mutation.SetAge(v)
+	return m
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (mc *MetadataCreate) SetNillableAge(i *int) *MetadataCreate {
-	if i != nil {
-		mc.SetAge(*i)
+func (m *MetadataCreate) SetNillableAge(v *int) *MetadataCreate {
+	if v != nil {
+		m.SetAge(*v)
 	}
-	return mc
+	return m
 }
 
 // SetParentID sets the "parent_id" field.
-func (mc *MetadataCreate) SetParentID(i int) *MetadataCreate {
-	mc.mutation.SetParentID(i)
-	return mc
+func (m *MetadataCreate) SetParentID(v int) *MetadataCreate {
+	m.mutation.SetParentID(v)
+	return m
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (mc *MetadataCreate) SetNillableParentID(i *int) *MetadataCreate {
-	if i != nil {
-		mc.SetParentID(*i)
+func (m *MetadataCreate) SetNillableParentID(v *int) *MetadataCreate {
+	if v != nil {
+		m.SetParentID(*v)
 	}
-	return mc
+	return m
 }
 
 // SetID sets the "id" field.
-func (mc *MetadataCreate) SetID(i int) *MetadataCreate {
-	mc.mutation.SetID(i)
-	return mc
+func (m *MetadataCreate) SetID(v int) *MetadataCreate {
+	m.mutation.SetID(v)
+	return m
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
-func (mc *MetadataCreate) SetUserID(id int) *MetadataCreate {
-	mc.mutation.SetUserID(id)
-	return mc
+func (m *MetadataCreate) SetUserID(id int) *MetadataCreate {
+	m.mutation.SetUserID(id)
+	return m
 }
 
 // SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (mc *MetadataCreate) SetNillableUserID(id *int) *MetadataCreate {
+func (m *MetadataCreate) SetNillableUserID(id *int) *MetadataCreate {
 	if id != nil {
-		mc = mc.SetUserID(*id)
+		m = m.SetUserID(*id)
 	}
-	return mc
+	return m
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (mc *MetadataCreate) SetUser(u *User) *MetadataCreate {
-	return mc.SetUserID(u.ID)
+func (m *MetadataCreate) SetUser(v *User) *MetadataCreate {
+	return m.SetUserID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the Metadata entity by IDs.
-func (mc *MetadataCreate) AddChildIDs(ids ...int) *MetadataCreate {
-	mc.mutation.AddChildIDs(ids...)
-	return mc
+func (m *MetadataCreate) AddChildIDs(ids ...int) *MetadataCreate {
+	m.mutation.AddChildIDs(ids...)
+	return m
 }
 
 // AddChildren adds the "children" edges to the Metadata entity.
-func (mc *MetadataCreate) AddChildren(m ...*Metadata) *MetadataCreate {
-	ids := make([]int, len(m))
-	for i := range m {
-		ids[i] = m[i].ID
+func (m *MetadataCreate) AddChildren(v ...*Metadata) *MetadataCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return mc.AddChildIDs(ids...)
+	return m.AddChildIDs(ids...)
 }
 
 // SetParent sets the "parent" edge to the Metadata entity.
-func (mc *MetadataCreate) SetParent(m *Metadata) *MetadataCreate {
-	return mc.SetParentID(m.ID)
+func (m *MetadataCreate) SetParent(v *Metadata) *MetadataCreate {
+	return m.SetParentID(v.ID)
 }
 
 // Mutation returns the MetadataMutation object of the builder.
-func (mc *MetadataCreate) Mutation() *MetadataMutation {
-	return mc.mutation
+func (m *MetadataCreate) Mutation() *MetadataMutation {
+	return m.mutation
 }
 
 // Save creates the Metadata in the database.
-func (mc *MetadataCreate) Save(ctx context.Context) (*Metadata, error) {
-	mc.defaults()
-	return withHooks(ctx, mc.sqlSave, mc.mutation, mc.hooks)
+func (c *MetadataCreate) Save(ctx context.Context) (*Metadata, error) {
+	c.defaults()
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (mc *MetadataCreate) SaveX(ctx context.Context) *Metadata {
-	v, err := mc.Save(ctx)
+func (c *MetadataCreate) SaveX(ctx context.Context) *Metadata {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -118,40 +118,40 @@ func (mc *MetadataCreate) SaveX(ctx context.Context) *Metadata {
 }
 
 // Exec executes the query.
-func (mc *MetadataCreate) Exec(ctx context.Context) error {
-	_, err := mc.Save(ctx)
+func (c *MetadataCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (mc *MetadataCreate) ExecX(ctx context.Context) {
-	if err := mc.Exec(ctx); err != nil {
+func (c *MetadataCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (mc *MetadataCreate) defaults() {
-	if _, ok := mc.mutation.Age(); !ok {
+func (c *MetadataCreate) defaults() {
+	if _, ok := c.mutation.Age(); !ok {
 		v := metadata.DefaultAge
-		mc.mutation.SetAge(v)
+		c.mutation.SetAge(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (mc *MetadataCreate) check() error {
-	if _, ok := mc.mutation.Age(); !ok {
+func (c *MetadataCreate) check() error {
+	if _, ok := c.mutation.Age(); !ok {
 		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "Metadata.age"`)}
 	}
 	return nil
 }
 
-func (mc *MetadataCreate) sqlSave(ctx context.Context) (*Metadata, error) {
-	if err := mc.check(); err != nil {
+func (c *MetadataCreate) sqlSave(ctx context.Context) (*Metadata, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := mc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, mc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -161,25 +161,25 @@ func (mc *MetadataCreate) sqlSave(ctx context.Context) (*Metadata, error) {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int(id)
 	}
-	mc.mutation.id = &_node.ID
-	mc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (mc *MetadataCreate) createSpec() (*Metadata, *sqlgraph.CreateSpec) {
+func (c *MetadataCreate) createSpec() (*Metadata, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Metadata{config: mc.config}
+		_node = &Metadata{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(metadata.Table, sqlgraph.NewFieldSpec(metadata.FieldID, field.TypeInt))
 	)
-	if id, ok := mc.mutation.ID(); ok {
+	if id, ok := c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := mc.mutation.Age(); ok {
+	if value, ok := c.mutation.Age(); ok {
 		_spec.SetField(metadata.FieldAge, field.TypeInt, value)
 		_node.Age = value
 	}
-	if nodes := mc.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -196,7 +196,7 @@ func (mc *MetadataCreate) createSpec() (*Metadata, *sqlgraph.CreateSpec) {
 		_node.ID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := mc.mutation.ChildrenIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.ChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -212,7 +212,7 @@ func (mc *MetadataCreate) createSpec() (*Metadata, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := mc.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -240,16 +240,16 @@ type MetadataCreateBulk struct {
 }
 
 // Save creates the Metadata entities in the database.
-func (mcb *MetadataCreateBulk) Save(ctx context.Context) ([]*Metadata, error) {
-	if mcb.err != nil {
-		return nil, mcb.err
+func (c *MetadataCreateBulk) Save(ctx context.Context) ([]*Metadata, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(mcb.builders))
-	nodes := make([]*Metadata, len(mcb.builders))
-	mutators := make([]Mutator, len(mcb.builders))
-	for i := range mcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Metadata, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := mcb.builders[i]
+			builder := c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*MetadataMutation)
@@ -263,11 +263,11 @@ func (mcb *MetadataCreateBulk) Save(ctx context.Context) ([]*Metadata, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, mcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, mcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -291,7 +291,7 @@ func (mcb *MetadataCreateBulk) Save(ctx context.Context) ([]*Metadata, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, mcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -299,8 +299,8 @@ func (mcb *MetadataCreateBulk) Save(ctx context.Context) ([]*Metadata, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (mcb *MetadataCreateBulk) SaveX(ctx context.Context) []*Metadata {
-	v, err := mcb.Save(ctx)
+func (c *MetadataCreateBulk) SaveX(ctx context.Context) []*Metadata {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -308,14 +308,14 @@ func (mcb *MetadataCreateBulk) SaveX(ctx context.Context) []*Metadata {
 }
 
 // Exec executes the query.
-func (mcb *MetadataCreateBulk) Exec(ctx context.Context) error {
-	_, err := mcb.Save(ctx)
+func (c *MetadataCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (mcb *MetadataCreateBulk) ExecX(ctx context.Context) {
-	if err := mcb.Exec(ctx); err != nil {
+func (c *MetadataCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

@@ -33,40 +33,40 @@ type CleanUserQuery struct {
 }
 
 // Where adds a new predicate for the CleanUserQuery builder.
-func (cuq *CleanUserQuery) Where(ps ...predicate.CleanUser) *CleanUserQuery {
-	cuq.predicates = append(cuq.predicates, ps...)
-	return cuq
+func (q *CleanUserQuery) Where(ps ...predicate.CleanUser) *CleanUserQuery {
+	q.predicates = append(q.predicates, ps...)
+	return q
 }
 
 // Limit the number of records to be returned by this query.
-func (cuq *CleanUserQuery) Limit(limit int) *CleanUserQuery {
-	cuq.ctx.Limit = &limit
-	return cuq
+func (q *CleanUserQuery) Limit(limit int) *CleanUserQuery {
+	q.ctx.Limit = &limit
+	return q
 }
 
 // Offset to start from.
-func (cuq *CleanUserQuery) Offset(offset int) *CleanUserQuery {
-	cuq.ctx.Offset = &offset
-	return cuq
+func (q *CleanUserQuery) Offset(offset int) *CleanUserQuery {
+	q.ctx.Offset = &offset
+	return q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (cuq *CleanUserQuery) Unique(unique bool) *CleanUserQuery {
-	cuq.ctx.Unique = &unique
-	return cuq
+func (q *CleanUserQuery) Unique(unique bool) *CleanUserQuery {
+	q.ctx.Unique = &unique
+	return q
 }
 
 // Order specifies how the records should be ordered.
-func (cuq *CleanUserQuery) Order(o ...cleanuser.OrderOption) *CleanUserQuery {
-	cuq.order = append(cuq.order, o...)
-	return cuq
+func (q *CleanUserQuery) Order(o ...cleanuser.OrderOption) *CleanUserQuery {
+	q.order = append(q.order, o...)
+	return q
 }
 
 // First returns the first CleanUser entity from the query.
 // Returns a *NotFoundError when no CleanUser was found.
-func (cuq *CleanUserQuery) First(ctx context.Context) (*CleanUser, error) {
-	nodes, err := cuq.Limit(1).All(setContextOp(ctx, cuq.ctx, ent.OpQueryFirst))
+func (q *CleanUserQuery) First(ctx context.Context) (*CleanUser, error) {
+	nodes, err := q.Limit(1).All(setContextOp(ctx, q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -77,8 +77,8 @@ func (cuq *CleanUserQuery) First(ctx context.Context) (*CleanUser, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (cuq *CleanUserQuery) FirstX(ctx context.Context) *CleanUser {
-	node, err := cuq.First(ctx)
+func (q *CleanUserQuery) FirstX(ctx context.Context) *CleanUser {
+	node, err := q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -88,8 +88,8 @@ func (cuq *CleanUserQuery) FirstX(ctx context.Context) *CleanUser {
 // Only returns a single CleanUser entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one CleanUser entity is found.
 // Returns a *NotFoundError when no CleanUser entities are found.
-func (cuq *CleanUserQuery) Only(ctx context.Context) (*CleanUser, error) {
-	nodes, err := cuq.Limit(2).All(setContextOp(ctx, cuq.ctx, ent.OpQueryOnly))
+func (q *CleanUserQuery) Only(ctx context.Context) (*CleanUser, error) {
+	nodes, err := q.Limit(2).All(setContextOp(ctx, q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -104,8 +104,8 @@ func (cuq *CleanUserQuery) Only(ctx context.Context) (*CleanUser, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (cuq *CleanUserQuery) OnlyX(ctx context.Context) *CleanUser {
-	node, err := cuq.Only(ctx)
+func (q *CleanUserQuery) OnlyX(ctx context.Context) *CleanUser {
+	node, err := q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -113,18 +113,18 @@ func (cuq *CleanUserQuery) OnlyX(ctx context.Context) *CleanUser {
 }
 
 // All executes the query and returns a list of CleanUsers.
-func (cuq *CleanUserQuery) All(ctx context.Context) ([]*CleanUser, error) {
-	ctx = setContextOp(ctx, cuq.ctx, ent.OpQueryAll)
-	if err := cuq.prepareQuery(ctx); err != nil {
+func (q *CleanUserQuery) All(ctx context.Context) ([]*CleanUser, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryAll)
+	if err := q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*CleanUser, *CleanUserQuery]()
-	return withInterceptors[[]*CleanUser](ctx, cuq, qr, cuq.inters)
+	return withInterceptors[[]*CleanUser](ctx, q, qr, q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (cuq *CleanUserQuery) AllX(ctx context.Context) []*CleanUser {
-	nodes, err := cuq.All(ctx)
+func (q *CleanUserQuery) AllX(ctx context.Context) []*CleanUser {
+	nodes, err := q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -132,17 +132,17 @@ func (cuq *CleanUserQuery) AllX(ctx context.Context) []*CleanUser {
 }
 
 // Count returns the count of the given query.
-func (cuq *CleanUserQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, cuq.ctx, ent.OpQueryCount)
-	if err := cuq.prepareQuery(ctx); err != nil {
+func (q *CleanUserQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryCount)
+	if err := q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, cuq, querierCount[*CleanUserQuery](), cuq.inters)
+	return withInterceptors[int](ctx, q, querierCount[*CleanUserQuery](), q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (cuq *CleanUserQuery) CountX(ctx context.Context) int {
-	count, err := cuq.Count(ctx)
+func (q *CleanUserQuery) CountX(ctx context.Context) int {
+	count, err := q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -150,9 +150,9 @@ func (cuq *CleanUserQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (cuq *CleanUserQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, cuq.ctx, ent.OpQueryExist)
-	switch _, err := cuq.First(ctx); {
+func (q *CleanUserQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryExist)
+	switch _, err := q.First(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -163,8 +163,8 @@ func (cuq *CleanUserQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (cuq *CleanUserQuery) ExistX(ctx context.Context) bool {
-	exist, err := cuq.Exist(ctx)
+func (q *CleanUserQuery) ExistX(ctx context.Context) bool {
+	exist, err := q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -173,20 +173,20 @@ func (cuq *CleanUserQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the CleanUserQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (cuq *CleanUserQuery) Clone() *CleanUserQuery {
-	if cuq == nil {
+func (q *CleanUserQuery) Clone() *CleanUserQuery {
+	if q == nil {
 		return nil
 	}
 	return &CleanUserQuery{
-		config:     cuq.config,
-		ctx:        cuq.ctx.Clone(),
-		order:      append([]cleanuser.OrderOption{}, cuq.order...),
-		inters:     append([]Interceptor{}, cuq.inters...),
-		predicates: append([]predicate.CleanUser{}, cuq.predicates...),
+		config:     q.config,
+		ctx:        q.ctx.Clone(),
+		order:      append([]cleanuser.OrderOption{}, q.order...),
+		inters:     append([]Interceptor{}, q.inters...),
+		predicates: append([]predicate.CleanUser{}, q.predicates...),
 		// clone intermediate query.
-		sql:       cuq.sql.Clone(),
-		path:      cuq.path,
-		modifiers: append([]func(*sql.Selector){}, cuq.modifiers...),
+		sql:       q.sql.Clone(),
+		path:      q.path,
+		modifiers: append([]func(*sql.Selector){}, q.modifiers...),
 	}
 }
 
@@ -204,10 +204,10 @@ func (cuq *CleanUserQuery) Clone() *CleanUserQuery {
 //		GroupBy(cleanuser.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (cuq *CleanUserQuery) GroupBy(field string, fields ...string) *CleanUserGroupBy {
-	cuq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &CleanUserGroupBy{build: cuq}
-	grbuild.flds = &cuq.ctx.Fields
+func (q *CleanUserQuery) GroupBy(field string, fields ...string) *CleanUserGroupBy {
+	q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &CleanUserGroupBy{build: q}
+	grbuild.flds = &q.ctx.Fields
 	grbuild.label = cleanuser.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -225,67 +225,67 @@ func (cuq *CleanUserQuery) GroupBy(field string, fields ...string) *CleanUserGro
 //	client.CleanUser.Query().
 //		Select(cleanuser.FieldName).
 //		Scan(ctx, &v)
-func (cuq *CleanUserQuery) Select(fields ...string) *CleanUserSelect {
-	cuq.ctx.Fields = append(cuq.ctx.Fields, fields...)
-	sbuild := &CleanUserSelect{CleanUserQuery: cuq}
+func (q *CleanUserQuery) Select(fields ...string) *CleanUserSelect {
+	q.ctx.Fields = append(q.ctx.Fields, fields...)
+	sbuild := &CleanUserSelect{CleanUserQuery: q}
 	sbuild.label = cleanuser.Label
-	sbuild.flds, sbuild.scan = &cuq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a CleanUserSelect configured with the given aggregations.
-func (cuq *CleanUserQuery) Aggregate(fns ...AggregateFunc) *CleanUserSelect {
-	return cuq.Select().Aggregate(fns...)
+func (q *CleanUserQuery) Aggregate(fns ...AggregateFunc) *CleanUserSelect {
+	return q.Select().Aggregate(fns...)
 }
 
-func (cuq *CleanUserQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range cuq.inters {
+func (q *CleanUserQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, cuq); err != nil {
+			if err := trv.Traverse(ctx, q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range cuq.ctx.Fields {
+	for _, f := range q.ctx.Fields {
 		if !cleanuser.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if cuq.path != nil {
-		prev, err := cuq.path(ctx)
+	if q.path != nil {
+		prev, err := q.path(ctx)
 		if err != nil {
 			return err
 		}
-		cuq.sql = prev
+		q.sql = prev
 	}
 	return nil
 }
 
-func (cuq *CleanUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CleanUser, error) {
+func (q *CleanUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*CleanUser, error) {
 	var (
 		nodes = []*CleanUser{}
-		_spec = cuq.querySpec()
+		_spec = q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*CleanUser).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &CleanUser{config: cuq.config}
+		node := &CleanUser{config: q.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
-	_spec.Node.Schema = cuq.schemaConfig.CleanUser
-	ctx = internal.NewSchemaConfigContext(ctx, cuq.schemaConfig)
-	if len(cuq.modifiers) > 0 {
-		_spec.Modifiers = cuq.modifiers
+	_spec.Node.Schema = q.schemaConfig.CleanUser
+	ctx = internal.NewSchemaConfigContext(ctx, q.schemaConfig)
+	if len(q.modifiers) > 0 {
+		_spec.Modifiers = q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, cuq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -294,48 +294,48 @@ func (cuq *CleanUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*C
 	return nodes, nil
 }
 
-func (cuq *CleanUserQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := cuq.querySpec()
-	_spec.Node.Schema = cuq.schemaConfig.CleanUser
-	ctx = internal.NewSchemaConfigContext(ctx, cuq.schemaConfig)
-	if len(cuq.modifiers) > 0 {
-		_spec.Modifiers = cuq.modifiers
+func (q *CleanUserQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := q.querySpec()
+	_spec.Node.Schema = q.schemaConfig.CleanUser
+	ctx = internal.NewSchemaConfigContext(ctx, q.schemaConfig)
+	if len(q.modifiers) > 0 {
+		_spec.Modifiers = q.modifiers
 	}
-	_spec.Node.Columns = cuq.ctx.Fields
-	if len(cuq.ctx.Fields) > 0 {
-		_spec.Unique = cuq.ctx.Unique != nil && *cuq.ctx.Unique
+	_spec.Node.Columns = q.ctx.Fields
+	if len(q.ctx.Fields) > 0 {
+		_spec.Unique = q.ctx.Unique != nil && *q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, cuq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, q.driver, _spec)
 }
 
-func (cuq *CleanUserQuery) querySpec() *sqlgraph.QuerySpec {
+func (q *CleanUserQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(cleanuser.Table, cleanuser.Columns, nil)
-	_spec.From = cuq.sql
-	if unique := cuq.ctx.Unique; unique != nil {
+	_spec.From = q.sql
+	if unique := q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if cuq.path != nil {
+	} else if q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := cuq.ctx.Fields; len(fields) > 0 {
+	if fields := q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		for i := range fields {
 			_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 		}
 	}
-	if ps := cuq.predicates; len(ps) > 0 {
+	if ps := q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := cuq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := cuq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := cuq.order; len(ps) > 0 {
+	if ps := q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -345,48 +345,48 @@ func (cuq *CleanUserQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (cuq *CleanUserQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(cuq.driver.Dialect())
+func (q *CleanUserQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(q.driver.Dialect())
 	t1 := builder.Table(cleanuser.Table)
-	columns := cuq.ctx.Fields
+	columns := q.ctx.Fields
 	if len(columns) == 0 {
 		columns = cleanuser.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if cuq.sql != nil {
-		selector = cuq.sql
+	if q.sql != nil {
+		selector = q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if cuq.ctx.Unique != nil && *cuq.ctx.Unique {
+	if q.ctx.Unique != nil && *q.ctx.Unique {
 		selector.Distinct()
 	}
-	t1.Schema(cuq.schemaConfig.CleanUser)
-	ctx = internal.NewSchemaConfigContext(ctx, cuq.schemaConfig)
+	t1.Schema(q.schemaConfig.CleanUser)
+	ctx = internal.NewSchemaConfigContext(ctx, q.schemaConfig)
 	selector.WithContext(ctx)
-	for _, m := range cuq.modifiers {
+	for _, m := range q.modifiers {
 		m(selector)
 	}
-	for _, p := range cuq.predicates {
+	for _, p := range q.predicates {
 		p(selector)
 	}
-	for _, p := range cuq.order {
+	for _, p := range q.order {
 		p(selector)
 	}
-	if offset := cuq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := cuq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (cuq *CleanUserQuery) Modify(modifiers ...func(s *sql.Selector)) *CleanUserSelect {
-	cuq.modifiers = append(cuq.modifiers, modifiers...)
-	return cuq.Select()
+func (q *CleanUserQuery) Modify(modifiers ...func(s *sql.Selector)) *CleanUserSelect {
+	q.modifiers = append(q.modifiers, modifiers...)
+	return q.Select()
 }
 
 // CleanUserGroupBy is the group-by builder for CleanUser entities.
@@ -410,27 +410,27 @@ func (cugb *CleanUserGroupBy) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*CleanUserQuery, *CleanUserGroupBy](ctx, cugb.build, cugb, cugb.build.inters, v)
 }
 
-func (cugb *CleanUserGroupBy) sqlScan(ctx context.Context, root *CleanUserQuery, v any) error {
+func (q *CleanUserGroupBy) sqlScan(ctx context.Context, root *CleanUserQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(cugb.fns))
-	for _, fn := range cugb.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*cugb.flds)+len(cugb.fns))
-		for _, f := range *cugb.flds {
+		columns := make([]string, 0, len(*q.flds)+len(q.fns))
+		for _, f := range *q.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*cugb.flds...)...)
+	selector.GroupBy(selector.Columns(*q.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := cugb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -458,13 +458,13 @@ func (cus *CleanUserSelect) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*CleanUserQuery, *CleanUserSelect](ctx, cus.CleanUserQuery, cus, cus.inters, v)
 }
 
-func (cus *CleanUserSelect) sqlScan(ctx context.Context, root *CleanUserQuery, v any) error {
+func (q *CleanUserSelect) sqlScan(ctx context.Context, root *CleanUserQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(cus.fns))
-	for _, fn := range cus.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*cus.selector.flds); {
+	switch n := len(*q.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -472,7 +472,7 @@ func (cus *CleanUserSelect) sqlScan(ctx context.Context, root *CleanUserQuery, v
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := cus.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -480,7 +480,7 @@ func (cus *CleanUserSelect) sqlScan(ctx context.Context, root *CleanUserQuery, v
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (cus *CleanUserSelect) Modify(modifiers ...func(s *sql.Selector)) *CleanUserSelect {
-	cus.modifiers = append(cus.modifiers, modifiers...)
-	return cus
+func (q *CleanUserSelect) Modify(modifiers ...func(s *sql.Selector)) *CleanUserSelect {
+	q.modifiers = append(q.modifiers, modifiers...)
+	return q
 }

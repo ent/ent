@@ -59,9 +59,9 @@ func (*Conversion) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Conversion fields.
-func (c *Conversion) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Conversion) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -70,63 +70,63 @@ func (c *Conversion) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			c.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case conversion.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				c.Name = value.String
+				m.Name = value.String
 			}
 		case conversion.FieldInt8ToString:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field int8_to_string", values[i])
 			} else if value.Valid {
-				c.Int8ToString = value.String
+				m.Int8ToString = value.String
 			}
 		case conversion.FieldUint8ToString:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field uint8_to_string", values[i])
 			} else if value.Valid {
-				c.Uint8ToString = value.String
+				m.Uint8ToString = value.String
 			}
 		case conversion.FieldInt16ToString:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field int16_to_string", values[i])
 			} else if value.Valid {
-				c.Int16ToString = value.String
+				m.Int16ToString = value.String
 			}
 		case conversion.FieldUint16ToString:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field uint16_to_string", values[i])
 			} else if value.Valid {
-				c.Uint16ToString = value.String
+				m.Uint16ToString = value.String
 			}
 		case conversion.FieldInt32ToString:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field int32_to_string", values[i])
 			} else if value.Valid {
-				c.Int32ToString = value.String
+				m.Int32ToString = value.String
 			}
 		case conversion.FieldUint32ToString:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field uint32_to_string", values[i])
 			} else if value.Valid {
-				c.Uint32ToString = value.String
+				m.Uint32ToString = value.String
 			}
 		case conversion.FieldInt64ToString:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field int64_to_string", values[i])
 			} else if value.Valid {
-				c.Int64ToString = value.String
+				m.Int64ToString = value.String
 			}
 		case conversion.FieldUint64ToString:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field uint64_to_string", values[i])
 			} else if value.Valid {
-				c.Uint64ToString = value.String
+				m.Uint64ToString = value.String
 			}
 		default:
-			c.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -134,59 +134,59 @@ func (c *Conversion) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Conversion.
 // This includes values selected through modifiers, order, etc.
-func (c *Conversion) Value(name string) (ent.Value, error) {
-	return c.selectValues.Get(name)
+func (m *Conversion) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Conversion.
 // Note that you need to call Conversion.Unwrap() before calling this method if this Conversion
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (c *Conversion) Update() *ConversionUpdateOne {
-	return NewConversionClient(c.config).UpdateOne(c)
+func (m *Conversion) Update() *ConversionUpdateOne {
+	return NewConversionClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Conversion entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (c *Conversion) Unwrap() *Conversion {
-	_tx, ok := c.config.driver.(*txDriver)
+func (m *Conversion) Unwrap() *Conversion {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("entv2: Conversion is not a transactional entity")
 	}
-	c.config.driver = _tx.drv
-	return c
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (c *Conversion) String() string {
+func (m *Conversion) String() string {
 	var builder strings.Builder
 	builder.WriteString("Conversion(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("name=")
-	builder.WriteString(c.Name)
+	builder.WriteString(m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("int8_to_string=")
-	builder.WriteString(c.Int8ToString)
+	builder.WriteString(m.Int8ToString)
 	builder.WriteString(", ")
 	builder.WriteString("uint8_to_string=")
-	builder.WriteString(c.Uint8ToString)
+	builder.WriteString(m.Uint8ToString)
 	builder.WriteString(", ")
 	builder.WriteString("int16_to_string=")
-	builder.WriteString(c.Int16ToString)
+	builder.WriteString(m.Int16ToString)
 	builder.WriteString(", ")
 	builder.WriteString("uint16_to_string=")
-	builder.WriteString(c.Uint16ToString)
+	builder.WriteString(m.Uint16ToString)
 	builder.WriteString(", ")
 	builder.WriteString("int32_to_string=")
-	builder.WriteString(c.Int32ToString)
+	builder.WriteString(m.Int32ToString)
 	builder.WriteString(", ")
 	builder.WriteString("uint32_to_string=")
-	builder.WriteString(c.Uint32ToString)
+	builder.WriteString(m.Uint32ToString)
 	builder.WriteString(", ")
 	builder.WriteString("int64_to_string=")
-	builder.WriteString(c.Int64ToString)
+	builder.WriteString(m.Int64ToString)
 	builder.WriteString(", ")
 	builder.WriteString("uint64_to_string=")
-	builder.WriteString(c.Uint64ToString)
+	builder.WriteString(m.Uint64ToString)
 	builder.WriteByte(')')
 	return builder.String()
 }

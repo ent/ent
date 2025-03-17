@@ -29,54 +29,54 @@ type AccountCreate struct {
 }
 
 // SetEmail sets the "email" field.
-func (ac *AccountCreate) SetEmail(s string) *AccountCreate {
-	ac.mutation.SetEmail(s)
-	return ac
+func (m *AccountCreate) SetEmail(v string) *AccountCreate {
+	m.mutation.SetEmail(v)
+	return m
 }
 
 // SetID sets the "id" field.
-func (ac *AccountCreate) SetID(s sid.ID) *AccountCreate {
-	ac.mutation.SetID(s)
-	return ac
+func (m *AccountCreate) SetID(v sid.ID) *AccountCreate {
+	m.mutation.SetID(v)
+	return m
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (ac *AccountCreate) SetNillableID(s *sid.ID) *AccountCreate {
-	if s != nil {
-		ac.SetID(*s)
+func (m *AccountCreate) SetNillableID(v *sid.ID) *AccountCreate {
+	if v != nil {
+		m.SetID(*v)
 	}
-	return ac
+	return m
 }
 
 // AddTokenIDs adds the "token" edge to the Token entity by IDs.
-func (ac *AccountCreate) AddTokenIDs(ids ...sid.ID) *AccountCreate {
-	ac.mutation.AddTokenIDs(ids...)
-	return ac
+func (m *AccountCreate) AddTokenIDs(ids ...sid.ID) *AccountCreate {
+	m.mutation.AddTokenIDs(ids...)
+	return m
 }
 
 // AddToken adds the "token" edges to the Token entity.
-func (ac *AccountCreate) AddToken(t ...*Token) *AccountCreate {
-	ids := make([]sid.ID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (m *AccountCreate) AddToken(v ...*Token) *AccountCreate {
+	ids := make([]sid.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ac.AddTokenIDs(ids...)
+	return m.AddTokenIDs(ids...)
 }
 
 // Mutation returns the AccountMutation object of the builder.
-func (ac *AccountCreate) Mutation() *AccountMutation {
-	return ac.mutation
+func (m *AccountCreate) Mutation() *AccountMutation {
+	return m.mutation
 }
 
 // Save creates the Account in the database.
-func (ac *AccountCreate) Save(ctx context.Context) (*Account, error) {
-	ac.defaults()
-	return withHooks(ctx, ac.sqlSave, ac.mutation, ac.hooks)
+func (c *AccountCreate) Save(ctx context.Context) (*Account, error) {
+	c.defaults()
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (ac *AccountCreate) SaveX(ctx context.Context) *Account {
-	v, err := ac.Save(ctx)
+func (c *AccountCreate) SaveX(ctx context.Context) *Account {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -84,32 +84,32 @@ func (ac *AccountCreate) SaveX(ctx context.Context) *Account {
 }
 
 // Exec executes the query.
-func (ac *AccountCreate) Exec(ctx context.Context) error {
-	_, err := ac.Save(ctx)
+func (c *AccountCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ac *AccountCreate) ExecX(ctx context.Context) {
-	if err := ac.Exec(ctx); err != nil {
+func (c *AccountCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (ac *AccountCreate) defaults() {
-	if _, ok := ac.mutation.ID(); !ok {
+func (c *AccountCreate) defaults() {
+	if _, ok := c.mutation.ID(); !ok {
 		v := account.DefaultID()
-		ac.mutation.SetID(v)
+		c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ac *AccountCreate) check() error {
-	if _, ok := ac.mutation.Email(); !ok {
+func (c *AccountCreate) check() error {
+	if _, ok := c.mutation.Email(); !ok {
 		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "Account.email"`)}
 	}
-	if v, ok := ac.mutation.Email(); ok {
+	if v, ok := c.mutation.Email(); ok {
 		if err := account.EmailValidator(v); err != nil {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "Account.email": %w`, err)}
 		}
@@ -117,12 +117,12 @@ func (ac *AccountCreate) check() error {
 	return nil
 }
 
-func (ac *AccountCreate) sqlSave(ctx context.Context) (*Account, error) {
-	if err := ac.check(); err != nil {
+func (c *AccountCreate) sqlSave(ctx context.Context) (*Account, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := ac.createSpec()
-	if err := sqlgraph.CreateNode(ctx, ac.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -135,26 +135,26 @@ func (ac *AccountCreate) sqlSave(ctx context.Context) (*Account, error) {
 			return nil, err
 		}
 	}
-	ac.mutation.id = &_node.ID
-	ac.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
+func (c *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Account{config: ac.config}
+		_node = &Account{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(account.Table, sqlgraph.NewFieldSpec(account.FieldID, field.TypeOther))
 	)
-	_spec.OnConflict = ac.conflict
-	if id, ok := ac.mutation.ID(); ok {
+	_spec.OnConflict = c.conflict
+	if id, ok := c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := ac.mutation.Email(); ok {
+	if value, ok := c.mutation.Email(); ok {
 		_spec.SetField(account.FieldEmail, field.TypeString, value)
 		_node.Email = value
 	}
-	if nodes := ac.mutation.TokenIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.TokenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -189,11 +189,9 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 //			SetEmail(v+v).
 //		}).
 //		Exec(ctx)
-func (ac *AccountCreate) OnConflict(opts ...sql.ConflictOption) *AccountUpsertOne {
-	ac.conflict = opts
-	return &AccountUpsertOne{
-		create: ac,
-	}
+func (c *AccountCreate) OnConflict(opts ...sql.ConflictOption) *AccountUpsertOne {
+	c.conflict = opts
+	return &AccountUpsertOne{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -202,11 +200,9 @@ func (ac *AccountCreate) OnConflict(opts ...sql.ConflictOption) *AccountUpsertOn
 //	client.Account.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (ac *AccountCreate) OnConflictColumns(columns ...string) *AccountUpsertOne {
-	ac.conflict = append(ac.conflict, sql.ConflictColumns(columns...))
-	return &AccountUpsertOne{
-		create: ac,
-	}
+func (c *AccountCreate) OnConflictColumns(columns ...string) *AccountUpsertOne {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &AccountUpsertOne{create: c}
 }
 
 type (
@@ -343,16 +339,16 @@ type AccountCreateBulk struct {
 }
 
 // Save creates the Account entities in the database.
-func (acb *AccountCreateBulk) Save(ctx context.Context) ([]*Account, error) {
-	if acb.err != nil {
-		return nil, acb.err
+func (c *AccountCreateBulk) Save(ctx context.Context) ([]*Account, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(acb.builders))
-	nodes := make([]*Account, len(acb.builders))
-	mutators := make([]Mutator, len(acb.builders))
-	for i := range acb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Account, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := acb.builders[i]
+			builder := c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*AccountMutation)
@@ -366,12 +362,12 @@ func (acb *AccountCreateBulk) Save(ctx context.Context) ([]*Account, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, acb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = acb.conflict
+					spec.OnConflict = c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, acb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -391,7 +387,7 @@ func (acb *AccountCreateBulk) Save(ctx context.Context) ([]*Account, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, acb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -399,8 +395,8 @@ func (acb *AccountCreateBulk) Save(ctx context.Context) ([]*Account, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (acb *AccountCreateBulk) SaveX(ctx context.Context) []*Account {
-	v, err := acb.Save(ctx)
+func (c *AccountCreateBulk) SaveX(ctx context.Context) []*Account {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -408,14 +404,14 @@ func (acb *AccountCreateBulk) SaveX(ctx context.Context) []*Account {
 }
 
 // Exec executes the query.
-func (acb *AccountCreateBulk) Exec(ctx context.Context) error {
-	_, err := acb.Save(ctx)
+func (c *AccountCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (acb *AccountCreateBulk) ExecX(ctx context.Context) {
-	if err := acb.Exec(ctx); err != nil {
+func (c *AccountCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -435,11 +431,9 @@ func (acb *AccountCreateBulk) ExecX(ctx context.Context) {
 //			SetEmail(v+v).
 //		}).
 //		Exec(ctx)
-func (acb *AccountCreateBulk) OnConflict(opts ...sql.ConflictOption) *AccountUpsertBulk {
-	acb.conflict = opts
-	return &AccountUpsertBulk{
-		create: acb,
-	}
+func (c *AccountCreateBulk) OnConflict(opts ...sql.ConflictOption) *AccountUpsertBulk {
+	c.conflict = opts
+	return &AccountUpsertBulk{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -448,11 +442,9 @@ func (acb *AccountCreateBulk) OnConflict(opts ...sql.ConflictOption) *AccountUps
 //	client.Account.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (acb *AccountCreateBulk) OnConflictColumns(columns ...string) *AccountUpsertBulk {
-	acb.conflict = append(acb.conflict, sql.ConflictColumns(columns...))
-	return &AccountUpsertBulk{
-		create: acb,
-	}
+func (c *AccountCreateBulk) OnConflictColumns(columns ...string) *AccountUpsertBulk {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &AccountUpsertBulk{create: c}
 }
 
 // AccountUpsertBulk is the builder for "upsert"-ing

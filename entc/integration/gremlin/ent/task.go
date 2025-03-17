@@ -76,51 +76,51 @@ func (t *Task) FromResponse(res *gremlin.Response) error {
 // Update returns a builder for updating this Task.
 // Note that you need to call Task.Unwrap() before calling this method if this Task
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (t *Task) Update() *TaskUpdateOne {
-	return NewTaskClient(t.config).UpdateOne(t)
+func (m *Task) Update() *TaskUpdateOne {
+	return NewTaskClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Task entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (t *Task) Unwrap() *Task {
-	_tx, ok := t.config.driver.(*txDriver)
+func (m *Task) Unwrap() *Task {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Task is not a transactional entity")
 	}
-	t.config.driver = _tx.drv
-	return t
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (t *Task) String() string {
+func (m *Task) String() string {
 	var builder strings.Builder
 	builder.WriteString("Task(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("priority=")
-	builder.WriteString(fmt.Sprintf("%v", t.Priority))
+	builder.WriteString(fmt.Sprintf("%v", m.Priority))
 	builder.WriteString(", ")
 	builder.WriteString("priorities=")
-	builder.WriteString(fmt.Sprintf("%v", t.Priorities))
+	builder.WriteString(fmt.Sprintf("%v", m.Priorities))
 	builder.WriteString(", ")
-	if v := t.CreatedAt; v != nil {
+	if v := m.CreatedAt; v != nil {
 		builder.WriteString("created_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(t.Name)
+	builder.WriteString(m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("owner=")
-	builder.WriteString(t.Owner)
+	builder.WriteString(m.Owner)
 	builder.WriteString(", ")
 	builder.WriteString("order=")
-	builder.WriteString(fmt.Sprintf("%v", t.Order))
+	builder.WriteString(fmt.Sprintf("%v", m.Order))
 	builder.WriteString(", ")
 	builder.WriteString("order_option=")
-	builder.WriteString(fmt.Sprintf("%v", t.OrderOption))
+	builder.WriteString(fmt.Sprintf("%v", m.OrderOption))
 	builder.WriteString(", ")
 	builder.WriteString("op=")
-	builder.WriteString(t.Op)
+	builder.WriteString(m.Op)
 	builder.WriteByte(')')
 	return builder.String()
 }

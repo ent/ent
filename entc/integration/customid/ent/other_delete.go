@@ -24,56 +24,56 @@ type OtherDelete struct {
 }
 
 // Where appends a list predicates to the OtherDelete builder.
-func (od *OtherDelete) Where(ps ...predicate.Other) *OtherDelete {
-	od.mutation.Where(ps...)
-	return od
+func (d *OtherDelete) Where(ps ...predicate.Other) *OtherDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (od *OtherDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, od.sqlExec, od.mutation, od.hooks)
+func (d *OtherDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (od *OtherDelete) ExecX(ctx context.Context) int {
-	n, err := od.Exec(ctx)
+func (d *OtherDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (od *OtherDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *OtherDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(other.Table, sqlgraph.NewFieldSpec(other.FieldID, field.TypeOther))
-	if ps := od.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, od.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	od.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // OtherDeleteOne is the builder for deleting a single Other entity.
 type OtherDeleteOne struct {
-	od *OtherDelete
+	d *OtherDelete
 }
 
 // Where appends a list predicates to the OtherDelete builder.
-func (odo *OtherDeleteOne) Where(ps ...predicate.Other) *OtherDeleteOne {
-	odo.od.mutation.Where(ps...)
-	return odo
+func (d *OtherDeleteOne) Where(ps ...predicate.Other) *OtherDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (odo *OtherDeleteOne) Exec(ctx context.Context) error {
-	n, err := odo.od.Exec(ctx)
+func (d *OtherDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (odo *OtherDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (odo *OtherDeleteOne) ExecX(ctx context.Context) {
-	if err := odo.Exec(ctx); err != nil {
+func (d *OtherDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

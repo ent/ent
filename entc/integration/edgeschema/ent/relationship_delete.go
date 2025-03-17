@@ -23,56 +23,56 @@ type RelationshipDelete struct {
 }
 
 // Where appends a list predicates to the RelationshipDelete builder.
-func (rd *RelationshipDelete) Where(ps ...predicate.Relationship) *RelationshipDelete {
-	rd.mutation.Where(ps...)
-	return rd
+func (d *RelationshipDelete) Where(ps ...predicate.Relationship) *RelationshipDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (rd *RelationshipDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, rd.sqlExec, rd.mutation, rd.hooks)
+func (d *RelationshipDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rd *RelationshipDelete) ExecX(ctx context.Context) int {
-	n, err := rd.Exec(ctx)
+func (d *RelationshipDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (rd *RelationshipDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *RelationshipDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(relationship.Table, nil)
-	if ps := rd.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, rd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	rd.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // RelationshipDeleteOne is the builder for deleting a single Relationship entity.
 type RelationshipDeleteOne struct {
-	rd *RelationshipDelete
+	d *RelationshipDelete
 }
 
 // Where appends a list predicates to the RelationshipDelete builder.
-func (rdo *RelationshipDeleteOne) Where(ps ...predicate.Relationship) *RelationshipDeleteOne {
-	rdo.rd.mutation.Where(ps...)
-	return rdo
+func (d *RelationshipDeleteOne) Where(ps ...predicate.Relationship) *RelationshipDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (rdo *RelationshipDeleteOne) Exec(ctx context.Context) error {
-	n, err := rdo.rd.Exec(ctx)
+func (d *RelationshipDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -84,8 +84,8 @@ func (rdo *RelationshipDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rdo *RelationshipDeleteOne) ExecX(ctx context.Context) {
-	if err := rdo.Exec(ctx); err != nil {
+func (d *RelationshipDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

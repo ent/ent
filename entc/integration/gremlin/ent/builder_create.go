@@ -23,18 +23,18 @@ type BuilderCreate struct {
 }
 
 // Mutation returns the BuilderMutation object of the builder.
-func (bc *BuilderCreate) Mutation() *BuilderMutation {
-	return bc.mutation
+func (m *BuilderCreate) Mutation() *BuilderMutation {
+	return m.mutation
 }
 
 // Save creates the Builder in the database.
-func (bc *BuilderCreate) Save(ctx context.Context) (*Builder, error) {
-	return withHooks(ctx, bc.gremlinSave, bc.mutation, bc.hooks)
+func (c *BuilderCreate) Save(ctx context.Context) (*Builder, error) {
+	return withHooks(ctx, c.gremlinSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (bc *BuilderCreate) SaveX(ctx context.Context) *Builder {
-	v, err := bc.Save(ctx)
+func (c *BuilderCreate) SaveX(ctx context.Context) *Builder {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -42,45 +42,45 @@ func (bc *BuilderCreate) SaveX(ctx context.Context) *Builder {
 }
 
 // Exec executes the query.
-func (bc *BuilderCreate) Exec(ctx context.Context) error {
-	_, err := bc.Save(ctx)
+func (c *BuilderCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bc *BuilderCreate) ExecX(ctx context.Context) {
-	if err := bc.Exec(ctx); err != nil {
+func (c *BuilderCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (bc *BuilderCreate) check() error {
+func (c *BuilderCreate) check() error {
 	return nil
 }
 
-func (bc *BuilderCreate) gremlinSave(ctx context.Context) (*Builder, error) {
-	if err := bc.check(); err != nil {
+func (c *BuilderCreate) gremlinSave(ctx context.Context) (*Builder, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := bc.gremlin().Query()
-	if err := bc.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := c.gremlin().Query()
+	if err := c.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	rnode := &Builder{config: bc.config}
+	rnode := &Builder{config: c.config}
 	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	bc.mutation.id = &rnode.ID
-	bc.mutation.done = true
+	c.mutation.id = &rnode.ID
+	c.mutation.done = true
 	return rnode, nil
 }
 
-func (bc *BuilderCreate) gremlin() *dsl.Traversal {
+func (c *BuilderCreate) gremlin() *dsl.Traversal {
 	v := g.AddV(builder.Label)
 	return v.ValueMap(true)
 }

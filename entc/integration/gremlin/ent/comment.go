@@ -64,45 +64,45 @@ func (c *Comment) FromResponse(res *gremlin.Response) error {
 // Update returns a builder for updating this Comment.
 // Note that you need to call Comment.Unwrap() before calling this method if this Comment
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (c *Comment) Update() *CommentUpdateOne {
-	return NewCommentClient(c.config).UpdateOne(c)
+func (m *Comment) Update() *CommentUpdateOne {
+	return NewCommentClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Comment entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (c *Comment) Unwrap() *Comment {
-	_tx, ok := c.config.driver.(*txDriver)
+func (m *Comment) Unwrap() *Comment {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Comment is not a transactional entity")
 	}
-	c.config.driver = _tx.drv
-	return c
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (c *Comment) String() string {
+func (m *Comment) String() string {
 	var builder strings.Builder
 	builder.WriteString("Comment(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("unique_int=")
-	builder.WriteString(fmt.Sprintf("%v", c.UniqueInt))
+	builder.WriteString(fmt.Sprintf("%v", m.UniqueInt))
 	builder.WriteString(", ")
 	builder.WriteString("unique_float=")
-	builder.WriteString(fmt.Sprintf("%v", c.UniqueFloat))
+	builder.WriteString(fmt.Sprintf("%v", m.UniqueFloat))
 	builder.WriteString(", ")
-	if v := c.NillableInt; v != nil {
+	if v := m.NillableInt; v != nil {
 		builder.WriteString("nillable_int=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("table=")
-	builder.WriteString(c.Table)
+	builder.WriteString(m.Table)
 	builder.WriteString(", ")
 	builder.WriteString("dir=")
-	builder.WriteString(fmt.Sprintf("%v", c.Dir))
+	builder.WriteString(fmt.Sprintf("%v", m.Dir))
 	builder.WriteString(", ")
 	builder.WriteString("client=")
-	builder.WriteString(c.Client)
+	builder.WriteString(m.Client)
 	builder.WriteByte(')')
 	return builder.String()
 }

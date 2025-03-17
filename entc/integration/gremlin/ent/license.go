@@ -48,31 +48,31 @@ func (l *License) FromResponse(res *gremlin.Response) error {
 // Update returns a builder for updating this License.
 // Note that you need to call License.Unwrap() before calling this method if this License
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (l *License) Update() *LicenseUpdateOne {
-	return NewLicenseClient(l.config).UpdateOne(l)
+func (m *License) Update() *LicenseUpdateOne {
+	return NewLicenseClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the License entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (l *License) Unwrap() *License {
-	_tx, ok := l.config.driver.(*txDriver)
+func (m *License) Unwrap() *License {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: License is not a transactional entity")
 	}
-	l.config.driver = _tx.drv
-	return l
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (l *License) String() string {
+func (m *License) String() string {
 	var builder strings.Builder
 	builder.WriteString("License(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", l.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("create_time=")
-	builder.WriteString(l.CreateTime.Format(time.ANSIC))
+	builder.WriteString(m.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("update_time=")
-	builder.WriteString(l.UpdateTime.Format(time.ANSIC))
+	builder.WriteString(m.UpdateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

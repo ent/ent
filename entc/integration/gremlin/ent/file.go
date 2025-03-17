@@ -119,68 +119,68 @@ func (f *File) FromResponse(res *gremlin.Response) error {
 }
 
 // QueryOwner queries the "owner" edge of the File entity.
-func (f *File) QueryOwner() *UserQuery {
-	return NewFileClient(f.config).QueryOwner(f)
+func (m *File) QueryOwner() *UserQuery {
+	return NewFileClient(m.config).QueryOwner(m)
 }
 
 // QueryType queries the "type" edge of the File entity.
-func (f *File) QueryType() *FileTypeQuery {
-	return NewFileClient(f.config).QueryType(f)
+func (m *File) QueryType() *FileTypeQuery {
+	return NewFileClient(m.config).QueryType(m)
 }
 
 // QueryField queries the "field" edge of the File entity.
-func (f *File) QueryField() *FieldTypeQuery {
-	return NewFileClient(f.config).QueryField(f)
+func (m *File) QueryField() *FieldTypeQuery {
+	return NewFileClient(m.config).QueryField(m)
 }
 
 // Update returns a builder for updating this File.
 // Note that you need to call File.Unwrap() before calling this method if this File
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (f *File) Update() *FileUpdateOne {
-	return NewFileClient(f.config).UpdateOne(f)
+func (m *File) Update() *FileUpdateOne {
+	return NewFileClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the File entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (f *File) Unwrap() *File {
-	_tx, ok := f.config.driver.(*txDriver)
+func (m *File) Unwrap() *File {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: File is not a transactional entity")
 	}
-	f.config.driver = _tx.drv
-	return f
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (f *File) String() string {
+func (m *File) String() string {
 	var builder strings.Builder
 	builder.WriteString("File(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", f.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("set_id=")
-	builder.WriteString(fmt.Sprintf("%v", f.SetID))
+	builder.WriteString(fmt.Sprintf("%v", m.SetID))
 	builder.WriteString(", ")
 	builder.WriteString("size=")
-	builder.WriteString(fmt.Sprintf("%v", f.Size))
+	builder.WriteString(fmt.Sprintf("%v", m.Size))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(f.Name)
+	builder.WriteString(m.Name)
 	builder.WriteString(", ")
-	if v := f.User; v != nil {
+	if v := m.User; v != nil {
 		builder.WriteString("user=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
 	builder.WriteString("group=")
-	builder.WriteString(f.Group)
+	builder.WriteString(m.Group)
 	builder.WriteString(", ")
 	builder.WriteString("op=")
-	builder.WriteString(fmt.Sprintf("%v", f.Op))
+	builder.WriteString(fmt.Sprintf("%v", m.Op))
 	builder.WriteString(", ")
 	builder.WriteString("field_id=")
-	builder.WriteString(fmt.Sprintf("%v", f.FieldID))
+	builder.WriteString(fmt.Sprintf("%v", m.FieldID))
 	builder.WriteString(", ")
 	builder.WriteString("create_time=")
-	builder.WriteString(f.CreateTime.Format(time.ANSIC))
+	builder.WriteString(m.CreateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

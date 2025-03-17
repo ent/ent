@@ -28,102 +28,102 @@ type FileTypeUpdate struct {
 }
 
 // Where appends a list predicates to the FileTypeUpdate builder.
-func (ftu *FileTypeUpdate) Where(ps ...predicate.FileType) *FileTypeUpdate {
-	ftu.mutation.Where(ps...)
-	return ftu
+func (u *FileTypeUpdate) Where(ps ...predicate.FileType) *FileTypeUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetName sets the "name" field.
-func (ftu *FileTypeUpdate) SetName(s string) *FileTypeUpdate {
-	ftu.mutation.SetName(s)
-	return ftu
+func (m *FileTypeUpdate) SetName(v string) *FileTypeUpdate {
+	m.mutation.SetName(v)
+	return m
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (ftu *FileTypeUpdate) SetNillableName(s *string) *FileTypeUpdate {
-	if s != nil {
-		ftu.SetName(*s)
+func (m *FileTypeUpdate) SetNillableName(v *string) *FileTypeUpdate {
+	if v != nil {
+		m.SetName(*v)
 	}
-	return ftu
+	return m
 }
 
 // SetType sets the "type" field.
-func (ftu *FileTypeUpdate) SetType(f filetype.Type) *FileTypeUpdate {
-	ftu.mutation.SetType(f)
-	return ftu
+func (m *FileTypeUpdate) SetType(v filetype.Type) *FileTypeUpdate {
+	m.mutation.SetType(v)
+	return m
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (ftu *FileTypeUpdate) SetNillableType(f *filetype.Type) *FileTypeUpdate {
-	if f != nil {
-		ftu.SetType(*f)
+func (m *FileTypeUpdate) SetNillableType(v *filetype.Type) *FileTypeUpdate {
+	if v != nil {
+		m.SetType(*v)
 	}
-	return ftu
+	return m
 }
 
 // SetState sets the "state" field.
-func (ftu *FileTypeUpdate) SetState(f filetype.State) *FileTypeUpdate {
-	ftu.mutation.SetState(f)
-	return ftu
+func (m *FileTypeUpdate) SetState(v filetype.State) *FileTypeUpdate {
+	m.mutation.SetState(v)
+	return m
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
-func (ftu *FileTypeUpdate) SetNillableState(f *filetype.State) *FileTypeUpdate {
-	if f != nil {
-		ftu.SetState(*f)
+func (m *FileTypeUpdate) SetNillableState(v *filetype.State) *FileTypeUpdate {
+	if v != nil {
+		m.SetState(*v)
 	}
-	return ftu
+	return m
 }
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
-func (ftu *FileTypeUpdate) AddFileIDs(ids ...int) *FileTypeUpdate {
-	ftu.mutation.AddFileIDs(ids...)
-	return ftu
+func (m *FileTypeUpdate) AddFileIDs(ids ...int) *FileTypeUpdate {
+	m.mutation.AddFileIDs(ids...)
+	return m
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (ftu *FileTypeUpdate) AddFiles(f ...*File) *FileTypeUpdate {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (m *FileTypeUpdate) AddFiles(v ...*File) *FileTypeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ftu.AddFileIDs(ids...)
+	return m.AddFileIDs(ids...)
 }
 
 // Mutation returns the FileTypeMutation object of the builder.
-func (ftu *FileTypeUpdate) Mutation() *FileTypeMutation {
-	return ftu.mutation
+func (m *FileTypeUpdate) Mutation() *FileTypeMutation {
+	return m.mutation
 }
 
 // ClearFiles clears all "files" edges to the File entity.
-func (ftu *FileTypeUpdate) ClearFiles() *FileTypeUpdate {
-	ftu.mutation.ClearFiles()
-	return ftu
+func (u *FileTypeUpdate) ClearFiles() *FileTypeUpdate {
+	u.mutation.ClearFiles()
+	return u
 }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
-func (ftu *FileTypeUpdate) RemoveFileIDs(ids ...int) *FileTypeUpdate {
-	ftu.mutation.RemoveFileIDs(ids...)
-	return ftu
+func (u *FileTypeUpdate) RemoveFileIDs(ids ...int) *FileTypeUpdate {
+	u.mutation.RemoveFileIDs(ids...)
+	return u
 }
 
 // RemoveFiles removes "files" edges to File entities.
-func (ftu *FileTypeUpdate) RemoveFiles(f ...*File) *FileTypeUpdate {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (u *FileTypeUpdate) RemoveFiles(v ...*File) *FileTypeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ftu.RemoveFileIDs(ids...)
+	return u.RemoveFileIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (ftu *FileTypeUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, ftu.sqlSave, ftu.mutation, ftu.hooks)
+func (u *FileTypeUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ftu *FileTypeUpdate) SaveX(ctx context.Context) int {
-	affected, err := ftu.Save(ctx)
+func (u *FileTypeUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -131,26 +131,26 @@ func (ftu *FileTypeUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (ftu *FileTypeUpdate) Exec(ctx context.Context) error {
-	_, err := ftu.Save(ctx)
+func (u *FileTypeUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ftu *FileTypeUpdate) ExecX(ctx context.Context) {
-	if err := ftu.Exec(ctx); err != nil {
+func (u *FileTypeUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ftu *FileTypeUpdate) check() error {
-	if v, ok := ftu.mutation.GetType(); ok {
+func (u *FileTypeUpdate) check() error {
+	if v, ok := u.mutation.GetType(); ok {
 		if err := filetype.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "FileType.type": %w`, err)}
 		}
 	}
-	if v, ok := ftu.mutation.State(); ok {
+	if v, ok := u.mutation.State(); ok {
 		if err := filetype.StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "FileType.state": %w`, err)}
 		}
@@ -159,33 +159,33 @@ func (ftu *FileTypeUpdate) check() error {
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (ftu *FileTypeUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *FileTypeUpdate {
-	ftu.modifiers = append(ftu.modifiers, modifiers...)
-	return ftu
+func (u *FileTypeUpdate) Modify(modifiers ...func(*sql.UpdateBuilder)) *FileTypeUpdate {
+	u.modifiers = append(u.modifiers, modifiers...)
+	return u
 }
 
-func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := ftu.check(); err != nil {
-		return n, err
+func (u *FileTypeUpdate) sqlSave(ctx context.Context) (_n int, err error) {
+	if err := u.check(); err != nil {
+		return _n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(filetype.Table, filetype.Columns, sqlgraph.NewFieldSpec(filetype.FieldID, field.TypeInt))
-	if ps := ftu.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := ftu.mutation.Name(); ok {
+	if value, ok := u.mutation.Name(); ok {
 		_spec.SetField(filetype.FieldName, field.TypeString, value)
 	}
-	if value, ok := ftu.mutation.GetType(); ok {
+	if value, ok := u.mutation.GetType(); ok {
 		_spec.SetField(filetype.FieldType, field.TypeEnum, value)
 	}
-	if value, ok := ftu.mutation.State(); ok {
+	if value, ok := u.mutation.State(); ok {
 		_spec.SetField(filetype.FieldState, field.TypeEnum, value)
 	}
-	if ftu.mutation.FilesCleared() {
+	if u.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -198,7 +198,7 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ftu.mutation.RemovedFilesIDs(); len(nodes) > 0 && !ftu.mutation.FilesCleared() {
+	if nodes := u.mutation.RemovedFilesIDs(); len(nodes) > 0 && !u.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -214,7 +214,7 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ftu.mutation.FilesIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.FilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -230,8 +230,8 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.AddModifiers(ftu.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, ftu.driver, _spec); err != nil {
+	_spec.AddModifiers(u.modifiers...)
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{filetype.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -239,8 +239,8 @@ func (ftu *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	ftu.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // FileTypeUpdateOne is the builder for updating a single FileType entity.
@@ -253,109 +253,109 @@ type FileTypeUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (ftuo *FileTypeUpdateOne) SetName(s string) *FileTypeUpdateOne {
-	ftuo.mutation.SetName(s)
-	return ftuo
+func (m *FileTypeUpdateOne) SetName(v string) *FileTypeUpdateOne {
+	m.mutation.SetName(v)
+	return m
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (ftuo *FileTypeUpdateOne) SetNillableName(s *string) *FileTypeUpdateOne {
-	if s != nil {
-		ftuo.SetName(*s)
+func (m *FileTypeUpdateOne) SetNillableName(v *string) *FileTypeUpdateOne {
+	if v != nil {
+		m.SetName(*v)
 	}
-	return ftuo
+	return m
 }
 
 // SetType sets the "type" field.
-func (ftuo *FileTypeUpdateOne) SetType(f filetype.Type) *FileTypeUpdateOne {
-	ftuo.mutation.SetType(f)
-	return ftuo
+func (m *FileTypeUpdateOne) SetType(v filetype.Type) *FileTypeUpdateOne {
+	m.mutation.SetType(v)
+	return m
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (ftuo *FileTypeUpdateOne) SetNillableType(f *filetype.Type) *FileTypeUpdateOne {
-	if f != nil {
-		ftuo.SetType(*f)
+func (m *FileTypeUpdateOne) SetNillableType(v *filetype.Type) *FileTypeUpdateOne {
+	if v != nil {
+		m.SetType(*v)
 	}
-	return ftuo
+	return m
 }
 
 // SetState sets the "state" field.
-func (ftuo *FileTypeUpdateOne) SetState(f filetype.State) *FileTypeUpdateOne {
-	ftuo.mutation.SetState(f)
-	return ftuo
+func (m *FileTypeUpdateOne) SetState(v filetype.State) *FileTypeUpdateOne {
+	m.mutation.SetState(v)
+	return m
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
-func (ftuo *FileTypeUpdateOne) SetNillableState(f *filetype.State) *FileTypeUpdateOne {
-	if f != nil {
-		ftuo.SetState(*f)
+func (m *FileTypeUpdateOne) SetNillableState(v *filetype.State) *FileTypeUpdateOne {
+	if v != nil {
+		m.SetState(*v)
 	}
-	return ftuo
+	return m
 }
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
-func (ftuo *FileTypeUpdateOne) AddFileIDs(ids ...int) *FileTypeUpdateOne {
-	ftuo.mutation.AddFileIDs(ids...)
-	return ftuo
+func (m *FileTypeUpdateOne) AddFileIDs(ids ...int) *FileTypeUpdateOne {
+	m.mutation.AddFileIDs(ids...)
+	return m
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (ftuo *FileTypeUpdateOne) AddFiles(f ...*File) *FileTypeUpdateOne {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (m *FileTypeUpdateOne) AddFiles(v ...*File) *FileTypeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ftuo.AddFileIDs(ids...)
+	return m.AddFileIDs(ids...)
 }
 
 // Mutation returns the FileTypeMutation object of the builder.
-func (ftuo *FileTypeUpdateOne) Mutation() *FileTypeMutation {
-	return ftuo.mutation
+func (m *FileTypeUpdateOne) Mutation() *FileTypeMutation {
+	return m.mutation
 }
 
 // ClearFiles clears all "files" edges to the File entity.
-func (ftuo *FileTypeUpdateOne) ClearFiles() *FileTypeUpdateOne {
-	ftuo.mutation.ClearFiles()
-	return ftuo
+func (u *FileTypeUpdateOne) ClearFiles() *FileTypeUpdateOne {
+	u.mutation.ClearFiles()
+	return u
 }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
-func (ftuo *FileTypeUpdateOne) RemoveFileIDs(ids ...int) *FileTypeUpdateOne {
-	ftuo.mutation.RemoveFileIDs(ids...)
-	return ftuo
+func (u *FileTypeUpdateOne) RemoveFileIDs(ids ...int) *FileTypeUpdateOne {
+	u.mutation.RemoveFileIDs(ids...)
+	return u
 }
 
 // RemoveFiles removes "files" edges to File entities.
-func (ftuo *FileTypeUpdateOne) RemoveFiles(f ...*File) *FileTypeUpdateOne {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (u *FileTypeUpdateOne) RemoveFiles(v ...*File) *FileTypeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ftuo.RemoveFileIDs(ids...)
+	return u.RemoveFileIDs(ids...)
 }
 
 // Where appends a list predicates to the FileTypeUpdate builder.
-func (ftuo *FileTypeUpdateOne) Where(ps ...predicate.FileType) *FileTypeUpdateOne {
-	ftuo.mutation.Where(ps...)
-	return ftuo
+func (u *FileTypeUpdateOne) Where(ps ...predicate.FileType) *FileTypeUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (ftuo *FileTypeUpdateOne) Select(field string, fields ...string) *FileTypeUpdateOne {
-	ftuo.fields = append([]string{field}, fields...)
-	return ftuo
+func (u *FileTypeUpdateOne) Select(field string, fields ...string) *FileTypeUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated FileType entity.
-func (ftuo *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
-	return withHooks(ctx, ftuo.sqlSave, ftuo.mutation, ftuo.hooks)
+func (u *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ftuo *FileTypeUpdateOne) SaveX(ctx context.Context) *FileType {
-	node, err := ftuo.Save(ctx)
+func (u *FileTypeUpdateOne) SaveX(ctx context.Context) *FileType {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -363,26 +363,26 @@ func (ftuo *FileTypeUpdateOne) SaveX(ctx context.Context) *FileType {
 }
 
 // Exec executes the query on the entity.
-func (ftuo *FileTypeUpdateOne) Exec(ctx context.Context) error {
-	_, err := ftuo.Save(ctx)
+func (u *FileTypeUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ftuo *FileTypeUpdateOne) ExecX(ctx context.Context) {
-	if err := ftuo.Exec(ctx); err != nil {
+func (u *FileTypeUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ftuo *FileTypeUpdateOne) check() error {
-	if v, ok := ftuo.mutation.GetType(); ok {
+func (u *FileTypeUpdateOne) check() error {
+	if v, ok := u.mutation.GetType(); ok {
 		if err := filetype.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "FileType.type": %w`, err)}
 		}
 	}
-	if v, ok := ftuo.mutation.State(); ok {
+	if v, ok := u.mutation.State(); ok {
 		if err := filetype.StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "FileType.state": %w`, err)}
 		}
@@ -391,22 +391,22 @@ func (ftuo *FileTypeUpdateOne) check() error {
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (ftuo *FileTypeUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *FileTypeUpdateOne {
-	ftuo.modifiers = append(ftuo.modifiers, modifiers...)
-	return ftuo
+func (u *FileTypeUpdateOne) Modify(modifiers ...func(*sql.UpdateBuilder)) *FileTypeUpdateOne {
+	u.modifiers = append(u.modifiers, modifiers...)
+	return u
 }
 
-func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, err error) {
-	if err := ftuo.check(); err != nil {
-		return _node, err
+func (u *FileTypeUpdateOne) sqlSave(ctx context.Context) (_n *FileType, err error) {
+	if err := u.check(); err != nil {
+		return _n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(filetype.Table, filetype.Columns, sqlgraph.NewFieldSpec(filetype.FieldID, field.TypeInt))
-	id, ok := ftuo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "FileType.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := ftuo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, filetype.FieldID)
 		for _, f := range fields {
@@ -418,23 +418,23 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, er
 			}
 		}
 	}
-	if ps := ftuo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := ftuo.mutation.Name(); ok {
+	if value, ok := u.mutation.Name(); ok {
 		_spec.SetField(filetype.FieldName, field.TypeString, value)
 	}
-	if value, ok := ftuo.mutation.GetType(); ok {
+	if value, ok := u.mutation.GetType(); ok {
 		_spec.SetField(filetype.FieldType, field.TypeEnum, value)
 	}
-	if value, ok := ftuo.mutation.State(); ok {
+	if value, ok := u.mutation.State(); ok {
 		_spec.SetField(filetype.FieldState, field.TypeEnum, value)
 	}
-	if ftuo.mutation.FilesCleared() {
+	if u.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -447,7 +447,7 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ftuo.mutation.RemovedFilesIDs(); len(nodes) > 0 && !ftuo.mutation.FilesCleared() {
+	if nodes := u.mutation.RemovedFilesIDs(); len(nodes) > 0 && !u.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -463,7 +463,7 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ftuo.mutation.FilesIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.FilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -479,11 +479,11 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.AddModifiers(ftuo.modifiers...)
-	_node = &FileType{config: ftuo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, ftuo.driver, _spec); err != nil {
+	_spec.AddModifiers(u.modifiers...)
+	_n = &FileType{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{filetype.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -491,6 +491,6 @@ func (ftuo *FileTypeUpdateOne) sqlSave(ctx context.Context) (_node *FileType, er
 		}
 		return nil, err
 	}
-	ftuo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

@@ -84,9 +84,9 @@ func (*RoleUser) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the RoleUser fields.
-func (ru *RoleUser) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *RoleUser) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -94,22 +94,22 @@ func (ru *RoleUser) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				ru.CreatedAt = value.Time
+				m.CreatedAt = value.Time
 			}
 		case roleuser.FieldRoleID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field role_id", values[i])
 			} else if value.Valid {
-				ru.RoleID = int(value.Int64)
+				m.RoleID = int(value.Int64)
 			}
 		case roleuser.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				ru.UserID = int(value.Int64)
+				m.UserID = int(value.Int64)
 			}
 		default:
-			ru.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -117,50 +117,50 @@ func (ru *RoleUser) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the RoleUser.
 // This includes values selected through modifiers, order, etc.
-func (ru *RoleUser) Value(name string) (ent.Value, error) {
-	return ru.selectValues.Get(name)
+func (m *RoleUser) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryRole queries the "role" edge of the RoleUser entity.
-func (ru *RoleUser) QueryRole() *RoleQuery {
-	return NewRoleUserClient(ru.config).QueryRole(ru)
+func (m *RoleUser) QueryRole() *RoleQuery {
+	return NewRoleUserClient(m.config).QueryRole(m)
 }
 
 // QueryUser queries the "user" edge of the RoleUser entity.
-func (ru *RoleUser) QueryUser() *UserQuery {
-	return NewRoleUserClient(ru.config).QueryUser(ru)
+func (m *RoleUser) QueryUser() *UserQuery {
+	return NewRoleUserClient(m.config).QueryUser(m)
 }
 
 // Update returns a builder for updating this RoleUser.
 // Note that you need to call RoleUser.Unwrap() before calling this method if this RoleUser
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (ru *RoleUser) Update() *RoleUserUpdateOne {
-	return NewRoleUserClient(ru.config).UpdateOne(ru)
+func (m *RoleUser) Update() *RoleUserUpdateOne {
+	return NewRoleUserClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the RoleUser entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (ru *RoleUser) Unwrap() *RoleUser {
-	_tx, ok := ru.config.driver.(*txDriver)
+func (m *RoleUser) Unwrap() *RoleUser {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: RoleUser is not a transactional entity")
 	}
-	ru.config.driver = _tx.drv
-	return ru
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (ru *RoleUser) String() string {
+func (m *RoleUser) String() string {
 	var builder strings.Builder
 	builder.WriteString("RoleUser(")
 	builder.WriteString("created_at=")
-	builder.WriteString(ru.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("role_id=")
-	builder.WriteString(fmt.Sprintf("%v", ru.RoleID))
+	builder.WriteString(fmt.Sprintf("%v", m.RoleID))
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", ru.UserID))
+	builder.WriteString(fmt.Sprintf("%v", m.UserID))
 	builder.WriteByte(')')
 	return builder.String()
 }

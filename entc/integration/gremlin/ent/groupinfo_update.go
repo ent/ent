@@ -28,95 +28,95 @@ type GroupInfoUpdate struct {
 }
 
 // Where appends a list predicates to the GroupInfoUpdate builder.
-func (giu *GroupInfoUpdate) Where(ps ...predicate.GroupInfo) *GroupInfoUpdate {
-	giu.mutation.Where(ps...)
-	return giu
+func (u *GroupInfoUpdate) Where(ps ...predicate.GroupInfo) *GroupInfoUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetDesc sets the "desc" field.
-func (giu *GroupInfoUpdate) SetDesc(s string) *GroupInfoUpdate {
-	giu.mutation.SetDesc(s)
-	return giu
+func (m *GroupInfoUpdate) SetDesc(v string) *GroupInfoUpdate {
+	m.mutation.SetDesc(v)
+	return m
 }
 
 // SetNillableDesc sets the "desc" field if the given value is not nil.
-func (giu *GroupInfoUpdate) SetNillableDesc(s *string) *GroupInfoUpdate {
-	if s != nil {
-		giu.SetDesc(*s)
+func (m *GroupInfoUpdate) SetNillableDesc(v *string) *GroupInfoUpdate {
+	if v != nil {
+		m.SetDesc(*v)
 	}
-	return giu
+	return m
 }
 
 // SetMaxUsers sets the "max_users" field.
-func (giu *GroupInfoUpdate) SetMaxUsers(i int) *GroupInfoUpdate {
-	giu.mutation.ResetMaxUsers()
-	giu.mutation.SetMaxUsers(i)
-	return giu
+func (m *GroupInfoUpdate) SetMaxUsers(v int) *GroupInfoUpdate {
+	m.mutation.ResetMaxUsers()
+	m.mutation.SetMaxUsers(v)
+	return m
 }
 
 // SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (giu *GroupInfoUpdate) SetNillableMaxUsers(i *int) *GroupInfoUpdate {
-	if i != nil {
-		giu.SetMaxUsers(*i)
+func (m *GroupInfoUpdate) SetNillableMaxUsers(v *int) *GroupInfoUpdate {
+	if v != nil {
+		m.SetMaxUsers(*v)
 	}
-	return giu
+	return m
 }
 
-// AddMaxUsers adds i to the "max_users" field.
-func (giu *GroupInfoUpdate) AddMaxUsers(i int) *GroupInfoUpdate {
-	giu.mutation.AddMaxUsers(i)
-	return giu
+// AddMaxUsers adds value to the "max_users" field.
+func (m *GroupInfoUpdate) AddMaxUsers(v int) *GroupInfoUpdate {
+	m.mutation.AddMaxUsers(v)
+	return m
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (giu *GroupInfoUpdate) AddGroupIDs(ids ...string) *GroupInfoUpdate {
-	giu.mutation.AddGroupIDs(ids...)
-	return giu
+func (m *GroupInfoUpdate) AddGroupIDs(ids ...string) *GroupInfoUpdate {
+	m.mutation.AddGroupIDs(ids...)
+	return m
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (giu *GroupInfoUpdate) AddGroups(g ...*Group) *GroupInfoUpdate {
-	ids := make([]string, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (m *GroupInfoUpdate) AddGroups(v ...*Group) *GroupInfoUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return giu.AddGroupIDs(ids...)
+	return m.AddGroupIDs(ids...)
 }
 
 // Mutation returns the GroupInfoMutation object of the builder.
-func (giu *GroupInfoUpdate) Mutation() *GroupInfoMutation {
-	return giu.mutation
+func (m *GroupInfoUpdate) Mutation() *GroupInfoMutation {
+	return m.mutation
 }
 
 // ClearGroups clears all "groups" edges to the Group entity.
-func (giu *GroupInfoUpdate) ClearGroups() *GroupInfoUpdate {
-	giu.mutation.ClearGroups()
-	return giu
+func (u *GroupInfoUpdate) ClearGroups() *GroupInfoUpdate {
+	u.mutation.ClearGroups()
+	return u
 }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
-func (giu *GroupInfoUpdate) RemoveGroupIDs(ids ...string) *GroupInfoUpdate {
-	giu.mutation.RemoveGroupIDs(ids...)
-	return giu
+func (u *GroupInfoUpdate) RemoveGroupIDs(ids ...string) *GroupInfoUpdate {
+	u.mutation.RemoveGroupIDs(ids...)
+	return u
 }
 
 // RemoveGroups removes "groups" edges to Group entities.
-func (giu *GroupInfoUpdate) RemoveGroups(g ...*Group) *GroupInfoUpdate {
-	ids := make([]string, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (u *GroupInfoUpdate) RemoveGroups(v ...*Group) *GroupInfoUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return giu.RemoveGroupIDs(ids...)
+	return u.RemoveGroupIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (giu *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, giu.gremlinSave, giu.mutation, giu.hooks)
+func (u *GroupInfoUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.gremlinSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (giu *GroupInfoUpdate) SaveX(ctx context.Context) int {
-	affected, err := giu.Save(ctx)
+func (u *GroupInfoUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -124,39 +124,39 @@ func (giu *GroupInfoUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (giu *GroupInfoUpdate) Exec(ctx context.Context) error {
-	_, err := giu.Save(ctx)
+func (u *GroupInfoUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (giu *GroupInfoUpdate) ExecX(ctx context.Context) {
-	if err := giu.Exec(ctx); err != nil {
+func (u *GroupInfoUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (giu *GroupInfoUpdate) gremlinSave(ctx context.Context) (int, error) {
+func (u *GroupInfoUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := giu.gremlin().Query()
-	if err := giu.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := u.gremlin().Query()
+	if err := u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return 0, err
 	}
-	giu.mutation.done = true
+	u.mutation.done = true
 	return res.ReadInt()
 }
 
-func (giu *GroupInfoUpdate) gremlin() *dsl.Traversal {
+func (u *GroupInfoUpdate) gremlin() *dsl.Traversal {
 	type constraint struct {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
 	constraints := make([]*constraint, 0, 1)
 	v := g.V().HasLabel(groupinfo.Label)
-	for _, p := range giu.mutation.predicates {
+	for _, p := range u.mutation.predicates {
 		p(v)
 	}
 	var (
@@ -165,20 +165,20 @@ func (giu *GroupInfoUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value, ok := giu.mutation.Desc(); ok {
+	if value, ok := u.mutation.Desc(); ok {
 		v.Property(dsl.Single, groupinfo.FieldDesc, value)
 	}
-	if value, ok := giu.mutation.MaxUsers(); ok {
+	if value, ok := u.mutation.MaxUsers(); ok {
 		v.Property(dsl.Single, groupinfo.FieldMaxUsers, value)
 	}
-	if value, ok := giu.mutation.AddedMaxUsers(); ok {
+	if value, ok := u.mutation.AddedMaxUsers(); ok {
 		v.Property(dsl.Single, groupinfo.FieldMaxUsers, __.Union(__.Values(groupinfo.FieldMaxUsers), __.Constant(value)).Sum())
 	}
-	for _, id := range giu.mutation.RemovedGroupsIDs() {
+	for _, id := range u.mutation.RemovedGroupsIDs() {
 		tr := rv.Clone().InE(group.InfoLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for _, id := range giu.mutation.GroupsIDs() {
+	for _, id := range u.mutation.GroupsIDs() {
 		v.AddE(group.InfoLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(group.InfoLabel).OutV().HasID(id).Count(),
@@ -209,102 +209,102 @@ type GroupInfoUpdateOne struct {
 }
 
 // SetDesc sets the "desc" field.
-func (giuo *GroupInfoUpdateOne) SetDesc(s string) *GroupInfoUpdateOne {
-	giuo.mutation.SetDesc(s)
-	return giuo
+func (m *GroupInfoUpdateOne) SetDesc(v string) *GroupInfoUpdateOne {
+	m.mutation.SetDesc(v)
+	return m
 }
 
 // SetNillableDesc sets the "desc" field if the given value is not nil.
-func (giuo *GroupInfoUpdateOne) SetNillableDesc(s *string) *GroupInfoUpdateOne {
-	if s != nil {
-		giuo.SetDesc(*s)
+func (m *GroupInfoUpdateOne) SetNillableDesc(v *string) *GroupInfoUpdateOne {
+	if v != nil {
+		m.SetDesc(*v)
 	}
-	return giuo
+	return m
 }
 
 // SetMaxUsers sets the "max_users" field.
-func (giuo *GroupInfoUpdateOne) SetMaxUsers(i int) *GroupInfoUpdateOne {
-	giuo.mutation.ResetMaxUsers()
-	giuo.mutation.SetMaxUsers(i)
-	return giuo
+func (m *GroupInfoUpdateOne) SetMaxUsers(v int) *GroupInfoUpdateOne {
+	m.mutation.ResetMaxUsers()
+	m.mutation.SetMaxUsers(v)
+	return m
 }
 
 // SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (giuo *GroupInfoUpdateOne) SetNillableMaxUsers(i *int) *GroupInfoUpdateOne {
-	if i != nil {
-		giuo.SetMaxUsers(*i)
+func (m *GroupInfoUpdateOne) SetNillableMaxUsers(v *int) *GroupInfoUpdateOne {
+	if v != nil {
+		m.SetMaxUsers(*v)
 	}
-	return giuo
+	return m
 }
 
-// AddMaxUsers adds i to the "max_users" field.
-func (giuo *GroupInfoUpdateOne) AddMaxUsers(i int) *GroupInfoUpdateOne {
-	giuo.mutation.AddMaxUsers(i)
-	return giuo
+// AddMaxUsers adds value to the "max_users" field.
+func (m *GroupInfoUpdateOne) AddMaxUsers(v int) *GroupInfoUpdateOne {
+	m.mutation.AddMaxUsers(v)
+	return m
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (giuo *GroupInfoUpdateOne) AddGroupIDs(ids ...string) *GroupInfoUpdateOne {
-	giuo.mutation.AddGroupIDs(ids...)
-	return giuo
+func (m *GroupInfoUpdateOne) AddGroupIDs(ids ...string) *GroupInfoUpdateOne {
+	m.mutation.AddGroupIDs(ids...)
+	return m
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (giuo *GroupInfoUpdateOne) AddGroups(g ...*Group) *GroupInfoUpdateOne {
-	ids := make([]string, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (m *GroupInfoUpdateOne) AddGroups(v ...*Group) *GroupInfoUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return giuo.AddGroupIDs(ids...)
+	return m.AddGroupIDs(ids...)
 }
 
 // Mutation returns the GroupInfoMutation object of the builder.
-func (giuo *GroupInfoUpdateOne) Mutation() *GroupInfoMutation {
-	return giuo.mutation
+func (m *GroupInfoUpdateOne) Mutation() *GroupInfoMutation {
+	return m.mutation
 }
 
 // ClearGroups clears all "groups" edges to the Group entity.
-func (giuo *GroupInfoUpdateOne) ClearGroups() *GroupInfoUpdateOne {
-	giuo.mutation.ClearGroups()
-	return giuo
+func (u *GroupInfoUpdateOne) ClearGroups() *GroupInfoUpdateOne {
+	u.mutation.ClearGroups()
+	return u
 }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
-func (giuo *GroupInfoUpdateOne) RemoveGroupIDs(ids ...string) *GroupInfoUpdateOne {
-	giuo.mutation.RemoveGroupIDs(ids...)
-	return giuo
+func (u *GroupInfoUpdateOne) RemoveGroupIDs(ids ...string) *GroupInfoUpdateOne {
+	u.mutation.RemoveGroupIDs(ids...)
+	return u
 }
 
 // RemoveGroups removes "groups" edges to Group entities.
-func (giuo *GroupInfoUpdateOne) RemoveGroups(g ...*Group) *GroupInfoUpdateOne {
-	ids := make([]string, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (u *GroupInfoUpdateOne) RemoveGroups(v ...*Group) *GroupInfoUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return giuo.RemoveGroupIDs(ids...)
+	return u.RemoveGroupIDs(ids...)
 }
 
 // Where appends a list predicates to the GroupInfoUpdate builder.
-func (giuo *GroupInfoUpdateOne) Where(ps ...predicate.GroupInfo) *GroupInfoUpdateOne {
-	giuo.mutation.Where(ps...)
-	return giuo
+func (u *GroupInfoUpdateOne) Where(ps ...predicate.GroupInfo) *GroupInfoUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (giuo *GroupInfoUpdateOne) Select(field string, fields ...string) *GroupInfoUpdateOne {
-	giuo.fields = append([]string{field}, fields...)
-	return giuo
+func (u *GroupInfoUpdateOne) Select(field string, fields ...string) *GroupInfoUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated GroupInfo entity.
-func (giuo *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
-	return withHooks(ctx, giuo.gremlinSave, giuo.mutation, giuo.hooks)
+func (u *GroupInfoUpdateOne) Save(ctx context.Context) (*GroupInfo, error) {
+	return withHooks(ctx, u.gremlinSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (giuo *GroupInfoUpdateOne) SaveX(ctx context.Context) *GroupInfo {
-	node, err := giuo.Save(ctx)
+func (u *GroupInfoUpdateOne) SaveX(ctx context.Context) *GroupInfo {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -312,40 +312,40 @@ func (giuo *GroupInfoUpdateOne) SaveX(ctx context.Context) *GroupInfo {
 }
 
 // Exec executes the query on the entity.
-func (giuo *GroupInfoUpdateOne) Exec(ctx context.Context) error {
-	_, err := giuo.Save(ctx)
+func (u *GroupInfoUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (giuo *GroupInfoUpdateOne) ExecX(ctx context.Context) {
-	if err := giuo.Exec(ctx); err != nil {
+func (u *GroupInfoUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (giuo *GroupInfoUpdateOne) gremlinSave(ctx context.Context) (*GroupInfo, error) {
+func (u *GroupInfoUpdateOne) gremlinSave(ctx context.Context) (*GroupInfo, error) {
 	res := &gremlin.Response{}
-	id, ok := giuo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "GroupInfo.id" for update`)}
 	}
-	query, bindings := giuo.gremlin(id).Query()
-	if err := giuo.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := u.gremlin(id).Query()
+	if err := u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	giuo.mutation.done = true
-	gi := &GroupInfo{config: giuo.config}
-	if err := gi.FromResponse(res); err != nil {
+	u.mutation.done = true
+	m := &GroupInfo{config: u.config}
+	if err := m.FromResponse(res); err != nil {
 		return nil, err
 	}
-	return gi, nil
+	return m, nil
 }
 
-func (giuo *GroupInfoUpdateOne) gremlin(id string) *dsl.Traversal {
+func (u *GroupInfoUpdateOne) gremlin(id string) *dsl.Traversal {
 	type constraint struct {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
@@ -358,30 +358,30 @@ func (giuo *GroupInfoUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value, ok := giuo.mutation.Desc(); ok {
+	if value, ok := u.mutation.Desc(); ok {
 		v.Property(dsl.Single, groupinfo.FieldDesc, value)
 	}
-	if value, ok := giuo.mutation.MaxUsers(); ok {
+	if value, ok := u.mutation.MaxUsers(); ok {
 		v.Property(dsl.Single, groupinfo.FieldMaxUsers, value)
 	}
-	if value, ok := giuo.mutation.AddedMaxUsers(); ok {
+	if value, ok := u.mutation.AddedMaxUsers(); ok {
 		v.Property(dsl.Single, groupinfo.FieldMaxUsers, __.Union(__.Values(groupinfo.FieldMaxUsers), __.Constant(value)).Sum())
 	}
-	for _, id := range giuo.mutation.RemovedGroupsIDs() {
+	for _, id := range u.mutation.RemovedGroupsIDs() {
 		tr := rv.Clone().InE(group.InfoLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for _, id := range giuo.mutation.GroupsIDs() {
+	for _, id := range u.mutation.GroupsIDs() {
 		v.AddE(group.InfoLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(group.InfoLabel).OutV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(groupinfo.Label, group.InfoLabel, id)),
 		})
 	}
-	if len(giuo.fields) > 0 {
-		fields := make([]any, 0, len(giuo.fields)+1)
+	if len(u.fields) > 0 {
+		fields := make([]any, 0, len(u.fields)+1)
 		fields = append(fields, true)
-		for _, f := range giuo.fields {
+		for _, f := range u.fields {
 			fields = append(fields, f)
 		}
 		v.ValueMap(fields...)

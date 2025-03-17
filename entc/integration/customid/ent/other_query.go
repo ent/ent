@@ -33,40 +33,40 @@ type OtherQuery struct {
 }
 
 // Where adds a new predicate for the OtherQuery builder.
-func (oq *OtherQuery) Where(ps ...predicate.Other) *OtherQuery {
-	oq.predicates = append(oq.predicates, ps...)
-	return oq
+func (q *OtherQuery) Where(ps ...predicate.Other) *OtherQuery {
+	q.predicates = append(q.predicates, ps...)
+	return q
 }
 
 // Limit the number of records to be returned by this query.
-func (oq *OtherQuery) Limit(limit int) *OtherQuery {
-	oq.ctx.Limit = &limit
-	return oq
+func (q *OtherQuery) Limit(limit int) *OtherQuery {
+	q.ctx.Limit = &limit
+	return q
 }
 
 // Offset to start from.
-func (oq *OtherQuery) Offset(offset int) *OtherQuery {
-	oq.ctx.Offset = &offset
-	return oq
+func (q *OtherQuery) Offset(offset int) *OtherQuery {
+	q.ctx.Offset = &offset
+	return q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (oq *OtherQuery) Unique(unique bool) *OtherQuery {
-	oq.ctx.Unique = &unique
-	return oq
+func (q *OtherQuery) Unique(unique bool) *OtherQuery {
+	q.ctx.Unique = &unique
+	return q
 }
 
 // Order specifies how the records should be ordered.
-func (oq *OtherQuery) Order(o ...other.OrderOption) *OtherQuery {
-	oq.order = append(oq.order, o...)
-	return oq
+func (q *OtherQuery) Order(o ...other.OrderOption) *OtherQuery {
+	q.order = append(q.order, o...)
+	return q
 }
 
 // First returns the first Other entity from the query.
 // Returns a *NotFoundError when no Other was found.
-func (oq *OtherQuery) First(ctx context.Context) (*Other, error) {
-	nodes, err := oq.Limit(1).All(setContextOp(ctx, oq.ctx, ent.OpQueryFirst))
+func (q *OtherQuery) First(ctx context.Context) (*Other, error) {
+	nodes, err := q.Limit(1).All(setContextOp(ctx, q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -77,8 +77,8 @@ func (oq *OtherQuery) First(ctx context.Context) (*Other, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (oq *OtherQuery) FirstX(ctx context.Context) *Other {
-	node, err := oq.First(ctx)
+func (q *OtherQuery) FirstX(ctx context.Context) *Other {
+	node, err := q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -87,9 +87,9 @@ func (oq *OtherQuery) FirstX(ctx context.Context) *Other {
 
 // FirstID returns the first Other ID from the query.
 // Returns a *NotFoundError when no Other ID was found.
-func (oq *OtherQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
+func (q *OtherQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
 	var ids []sid.ID
-	if ids, err = oq.Limit(1).IDs(setContextOp(ctx, oq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = q.Limit(1).IDs(setContextOp(ctx, q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -100,8 +100,8 @@ func (oq *OtherQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (oq *OtherQuery) FirstIDX(ctx context.Context) sid.ID {
-	id, err := oq.FirstID(ctx)
+func (q *OtherQuery) FirstIDX(ctx context.Context) sid.ID {
+	id, err := q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -111,8 +111,8 @@ func (oq *OtherQuery) FirstIDX(ctx context.Context) sid.ID {
 // Only returns a single Other entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Other entity is found.
 // Returns a *NotFoundError when no Other entities are found.
-func (oq *OtherQuery) Only(ctx context.Context) (*Other, error) {
-	nodes, err := oq.Limit(2).All(setContextOp(ctx, oq.ctx, ent.OpQueryOnly))
+func (q *OtherQuery) Only(ctx context.Context) (*Other, error) {
+	nodes, err := q.Limit(2).All(setContextOp(ctx, q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -127,8 +127,8 @@ func (oq *OtherQuery) Only(ctx context.Context) (*Other, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (oq *OtherQuery) OnlyX(ctx context.Context) *Other {
-	node, err := oq.Only(ctx)
+func (q *OtherQuery) OnlyX(ctx context.Context) *Other {
+	node, err := q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -138,9 +138,9 @@ func (oq *OtherQuery) OnlyX(ctx context.Context) *Other {
 // OnlyID is like Only, but returns the only Other ID in the query.
 // Returns a *NotSingularError when more than one Other ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (oq *OtherQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
+func (q *OtherQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
 	var ids []sid.ID
-	if ids, err = oq.Limit(2).IDs(setContextOp(ctx, oq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = q.Limit(2).IDs(setContextOp(ctx, q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -155,8 +155,8 @@ func (oq *OtherQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (oq *OtherQuery) OnlyIDX(ctx context.Context) sid.ID {
-	id, err := oq.OnlyID(ctx)
+func (q *OtherQuery) OnlyIDX(ctx context.Context) sid.ID {
+	id, err := q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -164,18 +164,18 @@ func (oq *OtherQuery) OnlyIDX(ctx context.Context) sid.ID {
 }
 
 // All executes the query and returns a list of Others.
-func (oq *OtherQuery) All(ctx context.Context) ([]*Other, error) {
-	ctx = setContextOp(ctx, oq.ctx, ent.OpQueryAll)
-	if err := oq.prepareQuery(ctx); err != nil {
+func (q *OtherQuery) All(ctx context.Context) ([]*Other, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryAll)
+	if err := q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Other, *OtherQuery]()
-	return withInterceptors[[]*Other](ctx, oq, qr, oq.inters)
+	return withInterceptors[[]*Other](ctx, q, qr, q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (oq *OtherQuery) AllX(ctx context.Context) []*Other {
-	nodes, err := oq.All(ctx)
+func (q *OtherQuery) AllX(ctx context.Context) []*Other {
+	nodes, err := q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -183,20 +183,20 @@ func (oq *OtherQuery) AllX(ctx context.Context) []*Other {
 }
 
 // IDs executes the query and returns a list of Other IDs.
-func (oq *OtherQuery) IDs(ctx context.Context) (ids []sid.ID, err error) {
-	if oq.ctx.Unique == nil && oq.path != nil {
-		oq.Unique(true)
+func (q *OtherQuery) IDs(ctx context.Context) (ids []sid.ID, err error) {
+	if q.ctx.Unique == nil && q.path != nil {
+		q.Unique(true)
 	}
-	ctx = setContextOp(ctx, oq.ctx, ent.OpQueryIDs)
-	if err = oq.Select(other.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryIDs)
+	if err = q.Select(other.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (oq *OtherQuery) IDsX(ctx context.Context) []sid.ID {
-	ids, err := oq.IDs(ctx)
+func (q *OtherQuery) IDsX(ctx context.Context) []sid.ID {
+	ids, err := q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -204,17 +204,17 @@ func (oq *OtherQuery) IDsX(ctx context.Context) []sid.ID {
 }
 
 // Count returns the count of the given query.
-func (oq *OtherQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, oq.ctx, ent.OpQueryCount)
-	if err := oq.prepareQuery(ctx); err != nil {
+func (q *OtherQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryCount)
+	if err := q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, oq, querierCount[*OtherQuery](), oq.inters)
+	return withInterceptors[int](ctx, q, querierCount[*OtherQuery](), q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (oq *OtherQuery) CountX(ctx context.Context) int {
-	count, err := oq.Count(ctx)
+func (q *OtherQuery) CountX(ctx context.Context) int {
+	count, err := q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -222,9 +222,9 @@ func (oq *OtherQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (oq *OtherQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, oq.ctx, ent.OpQueryExist)
-	switch _, err := oq.FirstID(ctx); {
+func (q *OtherQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryExist)
+	switch _, err := q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -235,8 +235,8 @@ func (oq *OtherQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (oq *OtherQuery) ExistX(ctx context.Context) bool {
-	exist, err := oq.Exist(ctx)
+func (q *OtherQuery) ExistX(ctx context.Context) bool {
+	exist, err := q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -245,28 +245,28 @@ func (oq *OtherQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the OtherQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (oq *OtherQuery) Clone() *OtherQuery {
-	if oq == nil {
+func (q *OtherQuery) Clone() *OtherQuery {
+	if q == nil {
 		return nil
 	}
 	return &OtherQuery{
-		config:     oq.config,
-		ctx:        oq.ctx.Clone(),
-		order:      append([]other.OrderOption{}, oq.order...),
-		inters:     append([]Interceptor{}, oq.inters...),
-		predicates: append([]predicate.Other{}, oq.predicates...),
+		config:     q.config,
+		ctx:        q.ctx.Clone(),
+		order:      append([]other.OrderOption{}, q.order...),
+		inters:     append([]Interceptor{}, q.inters...),
+		predicates: append([]predicate.Other{}, q.predicates...),
 		// clone intermediate query.
-		sql:  oq.sql.Clone(),
-		path: oq.path,
+		sql:  q.sql.Clone(),
+		path: q.path,
 	}
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
-func (oq *OtherQuery) GroupBy(field string, fields ...string) *OtherGroupBy {
-	oq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &OtherGroupBy{build: oq}
-	grbuild.flds = &oq.ctx.Fields
+func (q *OtherQuery) GroupBy(field string, fields ...string) *OtherGroupBy {
+	q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &OtherGroupBy{build: q}
+	grbuild.flds = &q.ctx.Fields
 	grbuild.label = other.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -274,62 +274,62 @@ func (oq *OtherQuery) GroupBy(field string, fields ...string) *OtherGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (oq *OtherQuery) Select(fields ...string) *OtherSelect {
-	oq.ctx.Fields = append(oq.ctx.Fields, fields...)
-	sbuild := &OtherSelect{OtherQuery: oq}
+func (q *OtherQuery) Select(fields ...string) *OtherSelect {
+	q.ctx.Fields = append(q.ctx.Fields, fields...)
+	sbuild := &OtherSelect{OtherQuery: q}
 	sbuild.label = other.Label
-	sbuild.flds, sbuild.scan = &oq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a OtherSelect configured with the given aggregations.
-func (oq *OtherQuery) Aggregate(fns ...AggregateFunc) *OtherSelect {
-	return oq.Select().Aggregate(fns...)
+func (q *OtherQuery) Aggregate(fns ...AggregateFunc) *OtherSelect {
+	return q.Select().Aggregate(fns...)
 }
 
-func (oq *OtherQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range oq.inters {
+func (q *OtherQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, oq); err != nil {
+			if err := trv.Traverse(ctx, q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range oq.ctx.Fields {
+	for _, f := range q.ctx.Fields {
 		if !other.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if oq.path != nil {
-		prev, err := oq.path(ctx)
+	if q.path != nil {
+		prev, err := q.path(ctx)
 		if err != nil {
 			return err
 		}
-		oq.sql = prev
+		q.sql = prev
 	}
 	return nil
 }
 
-func (oq *OtherQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Other, error) {
+func (q *OtherQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Other, error) {
 	var (
 		nodes = []*Other{}
-		_spec = oq.querySpec()
+		_spec = q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Other).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Other{config: oq.config}
+		node := &Other{config: q.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, oq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -338,24 +338,24 @@ func (oq *OtherQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Other,
 	return nodes, nil
 }
 
-func (oq *OtherQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := oq.querySpec()
-	_spec.Node.Columns = oq.ctx.Fields
-	if len(oq.ctx.Fields) > 0 {
-		_spec.Unique = oq.ctx.Unique != nil && *oq.ctx.Unique
+func (q *OtherQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := q.querySpec()
+	_spec.Node.Columns = q.ctx.Fields
+	if len(q.ctx.Fields) > 0 {
+		_spec.Unique = q.ctx.Unique != nil && *q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, oq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, q.driver, _spec)
 }
 
-func (oq *OtherQuery) querySpec() *sqlgraph.QuerySpec {
+func (q *OtherQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(other.Table, other.Columns, sqlgraph.NewFieldSpec(other.FieldID, field.TypeOther))
-	_spec.From = oq.sql
-	if unique := oq.ctx.Unique; unique != nil {
+	_spec.From = q.sql
+	if unique := q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if oq.path != nil {
+	} else if q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := oq.ctx.Fields; len(fields) > 0 {
+	if fields := q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, other.FieldID)
 		for i := range fields {
@@ -364,20 +364,20 @@ func (oq *OtherQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := oq.predicates; len(ps) > 0 {
+	if ps := q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := oq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := oq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := oq.order; len(ps) > 0 {
+	if ps := q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -387,33 +387,33 @@ func (oq *OtherQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (oq *OtherQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(oq.driver.Dialect())
+func (q *OtherQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(q.driver.Dialect())
 	t1 := builder.Table(other.Table)
-	columns := oq.ctx.Fields
+	columns := q.ctx.Fields
 	if len(columns) == 0 {
 		columns = other.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if oq.sql != nil {
-		selector = oq.sql
+	if q.sql != nil {
+		selector = q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if oq.ctx.Unique != nil && *oq.ctx.Unique {
+	if q.ctx.Unique != nil && *q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range oq.predicates {
+	for _, p := range q.predicates {
 		p(selector)
 	}
-	for _, p := range oq.order {
+	for _, p := range q.order {
 		p(selector)
 	}
-	if offset := oq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := oq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -440,27 +440,27 @@ func (ogb *OtherGroupBy) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*OtherQuery, *OtherGroupBy](ctx, ogb.build, ogb, ogb.build.inters, v)
 }
 
-func (ogb *OtherGroupBy) sqlScan(ctx context.Context, root *OtherQuery, v any) error {
+func (q *OtherGroupBy) sqlScan(ctx context.Context, root *OtherQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(ogb.fns))
-	for _, fn := range ogb.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*ogb.flds)+len(ogb.fns))
-		for _, f := range *ogb.flds {
+		columns := make([]string, 0, len(*q.flds)+len(q.fns))
+		for _, f := range *q.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*ogb.flds...)...)
+	selector.GroupBy(selector.Columns(*q.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ogb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -488,13 +488,13 @@ func (os *OtherSelect) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*OtherQuery, *OtherSelect](ctx, os.OtherQuery, os, os.inters, v)
 }
 
-func (os *OtherSelect) sqlScan(ctx context.Context, root *OtherQuery, v any) error {
+func (q *OtherSelect) sqlScan(ctx context.Context, root *OtherQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(os.fns))
-	for _, fn := range os.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*os.selector.flds); {
+	switch n := len(*q.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -502,7 +502,7 @@ func (os *OtherSelect) sqlScan(ctx context.Context, root *OtherQuery, v any) err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := os.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

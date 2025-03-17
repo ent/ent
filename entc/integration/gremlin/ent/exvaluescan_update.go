@@ -28,114 +28,114 @@ type ExValueScanUpdate struct {
 }
 
 // Where appends a list predicates to the ExValueScanUpdate builder.
-func (evsu *ExValueScanUpdate) Where(ps ...predicate.ExValueScan) *ExValueScanUpdate {
-	evsu.mutation.Where(ps...)
-	return evsu
+func (u *ExValueScanUpdate) Where(ps ...predicate.ExValueScan) *ExValueScanUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetBinary sets the "binary" field.
-func (evsu *ExValueScanUpdate) SetBinary(u *url.URL) *ExValueScanUpdate {
-	evsu.mutation.SetBinary(u)
-	return evsu
+func (m *ExValueScanUpdate) SetBinary(v *url.URL) *ExValueScanUpdate {
+	m.mutation.SetBinary(v)
+	return m
 }
 
 // SetBinaryBytes sets the "binary_bytes" field.
-func (evsu *ExValueScanUpdate) SetBinaryBytes(u *url.URL) *ExValueScanUpdate {
-	evsu.mutation.SetBinaryBytes(u)
-	return evsu
+func (m *ExValueScanUpdate) SetBinaryBytes(v *url.URL) *ExValueScanUpdate {
+	m.mutation.SetBinaryBytes(v)
+	return m
 }
 
 // SetBinaryOptional sets the "binary_optional" field.
-func (evsu *ExValueScanUpdate) SetBinaryOptional(u *url.URL) *ExValueScanUpdate {
-	evsu.mutation.SetBinaryOptional(u)
-	return evsu
+func (m *ExValueScanUpdate) SetBinaryOptional(v *url.URL) *ExValueScanUpdate {
+	m.mutation.SetBinaryOptional(v)
+	return m
 }
 
 // ClearBinaryOptional clears the value of the "binary_optional" field.
-func (evsu *ExValueScanUpdate) ClearBinaryOptional() *ExValueScanUpdate {
-	evsu.mutation.ClearBinaryOptional()
-	return evsu
+func (m *ExValueScanUpdate) ClearBinaryOptional() *ExValueScanUpdate {
+	m.mutation.ClearBinaryOptional()
+	return m
 }
 
 // SetText sets the "text" field.
-func (evsu *ExValueScanUpdate) SetText(b *big.Int) *ExValueScanUpdate {
-	evsu.mutation.SetText(b)
-	return evsu
+func (m *ExValueScanUpdate) SetText(v *big.Int) *ExValueScanUpdate {
+	m.mutation.SetText(v)
+	return m
 }
 
 // SetTextOptional sets the "text_optional" field.
-func (evsu *ExValueScanUpdate) SetTextOptional(b *big.Int) *ExValueScanUpdate {
-	evsu.mutation.SetTextOptional(b)
-	return evsu
+func (m *ExValueScanUpdate) SetTextOptional(v *big.Int) *ExValueScanUpdate {
+	m.mutation.SetTextOptional(v)
+	return m
 }
 
 // ClearTextOptional clears the value of the "text_optional" field.
-func (evsu *ExValueScanUpdate) ClearTextOptional() *ExValueScanUpdate {
-	evsu.mutation.ClearTextOptional()
-	return evsu
+func (m *ExValueScanUpdate) ClearTextOptional() *ExValueScanUpdate {
+	m.mutation.ClearTextOptional()
+	return m
 }
 
 // SetBase64 sets the "base64" field.
-func (evsu *ExValueScanUpdate) SetBase64(s string) *ExValueScanUpdate {
-	evsu.mutation.SetBase64(s)
-	return evsu
+func (m *ExValueScanUpdate) SetBase64(v string) *ExValueScanUpdate {
+	m.mutation.SetBase64(v)
+	return m
 }
 
 // SetNillableBase64 sets the "base64" field if the given value is not nil.
-func (evsu *ExValueScanUpdate) SetNillableBase64(s *string) *ExValueScanUpdate {
-	if s != nil {
-		evsu.SetBase64(*s)
+func (m *ExValueScanUpdate) SetNillableBase64(v *string) *ExValueScanUpdate {
+	if v != nil {
+		m.SetBase64(*v)
 	}
-	return evsu
+	return m
 }
 
 // SetCustom sets the "custom" field.
-func (evsu *ExValueScanUpdate) SetCustom(s string) *ExValueScanUpdate {
-	evsu.mutation.SetCustom(s)
-	return evsu
+func (m *ExValueScanUpdate) SetCustom(v string) *ExValueScanUpdate {
+	m.mutation.SetCustom(v)
+	return m
 }
 
 // SetNillableCustom sets the "custom" field if the given value is not nil.
-func (evsu *ExValueScanUpdate) SetNillableCustom(s *string) *ExValueScanUpdate {
-	if s != nil {
-		evsu.SetCustom(*s)
+func (m *ExValueScanUpdate) SetNillableCustom(v *string) *ExValueScanUpdate {
+	if v != nil {
+		m.SetCustom(*v)
 	}
-	return evsu
+	return m
 }
 
 // SetCustomOptional sets the "custom_optional" field.
-func (evsu *ExValueScanUpdate) SetCustomOptional(s string) *ExValueScanUpdate {
-	evsu.mutation.SetCustomOptional(s)
-	return evsu
+func (m *ExValueScanUpdate) SetCustomOptional(v string) *ExValueScanUpdate {
+	m.mutation.SetCustomOptional(v)
+	return m
 }
 
 // SetNillableCustomOptional sets the "custom_optional" field if the given value is not nil.
-func (evsu *ExValueScanUpdate) SetNillableCustomOptional(s *string) *ExValueScanUpdate {
-	if s != nil {
-		evsu.SetCustomOptional(*s)
+func (m *ExValueScanUpdate) SetNillableCustomOptional(v *string) *ExValueScanUpdate {
+	if v != nil {
+		m.SetCustomOptional(*v)
 	}
-	return evsu
+	return m
 }
 
 // ClearCustomOptional clears the value of the "custom_optional" field.
-func (evsu *ExValueScanUpdate) ClearCustomOptional() *ExValueScanUpdate {
-	evsu.mutation.ClearCustomOptional()
-	return evsu
+func (m *ExValueScanUpdate) ClearCustomOptional() *ExValueScanUpdate {
+	m.mutation.ClearCustomOptional()
+	return m
 }
 
 // Mutation returns the ExValueScanMutation object of the builder.
-func (evsu *ExValueScanUpdate) Mutation() *ExValueScanMutation {
-	return evsu.mutation
+func (m *ExValueScanUpdate) Mutation() *ExValueScanMutation {
+	return m.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (evsu *ExValueScanUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, evsu.gremlinSave, evsu.mutation, evsu.hooks)
+func (u *ExValueScanUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.gremlinSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (evsu *ExValueScanUpdate) SaveX(ctx context.Context) int {
-	affected, err := evsu.Save(ctx)
+func (u *ExValueScanUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -143,71 +143,71 @@ func (evsu *ExValueScanUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (evsu *ExValueScanUpdate) Exec(ctx context.Context) error {
-	_, err := evsu.Save(ctx)
+func (u *ExValueScanUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (evsu *ExValueScanUpdate) ExecX(ctx context.Context) {
-	if err := evsu.Exec(ctx); err != nil {
+func (u *ExValueScanUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (evsu *ExValueScanUpdate) gremlinSave(ctx context.Context) (int, error) {
+func (u *ExValueScanUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := evsu.gremlin().Query()
-	if err := evsu.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := u.gremlin().Query()
+	if err := u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return 0, err
 	}
-	evsu.mutation.done = true
+	u.mutation.done = true
 	return res.ReadInt()
 }
 
-func (evsu *ExValueScanUpdate) gremlin() *dsl.Traversal {
+func (u *ExValueScanUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(exvaluescan.Label)
-	for _, p := range evsu.mutation.predicates {
+	for _, p := range u.mutation.predicates {
 		p(v)
 	}
 	var (
 		trs []*dsl.Traversal
 	)
-	if value, ok := evsu.mutation.Binary(); ok {
+	if value, ok := u.mutation.Binary(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldBinary, value)
 	}
-	if value, ok := evsu.mutation.BinaryBytes(); ok {
+	if value, ok := u.mutation.BinaryBytes(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldBinaryBytes, value)
 	}
-	if value, ok := evsu.mutation.BinaryOptional(); ok {
+	if value, ok := u.mutation.BinaryOptional(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldBinaryOptional, value)
 	}
-	if value, ok := evsu.mutation.Text(); ok {
+	if value, ok := u.mutation.Text(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldText, value)
 	}
-	if value, ok := evsu.mutation.TextOptional(); ok {
+	if value, ok := u.mutation.TextOptional(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldTextOptional, value)
 	}
-	if value, ok := evsu.mutation.Base64(); ok {
+	if value, ok := u.mutation.Base64(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldBase64, value)
 	}
-	if value, ok := evsu.mutation.Custom(); ok {
+	if value, ok := u.mutation.Custom(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldCustom, value)
 	}
-	if value, ok := evsu.mutation.CustomOptional(); ok {
+	if value, ok := u.mutation.CustomOptional(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldCustomOptional, value)
 	}
 	var properties []any
-	if evsu.mutation.BinaryOptionalCleared() {
+	if u.mutation.BinaryOptionalCleared() {
 		properties = append(properties, exvaluescan.FieldBinaryOptional)
 	}
-	if evsu.mutation.TextOptionalCleared() {
+	if u.mutation.TextOptionalCleared() {
 		properties = append(properties, exvaluescan.FieldTextOptional)
 	}
-	if evsu.mutation.CustomOptionalCleared() {
+	if u.mutation.CustomOptionalCleared() {
 		properties = append(properties, exvaluescan.FieldCustomOptional)
 	}
 	if len(properties) > 0 {
@@ -227,121 +227,121 @@ type ExValueScanUpdateOne struct {
 }
 
 // SetBinary sets the "binary" field.
-func (evsuo *ExValueScanUpdateOne) SetBinary(u *url.URL) *ExValueScanUpdateOne {
-	evsuo.mutation.SetBinary(u)
-	return evsuo
+func (m *ExValueScanUpdateOne) SetBinary(v *url.URL) *ExValueScanUpdateOne {
+	m.mutation.SetBinary(v)
+	return m
 }
 
 // SetBinaryBytes sets the "binary_bytes" field.
-func (evsuo *ExValueScanUpdateOne) SetBinaryBytes(u *url.URL) *ExValueScanUpdateOne {
-	evsuo.mutation.SetBinaryBytes(u)
-	return evsuo
+func (m *ExValueScanUpdateOne) SetBinaryBytes(v *url.URL) *ExValueScanUpdateOne {
+	m.mutation.SetBinaryBytes(v)
+	return m
 }
 
 // SetBinaryOptional sets the "binary_optional" field.
-func (evsuo *ExValueScanUpdateOne) SetBinaryOptional(u *url.URL) *ExValueScanUpdateOne {
-	evsuo.mutation.SetBinaryOptional(u)
-	return evsuo
+func (m *ExValueScanUpdateOne) SetBinaryOptional(v *url.URL) *ExValueScanUpdateOne {
+	m.mutation.SetBinaryOptional(v)
+	return m
 }
 
 // ClearBinaryOptional clears the value of the "binary_optional" field.
-func (evsuo *ExValueScanUpdateOne) ClearBinaryOptional() *ExValueScanUpdateOne {
-	evsuo.mutation.ClearBinaryOptional()
-	return evsuo
+func (m *ExValueScanUpdateOne) ClearBinaryOptional() *ExValueScanUpdateOne {
+	m.mutation.ClearBinaryOptional()
+	return m
 }
 
 // SetText sets the "text" field.
-func (evsuo *ExValueScanUpdateOne) SetText(b *big.Int) *ExValueScanUpdateOne {
-	evsuo.mutation.SetText(b)
-	return evsuo
+func (m *ExValueScanUpdateOne) SetText(v *big.Int) *ExValueScanUpdateOne {
+	m.mutation.SetText(v)
+	return m
 }
 
 // SetTextOptional sets the "text_optional" field.
-func (evsuo *ExValueScanUpdateOne) SetTextOptional(b *big.Int) *ExValueScanUpdateOne {
-	evsuo.mutation.SetTextOptional(b)
-	return evsuo
+func (m *ExValueScanUpdateOne) SetTextOptional(v *big.Int) *ExValueScanUpdateOne {
+	m.mutation.SetTextOptional(v)
+	return m
 }
 
 // ClearTextOptional clears the value of the "text_optional" field.
-func (evsuo *ExValueScanUpdateOne) ClearTextOptional() *ExValueScanUpdateOne {
-	evsuo.mutation.ClearTextOptional()
-	return evsuo
+func (m *ExValueScanUpdateOne) ClearTextOptional() *ExValueScanUpdateOne {
+	m.mutation.ClearTextOptional()
+	return m
 }
 
 // SetBase64 sets the "base64" field.
-func (evsuo *ExValueScanUpdateOne) SetBase64(s string) *ExValueScanUpdateOne {
-	evsuo.mutation.SetBase64(s)
-	return evsuo
+func (m *ExValueScanUpdateOne) SetBase64(v string) *ExValueScanUpdateOne {
+	m.mutation.SetBase64(v)
+	return m
 }
 
 // SetNillableBase64 sets the "base64" field if the given value is not nil.
-func (evsuo *ExValueScanUpdateOne) SetNillableBase64(s *string) *ExValueScanUpdateOne {
-	if s != nil {
-		evsuo.SetBase64(*s)
+func (m *ExValueScanUpdateOne) SetNillableBase64(v *string) *ExValueScanUpdateOne {
+	if v != nil {
+		m.SetBase64(*v)
 	}
-	return evsuo
+	return m
 }
 
 // SetCustom sets the "custom" field.
-func (evsuo *ExValueScanUpdateOne) SetCustom(s string) *ExValueScanUpdateOne {
-	evsuo.mutation.SetCustom(s)
-	return evsuo
+func (m *ExValueScanUpdateOne) SetCustom(v string) *ExValueScanUpdateOne {
+	m.mutation.SetCustom(v)
+	return m
 }
 
 // SetNillableCustom sets the "custom" field if the given value is not nil.
-func (evsuo *ExValueScanUpdateOne) SetNillableCustom(s *string) *ExValueScanUpdateOne {
-	if s != nil {
-		evsuo.SetCustom(*s)
+func (m *ExValueScanUpdateOne) SetNillableCustom(v *string) *ExValueScanUpdateOne {
+	if v != nil {
+		m.SetCustom(*v)
 	}
-	return evsuo
+	return m
 }
 
 // SetCustomOptional sets the "custom_optional" field.
-func (evsuo *ExValueScanUpdateOne) SetCustomOptional(s string) *ExValueScanUpdateOne {
-	evsuo.mutation.SetCustomOptional(s)
-	return evsuo
+func (m *ExValueScanUpdateOne) SetCustomOptional(v string) *ExValueScanUpdateOne {
+	m.mutation.SetCustomOptional(v)
+	return m
 }
 
 // SetNillableCustomOptional sets the "custom_optional" field if the given value is not nil.
-func (evsuo *ExValueScanUpdateOne) SetNillableCustomOptional(s *string) *ExValueScanUpdateOne {
-	if s != nil {
-		evsuo.SetCustomOptional(*s)
+func (m *ExValueScanUpdateOne) SetNillableCustomOptional(v *string) *ExValueScanUpdateOne {
+	if v != nil {
+		m.SetCustomOptional(*v)
 	}
-	return evsuo
+	return m
 }
 
 // ClearCustomOptional clears the value of the "custom_optional" field.
-func (evsuo *ExValueScanUpdateOne) ClearCustomOptional() *ExValueScanUpdateOne {
-	evsuo.mutation.ClearCustomOptional()
-	return evsuo
+func (m *ExValueScanUpdateOne) ClearCustomOptional() *ExValueScanUpdateOne {
+	m.mutation.ClearCustomOptional()
+	return m
 }
 
 // Mutation returns the ExValueScanMutation object of the builder.
-func (evsuo *ExValueScanUpdateOne) Mutation() *ExValueScanMutation {
-	return evsuo.mutation
+func (m *ExValueScanUpdateOne) Mutation() *ExValueScanMutation {
+	return m.mutation
 }
 
 // Where appends a list predicates to the ExValueScanUpdate builder.
-func (evsuo *ExValueScanUpdateOne) Where(ps ...predicate.ExValueScan) *ExValueScanUpdateOne {
-	evsuo.mutation.Where(ps...)
-	return evsuo
+func (u *ExValueScanUpdateOne) Where(ps ...predicate.ExValueScan) *ExValueScanUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (evsuo *ExValueScanUpdateOne) Select(field string, fields ...string) *ExValueScanUpdateOne {
-	evsuo.fields = append([]string{field}, fields...)
-	return evsuo
+func (u *ExValueScanUpdateOne) Select(field string, fields ...string) *ExValueScanUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated ExValueScan entity.
-func (evsuo *ExValueScanUpdateOne) Save(ctx context.Context) (*ExValueScan, error) {
-	return withHooks(ctx, evsuo.gremlinSave, evsuo.mutation, evsuo.hooks)
+func (u *ExValueScanUpdateOne) Save(ctx context.Context) (*ExValueScan, error) {
+	return withHooks(ctx, u.gremlinSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (evsuo *ExValueScanUpdateOne) SaveX(ctx context.Context) *ExValueScan {
-	node, err := evsuo.Save(ctx)
+func (u *ExValueScanUpdateOne) SaveX(ctx context.Context) *ExValueScan {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -349,85 +349,85 @@ func (evsuo *ExValueScanUpdateOne) SaveX(ctx context.Context) *ExValueScan {
 }
 
 // Exec executes the query on the entity.
-func (evsuo *ExValueScanUpdateOne) Exec(ctx context.Context) error {
-	_, err := evsuo.Save(ctx)
+func (u *ExValueScanUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (evsuo *ExValueScanUpdateOne) ExecX(ctx context.Context) {
-	if err := evsuo.Exec(ctx); err != nil {
+func (u *ExValueScanUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (evsuo *ExValueScanUpdateOne) gremlinSave(ctx context.Context) (*ExValueScan, error) {
+func (u *ExValueScanUpdateOne) gremlinSave(ctx context.Context) (*ExValueScan, error) {
 	res := &gremlin.Response{}
-	id, ok := evsuo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "ExValueScan.id" for update`)}
 	}
-	query, bindings := evsuo.gremlin(id).Query()
-	if err := evsuo.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := u.gremlin(id).Query()
+	if err := u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	evsuo.mutation.done = true
-	evs := &ExValueScan{config: evsuo.config}
-	if err := evs.FromResponse(res); err != nil {
+	u.mutation.done = true
+	m := &ExValueScan{config: u.config}
+	if err := m.FromResponse(res); err != nil {
 		return nil, err
 	}
-	return evs, nil
+	return m, nil
 }
 
-func (evsuo *ExValueScanUpdateOne) gremlin(id string) *dsl.Traversal {
+func (u *ExValueScanUpdateOne) gremlin(id string) *dsl.Traversal {
 	v := g.V(id)
 	var (
 		trs []*dsl.Traversal
 	)
-	if value, ok := evsuo.mutation.Binary(); ok {
+	if value, ok := u.mutation.Binary(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldBinary, value)
 	}
-	if value, ok := evsuo.mutation.BinaryBytes(); ok {
+	if value, ok := u.mutation.BinaryBytes(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldBinaryBytes, value)
 	}
-	if value, ok := evsuo.mutation.BinaryOptional(); ok {
+	if value, ok := u.mutation.BinaryOptional(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldBinaryOptional, value)
 	}
-	if value, ok := evsuo.mutation.Text(); ok {
+	if value, ok := u.mutation.Text(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldText, value)
 	}
-	if value, ok := evsuo.mutation.TextOptional(); ok {
+	if value, ok := u.mutation.TextOptional(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldTextOptional, value)
 	}
-	if value, ok := evsuo.mutation.Base64(); ok {
+	if value, ok := u.mutation.Base64(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldBase64, value)
 	}
-	if value, ok := evsuo.mutation.Custom(); ok {
+	if value, ok := u.mutation.Custom(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldCustom, value)
 	}
-	if value, ok := evsuo.mutation.CustomOptional(); ok {
+	if value, ok := u.mutation.CustomOptional(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldCustomOptional, value)
 	}
 	var properties []any
-	if evsuo.mutation.BinaryOptionalCleared() {
+	if u.mutation.BinaryOptionalCleared() {
 		properties = append(properties, exvaluescan.FieldBinaryOptional)
 	}
-	if evsuo.mutation.TextOptionalCleared() {
+	if u.mutation.TextOptionalCleared() {
 		properties = append(properties, exvaluescan.FieldTextOptional)
 	}
-	if evsuo.mutation.CustomOptionalCleared() {
+	if u.mutation.CustomOptionalCleared() {
 		properties = append(properties, exvaluescan.FieldCustomOptional)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
 	}
-	if len(evsuo.fields) > 0 {
-		fields := make([]any, 0, len(evsuo.fields)+1)
+	if len(u.fields) > 0 {
+		fields := make([]any, 0, len(u.fields)+1)
 		fields = append(fields, true)
-		for _, f := range evsuo.fields {
+		for _, f := range u.fields {
 			fields = append(fields, f)
 		}
 		v.ValueMap(fields...)

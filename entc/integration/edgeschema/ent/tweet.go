@@ -119,9 +119,9 @@ func (*Tweet) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Tweet fields.
-func (t *Tweet) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Tweet) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -130,15 +130,15 @@ func (t *Tweet) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			t.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case tweet.FieldText:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field text", values[i])
 			} else if value.Valid {
-				t.Text = value.String
+				m.Text = value.String
 			}
 		default:
-			t.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -146,65 +146,65 @@ func (t *Tweet) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Tweet.
 // This includes values selected through modifiers, order, etc.
-func (t *Tweet) Value(name string) (ent.Value, error) {
-	return t.selectValues.Get(name)
+func (m *Tweet) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryLikedUsers queries the "liked_users" edge of the Tweet entity.
-func (t *Tweet) QueryLikedUsers() *UserQuery {
-	return NewTweetClient(t.config).QueryLikedUsers(t)
+func (m *Tweet) QueryLikedUsers() *UserQuery {
+	return NewTweetClient(m.config).QueryLikedUsers(m)
 }
 
 // QueryUser queries the "user" edge of the Tweet entity.
-func (t *Tweet) QueryUser() *UserQuery {
-	return NewTweetClient(t.config).QueryUser(t)
+func (m *Tweet) QueryUser() *UserQuery {
+	return NewTweetClient(m.config).QueryUser(m)
 }
 
 // QueryTags queries the "tags" edge of the Tweet entity.
-func (t *Tweet) QueryTags() *TagQuery {
-	return NewTweetClient(t.config).QueryTags(t)
+func (m *Tweet) QueryTags() *TagQuery {
+	return NewTweetClient(m.config).QueryTags(m)
 }
 
 // QueryLikes queries the "likes" edge of the Tweet entity.
-func (t *Tweet) QueryLikes() *TweetLikeQuery {
-	return NewTweetClient(t.config).QueryLikes(t)
+func (m *Tweet) QueryLikes() *TweetLikeQuery {
+	return NewTweetClient(m.config).QueryLikes(m)
 }
 
 // QueryTweetUser queries the "tweet_user" edge of the Tweet entity.
-func (t *Tweet) QueryTweetUser() *UserTweetQuery {
-	return NewTweetClient(t.config).QueryTweetUser(t)
+func (m *Tweet) QueryTweetUser() *UserTweetQuery {
+	return NewTweetClient(m.config).QueryTweetUser(m)
 }
 
 // QueryTweetTags queries the "tweet_tags" edge of the Tweet entity.
-func (t *Tweet) QueryTweetTags() *TweetTagQuery {
-	return NewTweetClient(t.config).QueryTweetTags(t)
+func (m *Tweet) QueryTweetTags() *TweetTagQuery {
+	return NewTweetClient(m.config).QueryTweetTags(m)
 }
 
 // Update returns a builder for updating this Tweet.
 // Note that you need to call Tweet.Unwrap() before calling this method if this Tweet
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (t *Tweet) Update() *TweetUpdateOne {
-	return NewTweetClient(t.config).UpdateOne(t)
+func (m *Tweet) Update() *TweetUpdateOne {
+	return NewTweetClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Tweet entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (t *Tweet) Unwrap() *Tweet {
-	_tx, ok := t.config.driver.(*txDriver)
+func (m *Tweet) Unwrap() *Tweet {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Tweet is not a transactional entity")
 	}
-	t.config.driver = _tx.drv
-	return t
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (t *Tweet) String() string {
+func (m *Tweet) String() string {
 	var builder strings.Builder
 	builder.WriteString("Tweet(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("text=")
-	builder.WriteString(t.Text)
+	builder.WriteString(m.Text)
 	builder.WriteByte(')')
 	return builder.String()
 }

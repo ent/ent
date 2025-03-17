@@ -34,40 +34,40 @@ type BuilderQuery struct {
 }
 
 // Where adds a new predicate for the BuilderQuery builder.
-func (bq *BuilderQuery) Where(ps ...predicate.Builder) *BuilderQuery {
-	bq.predicates = append(bq.predicates, ps...)
-	return bq
+func (q *BuilderQuery) Where(ps ...predicate.Builder) *BuilderQuery {
+	q.predicates = append(q.predicates, ps...)
+	return q
 }
 
 // Limit the number of records to be returned by this query.
-func (bq *BuilderQuery) Limit(limit int) *BuilderQuery {
-	bq.ctx.Limit = &limit
-	return bq
+func (q *BuilderQuery) Limit(limit int) *BuilderQuery {
+	q.ctx.Limit = &limit
+	return q
 }
 
 // Offset to start from.
-func (bq *BuilderQuery) Offset(offset int) *BuilderQuery {
-	bq.ctx.Offset = &offset
-	return bq
+func (q *BuilderQuery) Offset(offset int) *BuilderQuery {
+	q.ctx.Offset = &offset
+	return q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (bq *BuilderQuery) Unique(unique bool) *BuilderQuery {
-	bq.ctx.Unique = &unique
-	return bq
+func (q *BuilderQuery) Unique(unique bool) *BuilderQuery {
+	q.ctx.Unique = &unique
+	return q
 }
 
 // Order specifies how the records should be ordered.
-func (bq *BuilderQuery) Order(o ...builder.OrderOption) *BuilderQuery {
-	bq.order = append(bq.order, o...)
-	return bq
+func (q *BuilderQuery) Order(o ...builder.OrderOption) *BuilderQuery {
+	q.order = append(q.order, o...)
+	return q
 }
 
 // First returns the first Builder entity from the query.
 // Returns a *NotFoundError when no Builder was found.
-func (bq *BuilderQuery) First(ctx context.Context) (*Builder, error) {
-	nodes, err := bq.Limit(1).All(setContextOp(ctx, bq.ctx, ent.OpQueryFirst))
+func (q *BuilderQuery) First(ctx context.Context) (*Builder, error) {
+	nodes, err := q.Limit(1).All(setContextOp(ctx, q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -78,8 +78,8 @@ func (bq *BuilderQuery) First(ctx context.Context) (*Builder, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (bq *BuilderQuery) FirstX(ctx context.Context) *Builder {
-	node, err := bq.First(ctx)
+func (q *BuilderQuery) FirstX(ctx context.Context) *Builder {
+	node, err := q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -88,9 +88,9 @@ func (bq *BuilderQuery) FirstX(ctx context.Context) *Builder {
 
 // FirstID returns the first Builder ID from the query.
 // Returns a *NotFoundError when no Builder ID was found.
-func (bq *BuilderQuery) FirstID(ctx context.Context) (id int, err error) {
+func (q *BuilderQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = bq.Limit(1).IDs(setContextOp(ctx, bq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = q.Limit(1).IDs(setContextOp(ctx, q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -101,8 +101,8 @@ func (bq *BuilderQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (bq *BuilderQuery) FirstIDX(ctx context.Context) int {
-	id, err := bq.FirstID(ctx)
+func (q *BuilderQuery) FirstIDX(ctx context.Context) int {
+	id, err := q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -112,8 +112,8 @@ func (bq *BuilderQuery) FirstIDX(ctx context.Context) int {
 // Only returns a single Builder entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Builder entity is found.
 // Returns a *NotFoundError when no Builder entities are found.
-func (bq *BuilderQuery) Only(ctx context.Context) (*Builder, error) {
-	nodes, err := bq.Limit(2).All(setContextOp(ctx, bq.ctx, ent.OpQueryOnly))
+func (q *BuilderQuery) Only(ctx context.Context) (*Builder, error) {
+	nodes, err := q.Limit(2).All(setContextOp(ctx, q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -128,8 +128,8 @@ func (bq *BuilderQuery) Only(ctx context.Context) (*Builder, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (bq *BuilderQuery) OnlyX(ctx context.Context) *Builder {
-	node, err := bq.Only(ctx)
+func (q *BuilderQuery) OnlyX(ctx context.Context) *Builder {
+	node, err := q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -139,9 +139,9 @@ func (bq *BuilderQuery) OnlyX(ctx context.Context) *Builder {
 // OnlyID is like Only, but returns the only Builder ID in the query.
 // Returns a *NotSingularError when more than one Builder ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (bq *BuilderQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (q *BuilderQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = bq.Limit(2).IDs(setContextOp(ctx, bq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = q.Limit(2).IDs(setContextOp(ctx, q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -156,8 +156,8 @@ func (bq *BuilderQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (bq *BuilderQuery) OnlyIDX(ctx context.Context) int {
-	id, err := bq.OnlyID(ctx)
+func (q *BuilderQuery) OnlyIDX(ctx context.Context) int {
+	id, err := q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -165,18 +165,18 @@ func (bq *BuilderQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Builders.
-func (bq *BuilderQuery) All(ctx context.Context) ([]*Builder, error) {
-	ctx = setContextOp(ctx, bq.ctx, ent.OpQueryAll)
-	if err := bq.prepareQuery(ctx); err != nil {
+func (q *BuilderQuery) All(ctx context.Context) ([]*Builder, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryAll)
+	if err := q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Builder, *BuilderQuery]()
-	return withInterceptors[[]*Builder](ctx, bq, qr, bq.inters)
+	return withInterceptors[[]*Builder](ctx, q, qr, q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (bq *BuilderQuery) AllX(ctx context.Context) []*Builder {
-	nodes, err := bq.All(ctx)
+func (q *BuilderQuery) AllX(ctx context.Context) []*Builder {
+	nodes, err := q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -184,20 +184,20 @@ func (bq *BuilderQuery) AllX(ctx context.Context) []*Builder {
 }
 
 // IDs executes the query and returns a list of Builder IDs.
-func (bq *BuilderQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if bq.ctx.Unique == nil && bq.path != nil {
-		bq.Unique(true)
+func (q *BuilderQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if q.ctx.Unique == nil && q.path != nil {
+		q.Unique(true)
 	}
-	ctx = setContextOp(ctx, bq.ctx, ent.OpQueryIDs)
-	if err = bq.Select(builder.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryIDs)
+	if err = q.Select(builder.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (bq *BuilderQuery) IDsX(ctx context.Context) []int {
-	ids, err := bq.IDs(ctx)
+func (q *BuilderQuery) IDsX(ctx context.Context) []int {
+	ids, err := q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -205,17 +205,17 @@ func (bq *BuilderQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (bq *BuilderQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, bq.ctx, ent.OpQueryCount)
-	if err := bq.prepareQuery(ctx); err != nil {
+func (q *BuilderQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryCount)
+	if err := q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, bq, querierCount[*BuilderQuery](), bq.inters)
+	return withInterceptors[int](ctx, q, querierCount[*BuilderQuery](), q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (bq *BuilderQuery) CountX(ctx context.Context) int {
-	count, err := bq.Count(ctx)
+func (q *BuilderQuery) CountX(ctx context.Context) int {
+	count, err := q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -223,9 +223,9 @@ func (bq *BuilderQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (bq *BuilderQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, bq.ctx, ent.OpQueryExist)
-	switch _, err := bq.FirstID(ctx); {
+func (q *BuilderQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryExist)
+	switch _, err := q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -236,8 +236,8 @@ func (bq *BuilderQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (bq *BuilderQuery) ExistX(ctx context.Context) bool {
-	exist, err := bq.Exist(ctx)
+func (q *BuilderQuery) ExistX(ctx context.Context) bool {
+	exist, err := q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -246,29 +246,29 @@ func (bq *BuilderQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the BuilderQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (bq *BuilderQuery) Clone() *BuilderQuery {
-	if bq == nil {
+func (q *BuilderQuery) Clone() *BuilderQuery {
+	if q == nil {
 		return nil
 	}
 	return &BuilderQuery{
-		config:     bq.config,
-		ctx:        bq.ctx.Clone(),
-		order:      append([]builder.OrderOption{}, bq.order...),
-		inters:     append([]Interceptor{}, bq.inters...),
-		predicates: append([]predicate.Builder{}, bq.predicates...),
+		config:     q.config,
+		ctx:        q.ctx.Clone(),
+		order:      append([]builder.OrderOption{}, q.order...),
+		inters:     append([]Interceptor{}, q.inters...),
+		predicates: append([]predicate.Builder{}, q.predicates...),
 		// clone intermediate query.
-		sql:       bq.sql.Clone(),
-		path:      bq.path,
-		modifiers: append([]func(*sql.Selector){}, bq.modifiers...),
+		sql:       q.sql.Clone(),
+		path:      q.path,
+		modifiers: append([]func(*sql.Selector){}, q.modifiers...),
 	}
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
-func (bq *BuilderQuery) GroupBy(field string, fields ...string) *BuilderGroupBy {
-	bq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &BuilderGroupBy{build: bq}
-	grbuild.flds = &bq.ctx.Fields
+func (q *BuilderQuery) GroupBy(field string, fields ...string) *BuilderGroupBy {
+	q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &BuilderGroupBy{build: q}
+	grbuild.flds = &q.ctx.Fields
 	grbuild.label = builder.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -276,65 +276,65 @@ func (bq *BuilderQuery) GroupBy(field string, fields ...string) *BuilderGroupBy 
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (bq *BuilderQuery) Select(fields ...string) *BuilderSelect {
-	bq.ctx.Fields = append(bq.ctx.Fields, fields...)
-	sbuild := &BuilderSelect{BuilderQuery: bq}
+func (q *BuilderQuery) Select(fields ...string) *BuilderSelect {
+	q.ctx.Fields = append(q.ctx.Fields, fields...)
+	sbuild := &BuilderSelect{BuilderQuery: q}
 	sbuild.label = builder.Label
-	sbuild.flds, sbuild.scan = &bq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a BuilderSelect configured with the given aggregations.
-func (bq *BuilderQuery) Aggregate(fns ...AggregateFunc) *BuilderSelect {
-	return bq.Select().Aggregate(fns...)
+func (q *BuilderQuery) Aggregate(fns ...AggregateFunc) *BuilderSelect {
+	return q.Select().Aggregate(fns...)
 }
 
-func (bq *BuilderQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range bq.inters {
+func (q *BuilderQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, bq); err != nil {
+			if err := trv.Traverse(ctx, q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range bq.ctx.Fields {
+	for _, f := range q.ctx.Fields {
 		if !builder.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if bq.path != nil {
-		prev, err := bq.path(ctx)
+	if q.path != nil {
+		prev, err := q.path(ctx)
 		if err != nil {
 			return err
 		}
-		bq.sql = prev
+		q.sql = prev
 	}
 	return nil
 }
 
-func (bq *BuilderQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Builder, error) {
+func (q *BuilderQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Builder, error) {
 	var (
 		nodes = []*Builder{}
-		_spec = bq.querySpec()
+		_spec = q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Builder).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Builder{config: bq.config}
+		node := &Builder{config: q.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
-	if len(bq.modifiers) > 0 {
-		_spec.Modifiers = bq.modifiers
+	if len(q.modifiers) > 0 {
+		_spec.Modifiers = q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, bq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -343,27 +343,27 @@ func (bq *BuilderQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Buil
 	return nodes, nil
 }
 
-func (bq *BuilderQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := bq.querySpec()
-	if len(bq.modifiers) > 0 {
-		_spec.Modifiers = bq.modifiers
+func (q *BuilderQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := q.querySpec()
+	if len(q.modifiers) > 0 {
+		_spec.Modifiers = q.modifiers
 	}
-	_spec.Node.Columns = bq.ctx.Fields
-	if len(bq.ctx.Fields) > 0 {
-		_spec.Unique = bq.ctx.Unique != nil && *bq.ctx.Unique
+	_spec.Node.Columns = q.ctx.Fields
+	if len(q.ctx.Fields) > 0 {
+		_spec.Unique = q.ctx.Unique != nil && *q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, bq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, q.driver, _spec)
 }
 
-func (bq *BuilderQuery) querySpec() *sqlgraph.QuerySpec {
+func (q *BuilderQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(builder.Table, builder.Columns, sqlgraph.NewFieldSpec(builder.FieldID, field.TypeInt))
-	_spec.From = bq.sql
-	if unique := bq.ctx.Unique; unique != nil {
+	_spec.From = q.sql
+	if unique := q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if bq.path != nil {
+	} else if q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := bq.ctx.Fields; len(fields) > 0 {
+	if fields := q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, builder.FieldID)
 		for i := range fields {
@@ -372,20 +372,20 @@ func (bq *BuilderQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := bq.predicates; len(ps) > 0 {
+	if ps := q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := bq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := bq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := bq.order; len(ps) > 0 {
+	if ps := q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -395,36 +395,36 @@ func (bq *BuilderQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (bq *BuilderQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builderC := sql.Dialect(bq.driver.Dialect())
+func (q *BuilderQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builderC := sql.Dialect(q.driver.Dialect())
 	t1 := builderC.Table(builder.Table)
-	columns := bq.ctx.Fields
+	columns := q.ctx.Fields
 	if len(columns) == 0 {
 		columns = builder.Columns
 	}
 	selector := builderC.Select(t1.Columns(columns...)...).From(t1)
-	if bq.sql != nil {
-		selector = bq.sql
+	if q.sql != nil {
+		selector = q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if bq.ctx.Unique != nil && *bq.ctx.Unique {
+	if q.ctx.Unique != nil && *q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, m := range bq.modifiers {
+	for _, m := range q.modifiers {
 		m(selector)
 	}
-	for _, p := range bq.predicates {
+	for _, p := range q.predicates {
 		p(selector)
 	}
-	for _, p := range bq.order {
+	for _, p := range q.order {
 		p(selector)
 	}
-	if offset := bq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := bq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -457,9 +457,9 @@ func (bq *BuilderQuery) ForShare(opts ...sql.LockOption) *BuilderQuery {
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (bq *BuilderQuery) Modify(modifiers ...func(s *sql.Selector)) *BuilderSelect {
-	bq.modifiers = append(bq.modifiers, modifiers...)
-	return bq.Select()
+func (q *BuilderQuery) Modify(modifiers ...func(s *sql.Selector)) *BuilderSelect {
+	q.modifiers = append(q.modifiers, modifiers...)
+	return q.Select()
 }
 
 // BuilderGroupBy is the group-by builder for Builder entities.
@@ -483,27 +483,27 @@ func (bgb *BuilderGroupBy) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*BuilderQuery, *BuilderGroupBy](ctx, bgb.build, bgb, bgb.build.inters, v)
 }
 
-func (bgb *BuilderGroupBy) sqlScan(ctx context.Context, root *BuilderQuery, v any) error {
+func (q *BuilderGroupBy) sqlScan(ctx context.Context, root *BuilderQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(bgb.fns))
-	for _, fn := range bgb.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*bgb.flds)+len(bgb.fns))
-		for _, f := range *bgb.flds {
+		columns := make([]string, 0, len(*q.flds)+len(q.fns))
+		for _, f := range *q.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*bgb.flds...)...)
+	selector.GroupBy(selector.Columns(*q.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := bgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -531,13 +531,13 @@ func (bs *BuilderSelect) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*BuilderQuery, *BuilderSelect](ctx, bs.BuilderQuery, bs, bs.inters, v)
 }
 
-func (bs *BuilderSelect) sqlScan(ctx context.Context, root *BuilderQuery, v any) error {
+func (q *BuilderSelect) sqlScan(ctx context.Context, root *BuilderQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(bs.fns))
-	for _, fn := range bs.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*bs.selector.flds); {
+	switch n := len(*q.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -545,7 +545,7 @@ func (bs *BuilderSelect) sqlScan(ctx context.Context, root *BuilderQuery, v any)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := bs.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -553,7 +553,7 @@ func (bs *BuilderSelect) sqlScan(ctx context.Context, root *BuilderQuery, v any)
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (bs *BuilderSelect) Modify(modifiers ...func(s *sql.Selector)) *BuilderSelect {
-	bs.modifiers = append(bs.modifiers, modifiers...)
-	return bs
+func (q *BuilderSelect) Modify(modifiers ...func(s *sql.Selector)) *BuilderSelect {
+	q.modifiers = append(q.modifiers, modifiers...)
+	return q
 }

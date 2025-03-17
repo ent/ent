@@ -29,55 +29,55 @@ type UserTweetCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (utc *UserTweetCreate) SetCreatedAt(t time.Time) *UserTweetCreate {
-	utc.mutation.SetCreatedAt(t)
-	return utc
+func (m *UserTweetCreate) SetCreatedAt(v time.Time) *UserTweetCreate {
+	m.mutation.SetCreatedAt(v)
+	return m
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (utc *UserTweetCreate) SetNillableCreatedAt(t *time.Time) *UserTweetCreate {
-	if t != nil {
-		utc.SetCreatedAt(*t)
+func (m *UserTweetCreate) SetNillableCreatedAt(v *time.Time) *UserTweetCreate {
+	if v != nil {
+		m.SetCreatedAt(*v)
 	}
-	return utc
+	return m
 }
 
 // SetUserID sets the "user_id" field.
-func (utc *UserTweetCreate) SetUserID(i int) *UserTweetCreate {
-	utc.mutation.SetUserID(i)
-	return utc
+func (m *UserTweetCreate) SetUserID(v int) *UserTweetCreate {
+	m.mutation.SetUserID(v)
+	return m
 }
 
 // SetTweetID sets the "tweet_id" field.
-func (utc *UserTweetCreate) SetTweetID(i int) *UserTweetCreate {
-	utc.mutation.SetTweetID(i)
-	return utc
+func (m *UserTweetCreate) SetTweetID(v int) *UserTweetCreate {
+	m.mutation.SetTweetID(v)
+	return m
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (utc *UserTweetCreate) SetUser(u *User) *UserTweetCreate {
-	return utc.SetUserID(u.ID)
+func (m *UserTweetCreate) SetUser(v *User) *UserTweetCreate {
+	return m.SetUserID(v.ID)
 }
 
 // SetTweet sets the "tweet" edge to the Tweet entity.
-func (utc *UserTweetCreate) SetTweet(t *Tweet) *UserTweetCreate {
-	return utc.SetTweetID(t.ID)
+func (m *UserTweetCreate) SetTweet(v *Tweet) *UserTweetCreate {
+	return m.SetTweetID(v.ID)
 }
 
 // Mutation returns the UserTweetMutation object of the builder.
-func (utc *UserTweetCreate) Mutation() *UserTweetMutation {
-	return utc.mutation
+func (m *UserTweetCreate) Mutation() *UserTweetMutation {
+	return m.mutation
 }
 
 // Save creates the UserTweet in the database.
-func (utc *UserTweetCreate) Save(ctx context.Context) (*UserTweet, error) {
-	utc.defaults()
-	return withHooks(ctx, utc.sqlSave, utc.mutation, utc.hooks)
+func (c *UserTweetCreate) Save(ctx context.Context) (*UserTweet, error) {
+	c.defaults()
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (utc *UserTweetCreate) SaveX(ctx context.Context) *UserTweet {
-	v, err := utc.Save(ctx)
+func (c *UserTweetCreate) SaveX(ctx context.Context) *UserTweet {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -85,52 +85,52 @@ func (utc *UserTweetCreate) SaveX(ctx context.Context) *UserTweet {
 }
 
 // Exec executes the query.
-func (utc *UserTweetCreate) Exec(ctx context.Context) error {
-	_, err := utc.Save(ctx)
+func (c *UserTweetCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (utc *UserTweetCreate) ExecX(ctx context.Context) {
-	if err := utc.Exec(ctx); err != nil {
+func (c *UserTweetCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (utc *UserTweetCreate) defaults() {
-	if _, ok := utc.mutation.CreatedAt(); !ok {
+func (c *UserTweetCreate) defaults() {
+	if _, ok := c.mutation.CreatedAt(); !ok {
 		v := usertweet.DefaultCreatedAt()
-		utc.mutation.SetCreatedAt(v)
+		c.mutation.SetCreatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (utc *UserTweetCreate) check() error {
-	if _, ok := utc.mutation.CreatedAt(); !ok {
+func (c *UserTweetCreate) check() error {
+	if _, ok := c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "UserTweet.created_at"`)}
 	}
-	if _, ok := utc.mutation.UserID(); !ok {
+	if _, ok := c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "UserTweet.user_id"`)}
 	}
-	if _, ok := utc.mutation.TweetID(); !ok {
+	if _, ok := c.mutation.TweetID(); !ok {
 		return &ValidationError{Name: "tweet_id", err: errors.New(`ent: missing required field "UserTweet.tweet_id"`)}
 	}
-	if len(utc.mutation.UserIDs()) == 0 {
+	if len(c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "UserTweet.user"`)}
 	}
-	if len(utc.mutation.TweetIDs()) == 0 {
+	if len(c.mutation.TweetIDs()) == 0 {
 		return &ValidationError{Name: "tweet", err: errors.New(`ent: missing required edge "UserTweet.tweet"`)}
 	}
 	return nil
 }
 
-func (utc *UserTweetCreate) sqlSave(ctx context.Context) (*UserTweet, error) {
-	if err := utc.check(); err != nil {
+func (c *UserTweetCreate) sqlSave(ctx context.Context) (*UserTweet, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := utc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, utc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -138,22 +138,22 @@ func (utc *UserTweetCreate) sqlSave(ctx context.Context) (*UserTweet, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	utc.mutation.id = &_node.ID
-	utc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (utc *UserTweetCreate) createSpec() (*UserTweet, *sqlgraph.CreateSpec) {
+func (c *UserTweetCreate) createSpec() (*UserTweet, *sqlgraph.CreateSpec) {
 	var (
-		_node = &UserTweet{config: utc.config}
+		_node = &UserTweet{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(usertweet.Table, sqlgraph.NewFieldSpec(usertweet.FieldID, field.TypeInt))
 	)
-	_spec.OnConflict = utc.conflict
-	if value, ok := utc.mutation.CreatedAt(); ok {
+	_spec.OnConflict = c.conflict
+	if value, ok := c.mutation.CreatedAt(); ok {
 		_spec.SetField(usertweet.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if nodes := utc.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -170,7 +170,7 @@ func (utc *UserTweetCreate) createSpec() (*UserTweet, *sqlgraph.CreateSpec) {
 		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := utc.mutation.TweetIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.TweetIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -206,11 +206,9 @@ func (utc *UserTweetCreate) createSpec() (*UserTweet, *sqlgraph.CreateSpec) {
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
-func (utc *UserTweetCreate) OnConflict(opts ...sql.ConflictOption) *UserTweetUpsertOne {
-	utc.conflict = opts
-	return &UserTweetUpsertOne{
-		create: utc,
-	}
+func (c *UserTweetCreate) OnConflict(opts ...sql.ConflictOption) *UserTweetUpsertOne {
+	c.conflict = opts
+	return &UserTweetUpsertOne{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -219,11 +217,9 @@ func (utc *UserTweetCreate) OnConflict(opts ...sql.ConflictOption) *UserTweetUps
 //	client.UserTweet.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (utc *UserTweetCreate) OnConflictColumns(columns ...string) *UserTweetUpsertOne {
-	utc.conflict = append(utc.conflict, sql.ConflictColumns(columns...))
-	return &UserTweetUpsertOne{
-		create: utc,
-	}
+func (c *UserTweetCreate) OnConflictColumns(columns ...string) *UserTweetUpsertOne {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &UserTweetUpsertOne{create: c}
 }
 
 type (
@@ -399,16 +395,16 @@ type UserTweetCreateBulk struct {
 }
 
 // Save creates the UserTweet entities in the database.
-func (utcb *UserTweetCreateBulk) Save(ctx context.Context) ([]*UserTweet, error) {
-	if utcb.err != nil {
-		return nil, utcb.err
+func (c *UserTweetCreateBulk) Save(ctx context.Context) ([]*UserTweet, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(utcb.builders))
-	nodes := make([]*UserTweet, len(utcb.builders))
-	mutators := make([]Mutator, len(utcb.builders))
-	for i := range utcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*UserTweet, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := utcb.builders[i]
+			builder := c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UserTweetMutation)
@@ -422,12 +418,12 @@ func (utcb *UserTweetCreateBulk) Save(ctx context.Context) ([]*UserTweet, error)
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, utcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = utcb.conflict
+					spec.OnConflict = c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, utcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -451,7 +447,7 @@ func (utcb *UserTweetCreateBulk) Save(ctx context.Context) ([]*UserTweet, error)
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, utcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -459,8 +455,8 @@ func (utcb *UserTweetCreateBulk) Save(ctx context.Context) ([]*UserTweet, error)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (utcb *UserTweetCreateBulk) SaveX(ctx context.Context) []*UserTweet {
-	v, err := utcb.Save(ctx)
+func (c *UserTweetCreateBulk) SaveX(ctx context.Context) []*UserTweet {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -468,14 +464,14 @@ func (utcb *UserTweetCreateBulk) SaveX(ctx context.Context) []*UserTweet {
 }
 
 // Exec executes the query.
-func (utcb *UserTweetCreateBulk) Exec(ctx context.Context) error {
-	_, err := utcb.Save(ctx)
+func (c *UserTweetCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (utcb *UserTweetCreateBulk) ExecX(ctx context.Context) {
-	if err := utcb.Exec(ctx); err != nil {
+func (c *UserTweetCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -495,11 +491,9 @@ func (utcb *UserTweetCreateBulk) ExecX(ctx context.Context) {
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
-func (utcb *UserTweetCreateBulk) OnConflict(opts ...sql.ConflictOption) *UserTweetUpsertBulk {
-	utcb.conflict = opts
-	return &UserTweetUpsertBulk{
-		create: utcb,
-	}
+func (c *UserTweetCreateBulk) OnConflict(opts ...sql.ConflictOption) *UserTweetUpsertBulk {
+	c.conflict = opts
+	return &UserTweetUpsertBulk{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -508,11 +502,9 @@ func (utcb *UserTweetCreateBulk) OnConflict(opts ...sql.ConflictOption) *UserTwe
 //	client.UserTweet.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (utcb *UserTweetCreateBulk) OnConflictColumns(columns ...string) *UserTweetUpsertBulk {
-	utcb.conflict = append(utcb.conflict, sql.ConflictColumns(columns...))
-	return &UserTweetUpsertBulk{
-		create: utcb,
-	}
+func (c *UserTweetCreateBulk) OnConflictColumns(columns ...string) *UserTweetUpsertBulk {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &UserTweetUpsertBulk{create: c}
 }
 
 // UserTweetUpsertBulk is the builder for "upsert"-ing

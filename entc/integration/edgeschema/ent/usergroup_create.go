@@ -29,55 +29,55 @@ type UserGroupCreate struct {
 }
 
 // SetJoinedAt sets the "joined_at" field.
-func (ugc *UserGroupCreate) SetJoinedAt(t time.Time) *UserGroupCreate {
-	ugc.mutation.SetJoinedAt(t)
-	return ugc
+func (m *UserGroupCreate) SetJoinedAt(v time.Time) *UserGroupCreate {
+	m.mutation.SetJoinedAt(v)
+	return m
 }
 
 // SetNillableJoinedAt sets the "joined_at" field if the given value is not nil.
-func (ugc *UserGroupCreate) SetNillableJoinedAt(t *time.Time) *UserGroupCreate {
-	if t != nil {
-		ugc.SetJoinedAt(*t)
+func (m *UserGroupCreate) SetNillableJoinedAt(v *time.Time) *UserGroupCreate {
+	if v != nil {
+		m.SetJoinedAt(*v)
 	}
-	return ugc
+	return m
 }
 
 // SetUserID sets the "user_id" field.
-func (ugc *UserGroupCreate) SetUserID(i int) *UserGroupCreate {
-	ugc.mutation.SetUserID(i)
-	return ugc
+func (m *UserGroupCreate) SetUserID(v int) *UserGroupCreate {
+	m.mutation.SetUserID(v)
+	return m
 }
 
 // SetGroupID sets the "group_id" field.
-func (ugc *UserGroupCreate) SetGroupID(i int) *UserGroupCreate {
-	ugc.mutation.SetGroupID(i)
-	return ugc
+func (m *UserGroupCreate) SetGroupID(v int) *UserGroupCreate {
+	m.mutation.SetGroupID(v)
+	return m
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (ugc *UserGroupCreate) SetUser(u *User) *UserGroupCreate {
-	return ugc.SetUserID(u.ID)
+func (m *UserGroupCreate) SetUser(v *User) *UserGroupCreate {
+	return m.SetUserID(v.ID)
 }
 
 // SetGroup sets the "group" edge to the Group entity.
-func (ugc *UserGroupCreate) SetGroup(g *Group) *UserGroupCreate {
-	return ugc.SetGroupID(g.ID)
+func (m *UserGroupCreate) SetGroup(v *Group) *UserGroupCreate {
+	return m.SetGroupID(v.ID)
 }
 
 // Mutation returns the UserGroupMutation object of the builder.
-func (ugc *UserGroupCreate) Mutation() *UserGroupMutation {
-	return ugc.mutation
+func (m *UserGroupCreate) Mutation() *UserGroupMutation {
+	return m.mutation
 }
 
 // Save creates the UserGroup in the database.
-func (ugc *UserGroupCreate) Save(ctx context.Context) (*UserGroup, error) {
-	ugc.defaults()
-	return withHooks(ctx, ugc.sqlSave, ugc.mutation, ugc.hooks)
+func (c *UserGroupCreate) Save(ctx context.Context) (*UserGroup, error) {
+	c.defaults()
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (ugc *UserGroupCreate) SaveX(ctx context.Context) *UserGroup {
-	v, err := ugc.Save(ctx)
+func (c *UserGroupCreate) SaveX(ctx context.Context) *UserGroup {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -85,52 +85,52 @@ func (ugc *UserGroupCreate) SaveX(ctx context.Context) *UserGroup {
 }
 
 // Exec executes the query.
-func (ugc *UserGroupCreate) Exec(ctx context.Context) error {
-	_, err := ugc.Save(ctx)
+func (c *UserGroupCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ugc *UserGroupCreate) ExecX(ctx context.Context) {
-	if err := ugc.Exec(ctx); err != nil {
+func (c *UserGroupCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (ugc *UserGroupCreate) defaults() {
-	if _, ok := ugc.mutation.JoinedAt(); !ok {
+func (c *UserGroupCreate) defaults() {
+	if _, ok := c.mutation.JoinedAt(); !ok {
 		v := usergroup.DefaultJoinedAt()
-		ugc.mutation.SetJoinedAt(v)
+		c.mutation.SetJoinedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ugc *UserGroupCreate) check() error {
-	if _, ok := ugc.mutation.JoinedAt(); !ok {
+func (c *UserGroupCreate) check() error {
+	if _, ok := c.mutation.JoinedAt(); !ok {
 		return &ValidationError{Name: "joined_at", err: errors.New(`ent: missing required field "UserGroup.joined_at"`)}
 	}
-	if _, ok := ugc.mutation.UserID(); !ok {
+	if _, ok := c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "UserGroup.user_id"`)}
 	}
-	if _, ok := ugc.mutation.GroupID(); !ok {
+	if _, ok := c.mutation.GroupID(); !ok {
 		return &ValidationError{Name: "group_id", err: errors.New(`ent: missing required field "UserGroup.group_id"`)}
 	}
-	if len(ugc.mutation.UserIDs()) == 0 {
+	if len(c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "UserGroup.user"`)}
 	}
-	if len(ugc.mutation.GroupIDs()) == 0 {
+	if len(c.mutation.GroupIDs()) == 0 {
 		return &ValidationError{Name: "group", err: errors.New(`ent: missing required edge "UserGroup.group"`)}
 	}
 	return nil
 }
 
-func (ugc *UserGroupCreate) sqlSave(ctx context.Context) (*UserGroup, error) {
-	if err := ugc.check(); err != nil {
+func (c *UserGroupCreate) sqlSave(ctx context.Context) (*UserGroup, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := ugc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, ugc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -138,22 +138,22 @@ func (ugc *UserGroupCreate) sqlSave(ctx context.Context) (*UserGroup, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	ugc.mutation.id = &_node.ID
-	ugc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (ugc *UserGroupCreate) createSpec() (*UserGroup, *sqlgraph.CreateSpec) {
+func (c *UserGroupCreate) createSpec() (*UserGroup, *sqlgraph.CreateSpec) {
 	var (
-		_node = &UserGroup{config: ugc.config}
+		_node = &UserGroup{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(usergroup.Table, sqlgraph.NewFieldSpec(usergroup.FieldID, field.TypeInt))
 	)
-	_spec.OnConflict = ugc.conflict
-	if value, ok := ugc.mutation.JoinedAt(); ok {
+	_spec.OnConflict = c.conflict
+	if value, ok := c.mutation.JoinedAt(); ok {
 		_spec.SetField(usergroup.FieldJoinedAt, field.TypeTime, value)
 		_node.JoinedAt = value
 	}
-	if nodes := ugc.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -170,7 +170,7 @@ func (ugc *UserGroupCreate) createSpec() (*UserGroup, *sqlgraph.CreateSpec) {
 		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ugc.mutation.GroupIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -206,11 +206,9 @@ func (ugc *UserGroupCreate) createSpec() (*UserGroup, *sqlgraph.CreateSpec) {
 //			SetJoinedAt(v+v).
 //		}).
 //		Exec(ctx)
-func (ugc *UserGroupCreate) OnConflict(opts ...sql.ConflictOption) *UserGroupUpsertOne {
-	ugc.conflict = opts
-	return &UserGroupUpsertOne{
-		create: ugc,
-	}
+func (c *UserGroupCreate) OnConflict(opts ...sql.ConflictOption) *UserGroupUpsertOne {
+	c.conflict = opts
+	return &UserGroupUpsertOne{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -219,11 +217,9 @@ func (ugc *UserGroupCreate) OnConflict(opts ...sql.ConflictOption) *UserGroupUps
 //	client.UserGroup.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (ugc *UserGroupCreate) OnConflictColumns(columns ...string) *UserGroupUpsertOne {
-	ugc.conflict = append(ugc.conflict, sql.ConflictColumns(columns...))
-	return &UserGroupUpsertOne{
-		create: ugc,
-	}
+func (c *UserGroupCreate) OnConflictColumns(columns ...string) *UserGroupUpsertOne {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &UserGroupUpsertOne{create: c}
 }
 
 type (
@@ -399,16 +395,16 @@ type UserGroupCreateBulk struct {
 }
 
 // Save creates the UserGroup entities in the database.
-func (ugcb *UserGroupCreateBulk) Save(ctx context.Context) ([]*UserGroup, error) {
-	if ugcb.err != nil {
-		return nil, ugcb.err
+func (c *UserGroupCreateBulk) Save(ctx context.Context) ([]*UserGroup, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(ugcb.builders))
-	nodes := make([]*UserGroup, len(ugcb.builders))
-	mutators := make([]Mutator, len(ugcb.builders))
-	for i := range ugcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*UserGroup, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := ugcb.builders[i]
+			builder := c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UserGroupMutation)
@@ -422,12 +418,12 @@ func (ugcb *UserGroupCreateBulk) Save(ctx context.Context) ([]*UserGroup, error)
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, ugcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = ugcb.conflict
+					spec.OnConflict = c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ugcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -451,7 +447,7 @@ func (ugcb *UserGroupCreateBulk) Save(ctx context.Context) ([]*UserGroup, error)
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, ugcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -459,8 +455,8 @@ func (ugcb *UserGroupCreateBulk) Save(ctx context.Context) ([]*UserGroup, error)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ugcb *UserGroupCreateBulk) SaveX(ctx context.Context) []*UserGroup {
-	v, err := ugcb.Save(ctx)
+func (c *UserGroupCreateBulk) SaveX(ctx context.Context) []*UserGroup {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -468,14 +464,14 @@ func (ugcb *UserGroupCreateBulk) SaveX(ctx context.Context) []*UserGroup {
 }
 
 // Exec executes the query.
-func (ugcb *UserGroupCreateBulk) Exec(ctx context.Context) error {
-	_, err := ugcb.Save(ctx)
+func (c *UserGroupCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ugcb *UserGroupCreateBulk) ExecX(ctx context.Context) {
-	if err := ugcb.Exec(ctx); err != nil {
+func (c *UserGroupCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -495,11 +491,9 @@ func (ugcb *UserGroupCreateBulk) ExecX(ctx context.Context) {
 //			SetJoinedAt(v+v).
 //		}).
 //		Exec(ctx)
-func (ugcb *UserGroupCreateBulk) OnConflict(opts ...sql.ConflictOption) *UserGroupUpsertBulk {
-	ugcb.conflict = opts
-	return &UserGroupUpsertBulk{
-		create: ugcb,
-	}
+func (c *UserGroupCreateBulk) OnConflict(opts ...sql.ConflictOption) *UserGroupUpsertBulk {
+	c.conflict = opts
+	return &UserGroupUpsertBulk{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -508,11 +502,9 @@ func (ugcb *UserGroupCreateBulk) OnConflict(opts ...sql.ConflictOption) *UserGro
 //	client.UserGroup.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (ugcb *UserGroupCreateBulk) OnConflictColumns(columns ...string) *UserGroupUpsertBulk {
-	ugcb.conflict = append(ugcb.conflict, sql.ConflictColumns(columns...))
-	return &UserGroupUpsertBulk{
-		create: ugcb,
-	}
+func (c *UserGroupCreateBulk) OnConflictColumns(columns ...string) *UserGroupUpsertBulk {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &UserGroupUpsertBulk{create: c}
 }
 
 // UserGroupUpsertBulk is the builder for "upsert"-ing

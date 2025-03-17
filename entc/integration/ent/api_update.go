@@ -27,24 +27,24 @@ type APIUpdate struct {
 }
 
 // Where appends a list predicates to the APIUpdate builder.
-func (au *APIUpdate) Where(ps ...predicate.Api) *APIUpdate {
-	au.mutation.Where(ps...)
-	return au
+func (u *APIUpdate) Where(ps ...predicate.Api) *APIUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Mutation returns the APIMutation object of the builder.
-func (au *APIUpdate) Mutation() *APIMutation {
-	return au.mutation
+func (m *APIUpdate) Mutation() *APIMutation {
+	return m.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (au *APIUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, au.sqlSave, au.mutation, au.hooks)
+func (u *APIUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (au *APIUpdate) SaveX(ctx context.Context) int {
-	affected, err := au.Save(ctx)
+func (u *APIUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -52,35 +52,35 @@ func (au *APIUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (au *APIUpdate) Exec(ctx context.Context) error {
-	_, err := au.Save(ctx)
+func (u *APIUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (au *APIUpdate) ExecX(ctx context.Context) {
-	if err := au.Exec(ctx); err != nil {
+func (u *APIUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (au *APIUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *APIUpdate {
-	au.modifiers = append(au.modifiers, modifiers...)
-	return au
+func (u *APIUpdate) Modify(modifiers ...func(*sql.UpdateBuilder)) *APIUpdate {
+	u.modifiers = append(u.modifiers, modifiers...)
+	return u
 }
 
-func (au *APIUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (u *APIUpdate) sqlSave(ctx context.Context) (_n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(api.Table, api.Columns, sqlgraph.NewFieldSpec(api.FieldID, field.TypeInt))
-	if ps := au.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	_spec.AddModifiers(au.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
+	_spec.AddModifiers(u.modifiers...)
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{api.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -88,8 +88,8 @@ func (au *APIUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	au.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // APIUpdateOne is the builder for updating a single Api entity.
@@ -102,31 +102,31 @@ type APIUpdateOne struct {
 }
 
 // Mutation returns the APIMutation object of the builder.
-func (auo *APIUpdateOne) Mutation() *APIMutation {
-	return auo.mutation
+func (m *APIUpdateOne) Mutation() *APIMutation {
+	return m.mutation
 }
 
 // Where appends a list predicates to the APIUpdate builder.
-func (auo *APIUpdateOne) Where(ps ...predicate.Api) *APIUpdateOne {
-	auo.mutation.Where(ps...)
-	return auo
+func (u *APIUpdateOne) Where(ps ...predicate.Api) *APIUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (auo *APIUpdateOne) Select(field string, fields ...string) *APIUpdateOne {
-	auo.fields = append([]string{field}, fields...)
-	return auo
+func (u *APIUpdateOne) Select(field string, fields ...string) *APIUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated Api entity.
-func (auo *APIUpdateOne) Save(ctx context.Context) (*Api, error) {
-	return withHooks(ctx, auo.sqlSave, auo.mutation, auo.hooks)
+func (u *APIUpdateOne) Save(ctx context.Context) (*Api, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (auo *APIUpdateOne) SaveX(ctx context.Context) *Api {
-	node, err := auo.Save(ctx)
+func (u *APIUpdateOne) SaveX(ctx context.Context) *Api {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -134,32 +134,32 @@ func (auo *APIUpdateOne) SaveX(ctx context.Context) *Api {
 }
 
 // Exec executes the query on the entity.
-func (auo *APIUpdateOne) Exec(ctx context.Context) error {
-	_, err := auo.Save(ctx)
+func (u *APIUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (auo *APIUpdateOne) ExecX(ctx context.Context) {
-	if err := auo.Exec(ctx); err != nil {
+func (u *APIUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (auo *APIUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *APIUpdateOne {
-	auo.modifiers = append(auo.modifiers, modifiers...)
-	return auo
+func (u *APIUpdateOne) Modify(modifiers ...func(*sql.UpdateBuilder)) *APIUpdateOne {
+	u.modifiers = append(u.modifiers, modifiers...)
+	return u
 }
 
-func (auo *APIUpdateOne) sqlSave(ctx context.Context) (_node *Api, err error) {
+func (u *APIUpdateOne) sqlSave(ctx context.Context) (_n *Api, err error) {
 	_spec := sqlgraph.NewUpdateSpec(api.Table, api.Columns, sqlgraph.NewFieldSpec(api.FieldID, field.TypeInt))
-	id, ok := auo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Api.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := auo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, api.FieldID)
 		for _, f := range fields {
@@ -171,18 +171,18 @@ func (auo *APIUpdateOne) sqlSave(ctx context.Context) (_node *Api, err error) {
 			}
 		}
 	}
-	if ps := auo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	_spec.AddModifiers(auo.modifiers...)
-	_node = &Api{config: auo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, auo.driver, _spec); err != nil {
+	_spec.AddModifiers(u.modifiers...)
+	_n = &Api{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{api.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -190,6 +190,6 @@ func (auo *APIUpdateOne) sqlSave(ctx context.Context) (_node *Api, err error) {
 		}
 		return nil, err
 	}
-	auo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

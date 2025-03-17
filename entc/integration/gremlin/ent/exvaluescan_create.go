@@ -26,74 +26,74 @@ type ExValueScanCreate struct {
 }
 
 // SetBinary sets the "binary" field.
-func (evsc *ExValueScanCreate) SetBinary(u *url.URL) *ExValueScanCreate {
-	evsc.mutation.SetBinary(u)
-	return evsc
+func (m *ExValueScanCreate) SetBinary(v *url.URL) *ExValueScanCreate {
+	m.mutation.SetBinary(v)
+	return m
 }
 
 // SetBinaryBytes sets the "binary_bytes" field.
-func (evsc *ExValueScanCreate) SetBinaryBytes(u *url.URL) *ExValueScanCreate {
-	evsc.mutation.SetBinaryBytes(u)
-	return evsc
+func (m *ExValueScanCreate) SetBinaryBytes(v *url.URL) *ExValueScanCreate {
+	m.mutation.SetBinaryBytes(v)
+	return m
 }
 
 // SetBinaryOptional sets the "binary_optional" field.
-func (evsc *ExValueScanCreate) SetBinaryOptional(u *url.URL) *ExValueScanCreate {
-	evsc.mutation.SetBinaryOptional(u)
-	return evsc
+func (m *ExValueScanCreate) SetBinaryOptional(v *url.URL) *ExValueScanCreate {
+	m.mutation.SetBinaryOptional(v)
+	return m
 }
 
 // SetText sets the "text" field.
-func (evsc *ExValueScanCreate) SetText(b *big.Int) *ExValueScanCreate {
-	evsc.mutation.SetText(b)
-	return evsc
+func (m *ExValueScanCreate) SetText(v *big.Int) *ExValueScanCreate {
+	m.mutation.SetText(v)
+	return m
 }
 
 // SetTextOptional sets the "text_optional" field.
-func (evsc *ExValueScanCreate) SetTextOptional(b *big.Int) *ExValueScanCreate {
-	evsc.mutation.SetTextOptional(b)
-	return evsc
+func (m *ExValueScanCreate) SetTextOptional(v *big.Int) *ExValueScanCreate {
+	m.mutation.SetTextOptional(v)
+	return m
 }
 
 // SetBase64 sets the "base64" field.
-func (evsc *ExValueScanCreate) SetBase64(s string) *ExValueScanCreate {
-	evsc.mutation.SetBase64(s)
-	return evsc
+func (m *ExValueScanCreate) SetBase64(v string) *ExValueScanCreate {
+	m.mutation.SetBase64(v)
+	return m
 }
 
 // SetCustom sets the "custom" field.
-func (evsc *ExValueScanCreate) SetCustom(s string) *ExValueScanCreate {
-	evsc.mutation.SetCustom(s)
-	return evsc
+func (m *ExValueScanCreate) SetCustom(v string) *ExValueScanCreate {
+	m.mutation.SetCustom(v)
+	return m
 }
 
 // SetCustomOptional sets the "custom_optional" field.
-func (evsc *ExValueScanCreate) SetCustomOptional(s string) *ExValueScanCreate {
-	evsc.mutation.SetCustomOptional(s)
-	return evsc
+func (m *ExValueScanCreate) SetCustomOptional(v string) *ExValueScanCreate {
+	m.mutation.SetCustomOptional(v)
+	return m
 }
 
 // SetNillableCustomOptional sets the "custom_optional" field if the given value is not nil.
-func (evsc *ExValueScanCreate) SetNillableCustomOptional(s *string) *ExValueScanCreate {
-	if s != nil {
-		evsc.SetCustomOptional(*s)
+func (m *ExValueScanCreate) SetNillableCustomOptional(v *string) *ExValueScanCreate {
+	if v != nil {
+		m.SetCustomOptional(*v)
 	}
-	return evsc
+	return m
 }
 
 // Mutation returns the ExValueScanMutation object of the builder.
-func (evsc *ExValueScanCreate) Mutation() *ExValueScanMutation {
-	return evsc.mutation
+func (m *ExValueScanCreate) Mutation() *ExValueScanMutation {
+	return m.mutation
 }
 
 // Save creates the ExValueScan in the database.
-func (evsc *ExValueScanCreate) Save(ctx context.Context) (*ExValueScan, error) {
-	return withHooks(ctx, evsc.gremlinSave, evsc.mutation, evsc.hooks)
+func (c *ExValueScanCreate) Save(ctx context.Context) (*ExValueScan, error) {
+	return withHooks(ctx, c.gremlinSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (evsc *ExValueScanCreate) SaveX(ctx context.Context) *ExValueScan {
-	v, err := evsc.Save(ctx)
+func (c *ExValueScanCreate) SaveX(ctx context.Context) *ExValueScan {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -101,83 +101,83 @@ func (evsc *ExValueScanCreate) SaveX(ctx context.Context) *ExValueScan {
 }
 
 // Exec executes the query.
-func (evsc *ExValueScanCreate) Exec(ctx context.Context) error {
-	_, err := evsc.Save(ctx)
+func (c *ExValueScanCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (evsc *ExValueScanCreate) ExecX(ctx context.Context) {
-	if err := evsc.Exec(ctx); err != nil {
+func (c *ExValueScanCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (evsc *ExValueScanCreate) check() error {
-	if _, ok := evsc.mutation.Binary(); !ok {
+func (c *ExValueScanCreate) check() error {
+	if _, ok := c.mutation.Binary(); !ok {
 		return &ValidationError{Name: "binary", err: errors.New(`ent: missing required field "ExValueScan.binary"`)}
 	}
-	if _, ok := evsc.mutation.BinaryBytes(); !ok {
+	if _, ok := c.mutation.BinaryBytes(); !ok {
 		return &ValidationError{Name: "binary_bytes", err: errors.New(`ent: missing required field "ExValueScan.binary_bytes"`)}
 	}
-	if _, ok := evsc.mutation.Text(); !ok {
+	if _, ok := c.mutation.Text(); !ok {
 		return &ValidationError{Name: "text", err: errors.New(`ent: missing required field "ExValueScan.text"`)}
 	}
-	if _, ok := evsc.mutation.Base64(); !ok {
+	if _, ok := c.mutation.Base64(); !ok {
 		return &ValidationError{Name: "base64", err: errors.New(`ent: missing required field "ExValueScan.base64"`)}
 	}
-	if _, ok := evsc.mutation.Custom(); !ok {
+	if _, ok := c.mutation.Custom(); !ok {
 		return &ValidationError{Name: "custom", err: errors.New(`ent: missing required field "ExValueScan.custom"`)}
 	}
 	return nil
 }
 
-func (evsc *ExValueScanCreate) gremlinSave(ctx context.Context) (*ExValueScan, error) {
-	if err := evsc.check(); err != nil {
+func (c *ExValueScanCreate) gremlinSave(ctx context.Context) (*ExValueScan, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := evsc.gremlin().Query()
-	if err := evsc.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := c.gremlin().Query()
+	if err := c.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	rnode := &ExValueScan{config: evsc.config}
+	rnode := &ExValueScan{config: c.config}
 	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	evsc.mutation.id = &rnode.ID
-	evsc.mutation.done = true
+	c.mutation.id = &rnode.ID
+	c.mutation.done = true
 	return rnode, nil
 }
 
-func (evsc *ExValueScanCreate) gremlin() *dsl.Traversal {
+func (c *ExValueScanCreate) gremlin() *dsl.Traversal {
 	v := g.AddV(exvaluescan.Label)
-	if value, ok := evsc.mutation.Binary(); ok {
+	if value, ok := c.mutation.Binary(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldBinary, value)
 	}
-	if value, ok := evsc.mutation.BinaryBytes(); ok {
+	if value, ok := c.mutation.BinaryBytes(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldBinaryBytes, value)
 	}
-	if value, ok := evsc.mutation.BinaryOptional(); ok {
+	if value, ok := c.mutation.BinaryOptional(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldBinaryOptional, value)
 	}
-	if value, ok := evsc.mutation.Text(); ok {
+	if value, ok := c.mutation.Text(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldText, value)
 	}
-	if value, ok := evsc.mutation.TextOptional(); ok {
+	if value, ok := c.mutation.TextOptional(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldTextOptional, value)
 	}
-	if value, ok := evsc.mutation.Base64(); ok {
+	if value, ok := c.mutation.Base64(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldBase64, value)
 	}
-	if value, ok := evsc.mutation.Custom(); ok {
+	if value, ok := c.mutation.Custom(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldCustom, value)
 	}
-	if value, ok := evsc.mutation.CustomOptional(); ok {
+	if value, ok := c.mutation.CustomOptional(); ok {
 		v.Property(dsl.Single, exvaluescan.FieldCustomOptional, value)
 	}
 	return v.ValueMap(true)

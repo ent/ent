@@ -24,56 +24,56 @@ type CommentDelete struct {
 }
 
 // Where appends a list predicates to the CommentDelete builder.
-func (cd *CommentDelete) Where(ps ...predicate.Comment) *CommentDelete {
-	cd.mutation.Where(ps...)
-	return cd
+func (d *CommentDelete) Where(ps ...predicate.Comment) *CommentDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (cd *CommentDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, cd.sqlExec, cd.mutation, cd.hooks)
+func (d *CommentDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cd *CommentDelete) ExecX(ctx context.Context) int {
-	n, err := cd.Exec(ctx)
+func (d *CommentDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (cd *CommentDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *CommentDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(comment.Table, sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt))
-	if ps := cd.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, cd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	cd.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // CommentDeleteOne is the builder for deleting a single Comment entity.
 type CommentDeleteOne struct {
-	cd *CommentDelete
+	d *CommentDelete
 }
 
 // Where appends a list predicates to the CommentDelete builder.
-func (cdo *CommentDeleteOne) Where(ps ...predicate.Comment) *CommentDeleteOne {
-	cdo.cd.mutation.Where(ps...)
-	return cdo
+func (d *CommentDeleteOne) Where(ps ...predicate.Comment) *CommentDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (cdo *CommentDeleteOne) Exec(ctx context.Context) error {
-	n, err := cdo.cd.Exec(ctx)
+func (d *CommentDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (cdo *CommentDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cdo *CommentDeleteOne) ExecX(ctx context.Context) {
-	if err := cdo.Exec(ctx); err != nil {
+func (d *CommentDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

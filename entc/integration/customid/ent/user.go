@@ -98,9 +98,9 @@ func (*User) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
-func (u *User) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *User) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -109,16 +109,16 @@ func (u *User) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			u.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case user.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field user_children", value)
 			} else if value.Valid {
-				u.user_children = new(int)
-				*u.user_children = int(value.Int64)
+				m.user_children = new(int)
+				*m.user_children = int(value.Int64)
 			}
 		default:
-			u.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -126,53 +126,53 @@ func (u *User) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the User.
 // This includes values selected through modifiers, order, etc.
-func (u *User) Value(name string) (ent.Value, error) {
-	return u.selectValues.Get(name)
+func (m *User) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryGroups queries the "groups" edge of the User entity.
-func (u *User) QueryGroups() *GroupQuery {
-	return NewUserClient(u.config).QueryGroups(u)
+func (m *User) QueryGroups() *GroupQuery {
+	return NewUserClient(m.config).QueryGroups(m)
 }
 
 // QueryParent queries the "parent" edge of the User entity.
-func (u *User) QueryParent() *UserQuery {
-	return NewUserClient(u.config).QueryParent(u)
+func (m *User) QueryParent() *UserQuery {
+	return NewUserClient(m.config).QueryParent(m)
 }
 
 // QueryChildren queries the "children" edge of the User entity.
-func (u *User) QueryChildren() *UserQuery {
-	return NewUserClient(u.config).QueryChildren(u)
+func (m *User) QueryChildren() *UserQuery {
+	return NewUserClient(m.config).QueryChildren(m)
 }
 
 // QueryPets queries the "pets" edge of the User entity.
-func (u *User) QueryPets() *PetQuery {
-	return NewUserClient(u.config).QueryPets(u)
+func (m *User) QueryPets() *PetQuery {
+	return NewUserClient(m.config).QueryPets(m)
 }
 
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (u *User) Update() *UserUpdateOne {
-	return NewUserClient(u.config).UpdateOne(u)
+func (m *User) Update() *UserUpdateOne {
+	return NewUserClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the User entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (u *User) Unwrap() *User {
-	_tx, ok := u.config.driver.(*txDriver)
+func (m *User) Unwrap() *User {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: User is not a transactional entity")
 	}
-	u.config.driver = _tx.drv
-	return u
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (u *User) String() string {
+func (m *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
-	builder.WriteString(fmt.Sprintf("id=%v", u.ID))
+	builder.WriteString(fmt.Sprintf("id=%v", m.ID))
 	builder.WriteByte(')')
 	return builder.String()
 }

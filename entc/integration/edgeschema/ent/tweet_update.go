@@ -31,218 +31,218 @@ type TweetUpdate struct {
 }
 
 // Where appends a list predicates to the TweetUpdate builder.
-func (tu *TweetUpdate) Where(ps ...predicate.Tweet) *TweetUpdate {
-	tu.mutation.Where(ps...)
-	return tu
+func (u *TweetUpdate) Where(ps ...predicate.Tweet) *TweetUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetText sets the "text" field.
-func (tu *TweetUpdate) SetText(s string) *TweetUpdate {
-	tu.mutation.SetText(s)
-	return tu
+func (m *TweetUpdate) SetText(v string) *TweetUpdate {
+	m.mutation.SetText(v)
+	return m
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (tu *TweetUpdate) SetNillableText(s *string) *TweetUpdate {
-	if s != nil {
-		tu.SetText(*s)
+func (m *TweetUpdate) SetNillableText(v *string) *TweetUpdate {
+	if v != nil {
+		m.SetText(*v)
 	}
-	return tu
+	return m
 }
 
 // AddLikedUserIDs adds the "liked_users" edge to the User entity by IDs.
-func (tu *TweetUpdate) AddLikedUserIDs(ids ...int) *TweetUpdate {
-	tu.mutation.AddLikedUserIDs(ids...)
-	return tu
+func (m *TweetUpdate) AddLikedUserIDs(ids ...int) *TweetUpdate {
+	m.mutation.AddLikedUserIDs(ids...)
+	return m
 }
 
 // AddLikedUsers adds the "liked_users" edges to the User entity.
-func (tu *TweetUpdate) AddLikedUsers(u ...*User) *TweetUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (m *TweetUpdate) AddLikedUsers(v ...*User) *TweetUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tu.AddLikedUserIDs(ids...)
+	return m.AddLikedUserIDs(ids...)
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
-func (tu *TweetUpdate) AddUserIDs(ids ...int) *TweetUpdate {
-	tu.mutation.AddUserIDs(ids...)
-	return tu
+func (m *TweetUpdate) AddUserIDs(ids ...int) *TweetUpdate {
+	m.mutation.AddUserIDs(ids...)
+	return m
 }
 
 // AddUser adds the "user" edges to the User entity.
-func (tu *TweetUpdate) AddUser(u ...*User) *TweetUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (m *TweetUpdate) AddUser(v ...*User) *TweetUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tu.AddUserIDs(ids...)
+	return m.AddUserIDs(ids...)
 }
 
 // AddTagIDs adds the "tags" edge to the Tag entity by IDs.
-func (tu *TweetUpdate) AddTagIDs(ids ...int) *TweetUpdate {
-	tu.mutation.AddTagIDs(ids...)
-	return tu
+func (m *TweetUpdate) AddTagIDs(ids ...int) *TweetUpdate {
+	m.mutation.AddTagIDs(ids...)
+	return m
 }
 
 // AddTags adds the "tags" edges to the Tag entity.
-func (tu *TweetUpdate) AddTags(t ...*Tag) *TweetUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (m *TweetUpdate) AddTags(v ...*Tag) *TweetUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tu.AddTagIDs(ids...)
+	return m.AddTagIDs(ids...)
 }
 
 // AddTweetUserIDs adds the "tweet_user" edge to the UserTweet entity by IDs.
-func (tu *TweetUpdate) AddTweetUserIDs(ids ...int) *TweetUpdate {
-	tu.mutation.AddTweetUserIDs(ids...)
-	return tu
+func (m *TweetUpdate) AddTweetUserIDs(ids ...int) *TweetUpdate {
+	m.mutation.AddTweetUserIDs(ids...)
+	return m
 }
 
 // AddTweetUser adds the "tweet_user" edges to the UserTweet entity.
-func (tu *TweetUpdate) AddTweetUser(u ...*UserTweet) *TweetUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (m *TweetUpdate) AddTweetUser(v ...*UserTweet) *TweetUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tu.AddTweetUserIDs(ids...)
+	return m.AddTweetUserIDs(ids...)
 }
 
 // AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by IDs.
-func (tu *TweetUpdate) AddTweetTagIDs(ids ...uuid.UUID) *TweetUpdate {
-	tu.mutation.AddTweetTagIDs(ids...)
-	return tu
+func (m *TweetUpdate) AddTweetTagIDs(ids ...uuid.UUID) *TweetUpdate {
+	m.mutation.AddTweetTagIDs(ids...)
+	return m
 }
 
 // AddTweetTags adds the "tweet_tags" edges to the TweetTag entity.
-func (tu *TweetUpdate) AddTweetTags(t ...*TweetTag) *TweetUpdate {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (m *TweetUpdate) AddTweetTags(v ...*TweetTag) *TweetUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tu.AddTweetTagIDs(ids...)
+	return m.AddTweetTagIDs(ids...)
 }
 
 // Mutation returns the TweetMutation object of the builder.
-func (tu *TweetUpdate) Mutation() *TweetMutation {
-	return tu.mutation
+func (m *TweetUpdate) Mutation() *TweetMutation {
+	return m.mutation
 }
 
 // ClearLikedUsers clears all "liked_users" edges to the User entity.
-func (tu *TweetUpdate) ClearLikedUsers() *TweetUpdate {
-	tu.mutation.ClearLikedUsers()
-	return tu
+func (u *TweetUpdate) ClearLikedUsers() *TweetUpdate {
+	u.mutation.ClearLikedUsers()
+	return u
 }
 
 // RemoveLikedUserIDs removes the "liked_users" edge to User entities by IDs.
-func (tu *TweetUpdate) RemoveLikedUserIDs(ids ...int) *TweetUpdate {
-	tu.mutation.RemoveLikedUserIDs(ids...)
-	return tu
+func (u *TweetUpdate) RemoveLikedUserIDs(ids ...int) *TweetUpdate {
+	u.mutation.RemoveLikedUserIDs(ids...)
+	return u
 }
 
 // RemoveLikedUsers removes "liked_users" edges to User entities.
-func (tu *TweetUpdate) RemoveLikedUsers(u ...*User) *TweetUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (u *TweetUpdate) RemoveLikedUsers(v ...*User) *TweetUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tu.RemoveLikedUserIDs(ids...)
+	return u.RemoveLikedUserIDs(ids...)
 }
 
 // ClearUser clears all "user" edges to the User entity.
-func (tu *TweetUpdate) ClearUser() *TweetUpdate {
-	tu.mutation.ClearUser()
-	return tu
+func (u *TweetUpdate) ClearUser() *TweetUpdate {
+	u.mutation.ClearUser()
+	return u
 }
 
 // RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (tu *TweetUpdate) RemoveUserIDs(ids ...int) *TweetUpdate {
-	tu.mutation.RemoveUserIDs(ids...)
-	return tu
+func (u *TweetUpdate) RemoveUserIDs(ids ...int) *TweetUpdate {
+	u.mutation.RemoveUserIDs(ids...)
+	return u
 }
 
 // RemoveUser removes "user" edges to User entities.
-func (tu *TweetUpdate) RemoveUser(u ...*User) *TweetUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (u *TweetUpdate) RemoveUser(v ...*User) *TweetUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tu.RemoveUserIDs(ids...)
+	return u.RemoveUserIDs(ids...)
 }
 
 // ClearTags clears all "tags" edges to the Tag entity.
-func (tu *TweetUpdate) ClearTags() *TweetUpdate {
-	tu.mutation.ClearTags()
-	return tu
+func (u *TweetUpdate) ClearTags() *TweetUpdate {
+	u.mutation.ClearTags()
+	return u
 }
 
 // RemoveTagIDs removes the "tags" edge to Tag entities by IDs.
-func (tu *TweetUpdate) RemoveTagIDs(ids ...int) *TweetUpdate {
-	tu.mutation.RemoveTagIDs(ids...)
-	return tu
+func (u *TweetUpdate) RemoveTagIDs(ids ...int) *TweetUpdate {
+	u.mutation.RemoveTagIDs(ids...)
+	return u
 }
 
 // RemoveTags removes "tags" edges to Tag entities.
-func (tu *TweetUpdate) RemoveTags(t ...*Tag) *TweetUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (u *TweetUpdate) RemoveTags(v ...*Tag) *TweetUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tu.RemoveTagIDs(ids...)
+	return u.RemoveTagIDs(ids...)
 }
 
 // ClearTweetUser clears all "tweet_user" edges to the UserTweet entity.
-func (tu *TweetUpdate) ClearTweetUser() *TweetUpdate {
-	tu.mutation.ClearTweetUser()
-	return tu
+func (u *TweetUpdate) ClearTweetUser() *TweetUpdate {
+	u.mutation.ClearTweetUser()
+	return u
 }
 
 // RemoveTweetUserIDs removes the "tweet_user" edge to UserTweet entities by IDs.
-func (tu *TweetUpdate) RemoveTweetUserIDs(ids ...int) *TweetUpdate {
-	tu.mutation.RemoveTweetUserIDs(ids...)
-	return tu
+func (u *TweetUpdate) RemoveTweetUserIDs(ids ...int) *TweetUpdate {
+	u.mutation.RemoveTweetUserIDs(ids...)
+	return u
 }
 
 // RemoveTweetUser removes "tweet_user" edges to UserTweet entities.
-func (tu *TweetUpdate) RemoveTweetUser(u ...*UserTweet) *TweetUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (u *TweetUpdate) RemoveTweetUser(v ...*UserTweet) *TweetUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tu.RemoveTweetUserIDs(ids...)
+	return u.RemoveTweetUserIDs(ids...)
 }
 
 // ClearTweetTags clears all "tweet_tags" edges to the TweetTag entity.
-func (tu *TweetUpdate) ClearTweetTags() *TweetUpdate {
-	tu.mutation.ClearTweetTags()
-	return tu
+func (u *TweetUpdate) ClearTweetTags() *TweetUpdate {
+	u.mutation.ClearTweetTags()
+	return u
 }
 
 // RemoveTweetTagIDs removes the "tweet_tags" edge to TweetTag entities by IDs.
-func (tu *TweetUpdate) RemoveTweetTagIDs(ids ...uuid.UUID) *TweetUpdate {
-	tu.mutation.RemoveTweetTagIDs(ids...)
-	return tu
+func (u *TweetUpdate) RemoveTweetTagIDs(ids ...uuid.UUID) *TweetUpdate {
+	u.mutation.RemoveTweetTagIDs(ids...)
+	return u
 }
 
 // RemoveTweetTags removes "tweet_tags" edges to TweetTag entities.
-func (tu *TweetUpdate) RemoveTweetTags(t ...*TweetTag) *TweetUpdate {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (u *TweetUpdate) RemoveTweetTags(v ...*TweetTag) *TweetUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tu.RemoveTweetTagIDs(ids...)
+	return u.RemoveTweetTagIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (tu *TweetUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, tu.sqlSave, tu.mutation, tu.hooks)
+func (u *TweetUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (tu *TweetUpdate) SaveX(ctx context.Context) int {
-	affected, err := tu.Save(ctx)
+func (u *TweetUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -250,31 +250,31 @@ func (tu *TweetUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (tu *TweetUpdate) Exec(ctx context.Context) error {
-	_, err := tu.Save(ctx)
+func (u *TweetUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tu *TweetUpdate) ExecX(ctx context.Context) {
-	if err := tu.Exec(ctx); err != nil {
+func (u *TweetUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (u *TweetUpdate) sqlSave(ctx context.Context) (_n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(tweet.Table, tweet.Columns, sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt))
-	if ps := tu.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := tu.mutation.Text(); ok {
+	if value, ok := u.mutation.Text(); ok {
 		_spec.SetField(tweet.FieldText, field.TypeString, value)
 	}
-	if tu.mutation.LikedUsersCleared() {
+	if u.mutation.LikedUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -285,33 +285,13 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
-		createE := &TweetLikeCreate{config: tu.config, mutation: newTweetLikeMutation(tu.config, OpCreate)}
+		createE := &TweetLikeCreate{config: u.config, mutation: newTweetLikeMutation(u.config, OpCreate)}
 		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.RemovedLikedUsersIDs(); len(nodes) > 0 && !tu.mutation.LikedUsersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   tweet.LikedUsersTable,
-			Columns: tweet.LikedUsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		createE := &TweetLikeCreate{config: tu.config, mutation: newTweetLikeMutation(tu.config, OpCreate)}
-		_ = createE.defaults()
-		_, specE := createE.createSpec()
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tu.mutation.LikedUsersIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.RemovedLikedUsersIDs(); len(nodes) > 0 && !u.mutation.LikedUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -325,13 +305,33 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &TweetLikeCreate{config: tu.config, mutation: newTweetLikeMutation(tu.config, OpCreate)}
+		createE := &TweetLikeCreate{config: u.config, mutation: newTweetLikeMutation(u.config, OpCreate)}
+		_ = createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := u.mutation.LikedUsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   tweet.LikedUsersTable,
+			Columns: tweet.LikedUsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &TweetLikeCreate{config: u.config, mutation: newTweetLikeMutation(u.config, OpCreate)}
 		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tu.mutation.UserCleared() {
+	if u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -342,33 +342,13 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
-		createE := &UserTweetCreate{config: tu.config, mutation: newUserTweetMutation(tu.config, OpCreate)}
+		createE := &UserTweetCreate{config: u.config, mutation: newUserTweetMutation(u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.RemovedUserIDs(); len(nodes) > 0 && !tu.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   tweet.UserTable,
-			Columns: tweet.UserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		createE := &UserTweetCreate{config: tu.config, mutation: newUserTweetMutation(tu.config, OpCreate)}
-		createE.defaults()
-		_, specE := createE.createSpec()
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tu.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.RemovedUserIDs(); len(nodes) > 0 && !u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -382,13 +362,33 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &UserTweetCreate{config: tu.config, mutation: newUserTweetMutation(tu.config, OpCreate)}
+		createE := &UserTweetCreate{config: u.config, mutation: newUserTweetMutation(u.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := u.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   tweet.UserTable,
+			Columns: tweet.UserPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &UserTweetCreate{config: u.config, mutation: newUserTweetMutation(u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tu.mutation.TagsCleared() {
+	if u.mutation.TagsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -399,7 +399,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
 			},
 		}
-		createE := &TweetTagCreate{config: tu.config, mutation: newTweetTagMutation(tu.config, OpCreate)}
+		createE := &TweetTagCreate{config: u.config, mutation: newTweetTagMutation(u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
@@ -408,7 +408,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.RemovedTagsIDs(); len(nodes) > 0 && !tu.mutation.TagsCleared() {
+	if nodes := u.mutation.RemovedTagsIDs(); len(nodes) > 0 && !u.mutation.TagsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -422,7 +422,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &TweetTagCreate{config: tu.config, mutation: newTweetTagMutation(tu.config, OpCreate)}
+		createE := &TweetTagCreate{config: u.config, mutation: newTweetTagMutation(u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
@@ -431,7 +431,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.TagsIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.TagsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -445,7 +445,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &TweetTagCreate{config: tu.config, mutation: newTweetTagMutation(tu.config, OpCreate)}
+		createE := &TweetTagCreate{config: u.config, mutation: newTweetTagMutation(u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
@@ -454,7 +454,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tu.mutation.TweetUserCleared() {
+	if u.mutation.TweetUserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -467,7 +467,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.RemovedTweetUserIDs(); len(nodes) > 0 && !tu.mutation.TweetUserCleared() {
+	if nodes := u.mutation.RemovedTweetUserIDs(); len(nodes) > 0 && !u.mutation.TweetUserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -483,7 +483,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.TweetUserIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.TweetUserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -499,7 +499,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tu.mutation.TweetTagsCleared() {
+	if u.mutation.TweetTagsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -512,7 +512,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.RemovedTweetTagsIDs(); len(nodes) > 0 && !tu.mutation.TweetTagsCleared() {
+	if nodes := u.mutation.RemovedTweetTagsIDs(); len(nodes) > 0 && !u.mutation.TweetTagsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -528,7 +528,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.TweetTagsIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.TweetTagsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -544,7 +544,7 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{tweet.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -552,8 +552,8 @@ func (tu *TweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	tu.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // TweetUpdateOne is the builder for updating a single Tweet entity.
@@ -565,225 +565,225 @@ type TweetUpdateOne struct {
 }
 
 // SetText sets the "text" field.
-func (tuo *TweetUpdateOne) SetText(s string) *TweetUpdateOne {
-	tuo.mutation.SetText(s)
-	return tuo
+func (m *TweetUpdateOne) SetText(v string) *TweetUpdateOne {
+	m.mutation.SetText(v)
+	return m
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (tuo *TweetUpdateOne) SetNillableText(s *string) *TweetUpdateOne {
-	if s != nil {
-		tuo.SetText(*s)
+func (m *TweetUpdateOne) SetNillableText(v *string) *TweetUpdateOne {
+	if v != nil {
+		m.SetText(*v)
 	}
-	return tuo
+	return m
 }
 
 // AddLikedUserIDs adds the "liked_users" edge to the User entity by IDs.
-func (tuo *TweetUpdateOne) AddLikedUserIDs(ids ...int) *TweetUpdateOne {
-	tuo.mutation.AddLikedUserIDs(ids...)
-	return tuo
+func (m *TweetUpdateOne) AddLikedUserIDs(ids ...int) *TweetUpdateOne {
+	m.mutation.AddLikedUserIDs(ids...)
+	return m
 }
 
 // AddLikedUsers adds the "liked_users" edges to the User entity.
-func (tuo *TweetUpdateOne) AddLikedUsers(u ...*User) *TweetUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (m *TweetUpdateOne) AddLikedUsers(v ...*User) *TweetUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tuo.AddLikedUserIDs(ids...)
+	return m.AddLikedUserIDs(ids...)
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
-func (tuo *TweetUpdateOne) AddUserIDs(ids ...int) *TweetUpdateOne {
-	tuo.mutation.AddUserIDs(ids...)
-	return tuo
+func (m *TweetUpdateOne) AddUserIDs(ids ...int) *TweetUpdateOne {
+	m.mutation.AddUserIDs(ids...)
+	return m
 }
 
 // AddUser adds the "user" edges to the User entity.
-func (tuo *TweetUpdateOne) AddUser(u ...*User) *TweetUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (m *TweetUpdateOne) AddUser(v ...*User) *TweetUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tuo.AddUserIDs(ids...)
+	return m.AddUserIDs(ids...)
 }
 
 // AddTagIDs adds the "tags" edge to the Tag entity by IDs.
-func (tuo *TweetUpdateOne) AddTagIDs(ids ...int) *TweetUpdateOne {
-	tuo.mutation.AddTagIDs(ids...)
-	return tuo
+func (m *TweetUpdateOne) AddTagIDs(ids ...int) *TweetUpdateOne {
+	m.mutation.AddTagIDs(ids...)
+	return m
 }
 
 // AddTags adds the "tags" edges to the Tag entity.
-func (tuo *TweetUpdateOne) AddTags(t ...*Tag) *TweetUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (m *TweetUpdateOne) AddTags(v ...*Tag) *TweetUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tuo.AddTagIDs(ids...)
+	return m.AddTagIDs(ids...)
 }
 
 // AddTweetUserIDs adds the "tweet_user" edge to the UserTweet entity by IDs.
-func (tuo *TweetUpdateOne) AddTweetUserIDs(ids ...int) *TweetUpdateOne {
-	tuo.mutation.AddTweetUserIDs(ids...)
-	return tuo
+func (m *TweetUpdateOne) AddTweetUserIDs(ids ...int) *TweetUpdateOne {
+	m.mutation.AddTweetUserIDs(ids...)
+	return m
 }
 
 // AddTweetUser adds the "tweet_user" edges to the UserTweet entity.
-func (tuo *TweetUpdateOne) AddTweetUser(u ...*UserTweet) *TweetUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (m *TweetUpdateOne) AddTweetUser(v ...*UserTweet) *TweetUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tuo.AddTweetUserIDs(ids...)
+	return m.AddTweetUserIDs(ids...)
 }
 
 // AddTweetTagIDs adds the "tweet_tags" edge to the TweetTag entity by IDs.
-func (tuo *TweetUpdateOne) AddTweetTagIDs(ids ...uuid.UUID) *TweetUpdateOne {
-	tuo.mutation.AddTweetTagIDs(ids...)
-	return tuo
+func (m *TweetUpdateOne) AddTweetTagIDs(ids ...uuid.UUID) *TweetUpdateOne {
+	m.mutation.AddTweetTagIDs(ids...)
+	return m
 }
 
 // AddTweetTags adds the "tweet_tags" edges to the TweetTag entity.
-func (tuo *TweetUpdateOne) AddTweetTags(t ...*TweetTag) *TweetUpdateOne {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (m *TweetUpdateOne) AddTweetTags(v ...*TweetTag) *TweetUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tuo.AddTweetTagIDs(ids...)
+	return m.AddTweetTagIDs(ids...)
 }
 
 // Mutation returns the TweetMutation object of the builder.
-func (tuo *TweetUpdateOne) Mutation() *TweetMutation {
-	return tuo.mutation
+func (m *TweetUpdateOne) Mutation() *TweetMutation {
+	return m.mutation
 }
 
 // ClearLikedUsers clears all "liked_users" edges to the User entity.
-func (tuo *TweetUpdateOne) ClearLikedUsers() *TweetUpdateOne {
-	tuo.mutation.ClearLikedUsers()
-	return tuo
+func (u *TweetUpdateOne) ClearLikedUsers() *TweetUpdateOne {
+	u.mutation.ClearLikedUsers()
+	return u
 }
 
 // RemoveLikedUserIDs removes the "liked_users" edge to User entities by IDs.
-func (tuo *TweetUpdateOne) RemoveLikedUserIDs(ids ...int) *TweetUpdateOne {
-	tuo.mutation.RemoveLikedUserIDs(ids...)
-	return tuo
+func (u *TweetUpdateOne) RemoveLikedUserIDs(ids ...int) *TweetUpdateOne {
+	u.mutation.RemoveLikedUserIDs(ids...)
+	return u
 }
 
 // RemoveLikedUsers removes "liked_users" edges to User entities.
-func (tuo *TweetUpdateOne) RemoveLikedUsers(u ...*User) *TweetUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (u *TweetUpdateOne) RemoveLikedUsers(v ...*User) *TweetUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tuo.RemoveLikedUserIDs(ids...)
+	return u.RemoveLikedUserIDs(ids...)
 }
 
 // ClearUser clears all "user" edges to the User entity.
-func (tuo *TweetUpdateOne) ClearUser() *TweetUpdateOne {
-	tuo.mutation.ClearUser()
-	return tuo
+func (u *TweetUpdateOne) ClearUser() *TweetUpdateOne {
+	u.mutation.ClearUser()
+	return u
 }
 
 // RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (tuo *TweetUpdateOne) RemoveUserIDs(ids ...int) *TweetUpdateOne {
-	tuo.mutation.RemoveUserIDs(ids...)
-	return tuo
+func (u *TweetUpdateOne) RemoveUserIDs(ids ...int) *TweetUpdateOne {
+	u.mutation.RemoveUserIDs(ids...)
+	return u
 }
 
 // RemoveUser removes "user" edges to User entities.
-func (tuo *TweetUpdateOne) RemoveUser(u ...*User) *TweetUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (u *TweetUpdateOne) RemoveUser(v ...*User) *TweetUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tuo.RemoveUserIDs(ids...)
+	return u.RemoveUserIDs(ids...)
 }
 
 // ClearTags clears all "tags" edges to the Tag entity.
-func (tuo *TweetUpdateOne) ClearTags() *TweetUpdateOne {
-	tuo.mutation.ClearTags()
-	return tuo
+func (u *TweetUpdateOne) ClearTags() *TweetUpdateOne {
+	u.mutation.ClearTags()
+	return u
 }
 
 // RemoveTagIDs removes the "tags" edge to Tag entities by IDs.
-func (tuo *TweetUpdateOne) RemoveTagIDs(ids ...int) *TweetUpdateOne {
-	tuo.mutation.RemoveTagIDs(ids...)
-	return tuo
+func (u *TweetUpdateOne) RemoveTagIDs(ids ...int) *TweetUpdateOne {
+	u.mutation.RemoveTagIDs(ids...)
+	return u
 }
 
 // RemoveTags removes "tags" edges to Tag entities.
-func (tuo *TweetUpdateOne) RemoveTags(t ...*Tag) *TweetUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (u *TweetUpdateOne) RemoveTags(v ...*Tag) *TweetUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tuo.RemoveTagIDs(ids...)
+	return u.RemoveTagIDs(ids...)
 }
 
 // ClearTweetUser clears all "tweet_user" edges to the UserTweet entity.
-func (tuo *TweetUpdateOne) ClearTweetUser() *TweetUpdateOne {
-	tuo.mutation.ClearTweetUser()
-	return tuo
+func (u *TweetUpdateOne) ClearTweetUser() *TweetUpdateOne {
+	u.mutation.ClearTweetUser()
+	return u
 }
 
 // RemoveTweetUserIDs removes the "tweet_user" edge to UserTweet entities by IDs.
-func (tuo *TweetUpdateOne) RemoveTweetUserIDs(ids ...int) *TweetUpdateOne {
-	tuo.mutation.RemoveTweetUserIDs(ids...)
-	return tuo
+func (u *TweetUpdateOne) RemoveTweetUserIDs(ids ...int) *TweetUpdateOne {
+	u.mutation.RemoveTweetUserIDs(ids...)
+	return u
 }
 
 // RemoveTweetUser removes "tweet_user" edges to UserTweet entities.
-func (tuo *TweetUpdateOne) RemoveTweetUser(u ...*UserTweet) *TweetUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (u *TweetUpdateOne) RemoveTweetUser(v ...*UserTweet) *TweetUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tuo.RemoveTweetUserIDs(ids...)
+	return u.RemoveTweetUserIDs(ids...)
 }
 
 // ClearTweetTags clears all "tweet_tags" edges to the TweetTag entity.
-func (tuo *TweetUpdateOne) ClearTweetTags() *TweetUpdateOne {
-	tuo.mutation.ClearTweetTags()
-	return tuo
+func (u *TweetUpdateOne) ClearTweetTags() *TweetUpdateOne {
+	u.mutation.ClearTweetTags()
+	return u
 }
 
 // RemoveTweetTagIDs removes the "tweet_tags" edge to TweetTag entities by IDs.
-func (tuo *TweetUpdateOne) RemoveTweetTagIDs(ids ...uuid.UUID) *TweetUpdateOne {
-	tuo.mutation.RemoveTweetTagIDs(ids...)
-	return tuo
+func (u *TweetUpdateOne) RemoveTweetTagIDs(ids ...uuid.UUID) *TweetUpdateOne {
+	u.mutation.RemoveTweetTagIDs(ids...)
+	return u
 }
 
 // RemoveTweetTags removes "tweet_tags" edges to TweetTag entities.
-func (tuo *TweetUpdateOne) RemoveTweetTags(t ...*TweetTag) *TweetUpdateOne {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (u *TweetUpdateOne) RemoveTweetTags(v ...*TweetTag) *TweetUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tuo.RemoveTweetTagIDs(ids...)
+	return u.RemoveTweetTagIDs(ids...)
 }
 
 // Where appends a list predicates to the TweetUpdate builder.
-func (tuo *TweetUpdateOne) Where(ps ...predicate.Tweet) *TweetUpdateOne {
-	tuo.mutation.Where(ps...)
-	return tuo
+func (u *TweetUpdateOne) Where(ps ...predicate.Tweet) *TweetUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (tuo *TweetUpdateOne) Select(field string, fields ...string) *TweetUpdateOne {
-	tuo.fields = append([]string{field}, fields...)
-	return tuo
+func (u *TweetUpdateOne) Select(field string, fields ...string) *TweetUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated Tweet entity.
-func (tuo *TweetUpdateOne) Save(ctx context.Context) (*Tweet, error) {
-	return withHooks(ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
+func (u *TweetUpdateOne) Save(ctx context.Context) (*Tweet, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (tuo *TweetUpdateOne) SaveX(ctx context.Context) *Tweet {
-	node, err := tuo.Save(ctx)
+func (u *TweetUpdateOne) SaveX(ctx context.Context) *Tweet {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -791,26 +791,26 @@ func (tuo *TweetUpdateOne) SaveX(ctx context.Context) *Tweet {
 }
 
 // Exec executes the query on the entity.
-func (tuo *TweetUpdateOne) Exec(ctx context.Context) error {
-	_, err := tuo.Save(ctx)
+func (u *TweetUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tuo *TweetUpdateOne) ExecX(ctx context.Context) {
-	if err := tuo.Exec(ctx); err != nil {
+func (u *TweetUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error) {
+func (u *TweetUpdateOne) sqlSave(ctx context.Context) (_n *Tweet, err error) {
 	_spec := sqlgraph.NewUpdateSpec(tweet.Table, tweet.Columns, sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt))
-	id, ok := tuo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Tweet.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := tuo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, tweet.FieldID)
 		for _, f := range fields {
@@ -822,17 +822,17 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 			}
 		}
 	}
-	if ps := tuo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := tuo.mutation.Text(); ok {
+	if value, ok := u.mutation.Text(); ok {
 		_spec.SetField(tweet.FieldText, field.TypeString, value)
 	}
-	if tuo.mutation.LikedUsersCleared() {
+	if u.mutation.LikedUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -843,33 +843,13 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
-		createE := &TweetLikeCreate{config: tuo.config, mutation: newTweetLikeMutation(tuo.config, OpCreate)}
+		createE := &TweetLikeCreate{config: u.config, mutation: newTweetLikeMutation(u.config, OpCreate)}
 		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.RemovedLikedUsersIDs(); len(nodes) > 0 && !tuo.mutation.LikedUsersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   tweet.LikedUsersTable,
-			Columns: tweet.LikedUsersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		createE := &TweetLikeCreate{config: tuo.config, mutation: newTweetLikeMutation(tuo.config, OpCreate)}
-		_ = createE.defaults()
-		_, specE := createE.createSpec()
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tuo.mutation.LikedUsersIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.RemovedLikedUsersIDs(); len(nodes) > 0 && !u.mutation.LikedUsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -883,13 +863,33 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &TweetLikeCreate{config: tuo.config, mutation: newTweetLikeMutation(tuo.config, OpCreate)}
+		createE := &TweetLikeCreate{config: u.config, mutation: newTweetLikeMutation(u.config, OpCreate)}
+		_ = createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := u.mutation.LikedUsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   tweet.LikedUsersTable,
+			Columns: tweet.LikedUsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &TweetLikeCreate{config: u.config, mutation: newTweetLikeMutation(u.config, OpCreate)}
 		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tuo.mutation.UserCleared() {
+	if u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -900,33 +900,13 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
-		createE := &UserTweetCreate{config: tuo.config, mutation: newUserTweetMutation(tuo.config, OpCreate)}
+		createE := &UserTweetCreate{config: u.config, mutation: newUserTweetMutation(u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.RemovedUserIDs(); len(nodes) > 0 && !tuo.mutation.UserCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   tweet.UserTable,
-			Columns: tweet.UserPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		createE := &UserTweetCreate{config: tuo.config, mutation: newUserTweetMutation(tuo.config, OpCreate)}
-		createE.defaults()
-		_, specE := createE.createSpec()
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tuo.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.RemovedUserIDs(); len(nodes) > 0 && !u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -940,13 +920,33 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &UserTweetCreate{config: tuo.config, mutation: newUserTweetMutation(tuo.config, OpCreate)}
+		createE := &UserTweetCreate{config: u.config, mutation: newUserTweetMutation(u.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := u.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   tweet.UserTable,
+			Columns: tweet.UserPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &UserTweetCreate{config: u.config, mutation: newUserTweetMutation(u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tuo.mutation.TagsCleared() {
+	if u.mutation.TagsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -957,7 +957,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 				IDSpec: sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt),
 			},
 		}
-		createE := &TweetTagCreate{config: tuo.config, mutation: newTweetTagMutation(tuo.config, OpCreate)}
+		createE := &TweetTagCreate{config: u.config, mutation: newTweetTagMutation(u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
@@ -966,7 +966,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.RemovedTagsIDs(); len(nodes) > 0 && !tuo.mutation.TagsCleared() {
+	if nodes := u.mutation.RemovedTagsIDs(); len(nodes) > 0 && !u.mutation.TagsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -980,7 +980,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &TweetTagCreate{config: tuo.config, mutation: newTweetTagMutation(tuo.config, OpCreate)}
+		createE := &TweetTagCreate{config: u.config, mutation: newTweetTagMutation(u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
@@ -989,7 +989,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.TagsIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.TagsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -1003,7 +1003,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &TweetTagCreate{config: tuo.config, mutation: newTweetTagMutation(tuo.config, OpCreate)}
+		createE := &TweetTagCreate{config: u.config, mutation: newTweetTagMutation(u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
@@ -1012,7 +1012,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tuo.mutation.TweetUserCleared() {
+	if u.mutation.TweetUserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1025,7 +1025,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.RemovedTweetUserIDs(); len(nodes) > 0 && !tuo.mutation.TweetUserCleared() {
+	if nodes := u.mutation.RemovedTweetUserIDs(); len(nodes) > 0 && !u.mutation.TweetUserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1041,7 +1041,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.TweetUserIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.TweetUserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1057,7 +1057,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tuo.mutation.TweetTagsCleared() {
+	if u.mutation.TweetTagsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1070,7 +1070,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.RemovedTweetTagsIDs(); len(nodes) > 0 && !tuo.mutation.TweetTagsCleared() {
+	if nodes := u.mutation.RemovedTweetTagsIDs(); len(nodes) > 0 && !u.mutation.TweetTagsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1086,7 +1086,7 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.TweetTagsIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.TweetTagsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1102,10 +1102,10 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Tweet{config: tuo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, tuo.driver, _spec); err != nil {
+	_n = &Tweet{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{tweet.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -1113,6 +1113,6 @@ func (tuo *TweetUpdateOne) sqlSave(ctx context.Context) (_node *Tweet, err error
 		}
 		return nil, err
 	}
-	tuo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

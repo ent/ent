@@ -36,44 +36,44 @@ type TokenQuery struct {
 }
 
 // Where adds a new predicate for the TokenQuery builder.
-func (tq *TokenQuery) Where(ps ...predicate.Token) *TokenQuery {
-	tq.predicates = append(tq.predicates, ps...)
-	return tq
+func (q *TokenQuery) Where(ps ...predicate.Token) *TokenQuery {
+	q.predicates = append(q.predicates, ps...)
+	return q
 }
 
 // Limit the number of records to be returned by this query.
-func (tq *TokenQuery) Limit(limit int) *TokenQuery {
-	tq.ctx.Limit = &limit
-	return tq
+func (q *TokenQuery) Limit(limit int) *TokenQuery {
+	q.ctx.Limit = &limit
+	return q
 }
 
 // Offset to start from.
-func (tq *TokenQuery) Offset(offset int) *TokenQuery {
-	tq.ctx.Offset = &offset
-	return tq
+func (q *TokenQuery) Offset(offset int) *TokenQuery {
+	q.ctx.Offset = &offset
+	return q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (tq *TokenQuery) Unique(unique bool) *TokenQuery {
-	tq.ctx.Unique = &unique
-	return tq
+func (q *TokenQuery) Unique(unique bool) *TokenQuery {
+	q.ctx.Unique = &unique
+	return q
 }
 
 // Order specifies how the records should be ordered.
-func (tq *TokenQuery) Order(o ...token.OrderOption) *TokenQuery {
-	tq.order = append(tq.order, o...)
-	return tq
+func (q *TokenQuery) Order(o ...token.OrderOption) *TokenQuery {
+	q.order = append(q.order, o...)
+	return q
 }
 
 // QueryAccount chains the current query on the "account" edge.
-func (tq *TokenQuery) QueryAccount() *AccountQuery {
-	query := (&AccountClient{config: tq.config}).Query()
+func (q *TokenQuery) QueryAccount() *AccountQuery {
+	query := (&AccountClient{config: q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
+		if err := q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := tq.sqlQuery(ctx)
+		selector := q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -82,7 +82,7 @@ func (tq *TokenQuery) QueryAccount() *AccountQuery {
 			sqlgraph.To(account.Table, account.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, token.AccountTable, token.AccountColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -90,8 +90,8 @@ func (tq *TokenQuery) QueryAccount() *AccountQuery {
 
 // First returns the first Token entity from the query.
 // Returns a *NotFoundError when no Token was found.
-func (tq *TokenQuery) First(ctx context.Context) (*Token, error) {
-	nodes, err := tq.Limit(1).All(setContextOp(ctx, tq.ctx, ent.OpQueryFirst))
+func (q *TokenQuery) First(ctx context.Context) (*Token, error) {
+	nodes, err := q.Limit(1).All(setContextOp(ctx, q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -102,8 +102,8 @@ func (tq *TokenQuery) First(ctx context.Context) (*Token, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (tq *TokenQuery) FirstX(ctx context.Context) *Token {
-	node, err := tq.First(ctx)
+func (q *TokenQuery) FirstX(ctx context.Context) *Token {
+	node, err := q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -112,9 +112,9 @@ func (tq *TokenQuery) FirstX(ctx context.Context) *Token {
 
 // FirstID returns the first Token ID from the query.
 // Returns a *NotFoundError when no Token ID was found.
-func (tq *TokenQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
+func (q *TokenQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
 	var ids []sid.ID
-	if ids, err = tq.Limit(1).IDs(setContextOp(ctx, tq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = q.Limit(1).IDs(setContextOp(ctx, q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -125,8 +125,8 @@ func (tq *TokenQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (tq *TokenQuery) FirstIDX(ctx context.Context) sid.ID {
-	id, err := tq.FirstID(ctx)
+func (q *TokenQuery) FirstIDX(ctx context.Context) sid.ID {
+	id, err := q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -136,8 +136,8 @@ func (tq *TokenQuery) FirstIDX(ctx context.Context) sid.ID {
 // Only returns a single Token entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Token entity is found.
 // Returns a *NotFoundError when no Token entities are found.
-func (tq *TokenQuery) Only(ctx context.Context) (*Token, error) {
-	nodes, err := tq.Limit(2).All(setContextOp(ctx, tq.ctx, ent.OpQueryOnly))
+func (q *TokenQuery) Only(ctx context.Context) (*Token, error) {
+	nodes, err := q.Limit(2).All(setContextOp(ctx, q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -152,8 +152,8 @@ func (tq *TokenQuery) Only(ctx context.Context) (*Token, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (tq *TokenQuery) OnlyX(ctx context.Context) *Token {
-	node, err := tq.Only(ctx)
+func (q *TokenQuery) OnlyX(ctx context.Context) *Token {
+	node, err := q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -163,9 +163,9 @@ func (tq *TokenQuery) OnlyX(ctx context.Context) *Token {
 // OnlyID is like Only, but returns the only Token ID in the query.
 // Returns a *NotSingularError when more than one Token ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (tq *TokenQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
+func (q *TokenQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
 	var ids []sid.ID
-	if ids, err = tq.Limit(2).IDs(setContextOp(ctx, tq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = q.Limit(2).IDs(setContextOp(ctx, q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -180,8 +180,8 @@ func (tq *TokenQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (tq *TokenQuery) OnlyIDX(ctx context.Context) sid.ID {
-	id, err := tq.OnlyID(ctx)
+func (q *TokenQuery) OnlyIDX(ctx context.Context) sid.ID {
+	id, err := q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -189,18 +189,18 @@ func (tq *TokenQuery) OnlyIDX(ctx context.Context) sid.ID {
 }
 
 // All executes the query and returns a list of Tokens.
-func (tq *TokenQuery) All(ctx context.Context) ([]*Token, error) {
-	ctx = setContextOp(ctx, tq.ctx, ent.OpQueryAll)
-	if err := tq.prepareQuery(ctx); err != nil {
+func (q *TokenQuery) All(ctx context.Context) ([]*Token, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryAll)
+	if err := q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Token, *TokenQuery]()
-	return withInterceptors[[]*Token](ctx, tq, qr, tq.inters)
+	return withInterceptors[[]*Token](ctx, q, qr, q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (tq *TokenQuery) AllX(ctx context.Context) []*Token {
-	nodes, err := tq.All(ctx)
+func (q *TokenQuery) AllX(ctx context.Context) []*Token {
+	nodes, err := q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -208,20 +208,20 @@ func (tq *TokenQuery) AllX(ctx context.Context) []*Token {
 }
 
 // IDs executes the query and returns a list of Token IDs.
-func (tq *TokenQuery) IDs(ctx context.Context) (ids []sid.ID, err error) {
-	if tq.ctx.Unique == nil && tq.path != nil {
-		tq.Unique(true)
+func (q *TokenQuery) IDs(ctx context.Context) (ids []sid.ID, err error) {
+	if q.ctx.Unique == nil && q.path != nil {
+		q.Unique(true)
 	}
-	ctx = setContextOp(ctx, tq.ctx, ent.OpQueryIDs)
-	if err = tq.Select(token.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryIDs)
+	if err = q.Select(token.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (tq *TokenQuery) IDsX(ctx context.Context) []sid.ID {
-	ids, err := tq.IDs(ctx)
+func (q *TokenQuery) IDsX(ctx context.Context) []sid.ID {
+	ids, err := q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -229,17 +229,17 @@ func (tq *TokenQuery) IDsX(ctx context.Context) []sid.ID {
 }
 
 // Count returns the count of the given query.
-func (tq *TokenQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, tq.ctx, ent.OpQueryCount)
-	if err := tq.prepareQuery(ctx); err != nil {
+func (q *TokenQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryCount)
+	if err := q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, tq, querierCount[*TokenQuery](), tq.inters)
+	return withInterceptors[int](ctx, q, querierCount[*TokenQuery](), q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (tq *TokenQuery) CountX(ctx context.Context) int {
-	count, err := tq.Count(ctx)
+func (q *TokenQuery) CountX(ctx context.Context) int {
+	count, err := q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -247,9 +247,9 @@ func (tq *TokenQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (tq *TokenQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, tq.ctx, ent.OpQueryExist)
-	switch _, err := tq.FirstID(ctx); {
+func (q *TokenQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryExist)
+	switch _, err := q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -260,8 +260,8 @@ func (tq *TokenQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (tq *TokenQuery) ExistX(ctx context.Context) bool {
-	exist, err := tq.Exist(ctx)
+func (q *TokenQuery) ExistX(ctx context.Context) bool {
+	exist, err := q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -270,32 +270,32 @@ func (tq *TokenQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the TokenQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (tq *TokenQuery) Clone() *TokenQuery {
-	if tq == nil {
+func (q *TokenQuery) Clone() *TokenQuery {
+	if q == nil {
 		return nil
 	}
 	return &TokenQuery{
-		config:      tq.config,
-		ctx:         tq.ctx.Clone(),
-		order:       append([]token.OrderOption{}, tq.order...),
-		inters:      append([]Interceptor{}, tq.inters...),
-		predicates:  append([]predicate.Token{}, tq.predicates...),
-		withAccount: tq.withAccount.Clone(),
+		config:      q.config,
+		ctx:         q.ctx.Clone(),
+		order:       append([]token.OrderOption{}, q.order...),
+		inters:      append([]Interceptor{}, q.inters...),
+		predicates:  append([]predicate.Token{}, q.predicates...),
+		withAccount: q.withAccount.Clone(),
 		// clone intermediate query.
-		sql:  tq.sql.Clone(),
-		path: tq.path,
+		sql:  q.sql.Clone(),
+		path: q.path,
 	}
 }
 
 // WithAccount tells the query-builder to eager-load the nodes that are connected to
 // the "account" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TokenQuery) WithAccount(opts ...func(*AccountQuery)) *TokenQuery {
-	query := (&AccountClient{config: tq.config}).Query()
+func (q *TokenQuery) WithAccount(opts ...func(*AccountQuery)) *TokenQuery {
+	query := (&AccountClient{config: q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	tq.withAccount = query
-	return tq
+	q.withAccount = query
+	return q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -312,10 +312,10 @@ func (tq *TokenQuery) WithAccount(opts ...func(*AccountQuery)) *TokenQuery {
 //		GroupBy(token.FieldBody).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (tq *TokenQuery) GroupBy(field string, fields ...string) *TokenGroupBy {
-	tq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &TokenGroupBy{build: tq}
-	grbuild.flds = &tq.ctx.Fields
+func (q *TokenQuery) GroupBy(field string, fields ...string) *TokenGroupBy {
+	q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &TokenGroupBy{build: q}
+	grbuild.flds = &q.ctx.Fields
 	grbuild.label = token.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -333,55 +333,55 @@ func (tq *TokenQuery) GroupBy(field string, fields ...string) *TokenGroupBy {
 //	client.Token.Query().
 //		Select(token.FieldBody).
 //		Scan(ctx, &v)
-func (tq *TokenQuery) Select(fields ...string) *TokenSelect {
-	tq.ctx.Fields = append(tq.ctx.Fields, fields...)
-	sbuild := &TokenSelect{TokenQuery: tq}
+func (q *TokenQuery) Select(fields ...string) *TokenSelect {
+	q.ctx.Fields = append(q.ctx.Fields, fields...)
+	sbuild := &TokenSelect{TokenQuery: q}
 	sbuild.label = token.Label
-	sbuild.flds, sbuild.scan = &tq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a TokenSelect configured with the given aggregations.
-func (tq *TokenQuery) Aggregate(fns ...AggregateFunc) *TokenSelect {
-	return tq.Select().Aggregate(fns...)
+func (q *TokenQuery) Aggregate(fns ...AggregateFunc) *TokenSelect {
+	return q.Select().Aggregate(fns...)
 }
 
-func (tq *TokenQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range tq.inters {
+func (q *TokenQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, tq); err != nil {
+			if err := trv.Traverse(ctx, q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range tq.ctx.Fields {
+	for _, f := range q.ctx.Fields {
 		if !token.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if tq.path != nil {
-		prev, err := tq.path(ctx)
+	if q.path != nil {
+		prev, err := q.path(ctx)
 		if err != nil {
 			return err
 		}
-		tq.sql = prev
+		q.sql = prev
 	}
 	return nil
 }
 
-func (tq *TokenQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Token, error) {
+func (q *TokenQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Token, error) {
 	var (
 		nodes       = []*Token{}
-		withFKs     = tq.withFKs
-		_spec       = tq.querySpec()
+		withFKs     = q.withFKs
+		_spec       = q.querySpec()
 		loadedTypes = [1]bool{
-			tq.withAccount != nil,
+			q.withAccount != nil,
 		}
 	)
-	if tq.withAccount != nil {
+	if q.withAccount != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -391,7 +391,7 @@ func (tq *TokenQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Token,
 		return (*Token).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Token{config: tq.config}
+		node := &Token{config: q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -399,14 +399,14 @@ func (tq *TokenQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Token,
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, tq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := tq.withAccount; query != nil {
-		if err := tq.loadAccount(ctx, query, nodes, nil,
+	if query := q.withAccount; query != nil {
+		if err := q.loadAccount(ctx, query, nodes, nil,
 			func(n *Token, e *Account) { n.Edges.Account = e }); err != nil {
 			return nil, err
 		}
@@ -414,7 +414,7 @@ func (tq *TokenQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Token,
 	return nodes, nil
 }
 
-func (tq *TokenQuery) loadAccount(ctx context.Context, query *AccountQuery, nodes []*Token, init func(*Token), assign func(*Token, *Account)) error {
+func (q *TokenQuery) loadAccount(ctx context.Context, query *AccountQuery, nodes []*Token, init func(*Token), assign func(*Token, *Account)) error {
 	ids := make([]sid.ID, 0, len(nodes))
 	nodeids := make(map[sid.ID][]*Token)
 	for i := range nodes {
@@ -447,24 +447,24 @@ func (tq *TokenQuery) loadAccount(ctx context.Context, query *AccountQuery, node
 	return nil
 }
 
-func (tq *TokenQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := tq.querySpec()
-	_spec.Node.Columns = tq.ctx.Fields
-	if len(tq.ctx.Fields) > 0 {
-		_spec.Unique = tq.ctx.Unique != nil && *tq.ctx.Unique
+func (q *TokenQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := q.querySpec()
+	_spec.Node.Columns = q.ctx.Fields
+	if len(q.ctx.Fields) > 0 {
+		_spec.Unique = q.ctx.Unique != nil && *q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, tq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, q.driver, _spec)
 }
 
-func (tq *TokenQuery) querySpec() *sqlgraph.QuerySpec {
+func (q *TokenQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(token.Table, token.Columns, sqlgraph.NewFieldSpec(token.FieldID, field.TypeOther))
-	_spec.From = tq.sql
-	if unique := tq.ctx.Unique; unique != nil {
+	_spec.From = q.sql
+	if unique := q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if tq.path != nil {
+	} else if q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := tq.ctx.Fields; len(fields) > 0 {
+	if fields := q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, token.FieldID)
 		for i := range fields {
@@ -473,20 +473,20 @@ func (tq *TokenQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := tq.predicates; len(ps) > 0 {
+	if ps := q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := tq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := tq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := tq.order; len(ps) > 0 {
+	if ps := q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -496,33 +496,33 @@ func (tq *TokenQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (tq *TokenQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(tq.driver.Dialect())
+func (q *TokenQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(q.driver.Dialect())
 	t1 := builder.Table(token.Table)
-	columns := tq.ctx.Fields
+	columns := q.ctx.Fields
 	if len(columns) == 0 {
 		columns = token.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if tq.sql != nil {
-		selector = tq.sql
+	if q.sql != nil {
+		selector = q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if tq.ctx.Unique != nil && *tq.ctx.Unique {
+	if q.ctx.Unique != nil && *q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range tq.predicates {
+	for _, p := range q.predicates {
 		p(selector)
 	}
-	for _, p := range tq.order {
+	for _, p := range q.order {
 		p(selector)
 	}
-	if offset := tq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := tq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -549,27 +549,27 @@ func (tgb *TokenGroupBy) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*TokenQuery, *TokenGroupBy](ctx, tgb.build, tgb, tgb.build.inters, v)
 }
 
-func (tgb *TokenGroupBy) sqlScan(ctx context.Context, root *TokenQuery, v any) error {
+func (q *TokenGroupBy) sqlScan(ctx context.Context, root *TokenQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(tgb.fns))
-	for _, fn := range tgb.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*tgb.flds)+len(tgb.fns))
-		for _, f := range *tgb.flds {
+		columns := make([]string, 0, len(*q.flds)+len(q.fns))
+		for _, f := range *q.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*tgb.flds...)...)
+	selector.GroupBy(selector.Columns(*q.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := tgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -597,13 +597,13 @@ func (ts *TokenSelect) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*TokenQuery, *TokenSelect](ctx, ts.TokenQuery, ts, ts.inters, v)
 }
 
-func (ts *TokenSelect) sqlScan(ctx context.Context, root *TokenQuery, v any) error {
+func (q *TokenSelect) sqlScan(ctx context.Context, root *TokenQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(ts.fns))
-	for _, fn := range ts.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*ts.selector.flds); {
+	switch n := len(*q.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -611,7 +611,7 @@ func (ts *TokenSelect) sqlScan(ctx context.Context, root *TokenQuery, v any) err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ts.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

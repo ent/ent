@@ -28,126 +28,126 @@ type RelationshipUpdate struct {
 }
 
 // Where appends a list predicates to the RelationshipUpdate builder.
-func (ru *RelationshipUpdate) Where(ps ...predicate.Relationship) *RelationshipUpdate {
-	ru.mutation.Where(ps...)
-	return ru
+func (u *RelationshipUpdate) Where(ps ...predicate.Relationship) *RelationshipUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetWeight sets the "weight" field.
-func (ru *RelationshipUpdate) SetWeight(i int) *RelationshipUpdate {
-	ru.mutation.ResetWeight()
-	ru.mutation.SetWeight(i)
-	return ru
+func (m *RelationshipUpdate) SetWeight(v int) *RelationshipUpdate {
+	m.mutation.ResetWeight()
+	m.mutation.SetWeight(v)
+	return m
 }
 
 // SetNillableWeight sets the "weight" field if the given value is not nil.
-func (ru *RelationshipUpdate) SetNillableWeight(i *int) *RelationshipUpdate {
-	if i != nil {
-		ru.SetWeight(*i)
+func (m *RelationshipUpdate) SetNillableWeight(v *int) *RelationshipUpdate {
+	if v != nil {
+		m.SetWeight(*v)
 	}
-	return ru
+	return m
 }
 
-// AddWeight adds i to the "weight" field.
-func (ru *RelationshipUpdate) AddWeight(i int) *RelationshipUpdate {
-	ru.mutation.AddWeight(i)
-	return ru
+// AddWeight adds value to the "weight" field.
+func (m *RelationshipUpdate) AddWeight(v int) *RelationshipUpdate {
+	m.mutation.AddWeight(v)
+	return m
 }
 
 // SetUserID sets the "user_id" field.
-func (ru *RelationshipUpdate) SetUserID(i int) *RelationshipUpdate {
-	ru.mutation.SetUserID(i)
-	return ru
+func (m *RelationshipUpdate) SetUserID(v int) *RelationshipUpdate {
+	m.mutation.SetUserID(v)
+	return m
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (ru *RelationshipUpdate) SetNillableUserID(i *int) *RelationshipUpdate {
-	if i != nil {
-		ru.SetUserID(*i)
+func (m *RelationshipUpdate) SetNillableUserID(v *int) *RelationshipUpdate {
+	if v != nil {
+		m.SetUserID(*v)
 	}
-	return ru
+	return m
 }
 
 // SetRelativeID sets the "relative_id" field.
-func (ru *RelationshipUpdate) SetRelativeID(i int) *RelationshipUpdate {
-	ru.mutation.SetRelativeID(i)
-	return ru
+func (m *RelationshipUpdate) SetRelativeID(v int) *RelationshipUpdate {
+	m.mutation.SetRelativeID(v)
+	return m
 }
 
 // SetNillableRelativeID sets the "relative_id" field if the given value is not nil.
-func (ru *RelationshipUpdate) SetNillableRelativeID(i *int) *RelationshipUpdate {
-	if i != nil {
-		ru.SetRelativeID(*i)
+func (m *RelationshipUpdate) SetNillableRelativeID(v *int) *RelationshipUpdate {
+	if v != nil {
+		m.SetRelativeID(*v)
 	}
-	return ru
+	return m
 }
 
 // SetInfoID sets the "info_id" field.
-func (ru *RelationshipUpdate) SetInfoID(i int) *RelationshipUpdate {
-	ru.mutation.SetInfoID(i)
-	return ru
+func (m *RelationshipUpdate) SetInfoID(v int) *RelationshipUpdate {
+	m.mutation.SetInfoID(v)
+	return m
 }
 
 // SetNillableInfoID sets the "info_id" field if the given value is not nil.
-func (ru *RelationshipUpdate) SetNillableInfoID(i *int) *RelationshipUpdate {
-	if i != nil {
-		ru.SetInfoID(*i)
+func (m *RelationshipUpdate) SetNillableInfoID(v *int) *RelationshipUpdate {
+	if v != nil {
+		m.SetInfoID(*v)
 	}
-	return ru
+	return m
 }
 
 // ClearInfoID clears the value of the "info_id" field.
-func (ru *RelationshipUpdate) ClearInfoID() *RelationshipUpdate {
-	ru.mutation.ClearInfoID()
-	return ru
+func (m *RelationshipUpdate) ClearInfoID() *RelationshipUpdate {
+	m.mutation.ClearInfoID()
+	return m
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (ru *RelationshipUpdate) SetUser(u *User) *RelationshipUpdate {
-	return ru.SetUserID(u.ID)
+func (m *RelationshipUpdate) SetUser(v *User) *RelationshipUpdate {
+	return m.SetUserID(v.ID)
 }
 
 // SetRelative sets the "relative" edge to the User entity.
-func (ru *RelationshipUpdate) SetRelative(u *User) *RelationshipUpdate {
-	return ru.SetRelativeID(u.ID)
+func (m *RelationshipUpdate) SetRelative(v *User) *RelationshipUpdate {
+	return m.SetRelativeID(v.ID)
 }
 
 // SetInfo sets the "info" edge to the RelationshipInfo entity.
-func (ru *RelationshipUpdate) SetInfo(r *RelationshipInfo) *RelationshipUpdate {
-	return ru.SetInfoID(r.ID)
+func (m *RelationshipUpdate) SetInfo(v *RelationshipInfo) *RelationshipUpdate {
+	return m.SetInfoID(v.ID)
 }
 
 // Mutation returns the RelationshipMutation object of the builder.
-func (ru *RelationshipUpdate) Mutation() *RelationshipMutation {
-	return ru.mutation
+func (m *RelationshipUpdate) Mutation() *RelationshipMutation {
+	return m.mutation
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (ru *RelationshipUpdate) ClearUser() *RelationshipUpdate {
-	ru.mutation.ClearUser()
-	return ru
+func (u *RelationshipUpdate) ClearUser() *RelationshipUpdate {
+	u.mutation.ClearUser()
+	return u
 }
 
 // ClearRelative clears the "relative" edge to the User entity.
-func (ru *RelationshipUpdate) ClearRelative() *RelationshipUpdate {
-	ru.mutation.ClearRelative()
-	return ru
+func (u *RelationshipUpdate) ClearRelative() *RelationshipUpdate {
+	u.mutation.ClearRelative()
+	return u
 }
 
 // ClearInfo clears the "info" edge to the RelationshipInfo entity.
-func (ru *RelationshipUpdate) ClearInfo() *RelationshipUpdate {
-	ru.mutation.ClearInfo()
-	return ru
+func (u *RelationshipUpdate) ClearInfo() *RelationshipUpdate {
+	u.mutation.ClearInfo()
+	return u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (ru *RelationshipUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, ru.sqlSave, ru.mutation, ru.hooks)
+func (u *RelationshipUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ru *RelationshipUpdate) SaveX(ctx context.Context) int {
-	affected, err := ru.Save(ctx)
+func (u *RelationshipUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -155,48 +155,48 @@ func (ru *RelationshipUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (ru *RelationshipUpdate) Exec(ctx context.Context) error {
-	_, err := ru.Save(ctx)
+func (u *RelationshipUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ru *RelationshipUpdate) ExecX(ctx context.Context) {
-	if err := ru.Exec(ctx); err != nil {
+func (u *RelationshipUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ru *RelationshipUpdate) check() error {
-	if ru.mutation.UserCleared() && len(ru.mutation.UserIDs()) > 0 {
+func (u *RelationshipUpdate) check() error {
+	if u.mutation.UserCleared() && len(u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Relationship.user"`)
 	}
-	if ru.mutation.RelativeCleared() && len(ru.mutation.RelativeIDs()) > 0 {
+	if u.mutation.RelativeCleared() && len(u.mutation.RelativeIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Relationship.relative"`)
 	}
 	return nil
 }
 
-func (ru *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := ru.check(); err != nil {
-		return n, err
+func (u *RelationshipUpdate) sqlSave(ctx context.Context) (_n int, err error) {
+	if err := u.check(); err != nil {
+		return _n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(relationship.Table, relationship.Columns, sqlgraph.NewFieldSpec(relationship.FieldUserID, field.TypeInt), sqlgraph.NewFieldSpec(relationship.FieldRelativeID, field.TypeInt))
-	if ps := ru.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := ru.mutation.Weight(); ok {
+	if value, ok := u.mutation.Weight(); ok {
 		_spec.SetField(relationship.FieldWeight, field.TypeInt, value)
 	}
-	if value, ok := ru.mutation.AddedWeight(); ok {
+	if value, ok := u.mutation.AddedWeight(); ok {
 		_spec.AddField(relationship.FieldWeight, field.TypeInt, value)
 	}
-	if ru.mutation.UserCleared() {
+	if u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -209,7 +209,7 @@ func (ru *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ru.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -225,7 +225,7 @@ func (ru *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ru.mutation.RelativeCleared() {
+	if u.mutation.RelativeCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -238,7 +238,7 @@ func (ru *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ru.mutation.RelativeIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.RelativeIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -254,7 +254,7 @@ func (ru *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ru.mutation.InfoCleared() {
+	if u.mutation.InfoCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -267,7 +267,7 @@ func (ru *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ru.mutation.InfoIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.InfoIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -283,7 +283,7 @@ func (ru *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, ru.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{relationship.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -291,8 +291,8 @@ func (ru *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	ru.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // RelationshipUpdateOne is the builder for updating a single Relationship entity.
@@ -304,133 +304,133 @@ type RelationshipUpdateOne struct {
 }
 
 // SetWeight sets the "weight" field.
-func (ruo *RelationshipUpdateOne) SetWeight(i int) *RelationshipUpdateOne {
-	ruo.mutation.ResetWeight()
-	ruo.mutation.SetWeight(i)
-	return ruo
+func (m *RelationshipUpdateOne) SetWeight(v int) *RelationshipUpdateOne {
+	m.mutation.ResetWeight()
+	m.mutation.SetWeight(v)
+	return m
 }
 
 // SetNillableWeight sets the "weight" field if the given value is not nil.
-func (ruo *RelationshipUpdateOne) SetNillableWeight(i *int) *RelationshipUpdateOne {
-	if i != nil {
-		ruo.SetWeight(*i)
+func (m *RelationshipUpdateOne) SetNillableWeight(v *int) *RelationshipUpdateOne {
+	if v != nil {
+		m.SetWeight(*v)
 	}
-	return ruo
+	return m
 }
 
-// AddWeight adds i to the "weight" field.
-func (ruo *RelationshipUpdateOne) AddWeight(i int) *RelationshipUpdateOne {
-	ruo.mutation.AddWeight(i)
-	return ruo
+// AddWeight adds value to the "weight" field.
+func (m *RelationshipUpdateOne) AddWeight(v int) *RelationshipUpdateOne {
+	m.mutation.AddWeight(v)
+	return m
 }
 
 // SetUserID sets the "user_id" field.
-func (ruo *RelationshipUpdateOne) SetUserID(i int) *RelationshipUpdateOne {
-	ruo.mutation.SetUserID(i)
-	return ruo
+func (m *RelationshipUpdateOne) SetUserID(v int) *RelationshipUpdateOne {
+	m.mutation.SetUserID(v)
+	return m
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (ruo *RelationshipUpdateOne) SetNillableUserID(i *int) *RelationshipUpdateOne {
-	if i != nil {
-		ruo.SetUserID(*i)
+func (m *RelationshipUpdateOne) SetNillableUserID(v *int) *RelationshipUpdateOne {
+	if v != nil {
+		m.SetUserID(*v)
 	}
-	return ruo
+	return m
 }
 
 // SetRelativeID sets the "relative_id" field.
-func (ruo *RelationshipUpdateOne) SetRelativeID(i int) *RelationshipUpdateOne {
-	ruo.mutation.SetRelativeID(i)
-	return ruo
+func (m *RelationshipUpdateOne) SetRelativeID(v int) *RelationshipUpdateOne {
+	m.mutation.SetRelativeID(v)
+	return m
 }
 
 // SetNillableRelativeID sets the "relative_id" field if the given value is not nil.
-func (ruo *RelationshipUpdateOne) SetNillableRelativeID(i *int) *RelationshipUpdateOne {
-	if i != nil {
-		ruo.SetRelativeID(*i)
+func (m *RelationshipUpdateOne) SetNillableRelativeID(v *int) *RelationshipUpdateOne {
+	if v != nil {
+		m.SetRelativeID(*v)
 	}
-	return ruo
+	return m
 }
 
 // SetInfoID sets the "info_id" field.
-func (ruo *RelationshipUpdateOne) SetInfoID(i int) *RelationshipUpdateOne {
-	ruo.mutation.SetInfoID(i)
-	return ruo
+func (m *RelationshipUpdateOne) SetInfoID(v int) *RelationshipUpdateOne {
+	m.mutation.SetInfoID(v)
+	return m
 }
 
 // SetNillableInfoID sets the "info_id" field if the given value is not nil.
-func (ruo *RelationshipUpdateOne) SetNillableInfoID(i *int) *RelationshipUpdateOne {
-	if i != nil {
-		ruo.SetInfoID(*i)
+func (m *RelationshipUpdateOne) SetNillableInfoID(v *int) *RelationshipUpdateOne {
+	if v != nil {
+		m.SetInfoID(*v)
 	}
-	return ruo
+	return m
 }
 
 // ClearInfoID clears the value of the "info_id" field.
-func (ruo *RelationshipUpdateOne) ClearInfoID() *RelationshipUpdateOne {
-	ruo.mutation.ClearInfoID()
-	return ruo
+func (m *RelationshipUpdateOne) ClearInfoID() *RelationshipUpdateOne {
+	m.mutation.ClearInfoID()
+	return m
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (ruo *RelationshipUpdateOne) SetUser(u *User) *RelationshipUpdateOne {
-	return ruo.SetUserID(u.ID)
+func (m *RelationshipUpdateOne) SetUser(v *User) *RelationshipUpdateOne {
+	return m.SetUserID(v.ID)
 }
 
 // SetRelative sets the "relative" edge to the User entity.
-func (ruo *RelationshipUpdateOne) SetRelative(u *User) *RelationshipUpdateOne {
-	return ruo.SetRelativeID(u.ID)
+func (m *RelationshipUpdateOne) SetRelative(v *User) *RelationshipUpdateOne {
+	return m.SetRelativeID(v.ID)
 }
 
 // SetInfo sets the "info" edge to the RelationshipInfo entity.
-func (ruo *RelationshipUpdateOne) SetInfo(r *RelationshipInfo) *RelationshipUpdateOne {
-	return ruo.SetInfoID(r.ID)
+func (m *RelationshipUpdateOne) SetInfo(v *RelationshipInfo) *RelationshipUpdateOne {
+	return m.SetInfoID(v.ID)
 }
 
 // Mutation returns the RelationshipMutation object of the builder.
-func (ruo *RelationshipUpdateOne) Mutation() *RelationshipMutation {
-	return ruo.mutation
+func (m *RelationshipUpdateOne) Mutation() *RelationshipMutation {
+	return m.mutation
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (ruo *RelationshipUpdateOne) ClearUser() *RelationshipUpdateOne {
-	ruo.mutation.ClearUser()
-	return ruo
+func (u *RelationshipUpdateOne) ClearUser() *RelationshipUpdateOne {
+	u.mutation.ClearUser()
+	return u
 }
 
 // ClearRelative clears the "relative" edge to the User entity.
-func (ruo *RelationshipUpdateOne) ClearRelative() *RelationshipUpdateOne {
-	ruo.mutation.ClearRelative()
-	return ruo
+func (u *RelationshipUpdateOne) ClearRelative() *RelationshipUpdateOne {
+	u.mutation.ClearRelative()
+	return u
 }
 
 // ClearInfo clears the "info" edge to the RelationshipInfo entity.
-func (ruo *RelationshipUpdateOne) ClearInfo() *RelationshipUpdateOne {
-	ruo.mutation.ClearInfo()
-	return ruo
+func (u *RelationshipUpdateOne) ClearInfo() *RelationshipUpdateOne {
+	u.mutation.ClearInfo()
+	return u
 }
 
 // Where appends a list predicates to the RelationshipUpdate builder.
-func (ruo *RelationshipUpdateOne) Where(ps ...predicate.Relationship) *RelationshipUpdateOne {
-	ruo.mutation.Where(ps...)
-	return ruo
+func (u *RelationshipUpdateOne) Where(ps ...predicate.Relationship) *RelationshipUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (ruo *RelationshipUpdateOne) Select(field string, fields ...string) *RelationshipUpdateOne {
-	ruo.fields = append([]string{field}, fields...)
-	return ruo
+func (u *RelationshipUpdateOne) Select(field string, fields ...string) *RelationshipUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated Relationship entity.
-func (ruo *RelationshipUpdateOne) Save(ctx context.Context) (*Relationship, error) {
-	return withHooks(ctx, ruo.sqlSave, ruo.mutation, ruo.hooks)
+func (u *RelationshipUpdateOne) Save(ctx context.Context) (*Relationship, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ruo *RelationshipUpdateOne) SaveX(ctx context.Context) *Relationship {
-	node, err := ruo.Save(ctx)
+func (u *RelationshipUpdateOne) SaveX(ctx context.Context) *Relationship {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -438,45 +438,45 @@ func (ruo *RelationshipUpdateOne) SaveX(ctx context.Context) *Relationship {
 }
 
 // Exec executes the query on the entity.
-func (ruo *RelationshipUpdateOne) Exec(ctx context.Context) error {
-	_, err := ruo.Save(ctx)
+func (u *RelationshipUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ruo *RelationshipUpdateOne) ExecX(ctx context.Context) {
-	if err := ruo.Exec(ctx); err != nil {
+func (u *RelationshipUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ruo *RelationshipUpdateOne) check() error {
-	if ruo.mutation.UserCleared() && len(ruo.mutation.UserIDs()) > 0 {
+func (u *RelationshipUpdateOne) check() error {
+	if u.mutation.UserCleared() && len(u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Relationship.user"`)
 	}
-	if ruo.mutation.RelativeCleared() && len(ruo.mutation.RelativeIDs()) > 0 {
+	if u.mutation.RelativeCleared() && len(u.mutation.RelativeIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Relationship.relative"`)
 	}
 	return nil
 }
 
-func (ruo *RelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Relationship, err error) {
-	if err := ruo.check(); err != nil {
-		return _node, err
+func (u *RelationshipUpdateOne) sqlSave(ctx context.Context) (_n *Relationship, err error) {
+	if err := u.check(); err != nil {
+		return _n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(relationship.Table, relationship.Columns, sqlgraph.NewFieldSpec(relationship.FieldUserID, field.TypeInt), sqlgraph.NewFieldSpec(relationship.FieldRelativeID, field.TypeInt))
-	if id, ok := ruo.mutation.UserID(); !ok {
+	if id, ok := u.mutation.UserID(); !ok {
 		return nil, &ValidationError{Name: "user_id", err: errors.New(`ent: missing "Relationship.user_id" for update`)}
 	} else {
 		_spec.Node.CompositeID[0].Value = id
 	}
-	if id, ok := ruo.mutation.RelativeID(); !ok {
+	if id, ok := u.mutation.RelativeID(); !ok {
 		return nil, &ValidationError{Name: "relative_id", err: errors.New(`ent: missing "Relationship.relative_id" for update`)}
 	} else {
 		_spec.Node.CompositeID[1].Value = id
 	}
-	if fields := ruo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, len(fields))
 		for i, f := range fields {
 			if !relationship.ValidColumn(f) {
@@ -485,20 +485,20 @@ func (ruo *RelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Relations
 			_spec.Node.Columns[i] = f
 		}
 	}
-	if ps := ruo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := ruo.mutation.Weight(); ok {
+	if value, ok := u.mutation.Weight(); ok {
 		_spec.SetField(relationship.FieldWeight, field.TypeInt, value)
 	}
-	if value, ok := ruo.mutation.AddedWeight(); ok {
+	if value, ok := u.mutation.AddedWeight(); ok {
 		_spec.AddField(relationship.FieldWeight, field.TypeInt, value)
 	}
-	if ruo.mutation.UserCleared() {
+	if u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -511,7 +511,7 @@ func (ruo *RelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Relations
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ruo.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -527,7 +527,7 @@ func (ruo *RelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Relations
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ruo.mutation.RelativeCleared() {
+	if u.mutation.RelativeCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -540,7 +540,7 @@ func (ruo *RelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Relations
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ruo.mutation.RelativeIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.RelativeIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -556,7 +556,7 @@ func (ruo *RelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Relations
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ruo.mutation.InfoCleared() {
+	if u.mutation.InfoCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -569,7 +569,7 @@ func (ruo *RelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Relations
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ruo.mutation.InfoIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.InfoIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -585,10 +585,10 @@ func (ruo *RelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Relations
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Relationship{config: ruo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, ruo.driver, _spec); err != nil {
+	_n = &Relationship{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{relationship.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -596,6 +596,6 @@ func (ruo *RelationshipUpdateOne) sqlSave(ctx context.Context) (_node *Relations
 		}
 		return nil, err
 	}
-	ruo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

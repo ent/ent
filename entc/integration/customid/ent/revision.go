@@ -39,9 +39,9 @@ func (*Revision) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Revision fields.
-func (r *Revision) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Revision) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -49,10 +49,10 @@ func (r *Revision) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value.Valid {
-				r.ID = value.String
+				m.ID = value.String
 			}
 		default:
-			r.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -60,33 +60,33 @@ func (r *Revision) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Revision.
 // This includes values selected through modifiers, order, etc.
-func (r *Revision) Value(name string) (ent.Value, error) {
-	return r.selectValues.Get(name)
+func (m *Revision) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Revision.
 // Note that you need to call Revision.Unwrap() before calling this method if this Revision
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (r *Revision) Update() *RevisionUpdateOne {
-	return NewRevisionClient(r.config).UpdateOne(r)
+func (m *Revision) Update() *RevisionUpdateOne {
+	return NewRevisionClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Revision entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (r *Revision) Unwrap() *Revision {
-	_tx, ok := r.config.driver.(*txDriver)
+func (m *Revision) Unwrap() *Revision {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Revision is not a transactional entity")
 	}
-	r.config.driver = _tx.drv
-	return r
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (r *Revision) String() string {
+func (m *Revision) String() string {
 	var builder strings.Builder
 	builder.WriteString("Revision(")
-	builder.WriteString(fmt.Sprintf("id=%v", r.ID))
+	builder.WriteString(fmt.Sprintf("id=%v", m.ID))
 	builder.WriteByte(')')
 	return builder.String()
 }

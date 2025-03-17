@@ -28,74 +28,74 @@ type AccountUpdate struct {
 }
 
 // Where appends a list predicates to the AccountUpdate builder.
-func (au *AccountUpdate) Where(ps ...predicate.Account) *AccountUpdate {
-	au.mutation.Where(ps...)
-	return au
+func (u *AccountUpdate) Where(ps ...predicate.Account) *AccountUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetEmail sets the "email" field.
-func (au *AccountUpdate) SetEmail(s string) *AccountUpdate {
-	au.mutation.SetEmail(s)
-	return au
+func (m *AccountUpdate) SetEmail(v string) *AccountUpdate {
+	m.mutation.SetEmail(v)
+	return m
 }
 
 // SetNillableEmail sets the "email" field if the given value is not nil.
-func (au *AccountUpdate) SetNillableEmail(s *string) *AccountUpdate {
-	if s != nil {
-		au.SetEmail(*s)
+func (m *AccountUpdate) SetNillableEmail(v *string) *AccountUpdate {
+	if v != nil {
+		m.SetEmail(*v)
 	}
-	return au
+	return m
 }
 
 // AddTokenIDs adds the "token" edge to the Token entity by IDs.
-func (au *AccountUpdate) AddTokenIDs(ids ...sid.ID) *AccountUpdate {
-	au.mutation.AddTokenIDs(ids...)
-	return au
+func (m *AccountUpdate) AddTokenIDs(ids ...sid.ID) *AccountUpdate {
+	m.mutation.AddTokenIDs(ids...)
+	return m
 }
 
 // AddToken adds the "token" edges to the Token entity.
-func (au *AccountUpdate) AddToken(t ...*Token) *AccountUpdate {
-	ids := make([]sid.ID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (m *AccountUpdate) AddToken(v ...*Token) *AccountUpdate {
+	ids := make([]sid.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.AddTokenIDs(ids...)
+	return m.AddTokenIDs(ids...)
 }
 
 // Mutation returns the AccountMutation object of the builder.
-func (au *AccountUpdate) Mutation() *AccountMutation {
-	return au.mutation
+func (m *AccountUpdate) Mutation() *AccountMutation {
+	return m.mutation
 }
 
 // ClearToken clears all "token" edges to the Token entity.
-func (au *AccountUpdate) ClearToken() *AccountUpdate {
-	au.mutation.ClearToken()
-	return au
+func (u *AccountUpdate) ClearToken() *AccountUpdate {
+	u.mutation.ClearToken()
+	return u
 }
 
 // RemoveTokenIDs removes the "token" edge to Token entities by IDs.
-func (au *AccountUpdate) RemoveTokenIDs(ids ...sid.ID) *AccountUpdate {
-	au.mutation.RemoveTokenIDs(ids...)
-	return au
+func (u *AccountUpdate) RemoveTokenIDs(ids ...sid.ID) *AccountUpdate {
+	u.mutation.RemoveTokenIDs(ids...)
+	return u
 }
 
 // RemoveToken removes "token" edges to Token entities.
-func (au *AccountUpdate) RemoveToken(t ...*Token) *AccountUpdate {
-	ids := make([]sid.ID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (u *AccountUpdate) RemoveToken(v ...*Token) *AccountUpdate {
+	ids := make([]sid.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.RemoveTokenIDs(ids...)
+	return u.RemoveTokenIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (au *AccountUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, au.sqlSave, au.mutation, au.hooks)
+func (u *AccountUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (au *AccountUpdate) SaveX(ctx context.Context) int {
-	affected, err := au.Save(ctx)
+func (u *AccountUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -103,21 +103,21 @@ func (au *AccountUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (au *AccountUpdate) Exec(ctx context.Context) error {
-	_, err := au.Save(ctx)
+func (u *AccountUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (au *AccountUpdate) ExecX(ctx context.Context) {
-	if err := au.Exec(ctx); err != nil {
+func (u *AccountUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (au *AccountUpdate) check() error {
-	if v, ok := au.mutation.Email(); ok {
+func (u *AccountUpdate) check() error {
+	if v, ok := u.mutation.Email(); ok {
 		if err := account.EmailValidator(v); err != nil {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "Account.email": %w`, err)}
 		}
@@ -125,22 +125,22 @@ func (au *AccountUpdate) check() error {
 	return nil
 }
 
-func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := au.check(); err != nil {
-		return n, err
+func (u *AccountUpdate) sqlSave(ctx context.Context) (_n int, err error) {
+	if err := u.check(); err != nil {
+		return _n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(account.Table, account.Columns, sqlgraph.NewFieldSpec(account.FieldID, field.TypeOther))
-	if ps := au.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := au.mutation.Email(); ok {
+	if value, ok := u.mutation.Email(); ok {
 		_spec.SetField(account.FieldEmail, field.TypeString, value)
 	}
-	if au.mutation.TokenCleared() {
+	if u.mutation.TokenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -153,7 +153,7 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.RemovedTokenIDs(); len(nodes) > 0 && !au.mutation.TokenCleared() {
+	if nodes := u.mutation.RemovedTokenIDs(); len(nodes) > 0 && !u.mutation.TokenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -169,7 +169,7 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.TokenIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.TokenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -185,7 +185,7 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{account.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -193,8 +193,8 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	au.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // AccountUpdateOne is the builder for updating a single Account entity.
@@ -206,81 +206,81 @@ type AccountUpdateOne struct {
 }
 
 // SetEmail sets the "email" field.
-func (auo *AccountUpdateOne) SetEmail(s string) *AccountUpdateOne {
-	auo.mutation.SetEmail(s)
-	return auo
+func (m *AccountUpdateOne) SetEmail(v string) *AccountUpdateOne {
+	m.mutation.SetEmail(v)
+	return m
 }
 
 // SetNillableEmail sets the "email" field if the given value is not nil.
-func (auo *AccountUpdateOne) SetNillableEmail(s *string) *AccountUpdateOne {
-	if s != nil {
-		auo.SetEmail(*s)
+func (m *AccountUpdateOne) SetNillableEmail(v *string) *AccountUpdateOne {
+	if v != nil {
+		m.SetEmail(*v)
 	}
-	return auo
+	return m
 }
 
 // AddTokenIDs adds the "token" edge to the Token entity by IDs.
-func (auo *AccountUpdateOne) AddTokenIDs(ids ...sid.ID) *AccountUpdateOne {
-	auo.mutation.AddTokenIDs(ids...)
-	return auo
+func (m *AccountUpdateOne) AddTokenIDs(ids ...sid.ID) *AccountUpdateOne {
+	m.mutation.AddTokenIDs(ids...)
+	return m
 }
 
 // AddToken adds the "token" edges to the Token entity.
-func (auo *AccountUpdateOne) AddToken(t ...*Token) *AccountUpdateOne {
-	ids := make([]sid.ID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (m *AccountUpdateOne) AddToken(v ...*Token) *AccountUpdateOne {
+	ids := make([]sid.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.AddTokenIDs(ids...)
+	return m.AddTokenIDs(ids...)
 }
 
 // Mutation returns the AccountMutation object of the builder.
-func (auo *AccountUpdateOne) Mutation() *AccountMutation {
-	return auo.mutation
+func (m *AccountUpdateOne) Mutation() *AccountMutation {
+	return m.mutation
 }
 
 // ClearToken clears all "token" edges to the Token entity.
-func (auo *AccountUpdateOne) ClearToken() *AccountUpdateOne {
-	auo.mutation.ClearToken()
-	return auo
+func (u *AccountUpdateOne) ClearToken() *AccountUpdateOne {
+	u.mutation.ClearToken()
+	return u
 }
 
 // RemoveTokenIDs removes the "token" edge to Token entities by IDs.
-func (auo *AccountUpdateOne) RemoveTokenIDs(ids ...sid.ID) *AccountUpdateOne {
-	auo.mutation.RemoveTokenIDs(ids...)
-	return auo
+func (u *AccountUpdateOne) RemoveTokenIDs(ids ...sid.ID) *AccountUpdateOne {
+	u.mutation.RemoveTokenIDs(ids...)
+	return u
 }
 
 // RemoveToken removes "token" edges to Token entities.
-func (auo *AccountUpdateOne) RemoveToken(t ...*Token) *AccountUpdateOne {
-	ids := make([]sid.ID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (u *AccountUpdateOne) RemoveToken(v ...*Token) *AccountUpdateOne {
+	ids := make([]sid.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.RemoveTokenIDs(ids...)
+	return u.RemoveTokenIDs(ids...)
 }
 
 // Where appends a list predicates to the AccountUpdate builder.
-func (auo *AccountUpdateOne) Where(ps ...predicate.Account) *AccountUpdateOne {
-	auo.mutation.Where(ps...)
-	return auo
+func (u *AccountUpdateOne) Where(ps ...predicate.Account) *AccountUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (auo *AccountUpdateOne) Select(field string, fields ...string) *AccountUpdateOne {
-	auo.fields = append([]string{field}, fields...)
-	return auo
+func (u *AccountUpdateOne) Select(field string, fields ...string) *AccountUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated Account entity.
-func (auo *AccountUpdateOne) Save(ctx context.Context) (*Account, error) {
-	return withHooks(ctx, auo.sqlSave, auo.mutation, auo.hooks)
+func (u *AccountUpdateOne) Save(ctx context.Context) (*Account, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (auo *AccountUpdateOne) SaveX(ctx context.Context) *Account {
-	node, err := auo.Save(ctx)
+func (u *AccountUpdateOne) SaveX(ctx context.Context) *Account {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -288,21 +288,21 @@ func (auo *AccountUpdateOne) SaveX(ctx context.Context) *Account {
 }
 
 // Exec executes the query on the entity.
-func (auo *AccountUpdateOne) Exec(ctx context.Context) error {
-	_, err := auo.Save(ctx)
+func (u *AccountUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (auo *AccountUpdateOne) ExecX(ctx context.Context) {
-	if err := auo.Exec(ctx); err != nil {
+func (u *AccountUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (auo *AccountUpdateOne) check() error {
-	if v, ok := auo.mutation.Email(); ok {
+func (u *AccountUpdateOne) check() error {
+	if v, ok := u.mutation.Email(); ok {
 		if err := account.EmailValidator(v); err != nil {
 			return &ValidationError{Name: "email", err: fmt.Errorf(`ent: validator failed for field "Account.email": %w`, err)}
 		}
@@ -310,17 +310,17 @@ func (auo *AccountUpdateOne) check() error {
 	return nil
 }
 
-func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err error) {
-	if err := auo.check(); err != nil {
-		return _node, err
+func (u *AccountUpdateOne) sqlSave(ctx context.Context) (_n *Account, err error) {
+	if err := u.check(); err != nil {
+		return _n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(account.Table, account.Columns, sqlgraph.NewFieldSpec(account.FieldID, field.TypeOther))
-	id, ok := auo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Account.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := auo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, account.FieldID)
 		for _, f := range fields {
@@ -332,17 +332,17 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 			}
 		}
 	}
-	if ps := auo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := auo.mutation.Email(); ok {
+	if value, ok := u.mutation.Email(); ok {
 		_spec.SetField(account.FieldEmail, field.TypeString, value)
 	}
-	if auo.mutation.TokenCleared() {
+	if u.mutation.TokenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -355,7 +355,7 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.RemovedTokenIDs(); len(nodes) > 0 && !auo.mutation.TokenCleared() {
+	if nodes := u.mutation.RemovedTokenIDs(); len(nodes) > 0 && !u.mutation.TokenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -371,7 +371,7 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.TokenIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.TokenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -387,10 +387,10 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Account{config: auo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, auo.driver, _spec); err != nil {
+	_n = &Account{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{account.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -398,6 +398,6 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 		}
 		return nil, err
 	}
-	auo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

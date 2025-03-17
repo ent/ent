@@ -71,9 +71,9 @@ func (*Token) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Token fields.
-func (t *Token) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Token) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -81,23 +81,23 @@ func (t *Token) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sid.ID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				t.ID = *value
+				m.ID = *value
 			}
 		case token.FieldBody:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field body", values[i])
 			} else if value.Valid {
-				t.Body = value.String
+				m.Body = value.String
 			}
 		case token.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field account_token", values[i])
 			} else if value.Valid {
-				t.account_token = new(sid.ID)
-				*t.account_token = *value.S.(*sid.ID)
+				m.account_token = new(sid.ID)
+				*m.account_token = *value.S.(*sid.ID)
 			}
 		default:
-			t.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -105,40 +105,40 @@ func (t *Token) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Token.
 // This includes values selected through modifiers, order, etc.
-func (t *Token) Value(name string) (ent.Value, error) {
-	return t.selectValues.Get(name)
+func (m *Token) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryAccount queries the "account" edge of the Token entity.
-func (t *Token) QueryAccount() *AccountQuery {
-	return NewTokenClient(t.config).QueryAccount(t)
+func (m *Token) QueryAccount() *AccountQuery {
+	return NewTokenClient(m.config).QueryAccount(m)
 }
 
 // Update returns a builder for updating this Token.
 // Note that you need to call Token.Unwrap() before calling this method if this Token
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (t *Token) Update() *TokenUpdateOne {
-	return NewTokenClient(t.config).UpdateOne(t)
+func (m *Token) Update() *TokenUpdateOne {
+	return NewTokenClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Token entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (t *Token) Unwrap() *Token {
-	_tx, ok := t.config.driver.(*txDriver)
+func (m *Token) Unwrap() *Token {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Token is not a transactional entity")
 	}
-	t.config.driver = _tx.drv
-	return t
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (t *Token) String() string {
+func (m *Token) String() string {
 	var builder strings.Builder
 	builder.WriteString("Token(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("body=")
-	builder.WriteString(t.Body)
+	builder.WriteString(m.Body)
 	builder.WriteByte(')')
 	return builder.String()
 }

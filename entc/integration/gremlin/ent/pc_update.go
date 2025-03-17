@@ -25,24 +25,24 @@ type PCUpdate struct {
 }
 
 // Where appends a list predicates to the PCUpdate builder.
-func (pu *PCUpdate) Where(ps ...predicate.PC) *PCUpdate {
-	pu.mutation.Where(ps...)
-	return pu
+func (u *PCUpdate) Where(ps ...predicate.PC) *PCUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Mutation returns the PCMutation object of the builder.
-func (pu *PCUpdate) Mutation() *PCMutation {
-	return pu.mutation
+func (m *PCUpdate) Mutation() *PCMutation {
+	return m.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (pu *PCUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, pu.gremlinSave, pu.mutation, pu.hooks)
+func (u *PCUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.gremlinSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (pu *PCUpdate) SaveX(ctx context.Context) int {
-	affected, err := pu.Save(ctx)
+func (u *PCUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -50,34 +50,34 @@ func (pu *PCUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (pu *PCUpdate) Exec(ctx context.Context) error {
-	_, err := pu.Save(ctx)
+func (u *PCUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pu *PCUpdate) ExecX(ctx context.Context) {
-	if err := pu.Exec(ctx); err != nil {
+func (u *PCUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (pu *PCUpdate) gremlinSave(ctx context.Context) (int, error) {
+func (u *PCUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := pu.gremlin().Query()
-	if err := pu.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := u.gremlin().Query()
+	if err := u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return 0, err
 	}
-	pu.mutation.done = true
+	u.mutation.done = true
 	return res.ReadInt()
 }
 
-func (pu *PCUpdate) gremlin() *dsl.Traversal {
+func (u *PCUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(pc.Label)
-	for _, p := range pu.mutation.predicates {
+	for _, p := range u.mutation.predicates {
 		p(v)
 	}
 	var (
@@ -97,31 +97,31 @@ type PCUpdateOne struct {
 }
 
 // Mutation returns the PCMutation object of the builder.
-func (puo *PCUpdateOne) Mutation() *PCMutation {
-	return puo.mutation
+func (m *PCUpdateOne) Mutation() *PCMutation {
+	return m.mutation
 }
 
 // Where appends a list predicates to the PCUpdate builder.
-func (puo *PCUpdateOne) Where(ps ...predicate.PC) *PCUpdateOne {
-	puo.mutation.Where(ps...)
-	return puo
+func (u *PCUpdateOne) Where(ps ...predicate.PC) *PCUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (puo *PCUpdateOne) Select(field string, fields ...string) *PCUpdateOne {
-	puo.fields = append([]string{field}, fields...)
-	return puo
+func (u *PCUpdateOne) Select(field string, fields ...string) *PCUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated PC entity.
-func (puo *PCUpdateOne) Save(ctx context.Context) (*PC, error) {
-	return withHooks(ctx, puo.gremlinSave, puo.mutation, puo.hooks)
+func (u *PCUpdateOne) Save(ctx context.Context) (*PC, error) {
+	return withHooks(ctx, u.gremlinSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (puo *PCUpdateOne) SaveX(ctx context.Context) *PC {
-	node, err := puo.Save(ctx)
+func (u *PCUpdateOne) SaveX(ctx context.Context) *PC {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -129,48 +129,48 @@ func (puo *PCUpdateOne) SaveX(ctx context.Context) *PC {
 }
 
 // Exec executes the query on the entity.
-func (puo *PCUpdateOne) Exec(ctx context.Context) error {
-	_, err := puo.Save(ctx)
+func (u *PCUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (puo *PCUpdateOne) ExecX(ctx context.Context) {
-	if err := puo.Exec(ctx); err != nil {
+func (u *PCUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (puo *PCUpdateOne) gremlinSave(ctx context.Context) (*PC, error) {
+func (u *PCUpdateOne) gremlinSave(ctx context.Context) (*PC, error) {
 	res := &gremlin.Response{}
-	id, ok := puo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "PC.id" for update`)}
 	}
-	query, bindings := puo.gremlin(id).Query()
-	if err := puo.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := u.gremlin(id).Query()
+	if err := u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	puo.mutation.done = true
-	_pc := &PC{config: puo.config}
-	if err := _pc.FromResponse(res); err != nil {
+	u.mutation.done = true
+	m := &PC{config: u.config}
+	if err := m.FromResponse(res); err != nil {
 		return nil, err
 	}
-	return _pc, nil
+	return m, nil
 }
 
-func (puo *PCUpdateOne) gremlin(id string) *dsl.Traversal {
+func (u *PCUpdateOne) gremlin(id string) *dsl.Traversal {
 	v := g.V(id)
 	var (
 		trs []*dsl.Traversal
 	)
-	if len(puo.fields) > 0 {
-		fields := make([]any, 0, len(puo.fields)+1)
+	if len(u.fields) > 0 {
+		fields := make([]any, 0, len(u.fields)+1)
 		fields = append(fields, true)
-		for _, f := range puo.fields {
+		for _, f := range u.fields {
 			fields = append(fields, f)
 		}
 		v.ValueMap(fields...)

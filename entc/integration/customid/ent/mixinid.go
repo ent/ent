@@ -46,9 +46,9 @@ func (*MixinID) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the MixinID fields.
-func (mi *MixinID) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *MixinID) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -56,22 +56,22 @@ func (mi *MixinID) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				mi.ID = *value
+				m.ID = *value
 			}
 		case mixinid.FieldSomeField:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field some_field", values[i])
 			} else if value.Valid {
-				mi.SomeField = value.String
+				m.SomeField = value.String
 			}
 		case mixinid.FieldMixinField:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field mixin_field", values[i])
 			} else if value.Valid {
-				mi.MixinField = value.String
+				m.MixinField = value.String
 			}
 		default:
-			mi.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -79,38 +79,38 @@ func (mi *MixinID) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the MixinID.
 // This includes values selected through modifiers, order, etc.
-func (mi *MixinID) Value(name string) (ent.Value, error) {
-	return mi.selectValues.Get(name)
+func (m *MixinID) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this MixinID.
 // Note that you need to call MixinID.Unwrap() before calling this method if this MixinID
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (mi *MixinID) Update() *MixinIDUpdateOne {
-	return NewMixinIDClient(mi.config).UpdateOne(mi)
+func (m *MixinID) Update() *MixinIDUpdateOne {
+	return NewMixinIDClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the MixinID entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (mi *MixinID) Unwrap() *MixinID {
-	_tx, ok := mi.config.driver.(*txDriver)
+func (m *MixinID) Unwrap() *MixinID {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: MixinID is not a transactional entity")
 	}
-	mi.config.driver = _tx.drv
-	return mi
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (mi *MixinID) String() string {
+func (m *MixinID) String() string {
 	var builder strings.Builder
 	builder.WriteString("MixinID(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", mi.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("some_field=")
-	builder.WriteString(mi.SomeField)
+	builder.WriteString(m.SomeField)
 	builder.WriteString(", ")
 	builder.WriteString("mixin_field=")
-	builder.WriteString(mi.MixinField)
+	builder.WriteString(m.MixinField)
 	builder.WriteByte(')')
 	return builder.String()
 }

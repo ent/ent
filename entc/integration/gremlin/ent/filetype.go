@@ -71,41 +71,41 @@ func (ft *FileType) FromResponse(res *gremlin.Response) error {
 }
 
 // QueryFiles queries the "files" edge of the FileType entity.
-func (ft *FileType) QueryFiles() *FileQuery {
-	return NewFileTypeClient(ft.config).QueryFiles(ft)
+func (m *FileType) QueryFiles() *FileQuery {
+	return NewFileTypeClient(m.config).QueryFiles(m)
 }
 
 // Update returns a builder for updating this FileType.
 // Note that you need to call FileType.Unwrap() before calling this method if this FileType
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (ft *FileType) Update() *FileTypeUpdateOne {
-	return NewFileTypeClient(ft.config).UpdateOne(ft)
+func (m *FileType) Update() *FileTypeUpdateOne {
+	return NewFileTypeClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the FileType entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (ft *FileType) Unwrap() *FileType {
-	_tx, ok := ft.config.driver.(*txDriver)
+func (m *FileType) Unwrap() *FileType {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: FileType is not a transactional entity")
 	}
-	ft.config.driver = _tx.drv
-	return ft
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (ft *FileType) String() string {
+func (m *FileType) String() string {
 	var builder strings.Builder
 	builder.WriteString("FileType(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", ft.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("name=")
-	builder.WriteString(ft.Name)
+	builder.WriteString(m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("type=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Type))
+	builder.WriteString(fmt.Sprintf("%v", m.Type))
 	builder.WriteString(", ")
 	builder.WriteString("state=")
-	builder.WriteString(fmt.Sprintf("%v", ft.State))
+	builder.WriteString(fmt.Sprintf("%v", m.State))
 	builder.WriteByte(')')
 	return builder.String()
 }

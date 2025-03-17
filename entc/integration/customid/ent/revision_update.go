@@ -26,24 +26,24 @@ type RevisionUpdate struct {
 }
 
 // Where appends a list predicates to the RevisionUpdate builder.
-func (ru *RevisionUpdate) Where(ps ...predicate.Revision) *RevisionUpdate {
-	ru.mutation.Where(ps...)
-	return ru
+func (u *RevisionUpdate) Where(ps ...predicate.Revision) *RevisionUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Mutation returns the RevisionMutation object of the builder.
-func (ru *RevisionUpdate) Mutation() *RevisionMutation {
-	return ru.mutation
+func (m *RevisionUpdate) Mutation() *RevisionMutation {
+	return m.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (ru *RevisionUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, ru.sqlSave, ru.mutation, ru.hooks)
+func (u *RevisionUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ru *RevisionUpdate) SaveX(ctx context.Context) int {
-	affected, err := ru.Save(ctx)
+func (u *RevisionUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -51,28 +51,28 @@ func (ru *RevisionUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (ru *RevisionUpdate) Exec(ctx context.Context) error {
-	_, err := ru.Save(ctx)
+func (u *RevisionUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ru *RevisionUpdate) ExecX(ctx context.Context) {
-	if err := ru.Exec(ctx); err != nil {
+func (u *RevisionUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (ru *RevisionUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (u *RevisionUpdate) sqlSave(ctx context.Context) (_n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(revision.Table, revision.Columns, sqlgraph.NewFieldSpec(revision.FieldID, field.TypeString))
-	if ps := ru.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, ru.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{revision.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -80,8 +80,8 @@ func (ru *RevisionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	ru.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // RevisionUpdateOne is the builder for updating a single Revision entity.
@@ -93,31 +93,31 @@ type RevisionUpdateOne struct {
 }
 
 // Mutation returns the RevisionMutation object of the builder.
-func (ruo *RevisionUpdateOne) Mutation() *RevisionMutation {
-	return ruo.mutation
+func (m *RevisionUpdateOne) Mutation() *RevisionMutation {
+	return m.mutation
 }
 
 // Where appends a list predicates to the RevisionUpdate builder.
-func (ruo *RevisionUpdateOne) Where(ps ...predicate.Revision) *RevisionUpdateOne {
-	ruo.mutation.Where(ps...)
-	return ruo
+func (u *RevisionUpdateOne) Where(ps ...predicate.Revision) *RevisionUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (ruo *RevisionUpdateOne) Select(field string, fields ...string) *RevisionUpdateOne {
-	ruo.fields = append([]string{field}, fields...)
-	return ruo
+func (u *RevisionUpdateOne) Select(field string, fields ...string) *RevisionUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated Revision entity.
-func (ruo *RevisionUpdateOne) Save(ctx context.Context) (*Revision, error) {
-	return withHooks(ctx, ruo.sqlSave, ruo.mutation, ruo.hooks)
+func (u *RevisionUpdateOne) Save(ctx context.Context) (*Revision, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ruo *RevisionUpdateOne) SaveX(ctx context.Context) *Revision {
-	node, err := ruo.Save(ctx)
+func (u *RevisionUpdateOne) SaveX(ctx context.Context) *Revision {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -125,26 +125,26 @@ func (ruo *RevisionUpdateOne) SaveX(ctx context.Context) *Revision {
 }
 
 // Exec executes the query on the entity.
-func (ruo *RevisionUpdateOne) Exec(ctx context.Context) error {
-	_, err := ruo.Save(ctx)
+func (u *RevisionUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ruo *RevisionUpdateOne) ExecX(ctx context.Context) {
-	if err := ruo.Exec(ctx); err != nil {
+func (u *RevisionUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (ruo *RevisionUpdateOne) sqlSave(ctx context.Context) (_node *Revision, err error) {
+func (u *RevisionUpdateOne) sqlSave(ctx context.Context) (_n *Revision, err error) {
 	_spec := sqlgraph.NewUpdateSpec(revision.Table, revision.Columns, sqlgraph.NewFieldSpec(revision.FieldID, field.TypeString))
-	id, ok := ruo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Revision.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := ruo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, revision.FieldID)
 		for _, f := range fields {
@@ -156,17 +156,17 @@ func (ruo *RevisionUpdateOne) sqlSave(ctx context.Context) (_node *Revision, err
 			}
 		}
 	}
-	if ps := ruo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	_node = &Revision{config: ruo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, ruo.driver, _spec); err != nil {
+	_n = &Revision{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{revision.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -174,6 +174,6 @@ func (ruo *RevisionUpdateOne) sqlSave(ctx context.Context) (_node *Revision, err
 		}
 		return nil, err
 	}
-	ruo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

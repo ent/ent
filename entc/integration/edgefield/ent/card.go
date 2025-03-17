@@ -69,9 +69,9 @@ func (*Card) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Card fields.
-func (c *Card) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Card) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -80,21 +80,21 @@ func (c *Card) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			c.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case card.FieldNumber:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field number", values[i])
 			} else if value.Valid {
-				c.Number = value.String
+				m.Number = value.String
 			}
 		case card.FieldOwnerID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field owner_id", values[i])
 			} else if value.Valid {
-				c.OwnerID = int(value.Int64)
+				m.OwnerID = int(value.Int64)
 			}
 		default:
-			c.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -102,43 +102,43 @@ func (c *Card) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Card.
 // This includes values selected through modifiers, order, etc.
-func (c *Card) Value(name string) (ent.Value, error) {
-	return c.selectValues.Get(name)
+func (m *Card) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryOwner queries the "owner" edge of the Card entity.
-func (c *Card) QueryOwner() *UserQuery {
-	return NewCardClient(c.config).QueryOwner(c)
+func (m *Card) QueryOwner() *UserQuery {
+	return NewCardClient(m.config).QueryOwner(m)
 }
 
 // Update returns a builder for updating this Card.
 // Note that you need to call Card.Unwrap() before calling this method if this Card
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (c *Card) Update() *CardUpdateOne {
-	return NewCardClient(c.config).UpdateOne(c)
+func (m *Card) Update() *CardUpdateOne {
+	return NewCardClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Card entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (c *Card) Unwrap() *Card {
-	_tx, ok := c.config.driver.(*txDriver)
+func (m *Card) Unwrap() *Card {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Card is not a transactional entity")
 	}
-	c.config.driver = _tx.drv
-	return c
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (c *Card) String() string {
+func (m *Card) String() string {
 	var builder strings.Builder
 	builder.WriteString("Card(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("number=")
-	builder.WriteString(c.Number)
+	builder.WriteString(m.Number)
 	builder.WriteString(", ")
 	builder.WriteString("owner_id=")
-	builder.WriteString(fmt.Sprintf("%v", c.OwnerID))
+	builder.WriteString(fmt.Sprintf("%v", m.OwnerID))
 	builder.WriteByte(')')
 	return builder.String()
 }

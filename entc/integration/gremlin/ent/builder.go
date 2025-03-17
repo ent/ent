@@ -39,26 +39,26 @@ func (b *Builder) FromResponse(res *gremlin.Response) error {
 // Update returns a builder for updating this Builder.
 // Note that you need to call Builder.Unwrap() before calling this method if this Builder
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (b *Builder) Update() *BuilderUpdateOne {
-	return NewBuilderClient(b.config).UpdateOne(b)
+func (m *Builder) Update() *BuilderUpdateOne {
+	return NewBuilderClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Builder entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (b *Builder) Unwrap() *Builder {
-	_tx, ok := b.config.driver.(*txDriver)
+func (m *Builder) Unwrap() *Builder {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Builder is not a transactional entity")
 	}
-	b.config.driver = _tx.drv
-	return b
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (b *Builder) String() string {
+func (m *Builder) String() string {
 	var builder strings.Builder
 	builder.WriteString("Builder(")
-	builder.WriteString(fmt.Sprintf("id=%v", b.ID))
+	builder.WriteString(fmt.Sprintf("id=%v", m.ID))
 	builder.WriteByte(')')
 	return builder.String()
 }

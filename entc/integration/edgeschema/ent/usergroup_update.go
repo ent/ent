@@ -29,88 +29,88 @@ type UserGroupUpdate struct {
 }
 
 // Where appends a list predicates to the UserGroupUpdate builder.
-func (ugu *UserGroupUpdate) Where(ps ...predicate.UserGroup) *UserGroupUpdate {
-	ugu.mutation.Where(ps...)
-	return ugu
+func (u *UserGroupUpdate) Where(ps ...predicate.UserGroup) *UserGroupUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetJoinedAt sets the "joined_at" field.
-func (ugu *UserGroupUpdate) SetJoinedAt(t time.Time) *UserGroupUpdate {
-	ugu.mutation.SetJoinedAt(t)
-	return ugu
+func (m *UserGroupUpdate) SetJoinedAt(v time.Time) *UserGroupUpdate {
+	m.mutation.SetJoinedAt(v)
+	return m
 }
 
 // SetNillableJoinedAt sets the "joined_at" field if the given value is not nil.
-func (ugu *UserGroupUpdate) SetNillableJoinedAt(t *time.Time) *UserGroupUpdate {
-	if t != nil {
-		ugu.SetJoinedAt(*t)
+func (m *UserGroupUpdate) SetNillableJoinedAt(v *time.Time) *UserGroupUpdate {
+	if v != nil {
+		m.SetJoinedAt(*v)
 	}
-	return ugu
+	return m
 }
 
 // SetUserID sets the "user_id" field.
-func (ugu *UserGroupUpdate) SetUserID(i int) *UserGroupUpdate {
-	ugu.mutation.SetUserID(i)
-	return ugu
+func (m *UserGroupUpdate) SetUserID(v int) *UserGroupUpdate {
+	m.mutation.SetUserID(v)
+	return m
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (ugu *UserGroupUpdate) SetNillableUserID(i *int) *UserGroupUpdate {
-	if i != nil {
-		ugu.SetUserID(*i)
+func (m *UserGroupUpdate) SetNillableUserID(v *int) *UserGroupUpdate {
+	if v != nil {
+		m.SetUserID(*v)
 	}
-	return ugu
+	return m
 }
 
 // SetGroupID sets the "group_id" field.
-func (ugu *UserGroupUpdate) SetGroupID(i int) *UserGroupUpdate {
-	ugu.mutation.SetGroupID(i)
-	return ugu
+func (m *UserGroupUpdate) SetGroupID(v int) *UserGroupUpdate {
+	m.mutation.SetGroupID(v)
+	return m
 }
 
 // SetNillableGroupID sets the "group_id" field if the given value is not nil.
-func (ugu *UserGroupUpdate) SetNillableGroupID(i *int) *UserGroupUpdate {
-	if i != nil {
-		ugu.SetGroupID(*i)
+func (m *UserGroupUpdate) SetNillableGroupID(v *int) *UserGroupUpdate {
+	if v != nil {
+		m.SetGroupID(*v)
 	}
-	return ugu
+	return m
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (ugu *UserGroupUpdate) SetUser(u *User) *UserGroupUpdate {
-	return ugu.SetUserID(u.ID)
+func (m *UserGroupUpdate) SetUser(v *User) *UserGroupUpdate {
+	return m.SetUserID(v.ID)
 }
 
 // SetGroup sets the "group" edge to the Group entity.
-func (ugu *UserGroupUpdate) SetGroup(g *Group) *UserGroupUpdate {
-	return ugu.SetGroupID(g.ID)
+func (m *UserGroupUpdate) SetGroup(v *Group) *UserGroupUpdate {
+	return m.SetGroupID(v.ID)
 }
 
 // Mutation returns the UserGroupMutation object of the builder.
-func (ugu *UserGroupUpdate) Mutation() *UserGroupMutation {
-	return ugu.mutation
+func (m *UserGroupUpdate) Mutation() *UserGroupMutation {
+	return m.mutation
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (ugu *UserGroupUpdate) ClearUser() *UserGroupUpdate {
-	ugu.mutation.ClearUser()
-	return ugu
+func (u *UserGroupUpdate) ClearUser() *UserGroupUpdate {
+	u.mutation.ClearUser()
+	return u
 }
 
 // ClearGroup clears the "group" edge to the Group entity.
-func (ugu *UserGroupUpdate) ClearGroup() *UserGroupUpdate {
-	ugu.mutation.ClearGroup()
-	return ugu
+func (u *UserGroupUpdate) ClearGroup() *UserGroupUpdate {
+	u.mutation.ClearGroup()
+	return u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (ugu *UserGroupUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, ugu.sqlSave, ugu.mutation, ugu.hooks)
+func (u *UserGroupUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ugu *UserGroupUpdate) SaveX(ctx context.Context) int {
-	affected, err := ugu.Save(ctx)
+func (u *UserGroupUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -118,45 +118,45 @@ func (ugu *UserGroupUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (ugu *UserGroupUpdate) Exec(ctx context.Context) error {
-	_, err := ugu.Save(ctx)
+func (u *UserGroupUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ugu *UserGroupUpdate) ExecX(ctx context.Context) {
-	if err := ugu.Exec(ctx); err != nil {
+func (u *UserGroupUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ugu *UserGroupUpdate) check() error {
-	if ugu.mutation.UserCleared() && len(ugu.mutation.UserIDs()) > 0 {
+func (u *UserGroupUpdate) check() error {
+	if u.mutation.UserCleared() && len(u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserGroup.user"`)
 	}
-	if ugu.mutation.GroupCleared() && len(ugu.mutation.GroupIDs()) > 0 {
+	if u.mutation.GroupCleared() && len(u.mutation.GroupIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserGroup.group"`)
 	}
 	return nil
 }
 
-func (ugu *UserGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := ugu.check(); err != nil {
-		return n, err
+func (u *UserGroupUpdate) sqlSave(ctx context.Context) (_n int, err error) {
+	if err := u.check(); err != nil {
+		return _n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(usergroup.Table, usergroup.Columns, sqlgraph.NewFieldSpec(usergroup.FieldID, field.TypeInt))
-	if ps := ugu.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := ugu.mutation.JoinedAt(); ok {
+	if value, ok := u.mutation.JoinedAt(); ok {
 		_spec.SetField(usergroup.FieldJoinedAt, field.TypeTime, value)
 	}
-	if ugu.mutation.UserCleared() {
+	if u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -169,7 +169,7 @@ func (ugu *UserGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ugu.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -185,7 +185,7 @@ func (ugu *UserGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if ugu.mutation.GroupCleared() {
+	if u.mutation.GroupCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -198,7 +198,7 @@ func (ugu *UserGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ugu.mutation.GroupIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -214,7 +214,7 @@ func (ugu *UserGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, ugu.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{usergroup.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -222,8 +222,8 @@ func (ugu *UserGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	ugu.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // UserGroupUpdateOne is the builder for updating a single UserGroup entity.
@@ -235,95 +235,95 @@ type UserGroupUpdateOne struct {
 }
 
 // SetJoinedAt sets the "joined_at" field.
-func (uguo *UserGroupUpdateOne) SetJoinedAt(t time.Time) *UserGroupUpdateOne {
-	uguo.mutation.SetJoinedAt(t)
-	return uguo
+func (m *UserGroupUpdateOne) SetJoinedAt(v time.Time) *UserGroupUpdateOne {
+	m.mutation.SetJoinedAt(v)
+	return m
 }
 
 // SetNillableJoinedAt sets the "joined_at" field if the given value is not nil.
-func (uguo *UserGroupUpdateOne) SetNillableJoinedAt(t *time.Time) *UserGroupUpdateOne {
-	if t != nil {
-		uguo.SetJoinedAt(*t)
+func (m *UserGroupUpdateOne) SetNillableJoinedAt(v *time.Time) *UserGroupUpdateOne {
+	if v != nil {
+		m.SetJoinedAt(*v)
 	}
-	return uguo
+	return m
 }
 
 // SetUserID sets the "user_id" field.
-func (uguo *UserGroupUpdateOne) SetUserID(i int) *UserGroupUpdateOne {
-	uguo.mutation.SetUserID(i)
-	return uguo
+func (m *UserGroupUpdateOne) SetUserID(v int) *UserGroupUpdateOne {
+	m.mutation.SetUserID(v)
+	return m
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (uguo *UserGroupUpdateOne) SetNillableUserID(i *int) *UserGroupUpdateOne {
-	if i != nil {
-		uguo.SetUserID(*i)
+func (m *UserGroupUpdateOne) SetNillableUserID(v *int) *UserGroupUpdateOne {
+	if v != nil {
+		m.SetUserID(*v)
 	}
-	return uguo
+	return m
 }
 
 // SetGroupID sets the "group_id" field.
-func (uguo *UserGroupUpdateOne) SetGroupID(i int) *UserGroupUpdateOne {
-	uguo.mutation.SetGroupID(i)
-	return uguo
+func (m *UserGroupUpdateOne) SetGroupID(v int) *UserGroupUpdateOne {
+	m.mutation.SetGroupID(v)
+	return m
 }
 
 // SetNillableGroupID sets the "group_id" field if the given value is not nil.
-func (uguo *UserGroupUpdateOne) SetNillableGroupID(i *int) *UserGroupUpdateOne {
-	if i != nil {
-		uguo.SetGroupID(*i)
+func (m *UserGroupUpdateOne) SetNillableGroupID(v *int) *UserGroupUpdateOne {
+	if v != nil {
+		m.SetGroupID(*v)
 	}
-	return uguo
+	return m
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (uguo *UserGroupUpdateOne) SetUser(u *User) *UserGroupUpdateOne {
-	return uguo.SetUserID(u.ID)
+func (m *UserGroupUpdateOne) SetUser(v *User) *UserGroupUpdateOne {
+	return m.SetUserID(v.ID)
 }
 
 // SetGroup sets the "group" edge to the Group entity.
-func (uguo *UserGroupUpdateOne) SetGroup(g *Group) *UserGroupUpdateOne {
-	return uguo.SetGroupID(g.ID)
+func (m *UserGroupUpdateOne) SetGroup(v *Group) *UserGroupUpdateOne {
+	return m.SetGroupID(v.ID)
 }
 
 // Mutation returns the UserGroupMutation object of the builder.
-func (uguo *UserGroupUpdateOne) Mutation() *UserGroupMutation {
-	return uguo.mutation
+func (m *UserGroupUpdateOne) Mutation() *UserGroupMutation {
+	return m.mutation
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (uguo *UserGroupUpdateOne) ClearUser() *UserGroupUpdateOne {
-	uguo.mutation.ClearUser()
-	return uguo
+func (u *UserGroupUpdateOne) ClearUser() *UserGroupUpdateOne {
+	u.mutation.ClearUser()
+	return u
 }
 
 // ClearGroup clears the "group" edge to the Group entity.
-func (uguo *UserGroupUpdateOne) ClearGroup() *UserGroupUpdateOne {
-	uguo.mutation.ClearGroup()
-	return uguo
+func (u *UserGroupUpdateOne) ClearGroup() *UserGroupUpdateOne {
+	u.mutation.ClearGroup()
+	return u
 }
 
 // Where appends a list predicates to the UserGroupUpdate builder.
-func (uguo *UserGroupUpdateOne) Where(ps ...predicate.UserGroup) *UserGroupUpdateOne {
-	uguo.mutation.Where(ps...)
-	return uguo
+func (u *UserGroupUpdateOne) Where(ps ...predicate.UserGroup) *UserGroupUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (uguo *UserGroupUpdateOne) Select(field string, fields ...string) *UserGroupUpdateOne {
-	uguo.fields = append([]string{field}, fields...)
-	return uguo
+func (u *UserGroupUpdateOne) Select(field string, fields ...string) *UserGroupUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated UserGroup entity.
-func (uguo *UserGroupUpdateOne) Save(ctx context.Context) (*UserGroup, error) {
-	return withHooks(ctx, uguo.sqlSave, uguo.mutation, uguo.hooks)
+func (u *UserGroupUpdateOne) Save(ctx context.Context) (*UserGroup, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uguo *UserGroupUpdateOne) SaveX(ctx context.Context) *UserGroup {
-	node, err := uguo.Save(ctx)
+func (u *UserGroupUpdateOne) SaveX(ctx context.Context) *UserGroup {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -331,40 +331,40 @@ func (uguo *UserGroupUpdateOne) SaveX(ctx context.Context) *UserGroup {
 }
 
 // Exec executes the query on the entity.
-func (uguo *UserGroupUpdateOne) Exec(ctx context.Context) error {
-	_, err := uguo.Save(ctx)
+func (u *UserGroupUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uguo *UserGroupUpdateOne) ExecX(ctx context.Context) {
-	if err := uguo.Exec(ctx); err != nil {
+func (u *UserGroupUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uguo *UserGroupUpdateOne) check() error {
-	if uguo.mutation.UserCleared() && len(uguo.mutation.UserIDs()) > 0 {
+func (u *UserGroupUpdateOne) check() error {
+	if u.mutation.UserCleared() && len(u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserGroup.user"`)
 	}
-	if uguo.mutation.GroupCleared() && len(uguo.mutation.GroupIDs()) > 0 {
+	if u.mutation.GroupCleared() && len(u.mutation.GroupIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserGroup.group"`)
 	}
 	return nil
 }
 
-func (uguo *UserGroupUpdateOne) sqlSave(ctx context.Context) (_node *UserGroup, err error) {
-	if err := uguo.check(); err != nil {
-		return _node, err
+func (u *UserGroupUpdateOne) sqlSave(ctx context.Context) (_n *UserGroup, err error) {
+	if err := u.check(); err != nil {
+		return _n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(usergroup.Table, usergroup.Columns, sqlgraph.NewFieldSpec(usergroup.FieldID, field.TypeInt))
-	id, ok := uguo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "UserGroup.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := uguo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, usergroup.FieldID)
 		for _, f := range fields {
@@ -376,17 +376,17 @@ func (uguo *UserGroupUpdateOne) sqlSave(ctx context.Context) (_node *UserGroup, 
 			}
 		}
 	}
-	if ps := uguo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uguo.mutation.JoinedAt(); ok {
+	if value, ok := u.mutation.JoinedAt(); ok {
 		_spec.SetField(usergroup.FieldJoinedAt, field.TypeTime, value)
 	}
-	if uguo.mutation.UserCleared() {
+	if u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -399,7 +399,7 @@ func (uguo *UserGroupUpdateOne) sqlSave(ctx context.Context) (_node *UserGroup, 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uguo.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -415,7 +415,7 @@ func (uguo *UserGroupUpdateOne) sqlSave(ctx context.Context) (_node *UserGroup, 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uguo.mutation.GroupCleared() {
+	if u.mutation.GroupCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -428,7 +428,7 @@ func (uguo *UserGroupUpdateOne) sqlSave(ctx context.Context) (_node *UserGroup, 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uguo.mutation.GroupIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -444,10 +444,10 @@ func (uguo *UserGroupUpdateOne) sqlSave(ctx context.Context) (_node *UserGroup, 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &UserGroup{config: uguo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, uguo.driver, _spec); err != nil {
+	_n = &UserGroup{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{usergroup.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -455,6 +455,6 @@ func (uguo *UserGroupUpdateOne) sqlSave(ctx context.Context) (_node *UserGroup, 
 		}
 		return nil, err
 	}
-	uguo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

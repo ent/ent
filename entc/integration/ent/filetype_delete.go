@@ -24,56 +24,56 @@ type FileTypeDelete struct {
 }
 
 // Where appends a list predicates to the FileTypeDelete builder.
-func (ftd *FileTypeDelete) Where(ps ...predicate.FileType) *FileTypeDelete {
-	ftd.mutation.Where(ps...)
-	return ftd
+func (d *FileTypeDelete) Where(ps ...predicate.FileType) *FileTypeDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (ftd *FileTypeDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, ftd.sqlExec, ftd.mutation, ftd.hooks)
+func (d *FileTypeDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ftd *FileTypeDelete) ExecX(ctx context.Context) int {
-	n, err := ftd.Exec(ctx)
+func (d *FileTypeDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (ftd *FileTypeDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *FileTypeDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(filetype.Table, sqlgraph.NewFieldSpec(filetype.FieldID, field.TypeInt))
-	if ps := ftd.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, ftd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	ftd.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // FileTypeDeleteOne is the builder for deleting a single FileType entity.
 type FileTypeDeleteOne struct {
-	ftd *FileTypeDelete
+	d *FileTypeDelete
 }
 
 // Where appends a list predicates to the FileTypeDelete builder.
-func (ftdo *FileTypeDeleteOne) Where(ps ...predicate.FileType) *FileTypeDeleteOne {
-	ftdo.ftd.mutation.Where(ps...)
-	return ftdo
+func (d *FileTypeDeleteOne) Where(ps ...predicate.FileType) *FileTypeDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (ftdo *FileTypeDeleteOne) Exec(ctx context.Context) error {
-	n, err := ftdo.ftd.Exec(ctx)
+func (d *FileTypeDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (ftdo *FileTypeDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ftdo *FileTypeDeleteOne) ExecX(ctx context.Context) {
-	if err := ftdo.Exec(ctx); err != nil {
+func (d *FileTypeDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

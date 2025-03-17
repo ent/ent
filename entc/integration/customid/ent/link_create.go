@@ -29,39 +29,39 @@ type LinkCreate struct {
 }
 
 // SetLinkInformation sets the "link_information" field.
-func (lc *LinkCreate) SetLinkInformation(mi map[string]schema.LinkInformation) *LinkCreate {
-	lc.mutation.SetLinkInformation(mi)
-	return lc
+func (m *LinkCreate) SetLinkInformation(v map[string]schema.LinkInformation) *LinkCreate {
+	m.mutation.SetLinkInformation(v)
+	return m
 }
 
 // SetID sets the "id" field.
-func (lc *LinkCreate) SetID(u uuidc.UUIDC) *LinkCreate {
-	lc.mutation.SetID(u)
-	return lc
+func (m *LinkCreate) SetID(v uuidc.UUIDC) *LinkCreate {
+	m.mutation.SetID(v)
+	return m
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (lc *LinkCreate) SetNillableID(u *uuidc.UUIDC) *LinkCreate {
-	if u != nil {
-		lc.SetID(*u)
+func (m *LinkCreate) SetNillableID(v *uuidc.UUIDC) *LinkCreate {
+	if v != nil {
+		m.SetID(*v)
 	}
-	return lc
+	return m
 }
 
 // Mutation returns the LinkMutation object of the builder.
-func (lc *LinkCreate) Mutation() *LinkMutation {
-	return lc.mutation
+func (m *LinkCreate) Mutation() *LinkMutation {
+	return m.mutation
 }
 
 // Save creates the Link in the database.
-func (lc *LinkCreate) Save(ctx context.Context) (*Link, error) {
-	lc.defaults()
-	return withHooks(ctx, lc.sqlSave, lc.mutation, lc.hooks)
+func (c *LinkCreate) Save(ctx context.Context) (*Link, error) {
+	c.defaults()
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (lc *LinkCreate) SaveX(ctx context.Context) *Link {
-	v, err := lc.Save(ctx)
+func (c *LinkCreate) SaveX(ctx context.Context) *Link {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -69,44 +69,44 @@ func (lc *LinkCreate) SaveX(ctx context.Context) *Link {
 }
 
 // Exec executes the query.
-func (lc *LinkCreate) Exec(ctx context.Context) error {
-	_, err := lc.Save(ctx)
+func (c *LinkCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (lc *LinkCreate) ExecX(ctx context.Context) {
-	if err := lc.Exec(ctx); err != nil {
+func (c *LinkCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (lc *LinkCreate) defaults() {
-	if _, ok := lc.mutation.LinkInformation(); !ok {
+func (c *LinkCreate) defaults() {
+	if _, ok := c.mutation.LinkInformation(); !ok {
 		v := link.DefaultLinkInformation
-		lc.mutation.SetLinkInformation(v)
+		c.mutation.SetLinkInformation(v)
 	}
-	if _, ok := lc.mutation.ID(); !ok {
+	if _, ok := c.mutation.ID(); !ok {
 		v := link.DefaultID()
-		lc.mutation.SetID(v)
+		c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (lc *LinkCreate) check() error {
-	if _, ok := lc.mutation.LinkInformation(); !ok {
+func (c *LinkCreate) check() error {
+	if _, ok := c.mutation.LinkInformation(); !ok {
 		return &ValidationError{Name: "link_information", err: errors.New(`ent: missing required field "Link.link_information"`)}
 	}
 	return nil
 }
 
-func (lc *LinkCreate) sqlSave(ctx context.Context) (*Link, error) {
-	if err := lc.check(); err != nil {
+func (c *LinkCreate) sqlSave(ctx context.Context) (*Link, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := lc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, lc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -119,22 +119,22 @@ func (lc *LinkCreate) sqlSave(ctx context.Context) (*Link, error) {
 			return nil, err
 		}
 	}
-	lc.mutation.id = &_node.ID
-	lc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (lc *LinkCreate) createSpec() (*Link, *sqlgraph.CreateSpec) {
+func (c *LinkCreate) createSpec() (*Link, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Link{config: lc.config}
+		_node = &Link{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(link.Table, sqlgraph.NewFieldSpec(link.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = lc.conflict
-	if id, ok := lc.mutation.ID(); ok {
+	_spec.OnConflict = c.conflict
+	if id, ok := c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := lc.mutation.LinkInformation(); ok {
+	if value, ok := c.mutation.LinkInformation(); ok {
 		_spec.SetField(link.FieldLinkInformation, field.TypeJSON, value)
 		_node.LinkInformation = value
 	}
@@ -157,11 +157,9 @@ func (lc *LinkCreate) createSpec() (*Link, *sqlgraph.CreateSpec) {
 //			SetLinkInformation(v+v).
 //		}).
 //		Exec(ctx)
-func (lc *LinkCreate) OnConflict(opts ...sql.ConflictOption) *LinkUpsertOne {
-	lc.conflict = opts
-	return &LinkUpsertOne{
-		create: lc,
-	}
+func (c *LinkCreate) OnConflict(opts ...sql.ConflictOption) *LinkUpsertOne {
+	c.conflict = opts
+	return &LinkUpsertOne{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -170,11 +168,9 @@ func (lc *LinkCreate) OnConflict(opts ...sql.ConflictOption) *LinkUpsertOne {
 //	client.Link.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (lc *LinkCreate) OnConflictColumns(columns ...string) *LinkUpsertOne {
-	lc.conflict = append(lc.conflict, sql.ConflictColumns(columns...))
-	return &LinkUpsertOne{
-		create: lc,
-	}
+func (c *LinkCreate) OnConflictColumns(columns ...string) *LinkUpsertOne {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &LinkUpsertOne{create: c}
 }
 
 type (
@@ -311,16 +307,16 @@ type LinkCreateBulk struct {
 }
 
 // Save creates the Link entities in the database.
-func (lcb *LinkCreateBulk) Save(ctx context.Context) ([]*Link, error) {
-	if lcb.err != nil {
-		return nil, lcb.err
+func (c *LinkCreateBulk) Save(ctx context.Context) ([]*Link, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(lcb.builders))
-	nodes := make([]*Link, len(lcb.builders))
-	mutators := make([]Mutator, len(lcb.builders))
-	for i := range lcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Link, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := lcb.builders[i]
+			builder := c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*LinkMutation)
@@ -334,12 +330,12 @@ func (lcb *LinkCreateBulk) Save(ctx context.Context) ([]*Link, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, lcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = lcb.conflict
+					spec.OnConflict = c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, lcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -359,7 +355,7 @@ func (lcb *LinkCreateBulk) Save(ctx context.Context) ([]*Link, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, lcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -367,8 +363,8 @@ func (lcb *LinkCreateBulk) Save(ctx context.Context) ([]*Link, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (lcb *LinkCreateBulk) SaveX(ctx context.Context) []*Link {
-	v, err := lcb.Save(ctx)
+func (c *LinkCreateBulk) SaveX(ctx context.Context) []*Link {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -376,14 +372,14 @@ func (lcb *LinkCreateBulk) SaveX(ctx context.Context) []*Link {
 }
 
 // Exec executes the query.
-func (lcb *LinkCreateBulk) Exec(ctx context.Context) error {
-	_, err := lcb.Save(ctx)
+func (c *LinkCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (lcb *LinkCreateBulk) ExecX(ctx context.Context) {
-	if err := lcb.Exec(ctx); err != nil {
+func (c *LinkCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -403,11 +399,9 @@ func (lcb *LinkCreateBulk) ExecX(ctx context.Context) {
 //			SetLinkInformation(v+v).
 //		}).
 //		Exec(ctx)
-func (lcb *LinkCreateBulk) OnConflict(opts ...sql.ConflictOption) *LinkUpsertBulk {
-	lcb.conflict = opts
-	return &LinkUpsertBulk{
-		create: lcb,
-	}
+func (c *LinkCreateBulk) OnConflict(opts ...sql.ConflictOption) *LinkUpsertBulk {
+	c.conflict = opts
+	return &LinkUpsertBulk{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -416,11 +410,9 @@ func (lcb *LinkCreateBulk) OnConflict(opts ...sql.ConflictOption) *LinkUpsertBul
 //	client.Link.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (lcb *LinkCreateBulk) OnConflictColumns(columns ...string) *LinkUpsertBulk {
-	lcb.conflict = append(lcb.conflict, sql.ConflictColumns(columns...))
-	return &LinkUpsertBulk{
-		create: lcb,
-	}
+func (c *LinkCreateBulk) OnConflictColumns(columns ...string) *LinkUpsertBulk {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &LinkUpsertBulk{create: c}
 }
 
 // LinkUpsertBulk is the builder for "upsert"-ing

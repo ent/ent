@@ -93,8 +93,8 @@ func (*Metadata) scanValues(columns []string) ([]any, error) {
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Metadata fields.
 func (m *Metadata) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {

@@ -84,9 +84,9 @@ func (*BlobLink) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the BlobLink fields.
-func (bl *BlobLink) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *BlobLink) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -94,22 +94,22 @@ func (bl *BlobLink) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				bl.CreatedAt = value.Time
+				m.CreatedAt = value.Time
 			}
 		case bloblink.FieldBlobID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field blob_id", values[i])
 			} else if value != nil {
-				bl.BlobID = *value
+				m.BlobID = *value
 			}
 		case bloblink.FieldLinkID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field link_id", values[i])
 			} else if value != nil {
-				bl.LinkID = *value
+				m.LinkID = *value
 			}
 		default:
-			bl.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -117,50 +117,50 @@ func (bl *BlobLink) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the BlobLink.
 // This includes values selected through modifiers, order, etc.
-func (bl *BlobLink) Value(name string) (ent.Value, error) {
-	return bl.selectValues.Get(name)
+func (m *BlobLink) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryBlob queries the "blob" edge of the BlobLink entity.
-func (bl *BlobLink) QueryBlob() *BlobQuery {
-	return NewBlobLinkClient(bl.config).QueryBlob(bl)
+func (m *BlobLink) QueryBlob() *BlobQuery {
+	return NewBlobLinkClient(m.config).QueryBlob(m)
 }
 
 // QueryLink queries the "link" edge of the BlobLink entity.
-func (bl *BlobLink) QueryLink() *BlobQuery {
-	return NewBlobLinkClient(bl.config).QueryLink(bl)
+func (m *BlobLink) QueryLink() *BlobQuery {
+	return NewBlobLinkClient(m.config).QueryLink(m)
 }
 
 // Update returns a builder for updating this BlobLink.
 // Note that you need to call BlobLink.Unwrap() before calling this method if this BlobLink
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (bl *BlobLink) Update() *BlobLinkUpdateOne {
-	return NewBlobLinkClient(bl.config).UpdateOne(bl)
+func (m *BlobLink) Update() *BlobLinkUpdateOne {
+	return NewBlobLinkClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the BlobLink entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (bl *BlobLink) Unwrap() *BlobLink {
-	_tx, ok := bl.config.driver.(*txDriver)
+func (m *BlobLink) Unwrap() *BlobLink {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: BlobLink is not a transactional entity")
 	}
-	bl.config.driver = _tx.drv
-	return bl
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (bl *BlobLink) String() string {
+func (m *BlobLink) String() string {
 	var builder strings.Builder
 	builder.WriteString("BlobLink(")
 	builder.WriteString("created_at=")
-	builder.WriteString(bl.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("blob_id=")
-	builder.WriteString(fmt.Sprintf("%v", bl.BlobID))
+	builder.WriteString(fmt.Sprintf("%v", m.BlobID))
 	builder.WriteString(", ")
 	builder.WriteString("link_id=")
-	builder.WriteString(fmt.Sprintf("%v", bl.LinkID))
+	builder.WriteString(fmt.Sprintf("%v", m.LinkID))
 	builder.WriteByte(')')
 	return builder.String()
 }

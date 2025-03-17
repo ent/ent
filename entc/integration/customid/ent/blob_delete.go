@@ -24,56 +24,56 @@ type BlobDelete struct {
 }
 
 // Where appends a list predicates to the BlobDelete builder.
-func (bd *BlobDelete) Where(ps ...predicate.Blob) *BlobDelete {
-	bd.mutation.Where(ps...)
-	return bd
+func (d *BlobDelete) Where(ps ...predicate.Blob) *BlobDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (bd *BlobDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, bd.sqlExec, bd.mutation, bd.hooks)
+func (d *BlobDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bd *BlobDelete) ExecX(ctx context.Context) int {
-	n, err := bd.Exec(ctx)
+func (d *BlobDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (bd *BlobDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *BlobDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(blob.Table, sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID))
-	if ps := bd.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, bd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	bd.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // BlobDeleteOne is the builder for deleting a single Blob entity.
 type BlobDeleteOne struct {
-	bd *BlobDelete
+	d *BlobDelete
 }
 
 // Where appends a list predicates to the BlobDelete builder.
-func (bdo *BlobDeleteOne) Where(ps ...predicate.Blob) *BlobDeleteOne {
-	bdo.bd.mutation.Where(ps...)
-	return bdo
+func (d *BlobDeleteOne) Where(ps ...predicate.Blob) *BlobDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (bdo *BlobDeleteOne) Exec(ctx context.Context) error {
-	n, err := bdo.bd.Exec(ctx)
+func (d *BlobDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (bdo *BlobDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bdo *BlobDeleteOne) ExecX(ctx context.Context) {
-	if err := bdo.Exec(ctx); err != nil {
+func (d *BlobDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

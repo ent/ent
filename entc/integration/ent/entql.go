@@ -746,13 +746,13 @@ type predicateAdder interface {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (aq *APIQuery) addPredicate(pred func(s *sql.Selector)) {
-	aq.predicates = append(aq.predicates, pred)
+func (q *APIQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the APIQuery builder.
-func (aq *APIQuery) Filter() *APIFilter {
-	return &APIFilter{config: aq.config, predicateAdder: aq}
+func (q *APIQuery) Filter() *APIFilter {
+	return &APIFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -786,13 +786,13 @@ func (f *APIFilter) WhereID(p entql.IntP) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (bq *BuilderQuery) addPredicate(pred func(s *sql.Selector)) {
-	bq.predicates = append(bq.predicates, pred)
+func (q *BuilderQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the BuilderQuery builder.
-func (bq *BuilderQuery) Filter() *BuilderFilter {
-	return &BuilderFilter{config: bq.config, predicateAdder: bq}
+func (q *BuilderQuery) Filter() *BuilderFilter {
+	return &BuilderFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -826,13 +826,13 @@ func (f *BuilderFilter) WhereID(p entql.IntP) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (cq *CardQuery) addPredicate(pred func(s *sql.Selector)) {
-	cq.predicates = append(cq.predicates, pred)
+func (q *CardQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the CardQuery builder.
-func (cq *CardQuery) Filter() *CardFilter {
-	return &CardFilter{config: cq.config, predicateAdder: cq}
+func (q *CardQuery) Filter() *CardFilter {
+	return &CardFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -919,13 +919,13 @@ func (f *CardFilter) WhereHasSpecWith(preds ...predicate.Spec) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (cq *CommentQuery) addPredicate(pred func(s *sql.Selector)) {
-	cq.predicates = append(cq.predicates, pred)
+func (q *CommentQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the CommentQuery builder.
-func (cq *CommentQuery) Filter() *CommentFilter {
-	return &CommentFilter{config: cq.config, predicateAdder: cq}
+func (q *CommentQuery) Filter() *CommentFilter {
+	return &CommentFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -989,13 +989,13 @@ func (f *CommentFilter) WhereClient(p entql.StringP) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (evsq *ExValueScanQuery) addPredicate(pred func(s *sql.Selector)) {
-	evsq.predicates = append(evsq.predicates, pred)
+func (q *ExValueScanQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the ExValueScanQuery builder.
-func (evsq *ExValueScanQuery) Filter() *ExValueScanFilter {
-	return &ExValueScanFilter{config: evsq.config, predicateAdder: evsq}
+func (q *ExValueScanQuery) Filter() *ExValueScanFilter {
+	return &ExValueScanFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1069,13 +1069,13 @@ func (f *ExValueScanFilter) WhereCustomOptional(p entql.StringP) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (ftq *FieldTypeQuery) addPredicate(pred func(s *sql.Selector)) {
-	ftq.predicates = append(ftq.predicates, pred)
+func (q *FieldTypeQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the FieldTypeQuery builder.
-func (ftq *FieldTypeQuery) Filter() *FieldTypeFilter {
-	return &FieldTypeFilter{config: ftq.config, predicateAdder: ftq}
+func (q *FieldTypeQuery) Filter() *FieldTypeFilter {
+	return &FieldTypeFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1434,13 +1434,13 @@ func (f *FieldTypeFilter) WherePasswordOther(p entql.OtherP) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (fq *FileQuery) addPredicate(pred func(s *sql.Selector)) {
-	fq.predicates = append(fq.predicates, pred)
+func (q *FileQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the FileQuery builder.
-func (fq *FileQuery) Filter() *FileFilter {
-	return &FileFilter{config: fq.config, predicateAdder: fq}
+func (q *FileQuery) Filter() *FileFilter {
+	return &FileFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1556,13 +1556,13 @@ func (f *FileFilter) WhereHasFieldWith(preds ...predicate.FieldType) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (ftq *FileTypeQuery) addPredicate(pred func(s *sql.Selector)) {
-	ftq.predicates = append(ftq.predicates, pred)
+func (q *FileTypeQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the FileTypeQuery builder.
-func (ftq *FileTypeQuery) Filter() *FileTypeFilter {
-	return &FileTypeFilter{config: ftq.config, predicateAdder: ftq}
+func (q *FileTypeQuery) Filter() *FileTypeFilter {
+	return &FileTypeFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1625,13 +1625,13 @@ func (f *FileTypeFilter) WhereHasFilesWith(preds ...predicate.File) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (gq *GoodsQuery) addPredicate(pred func(s *sql.Selector)) {
-	gq.predicates = append(gq.predicates, pred)
+func (q *GoodsQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the GoodsQuery builder.
-func (gq *GoodsQuery) Filter() *GoodsFilter {
-	return &GoodsFilter{config: gq.config, predicateAdder: gq}
+func (q *GoodsQuery) Filter() *GoodsFilter {
+	return &GoodsFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1665,13 +1665,13 @@ func (f *GoodsFilter) WhereID(p entql.IntP) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (gq *GroupQuery) addPredicate(pred func(s *sql.Selector)) {
-	gq.predicates = append(gq.predicates, pred)
+func (q *GroupQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the GroupQuery builder.
-func (gq *GroupQuery) Filter() *GroupFilter {
-	return &GroupFilter{config: gq.config, predicateAdder: gq}
+func (q *GroupQuery) Filter() *GroupFilter {
+	return &GroupFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1786,13 +1786,13 @@ func (f *GroupFilter) WhereHasInfoWith(preds ...predicate.GroupInfo) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (giq *GroupInfoQuery) addPredicate(pred func(s *sql.Selector)) {
-	giq.predicates = append(giq.predicates, pred)
+func (q *GroupInfoQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the GroupInfoQuery builder.
-func (giq *GroupInfoQuery) Filter() *GroupInfoFilter {
-	return &GroupInfoFilter{config: giq.config, predicateAdder: giq}
+func (q *GroupInfoQuery) Filter() *GroupInfoFilter {
+	return &GroupInfoFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1850,13 +1850,13 @@ func (f *GroupInfoFilter) WhereHasGroupsWith(preds ...predicate.Group) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (iq *ItemQuery) addPredicate(pred func(s *sql.Selector)) {
-	iq.predicates = append(iq.predicates, pred)
+func (q *ItemQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the ItemQuery builder.
-func (iq *ItemQuery) Filter() *ItemFilter {
-	return &ItemFilter{config: iq.config, predicateAdder: iq}
+func (q *ItemQuery) Filter() *ItemFilter {
+	return &ItemFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1895,13 +1895,13 @@ func (f *ItemFilter) WhereText(p entql.StringP) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (lq *LicenseQuery) addPredicate(pred func(s *sql.Selector)) {
-	lq.predicates = append(lq.predicates, pred)
+func (q *LicenseQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the LicenseQuery builder.
-func (lq *LicenseQuery) Filter() *LicenseFilter {
-	return &LicenseFilter{config: lq.config, predicateAdder: lq}
+func (q *LicenseQuery) Filter() *LicenseFilter {
+	return &LicenseFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1945,13 +1945,13 @@ func (f *LicenseFilter) WhereUpdateTime(p entql.TimeP) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (nq *NodeQuery) addPredicate(pred func(s *sql.Selector)) {
-	nq.predicates = append(nq.predicates, pred)
+func (q *NodeQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the NodeQuery builder.
-func (nq *NodeQuery) Filter() *NodeFilter {
-	return &NodeFilter{config: nq.config, predicateAdder: nq}
+func (q *NodeQuery) Filter() *NodeFilter {
+	return &NodeFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -2023,13 +2023,13 @@ func (f *NodeFilter) WhereHasNextWith(preds ...predicate.Node) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (pq *PCQuery) addPredicate(pred func(s *sql.Selector)) {
-	pq.predicates = append(pq.predicates, pred)
+func (q *PCQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the PCQuery builder.
-func (pq *PCQuery) Filter() *PCFilter {
-	return &PCFilter{config: pq.config, predicateAdder: pq}
+func (q *PCQuery) Filter() *PCFilter {
+	return &PCFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -2063,13 +2063,13 @@ func (f *PCFilter) WhereID(p entql.IntP) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (pq *PetQuery) addPredicate(pred func(s *sql.Selector)) {
-	pq.predicates = append(pq.predicates, pred)
+func (q *PetQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the PetQuery builder.
-func (pq *PetQuery) Filter() *PetFilter {
-	return &PetFilter{config: pq.config, predicateAdder: pq}
+func (q *PetQuery) Filter() *PetFilter {
+	return &PetFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -2161,13 +2161,13 @@ func (f *PetFilter) WhereHasOwnerWith(preds ...predicate.User) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (sq *SpecQuery) addPredicate(pred func(s *sql.Selector)) {
-	sq.predicates = append(sq.predicates, pred)
+func (q *SpecQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the SpecQuery builder.
-func (sq *SpecQuery) Filter() *SpecFilter {
-	return &SpecFilter{config: sq.config, predicateAdder: sq}
+func (q *SpecQuery) Filter() *SpecFilter {
+	return &SpecFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -2215,13 +2215,13 @@ func (f *SpecFilter) WhereHasCardWith(preds ...predicate.Card) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (tq *TaskQuery) addPredicate(pred func(s *sql.Selector)) {
-	tq.predicates = append(tq.predicates, pred)
+func (q *TaskQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the TaskQuery builder.
-func (tq *TaskQuery) Filter() *TaskFilter {
-	return &TaskFilter{config: tq.config, predicateAdder: tq}
+func (q *TaskQuery) Filter() *TaskFilter {
+	return &TaskFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -2295,13 +2295,13 @@ func (f *TaskFilter) WhereOp(p entql.StringP) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (uq *UserQuery) addPredicate(pred func(s *sql.Selector)) {
-	uq.predicates = append(uq.predicates, pred)
+func (q *UserQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the UserQuery builder.
-func (uq *UserQuery) Filter() *UserFilter {
-	return &UserFilter{config: uq.config, predicateAdder: uq}
+func (q *UserQuery) Filter() *UserFilter {
+	return &UserFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.

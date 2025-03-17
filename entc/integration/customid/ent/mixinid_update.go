@@ -26,52 +26,52 @@ type MixinIDUpdate struct {
 }
 
 // Where appends a list predicates to the MixinIDUpdate builder.
-func (miu *MixinIDUpdate) Where(ps ...predicate.MixinID) *MixinIDUpdate {
-	miu.mutation.Where(ps...)
-	return miu
+func (u *MixinIDUpdate) Where(ps ...predicate.MixinID) *MixinIDUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetSomeField sets the "some_field" field.
-func (miu *MixinIDUpdate) SetSomeField(s string) *MixinIDUpdate {
-	miu.mutation.SetSomeField(s)
-	return miu
+func (m *MixinIDUpdate) SetSomeField(v string) *MixinIDUpdate {
+	m.mutation.SetSomeField(v)
+	return m
 }
 
 // SetNillableSomeField sets the "some_field" field if the given value is not nil.
-func (miu *MixinIDUpdate) SetNillableSomeField(s *string) *MixinIDUpdate {
-	if s != nil {
-		miu.SetSomeField(*s)
+func (m *MixinIDUpdate) SetNillableSomeField(v *string) *MixinIDUpdate {
+	if v != nil {
+		m.SetSomeField(*v)
 	}
-	return miu
+	return m
 }
 
 // SetMixinField sets the "mixin_field" field.
-func (miu *MixinIDUpdate) SetMixinField(s string) *MixinIDUpdate {
-	miu.mutation.SetMixinField(s)
-	return miu
+func (m *MixinIDUpdate) SetMixinField(v string) *MixinIDUpdate {
+	m.mutation.SetMixinField(v)
+	return m
 }
 
 // SetNillableMixinField sets the "mixin_field" field if the given value is not nil.
-func (miu *MixinIDUpdate) SetNillableMixinField(s *string) *MixinIDUpdate {
-	if s != nil {
-		miu.SetMixinField(*s)
+func (m *MixinIDUpdate) SetNillableMixinField(v *string) *MixinIDUpdate {
+	if v != nil {
+		m.SetMixinField(*v)
 	}
-	return miu
+	return m
 }
 
 // Mutation returns the MixinIDMutation object of the builder.
-func (miu *MixinIDUpdate) Mutation() *MixinIDMutation {
-	return miu.mutation
+func (m *MixinIDUpdate) Mutation() *MixinIDMutation {
+	return m.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (miu *MixinIDUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, miu.sqlSave, miu.mutation, miu.hooks)
+func (u *MixinIDUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (miu *MixinIDUpdate) SaveX(ctx context.Context) int {
-	affected, err := miu.Save(ctx)
+func (u *MixinIDUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -79,34 +79,34 @@ func (miu *MixinIDUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (miu *MixinIDUpdate) Exec(ctx context.Context) error {
-	_, err := miu.Save(ctx)
+func (u *MixinIDUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (miu *MixinIDUpdate) ExecX(ctx context.Context) {
-	if err := miu.Exec(ctx); err != nil {
+func (u *MixinIDUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (miu *MixinIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (u *MixinIDUpdate) sqlSave(ctx context.Context) (_n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(mixinid.Table, mixinid.Columns, sqlgraph.NewFieldSpec(mixinid.FieldID, field.TypeUUID))
-	if ps := miu.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := miu.mutation.SomeField(); ok {
+	if value, ok := u.mutation.SomeField(); ok {
 		_spec.SetField(mixinid.FieldSomeField, field.TypeString, value)
 	}
-	if value, ok := miu.mutation.MixinField(); ok {
+	if value, ok := u.mutation.MixinField(); ok {
 		_spec.SetField(mixinid.FieldMixinField, field.TypeString, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, miu.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{mixinid.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -114,8 +114,8 @@ func (miu *MixinIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	miu.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // MixinIDUpdateOne is the builder for updating a single MixinID entity.
@@ -127,59 +127,59 @@ type MixinIDUpdateOne struct {
 }
 
 // SetSomeField sets the "some_field" field.
-func (miuo *MixinIDUpdateOne) SetSomeField(s string) *MixinIDUpdateOne {
-	miuo.mutation.SetSomeField(s)
-	return miuo
+func (m *MixinIDUpdateOne) SetSomeField(v string) *MixinIDUpdateOne {
+	m.mutation.SetSomeField(v)
+	return m
 }
 
 // SetNillableSomeField sets the "some_field" field if the given value is not nil.
-func (miuo *MixinIDUpdateOne) SetNillableSomeField(s *string) *MixinIDUpdateOne {
-	if s != nil {
-		miuo.SetSomeField(*s)
+func (m *MixinIDUpdateOne) SetNillableSomeField(v *string) *MixinIDUpdateOne {
+	if v != nil {
+		m.SetSomeField(*v)
 	}
-	return miuo
+	return m
 }
 
 // SetMixinField sets the "mixin_field" field.
-func (miuo *MixinIDUpdateOne) SetMixinField(s string) *MixinIDUpdateOne {
-	miuo.mutation.SetMixinField(s)
-	return miuo
+func (m *MixinIDUpdateOne) SetMixinField(v string) *MixinIDUpdateOne {
+	m.mutation.SetMixinField(v)
+	return m
 }
 
 // SetNillableMixinField sets the "mixin_field" field if the given value is not nil.
-func (miuo *MixinIDUpdateOne) SetNillableMixinField(s *string) *MixinIDUpdateOne {
-	if s != nil {
-		miuo.SetMixinField(*s)
+func (m *MixinIDUpdateOne) SetNillableMixinField(v *string) *MixinIDUpdateOne {
+	if v != nil {
+		m.SetMixinField(*v)
 	}
-	return miuo
+	return m
 }
 
 // Mutation returns the MixinIDMutation object of the builder.
-func (miuo *MixinIDUpdateOne) Mutation() *MixinIDMutation {
-	return miuo.mutation
+func (m *MixinIDUpdateOne) Mutation() *MixinIDMutation {
+	return m.mutation
 }
 
 // Where appends a list predicates to the MixinIDUpdate builder.
-func (miuo *MixinIDUpdateOne) Where(ps ...predicate.MixinID) *MixinIDUpdateOne {
-	miuo.mutation.Where(ps...)
-	return miuo
+func (u *MixinIDUpdateOne) Where(ps ...predicate.MixinID) *MixinIDUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (miuo *MixinIDUpdateOne) Select(field string, fields ...string) *MixinIDUpdateOne {
-	miuo.fields = append([]string{field}, fields...)
-	return miuo
+func (u *MixinIDUpdateOne) Select(field string, fields ...string) *MixinIDUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated MixinID entity.
-func (miuo *MixinIDUpdateOne) Save(ctx context.Context) (*MixinID, error) {
-	return withHooks(ctx, miuo.sqlSave, miuo.mutation, miuo.hooks)
+func (u *MixinIDUpdateOne) Save(ctx context.Context) (*MixinID, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (miuo *MixinIDUpdateOne) SaveX(ctx context.Context) *MixinID {
-	node, err := miuo.Save(ctx)
+func (u *MixinIDUpdateOne) SaveX(ctx context.Context) *MixinID {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -187,26 +187,26 @@ func (miuo *MixinIDUpdateOne) SaveX(ctx context.Context) *MixinID {
 }
 
 // Exec executes the query on the entity.
-func (miuo *MixinIDUpdateOne) Exec(ctx context.Context) error {
-	_, err := miuo.Save(ctx)
+func (u *MixinIDUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (miuo *MixinIDUpdateOne) ExecX(ctx context.Context) {
-	if err := miuo.Exec(ctx); err != nil {
+func (u *MixinIDUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (miuo *MixinIDUpdateOne) sqlSave(ctx context.Context) (_node *MixinID, err error) {
+func (u *MixinIDUpdateOne) sqlSave(ctx context.Context) (_n *MixinID, err error) {
 	_spec := sqlgraph.NewUpdateSpec(mixinid.Table, mixinid.Columns, sqlgraph.NewFieldSpec(mixinid.FieldID, field.TypeUUID))
-	id, ok := miuo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "MixinID.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := miuo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, mixinid.FieldID)
 		for _, f := range fields {
@@ -218,23 +218,23 @@ func (miuo *MixinIDUpdateOne) sqlSave(ctx context.Context) (_node *MixinID, err 
 			}
 		}
 	}
-	if ps := miuo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := miuo.mutation.SomeField(); ok {
+	if value, ok := u.mutation.SomeField(); ok {
 		_spec.SetField(mixinid.FieldSomeField, field.TypeString, value)
 	}
-	if value, ok := miuo.mutation.MixinField(); ok {
+	if value, ok := u.mutation.MixinField(); ok {
 		_spec.SetField(mixinid.FieldMixinField, field.TypeString, value)
 	}
-	_node = &MixinID{config: miuo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, miuo.driver, _spec); err != nil {
+	_n = &MixinID{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{mixinid.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -242,6 +242,6 @@ func (miuo *MixinIDUpdateOne) sqlSave(ctx context.Context) (_node *MixinID, err 
 		}
 		return nil, err
 	}
-	miuo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

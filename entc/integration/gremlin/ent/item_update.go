@@ -28,44 +28,44 @@ type ItemUpdate struct {
 }
 
 // Where appends a list predicates to the ItemUpdate builder.
-func (iu *ItemUpdate) Where(ps ...predicate.Item) *ItemUpdate {
-	iu.mutation.Where(ps...)
-	return iu
+func (u *ItemUpdate) Where(ps ...predicate.Item) *ItemUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetText sets the "text" field.
-func (iu *ItemUpdate) SetText(s string) *ItemUpdate {
-	iu.mutation.SetText(s)
-	return iu
+func (m *ItemUpdate) SetText(v string) *ItemUpdate {
+	m.mutation.SetText(v)
+	return m
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (iu *ItemUpdate) SetNillableText(s *string) *ItemUpdate {
-	if s != nil {
-		iu.SetText(*s)
+func (m *ItemUpdate) SetNillableText(v *string) *ItemUpdate {
+	if v != nil {
+		m.SetText(*v)
 	}
-	return iu
+	return m
 }
 
 // ClearText clears the value of the "text" field.
-func (iu *ItemUpdate) ClearText() *ItemUpdate {
-	iu.mutation.ClearText()
-	return iu
+func (m *ItemUpdate) ClearText() *ItemUpdate {
+	m.mutation.ClearText()
+	return m
 }
 
 // Mutation returns the ItemMutation object of the builder.
-func (iu *ItemUpdate) Mutation() *ItemMutation {
-	return iu.mutation
+func (m *ItemUpdate) Mutation() *ItemMutation {
+	return m.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (iu *ItemUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, iu.gremlinSave, iu.mutation, iu.hooks)
+func (u *ItemUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.gremlinSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (iu *ItemUpdate) SaveX(ctx context.Context) int {
-	affected, err := iu.Save(ctx)
+func (u *ItemUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -73,21 +73,21 @@ func (iu *ItemUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (iu *ItemUpdate) Exec(ctx context.Context) error {
-	_, err := iu.Save(ctx)
+func (u *ItemUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (iu *ItemUpdate) ExecX(ctx context.Context) {
-	if err := iu.Exec(ctx); err != nil {
+func (u *ItemUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (iu *ItemUpdate) check() error {
-	if v, ok := iu.mutation.Text(); ok {
+func (u *ItemUpdate) check() error {
+	if v, ok := u.mutation.Text(); ok {
 		if err := item.TextValidator(v); err != nil {
 			return &ValidationError{Name: "text", err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
 		}
@@ -95,30 +95,30 @@ func (iu *ItemUpdate) check() error {
 	return nil
 }
 
-func (iu *ItemUpdate) gremlinSave(ctx context.Context) (int, error) {
-	if err := iu.check(); err != nil {
+func (u *ItemUpdate) gremlinSave(ctx context.Context) (int, error) {
+	if err := u.check(); err != nil {
 		return 0, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := iu.gremlin().Query()
-	if err := iu.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := u.gremlin().Query()
+	if err := u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return 0, err
 	}
-	iu.mutation.done = true
+	u.mutation.done = true
 	return res.ReadInt()
 }
 
-func (iu *ItemUpdate) gremlin() *dsl.Traversal {
+func (u *ItemUpdate) gremlin() *dsl.Traversal {
 	type constraint struct {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
 	constraints := make([]*constraint, 0, 1)
 	v := g.V().HasLabel(item.Label)
-	for _, p := range iu.mutation.predicates {
+	for _, p := range u.mutation.predicates {
 		p(v)
 	}
 	var (
@@ -127,7 +127,7 @@ func (iu *ItemUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value, ok := iu.mutation.Text(); ok {
+	if value, ok := u.mutation.Text(); ok {
 		constraints = append(constraints, &constraint{
 			pred: g.V().Has(item.Label, item.FieldText, value).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(item.Label, item.FieldText, value)),
@@ -135,7 +135,7 @@ func (iu *ItemUpdate) gremlin() *dsl.Traversal {
 		v.Property(dsl.Single, item.FieldText, value)
 	}
 	var properties []any
-	if iu.mutation.TextCleared() {
+	if u.mutation.TextCleared() {
 		properties = append(properties, item.FieldText)
 	}
 	if len(properties) > 0 {
@@ -165,51 +165,51 @@ type ItemUpdateOne struct {
 }
 
 // SetText sets the "text" field.
-func (iuo *ItemUpdateOne) SetText(s string) *ItemUpdateOne {
-	iuo.mutation.SetText(s)
-	return iuo
+func (m *ItemUpdateOne) SetText(v string) *ItemUpdateOne {
+	m.mutation.SetText(v)
+	return m
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (iuo *ItemUpdateOne) SetNillableText(s *string) *ItemUpdateOne {
-	if s != nil {
-		iuo.SetText(*s)
+func (m *ItemUpdateOne) SetNillableText(v *string) *ItemUpdateOne {
+	if v != nil {
+		m.SetText(*v)
 	}
-	return iuo
+	return m
 }
 
 // ClearText clears the value of the "text" field.
-func (iuo *ItemUpdateOne) ClearText() *ItemUpdateOne {
-	iuo.mutation.ClearText()
-	return iuo
+func (m *ItemUpdateOne) ClearText() *ItemUpdateOne {
+	m.mutation.ClearText()
+	return m
 }
 
 // Mutation returns the ItemMutation object of the builder.
-func (iuo *ItemUpdateOne) Mutation() *ItemMutation {
-	return iuo.mutation
+func (m *ItemUpdateOne) Mutation() *ItemMutation {
+	return m.mutation
 }
 
 // Where appends a list predicates to the ItemUpdate builder.
-func (iuo *ItemUpdateOne) Where(ps ...predicate.Item) *ItemUpdateOne {
-	iuo.mutation.Where(ps...)
-	return iuo
+func (u *ItemUpdateOne) Where(ps ...predicate.Item) *ItemUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (iuo *ItemUpdateOne) Select(field string, fields ...string) *ItemUpdateOne {
-	iuo.fields = append([]string{field}, fields...)
-	return iuo
+func (u *ItemUpdateOne) Select(field string, fields ...string) *ItemUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated Item entity.
-func (iuo *ItemUpdateOne) Save(ctx context.Context) (*Item, error) {
-	return withHooks(ctx, iuo.gremlinSave, iuo.mutation, iuo.hooks)
+func (u *ItemUpdateOne) Save(ctx context.Context) (*Item, error) {
+	return withHooks(ctx, u.gremlinSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (iuo *ItemUpdateOne) SaveX(ctx context.Context) *Item {
-	node, err := iuo.Save(ctx)
+func (u *ItemUpdateOne) SaveX(ctx context.Context) *Item {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -217,21 +217,21 @@ func (iuo *ItemUpdateOne) SaveX(ctx context.Context) *Item {
 }
 
 // Exec executes the query on the entity.
-func (iuo *ItemUpdateOne) Exec(ctx context.Context) error {
-	_, err := iuo.Save(ctx)
+func (u *ItemUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (iuo *ItemUpdateOne) ExecX(ctx context.Context) {
-	if err := iuo.Exec(ctx); err != nil {
+func (u *ItemUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (iuo *ItemUpdateOne) check() error {
-	if v, ok := iuo.mutation.Text(); ok {
+func (u *ItemUpdateOne) check() error {
+	if v, ok := u.mutation.Text(); ok {
 		if err := item.TextValidator(v); err != nil {
 			return &ValidationError{Name: "text", err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
 		}
@@ -239,31 +239,31 @@ func (iuo *ItemUpdateOne) check() error {
 	return nil
 }
 
-func (iuo *ItemUpdateOne) gremlinSave(ctx context.Context) (*Item, error) {
-	if err := iuo.check(); err != nil {
+func (u *ItemUpdateOne) gremlinSave(ctx context.Context) (*Item, error) {
+	if err := u.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	id, ok := iuo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Item.id" for update`)}
 	}
-	query, bindings := iuo.gremlin(id).Query()
-	if err := iuo.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := u.gremlin(id).Query()
+	if err := u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	iuo.mutation.done = true
-	i := &Item{config: iuo.config}
-	if err := i.FromResponse(res); err != nil {
+	u.mutation.done = true
+	m := &Item{config: u.config}
+	if err := m.FromResponse(res); err != nil {
 		return nil, err
 	}
-	return i, nil
+	return m, nil
 }
 
-func (iuo *ItemUpdateOne) gremlin(id string) *dsl.Traversal {
+func (u *ItemUpdateOne) gremlin(id string) *dsl.Traversal {
 	type constraint struct {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
@@ -276,7 +276,7 @@ func (iuo *ItemUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value, ok := iuo.mutation.Text(); ok {
+	if value, ok := u.mutation.Text(); ok {
 		constraints = append(constraints, &constraint{
 			pred: g.V().Has(item.Label, item.FieldText, value).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(item.Label, item.FieldText, value)),
@@ -284,16 +284,16 @@ func (iuo *ItemUpdateOne) gremlin(id string) *dsl.Traversal {
 		v.Property(dsl.Single, item.FieldText, value)
 	}
 	var properties []any
-	if iuo.mutation.TextCleared() {
+	if u.mutation.TextCleared() {
 		properties = append(properties, item.FieldText)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
 	}
-	if len(iuo.fields) > 0 {
-		fields := make([]any, 0, len(iuo.fields)+1)
+	if len(u.fields) > 0 {
+		fields := make([]any, 0, len(u.fields)+1)
 		fields = append(fields, true)
-		for _, f := range iuo.fields {
+		for _, f := range u.fields {
 			fields = append(fields, f)
 		}
 		v.ValueMap(fields...)

@@ -43,28 +43,28 @@ func (i *Item) FromResponse(res *gremlin.Response) error {
 // Update returns a builder for updating this Item.
 // Note that you need to call Item.Unwrap() before calling this method if this Item
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (i *Item) Update() *ItemUpdateOne {
-	return NewItemClient(i.config).UpdateOne(i)
+func (m *Item) Update() *ItemUpdateOne {
+	return NewItemClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Item entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (i *Item) Unwrap() *Item {
-	_tx, ok := i.config.driver.(*txDriver)
+func (m *Item) Unwrap() *Item {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Item is not a transactional entity")
 	}
-	i.config.driver = _tx.drv
-	return i
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (i *Item) String() string {
+func (m *Item) String() string {
 	var builder strings.Builder
 	builder.WriteString("Item(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", i.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("text=")
-	builder.WriteString(i.Text)
+	builder.WriteString(m.Text)
 	builder.WriteByte(')')
 	return builder.String()
 }

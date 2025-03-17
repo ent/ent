@@ -30,93 +30,93 @@ type GroupCreate struct {
 }
 
 // SetName sets the "name" field.
-func (gc *GroupCreate) SetName(s string) *GroupCreate {
-	gc.mutation.SetName(s)
-	return gc
+func (m *GroupCreate) SetName(v string) *GroupCreate {
+	m.mutation.SetName(v)
+	return m
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (gc *GroupCreate) SetNillableName(s *string) *GroupCreate {
-	if s != nil {
-		gc.SetName(*s)
+func (m *GroupCreate) SetNillableName(v *string) *GroupCreate {
+	if v != nil {
+		m.SetName(*v)
 	}
-	return gc
+	return m
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
-func (gc *GroupCreate) AddUserIDs(ids ...int) *GroupCreate {
-	gc.mutation.AddUserIDs(ids...)
-	return gc
+func (m *GroupCreate) AddUserIDs(ids ...int) *GroupCreate {
+	m.mutation.AddUserIDs(ids...)
+	return m
 }
 
 // AddUsers adds the "users" edges to the User entity.
-func (gc *GroupCreate) AddUsers(u ...*User) *GroupCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (m *GroupCreate) AddUsers(v ...*User) *GroupCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return gc.AddUserIDs(ids...)
+	return m.AddUserIDs(ids...)
 }
 
 // AddTagIDs adds the "tags" edge to the Tag entity by IDs.
-func (gc *GroupCreate) AddTagIDs(ids ...int) *GroupCreate {
-	gc.mutation.AddTagIDs(ids...)
-	return gc
+func (m *GroupCreate) AddTagIDs(ids ...int) *GroupCreate {
+	m.mutation.AddTagIDs(ids...)
+	return m
 }
 
 // AddTags adds the "tags" edges to the Tag entity.
-func (gc *GroupCreate) AddTags(t ...*Tag) *GroupCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (m *GroupCreate) AddTags(v ...*Tag) *GroupCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return gc.AddTagIDs(ids...)
+	return m.AddTagIDs(ids...)
 }
 
 // AddJoinedUserIDs adds the "joined_users" edge to the UserGroup entity by IDs.
-func (gc *GroupCreate) AddJoinedUserIDs(ids ...int) *GroupCreate {
-	gc.mutation.AddJoinedUserIDs(ids...)
-	return gc
+func (m *GroupCreate) AddJoinedUserIDs(ids ...int) *GroupCreate {
+	m.mutation.AddJoinedUserIDs(ids...)
+	return m
 }
 
 // AddJoinedUsers adds the "joined_users" edges to the UserGroup entity.
-func (gc *GroupCreate) AddJoinedUsers(u ...*UserGroup) *GroupCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (m *GroupCreate) AddJoinedUsers(v ...*UserGroup) *GroupCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return gc.AddJoinedUserIDs(ids...)
+	return m.AddJoinedUserIDs(ids...)
 }
 
 // AddGroupTagIDs adds the "group_tags" edge to the GroupTag entity by IDs.
-func (gc *GroupCreate) AddGroupTagIDs(ids ...int) *GroupCreate {
-	gc.mutation.AddGroupTagIDs(ids...)
-	return gc
+func (m *GroupCreate) AddGroupTagIDs(ids ...int) *GroupCreate {
+	m.mutation.AddGroupTagIDs(ids...)
+	return m
 }
 
 // AddGroupTags adds the "group_tags" edges to the GroupTag entity.
-func (gc *GroupCreate) AddGroupTags(g ...*GroupTag) *GroupCreate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (m *GroupCreate) AddGroupTags(v ...*GroupTag) *GroupCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return gc.AddGroupTagIDs(ids...)
+	return m.AddGroupTagIDs(ids...)
 }
 
 // Mutation returns the GroupMutation object of the builder.
-func (gc *GroupCreate) Mutation() *GroupMutation {
-	return gc.mutation
+func (m *GroupCreate) Mutation() *GroupMutation {
+	return m.mutation
 }
 
 // Save creates the Group in the database.
-func (gc *GroupCreate) Save(ctx context.Context) (*Group, error) {
-	gc.defaults()
-	return withHooks(ctx, gc.sqlSave, gc.mutation, gc.hooks)
+func (c *GroupCreate) Save(ctx context.Context) (*Group, error) {
+	c.defaults()
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
-	v, err := gc.Save(ctx)
+func (c *GroupCreate) SaveX(ctx context.Context) *Group {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -124,40 +124,40 @@ func (gc *GroupCreate) SaveX(ctx context.Context) *Group {
 }
 
 // Exec executes the query.
-func (gc *GroupCreate) Exec(ctx context.Context) error {
-	_, err := gc.Save(ctx)
+func (c *GroupCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gc *GroupCreate) ExecX(ctx context.Context) {
-	if err := gc.Exec(ctx); err != nil {
+func (c *GroupCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (gc *GroupCreate) defaults() {
-	if _, ok := gc.mutation.Name(); !ok {
+func (c *GroupCreate) defaults() {
+	if _, ok := c.mutation.Name(); !ok {
 		v := group.DefaultName
-		gc.mutation.SetName(v)
+		c.mutation.SetName(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (gc *GroupCreate) check() error {
-	if _, ok := gc.mutation.Name(); !ok {
+func (c *GroupCreate) check() error {
+	if _, ok := c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Group.name"`)}
 	}
 	return nil
 }
 
-func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
-	if err := gc.check(); err != nil {
+func (c *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := gc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, gc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -165,22 +165,22 @@ func (gc *GroupCreate) sqlSave(ctx context.Context) (*Group, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	gc.mutation.id = &_node.ID
-	gc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
+func (c *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Group{config: gc.config}
+		_node = &Group{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(group.Table, sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt))
 	)
-	_spec.OnConflict = gc.conflict
-	if value, ok := gc.mutation.Name(); ok {
+	_spec.OnConflict = c.conflict
+	if value, ok := c.mutation.Name(); ok {
 		_spec.SetField(group.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if nodes := gc.mutation.UsersIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.UsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -194,13 +194,13 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &UserGroupCreate{config: gc.config, mutation: newUserGroupMutation(gc.config, OpCreate)}
+		createE := &UserGroupCreate{config: c.config, mutation: newUserGroupMutation(c.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := gc.mutation.TagsIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.TagsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -216,7 +216,7 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := gc.mutation.JoinedUsersIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.JoinedUsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -232,7 +232,7 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := gc.mutation.GroupTagsIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.GroupTagsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -267,11 +267,9 @@ func (gc *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 //			SetName(v+v).
 //		}).
 //		Exec(ctx)
-func (gc *GroupCreate) OnConflict(opts ...sql.ConflictOption) *GroupUpsertOne {
-	gc.conflict = opts
-	return &GroupUpsertOne{
-		create: gc,
-	}
+func (c *GroupCreate) OnConflict(opts ...sql.ConflictOption) *GroupUpsertOne {
+	c.conflict = opts
+	return &GroupUpsertOne{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -280,11 +278,9 @@ func (gc *GroupCreate) OnConflict(opts ...sql.ConflictOption) *GroupUpsertOne {
 //	client.Group.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (gc *GroupCreate) OnConflictColumns(columns ...string) *GroupUpsertOne {
-	gc.conflict = append(gc.conflict, sql.ConflictColumns(columns...))
-	return &GroupUpsertOne{
-		create: gc,
-	}
+func (c *GroupCreate) OnConflictColumns(columns ...string) *GroupUpsertOne {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &GroupUpsertOne{create: c}
 }
 
 type (
@@ -408,16 +404,16 @@ type GroupCreateBulk struct {
 }
 
 // Save creates the Group entities in the database.
-func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
-	if gcb.err != nil {
-		return nil, gcb.err
+func (c *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(gcb.builders))
-	nodes := make([]*Group, len(gcb.builders))
-	mutators := make([]Mutator, len(gcb.builders))
-	for i := range gcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Group, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := gcb.builders[i]
+			builder := c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*GroupMutation)
@@ -431,12 +427,12 @@ func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, gcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = gcb.conflict
+					spec.OnConflict = c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, gcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -460,7 +456,7 @@ func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, gcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -468,8 +464,8 @@ func (gcb *GroupCreateBulk) Save(ctx context.Context) ([]*Group, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (gcb *GroupCreateBulk) SaveX(ctx context.Context) []*Group {
-	v, err := gcb.Save(ctx)
+func (c *GroupCreateBulk) SaveX(ctx context.Context) []*Group {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -477,14 +473,14 @@ func (gcb *GroupCreateBulk) SaveX(ctx context.Context) []*Group {
 }
 
 // Exec executes the query.
-func (gcb *GroupCreateBulk) Exec(ctx context.Context) error {
-	_, err := gcb.Save(ctx)
+func (c *GroupCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gcb *GroupCreateBulk) ExecX(ctx context.Context) {
-	if err := gcb.Exec(ctx); err != nil {
+func (c *GroupCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -504,11 +500,9 @@ func (gcb *GroupCreateBulk) ExecX(ctx context.Context) {
 //			SetName(v+v).
 //		}).
 //		Exec(ctx)
-func (gcb *GroupCreateBulk) OnConflict(opts ...sql.ConflictOption) *GroupUpsertBulk {
-	gcb.conflict = opts
-	return &GroupUpsertBulk{
-		create: gcb,
-	}
+func (c *GroupCreateBulk) OnConflict(opts ...sql.ConflictOption) *GroupUpsertBulk {
+	c.conflict = opts
+	return &GroupUpsertBulk{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -517,11 +511,9 @@ func (gcb *GroupCreateBulk) OnConflict(opts ...sql.ConflictOption) *GroupUpsertB
 //	client.Group.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (gcb *GroupCreateBulk) OnConflictColumns(columns ...string) *GroupUpsertBulk {
-	gcb.conflict = append(gcb.conflict, sql.ConflictColumns(columns...))
-	return &GroupUpsertBulk{
-		create: gcb,
-	}
+func (c *GroupCreateBulk) OnConflictColumns(columns ...string) *GroupUpsertBulk {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &GroupUpsertBulk{create: c}
 }
 
 // GroupUpsertBulk is the builder for "upsert"-ing

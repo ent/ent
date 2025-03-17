@@ -28,74 +28,74 @@ type GroupTagUpdate struct {
 }
 
 // Where appends a list predicates to the GroupTagUpdate builder.
-func (gtu *GroupTagUpdate) Where(ps ...predicate.GroupTag) *GroupTagUpdate {
-	gtu.mutation.Where(ps...)
-	return gtu
+func (u *GroupTagUpdate) Where(ps ...predicate.GroupTag) *GroupTagUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetTagID sets the "tag_id" field.
-func (gtu *GroupTagUpdate) SetTagID(i int) *GroupTagUpdate {
-	gtu.mutation.SetTagID(i)
-	return gtu
+func (m *GroupTagUpdate) SetTagID(v int) *GroupTagUpdate {
+	m.mutation.SetTagID(v)
+	return m
 }
 
 // SetNillableTagID sets the "tag_id" field if the given value is not nil.
-func (gtu *GroupTagUpdate) SetNillableTagID(i *int) *GroupTagUpdate {
-	if i != nil {
-		gtu.SetTagID(*i)
+func (m *GroupTagUpdate) SetNillableTagID(v *int) *GroupTagUpdate {
+	if v != nil {
+		m.SetTagID(*v)
 	}
-	return gtu
+	return m
 }
 
 // SetGroupID sets the "group_id" field.
-func (gtu *GroupTagUpdate) SetGroupID(i int) *GroupTagUpdate {
-	gtu.mutation.SetGroupID(i)
-	return gtu
+func (m *GroupTagUpdate) SetGroupID(v int) *GroupTagUpdate {
+	m.mutation.SetGroupID(v)
+	return m
 }
 
 // SetNillableGroupID sets the "group_id" field if the given value is not nil.
-func (gtu *GroupTagUpdate) SetNillableGroupID(i *int) *GroupTagUpdate {
-	if i != nil {
-		gtu.SetGroupID(*i)
+func (m *GroupTagUpdate) SetNillableGroupID(v *int) *GroupTagUpdate {
+	if v != nil {
+		m.SetGroupID(*v)
 	}
-	return gtu
+	return m
 }
 
 // SetTag sets the "tag" edge to the Tag entity.
-func (gtu *GroupTagUpdate) SetTag(t *Tag) *GroupTagUpdate {
-	return gtu.SetTagID(t.ID)
+func (m *GroupTagUpdate) SetTag(v *Tag) *GroupTagUpdate {
+	return m.SetTagID(v.ID)
 }
 
 // SetGroup sets the "group" edge to the Group entity.
-func (gtu *GroupTagUpdate) SetGroup(g *Group) *GroupTagUpdate {
-	return gtu.SetGroupID(g.ID)
+func (m *GroupTagUpdate) SetGroup(v *Group) *GroupTagUpdate {
+	return m.SetGroupID(v.ID)
 }
 
 // Mutation returns the GroupTagMutation object of the builder.
-func (gtu *GroupTagUpdate) Mutation() *GroupTagMutation {
-	return gtu.mutation
+func (m *GroupTagUpdate) Mutation() *GroupTagMutation {
+	return m.mutation
 }
 
 // ClearTag clears the "tag" edge to the Tag entity.
-func (gtu *GroupTagUpdate) ClearTag() *GroupTagUpdate {
-	gtu.mutation.ClearTag()
-	return gtu
+func (u *GroupTagUpdate) ClearTag() *GroupTagUpdate {
+	u.mutation.ClearTag()
+	return u
 }
 
 // ClearGroup clears the "group" edge to the Group entity.
-func (gtu *GroupTagUpdate) ClearGroup() *GroupTagUpdate {
-	gtu.mutation.ClearGroup()
-	return gtu
+func (u *GroupTagUpdate) ClearGroup() *GroupTagUpdate {
+	u.mutation.ClearGroup()
+	return u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (gtu *GroupTagUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, gtu.sqlSave, gtu.mutation, gtu.hooks)
+func (u *GroupTagUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (gtu *GroupTagUpdate) SaveX(ctx context.Context) int {
-	affected, err := gtu.Save(ctx)
+func (u *GroupTagUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -103,42 +103,42 @@ func (gtu *GroupTagUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (gtu *GroupTagUpdate) Exec(ctx context.Context) error {
-	_, err := gtu.Save(ctx)
+func (u *GroupTagUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gtu *GroupTagUpdate) ExecX(ctx context.Context) {
-	if err := gtu.Exec(ctx); err != nil {
+func (u *GroupTagUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (gtu *GroupTagUpdate) check() error {
-	if gtu.mutation.TagCleared() && len(gtu.mutation.TagIDs()) > 0 {
+func (u *GroupTagUpdate) check() error {
+	if u.mutation.TagCleared() && len(u.mutation.TagIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "GroupTag.tag"`)
 	}
-	if gtu.mutation.GroupCleared() && len(gtu.mutation.GroupIDs()) > 0 {
+	if u.mutation.GroupCleared() && len(u.mutation.GroupIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "GroupTag.group"`)
 	}
 	return nil
 }
 
-func (gtu *GroupTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := gtu.check(); err != nil {
-		return n, err
+func (u *GroupTagUpdate) sqlSave(ctx context.Context) (_n int, err error) {
+	if err := u.check(); err != nil {
+		return _n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(grouptag.Table, grouptag.Columns, sqlgraph.NewFieldSpec(grouptag.FieldID, field.TypeInt))
-	if ps := gtu.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if gtu.mutation.TagCleared() {
+	if u.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -151,7 +151,7 @@ func (gtu *GroupTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gtu.mutation.TagIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -167,7 +167,7 @@ func (gtu *GroupTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if gtu.mutation.GroupCleared() {
+	if u.mutation.GroupCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -180,7 +180,7 @@ func (gtu *GroupTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gtu.mutation.GroupIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -196,7 +196,7 @@ func (gtu *GroupTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, gtu.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{grouptag.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -204,8 +204,8 @@ func (gtu *GroupTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	gtu.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // GroupTagUpdateOne is the builder for updating a single GroupTag entity.
@@ -217,81 +217,81 @@ type GroupTagUpdateOne struct {
 }
 
 // SetTagID sets the "tag_id" field.
-func (gtuo *GroupTagUpdateOne) SetTagID(i int) *GroupTagUpdateOne {
-	gtuo.mutation.SetTagID(i)
-	return gtuo
+func (m *GroupTagUpdateOne) SetTagID(v int) *GroupTagUpdateOne {
+	m.mutation.SetTagID(v)
+	return m
 }
 
 // SetNillableTagID sets the "tag_id" field if the given value is not nil.
-func (gtuo *GroupTagUpdateOne) SetNillableTagID(i *int) *GroupTagUpdateOne {
-	if i != nil {
-		gtuo.SetTagID(*i)
+func (m *GroupTagUpdateOne) SetNillableTagID(v *int) *GroupTagUpdateOne {
+	if v != nil {
+		m.SetTagID(*v)
 	}
-	return gtuo
+	return m
 }
 
 // SetGroupID sets the "group_id" field.
-func (gtuo *GroupTagUpdateOne) SetGroupID(i int) *GroupTagUpdateOne {
-	gtuo.mutation.SetGroupID(i)
-	return gtuo
+func (m *GroupTagUpdateOne) SetGroupID(v int) *GroupTagUpdateOne {
+	m.mutation.SetGroupID(v)
+	return m
 }
 
 // SetNillableGroupID sets the "group_id" field if the given value is not nil.
-func (gtuo *GroupTagUpdateOne) SetNillableGroupID(i *int) *GroupTagUpdateOne {
-	if i != nil {
-		gtuo.SetGroupID(*i)
+func (m *GroupTagUpdateOne) SetNillableGroupID(v *int) *GroupTagUpdateOne {
+	if v != nil {
+		m.SetGroupID(*v)
 	}
-	return gtuo
+	return m
 }
 
 // SetTag sets the "tag" edge to the Tag entity.
-func (gtuo *GroupTagUpdateOne) SetTag(t *Tag) *GroupTagUpdateOne {
-	return gtuo.SetTagID(t.ID)
+func (m *GroupTagUpdateOne) SetTag(v *Tag) *GroupTagUpdateOne {
+	return m.SetTagID(v.ID)
 }
 
 // SetGroup sets the "group" edge to the Group entity.
-func (gtuo *GroupTagUpdateOne) SetGroup(g *Group) *GroupTagUpdateOne {
-	return gtuo.SetGroupID(g.ID)
+func (m *GroupTagUpdateOne) SetGroup(v *Group) *GroupTagUpdateOne {
+	return m.SetGroupID(v.ID)
 }
 
 // Mutation returns the GroupTagMutation object of the builder.
-func (gtuo *GroupTagUpdateOne) Mutation() *GroupTagMutation {
-	return gtuo.mutation
+func (m *GroupTagUpdateOne) Mutation() *GroupTagMutation {
+	return m.mutation
 }
 
 // ClearTag clears the "tag" edge to the Tag entity.
-func (gtuo *GroupTagUpdateOne) ClearTag() *GroupTagUpdateOne {
-	gtuo.mutation.ClearTag()
-	return gtuo
+func (u *GroupTagUpdateOne) ClearTag() *GroupTagUpdateOne {
+	u.mutation.ClearTag()
+	return u
 }
 
 // ClearGroup clears the "group" edge to the Group entity.
-func (gtuo *GroupTagUpdateOne) ClearGroup() *GroupTagUpdateOne {
-	gtuo.mutation.ClearGroup()
-	return gtuo
+func (u *GroupTagUpdateOne) ClearGroup() *GroupTagUpdateOne {
+	u.mutation.ClearGroup()
+	return u
 }
 
 // Where appends a list predicates to the GroupTagUpdate builder.
-func (gtuo *GroupTagUpdateOne) Where(ps ...predicate.GroupTag) *GroupTagUpdateOne {
-	gtuo.mutation.Where(ps...)
-	return gtuo
+func (u *GroupTagUpdateOne) Where(ps ...predicate.GroupTag) *GroupTagUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (gtuo *GroupTagUpdateOne) Select(field string, fields ...string) *GroupTagUpdateOne {
-	gtuo.fields = append([]string{field}, fields...)
-	return gtuo
+func (u *GroupTagUpdateOne) Select(field string, fields ...string) *GroupTagUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated GroupTag entity.
-func (gtuo *GroupTagUpdateOne) Save(ctx context.Context) (*GroupTag, error) {
-	return withHooks(ctx, gtuo.sqlSave, gtuo.mutation, gtuo.hooks)
+func (u *GroupTagUpdateOne) Save(ctx context.Context) (*GroupTag, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (gtuo *GroupTagUpdateOne) SaveX(ctx context.Context) *GroupTag {
-	node, err := gtuo.Save(ctx)
+func (u *GroupTagUpdateOne) SaveX(ctx context.Context) *GroupTag {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -299,40 +299,40 @@ func (gtuo *GroupTagUpdateOne) SaveX(ctx context.Context) *GroupTag {
 }
 
 // Exec executes the query on the entity.
-func (gtuo *GroupTagUpdateOne) Exec(ctx context.Context) error {
-	_, err := gtuo.Save(ctx)
+func (u *GroupTagUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gtuo *GroupTagUpdateOne) ExecX(ctx context.Context) {
-	if err := gtuo.Exec(ctx); err != nil {
+func (u *GroupTagUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (gtuo *GroupTagUpdateOne) check() error {
-	if gtuo.mutation.TagCleared() && len(gtuo.mutation.TagIDs()) > 0 {
+func (u *GroupTagUpdateOne) check() error {
+	if u.mutation.TagCleared() && len(u.mutation.TagIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "GroupTag.tag"`)
 	}
-	if gtuo.mutation.GroupCleared() && len(gtuo.mutation.GroupIDs()) > 0 {
+	if u.mutation.GroupCleared() && len(u.mutation.GroupIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "GroupTag.group"`)
 	}
 	return nil
 }
 
-func (gtuo *GroupTagUpdateOne) sqlSave(ctx context.Context) (_node *GroupTag, err error) {
-	if err := gtuo.check(); err != nil {
-		return _node, err
+func (u *GroupTagUpdateOne) sqlSave(ctx context.Context) (_n *GroupTag, err error) {
+	if err := u.check(); err != nil {
+		return _n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(grouptag.Table, grouptag.Columns, sqlgraph.NewFieldSpec(grouptag.FieldID, field.TypeInt))
-	id, ok := gtuo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "GroupTag.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := gtuo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, grouptag.FieldID)
 		for _, f := range fields {
@@ -344,14 +344,14 @@ func (gtuo *GroupTagUpdateOne) sqlSave(ctx context.Context) (_node *GroupTag, er
 			}
 		}
 	}
-	if ps := gtuo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if gtuo.mutation.TagCleared() {
+	if u.mutation.TagCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -364,7 +364,7 @@ func (gtuo *GroupTagUpdateOne) sqlSave(ctx context.Context) (_node *GroupTag, er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gtuo.mutation.TagIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -380,7 +380,7 @@ func (gtuo *GroupTagUpdateOne) sqlSave(ctx context.Context) (_node *GroupTag, er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if gtuo.mutation.GroupCleared() {
+	if u.mutation.GroupCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -393,7 +393,7 @@ func (gtuo *GroupTagUpdateOne) sqlSave(ctx context.Context) (_node *GroupTag, er
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := gtuo.mutation.GroupIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -409,10 +409,10 @@ func (gtuo *GroupTagUpdateOne) sqlSave(ctx context.Context) (_node *GroupTag, er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &GroupTag{config: gtuo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, gtuo.driver, _spec); err != nil {
+	_n = &GroupTag{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{grouptag.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -420,6 +420,6 @@ func (gtuo *GroupTagUpdateOne) sqlSave(ctx context.Context) (_node *GroupTag, er
 		}
 		return nil, err
 	}
-	gtuo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

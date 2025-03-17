@@ -39,26 +39,26 @@ func (_pc *PC) FromResponse(res *gremlin.Response) error {
 // Update returns a builder for updating this PC.
 // Note that you need to call PC.Unwrap() before calling this method if this PC
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (_pc *PC) Update() *PCUpdateOne {
-	return NewPCClient(_pc.config).UpdateOne(_pc)
+func (m *PC) Update() *PCUpdateOne {
+	return NewPCClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the PC entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (_pc *PC) Unwrap() *PC {
-	_tx, ok := _pc.config.driver.(*txDriver)
+func (m *PC) Unwrap() *PC {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: PC is not a transactional entity")
 	}
-	_pc.config.driver = _tx.drv
-	return _pc
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (_pc *PC) String() string {
+func (m *PC) String() string {
 	var builder strings.Builder
 	builder.WriteString("PC(")
-	builder.WriteString(fmt.Sprintf("id=%v", _pc.ID))
+	builder.WriteString(fmt.Sprintf("id=%v", m.ID))
 	builder.WriteByte(')')
 	return builder.String()
 }

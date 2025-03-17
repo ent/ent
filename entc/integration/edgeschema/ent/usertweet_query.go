@@ -36,44 +36,44 @@ type UserTweetQuery struct {
 }
 
 // Where adds a new predicate for the UserTweetQuery builder.
-func (utq *UserTweetQuery) Where(ps ...predicate.UserTweet) *UserTweetQuery {
-	utq.predicates = append(utq.predicates, ps...)
-	return utq
+func (q *UserTweetQuery) Where(ps ...predicate.UserTweet) *UserTweetQuery {
+	q.predicates = append(q.predicates, ps...)
+	return q
 }
 
 // Limit the number of records to be returned by this query.
-func (utq *UserTweetQuery) Limit(limit int) *UserTweetQuery {
-	utq.ctx.Limit = &limit
-	return utq
+func (q *UserTweetQuery) Limit(limit int) *UserTweetQuery {
+	q.ctx.Limit = &limit
+	return q
 }
 
 // Offset to start from.
-func (utq *UserTweetQuery) Offset(offset int) *UserTweetQuery {
-	utq.ctx.Offset = &offset
-	return utq
+func (q *UserTweetQuery) Offset(offset int) *UserTweetQuery {
+	q.ctx.Offset = &offset
+	return q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (utq *UserTweetQuery) Unique(unique bool) *UserTweetQuery {
-	utq.ctx.Unique = &unique
-	return utq
+func (q *UserTweetQuery) Unique(unique bool) *UserTweetQuery {
+	q.ctx.Unique = &unique
+	return q
 }
 
 // Order specifies how the records should be ordered.
-func (utq *UserTweetQuery) Order(o ...usertweet.OrderOption) *UserTweetQuery {
-	utq.order = append(utq.order, o...)
-	return utq
+func (q *UserTweetQuery) Order(o ...usertweet.OrderOption) *UserTweetQuery {
+	q.order = append(q.order, o...)
+	return q
 }
 
 // QueryUser chains the current query on the "user" edge.
-func (utq *UserTweetQuery) QueryUser() *UserQuery {
-	query := (&UserClient{config: utq.config}).Query()
+func (q *UserTweetQuery) QueryUser() *UserQuery {
+	query := (&UserClient{config: q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := utq.prepareQuery(ctx); err != nil {
+		if err := q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := utq.sqlQuery(ctx)
+		selector := q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -82,20 +82,20 @@ func (utq *UserTweetQuery) QueryUser() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, usertweet.UserTable, usertweet.UserColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(utq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryTweet chains the current query on the "tweet" edge.
-func (utq *UserTweetQuery) QueryTweet() *TweetQuery {
-	query := (&TweetClient{config: utq.config}).Query()
+func (q *UserTweetQuery) QueryTweet() *TweetQuery {
+	query := (&TweetClient{config: q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := utq.prepareQuery(ctx); err != nil {
+		if err := q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := utq.sqlQuery(ctx)
+		selector := q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -104,7 +104,7 @@ func (utq *UserTweetQuery) QueryTweet() *TweetQuery {
 			sqlgraph.To(tweet.Table, tweet.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, usertweet.TweetTable, usertweet.TweetColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(utq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -112,8 +112,8 @@ func (utq *UserTweetQuery) QueryTweet() *TweetQuery {
 
 // First returns the first UserTweet entity from the query.
 // Returns a *NotFoundError when no UserTweet was found.
-func (utq *UserTweetQuery) First(ctx context.Context) (*UserTweet, error) {
-	nodes, err := utq.Limit(1).All(setContextOp(ctx, utq.ctx, ent.OpQueryFirst))
+func (q *UserTweetQuery) First(ctx context.Context) (*UserTweet, error) {
+	nodes, err := q.Limit(1).All(setContextOp(ctx, q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -124,8 +124,8 @@ func (utq *UserTweetQuery) First(ctx context.Context) (*UserTweet, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (utq *UserTweetQuery) FirstX(ctx context.Context) *UserTweet {
-	node, err := utq.First(ctx)
+func (q *UserTweetQuery) FirstX(ctx context.Context) *UserTweet {
+	node, err := q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -134,9 +134,9 @@ func (utq *UserTweetQuery) FirstX(ctx context.Context) *UserTweet {
 
 // FirstID returns the first UserTweet ID from the query.
 // Returns a *NotFoundError when no UserTweet ID was found.
-func (utq *UserTweetQuery) FirstID(ctx context.Context) (id int, err error) {
+func (q *UserTweetQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = utq.Limit(1).IDs(setContextOp(ctx, utq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = q.Limit(1).IDs(setContextOp(ctx, q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -147,8 +147,8 @@ func (utq *UserTweetQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (utq *UserTweetQuery) FirstIDX(ctx context.Context) int {
-	id, err := utq.FirstID(ctx)
+func (q *UserTweetQuery) FirstIDX(ctx context.Context) int {
+	id, err := q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -158,8 +158,8 @@ func (utq *UserTweetQuery) FirstIDX(ctx context.Context) int {
 // Only returns a single UserTweet entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one UserTweet entity is found.
 // Returns a *NotFoundError when no UserTweet entities are found.
-func (utq *UserTweetQuery) Only(ctx context.Context) (*UserTweet, error) {
-	nodes, err := utq.Limit(2).All(setContextOp(ctx, utq.ctx, ent.OpQueryOnly))
+func (q *UserTweetQuery) Only(ctx context.Context) (*UserTweet, error) {
+	nodes, err := q.Limit(2).All(setContextOp(ctx, q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -174,8 +174,8 @@ func (utq *UserTweetQuery) Only(ctx context.Context) (*UserTweet, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (utq *UserTweetQuery) OnlyX(ctx context.Context) *UserTweet {
-	node, err := utq.Only(ctx)
+func (q *UserTweetQuery) OnlyX(ctx context.Context) *UserTweet {
+	node, err := q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -185,9 +185,9 @@ func (utq *UserTweetQuery) OnlyX(ctx context.Context) *UserTweet {
 // OnlyID is like Only, but returns the only UserTweet ID in the query.
 // Returns a *NotSingularError when more than one UserTweet ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (utq *UserTweetQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (q *UserTweetQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = utq.Limit(2).IDs(setContextOp(ctx, utq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = q.Limit(2).IDs(setContextOp(ctx, q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -202,8 +202,8 @@ func (utq *UserTweetQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (utq *UserTweetQuery) OnlyIDX(ctx context.Context) int {
-	id, err := utq.OnlyID(ctx)
+func (q *UserTweetQuery) OnlyIDX(ctx context.Context) int {
+	id, err := q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -211,18 +211,18 @@ func (utq *UserTweetQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of UserTweets.
-func (utq *UserTweetQuery) All(ctx context.Context) ([]*UserTweet, error) {
-	ctx = setContextOp(ctx, utq.ctx, ent.OpQueryAll)
-	if err := utq.prepareQuery(ctx); err != nil {
+func (q *UserTweetQuery) All(ctx context.Context) ([]*UserTweet, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryAll)
+	if err := q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*UserTweet, *UserTweetQuery]()
-	return withInterceptors[[]*UserTweet](ctx, utq, qr, utq.inters)
+	return withInterceptors[[]*UserTweet](ctx, q, qr, q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (utq *UserTweetQuery) AllX(ctx context.Context) []*UserTweet {
-	nodes, err := utq.All(ctx)
+func (q *UserTweetQuery) AllX(ctx context.Context) []*UserTweet {
+	nodes, err := q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -230,20 +230,20 @@ func (utq *UserTweetQuery) AllX(ctx context.Context) []*UserTweet {
 }
 
 // IDs executes the query and returns a list of UserTweet IDs.
-func (utq *UserTweetQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if utq.ctx.Unique == nil && utq.path != nil {
-		utq.Unique(true)
+func (q *UserTweetQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if q.ctx.Unique == nil && q.path != nil {
+		q.Unique(true)
 	}
-	ctx = setContextOp(ctx, utq.ctx, ent.OpQueryIDs)
-	if err = utq.Select(usertweet.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryIDs)
+	if err = q.Select(usertweet.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (utq *UserTweetQuery) IDsX(ctx context.Context) []int {
-	ids, err := utq.IDs(ctx)
+func (q *UserTweetQuery) IDsX(ctx context.Context) []int {
+	ids, err := q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -251,17 +251,17 @@ func (utq *UserTweetQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (utq *UserTweetQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, utq.ctx, ent.OpQueryCount)
-	if err := utq.prepareQuery(ctx); err != nil {
+func (q *UserTweetQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryCount)
+	if err := q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, utq, querierCount[*UserTweetQuery](), utq.inters)
+	return withInterceptors[int](ctx, q, querierCount[*UserTweetQuery](), q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (utq *UserTweetQuery) CountX(ctx context.Context) int {
-	count, err := utq.Count(ctx)
+func (q *UserTweetQuery) CountX(ctx context.Context) int {
+	count, err := q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -269,9 +269,9 @@ func (utq *UserTweetQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (utq *UserTweetQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, utq.ctx, ent.OpQueryExist)
-	switch _, err := utq.FirstID(ctx); {
+func (q *UserTweetQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryExist)
+	switch _, err := q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -282,8 +282,8 @@ func (utq *UserTweetQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (utq *UserTweetQuery) ExistX(ctx context.Context) bool {
-	exist, err := utq.Exist(ctx)
+func (q *UserTweetQuery) ExistX(ctx context.Context) bool {
+	exist, err := q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -292,44 +292,44 @@ func (utq *UserTweetQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the UserTweetQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (utq *UserTweetQuery) Clone() *UserTweetQuery {
-	if utq == nil {
+func (q *UserTweetQuery) Clone() *UserTweetQuery {
+	if q == nil {
 		return nil
 	}
 	return &UserTweetQuery{
-		config:     utq.config,
-		ctx:        utq.ctx.Clone(),
-		order:      append([]usertweet.OrderOption{}, utq.order...),
-		inters:     append([]Interceptor{}, utq.inters...),
-		predicates: append([]predicate.UserTweet{}, utq.predicates...),
-		withUser:   utq.withUser.Clone(),
-		withTweet:  utq.withTweet.Clone(),
+		config:     q.config,
+		ctx:        q.ctx.Clone(),
+		order:      append([]usertweet.OrderOption{}, q.order...),
+		inters:     append([]Interceptor{}, q.inters...),
+		predicates: append([]predicate.UserTweet{}, q.predicates...),
+		withUser:   q.withUser.Clone(),
+		withTweet:  q.withTweet.Clone(),
 		// clone intermediate query.
-		sql:  utq.sql.Clone(),
-		path: utq.path,
+		sql:  q.sql.Clone(),
+		path: q.path,
 	}
 }
 
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
-func (utq *UserTweetQuery) WithUser(opts ...func(*UserQuery)) *UserTweetQuery {
-	query := (&UserClient{config: utq.config}).Query()
+func (q *UserTweetQuery) WithUser(opts ...func(*UserQuery)) *UserTweetQuery {
+	query := (&UserClient{config: q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	utq.withUser = query
-	return utq
+	q.withUser = query
+	return q
 }
 
 // WithTweet tells the query-builder to eager-load the nodes that are connected to
 // the "tweet" edge. The optional arguments are used to configure the query builder of the edge.
-func (utq *UserTweetQuery) WithTweet(opts ...func(*TweetQuery)) *UserTweetQuery {
-	query := (&TweetClient{config: utq.config}).Query()
+func (q *UserTweetQuery) WithTweet(opts ...func(*TweetQuery)) *UserTweetQuery {
+	query := (&TweetClient{config: q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	utq.withTweet = query
-	return utq
+	q.withTweet = query
+	return q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -346,10 +346,10 @@ func (utq *UserTweetQuery) WithTweet(opts ...func(*TweetQuery)) *UserTweetQuery 
 //		GroupBy(usertweet.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (utq *UserTweetQuery) GroupBy(field string, fields ...string) *UserTweetGroupBy {
-	utq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &UserTweetGroupBy{build: utq}
-	grbuild.flds = &utq.ctx.Fields
+func (q *UserTweetQuery) GroupBy(field string, fields ...string) *UserTweetGroupBy {
+	q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &UserTweetGroupBy{build: q}
+	grbuild.flds = &q.ctx.Fields
 	grbuild.label = usertweet.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -367,59 +367,59 @@ func (utq *UserTweetQuery) GroupBy(field string, fields ...string) *UserTweetGro
 //	client.UserTweet.Query().
 //		Select(usertweet.FieldCreatedAt).
 //		Scan(ctx, &v)
-func (utq *UserTweetQuery) Select(fields ...string) *UserTweetSelect {
-	utq.ctx.Fields = append(utq.ctx.Fields, fields...)
-	sbuild := &UserTweetSelect{UserTweetQuery: utq}
+func (q *UserTweetQuery) Select(fields ...string) *UserTweetSelect {
+	q.ctx.Fields = append(q.ctx.Fields, fields...)
+	sbuild := &UserTweetSelect{UserTweetQuery: q}
 	sbuild.label = usertweet.Label
-	sbuild.flds, sbuild.scan = &utq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a UserTweetSelect configured with the given aggregations.
-func (utq *UserTweetQuery) Aggregate(fns ...AggregateFunc) *UserTweetSelect {
-	return utq.Select().Aggregate(fns...)
+func (q *UserTweetQuery) Aggregate(fns ...AggregateFunc) *UserTweetSelect {
+	return q.Select().Aggregate(fns...)
 }
 
-func (utq *UserTweetQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range utq.inters {
+func (q *UserTweetQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, utq); err != nil {
+			if err := trv.Traverse(ctx, q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range utq.ctx.Fields {
+	for _, f := range q.ctx.Fields {
 		if !usertweet.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if utq.path != nil {
-		prev, err := utq.path(ctx)
+	if q.path != nil {
+		prev, err := q.path(ctx)
 		if err != nil {
 			return err
 		}
-		utq.sql = prev
+		q.sql = prev
 	}
 	return nil
 }
 
-func (utq *UserTweetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*UserTweet, error) {
+func (q *UserTweetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*UserTweet, error) {
 	var (
 		nodes       = []*UserTweet{}
-		_spec       = utq.querySpec()
+		_spec       = q.querySpec()
 		loadedTypes = [2]bool{
-			utq.withUser != nil,
-			utq.withTweet != nil,
+			q.withUser != nil,
+			q.withTweet != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*UserTweet).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &UserTweet{config: utq.config}
+		node := &UserTweet{config: q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -427,20 +427,20 @@ func (utq *UserTweetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*U
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, utq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := utq.withUser; query != nil {
-		if err := utq.loadUser(ctx, query, nodes, nil,
+	if query := q.withUser; query != nil {
+		if err := q.loadUser(ctx, query, nodes, nil,
 			func(n *UserTweet, e *User) { n.Edges.User = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := utq.withTweet; query != nil {
-		if err := utq.loadTweet(ctx, query, nodes, nil,
+	if query := q.withTweet; query != nil {
+		if err := q.loadTweet(ctx, query, nodes, nil,
 			func(n *UserTweet, e *Tweet) { n.Edges.Tweet = e }); err != nil {
 			return nil, err
 		}
@@ -448,7 +448,7 @@ func (utq *UserTweetQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*U
 	return nodes, nil
 }
 
-func (utq *UserTweetQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*UserTweet, init func(*UserTweet), assign func(*UserTweet, *User)) error {
+func (q *UserTweetQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*UserTweet, init func(*UserTweet), assign func(*UserTweet, *User)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*UserTweet)
 	for i := range nodes {
@@ -477,7 +477,7 @@ func (utq *UserTweetQuery) loadUser(ctx context.Context, query *UserQuery, nodes
 	}
 	return nil
 }
-func (utq *UserTweetQuery) loadTweet(ctx context.Context, query *TweetQuery, nodes []*UserTweet, init func(*UserTweet), assign func(*UserTweet, *Tweet)) error {
+func (q *UserTweetQuery) loadTweet(ctx context.Context, query *TweetQuery, nodes []*UserTweet, init func(*UserTweet), assign func(*UserTweet, *Tweet)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*UserTweet)
 	for i := range nodes {
@@ -507,24 +507,24 @@ func (utq *UserTweetQuery) loadTweet(ctx context.Context, query *TweetQuery, nod
 	return nil
 }
 
-func (utq *UserTweetQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := utq.querySpec()
-	_spec.Node.Columns = utq.ctx.Fields
-	if len(utq.ctx.Fields) > 0 {
-		_spec.Unique = utq.ctx.Unique != nil && *utq.ctx.Unique
+func (q *UserTweetQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := q.querySpec()
+	_spec.Node.Columns = q.ctx.Fields
+	if len(q.ctx.Fields) > 0 {
+		_spec.Unique = q.ctx.Unique != nil && *q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, utq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, q.driver, _spec)
 }
 
-func (utq *UserTweetQuery) querySpec() *sqlgraph.QuerySpec {
+func (q *UserTweetQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(usertweet.Table, usertweet.Columns, sqlgraph.NewFieldSpec(usertweet.FieldID, field.TypeInt))
-	_spec.From = utq.sql
-	if unique := utq.ctx.Unique; unique != nil {
+	_spec.From = q.sql
+	if unique := q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if utq.path != nil {
+	} else if q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := utq.ctx.Fields; len(fields) > 0 {
+	if fields := q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, usertweet.FieldID)
 		for i := range fields {
@@ -532,27 +532,27 @@ func (utq *UserTweetQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if utq.withUser != nil {
+		if q.withUser != nil {
 			_spec.Node.AddColumnOnce(usertweet.FieldUserID)
 		}
-		if utq.withTweet != nil {
+		if q.withTweet != nil {
 			_spec.Node.AddColumnOnce(usertweet.FieldTweetID)
 		}
 	}
-	if ps := utq.predicates; len(ps) > 0 {
+	if ps := q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := utq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := utq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := utq.order; len(ps) > 0 {
+	if ps := q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -562,33 +562,33 @@ func (utq *UserTweetQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (utq *UserTweetQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(utq.driver.Dialect())
+func (q *UserTweetQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(q.driver.Dialect())
 	t1 := builder.Table(usertweet.Table)
-	columns := utq.ctx.Fields
+	columns := q.ctx.Fields
 	if len(columns) == 0 {
 		columns = usertweet.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if utq.sql != nil {
-		selector = utq.sql
+	if q.sql != nil {
+		selector = q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if utq.ctx.Unique != nil && *utq.ctx.Unique {
+	if q.ctx.Unique != nil && *q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range utq.predicates {
+	for _, p := range q.predicates {
 		p(selector)
 	}
-	for _, p := range utq.order {
+	for _, p := range q.order {
 		p(selector)
 	}
-	if offset := utq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := utq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -615,27 +615,27 @@ func (utgb *UserTweetGroupBy) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*UserTweetQuery, *UserTweetGroupBy](ctx, utgb.build, utgb, utgb.build.inters, v)
 }
 
-func (utgb *UserTweetGroupBy) sqlScan(ctx context.Context, root *UserTweetQuery, v any) error {
+func (q *UserTweetGroupBy) sqlScan(ctx context.Context, root *UserTweetQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(utgb.fns))
-	for _, fn := range utgb.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*utgb.flds)+len(utgb.fns))
-		for _, f := range *utgb.flds {
+		columns := make([]string, 0, len(*q.flds)+len(q.fns))
+		for _, f := range *q.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*utgb.flds...)...)
+	selector.GroupBy(selector.Columns(*q.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := utgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -663,13 +663,13 @@ func (uts *UserTweetSelect) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*UserTweetQuery, *UserTweetSelect](ctx, uts.UserTweetQuery, uts, uts.inters, v)
 }
 
-func (uts *UserTweetSelect) sqlScan(ctx context.Context, root *UserTweetQuery, v any) error {
+func (q *UserTweetSelect) sqlScan(ctx context.Context, root *UserTweetQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(uts.fns))
-	for _, fn := range uts.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*uts.selector.flds); {
+	switch n := len(*q.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -677,7 +677,7 @@ func (uts *UserTweetSelect) sqlScan(ctx context.Context, root *UserTweetQuery, v
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := uts.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

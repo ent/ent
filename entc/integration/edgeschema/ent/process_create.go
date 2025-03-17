@@ -28,48 +28,48 @@ type ProcessCreate struct {
 }
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
-func (pc *ProcessCreate) AddFileIDs(ids ...int) *ProcessCreate {
-	pc.mutation.AddFileIDs(ids...)
-	return pc
+func (m *ProcessCreate) AddFileIDs(ids ...int) *ProcessCreate {
+	m.mutation.AddFileIDs(ids...)
+	return m
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (pc *ProcessCreate) AddFiles(f ...*File) *ProcessCreate {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (m *ProcessCreate) AddFiles(v ...*File) *ProcessCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pc.AddFileIDs(ids...)
+	return m.AddFileIDs(ids...)
 }
 
 // AddAttachedFileIDs adds the "attached_files" edge to the AttachedFile entity by IDs.
-func (pc *ProcessCreate) AddAttachedFileIDs(ids ...int) *ProcessCreate {
-	pc.mutation.AddAttachedFileIDs(ids...)
-	return pc
+func (m *ProcessCreate) AddAttachedFileIDs(ids ...int) *ProcessCreate {
+	m.mutation.AddAttachedFileIDs(ids...)
+	return m
 }
 
 // AddAttachedFiles adds the "attached_files" edges to the AttachedFile entity.
-func (pc *ProcessCreate) AddAttachedFiles(a ...*AttachedFile) *ProcessCreate {
-	ids := make([]int, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (m *ProcessCreate) AddAttachedFiles(v ...*AttachedFile) *ProcessCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return pc.AddAttachedFileIDs(ids...)
+	return m.AddAttachedFileIDs(ids...)
 }
 
 // Mutation returns the ProcessMutation object of the builder.
-func (pc *ProcessCreate) Mutation() *ProcessMutation {
-	return pc.mutation
+func (m *ProcessCreate) Mutation() *ProcessMutation {
+	return m.mutation
 }
 
 // Save creates the Process in the database.
-func (pc *ProcessCreate) Save(ctx context.Context) (*Process, error) {
-	return withHooks(ctx, pc.sqlSave, pc.mutation, pc.hooks)
+func (c *ProcessCreate) Save(ctx context.Context) (*Process, error) {
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (pc *ProcessCreate) SaveX(ctx context.Context) *Process {
-	v, err := pc.Save(ctx)
+func (c *ProcessCreate) SaveX(ctx context.Context) *Process {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -77,29 +77,29 @@ func (pc *ProcessCreate) SaveX(ctx context.Context) *Process {
 }
 
 // Exec executes the query.
-func (pc *ProcessCreate) Exec(ctx context.Context) error {
-	_, err := pc.Save(ctx)
+func (c *ProcessCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pc *ProcessCreate) ExecX(ctx context.Context) {
-	if err := pc.Exec(ctx); err != nil {
+func (c *ProcessCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (pc *ProcessCreate) check() error {
+func (c *ProcessCreate) check() error {
 	return nil
 }
 
-func (pc *ProcessCreate) sqlSave(ctx context.Context) (*Process, error) {
-	if err := pc.check(); err != nil {
+func (c *ProcessCreate) sqlSave(ctx context.Context) (*Process, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := pc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -107,18 +107,18 @@ func (pc *ProcessCreate) sqlSave(ctx context.Context) (*Process, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	pc.mutation.id = &_node.ID
-	pc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (pc *ProcessCreate) createSpec() (*Process, *sqlgraph.CreateSpec) {
+func (c *ProcessCreate) createSpec() (*Process, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Process{config: pc.config}
+		_node = &Process{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(process.Table, sqlgraph.NewFieldSpec(process.FieldID, field.TypeInt))
 	)
-	_spec.OnConflict = pc.conflict
-	if nodes := pc.mutation.FilesIDs(); len(nodes) > 0 {
+	_spec.OnConflict = c.conflict
+	if nodes := c.mutation.FilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -132,13 +132,13 @@ func (pc *ProcessCreate) createSpec() (*Process, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &AttachedFileCreate{config: pc.config, mutation: newAttachedFileMutation(pc.config, OpCreate)}
+		createE := &AttachedFileCreate{config: c.config, mutation: newAttachedFileMutation(c.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pc.mutation.AttachedFilesIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.AttachedFilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -167,11 +167,9 @@ func (pc *ProcessCreate) createSpec() (*Process, *sqlgraph.CreateSpec) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-func (pc *ProcessCreate) OnConflict(opts ...sql.ConflictOption) *ProcessUpsertOne {
-	pc.conflict = opts
-	return &ProcessUpsertOne{
-		create: pc,
-	}
+func (c *ProcessCreate) OnConflict(opts ...sql.ConflictOption) *ProcessUpsertOne {
+	c.conflict = opts
+	return &ProcessUpsertOne{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -180,11 +178,9 @@ func (pc *ProcessCreate) OnConflict(opts ...sql.ConflictOption) *ProcessUpsertOn
 //	client.Process.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (pc *ProcessCreate) OnConflictColumns(columns ...string) *ProcessUpsertOne {
-	pc.conflict = append(pc.conflict, sql.ConflictColumns(columns...))
-	return &ProcessUpsertOne{
-		create: pc,
-	}
+func (c *ProcessCreate) OnConflictColumns(columns ...string) *ProcessUpsertOne {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &ProcessUpsertOne{create: c}
 }
 
 type (
@@ -282,16 +278,16 @@ type ProcessCreateBulk struct {
 }
 
 // Save creates the Process entities in the database.
-func (pcb *ProcessCreateBulk) Save(ctx context.Context) ([]*Process, error) {
-	if pcb.err != nil {
-		return nil, pcb.err
+func (c *ProcessCreateBulk) Save(ctx context.Context) ([]*Process, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(pcb.builders))
-	nodes := make([]*Process, len(pcb.builders))
-	mutators := make([]Mutator, len(pcb.builders))
-	for i := range pcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Process, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := pcb.builders[i]
+			builder := c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ProcessMutation)
 				if !ok {
@@ -304,12 +300,12 @@ func (pcb *ProcessCreateBulk) Save(ctx context.Context) ([]*Process, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, pcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = pcb.conflict
+					spec.OnConflict = c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, pcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -333,7 +329,7 @@ func (pcb *ProcessCreateBulk) Save(ctx context.Context) ([]*Process, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, pcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -341,8 +337,8 @@ func (pcb *ProcessCreateBulk) Save(ctx context.Context) ([]*Process, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (pcb *ProcessCreateBulk) SaveX(ctx context.Context) []*Process {
-	v, err := pcb.Save(ctx)
+func (c *ProcessCreateBulk) SaveX(ctx context.Context) []*Process {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -350,14 +346,14 @@ func (pcb *ProcessCreateBulk) SaveX(ctx context.Context) []*Process {
 }
 
 // Exec executes the query.
-func (pcb *ProcessCreateBulk) Exec(ctx context.Context) error {
-	_, err := pcb.Save(ctx)
+func (c *ProcessCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pcb *ProcessCreateBulk) ExecX(ctx context.Context) {
-	if err := pcb.Exec(ctx); err != nil {
+func (c *ProcessCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -372,11 +368,9 @@ func (pcb *ProcessCreateBulk) ExecX(ctx context.Context) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-func (pcb *ProcessCreateBulk) OnConflict(opts ...sql.ConflictOption) *ProcessUpsertBulk {
-	pcb.conflict = opts
-	return &ProcessUpsertBulk{
-		create: pcb,
-	}
+func (c *ProcessCreateBulk) OnConflict(opts ...sql.ConflictOption) *ProcessUpsertBulk {
+	c.conflict = opts
+	return &ProcessUpsertBulk{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -385,11 +379,9 @@ func (pcb *ProcessCreateBulk) OnConflict(opts ...sql.ConflictOption) *ProcessUps
 //	client.Process.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (pcb *ProcessCreateBulk) OnConflictColumns(columns ...string) *ProcessUpsertBulk {
-	pcb.conflict = append(pcb.conflict, sql.ConflictColumns(columns...))
-	return &ProcessUpsertBulk{
-		create: pcb,
-	}
+func (c *ProcessCreateBulk) OnConflictColumns(columns ...string) *ProcessUpsertBulk {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &ProcessUpsertBulk{create: c}
 }
 
 // ProcessUpsertBulk is the builder for "upsert"-ing

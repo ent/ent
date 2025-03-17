@@ -29,67 +29,67 @@ type DeviceCreate struct {
 }
 
 // SetID sets the "id" field.
-func (dc *DeviceCreate) SetID(s schema.ID) *DeviceCreate {
-	dc.mutation.SetID(s)
-	return dc
+func (m *DeviceCreate) SetID(v schema.ID) *DeviceCreate {
+	m.mutation.SetID(v)
+	return m
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (dc *DeviceCreate) SetNillableID(s *schema.ID) *DeviceCreate {
-	if s != nil {
-		dc.SetID(*s)
+func (m *DeviceCreate) SetNillableID(v *schema.ID) *DeviceCreate {
+	if v != nil {
+		m.SetID(*v)
 	}
-	return dc
+	return m
 }
 
 // SetActiveSessionID sets the "active_session" edge to the Session entity by ID.
-func (dc *DeviceCreate) SetActiveSessionID(id schema.ID) *DeviceCreate {
-	dc.mutation.SetActiveSessionID(id)
-	return dc
+func (m *DeviceCreate) SetActiveSessionID(id schema.ID) *DeviceCreate {
+	m.mutation.SetActiveSessionID(id)
+	return m
 }
 
 // SetNillableActiveSessionID sets the "active_session" edge to the Session entity by ID if the given value is not nil.
-func (dc *DeviceCreate) SetNillableActiveSessionID(id *schema.ID) *DeviceCreate {
+func (m *DeviceCreate) SetNillableActiveSessionID(id *schema.ID) *DeviceCreate {
 	if id != nil {
-		dc = dc.SetActiveSessionID(*id)
+		m = m.SetActiveSessionID(*id)
 	}
-	return dc
+	return m
 }
 
 // SetActiveSession sets the "active_session" edge to the Session entity.
-func (dc *DeviceCreate) SetActiveSession(s *Session) *DeviceCreate {
-	return dc.SetActiveSessionID(s.ID)
+func (m *DeviceCreate) SetActiveSession(v *Session) *DeviceCreate {
+	return m.SetActiveSessionID(v.ID)
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (dc *DeviceCreate) AddSessionIDs(ids ...schema.ID) *DeviceCreate {
-	dc.mutation.AddSessionIDs(ids...)
-	return dc
+func (m *DeviceCreate) AddSessionIDs(ids ...schema.ID) *DeviceCreate {
+	m.mutation.AddSessionIDs(ids...)
+	return m
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
-func (dc *DeviceCreate) AddSessions(s ...*Session) *DeviceCreate {
-	ids := make([]schema.ID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (m *DeviceCreate) AddSessions(v ...*Session) *DeviceCreate {
+	ids := make([]schema.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return dc.AddSessionIDs(ids...)
+	return m.AddSessionIDs(ids...)
 }
 
 // Mutation returns the DeviceMutation object of the builder.
-func (dc *DeviceCreate) Mutation() *DeviceMutation {
-	return dc.mutation
+func (m *DeviceCreate) Mutation() *DeviceMutation {
+	return m.mutation
 }
 
 // Save creates the Device in the database.
-func (dc *DeviceCreate) Save(ctx context.Context) (*Device, error) {
-	dc.defaults()
-	return withHooks(ctx, dc.sqlSave, dc.mutation, dc.hooks)
+func (c *DeviceCreate) Save(ctx context.Context) (*Device, error) {
+	c.defaults()
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (dc *DeviceCreate) SaveX(ctx context.Context) *Device {
-	v, err := dc.Save(ctx)
+func (c *DeviceCreate) SaveX(ctx context.Context) *Device {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -97,29 +97,29 @@ func (dc *DeviceCreate) SaveX(ctx context.Context) *Device {
 }
 
 // Exec executes the query.
-func (dc *DeviceCreate) Exec(ctx context.Context) error {
-	_, err := dc.Save(ctx)
+func (c *DeviceCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (dc *DeviceCreate) ExecX(ctx context.Context) {
-	if err := dc.Exec(ctx); err != nil {
+func (c *DeviceCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (dc *DeviceCreate) defaults() {
-	if _, ok := dc.mutation.ID(); !ok {
+func (c *DeviceCreate) defaults() {
+	if _, ok := c.mutation.ID(); !ok {
 		v := device.DefaultID()
-		dc.mutation.SetID(v)
+		c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (dc *DeviceCreate) check() error {
-	if v, ok := dc.mutation.ID(); ok {
+func (c *DeviceCreate) check() error {
+	if v, ok := c.mutation.ID(); ok {
 		if err := device.IDValidator(v[:]); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Device.id": %w`, err)}
 		}
@@ -127,12 +127,12 @@ func (dc *DeviceCreate) check() error {
 	return nil
 }
 
-func (dc *DeviceCreate) sqlSave(ctx context.Context) (*Device, error) {
-	if err := dc.check(); err != nil {
+func (c *DeviceCreate) sqlSave(ctx context.Context) (*Device, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := dc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, dc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -145,22 +145,22 @@ func (dc *DeviceCreate) sqlSave(ctx context.Context) (*Device, error) {
 			return nil, err
 		}
 	}
-	dc.mutation.id = &_node.ID
-	dc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (dc *DeviceCreate) createSpec() (*Device, *sqlgraph.CreateSpec) {
+func (c *DeviceCreate) createSpec() (*Device, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Device{config: dc.config}
+		_node = &Device{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(device.Table, sqlgraph.NewFieldSpec(device.FieldID, field.TypeBytes))
 	)
-	_spec.OnConflict = dc.conflict
-	if id, ok := dc.mutation.ID(); ok {
+	_spec.OnConflict = c.conflict
+	if id, ok := c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if nodes := dc.mutation.ActiveSessionIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.ActiveSessionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -177,7 +177,7 @@ func (dc *DeviceCreate) createSpec() (*Device, *sqlgraph.CreateSpec) {
 		_node.device_active_session = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := dc.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.SessionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -206,11 +206,9 @@ func (dc *DeviceCreate) createSpec() (*Device, *sqlgraph.CreateSpec) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-func (dc *DeviceCreate) OnConflict(opts ...sql.ConflictOption) *DeviceUpsertOne {
-	dc.conflict = opts
-	return &DeviceUpsertOne{
-		create: dc,
-	}
+func (c *DeviceCreate) OnConflict(opts ...sql.ConflictOption) *DeviceUpsertOne {
+	c.conflict = opts
+	return &DeviceUpsertOne{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -219,11 +217,9 @@ func (dc *DeviceCreate) OnConflict(opts ...sql.ConflictOption) *DeviceUpsertOne 
 //	client.Device.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (dc *DeviceCreate) OnConflictColumns(columns ...string) *DeviceUpsertOne {
-	dc.conflict = append(dc.conflict, sql.ConflictColumns(columns...))
-	return &DeviceUpsertOne{
-		create: dc,
-	}
+func (c *DeviceCreate) OnConflictColumns(columns ...string) *DeviceUpsertOne {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &DeviceUpsertOne{create: c}
 }
 
 type (
@@ -334,16 +330,16 @@ type DeviceCreateBulk struct {
 }
 
 // Save creates the Device entities in the database.
-func (dcb *DeviceCreateBulk) Save(ctx context.Context) ([]*Device, error) {
-	if dcb.err != nil {
-		return nil, dcb.err
+func (c *DeviceCreateBulk) Save(ctx context.Context) ([]*Device, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(dcb.builders))
-	nodes := make([]*Device, len(dcb.builders))
-	mutators := make([]Mutator, len(dcb.builders))
-	for i := range dcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Device, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := dcb.builders[i]
+			builder := c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*DeviceMutation)
@@ -357,12 +353,12 @@ func (dcb *DeviceCreateBulk) Save(ctx context.Context) ([]*Device, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, dcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = dcb.conflict
+					spec.OnConflict = c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, dcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -382,7 +378,7 @@ func (dcb *DeviceCreateBulk) Save(ctx context.Context) ([]*Device, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, dcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -390,8 +386,8 @@ func (dcb *DeviceCreateBulk) Save(ctx context.Context) ([]*Device, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (dcb *DeviceCreateBulk) SaveX(ctx context.Context) []*Device {
-	v, err := dcb.Save(ctx)
+func (c *DeviceCreateBulk) SaveX(ctx context.Context) []*Device {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -399,14 +395,14 @@ func (dcb *DeviceCreateBulk) SaveX(ctx context.Context) []*Device {
 }
 
 // Exec executes the query.
-func (dcb *DeviceCreateBulk) Exec(ctx context.Context) error {
-	_, err := dcb.Save(ctx)
+func (c *DeviceCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (dcb *DeviceCreateBulk) ExecX(ctx context.Context) {
-	if err := dcb.Exec(ctx); err != nil {
+func (c *DeviceCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -421,11 +417,9 @@ func (dcb *DeviceCreateBulk) ExecX(ctx context.Context) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-func (dcb *DeviceCreateBulk) OnConflict(opts ...sql.ConflictOption) *DeviceUpsertBulk {
-	dcb.conflict = opts
-	return &DeviceUpsertBulk{
-		create: dcb,
-	}
+func (c *DeviceCreateBulk) OnConflict(opts ...sql.ConflictOption) *DeviceUpsertBulk {
+	c.conflict = opts
+	return &DeviceUpsertBulk{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -434,11 +428,9 @@ func (dcb *DeviceCreateBulk) OnConflict(opts ...sql.ConflictOption) *DeviceUpser
 //	client.Device.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (dcb *DeviceCreateBulk) OnConflictColumns(columns ...string) *DeviceUpsertBulk {
-	dcb.conflict = append(dcb.conflict, sql.ConflictColumns(columns...))
-	return &DeviceUpsertBulk{
-		create: dcb,
-	}
+func (c *DeviceCreateBulk) OnConflictColumns(columns ...string) *DeviceUpsertBulk {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &DeviceUpsertBulk{create: c}
 }
 
 // DeviceUpsertBulk is the builder for "upsert"-ing

@@ -23,144 +23,144 @@ type ConversionCreate struct {
 }
 
 // SetName sets the "name" field.
-func (cc *ConversionCreate) SetName(s string) *ConversionCreate {
-	cc.mutation.SetName(s)
-	return cc
+func (m *ConversionCreate) SetName(v string) *ConversionCreate {
+	m.mutation.SetName(v)
+	return m
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (cc *ConversionCreate) SetNillableName(s *string) *ConversionCreate {
-	if s != nil {
-		cc.SetName(*s)
+func (m *ConversionCreate) SetNillableName(v *string) *ConversionCreate {
+	if v != nil {
+		m.SetName(*v)
 	}
-	return cc
+	return m
 }
 
 // SetInt8ToString sets the "int8_to_string" field.
-func (cc *ConversionCreate) SetInt8ToString(i int8) *ConversionCreate {
-	cc.mutation.SetInt8ToString(i)
-	return cc
+func (m *ConversionCreate) SetInt8ToString(v int8) *ConversionCreate {
+	m.mutation.SetInt8ToString(v)
+	return m
 }
 
 // SetNillableInt8ToString sets the "int8_to_string" field if the given value is not nil.
-func (cc *ConversionCreate) SetNillableInt8ToString(i *int8) *ConversionCreate {
-	if i != nil {
-		cc.SetInt8ToString(*i)
+func (m *ConversionCreate) SetNillableInt8ToString(v *int8) *ConversionCreate {
+	if v != nil {
+		m.SetInt8ToString(*v)
 	}
-	return cc
+	return m
 }
 
 // SetUint8ToString sets the "uint8_to_string" field.
-func (cc *ConversionCreate) SetUint8ToString(u uint8) *ConversionCreate {
-	cc.mutation.SetUint8ToString(u)
-	return cc
+func (m *ConversionCreate) SetUint8ToString(v uint8) *ConversionCreate {
+	m.mutation.SetUint8ToString(v)
+	return m
 }
 
 // SetNillableUint8ToString sets the "uint8_to_string" field if the given value is not nil.
-func (cc *ConversionCreate) SetNillableUint8ToString(u *uint8) *ConversionCreate {
-	if u != nil {
-		cc.SetUint8ToString(*u)
+func (m *ConversionCreate) SetNillableUint8ToString(v *uint8) *ConversionCreate {
+	if v != nil {
+		m.SetUint8ToString(*v)
 	}
-	return cc
+	return m
 }
 
 // SetInt16ToString sets the "int16_to_string" field.
-func (cc *ConversionCreate) SetInt16ToString(i int16) *ConversionCreate {
-	cc.mutation.SetInt16ToString(i)
-	return cc
+func (m *ConversionCreate) SetInt16ToString(v int16) *ConversionCreate {
+	m.mutation.SetInt16ToString(v)
+	return m
 }
 
 // SetNillableInt16ToString sets the "int16_to_string" field if the given value is not nil.
-func (cc *ConversionCreate) SetNillableInt16ToString(i *int16) *ConversionCreate {
-	if i != nil {
-		cc.SetInt16ToString(*i)
+func (m *ConversionCreate) SetNillableInt16ToString(v *int16) *ConversionCreate {
+	if v != nil {
+		m.SetInt16ToString(*v)
 	}
-	return cc
+	return m
 }
 
 // SetUint16ToString sets the "uint16_to_string" field.
-func (cc *ConversionCreate) SetUint16ToString(u uint16) *ConversionCreate {
-	cc.mutation.SetUint16ToString(u)
-	return cc
+func (m *ConversionCreate) SetUint16ToString(v uint16) *ConversionCreate {
+	m.mutation.SetUint16ToString(v)
+	return m
 }
 
 // SetNillableUint16ToString sets the "uint16_to_string" field if the given value is not nil.
-func (cc *ConversionCreate) SetNillableUint16ToString(u *uint16) *ConversionCreate {
-	if u != nil {
-		cc.SetUint16ToString(*u)
+func (m *ConversionCreate) SetNillableUint16ToString(v *uint16) *ConversionCreate {
+	if v != nil {
+		m.SetUint16ToString(*v)
 	}
-	return cc
+	return m
 }
 
 // SetInt32ToString sets the "int32_to_string" field.
-func (cc *ConversionCreate) SetInt32ToString(i int32) *ConversionCreate {
-	cc.mutation.SetInt32ToString(i)
-	return cc
+func (m *ConversionCreate) SetInt32ToString(v int32) *ConversionCreate {
+	m.mutation.SetInt32ToString(v)
+	return m
 }
 
 // SetNillableInt32ToString sets the "int32_to_string" field if the given value is not nil.
-func (cc *ConversionCreate) SetNillableInt32ToString(i *int32) *ConversionCreate {
-	if i != nil {
-		cc.SetInt32ToString(*i)
+func (m *ConversionCreate) SetNillableInt32ToString(v *int32) *ConversionCreate {
+	if v != nil {
+		m.SetInt32ToString(*v)
 	}
-	return cc
+	return m
 }
 
 // SetUint32ToString sets the "uint32_to_string" field.
-func (cc *ConversionCreate) SetUint32ToString(u uint32) *ConversionCreate {
-	cc.mutation.SetUint32ToString(u)
-	return cc
+func (m *ConversionCreate) SetUint32ToString(v uint32) *ConversionCreate {
+	m.mutation.SetUint32ToString(v)
+	return m
 }
 
 // SetNillableUint32ToString sets the "uint32_to_string" field if the given value is not nil.
-func (cc *ConversionCreate) SetNillableUint32ToString(u *uint32) *ConversionCreate {
-	if u != nil {
-		cc.SetUint32ToString(*u)
+func (m *ConversionCreate) SetNillableUint32ToString(v *uint32) *ConversionCreate {
+	if v != nil {
+		m.SetUint32ToString(*v)
 	}
-	return cc
+	return m
 }
 
 // SetInt64ToString sets the "int64_to_string" field.
-func (cc *ConversionCreate) SetInt64ToString(i int64) *ConversionCreate {
-	cc.mutation.SetInt64ToString(i)
-	return cc
+func (m *ConversionCreate) SetInt64ToString(v int64) *ConversionCreate {
+	m.mutation.SetInt64ToString(v)
+	return m
 }
 
 // SetNillableInt64ToString sets the "int64_to_string" field if the given value is not nil.
-func (cc *ConversionCreate) SetNillableInt64ToString(i *int64) *ConversionCreate {
-	if i != nil {
-		cc.SetInt64ToString(*i)
+func (m *ConversionCreate) SetNillableInt64ToString(v *int64) *ConversionCreate {
+	if v != nil {
+		m.SetInt64ToString(*v)
 	}
-	return cc
+	return m
 }
 
 // SetUint64ToString sets the "uint64_to_string" field.
-func (cc *ConversionCreate) SetUint64ToString(u uint64) *ConversionCreate {
-	cc.mutation.SetUint64ToString(u)
-	return cc
+func (m *ConversionCreate) SetUint64ToString(v uint64) *ConversionCreate {
+	m.mutation.SetUint64ToString(v)
+	return m
 }
 
 // SetNillableUint64ToString sets the "uint64_to_string" field if the given value is not nil.
-func (cc *ConversionCreate) SetNillableUint64ToString(u *uint64) *ConversionCreate {
-	if u != nil {
-		cc.SetUint64ToString(*u)
+func (m *ConversionCreate) SetNillableUint64ToString(v *uint64) *ConversionCreate {
+	if v != nil {
+		m.SetUint64ToString(*v)
 	}
-	return cc
+	return m
 }
 
 // Mutation returns the ConversionMutation object of the builder.
-func (cc *ConversionCreate) Mutation() *ConversionMutation {
-	return cc.mutation
+func (m *ConversionCreate) Mutation() *ConversionMutation {
+	return m.mutation
 }
 
 // Save creates the Conversion in the database.
-func (cc *ConversionCreate) Save(ctx context.Context) (*Conversion, error) {
-	return withHooks(ctx, cc.sqlSave, cc.mutation, cc.hooks)
+func (c *ConversionCreate) Save(ctx context.Context) (*Conversion, error) {
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (cc *ConversionCreate) SaveX(ctx context.Context) *Conversion {
-	v, err := cc.Save(ctx)
+func (c *ConversionCreate) SaveX(ctx context.Context) *Conversion {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -168,29 +168,29 @@ func (cc *ConversionCreate) SaveX(ctx context.Context) *Conversion {
 }
 
 // Exec executes the query.
-func (cc *ConversionCreate) Exec(ctx context.Context) error {
-	_, err := cc.Save(ctx)
+func (c *ConversionCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cc *ConversionCreate) ExecX(ctx context.Context) {
-	if err := cc.Exec(ctx); err != nil {
+func (c *ConversionCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cc *ConversionCreate) check() error {
+func (c *ConversionCreate) check() error {
 	return nil
 }
 
-func (cc *ConversionCreate) sqlSave(ctx context.Context) (*Conversion, error) {
-	if err := cc.check(); err != nil {
+func (c *ConversionCreate) sqlSave(ctx context.Context) (*Conversion, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := cc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -198,49 +198,49 @@ func (cc *ConversionCreate) sqlSave(ctx context.Context) (*Conversion, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	cc.mutation.id = &_node.ID
-	cc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (cc *ConversionCreate) createSpec() (*Conversion, *sqlgraph.CreateSpec) {
+func (c *ConversionCreate) createSpec() (*Conversion, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Conversion{config: cc.config}
+		_node = &Conversion{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(conversion.Table, sqlgraph.NewFieldSpec(conversion.FieldID, field.TypeInt))
 	)
-	if value, ok := cc.mutation.Name(); ok {
+	if value, ok := c.mutation.Name(); ok {
 		_spec.SetField(conversion.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := cc.mutation.Int8ToString(); ok {
+	if value, ok := c.mutation.Int8ToString(); ok {
 		_spec.SetField(conversion.FieldInt8ToString, field.TypeInt8, value)
 		_node.Int8ToString = value
 	}
-	if value, ok := cc.mutation.Uint8ToString(); ok {
+	if value, ok := c.mutation.Uint8ToString(); ok {
 		_spec.SetField(conversion.FieldUint8ToString, field.TypeUint8, value)
 		_node.Uint8ToString = value
 	}
-	if value, ok := cc.mutation.Int16ToString(); ok {
+	if value, ok := c.mutation.Int16ToString(); ok {
 		_spec.SetField(conversion.FieldInt16ToString, field.TypeInt16, value)
 		_node.Int16ToString = value
 	}
-	if value, ok := cc.mutation.Uint16ToString(); ok {
+	if value, ok := c.mutation.Uint16ToString(); ok {
 		_spec.SetField(conversion.FieldUint16ToString, field.TypeUint16, value)
 		_node.Uint16ToString = value
 	}
-	if value, ok := cc.mutation.Int32ToString(); ok {
+	if value, ok := c.mutation.Int32ToString(); ok {
 		_spec.SetField(conversion.FieldInt32ToString, field.TypeInt32, value)
 		_node.Int32ToString = value
 	}
-	if value, ok := cc.mutation.Uint32ToString(); ok {
+	if value, ok := c.mutation.Uint32ToString(); ok {
 		_spec.SetField(conversion.FieldUint32ToString, field.TypeUint32, value)
 		_node.Uint32ToString = value
 	}
-	if value, ok := cc.mutation.Int64ToString(); ok {
+	if value, ok := c.mutation.Int64ToString(); ok {
 		_spec.SetField(conversion.FieldInt64ToString, field.TypeInt64, value)
 		_node.Int64ToString = value
 	}
-	if value, ok := cc.mutation.Uint64ToString(); ok {
+	if value, ok := c.mutation.Uint64ToString(); ok {
 		_spec.SetField(conversion.FieldUint64ToString, field.TypeUint64, value)
 		_node.Uint64ToString = value
 	}
@@ -255,16 +255,16 @@ type ConversionCreateBulk struct {
 }
 
 // Save creates the Conversion entities in the database.
-func (ccb *ConversionCreateBulk) Save(ctx context.Context) ([]*Conversion, error) {
-	if ccb.err != nil {
-		return nil, ccb.err
+func (c *ConversionCreateBulk) Save(ctx context.Context) ([]*Conversion, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
-	nodes := make([]*Conversion, len(ccb.builders))
-	mutators := make([]Mutator, len(ccb.builders))
-	for i := range ccb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Conversion, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := ccb.builders[i]
+			builder := c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ConversionMutation)
 				if !ok {
@@ -277,11 +277,11 @@ func (ccb *ConversionCreateBulk) Save(ctx context.Context) ([]*Conversion, error
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, ccb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ccb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -305,7 +305,7 @@ func (ccb *ConversionCreateBulk) Save(ctx context.Context) ([]*Conversion, error
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, ccb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -313,8 +313,8 @@ func (ccb *ConversionCreateBulk) Save(ctx context.Context) ([]*Conversion, error
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ccb *ConversionCreateBulk) SaveX(ctx context.Context) []*Conversion {
-	v, err := ccb.Save(ctx)
+func (c *ConversionCreateBulk) SaveX(ctx context.Context) []*Conversion {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -322,14 +322,14 @@ func (ccb *ConversionCreateBulk) SaveX(ctx context.Context) []*Conversion {
 }
 
 // Exec executes the query.
-func (ccb *ConversionCreateBulk) Exec(ctx context.Context) error {
-	_, err := ccb.Save(ctx)
+func (c *ConversionCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ccb *ConversionCreateBulk) ExecX(ctx context.Context) {
-	if err := ccb.Exec(ctx); err != nil {
+func (c *ConversionCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

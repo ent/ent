@@ -95,52 +95,52 @@ func (c *Card) FromResponse(res *gremlin.Response) error {
 }
 
 // QueryOwner queries the "owner" edge of the Card entity.
-func (c *Card) QueryOwner() *UserQuery {
-	return NewCardClient(c.config).QueryOwner(c)
+func (m *Card) QueryOwner() *UserQuery {
+	return NewCardClient(m.config).QueryOwner(m)
 }
 
 // QuerySpec queries the "spec" edge of the Card entity.
-func (c *Card) QuerySpec() *SpecQuery {
-	return NewCardClient(c.config).QuerySpec(c)
+func (m *Card) QuerySpec() *SpecQuery {
+	return NewCardClient(m.config).QuerySpec(m)
 }
 
 // Update returns a builder for updating this Card.
 // Note that you need to call Card.Unwrap() before calling this method if this Card
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (c *Card) Update() *CardUpdateOne {
-	return NewCardClient(c.config).UpdateOne(c)
+func (m *Card) Update() *CardUpdateOne {
+	return NewCardClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Card entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (c *Card) Unwrap() *Card {
-	_tx, ok := c.config.driver.(*txDriver)
+func (m *Card) Unwrap() *Card {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Card is not a transactional entity")
 	}
-	c.config.driver = _tx.drv
-	return c
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (c *Card) String() string {
+func (m *Card) String() string {
 	var builder strings.Builder
 	builder.WriteString("Card(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("create_time=")
-	builder.WriteString(c.CreateTime.Format(time.ANSIC))
+	builder.WriteString(m.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("update_time=")
-	builder.WriteString(c.UpdateTime.Format(time.ANSIC))
+	builder.WriteString(m.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("balance=")
-	builder.WriteString(fmt.Sprintf("%v", c.Balance))
+	builder.WriteString(fmt.Sprintf("%v", m.Balance))
 	builder.WriteString(", ")
 	builder.WriteString("number=")
-	builder.WriteString(c.Number)
+	builder.WriteString(m.Number)
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(c.Name)
+	builder.WriteString(m.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }

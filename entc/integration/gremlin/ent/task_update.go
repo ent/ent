@@ -28,165 +28,165 @@ type TaskUpdate struct {
 }
 
 // Where appends a list predicates to the TaskUpdate builder.
-func (tu *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
-	tu.mutation.Where(ps...)
-	return tu
+func (u *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetPriority sets the "priority" field.
-func (tu *TaskUpdate) SetPriority(t task.Priority) *TaskUpdate {
-	tu.mutation.ResetPriority()
-	tu.mutation.SetPriority(t)
-	return tu
+func (m *TaskUpdate) SetPriority(v task.Priority) *TaskUpdate {
+	m.mutation.ResetPriority()
+	m.mutation.SetPriority(v)
+	return m
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillablePriority(t *task.Priority) *TaskUpdate {
-	if t != nil {
-		tu.SetPriority(*t)
+func (m *TaskUpdate) SetNillablePriority(v *task.Priority) *TaskUpdate {
+	if v != nil {
+		m.SetPriority(*v)
 	}
-	return tu
+	return m
 }
 
-// AddPriority adds t to the "priority" field.
-func (tu *TaskUpdate) AddPriority(t task.Priority) *TaskUpdate {
-	tu.mutation.AddPriority(t)
-	return tu
+// AddPriority adds value to the "priority" field.
+func (m *TaskUpdate) AddPriority(v task.Priority) *TaskUpdate {
+	m.mutation.AddPriority(v)
+	return m
 }
 
 // SetPriorities sets the "priorities" field.
-func (tu *TaskUpdate) SetPriorities(m map[string]task.Priority) *TaskUpdate {
-	tu.mutation.SetPriorities(m)
-	return tu
+func (m *TaskUpdate) SetPriorities(v map[string]task.Priority) *TaskUpdate {
+	m.mutation.SetPriorities(v)
+	return m
 }
 
 // ClearPriorities clears the value of the "priorities" field.
-func (tu *TaskUpdate) ClearPriorities() *TaskUpdate {
-	tu.mutation.ClearPriorities()
-	return tu
+func (m *TaskUpdate) ClearPriorities() *TaskUpdate {
+	m.mutation.ClearPriorities()
+	return m
 }
 
 // SetName sets the "name" field.
-func (tu *TaskUpdate) SetName(s string) *TaskUpdate {
-	tu.mutation.SetName(s)
-	return tu
+func (m *TaskUpdate) SetName(v string) *TaskUpdate {
+	m.mutation.SetName(v)
+	return m
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillableName(s *string) *TaskUpdate {
-	if s != nil {
-		tu.SetName(*s)
+func (m *TaskUpdate) SetNillableName(v *string) *TaskUpdate {
+	if v != nil {
+		m.SetName(*v)
 	}
-	return tu
+	return m
 }
 
 // ClearName clears the value of the "name" field.
-func (tu *TaskUpdate) ClearName() *TaskUpdate {
-	tu.mutation.ClearName()
-	return tu
+func (m *TaskUpdate) ClearName() *TaskUpdate {
+	m.mutation.ClearName()
+	return m
 }
 
 // SetOwner sets the "owner" field.
-func (tu *TaskUpdate) SetOwner(s string) *TaskUpdate {
-	tu.mutation.SetOwner(s)
-	return tu
+func (m *TaskUpdate) SetOwner(v string) *TaskUpdate {
+	m.mutation.SetOwner(v)
+	return m
 }
 
 // SetNillableOwner sets the "owner" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillableOwner(s *string) *TaskUpdate {
-	if s != nil {
-		tu.SetOwner(*s)
+func (m *TaskUpdate) SetNillableOwner(v *string) *TaskUpdate {
+	if v != nil {
+		m.SetOwner(*v)
 	}
-	return tu
+	return m
 }
 
 // ClearOwner clears the value of the "owner" field.
-func (tu *TaskUpdate) ClearOwner() *TaskUpdate {
-	tu.mutation.ClearOwner()
-	return tu
+func (m *TaskUpdate) ClearOwner() *TaskUpdate {
+	m.mutation.ClearOwner()
+	return m
 }
 
 // SetOrder sets the "order" field.
-func (tu *TaskUpdate) SetOrder(i int) *TaskUpdate {
-	tu.mutation.ResetOrder()
-	tu.mutation.SetOrder(i)
-	return tu
+func (m *TaskUpdate) SetOrder(v int) *TaskUpdate {
+	m.mutation.ResetOrder()
+	m.mutation.SetOrder(v)
+	return m
 }
 
 // SetNillableOrder sets the "order" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillableOrder(i *int) *TaskUpdate {
-	if i != nil {
-		tu.SetOrder(*i)
+func (m *TaskUpdate) SetNillableOrder(v *int) *TaskUpdate {
+	if v != nil {
+		m.SetOrder(*v)
 	}
-	return tu
+	return m
 }
 
-// AddOrder adds i to the "order" field.
-func (tu *TaskUpdate) AddOrder(i int) *TaskUpdate {
-	tu.mutation.AddOrder(i)
-	return tu
+// AddOrder adds value to the "order" field.
+func (m *TaskUpdate) AddOrder(v int) *TaskUpdate {
+	m.mutation.AddOrder(v)
+	return m
 }
 
 // ClearOrder clears the value of the "order" field.
-func (tu *TaskUpdate) ClearOrder() *TaskUpdate {
-	tu.mutation.ClearOrder()
-	return tu
+func (m *TaskUpdate) ClearOrder() *TaskUpdate {
+	m.mutation.ClearOrder()
+	return m
 }
 
 // SetOrderOption sets the "order_option" field.
-func (tu *TaskUpdate) SetOrderOption(i int) *TaskUpdate {
-	tu.mutation.ResetOrderOption()
-	tu.mutation.SetOrderOption(i)
-	return tu
+func (m *TaskUpdate) SetOrderOption(v int) *TaskUpdate {
+	m.mutation.ResetOrderOption()
+	m.mutation.SetOrderOption(v)
+	return m
 }
 
 // SetNillableOrderOption sets the "order_option" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillableOrderOption(i *int) *TaskUpdate {
-	if i != nil {
-		tu.SetOrderOption(*i)
+func (m *TaskUpdate) SetNillableOrderOption(v *int) *TaskUpdate {
+	if v != nil {
+		m.SetOrderOption(*v)
 	}
-	return tu
+	return m
 }
 
-// AddOrderOption adds i to the "order_option" field.
-func (tu *TaskUpdate) AddOrderOption(i int) *TaskUpdate {
-	tu.mutation.AddOrderOption(i)
-	return tu
+// AddOrderOption adds value to the "order_option" field.
+func (m *TaskUpdate) AddOrderOption(v int) *TaskUpdate {
+	m.mutation.AddOrderOption(v)
+	return m
 }
 
 // ClearOrderOption clears the value of the "order_option" field.
-func (tu *TaskUpdate) ClearOrderOption() *TaskUpdate {
-	tu.mutation.ClearOrderOption()
-	return tu
+func (m *TaskUpdate) ClearOrderOption() *TaskUpdate {
+	m.mutation.ClearOrderOption()
+	return m
 }
 
 // SetOp sets the "op" field.
-func (tu *TaskUpdate) SetOp(s string) *TaskUpdate {
-	tu.mutation.SetOpField(s)
-	return tu
+func (m *TaskUpdate) SetOp(v string) *TaskUpdate {
+	m.mutation.SetOpField(v)
+	return m
 }
 
 // SetNillableOp sets the "op" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillableOp(s *string) *TaskUpdate {
-	if s != nil {
-		tu.SetOp(*s)
+func (m *TaskUpdate) SetNillableOp(v *string) *TaskUpdate {
+	if v != nil {
+		m.SetOp(*v)
 	}
-	return tu
+	return m
 }
 
 // Mutation returns the TaskMutation object of the builder.
-func (tu *TaskUpdate) Mutation() *TaskMutation {
-	return tu.mutation
+func (m *TaskUpdate) Mutation() *TaskMutation {
+	return m.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (tu *TaskUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, tu.gremlinSave, tu.mutation, tu.hooks)
+func (u *TaskUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.gremlinSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (tu *TaskUpdate) SaveX(ctx context.Context) int {
-	affected, err := tu.Save(ctx)
+func (u *TaskUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -194,26 +194,26 @@ func (tu *TaskUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (tu *TaskUpdate) Exec(ctx context.Context) error {
-	_, err := tu.Save(ctx)
+func (u *TaskUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tu *TaskUpdate) ExecX(ctx context.Context) {
-	if err := tu.Exec(ctx); err != nil {
+func (u *TaskUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (tu *TaskUpdate) check() error {
-	if v, ok := tu.mutation.Priority(); ok {
+func (u *TaskUpdate) check() error {
+	if v, ok := u.mutation.Priority(); ok {
 		if err := v.Validate(); err != nil {
 			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
-	if v, ok := tu.mutation.GetOp(); ok {
+	if v, ok := u.mutation.GetOp(); ok {
 		if err := enttask.OpValidator(v); err != nil {
 			return &ValidationError{Name: "op", err: fmt.Errorf(`ent: validator failed for field "Task.op": %w`, err)}
 		}
@@ -221,74 +221,74 @@ func (tu *TaskUpdate) check() error {
 	return nil
 }
 
-func (tu *TaskUpdate) gremlinSave(ctx context.Context) (int, error) {
-	if err := tu.check(); err != nil {
+func (u *TaskUpdate) gremlinSave(ctx context.Context) (int, error) {
+	if err := u.check(); err != nil {
 		return 0, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := tu.gremlin().Query()
-	if err := tu.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := u.gremlin().Query()
+	if err := u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return 0, err
 	}
-	tu.mutation.done = true
+	u.mutation.done = true
 	return res.ReadInt()
 }
 
-func (tu *TaskUpdate) gremlin() *dsl.Traversal {
+func (u *TaskUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(enttask.Label)
-	for _, p := range tu.mutation.predicates {
+	for _, p := range u.mutation.predicates {
 		p(v)
 	}
 	var (
 		trs []*dsl.Traversal
 	)
-	if value, ok := tu.mutation.Priority(); ok {
+	if value, ok := u.mutation.Priority(); ok {
 		v.Property(dsl.Single, enttask.FieldPriority, value)
 	}
-	if value, ok := tu.mutation.AddedPriority(); ok {
+	if value, ok := u.mutation.AddedPriority(); ok {
 		v.Property(dsl.Single, enttask.FieldPriority, __.Union(__.Values(enttask.FieldPriority), __.Constant(value)).Sum())
 	}
-	if value, ok := tu.mutation.Priorities(); ok {
+	if value, ok := u.mutation.Priorities(); ok {
 		v.Property(dsl.Single, enttask.FieldPriorities, value)
 	}
-	if value, ok := tu.mutation.Name(); ok {
+	if value, ok := u.mutation.Name(); ok {
 		v.Property(dsl.Single, enttask.FieldName, value)
 	}
-	if value, ok := tu.mutation.Owner(); ok {
+	if value, ok := u.mutation.Owner(); ok {
 		v.Property(dsl.Single, enttask.FieldOwner, value)
 	}
-	if value, ok := tu.mutation.Order(); ok {
+	if value, ok := u.mutation.Order(); ok {
 		v.Property(dsl.Single, enttask.FieldOrder, value)
 	}
-	if value, ok := tu.mutation.AddedOrder(); ok {
+	if value, ok := u.mutation.AddedOrder(); ok {
 		v.Property(dsl.Single, enttask.FieldOrder, __.Union(__.Values(enttask.FieldOrder), __.Constant(value)).Sum())
 	}
-	if value, ok := tu.mutation.OrderOption(); ok {
+	if value, ok := u.mutation.OrderOption(); ok {
 		v.Property(dsl.Single, enttask.FieldOrderOption, value)
 	}
-	if value, ok := tu.mutation.AddedOrderOption(); ok {
+	if value, ok := u.mutation.AddedOrderOption(); ok {
 		v.Property(dsl.Single, enttask.FieldOrderOption, __.Union(__.Values(enttask.FieldOrderOption), __.Constant(value)).Sum())
 	}
-	if value, ok := tu.mutation.GetOp(); ok {
+	if value, ok := u.mutation.GetOp(); ok {
 		v.Property(dsl.Single, enttask.FieldOp, value)
 	}
 	var properties []any
-	if tu.mutation.PrioritiesCleared() {
+	if u.mutation.PrioritiesCleared() {
 		properties = append(properties, enttask.FieldPriorities)
 	}
-	if tu.mutation.NameCleared() {
+	if u.mutation.NameCleared() {
 		properties = append(properties, enttask.FieldName)
 	}
-	if tu.mutation.OwnerCleared() {
+	if u.mutation.OwnerCleared() {
 		properties = append(properties, enttask.FieldOwner)
 	}
-	if tu.mutation.OrderCleared() {
+	if u.mutation.OrderCleared() {
 		properties = append(properties, enttask.FieldOrder)
 	}
-	if tu.mutation.OrderOptionCleared() {
+	if u.mutation.OrderOptionCleared() {
 		properties = append(properties, enttask.FieldOrderOption)
 	}
 	if len(properties) > 0 {
@@ -308,172 +308,172 @@ type TaskUpdateOne struct {
 }
 
 // SetPriority sets the "priority" field.
-func (tuo *TaskUpdateOne) SetPriority(t task.Priority) *TaskUpdateOne {
-	tuo.mutation.ResetPriority()
-	tuo.mutation.SetPriority(t)
-	return tuo
+func (m *TaskUpdateOne) SetPriority(v task.Priority) *TaskUpdateOne {
+	m.mutation.ResetPriority()
+	m.mutation.SetPriority(v)
+	return m
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillablePriority(t *task.Priority) *TaskUpdateOne {
-	if t != nil {
-		tuo.SetPriority(*t)
+func (m *TaskUpdateOne) SetNillablePriority(v *task.Priority) *TaskUpdateOne {
+	if v != nil {
+		m.SetPriority(*v)
 	}
-	return tuo
+	return m
 }
 
-// AddPriority adds t to the "priority" field.
-func (tuo *TaskUpdateOne) AddPriority(t task.Priority) *TaskUpdateOne {
-	tuo.mutation.AddPriority(t)
-	return tuo
+// AddPriority adds value to the "priority" field.
+func (m *TaskUpdateOne) AddPriority(v task.Priority) *TaskUpdateOne {
+	m.mutation.AddPriority(v)
+	return m
 }
 
 // SetPriorities sets the "priorities" field.
-func (tuo *TaskUpdateOne) SetPriorities(m map[string]task.Priority) *TaskUpdateOne {
-	tuo.mutation.SetPriorities(m)
-	return tuo
+func (m *TaskUpdateOne) SetPriorities(v map[string]task.Priority) *TaskUpdateOne {
+	m.mutation.SetPriorities(v)
+	return m
 }
 
 // ClearPriorities clears the value of the "priorities" field.
-func (tuo *TaskUpdateOne) ClearPriorities() *TaskUpdateOne {
-	tuo.mutation.ClearPriorities()
-	return tuo
+func (m *TaskUpdateOne) ClearPriorities() *TaskUpdateOne {
+	m.mutation.ClearPriorities()
+	return m
 }
 
 // SetName sets the "name" field.
-func (tuo *TaskUpdateOne) SetName(s string) *TaskUpdateOne {
-	tuo.mutation.SetName(s)
-	return tuo
+func (m *TaskUpdateOne) SetName(v string) *TaskUpdateOne {
+	m.mutation.SetName(v)
+	return m
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillableName(s *string) *TaskUpdateOne {
-	if s != nil {
-		tuo.SetName(*s)
+func (m *TaskUpdateOne) SetNillableName(v *string) *TaskUpdateOne {
+	if v != nil {
+		m.SetName(*v)
 	}
-	return tuo
+	return m
 }
 
 // ClearName clears the value of the "name" field.
-func (tuo *TaskUpdateOne) ClearName() *TaskUpdateOne {
-	tuo.mutation.ClearName()
-	return tuo
+func (m *TaskUpdateOne) ClearName() *TaskUpdateOne {
+	m.mutation.ClearName()
+	return m
 }
 
 // SetOwner sets the "owner" field.
-func (tuo *TaskUpdateOne) SetOwner(s string) *TaskUpdateOne {
-	tuo.mutation.SetOwner(s)
-	return tuo
+func (m *TaskUpdateOne) SetOwner(v string) *TaskUpdateOne {
+	m.mutation.SetOwner(v)
+	return m
 }
 
 // SetNillableOwner sets the "owner" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillableOwner(s *string) *TaskUpdateOne {
-	if s != nil {
-		tuo.SetOwner(*s)
+func (m *TaskUpdateOne) SetNillableOwner(v *string) *TaskUpdateOne {
+	if v != nil {
+		m.SetOwner(*v)
 	}
-	return tuo
+	return m
 }
 
 // ClearOwner clears the value of the "owner" field.
-func (tuo *TaskUpdateOne) ClearOwner() *TaskUpdateOne {
-	tuo.mutation.ClearOwner()
-	return tuo
+func (m *TaskUpdateOne) ClearOwner() *TaskUpdateOne {
+	m.mutation.ClearOwner()
+	return m
 }
 
 // SetOrder sets the "order" field.
-func (tuo *TaskUpdateOne) SetOrder(i int) *TaskUpdateOne {
-	tuo.mutation.ResetOrder()
-	tuo.mutation.SetOrder(i)
-	return tuo
+func (m *TaskUpdateOne) SetOrder(v int) *TaskUpdateOne {
+	m.mutation.ResetOrder()
+	m.mutation.SetOrder(v)
+	return m
 }
 
 // SetNillableOrder sets the "order" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillableOrder(i *int) *TaskUpdateOne {
-	if i != nil {
-		tuo.SetOrder(*i)
+func (m *TaskUpdateOne) SetNillableOrder(v *int) *TaskUpdateOne {
+	if v != nil {
+		m.SetOrder(*v)
 	}
-	return tuo
+	return m
 }
 
-// AddOrder adds i to the "order" field.
-func (tuo *TaskUpdateOne) AddOrder(i int) *TaskUpdateOne {
-	tuo.mutation.AddOrder(i)
-	return tuo
+// AddOrder adds value to the "order" field.
+func (m *TaskUpdateOne) AddOrder(v int) *TaskUpdateOne {
+	m.mutation.AddOrder(v)
+	return m
 }
 
 // ClearOrder clears the value of the "order" field.
-func (tuo *TaskUpdateOne) ClearOrder() *TaskUpdateOne {
-	tuo.mutation.ClearOrder()
-	return tuo
+func (m *TaskUpdateOne) ClearOrder() *TaskUpdateOne {
+	m.mutation.ClearOrder()
+	return m
 }
 
 // SetOrderOption sets the "order_option" field.
-func (tuo *TaskUpdateOne) SetOrderOption(i int) *TaskUpdateOne {
-	tuo.mutation.ResetOrderOption()
-	tuo.mutation.SetOrderOption(i)
-	return tuo
+func (m *TaskUpdateOne) SetOrderOption(v int) *TaskUpdateOne {
+	m.mutation.ResetOrderOption()
+	m.mutation.SetOrderOption(v)
+	return m
 }
 
 // SetNillableOrderOption sets the "order_option" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillableOrderOption(i *int) *TaskUpdateOne {
-	if i != nil {
-		tuo.SetOrderOption(*i)
+func (m *TaskUpdateOne) SetNillableOrderOption(v *int) *TaskUpdateOne {
+	if v != nil {
+		m.SetOrderOption(*v)
 	}
-	return tuo
+	return m
 }
 
-// AddOrderOption adds i to the "order_option" field.
-func (tuo *TaskUpdateOne) AddOrderOption(i int) *TaskUpdateOne {
-	tuo.mutation.AddOrderOption(i)
-	return tuo
+// AddOrderOption adds value to the "order_option" field.
+func (m *TaskUpdateOne) AddOrderOption(v int) *TaskUpdateOne {
+	m.mutation.AddOrderOption(v)
+	return m
 }
 
 // ClearOrderOption clears the value of the "order_option" field.
-func (tuo *TaskUpdateOne) ClearOrderOption() *TaskUpdateOne {
-	tuo.mutation.ClearOrderOption()
-	return tuo
+func (m *TaskUpdateOne) ClearOrderOption() *TaskUpdateOne {
+	m.mutation.ClearOrderOption()
+	return m
 }
 
 // SetOp sets the "op" field.
-func (tuo *TaskUpdateOne) SetOp(s string) *TaskUpdateOne {
-	tuo.mutation.SetOpField(s)
-	return tuo
+func (m *TaskUpdateOne) SetOp(v string) *TaskUpdateOne {
+	m.mutation.SetOpField(v)
+	return m
 }
 
 // SetNillableOp sets the "op" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillableOp(s *string) *TaskUpdateOne {
-	if s != nil {
-		tuo.SetOp(*s)
+func (m *TaskUpdateOne) SetNillableOp(v *string) *TaskUpdateOne {
+	if v != nil {
+		m.SetOp(*v)
 	}
-	return tuo
+	return m
 }
 
 // Mutation returns the TaskMutation object of the builder.
-func (tuo *TaskUpdateOne) Mutation() *TaskMutation {
-	return tuo.mutation
+func (m *TaskUpdateOne) Mutation() *TaskMutation {
+	return m.mutation
 }
 
 // Where appends a list predicates to the TaskUpdate builder.
-func (tuo *TaskUpdateOne) Where(ps ...predicate.Task) *TaskUpdateOne {
-	tuo.mutation.Where(ps...)
-	return tuo
+func (u *TaskUpdateOne) Where(ps ...predicate.Task) *TaskUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (tuo *TaskUpdateOne) Select(field string, fields ...string) *TaskUpdateOne {
-	tuo.fields = append([]string{field}, fields...)
-	return tuo
+func (u *TaskUpdateOne) Select(field string, fields ...string) *TaskUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated Task entity.
-func (tuo *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
-	return withHooks(ctx, tuo.gremlinSave, tuo.mutation, tuo.hooks)
+func (u *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
+	return withHooks(ctx, u.gremlinSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (tuo *TaskUpdateOne) SaveX(ctx context.Context) *Task {
-	node, err := tuo.Save(ctx)
+func (u *TaskUpdateOne) SaveX(ctx context.Context) *Task {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -481,26 +481,26 @@ func (tuo *TaskUpdateOne) SaveX(ctx context.Context) *Task {
 }
 
 // Exec executes the query on the entity.
-func (tuo *TaskUpdateOne) Exec(ctx context.Context) error {
-	_, err := tuo.Save(ctx)
+func (u *TaskUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tuo *TaskUpdateOne) ExecX(ctx context.Context) {
-	if err := tuo.Exec(ctx); err != nil {
+func (u *TaskUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (tuo *TaskUpdateOne) check() error {
-	if v, ok := tuo.mutation.Priority(); ok {
+func (u *TaskUpdateOne) check() error {
+	if v, ok := u.mutation.Priority(); ok {
 		if err := v.Validate(); err != nil {
 			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
-	if v, ok := tuo.mutation.GetOp(); ok {
+	if v, ok := u.mutation.GetOp(); ok {
 		if err := enttask.OpValidator(v); err != nil {
 			return &ValidationError{Name: "op", err: fmt.Errorf(`ent: validator failed for field "Task.op": %w`, err)}
 		}
@@ -508,88 +508,88 @@ func (tuo *TaskUpdateOne) check() error {
 	return nil
 }
 
-func (tuo *TaskUpdateOne) gremlinSave(ctx context.Context) (*Task, error) {
-	if err := tuo.check(); err != nil {
+func (u *TaskUpdateOne) gremlinSave(ctx context.Context) (*Task, error) {
+	if err := u.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	id, ok := tuo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Task.id" for update`)}
 	}
-	query, bindings := tuo.gremlin(id).Query()
-	if err := tuo.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := u.gremlin(id).Query()
+	if err := u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	tuo.mutation.done = true
-	t := &Task{config: tuo.config}
-	if err := t.FromResponse(res); err != nil {
+	u.mutation.done = true
+	m := &Task{config: u.config}
+	if err := m.FromResponse(res); err != nil {
 		return nil, err
 	}
-	return t, nil
+	return m, nil
 }
 
-func (tuo *TaskUpdateOne) gremlin(id string) *dsl.Traversal {
+func (u *TaskUpdateOne) gremlin(id string) *dsl.Traversal {
 	v := g.V(id)
 	var (
 		trs []*dsl.Traversal
 	)
-	if value, ok := tuo.mutation.Priority(); ok {
+	if value, ok := u.mutation.Priority(); ok {
 		v.Property(dsl.Single, enttask.FieldPriority, value)
 	}
-	if value, ok := tuo.mutation.AddedPriority(); ok {
+	if value, ok := u.mutation.AddedPriority(); ok {
 		v.Property(dsl.Single, enttask.FieldPriority, __.Union(__.Values(enttask.FieldPriority), __.Constant(value)).Sum())
 	}
-	if value, ok := tuo.mutation.Priorities(); ok {
+	if value, ok := u.mutation.Priorities(); ok {
 		v.Property(dsl.Single, enttask.FieldPriorities, value)
 	}
-	if value, ok := tuo.mutation.Name(); ok {
+	if value, ok := u.mutation.Name(); ok {
 		v.Property(dsl.Single, enttask.FieldName, value)
 	}
-	if value, ok := tuo.mutation.Owner(); ok {
+	if value, ok := u.mutation.Owner(); ok {
 		v.Property(dsl.Single, enttask.FieldOwner, value)
 	}
-	if value, ok := tuo.mutation.Order(); ok {
+	if value, ok := u.mutation.Order(); ok {
 		v.Property(dsl.Single, enttask.FieldOrder, value)
 	}
-	if value, ok := tuo.mutation.AddedOrder(); ok {
+	if value, ok := u.mutation.AddedOrder(); ok {
 		v.Property(dsl.Single, enttask.FieldOrder, __.Union(__.Values(enttask.FieldOrder), __.Constant(value)).Sum())
 	}
-	if value, ok := tuo.mutation.OrderOption(); ok {
+	if value, ok := u.mutation.OrderOption(); ok {
 		v.Property(dsl.Single, enttask.FieldOrderOption, value)
 	}
-	if value, ok := tuo.mutation.AddedOrderOption(); ok {
+	if value, ok := u.mutation.AddedOrderOption(); ok {
 		v.Property(dsl.Single, enttask.FieldOrderOption, __.Union(__.Values(enttask.FieldOrderOption), __.Constant(value)).Sum())
 	}
-	if value, ok := tuo.mutation.GetOp(); ok {
+	if value, ok := u.mutation.GetOp(); ok {
 		v.Property(dsl.Single, enttask.FieldOp, value)
 	}
 	var properties []any
-	if tuo.mutation.PrioritiesCleared() {
+	if u.mutation.PrioritiesCleared() {
 		properties = append(properties, enttask.FieldPriorities)
 	}
-	if tuo.mutation.NameCleared() {
+	if u.mutation.NameCleared() {
 		properties = append(properties, enttask.FieldName)
 	}
-	if tuo.mutation.OwnerCleared() {
+	if u.mutation.OwnerCleared() {
 		properties = append(properties, enttask.FieldOwner)
 	}
-	if tuo.mutation.OrderCleared() {
+	if u.mutation.OrderCleared() {
 		properties = append(properties, enttask.FieldOrder)
 	}
-	if tuo.mutation.OrderOptionCleared() {
+	if u.mutation.OrderOptionCleared() {
 		properties = append(properties, enttask.FieldOrderOption)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
 	}
-	if len(tuo.fields) > 0 {
-		fields := make([]any, 0, len(tuo.fields)+1)
+	if len(u.fields) > 0 {
+		fields := make([]any, 0, len(u.fields)+1)
 		fields = append(fields, true)
-		for _, f := range tuo.fields {
+		for _, f := range u.fields {
 			fields = append(fields, f)
 		}
 		v.ValueMap(fields...)

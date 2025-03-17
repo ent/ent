@@ -29,55 +29,55 @@ type BlobLinkCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (blc *BlobLinkCreate) SetCreatedAt(t time.Time) *BlobLinkCreate {
-	blc.mutation.SetCreatedAt(t)
-	return blc
+func (m *BlobLinkCreate) SetCreatedAt(v time.Time) *BlobLinkCreate {
+	m.mutation.SetCreatedAt(v)
+	return m
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (blc *BlobLinkCreate) SetNillableCreatedAt(t *time.Time) *BlobLinkCreate {
-	if t != nil {
-		blc.SetCreatedAt(*t)
+func (m *BlobLinkCreate) SetNillableCreatedAt(v *time.Time) *BlobLinkCreate {
+	if v != nil {
+		m.SetCreatedAt(*v)
 	}
-	return blc
+	return m
 }
 
 // SetBlobID sets the "blob_id" field.
-func (blc *BlobLinkCreate) SetBlobID(u uuid.UUID) *BlobLinkCreate {
-	blc.mutation.SetBlobID(u)
-	return blc
+func (m *BlobLinkCreate) SetBlobID(v uuid.UUID) *BlobLinkCreate {
+	m.mutation.SetBlobID(v)
+	return m
 }
 
 // SetLinkID sets the "link_id" field.
-func (blc *BlobLinkCreate) SetLinkID(u uuid.UUID) *BlobLinkCreate {
-	blc.mutation.SetLinkID(u)
-	return blc
+func (m *BlobLinkCreate) SetLinkID(v uuid.UUID) *BlobLinkCreate {
+	m.mutation.SetLinkID(v)
+	return m
 }
 
 // SetBlob sets the "blob" edge to the Blob entity.
-func (blc *BlobLinkCreate) SetBlob(b *Blob) *BlobLinkCreate {
-	return blc.SetBlobID(b.ID)
+func (m *BlobLinkCreate) SetBlob(v *Blob) *BlobLinkCreate {
+	return m.SetBlobID(v.ID)
 }
 
 // SetLink sets the "link" edge to the Blob entity.
-func (blc *BlobLinkCreate) SetLink(b *Blob) *BlobLinkCreate {
-	return blc.SetLinkID(b.ID)
+func (m *BlobLinkCreate) SetLink(v *Blob) *BlobLinkCreate {
+	return m.SetLinkID(v.ID)
 }
 
 // Mutation returns the BlobLinkMutation object of the builder.
-func (blc *BlobLinkCreate) Mutation() *BlobLinkMutation {
-	return blc.mutation
+func (m *BlobLinkCreate) Mutation() *BlobLinkMutation {
+	return m.mutation
 }
 
 // Save creates the BlobLink in the database.
-func (blc *BlobLinkCreate) Save(ctx context.Context) (*BlobLink, error) {
-	blc.defaults()
-	return withHooks(ctx, blc.sqlSave, blc.mutation, blc.hooks)
+func (c *BlobLinkCreate) Save(ctx context.Context) (*BlobLink, error) {
+	c.defaults()
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (blc *BlobLinkCreate) SaveX(ctx context.Context) *BlobLink {
-	v, err := blc.Save(ctx)
+func (c *BlobLinkCreate) SaveX(ctx context.Context) *BlobLink {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -85,52 +85,52 @@ func (blc *BlobLinkCreate) SaveX(ctx context.Context) *BlobLink {
 }
 
 // Exec executes the query.
-func (blc *BlobLinkCreate) Exec(ctx context.Context) error {
-	_, err := blc.Save(ctx)
+func (c *BlobLinkCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (blc *BlobLinkCreate) ExecX(ctx context.Context) {
-	if err := blc.Exec(ctx); err != nil {
+func (c *BlobLinkCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (blc *BlobLinkCreate) defaults() {
-	if _, ok := blc.mutation.CreatedAt(); !ok {
+func (c *BlobLinkCreate) defaults() {
+	if _, ok := c.mutation.CreatedAt(); !ok {
 		v := bloblink.DefaultCreatedAt()
-		blc.mutation.SetCreatedAt(v)
+		c.mutation.SetCreatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (blc *BlobLinkCreate) check() error {
-	if _, ok := blc.mutation.CreatedAt(); !ok {
+func (c *BlobLinkCreate) check() error {
+	if _, ok := c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "BlobLink.created_at"`)}
 	}
-	if _, ok := blc.mutation.BlobID(); !ok {
+	if _, ok := c.mutation.BlobID(); !ok {
 		return &ValidationError{Name: "blob_id", err: errors.New(`ent: missing required field "BlobLink.blob_id"`)}
 	}
-	if _, ok := blc.mutation.LinkID(); !ok {
+	if _, ok := c.mutation.LinkID(); !ok {
 		return &ValidationError{Name: "link_id", err: errors.New(`ent: missing required field "BlobLink.link_id"`)}
 	}
-	if len(blc.mutation.BlobIDs()) == 0 {
+	if len(c.mutation.BlobIDs()) == 0 {
 		return &ValidationError{Name: "blob", err: errors.New(`ent: missing required edge "BlobLink.blob"`)}
 	}
-	if len(blc.mutation.LinkIDs()) == 0 {
+	if len(c.mutation.LinkIDs()) == 0 {
 		return &ValidationError{Name: "link", err: errors.New(`ent: missing required edge "BlobLink.link"`)}
 	}
 	return nil
 }
 
-func (blc *BlobLinkCreate) sqlSave(ctx context.Context) (*BlobLink, error) {
-	if err := blc.check(); err != nil {
+func (c *BlobLinkCreate) sqlSave(ctx context.Context) (*BlobLink, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := blc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, blc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -139,17 +139,17 @@ func (blc *BlobLinkCreate) sqlSave(ctx context.Context) (*BlobLink, error) {
 	return _node, nil
 }
 
-func (blc *BlobLinkCreate) createSpec() (*BlobLink, *sqlgraph.CreateSpec) {
+func (c *BlobLinkCreate) createSpec() (*BlobLink, *sqlgraph.CreateSpec) {
 	var (
-		_node = &BlobLink{config: blc.config}
+		_node = &BlobLink{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(bloblink.Table, nil)
 	)
-	_spec.OnConflict = blc.conflict
-	if value, ok := blc.mutation.CreatedAt(); ok {
+	_spec.OnConflict = c.conflict
+	if value, ok := c.mutation.CreatedAt(); ok {
 		_spec.SetField(bloblink.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if nodes := blc.mutation.BlobIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.BlobIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -166,7 +166,7 @@ func (blc *BlobLinkCreate) createSpec() (*BlobLink, *sqlgraph.CreateSpec) {
 		_node.BlobID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := blc.mutation.LinkIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.LinkIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -202,11 +202,9 @@ func (blc *BlobLinkCreate) createSpec() (*BlobLink, *sqlgraph.CreateSpec) {
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
-func (blc *BlobLinkCreate) OnConflict(opts ...sql.ConflictOption) *BlobLinkUpsertOne {
-	blc.conflict = opts
-	return &BlobLinkUpsertOne{
-		create: blc,
-	}
+func (c *BlobLinkCreate) OnConflict(opts ...sql.ConflictOption) *BlobLinkUpsertOne {
+	c.conflict = opts
+	return &BlobLinkUpsertOne{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -215,11 +213,9 @@ func (blc *BlobLinkCreate) OnConflict(opts ...sql.ConflictOption) *BlobLinkUpser
 //	client.BlobLink.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (blc *BlobLinkCreate) OnConflictColumns(columns ...string) *BlobLinkUpsertOne {
-	blc.conflict = append(blc.conflict, sql.ConflictColumns(columns...))
-	return &BlobLinkUpsertOne{
-		create: blc,
-	}
+func (c *BlobLinkCreate) OnConflictColumns(columns ...string) *BlobLinkUpsertOne {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &BlobLinkUpsertOne{create: c}
 }
 
 type (
@@ -377,16 +373,16 @@ type BlobLinkCreateBulk struct {
 }
 
 // Save creates the BlobLink entities in the database.
-func (blcb *BlobLinkCreateBulk) Save(ctx context.Context) ([]*BlobLink, error) {
-	if blcb.err != nil {
-		return nil, blcb.err
+func (c *BlobLinkCreateBulk) Save(ctx context.Context) ([]*BlobLink, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(blcb.builders))
-	nodes := make([]*BlobLink, len(blcb.builders))
-	mutators := make([]Mutator, len(blcb.builders))
-	for i := range blcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*BlobLink, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := blcb.builders[i]
+			builder := c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*BlobLinkMutation)
@@ -400,12 +396,12 @@ func (blcb *BlobLinkCreateBulk) Save(ctx context.Context) ([]*BlobLink, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, blcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = blcb.conflict
+					spec.OnConflict = c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, blcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -424,7 +420,7 @@ func (blcb *BlobLinkCreateBulk) Save(ctx context.Context) ([]*BlobLink, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, blcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -432,8 +428,8 @@ func (blcb *BlobLinkCreateBulk) Save(ctx context.Context) ([]*BlobLink, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (blcb *BlobLinkCreateBulk) SaveX(ctx context.Context) []*BlobLink {
-	v, err := blcb.Save(ctx)
+func (c *BlobLinkCreateBulk) SaveX(ctx context.Context) []*BlobLink {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -441,14 +437,14 @@ func (blcb *BlobLinkCreateBulk) SaveX(ctx context.Context) []*BlobLink {
 }
 
 // Exec executes the query.
-func (blcb *BlobLinkCreateBulk) Exec(ctx context.Context) error {
-	_, err := blcb.Save(ctx)
+func (c *BlobLinkCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (blcb *BlobLinkCreateBulk) ExecX(ctx context.Context) {
-	if err := blcb.Exec(ctx); err != nil {
+func (c *BlobLinkCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -468,11 +464,9 @@ func (blcb *BlobLinkCreateBulk) ExecX(ctx context.Context) {
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
-func (blcb *BlobLinkCreateBulk) OnConflict(opts ...sql.ConflictOption) *BlobLinkUpsertBulk {
-	blcb.conflict = opts
-	return &BlobLinkUpsertBulk{
-		create: blcb,
-	}
+func (c *BlobLinkCreateBulk) OnConflict(opts ...sql.ConflictOption) *BlobLinkUpsertBulk {
+	c.conflict = opts
+	return &BlobLinkUpsertBulk{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -481,11 +475,9 @@ func (blcb *BlobLinkCreateBulk) OnConflict(opts ...sql.ConflictOption) *BlobLink
 //	client.BlobLink.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (blcb *BlobLinkCreateBulk) OnConflictColumns(columns ...string) *BlobLinkUpsertBulk {
-	blcb.conflict = append(blcb.conflict, sql.ConflictColumns(columns...))
-	return &BlobLinkUpsertBulk{
-		create: blcb,
-	}
+func (c *BlobLinkCreateBulk) OnConflictColumns(columns ...string) *BlobLinkUpsertBulk {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &BlobLinkUpsertBulk{create: c}
 }
 
 // BlobLinkUpsertBulk is the builder for "upsert"-ing

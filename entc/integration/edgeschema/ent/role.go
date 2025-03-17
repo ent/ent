@@ -80,9 +80,9 @@ func (*Role) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Role fields.
-func (r *Role) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Role) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -91,21 +91,21 @@ func (r *Role) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			r.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case role.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				r.Name = value.String
+				m.Name = value.String
 			}
 		case role.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				r.CreatedAt = value.Time
+				m.CreatedAt = value.Time
 			}
 		default:
-			r.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -113,48 +113,48 @@ func (r *Role) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Role.
 // This includes values selected through modifiers, order, etc.
-func (r *Role) Value(name string) (ent.Value, error) {
-	return r.selectValues.Get(name)
+func (m *Role) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryUser queries the "user" edge of the Role entity.
-func (r *Role) QueryUser() *UserQuery {
-	return NewRoleClient(r.config).QueryUser(r)
+func (m *Role) QueryUser() *UserQuery {
+	return NewRoleClient(m.config).QueryUser(m)
 }
 
 // QueryRolesUsers queries the "roles_users" edge of the Role entity.
-func (r *Role) QueryRolesUsers() *RoleUserQuery {
-	return NewRoleClient(r.config).QueryRolesUsers(r)
+func (m *Role) QueryRolesUsers() *RoleUserQuery {
+	return NewRoleClient(m.config).QueryRolesUsers(m)
 }
 
 // Update returns a builder for updating this Role.
 // Note that you need to call Role.Unwrap() before calling this method if this Role
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (r *Role) Update() *RoleUpdateOne {
-	return NewRoleClient(r.config).UpdateOne(r)
+func (m *Role) Update() *RoleUpdateOne {
+	return NewRoleClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Role entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (r *Role) Unwrap() *Role {
-	_tx, ok := r.config.driver.(*txDriver)
+func (m *Role) Unwrap() *Role {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Role is not a transactional entity")
 	}
-	r.config.driver = _tx.drv
-	return r
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (r *Role) String() string {
+func (m *Role) String() string {
 	var builder strings.Builder
 	builder.WriteString("Role(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", r.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("name=")
-	builder.WriteString(r.Name)
+	builder.WriteString(m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
-	builder.WriteString(r.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(m.CreatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

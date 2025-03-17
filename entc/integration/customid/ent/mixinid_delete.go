@@ -24,56 +24,56 @@ type MixinIDDelete struct {
 }
 
 // Where appends a list predicates to the MixinIDDelete builder.
-func (mid *MixinIDDelete) Where(ps ...predicate.MixinID) *MixinIDDelete {
-	mid.mutation.Where(ps...)
-	return mid
+func (d *MixinIDDelete) Where(ps ...predicate.MixinID) *MixinIDDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (mid *MixinIDDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, mid.sqlExec, mid.mutation, mid.hooks)
+func (d *MixinIDDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (mid *MixinIDDelete) ExecX(ctx context.Context) int {
-	n, err := mid.Exec(ctx)
+func (d *MixinIDDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (mid *MixinIDDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *MixinIDDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(mixinid.Table, sqlgraph.NewFieldSpec(mixinid.FieldID, field.TypeUUID))
-	if ps := mid.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, mid.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	mid.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // MixinIDDeleteOne is the builder for deleting a single MixinID entity.
 type MixinIDDeleteOne struct {
-	mid *MixinIDDelete
+	d *MixinIDDelete
 }
 
 // Where appends a list predicates to the MixinIDDelete builder.
-func (mido *MixinIDDeleteOne) Where(ps ...predicate.MixinID) *MixinIDDeleteOne {
-	mido.mid.mutation.Where(ps...)
-	return mido
+func (d *MixinIDDeleteOne) Where(ps ...predicate.MixinID) *MixinIDDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (mido *MixinIDDeleteOne) Exec(ctx context.Context) error {
-	n, err := mido.mid.Exec(ctx)
+func (d *MixinIDDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (mido *MixinIDDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (mido *MixinIDDeleteOne) ExecX(ctx context.Context) {
-	if err := mido.Exec(ctx); err != nil {
+func (d *MixinIDDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

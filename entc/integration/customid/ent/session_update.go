@@ -28,49 +28,49 @@ type SessionUpdate struct {
 }
 
 // Where appends a list predicates to the SessionUpdate builder.
-func (su *SessionUpdate) Where(ps ...predicate.Session) *SessionUpdate {
-	su.mutation.Where(ps...)
-	return su
+func (u *SessionUpdate) Where(ps ...predicate.Session) *SessionUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetDeviceID sets the "device" edge to the Device entity by ID.
-func (su *SessionUpdate) SetDeviceID(id schema.ID) *SessionUpdate {
-	su.mutation.SetDeviceID(id)
-	return su
+func (m *SessionUpdate) SetDeviceID(id schema.ID) *SessionUpdate {
+	m.mutation.SetDeviceID(id)
+	return m
 }
 
 // SetNillableDeviceID sets the "device" edge to the Device entity by ID if the given value is not nil.
-func (su *SessionUpdate) SetNillableDeviceID(id *schema.ID) *SessionUpdate {
+func (m *SessionUpdate) SetNillableDeviceID(id *schema.ID) *SessionUpdate {
 	if id != nil {
-		su = su.SetDeviceID(*id)
+		m = m.SetDeviceID(*id)
 	}
-	return su
+	return m
 }
 
 // SetDevice sets the "device" edge to the Device entity.
-func (su *SessionUpdate) SetDevice(d *Device) *SessionUpdate {
-	return su.SetDeviceID(d.ID)
+func (m *SessionUpdate) SetDevice(v *Device) *SessionUpdate {
+	return m.SetDeviceID(v.ID)
 }
 
 // Mutation returns the SessionMutation object of the builder.
-func (su *SessionUpdate) Mutation() *SessionMutation {
-	return su.mutation
+func (m *SessionUpdate) Mutation() *SessionMutation {
+	return m.mutation
 }
 
 // ClearDevice clears the "device" edge to the Device entity.
-func (su *SessionUpdate) ClearDevice() *SessionUpdate {
-	su.mutation.ClearDevice()
-	return su
+func (u *SessionUpdate) ClearDevice() *SessionUpdate {
+	u.mutation.ClearDevice()
+	return u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (su *SessionUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, su.sqlSave, su.mutation, su.hooks)
+func (u *SessionUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (su *SessionUpdate) SaveX(ctx context.Context) int {
-	affected, err := su.Save(ctx)
+func (u *SessionUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -78,28 +78,28 @@ func (su *SessionUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (su *SessionUpdate) Exec(ctx context.Context) error {
-	_, err := su.Save(ctx)
+func (u *SessionUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (su *SessionUpdate) ExecX(ctx context.Context) {
-	if err := su.Exec(ctx); err != nil {
+func (u *SessionUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (u *SessionUpdate) sqlSave(ctx context.Context) (_n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(session.Table, session.Columns, sqlgraph.NewFieldSpec(session.FieldID, field.TypeBytes))
-	if ps := su.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if su.mutation.DeviceCleared() {
+	if u.mutation.DeviceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -112,7 +112,7 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := su.mutation.DeviceIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.DeviceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -128,7 +128,7 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, su.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{session.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -136,8 +136,8 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	su.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // SessionUpdateOne is the builder for updating a single Session entity.
@@ -149,56 +149,56 @@ type SessionUpdateOne struct {
 }
 
 // SetDeviceID sets the "device" edge to the Device entity by ID.
-func (suo *SessionUpdateOne) SetDeviceID(id schema.ID) *SessionUpdateOne {
-	suo.mutation.SetDeviceID(id)
-	return suo
+func (m *SessionUpdateOne) SetDeviceID(id schema.ID) *SessionUpdateOne {
+	m.mutation.SetDeviceID(id)
+	return m
 }
 
 // SetNillableDeviceID sets the "device" edge to the Device entity by ID if the given value is not nil.
-func (suo *SessionUpdateOne) SetNillableDeviceID(id *schema.ID) *SessionUpdateOne {
+func (m *SessionUpdateOne) SetNillableDeviceID(id *schema.ID) *SessionUpdateOne {
 	if id != nil {
-		suo = suo.SetDeviceID(*id)
+		m = m.SetDeviceID(*id)
 	}
-	return suo
+	return m
 }
 
 // SetDevice sets the "device" edge to the Device entity.
-func (suo *SessionUpdateOne) SetDevice(d *Device) *SessionUpdateOne {
-	return suo.SetDeviceID(d.ID)
+func (m *SessionUpdateOne) SetDevice(v *Device) *SessionUpdateOne {
+	return m.SetDeviceID(v.ID)
 }
 
 // Mutation returns the SessionMutation object of the builder.
-func (suo *SessionUpdateOne) Mutation() *SessionMutation {
-	return suo.mutation
+func (m *SessionUpdateOne) Mutation() *SessionMutation {
+	return m.mutation
 }
 
 // ClearDevice clears the "device" edge to the Device entity.
-func (suo *SessionUpdateOne) ClearDevice() *SessionUpdateOne {
-	suo.mutation.ClearDevice()
-	return suo
+func (u *SessionUpdateOne) ClearDevice() *SessionUpdateOne {
+	u.mutation.ClearDevice()
+	return u
 }
 
 // Where appends a list predicates to the SessionUpdate builder.
-func (suo *SessionUpdateOne) Where(ps ...predicate.Session) *SessionUpdateOne {
-	suo.mutation.Where(ps...)
-	return suo
+func (u *SessionUpdateOne) Where(ps ...predicate.Session) *SessionUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (suo *SessionUpdateOne) Select(field string, fields ...string) *SessionUpdateOne {
-	suo.fields = append([]string{field}, fields...)
-	return suo
+func (u *SessionUpdateOne) Select(field string, fields ...string) *SessionUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated Session entity.
-func (suo *SessionUpdateOne) Save(ctx context.Context) (*Session, error) {
-	return withHooks(ctx, suo.sqlSave, suo.mutation, suo.hooks)
+func (u *SessionUpdateOne) Save(ctx context.Context) (*Session, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (suo *SessionUpdateOne) SaveX(ctx context.Context) *Session {
-	node, err := suo.Save(ctx)
+func (u *SessionUpdateOne) SaveX(ctx context.Context) *Session {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -206,26 +206,26 @@ func (suo *SessionUpdateOne) SaveX(ctx context.Context) *Session {
 }
 
 // Exec executes the query on the entity.
-func (suo *SessionUpdateOne) Exec(ctx context.Context) error {
-	_, err := suo.Save(ctx)
+func (u *SessionUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (suo *SessionUpdateOne) ExecX(ctx context.Context) {
-	if err := suo.Exec(ctx); err != nil {
+func (u *SessionUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err error) {
+func (u *SessionUpdateOne) sqlSave(ctx context.Context) (_n *Session, err error) {
 	_spec := sqlgraph.NewUpdateSpec(session.Table, session.Columns, sqlgraph.NewFieldSpec(session.FieldID, field.TypeBytes))
-	id, ok := suo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Session.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := suo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, session.FieldID)
 		for _, f := range fields {
@@ -237,14 +237,14 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 			}
 		}
 	}
-	if ps := suo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if suo.mutation.DeviceCleared() {
+	if u.mutation.DeviceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -257,7 +257,7 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := suo.mutation.DeviceIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.DeviceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -273,10 +273,10 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Session{config: suo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, suo.driver, _spec); err != nil {
+	_n = &Session{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{session.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -284,6 +284,6 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 		}
 		return nil, err
 	}
-	suo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

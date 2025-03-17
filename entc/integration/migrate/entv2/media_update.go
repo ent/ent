@@ -26,84 +26,84 @@ type MediaUpdate struct {
 }
 
 // Where appends a list predicates to the MediaUpdate builder.
-func (mu *MediaUpdate) Where(ps ...predicate.Media) *MediaUpdate {
-	mu.mutation.Where(ps...)
-	return mu
+func (u *MediaUpdate) Where(ps ...predicate.Media) *MediaUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetSource sets the "source" field.
-func (mu *MediaUpdate) SetSource(s string) *MediaUpdate {
-	mu.mutation.SetSource(s)
-	return mu
+func (m *MediaUpdate) SetSource(v string) *MediaUpdate {
+	m.mutation.SetSource(v)
+	return m
 }
 
 // SetNillableSource sets the "source" field if the given value is not nil.
-func (mu *MediaUpdate) SetNillableSource(s *string) *MediaUpdate {
-	if s != nil {
-		mu.SetSource(*s)
+func (m *MediaUpdate) SetNillableSource(v *string) *MediaUpdate {
+	if v != nil {
+		m.SetSource(*v)
 	}
-	return mu
+	return m
 }
 
 // ClearSource clears the value of the "source" field.
-func (mu *MediaUpdate) ClearSource() *MediaUpdate {
-	mu.mutation.ClearSource()
-	return mu
+func (m *MediaUpdate) ClearSource() *MediaUpdate {
+	m.mutation.ClearSource()
+	return m
 }
 
 // SetSourceURI sets the "source_uri" field.
-func (mu *MediaUpdate) SetSourceURI(s string) *MediaUpdate {
-	mu.mutation.SetSourceURI(s)
-	return mu
+func (m *MediaUpdate) SetSourceURI(v string) *MediaUpdate {
+	m.mutation.SetSourceURI(v)
+	return m
 }
 
 // SetNillableSourceURI sets the "source_uri" field if the given value is not nil.
-func (mu *MediaUpdate) SetNillableSourceURI(s *string) *MediaUpdate {
-	if s != nil {
-		mu.SetSourceURI(*s)
+func (m *MediaUpdate) SetNillableSourceURI(v *string) *MediaUpdate {
+	if v != nil {
+		m.SetSourceURI(*v)
 	}
-	return mu
+	return m
 }
 
 // ClearSourceURI clears the value of the "source_uri" field.
-func (mu *MediaUpdate) ClearSourceURI() *MediaUpdate {
-	mu.mutation.ClearSourceURI()
-	return mu
+func (m *MediaUpdate) ClearSourceURI() *MediaUpdate {
+	m.mutation.ClearSourceURI()
+	return m
 }
 
 // SetText sets the "text" field.
-func (mu *MediaUpdate) SetText(s string) *MediaUpdate {
-	mu.mutation.SetText(s)
-	return mu
+func (m *MediaUpdate) SetText(v string) *MediaUpdate {
+	m.mutation.SetText(v)
+	return m
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (mu *MediaUpdate) SetNillableText(s *string) *MediaUpdate {
-	if s != nil {
-		mu.SetText(*s)
+func (m *MediaUpdate) SetNillableText(v *string) *MediaUpdate {
+	if v != nil {
+		m.SetText(*v)
 	}
-	return mu
+	return m
 }
 
 // ClearText clears the value of the "text" field.
-func (mu *MediaUpdate) ClearText() *MediaUpdate {
-	mu.mutation.ClearText()
-	return mu
+func (m *MediaUpdate) ClearText() *MediaUpdate {
+	m.mutation.ClearText()
+	return m
 }
 
 // Mutation returns the MediaMutation object of the builder.
-func (mu *MediaUpdate) Mutation() *MediaMutation {
-	return mu.mutation
+func (m *MediaUpdate) Mutation() *MediaMutation {
+	return m.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (mu *MediaUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, mu.sqlSave, mu.mutation, mu.hooks)
+func (u *MediaUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (mu *MediaUpdate) SaveX(ctx context.Context) int {
-	affected, err := mu.Save(ctx)
+func (u *MediaUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -111,46 +111,46 @@ func (mu *MediaUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (mu *MediaUpdate) Exec(ctx context.Context) error {
-	_, err := mu.Save(ctx)
+func (u *MediaUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (mu *MediaUpdate) ExecX(ctx context.Context) {
-	if err := mu.Exec(ctx); err != nil {
+func (u *MediaUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (mu *MediaUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (u *MediaUpdate) sqlSave(ctx context.Context) (_n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(media.Table, media.Columns, sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt))
-	if ps := mu.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := mu.mutation.Source(); ok {
+	if value, ok := u.mutation.Source(); ok {
 		_spec.SetField(media.FieldSource, field.TypeString, value)
 	}
-	if mu.mutation.SourceCleared() {
+	if u.mutation.SourceCleared() {
 		_spec.ClearField(media.FieldSource, field.TypeString)
 	}
-	if value, ok := mu.mutation.SourceURI(); ok {
+	if value, ok := u.mutation.SourceURI(); ok {
 		_spec.SetField(media.FieldSourceURI, field.TypeString, value)
 	}
-	if mu.mutation.SourceURICleared() {
+	if u.mutation.SourceURICleared() {
 		_spec.ClearField(media.FieldSourceURI, field.TypeString)
 	}
-	if value, ok := mu.mutation.Text(); ok {
+	if value, ok := u.mutation.Text(); ok {
 		_spec.SetField(media.FieldText, field.TypeString, value)
 	}
-	if mu.mutation.TextCleared() {
+	if u.mutation.TextCleared() {
 		_spec.ClearField(media.FieldText, field.TypeString)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, mu.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{media.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -158,8 +158,8 @@ func (mu *MediaUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	mu.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // MediaUpdateOne is the builder for updating a single Media entity.
@@ -171,91 +171,91 @@ type MediaUpdateOne struct {
 }
 
 // SetSource sets the "source" field.
-func (muo *MediaUpdateOne) SetSource(s string) *MediaUpdateOne {
-	muo.mutation.SetSource(s)
-	return muo
+func (m *MediaUpdateOne) SetSource(v string) *MediaUpdateOne {
+	m.mutation.SetSource(v)
+	return m
 }
 
 // SetNillableSource sets the "source" field if the given value is not nil.
-func (muo *MediaUpdateOne) SetNillableSource(s *string) *MediaUpdateOne {
-	if s != nil {
-		muo.SetSource(*s)
+func (m *MediaUpdateOne) SetNillableSource(v *string) *MediaUpdateOne {
+	if v != nil {
+		m.SetSource(*v)
 	}
-	return muo
+	return m
 }
 
 // ClearSource clears the value of the "source" field.
-func (muo *MediaUpdateOne) ClearSource() *MediaUpdateOne {
-	muo.mutation.ClearSource()
-	return muo
+func (m *MediaUpdateOne) ClearSource() *MediaUpdateOne {
+	m.mutation.ClearSource()
+	return m
 }
 
 // SetSourceURI sets the "source_uri" field.
-func (muo *MediaUpdateOne) SetSourceURI(s string) *MediaUpdateOne {
-	muo.mutation.SetSourceURI(s)
-	return muo
+func (m *MediaUpdateOne) SetSourceURI(v string) *MediaUpdateOne {
+	m.mutation.SetSourceURI(v)
+	return m
 }
 
 // SetNillableSourceURI sets the "source_uri" field if the given value is not nil.
-func (muo *MediaUpdateOne) SetNillableSourceURI(s *string) *MediaUpdateOne {
-	if s != nil {
-		muo.SetSourceURI(*s)
+func (m *MediaUpdateOne) SetNillableSourceURI(v *string) *MediaUpdateOne {
+	if v != nil {
+		m.SetSourceURI(*v)
 	}
-	return muo
+	return m
 }
 
 // ClearSourceURI clears the value of the "source_uri" field.
-func (muo *MediaUpdateOne) ClearSourceURI() *MediaUpdateOne {
-	muo.mutation.ClearSourceURI()
-	return muo
+func (m *MediaUpdateOne) ClearSourceURI() *MediaUpdateOne {
+	m.mutation.ClearSourceURI()
+	return m
 }
 
 // SetText sets the "text" field.
-func (muo *MediaUpdateOne) SetText(s string) *MediaUpdateOne {
-	muo.mutation.SetText(s)
-	return muo
+func (m *MediaUpdateOne) SetText(v string) *MediaUpdateOne {
+	m.mutation.SetText(v)
+	return m
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (muo *MediaUpdateOne) SetNillableText(s *string) *MediaUpdateOne {
-	if s != nil {
-		muo.SetText(*s)
+func (m *MediaUpdateOne) SetNillableText(v *string) *MediaUpdateOne {
+	if v != nil {
+		m.SetText(*v)
 	}
-	return muo
+	return m
 }
 
 // ClearText clears the value of the "text" field.
-func (muo *MediaUpdateOne) ClearText() *MediaUpdateOne {
-	muo.mutation.ClearText()
-	return muo
+func (m *MediaUpdateOne) ClearText() *MediaUpdateOne {
+	m.mutation.ClearText()
+	return m
 }
 
 // Mutation returns the MediaMutation object of the builder.
-func (muo *MediaUpdateOne) Mutation() *MediaMutation {
-	return muo.mutation
+func (m *MediaUpdateOne) Mutation() *MediaMutation {
+	return m.mutation
 }
 
 // Where appends a list predicates to the MediaUpdate builder.
-func (muo *MediaUpdateOne) Where(ps ...predicate.Media) *MediaUpdateOne {
-	muo.mutation.Where(ps...)
-	return muo
+func (u *MediaUpdateOne) Where(ps ...predicate.Media) *MediaUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (muo *MediaUpdateOne) Select(field string, fields ...string) *MediaUpdateOne {
-	muo.fields = append([]string{field}, fields...)
-	return muo
+func (u *MediaUpdateOne) Select(field string, fields ...string) *MediaUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated Media entity.
-func (muo *MediaUpdateOne) Save(ctx context.Context) (*Media, error) {
-	return withHooks(ctx, muo.sqlSave, muo.mutation, muo.hooks)
+func (u *MediaUpdateOne) Save(ctx context.Context) (*Media, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (muo *MediaUpdateOne) SaveX(ctx context.Context) *Media {
-	node, err := muo.Save(ctx)
+func (u *MediaUpdateOne) SaveX(ctx context.Context) *Media {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -263,26 +263,26 @@ func (muo *MediaUpdateOne) SaveX(ctx context.Context) *Media {
 }
 
 // Exec executes the query on the entity.
-func (muo *MediaUpdateOne) Exec(ctx context.Context) error {
-	_, err := muo.Save(ctx)
+func (u *MediaUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (muo *MediaUpdateOne) ExecX(ctx context.Context) {
-	if err := muo.Exec(ctx); err != nil {
+func (u *MediaUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (muo *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error) {
+func (u *MediaUpdateOne) sqlSave(ctx context.Context) (_n *Media, err error) {
 	_spec := sqlgraph.NewUpdateSpec(media.Table, media.Columns, sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt))
-	id, ok := muo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`entv2: missing "Media.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := muo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, media.FieldID)
 		for _, f := range fields {
@@ -294,35 +294,35 @@ func (muo *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error
 			}
 		}
 	}
-	if ps := muo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := muo.mutation.Source(); ok {
+	if value, ok := u.mutation.Source(); ok {
 		_spec.SetField(media.FieldSource, field.TypeString, value)
 	}
-	if muo.mutation.SourceCleared() {
+	if u.mutation.SourceCleared() {
 		_spec.ClearField(media.FieldSource, field.TypeString)
 	}
-	if value, ok := muo.mutation.SourceURI(); ok {
+	if value, ok := u.mutation.SourceURI(); ok {
 		_spec.SetField(media.FieldSourceURI, field.TypeString, value)
 	}
-	if muo.mutation.SourceURICleared() {
+	if u.mutation.SourceURICleared() {
 		_spec.ClearField(media.FieldSourceURI, field.TypeString)
 	}
-	if value, ok := muo.mutation.Text(); ok {
+	if value, ok := u.mutation.Text(); ok {
 		_spec.SetField(media.FieldText, field.TypeString, value)
 	}
-	if muo.mutation.TextCleared() {
+	if u.mutation.TextCleared() {
 		_spec.ClearField(media.FieldText, field.TypeString)
 	}
-	_node = &Media{config: muo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, muo.driver, _spec); err != nil {
+	_n = &Media{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{media.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -330,6 +330,6 @@ func (muo *MediaUpdateOne) sqlSave(ctx context.Context) (_node *Media, err error
 		}
 		return nil, err
 	}
-	muo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

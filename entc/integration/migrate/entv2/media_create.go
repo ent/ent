@@ -23,60 +23,60 @@ type MediaCreate struct {
 }
 
 // SetSource sets the "source" field.
-func (mc *MediaCreate) SetSource(s string) *MediaCreate {
-	mc.mutation.SetSource(s)
-	return mc
+func (m *MediaCreate) SetSource(v string) *MediaCreate {
+	m.mutation.SetSource(v)
+	return m
 }
 
 // SetNillableSource sets the "source" field if the given value is not nil.
-func (mc *MediaCreate) SetNillableSource(s *string) *MediaCreate {
-	if s != nil {
-		mc.SetSource(*s)
+func (m *MediaCreate) SetNillableSource(v *string) *MediaCreate {
+	if v != nil {
+		m.SetSource(*v)
 	}
-	return mc
+	return m
 }
 
 // SetSourceURI sets the "source_uri" field.
-func (mc *MediaCreate) SetSourceURI(s string) *MediaCreate {
-	mc.mutation.SetSourceURI(s)
-	return mc
+func (m *MediaCreate) SetSourceURI(v string) *MediaCreate {
+	m.mutation.SetSourceURI(v)
+	return m
 }
 
 // SetNillableSourceURI sets the "source_uri" field if the given value is not nil.
-func (mc *MediaCreate) SetNillableSourceURI(s *string) *MediaCreate {
-	if s != nil {
-		mc.SetSourceURI(*s)
+func (m *MediaCreate) SetNillableSourceURI(v *string) *MediaCreate {
+	if v != nil {
+		m.SetSourceURI(*v)
 	}
-	return mc
+	return m
 }
 
 // SetText sets the "text" field.
-func (mc *MediaCreate) SetText(s string) *MediaCreate {
-	mc.mutation.SetText(s)
-	return mc
+func (m *MediaCreate) SetText(v string) *MediaCreate {
+	m.mutation.SetText(v)
+	return m
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (mc *MediaCreate) SetNillableText(s *string) *MediaCreate {
-	if s != nil {
-		mc.SetText(*s)
+func (m *MediaCreate) SetNillableText(v *string) *MediaCreate {
+	if v != nil {
+		m.SetText(*v)
 	}
-	return mc
+	return m
 }
 
 // Mutation returns the MediaMutation object of the builder.
-func (mc *MediaCreate) Mutation() *MediaMutation {
-	return mc.mutation
+func (m *MediaCreate) Mutation() *MediaMutation {
+	return m.mutation
 }
 
 // Save creates the Media in the database.
-func (mc *MediaCreate) Save(ctx context.Context) (*Media, error) {
-	return withHooks(ctx, mc.sqlSave, mc.mutation, mc.hooks)
+func (c *MediaCreate) Save(ctx context.Context) (*Media, error) {
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (mc *MediaCreate) SaveX(ctx context.Context) *Media {
-	v, err := mc.Save(ctx)
+func (c *MediaCreate) SaveX(ctx context.Context) *Media {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -84,29 +84,29 @@ func (mc *MediaCreate) SaveX(ctx context.Context) *Media {
 }
 
 // Exec executes the query.
-func (mc *MediaCreate) Exec(ctx context.Context) error {
-	_, err := mc.Save(ctx)
+func (c *MediaCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (mc *MediaCreate) ExecX(ctx context.Context) {
-	if err := mc.Exec(ctx); err != nil {
+func (c *MediaCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (mc *MediaCreate) check() error {
+func (c *MediaCreate) check() error {
 	return nil
 }
 
-func (mc *MediaCreate) sqlSave(ctx context.Context) (*Media, error) {
-	if err := mc.check(); err != nil {
+func (c *MediaCreate) sqlSave(ctx context.Context) (*Media, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := mc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, mc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -114,25 +114,25 @@ func (mc *MediaCreate) sqlSave(ctx context.Context) (*Media, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	mc.mutation.id = &_node.ID
-	mc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (mc *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
+func (c *MediaCreate) createSpec() (*Media, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Media{config: mc.config}
+		_node = &Media{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(media.Table, sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt))
 	)
-	if value, ok := mc.mutation.Source(); ok {
+	if value, ok := c.mutation.Source(); ok {
 		_spec.SetField(media.FieldSource, field.TypeString, value)
 		_node.Source = value
 	}
-	if value, ok := mc.mutation.SourceURI(); ok {
+	if value, ok := c.mutation.SourceURI(); ok {
 		_spec.SetField(media.FieldSourceURI, field.TypeString, value)
 		_node.SourceURI = value
 	}
-	if value, ok := mc.mutation.Text(); ok {
+	if value, ok := c.mutation.Text(); ok {
 		_spec.SetField(media.FieldText, field.TypeString, value)
 		_node.Text = value
 	}
@@ -147,16 +147,16 @@ type MediaCreateBulk struct {
 }
 
 // Save creates the Media entities in the database.
-func (mcb *MediaCreateBulk) Save(ctx context.Context) ([]*Media, error) {
-	if mcb.err != nil {
-		return nil, mcb.err
+func (c *MediaCreateBulk) Save(ctx context.Context) ([]*Media, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(mcb.builders))
-	nodes := make([]*Media, len(mcb.builders))
-	mutators := make([]Mutator, len(mcb.builders))
-	for i := range mcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Media, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := mcb.builders[i]
+			builder := c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*MediaMutation)
 				if !ok {
@@ -169,11 +169,11 @@ func (mcb *MediaCreateBulk) Save(ctx context.Context) ([]*Media, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, mcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, mcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -197,7 +197,7 @@ func (mcb *MediaCreateBulk) Save(ctx context.Context) ([]*Media, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, mcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -205,8 +205,8 @@ func (mcb *MediaCreateBulk) Save(ctx context.Context) ([]*Media, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (mcb *MediaCreateBulk) SaveX(ctx context.Context) []*Media {
-	v, err := mcb.Save(ctx)
+func (c *MediaCreateBulk) SaveX(ctx context.Context) []*Media {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -214,14 +214,14 @@ func (mcb *MediaCreateBulk) SaveX(ctx context.Context) []*Media {
 }
 
 // Exec executes the query.
-func (mcb *MediaCreateBulk) Exec(ctx context.Context) error {
-	_, err := mcb.Save(ctx)
+func (c *MediaCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (mcb *MediaCreateBulk) ExecX(ctx context.Context) {
-	if err := mcb.Exec(ctx); err != nil {
+func (c *MediaCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

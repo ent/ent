@@ -24,56 +24,56 @@ type PostDelete struct {
 }
 
 // Where appends a list predicates to the PostDelete builder.
-func (pd *PostDelete) Where(ps ...predicate.Post) *PostDelete {
-	pd.mutation.Where(ps...)
-	return pd
+func (d *PostDelete) Where(ps ...predicate.Post) *PostDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (pd *PostDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, pd.sqlExec, pd.mutation, pd.hooks)
+func (d *PostDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pd *PostDelete) ExecX(ctx context.Context) int {
-	n, err := pd.Exec(ctx)
+func (d *PostDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (pd *PostDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *PostDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(post.Table, sqlgraph.NewFieldSpec(post.FieldID, field.TypeInt))
-	if ps := pd.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, pd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	pd.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // PostDeleteOne is the builder for deleting a single Post entity.
 type PostDeleteOne struct {
-	pd *PostDelete
+	d *PostDelete
 }
 
 // Where appends a list predicates to the PostDelete builder.
-func (pdo *PostDeleteOne) Where(ps ...predicate.Post) *PostDeleteOne {
-	pdo.pd.mutation.Where(ps...)
-	return pdo
+func (d *PostDeleteOne) Where(ps ...predicate.Post) *PostDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (pdo *PostDeleteOne) Exec(ctx context.Context) error {
-	n, err := pdo.pd.Exec(ctx)
+func (d *PostDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (pdo *PostDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pdo *PostDeleteOne) ExecX(ctx context.Context) {
-	if err := pdo.Exec(ctx); err != nil {
+func (d *PostDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

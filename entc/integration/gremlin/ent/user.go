@@ -227,117 +227,117 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 }
 
 // QueryCard queries the "card" edge of the User entity.
-func (u *User) QueryCard() *CardQuery {
-	return NewUserClient(u.config).QueryCard(u)
+func (m *User) QueryCard() *CardQuery {
+	return NewUserClient(m.config).QueryCard(m)
 }
 
 // QueryPets queries the "pets" edge of the User entity.
-func (u *User) QueryPets() *PetQuery {
-	return NewUserClient(u.config).QueryPets(u)
+func (m *User) QueryPets() *PetQuery {
+	return NewUserClient(m.config).QueryPets(m)
 }
 
 // QueryFiles queries the "files" edge of the User entity.
-func (u *User) QueryFiles() *FileQuery {
-	return NewUserClient(u.config).QueryFiles(u)
+func (m *User) QueryFiles() *FileQuery {
+	return NewUserClient(m.config).QueryFiles(m)
 }
 
 // QueryGroups queries the "groups" edge of the User entity.
-func (u *User) QueryGroups() *GroupQuery {
-	return NewUserClient(u.config).QueryGroups(u)
+func (m *User) QueryGroups() *GroupQuery {
+	return NewUserClient(m.config).QueryGroups(m)
 }
 
 // QueryFriends queries the "friends" edge of the User entity.
-func (u *User) QueryFriends() *UserQuery {
-	return NewUserClient(u.config).QueryFriends(u)
+func (m *User) QueryFriends() *UserQuery {
+	return NewUserClient(m.config).QueryFriends(m)
 }
 
 // QueryFollowers queries the "followers" edge of the User entity.
-func (u *User) QueryFollowers() *UserQuery {
-	return NewUserClient(u.config).QueryFollowers(u)
+func (m *User) QueryFollowers() *UserQuery {
+	return NewUserClient(m.config).QueryFollowers(m)
 }
 
 // QueryFollowing queries the "following" edge of the User entity.
-func (u *User) QueryFollowing() *UserQuery {
-	return NewUserClient(u.config).QueryFollowing(u)
+func (m *User) QueryFollowing() *UserQuery {
+	return NewUserClient(m.config).QueryFollowing(m)
 }
 
 // QueryTeam queries the "team" edge of the User entity.
-func (u *User) QueryTeam() *PetQuery {
-	return NewUserClient(u.config).QueryTeam(u)
+func (m *User) QueryTeam() *PetQuery {
+	return NewUserClient(m.config).QueryTeam(m)
 }
 
 // QuerySpouse queries the "spouse" edge of the User entity.
-func (u *User) QuerySpouse() *UserQuery {
-	return NewUserClient(u.config).QuerySpouse(u)
+func (m *User) QuerySpouse() *UserQuery {
+	return NewUserClient(m.config).QuerySpouse(m)
 }
 
 // QueryChildren queries the "children" edge of the User entity.
-func (u *User) QueryChildren() *UserQuery {
-	return NewUserClient(u.config).QueryChildren(u)
+func (m *User) QueryChildren() *UserQuery {
+	return NewUserClient(m.config).QueryChildren(m)
 }
 
 // QueryParent queries the "parent" edge of the User entity.
-func (u *User) QueryParent() *UserQuery {
-	return NewUserClient(u.config).QueryParent(u)
+func (m *User) QueryParent() *UserQuery {
+	return NewUserClient(m.config).QueryParent(m)
 }
 
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (u *User) Update() *UserUpdateOne {
-	return NewUserClient(u.config).UpdateOne(u)
+func (m *User) Update() *UserUpdateOne {
+	return NewUserClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the User entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (u *User) Unwrap() *User {
-	_tx, ok := u.config.driver.(*txDriver)
+func (m *User) Unwrap() *User {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: User is not a transactional entity")
 	}
-	u.config.driver = _tx.drv
-	return u
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (u *User) String() string {
+func (m *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("optional_int=")
-	builder.WriteString(fmt.Sprintf("%v", u.OptionalInt))
+	builder.WriteString(fmt.Sprintf("%v", m.OptionalInt))
 	builder.WriteString(", ")
 	builder.WriteString("age=")
-	builder.WriteString(fmt.Sprintf("%v", u.Age))
+	builder.WriteString(fmt.Sprintf("%v", m.Age))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(u.Name)
+	builder.WriteString(m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("last=")
-	builder.WriteString(u.Last)
+	builder.WriteString(m.Last)
 	builder.WriteString(", ")
 	builder.WriteString("nickname=")
-	builder.WriteString(u.Nickname)
+	builder.WriteString(m.Nickname)
 	builder.WriteString(", ")
 	builder.WriteString("address=")
-	builder.WriteString(u.Address)
+	builder.WriteString(m.Address)
 	builder.WriteString(", ")
 	builder.WriteString("phone=")
-	builder.WriteString(u.Phone)
+	builder.WriteString(m.Phone)
 	builder.WriteString(", ")
 	builder.WriteString("password=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("role=")
-	builder.WriteString(fmt.Sprintf("%v", u.Role))
+	builder.WriteString(fmt.Sprintf("%v", m.Role))
 	builder.WriteString(", ")
 	builder.WriteString("employment=")
-	builder.WriteString(fmt.Sprintf("%v", u.Employment))
+	builder.WriteString(fmt.Sprintf("%v", m.Employment))
 	builder.WriteString(", ")
 	builder.WriteString("SSOCert=")
-	builder.WriteString(u.SSOCert)
+	builder.WriteString(m.SSOCert)
 	builder.WriteString(", ")
 	builder.WriteString("files_count=")
-	builder.WriteString(fmt.Sprintf("%v", u.FilesCount))
+	builder.WriteString(fmt.Sprintf("%v", m.FilesCount))
 	builder.WriteByte(')')
 	return builder.String()
 }

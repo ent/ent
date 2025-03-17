@@ -98,9 +98,9 @@ func (*Card) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Card fields.
-func (c *Card) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Card) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -109,46 +109,46 @@ func (c *Card) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			c.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case card.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				c.CreateTime = value.Time
+				m.CreateTime = value.Time
 			}
 		case card.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
-				c.UpdateTime = value.Time
+				m.UpdateTime = value.Time
 			}
 		case card.FieldBalance:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field balance", values[i])
 			} else if value.Valid {
-				c.Balance = value.Float64
+				m.Balance = value.Float64
 			}
 		case card.FieldNumber:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field number", values[i])
 			} else if value.Valid {
-				c.Number = value.String
+				m.Number = value.String
 			}
 		case card.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				c.Name = value.String
+				m.Name = value.String
 			}
 		case card.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field user_card", value)
 			} else if value.Valid {
-				c.user_card = new(int)
-				*c.user_card = int(value.Int64)
+				m.user_card = new(int)
+				*m.user_card = int(value.Int64)
 			}
 		default:
-			c.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -156,82 +156,82 @@ func (c *Card) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Card.
 // This includes values selected through modifiers, order, etc.
-func (c *Card) Value(name string) (ent.Value, error) {
-	return c.selectValues.Get(name)
+func (m *Card) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryOwner queries the "owner" edge of the Card entity.
-func (c *Card) QueryOwner() *UserQuery {
-	return NewCardClient(c.config).QueryOwner(c)
+func (m *Card) QueryOwner() *UserQuery {
+	return NewCardClient(m.config).QueryOwner(m)
 }
 
 // QuerySpec queries the "spec" edge of the Card entity.
-func (c *Card) QuerySpec() *SpecQuery {
-	return NewCardClient(c.config).QuerySpec(c)
+func (m *Card) QuerySpec() *SpecQuery {
+	return NewCardClient(m.config).QuerySpec(m)
 }
 
 // Update returns a builder for updating this Card.
 // Note that you need to call Card.Unwrap() before calling this method if this Card
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (c *Card) Update() *CardUpdateOne {
-	return NewCardClient(c.config).UpdateOne(c)
+func (m *Card) Update() *CardUpdateOne {
+	return NewCardClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Card entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (c *Card) Unwrap() *Card {
-	_tx, ok := c.config.driver.(*txDriver)
+func (m *Card) Unwrap() *Card {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Card is not a transactional entity")
 	}
-	c.config.driver = _tx.drv
-	return c
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (c *Card) String() string {
+func (m *Card) String() string {
 	var builder strings.Builder
 	builder.WriteString("Card(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("create_time=")
-	builder.WriteString(c.CreateTime.Format(time.ANSIC))
+	builder.WriteString(m.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("update_time=")
-	builder.WriteString(c.UpdateTime.Format(time.ANSIC))
+	builder.WriteString(m.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("balance=")
-	builder.WriteString(fmt.Sprintf("%v", c.Balance))
+	builder.WriteString(fmt.Sprintf("%v", m.Balance))
 	builder.WriteString(", ")
 	builder.WriteString("number=")
-	builder.WriteString(c.Number)
+	builder.WriteString(m.Number)
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(c.Name)
+	builder.WriteString(m.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedSpec returns the Spec named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (c *Card) NamedSpec(name string) ([]*Spec, error) {
-	if c.Edges.namedSpec == nil {
+func (m *Card) NamedSpec(name string) ([]*Spec, error) {
+	if m.Edges.namedSpec == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := c.Edges.namedSpec[name]
+	nodes, ok := m.Edges.namedSpec[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (c *Card) appendNamedSpec(name string, edges ...*Spec) {
-	if c.Edges.namedSpec == nil {
-		c.Edges.namedSpec = make(map[string][]*Spec)
+func (m *Card) appendNamedSpec(name string, edges ...*Spec) {
+	if m.Edges.namedSpec == nil {
+		m.Edges.namedSpec = make(map[string][]*Spec)
 	}
 	if len(edges) == 0 {
-		c.Edges.namedSpec[name] = []*Spec{}
+		m.Edges.namedSpec[name] = []*Spec{}
 	} else {
-		c.Edges.namedSpec[name] = append(c.Edges.namedSpec[name], edges...)
+		m.Edges.namedSpec[name] = append(m.Edges.namedSpec[name], edges...)
 	}
 }
 

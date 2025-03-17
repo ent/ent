@@ -33,40 +33,40 @@ type ItemQuery struct {
 }
 
 // Where adds a new predicate for the ItemQuery builder.
-func (iq *ItemQuery) Where(ps ...predicate.Item) *ItemQuery {
-	iq.predicates = append(iq.predicates, ps...)
-	return iq
+func (q *ItemQuery) Where(ps ...predicate.Item) *ItemQuery {
+	q.predicates = append(q.predicates, ps...)
+	return q
 }
 
 // Limit the number of records to be returned by this query.
-func (iq *ItemQuery) Limit(limit int) *ItemQuery {
-	iq.ctx.Limit = &limit
-	return iq
+func (q *ItemQuery) Limit(limit int) *ItemQuery {
+	q.ctx.Limit = &limit
+	return q
 }
 
 // Offset to start from.
-func (iq *ItemQuery) Offset(offset int) *ItemQuery {
-	iq.ctx.Offset = &offset
-	return iq
+func (q *ItemQuery) Offset(offset int) *ItemQuery {
+	q.ctx.Offset = &offset
+	return q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (iq *ItemQuery) Unique(unique bool) *ItemQuery {
-	iq.ctx.Unique = &unique
-	return iq
+func (q *ItemQuery) Unique(unique bool) *ItemQuery {
+	q.ctx.Unique = &unique
+	return q
 }
 
 // Order specifies how the records should be ordered.
-func (iq *ItemQuery) Order(o ...item.OrderOption) *ItemQuery {
-	iq.order = append(iq.order, o...)
-	return iq
+func (q *ItemQuery) Order(o ...item.OrderOption) *ItemQuery {
+	q.order = append(q.order, o...)
+	return q
 }
 
 // First returns the first Item entity from the query.
 // Returns a *NotFoundError when no Item was found.
-func (iq *ItemQuery) First(ctx context.Context) (*Item, error) {
-	nodes, err := iq.Limit(1).All(setContextOp(ctx, iq.ctx, ent.OpQueryFirst))
+func (q *ItemQuery) First(ctx context.Context) (*Item, error) {
+	nodes, err := q.Limit(1).All(setContextOp(ctx, q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -77,8 +77,8 @@ func (iq *ItemQuery) First(ctx context.Context) (*Item, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (iq *ItemQuery) FirstX(ctx context.Context) *Item {
-	node, err := iq.First(ctx)
+func (q *ItemQuery) FirstX(ctx context.Context) *Item {
+	node, err := q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -87,9 +87,9 @@ func (iq *ItemQuery) FirstX(ctx context.Context) *Item {
 
 // FirstID returns the first Item ID from the query.
 // Returns a *NotFoundError when no Item ID was found.
-func (iq *ItemQuery) FirstID(ctx context.Context) (id string, err error) {
+func (q *ItemQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = iq.Limit(1).IDs(setContextOp(ctx, iq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = q.Limit(1).IDs(setContextOp(ctx, q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -100,8 +100,8 @@ func (iq *ItemQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (iq *ItemQuery) FirstIDX(ctx context.Context) string {
-	id, err := iq.FirstID(ctx)
+func (q *ItemQuery) FirstIDX(ctx context.Context) string {
+	id, err := q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -111,8 +111,8 @@ func (iq *ItemQuery) FirstIDX(ctx context.Context) string {
 // Only returns a single Item entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Item entity is found.
 // Returns a *NotFoundError when no Item entities are found.
-func (iq *ItemQuery) Only(ctx context.Context) (*Item, error) {
-	nodes, err := iq.Limit(2).All(setContextOp(ctx, iq.ctx, ent.OpQueryOnly))
+func (q *ItemQuery) Only(ctx context.Context) (*Item, error) {
+	nodes, err := q.Limit(2).All(setContextOp(ctx, q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -127,8 +127,8 @@ func (iq *ItemQuery) Only(ctx context.Context) (*Item, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (iq *ItemQuery) OnlyX(ctx context.Context) *Item {
-	node, err := iq.Only(ctx)
+func (q *ItemQuery) OnlyX(ctx context.Context) *Item {
+	node, err := q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -138,9 +138,9 @@ func (iq *ItemQuery) OnlyX(ctx context.Context) *Item {
 // OnlyID is like Only, but returns the only Item ID in the query.
 // Returns a *NotSingularError when more than one Item ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (iq *ItemQuery) OnlyID(ctx context.Context) (id string, err error) {
+func (q *ItemQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = iq.Limit(2).IDs(setContextOp(ctx, iq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = q.Limit(2).IDs(setContextOp(ctx, q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -155,8 +155,8 @@ func (iq *ItemQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (iq *ItemQuery) OnlyIDX(ctx context.Context) string {
-	id, err := iq.OnlyID(ctx)
+func (q *ItemQuery) OnlyIDX(ctx context.Context) string {
+	id, err := q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -164,18 +164,18 @@ func (iq *ItemQuery) OnlyIDX(ctx context.Context) string {
 }
 
 // All executes the query and returns a list of Items.
-func (iq *ItemQuery) All(ctx context.Context) ([]*Item, error) {
-	ctx = setContextOp(ctx, iq.ctx, ent.OpQueryAll)
-	if err := iq.prepareQuery(ctx); err != nil {
+func (q *ItemQuery) All(ctx context.Context) ([]*Item, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryAll)
+	if err := q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Item, *ItemQuery]()
-	return withInterceptors[[]*Item](ctx, iq, qr, iq.inters)
+	return withInterceptors[[]*Item](ctx, q, qr, q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (iq *ItemQuery) AllX(ctx context.Context) []*Item {
-	nodes, err := iq.All(ctx)
+func (q *ItemQuery) AllX(ctx context.Context) []*Item {
+	nodes, err := q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -183,20 +183,20 @@ func (iq *ItemQuery) AllX(ctx context.Context) []*Item {
 }
 
 // IDs executes the query and returns a list of Item IDs.
-func (iq *ItemQuery) IDs(ctx context.Context) (ids []string, err error) {
-	if iq.ctx.Unique == nil && iq.path != nil {
-		iq.Unique(true)
+func (q *ItemQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if q.ctx.Unique == nil && q.path != nil {
+		q.Unique(true)
 	}
-	ctx = setContextOp(ctx, iq.ctx, ent.OpQueryIDs)
-	if err = iq.Select(item.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryIDs)
+	if err = q.Select(item.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (iq *ItemQuery) IDsX(ctx context.Context) []string {
-	ids, err := iq.IDs(ctx)
+func (q *ItemQuery) IDsX(ctx context.Context) []string {
+	ids, err := q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -204,17 +204,17 @@ func (iq *ItemQuery) IDsX(ctx context.Context) []string {
 }
 
 // Count returns the count of the given query.
-func (iq *ItemQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, iq.ctx, ent.OpQueryCount)
-	if err := iq.prepareQuery(ctx); err != nil {
+func (q *ItemQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryCount)
+	if err := q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, iq, querierCount[*ItemQuery](), iq.inters)
+	return withInterceptors[int](ctx, q, querierCount[*ItemQuery](), q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (iq *ItemQuery) CountX(ctx context.Context) int {
-	count, err := iq.Count(ctx)
+func (q *ItemQuery) CountX(ctx context.Context) int {
+	count, err := q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -222,9 +222,9 @@ func (iq *ItemQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (iq *ItemQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, iq.ctx, ent.OpQueryExist)
-	switch _, err := iq.FirstID(ctx); {
+func (q *ItemQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryExist)
+	switch _, err := q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -235,8 +235,8 @@ func (iq *ItemQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (iq *ItemQuery) ExistX(ctx context.Context) bool {
-	exist, err := iq.Exist(ctx)
+func (q *ItemQuery) ExistX(ctx context.Context) bool {
+	exist, err := q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -245,19 +245,19 @@ func (iq *ItemQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the ItemQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (iq *ItemQuery) Clone() *ItemQuery {
-	if iq == nil {
+func (q *ItemQuery) Clone() *ItemQuery {
+	if q == nil {
 		return nil
 	}
 	return &ItemQuery{
-		config:     iq.config,
-		ctx:        iq.ctx.Clone(),
-		order:      append([]item.OrderOption{}, iq.order...),
-		inters:     append([]Interceptor{}, iq.inters...),
-		predicates: append([]predicate.Item{}, iq.predicates...),
+		config:     q.config,
+		ctx:        q.ctx.Clone(),
+		order:      append([]item.OrderOption{}, q.order...),
+		inters:     append([]Interceptor{}, q.inters...),
+		predicates: append([]predicate.Item{}, q.predicates...),
 		// clone intermediate query.
-		gremlin: iq.gremlin.Clone(),
-		path:    iq.path,
+		gremlin: q.gremlin.Clone(),
+		path:    q.path,
 	}
 }
 
@@ -275,10 +275,10 @@ func (iq *ItemQuery) Clone() *ItemQuery {
 //		GroupBy(item.FieldText).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
-	iq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &ItemGroupBy{build: iq}
-	grbuild.flds = &iq.ctx.Fields
+func (q *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
+	q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &ItemGroupBy{build: q}
+	grbuild.flds = &q.ctx.Fields
 	grbuild.label = item.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -296,46 +296,46 @@ func (iq *ItemQuery) GroupBy(field string, fields ...string) *ItemGroupBy {
 //	client.Item.Query().
 //		Select(item.FieldText).
 //		Scan(ctx, &v)
-func (iq *ItemQuery) Select(fields ...string) *ItemSelect {
-	iq.ctx.Fields = append(iq.ctx.Fields, fields...)
-	sbuild := &ItemSelect{ItemQuery: iq}
+func (q *ItemQuery) Select(fields ...string) *ItemSelect {
+	q.ctx.Fields = append(q.ctx.Fields, fields...)
+	sbuild := &ItemSelect{ItemQuery: q}
 	sbuild.label = item.Label
-	sbuild.flds, sbuild.scan = &iq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a ItemSelect configured with the given aggregations.
-func (iq *ItemQuery) Aggregate(fns ...AggregateFunc) *ItemSelect {
-	return iq.Select().Aggregate(fns...)
+func (q *ItemQuery) Aggregate(fns ...AggregateFunc) *ItemSelect {
+	return q.Select().Aggregate(fns...)
 }
 
-func (iq *ItemQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range iq.inters {
+func (q *ItemQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, iq); err != nil {
+			if err := trv.Traverse(ctx, q); err != nil {
 				return err
 			}
 		}
 	}
-	if iq.path != nil {
-		prev, err := iq.path(ctx)
+	if q.path != nil {
+		prev, err := q.path(ctx)
 		if err != nil {
 			return err
 		}
-		iq.gremlin = prev
+		q.gremlin = prev
 	}
 	return nil
 }
 
-func (iq *ItemQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Item, error) {
+func (q *ItemQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Item, error) {
 	res := &gremlin.Response{}
-	traversal := iq.gremlinQuery(ctx)
-	if len(iq.ctx.Fields) > 0 {
-		fields := make([]any, len(iq.ctx.Fields))
-		for i, f := range iq.ctx.Fields {
+	traversal := q.gremlinQuery(ctx)
+	if len(q.ctx.Fields) > 0 {
+		fields := make([]any, len(q.ctx.Fields))
+		for i, f := range q.ctx.Fields {
 			fields[i] = f
 		}
 		traversal.ValueMap(fields...)
@@ -343,43 +343,43 @@ func (iq *ItemQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Ite
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := iq.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
-	var is Items
-	if err := is.FromResponse(res); err != nil {
+	var results Items
+	if err := results.FromResponse(res); err != nil {
 		return nil, err
 	}
-	for i := range is {
-		is[i].config = iq.config
+	for i := range results {
+		results[i].config = q.config
 	}
-	return is, nil
+	return results, nil
 }
 
-func (iq *ItemQuery) gremlinCount(ctx context.Context) (int, error) {
+func (q *ItemQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := iq.gremlinQuery(ctx).Count().Query()
-	if err := iq.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := q.gremlinQuery(ctx).Count().Query()
+	if err := q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
 }
 
-func (iq *ItemQuery) gremlinQuery(context.Context) *dsl.Traversal {
+func (q *ItemQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(item.Label)
-	if iq.gremlin != nil {
-		v = iq.gremlin.Clone()
+	if q.gremlin != nil {
+		v = q.gremlin.Clone()
 	}
-	for _, p := range iq.predicates {
+	for _, p := range q.predicates {
 		p(v)
 	}
-	if len(iq.order) > 0 {
+	if len(q.order) > 0 {
 		v.Order()
-		for _, p := range iq.order {
+		for _, p := range q.order {
 			p(v)
 		}
 	}
-	switch limit, offset := iq.ctx.Limit, iq.ctx.Offset; {
+	switch limit, offset := q.ctx.Limit, q.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset+*limit)
 	case offset != nil:
@@ -387,7 +387,7 @@ func (iq *ItemQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := iq.ctx.Unique; unique == nil || *unique {
+	if unique := q.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v

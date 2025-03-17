@@ -78,9 +78,9 @@ func (*Device) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Device fields.
-func (d *Device) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Device) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -88,17 +88,17 @@ func (d *Device) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*schema.ID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				d.ID = *value
+				m.ID = *value
 			}
 		case device.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field device_active_session", values[i])
 			} else if value.Valid {
-				d.device_active_session = new(schema.ID)
-				*d.device_active_session = *value.S.(*schema.ID)
+				m.device_active_session = new(schema.ID)
+				*m.device_active_session = *value.S.(*schema.ID)
 			}
 		default:
-			d.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -106,43 +106,43 @@ func (d *Device) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Device.
 // This includes values selected through modifiers, order, etc.
-func (d *Device) Value(name string) (ent.Value, error) {
-	return d.selectValues.Get(name)
+func (m *Device) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryActiveSession queries the "active_session" edge of the Device entity.
-func (d *Device) QueryActiveSession() *SessionQuery {
-	return NewDeviceClient(d.config).QueryActiveSession(d)
+func (m *Device) QueryActiveSession() *SessionQuery {
+	return NewDeviceClient(m.config).QueryActiveSession(m)
 }
 
 // QuerySessions queries the "sessions" edge of the Device entity.
-func (d *Device) QuerySessions() *SessionQuery {
-	return NewDeviceClient(d.config).QuerySessions(d)
+func (m *Device) QuerySessions() *SessionQuery {
+	return NewDeviceClient(m.config).QuerySessions(m)
 }
 
 // Update returns a builder for updating this Device.
 // Note that you need to call Device.Unwrap() before calling this method if this Device
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (d *Device) Update() *DeviceUpdateOne {
-	return NewDeviceClient(d.config).UpdateOne(d)
+func (m *Device) Update() *DeviceUpdateOne {
+	return NewDeviceClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Device entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (d *Device) Unwrap() *Device {
-	_tx, ok := d.config.driver.(*txDriver)
+func (m *Device) Unwrap() *Device {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Device is not a transactional entity")
 	}
-	d.config.driver = _tx.drv
-	return d
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (d *Device) String() string {
+func (m *Device) String() string {
 	var builder strings.Builder
 	builder.WriteString("Device(")
-	builder.WriteString(fmt.Sprintf("id=%v", d.ID))
+	builder.WriteString(fmt.Sprintf("id=%v", m.ID))
 	builder.WriteByte(')')
 	return builder.String()
 }

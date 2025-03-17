@@ -24,56 +24,56 @@ type CustomTypeDelete struct {
 }
 
 // Where appends a list predicates to the CustomTypeDelete builder.
-func (ctd *CustomTypeDelete) Where(ps ...predicate.CustomType) *CustomTypeDelete {
-	ctd.mutation.Where(ps...)
-	return ctd
+func (d *CustomTypeDelete) Where(ps ...predicate.CustomType) *CustomTypeDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (ctd *CustomTypeDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, ctd.sqlExec, ctd.mutation, ctd.hooks)
+func (d *CustomTypeDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ctd *CustomTypeDelete) ExecX(ctx context.Context) int {
-	n, err := ctd.Exec(ctx)
+func (d *CustomTypeDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (ctd *CustomTypeDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *CustomTypeDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(customtype.Table, sqlgraph.NewFieldSpec(customtype.FieldID, field.TypeInt))
-	if ps := ctd.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, ctd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	ctd.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // CustomTypeDeleteOne is the builder for deleting a single CustomType entity.
 type CustomTypeDeleteOne struct {
-	ctd *CustomTypeDelete
+	d *CustomTypeDelete
 }
 
 // Where appends a list predicates to the CustomTypeDelete builder.
-func (ctdo *CustomTypeDeleteOne) Where(ps ...predicate.CustomType) *CustomTypeDeleteOne {
-	ctdo.ctd.mutation.Where(ps...)
-	return ctdo
+func (d *CustomTypeDeleteOne) Where(ps ...predicate.CustomType) *CustomTypeDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (ctdo *CustomTypeDeleteOne) Exec(ctx context.Context) error {
-	n, err := ctdo.ctd.Exec(ctx)
+func (d *CustomTypeDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (ctdo *CustomTypeDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ctdo *CustomTypeDeleteOne) ExecX(ctx context.Context) {
-	if err := ctdo.Exec(ctx); err != nil {
+func (d *CustomTypeDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

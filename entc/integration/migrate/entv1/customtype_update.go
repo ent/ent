@@ -26,44 +26,44 @@ type CustomTypeUpdate struct {
 }
 
 // Where appends a list predicates to the CustomTypeUpdate builder.
-func (ctu *CustomTypeUpdate) Where(ps ...predicate.CustomType) *CustomTypeUpdate {
-	ctu.mutation.Where(ps...)
-	return ctu
+func (u *CustomTypeUpdate) Where(ps ...predicate.CustomType) *CustomTypeUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetCustom sets the "custom" field.
-func (ctu *CustomTypeUpdate) SetCustom(s string) *CustomTypeUpdate {
-	ctu.mutation.SetCustom(s)
-	return ctu
+func (m *CustomTypeUpdate) SetCustom(v string) *CustomTypeUpdate {
+	m.mutation.SetCustom(v)
+	return m
 }
 
 // SetNillableCustom sets the "custom" field if the given value is not nil.
-func (ctu *CustomTypeUpdate) SetNillableCustom(s *string) *CustomTypeUpdate {
-	if s != nil {
-		ctu.SetCustom(*s)
+func (m *CustomTypeUpdate) SetNillableCustom(v *string) *CustomTypeUpdate {
+	if v != nil {
+		m.SetCustom(*v)
 	}
-	return ctu
+	return m
 }
 
 // ClearCustom clears the value of the "custom" field.
-func (ctu *CustomTypeUpdate) ClearCustom() *CustomTypeUpdate {
-	ctu.mutation.ClearCustom()
-	return ctu
+func (m *CustomTypeUpdate) ClearCustom() *CustomTypeUpdate {
+	m.mutation.ClearCustom()
+	return m
 }
 
 // Mutation returns the CustomTypeMutation object of the builder.
-func (ctu *CustomTypeUpdate) Mutation() *CustomTypeMutation {
-	return ctu.mutation
+func (m *CustomTypeUpdate) Mutation() *CustomTypeMutation {
+	return m.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (ctu *CustomTypeUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, ctu.sqlSave, ctu.mutation, ctu.hooks)
+func (u *CustomTypeUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ctu *CustomTypeUpdate) SaveX(ctx context.Context) int {
-	affected, err := ctu.Save(ctx)
+func (u *CustomTypeUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -71,34 +71,34 @@ func (ctu *CustomTypeUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (ctu *CustomTypeUpdate) Exec(ctx context.Context) error {
-	_, err := ctu.Save(ctx)
+func (u *CustomTypeUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ctu *CustomTypeUpdate) ExecX(ctx context.Context) {
-	if err := ctu.Exec(ctx); err != nil {
+func (u *CustomTypeUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (ctu *CustomTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (u *CustomTypeUpdate) sqlSave(ctx context.Context) (_n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(customtype.Table, customtype.Columns, sqlgraph.NewFieldSpec(customtype.FieldID, field.TypeInt))
-	if ps := ctu.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := ctu.mutation.Custom(); ok {
+	if value, ok := u.mutation.Custom(); ok {
 		_spec.SetField(customtype.FieldCustom, field.TypeString, value)
 	}
-	if ctu.mutation.CustomCleared() {
+	if u.mutation.CustomCleared() {
 		_spec.ClearField(customtype.FieldCustom, field.TypeString)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, ctu.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{customtype.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -106,8 +106,8 @@ func (ctu *CustomTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	ctu.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // CustomTypeUpdateOne is the builder for updating a single CustomType entity.
@@ -119,51 +119,51 @@ type CustomTypeUpdateOne struct {
 }
 
 // SetCustom sets the "custom" field.
-func (ctuo *CustomTypeUpdateOne) SetCustom(s string) *CustomTypeUpdateOne {
-	ctuo.mutation.SetCustom(s)
-	return ctuo
+func (m *CustomTypeUpdateOne) SetCustom(v string) *CustomTypeUpdateOne {
+	m.mutation.SetCustom(v)
+	return m
 }
 
 // SetNillableCustom sets the "custom" field if the given value is not nil.
-func (ctuo *CustomTypeUpdateOne) SetNillableCustom(s *string) *CustomTypeUpdateOne {
-	if s != nil {
-		ctuo.SetCustom(*s)
+func (m *CustomTypeUpdateOne) SetNillableCustom(v *string) *CustomTypeUpdateOne {
+	if v != nil {
+		m.SetCustom(*v)
 	}
-	return ctuo
+	return m
 }
 
 // ClearCustom clears the value of the "custom" field.
-func (ctuo *CustomTypeUpdateOne) ClearCustom() *CustomTypeUpdateOne {
-	ctuo.mutation.ClearCustom()
-	return ctuo
+func (m *CustomTypeUpdateOne) ClearCustom() *CustomTypeUpdateOne {
+	m.mutation.ClearCustom()
+	return m
 }
 
 // Mutation returns the CustomTypeMutation object of the builder.
-func (ctuo *CustomTypeUpdateOne) Mutation() *CustomTypeMutation {
-	return ctuo.mutation
+func (m *CustomTypeUpdateOne) Mutation() *CustomTypeMutation {
+	return m.mutation
 }
 
 // Where appends a list predicates to the CustomTypeUpdate builder.
-func (ctuo *CustomTypeUpdateOne) Where(ps ...predicate.CustomType) *CustomTypeUpdateOne {
-	ctuo.mutation.Where(ps...)
-	return ctuo
+func (u *CustomTypeUpdateOne) Where(ps ...predicate.CustomType) *CustomTypeUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (ctuo *CustomTypeUpdateOne) Select(field string, fields ...string) *CustomTypeUpdateOne {
-	ctuo.fields = append([]string{field}, fields...)
-	return ctuo
+func (u *CustomTypeUpdateOne) Select(field string, fields ...string) *CustomTypeUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated CustomType entity.
-func (ctuo *CustomTypeUpdateOne) Save(ctx context.Context) (*CustomType, error) {
-	return withHooks(ctx, ctuo.sqlSave, ctuo.mutation, ctuo.hooks)
+func (u *CustomTypeUpdateOne) Save(ctx context.Context) (*CustomType, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ctuo *CustomTypeUpdateOne) SaveX(ctx context.Context) *CustomType {
-	node, err := ctuo.Save(ctx)
+func (u *CustomTypeUpdateOne) SaveX(ctx context.Context) *CustomType {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -171,26 +171,26 @@ func (ctuo *CustomTypeUpdateOne) SaveX(ctx context.Context) *CustomType {
 }
 
 // Exec executes the query on the entity.
-func (ctuo *CustomTypeUpdateOne) Exec(ctx context.Context) error {
-	_, err := ctuo.Save(ctx)
+func (u *CustomTypeUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ctuo *CustomTypeUpdateOne) ExecX(ctx context.Context) {
-	if err := ctuo.Exec(ctx); err != nil {
+func (u *CustomTypeUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (ctuo *CustomTypeUpdateOne) sqlSave(ctx context.Context) (_node *CustomType, err error) {
+func (u *CustomTypeUpdateOne) sqlSave(ctx context.Context) (_n *CustomType, err error) {
 	_spec := sqlgraph.NewUpdateSpec(customtype.Table, customtype.Columns, sqlgraph.NewFieldSpec(customtype.FieldID, field.TypeInt))
-	id, ok := ctuo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`entv1: missing "CustomType.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := ctuo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, customtype.FieldID)
 		for _, f := range fields {
@@ -202,23 +202,23 @@ func (ctuo *CustomTypeUpdateOne) sqlSave(ctx context.Context) (_node *CustomType
 			}
 		}
 	}
-	if ps := ctuo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := ctuo.mutation.Custom(); ok {
+	if value, ok := u.mutation.Custom(); ok {
 		_spec.SetField(customtype.FieldCustom, field.TypeString, value)
 	}
-	if ctuo.mutation.CustomCleared() {
+	if u.mutation.CustomCleared() {
 		_spec.ClearField(customtype.FieldCustom, field.TypeString)
 	}
-	_node = &CustomType{config: ctuo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, ctuo.driver, _spec); err != nil {
+	_n = &CustomType{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{customtype.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -226,6 +226,6 @@ func (ctuo *CustomTypeUpdateOne) sqlSave(ctx context.Context) (_node *CustomType
 		}
 		return nil, err
 	}
-	ctuo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

@@ -24,51 +24,51 @@ type CardCreate struct {
 }
 
 // SetNumber sets the "number" field.
-func (cc *CardCreate) SetNumber(s string) *CardCreate {
-	cc.mutation.SetNumber(s)
-	return cc
+func (m *CardCreate) SetNumber(v string) *CardCreate {
+	m.mutation.SetNumber(v)
+	return m
 }
 
 // SetNillableNumber sets the "number" field if the given value is not nil.
-func (cc *CardCreate) SetNillableNumber(s *string) *CardCreate {
-	if s != nil {
-		cc.SetNumber(*s)
+func (m *CardCreate) SetNillableNumber(v *string) *CardCreate {
+	if v != nil {
+		m.SetNumber(*v)
 	}
-	return cc
+	return m
 }
 
 // SetOwnerID sets the "owner_id" field.
-func (cc *CardCreate) SetOwnerID(i int) *CardCreate {
-	cc.mutation.SetOwnerID(i)
-	return cc
+func (m *CardCreate) SetOwnerID(v int) *CardCreate {
+	m.mutation.SetOwnerID(v)
+	return m
 }
 
 // SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (cc *CardCreate) SetNillableOwnerID(i *int) *CardCreate {
-	if i != nil {
-		cc.SetOwnerID(*i)
+func (m *CardCreate) SetNillableOwnerID(v *int) *CardCreate {
+	if v != nil {
+		m.SetOwnerID(*v)
 	}
-	return cc
+	return m
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (cc *CardCreate) SetOwner(u *User) *CardCreate {
-	return cc.SetOwnerID(u.ID)
+func (m *CardCreate) SetOwner(v *User) *CardCreate {
+	return m.SetOwnerID(v.ID)
 }
 
 // Mutation returns the CardMutation object of the builder.
-func (cc *CardCreate) Mutation() *CardMutation {
-	return cc.mutation
+func (m *CardCreate) Mutation() *CardMutation {
+	return m.mutation
 }
 
 // Save creates the Card in the database.
-func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
-	return withHooks(ctx, cc.sqlSave, cc.mutation, cc.hooks)
+func (c *CardCreate) Save(ctx context.Context) (*Card, error) {
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (cc *CardCreate) SaveX(ctx context.Context) *Card {
-	v, err := cc.Save(ctx)
+func (c *CardCreate) SaveX(ctx context.Context) *Card {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -76,29 +76,29 @@ func (cc *CardCreate) SaveX(ctx context.Context) *Card {
 }
 
 // Exec executes the query.
-func (cc *CardCreate) Exec(ctx context.Context) error {
-	_, err := cc.Save(ctx)
+func (c *CardCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cc *CardCreate) ExecX(ctx context.Context) {
-	if err := cc.Exec(ctx); err != nil {
+func (c *CardCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cc *CardCreate) check() error {
+func (c *CardCreate) check() error {
 	return nil
 }
 
-func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
-	if err := cc.check(); err != nil {
+func (c *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := cc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -106,21 +106,21 @@ func (cc *CardCreate) sqlSave(ctx context.Context) (*Card, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	cc.mutation.id = &_node.ID
-	cc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (cc *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
+func (c *CardCreate) createSpec() (*Card, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Card{config: cc.config}
+		_node = &Card{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(card.Table, sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt))
 	)
-	if value, ok := cc.mutation.Number(); ok {
+	if value, ok := c.mutation.Number(); ok {
 		_spec.SetField(card.FieldNumber, field.TypeString, value)
 		_node.Number = value
 	}
-	if nodes := cc.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -148,16 +148,16 @@ type CardCreateBulk struct {
 }
 
 // Save creates the Card entities in the database.
-func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
-	if ccb.err != nil {
-		return nil, ccb.err
+func (c *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
-	nodes := make([]*Card, len(ccb.builders))
-	mutators := make([]Mutator, len(ccb.builders))
-	for i := range ccb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Card, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := ccb.builders[i]
+			builder := c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CardMutation)
 				if !ok {
@@ -170,11 +170,11 @@ func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, ccb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ccb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -198,7 +198,7 @@ func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, ccb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -206,8 +206,8 @@ func (ccb *CardCreateBulk) Save(ctx context.Context) ([]*Card, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ccb *CardCreateBulk) SaveX(ctx context.Context) []*Card {
-	v, err := ccb.Save(ctx)
+func (c *CardCreateBulk) SaveX(ctx context.Context) []*Card {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -215,14 +215,14 @@ func (ccb *CardCreateBulk) SaveX(ctx context.Context) []*Card {
 }
 
 // Exec executes the query.
-func (ccb *CardCreateBulk) Exec(ctx context.Context) error {
-	_, err := ccb.Save(ctx)
+func (c *CardCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ccb *CardCreateBulk) ExecX(ctx context.Context) {
-	if err := ccb.Exec(ctx); err != nil {
+func (c *CardCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

@@ -36,44 +36,44 @@ type SessionQuery struct {
 }
 
 // Where adds a new predicate for the SessionQuery builder.
-func (sq *SessionQuery) Where(ps ...predicate.Session) *SessionQuery {
-	sq.predicates = append(sq.predicates, ps...)
-	return sq
+func (q *SessionQuery) Where(ps ...predicate.Session) *SessionQuery {
+	q.predicates = append(q.predicates, ps...)
+	return q
 }
 
 // Limit the number of records to be returned by this query.
-func (sq *SessionQuery) Limit(limit int) *SessionQuery {
-	sq.ctx.Limit = &limit
-	return sq
+func (q *SessionQuery) Limit(limit int) *SessionQuery {
+	q.ctx.Limit = &limit
+	return q
 }
 
 // Offset to start from.
-func (sq *SessionQuery) Offset(offset int) *SessionQuery {
-	sq.ctx.Offset = &offset
-	return sq
+func (q *SessionQuery) Offset(offset int) *SessionQuery {
+	q.ctx.Offset = &offset
+	return q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (sq *SessionQuery) Unique(unique bool) *SessionQuery {
-	sq.ctx.Unique = &unique
-	return sq
+func (q *SessionQuery) Unique(unique bool) *SessionQuery {
+	q.ctx.Unique = &unique
+	return q
 }
 
 // Order specifies how the records should be ordered.
-func (sq *SessionQuery) Order(o ...session.OrderOption) *SessionQuery {
-	sq.order = append(sq.order, o...)
-	return sq
+func (q *SessionQuery) Order(o ...session.OrderOption) *SessionQuery {
+	q.order = append(q.order, o...)
+	return q
 }
 
 // QueryDevice chains the current query on the "device" edge.
-func (sq *SessionQuery) QueryDevice() *DeviceQuery {
-	query := (&DeviceClient{config: sq.config}).Query()
+func (q *SessionQuery) QueryDevice() *DeviceQuery {
+	query := (&DeviceClient{config: q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := sq.prepareQuery(ctx); err != nil {
+		if err := q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := sq.sqlQuery(ctx)
+		selector := q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -82,7 +82,7 @@ func (sq *SessionQuery) QueryDevice() *DeviceQuery {
 			sqlgraph.To(device.Table, device.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, session.DeviceTable, session.DeviceColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -90,8 +90,8 @@ func (sq *SessionQuery) QueryDevice() *DeviceQuery {
 
 // First returns the first Session entity from the query.
 // Returns a *NotFoundError when no Session was found.
-func (sq *SessionQuery) First(ctx context.Context) (*Session, error) {
-	nodes, err := sq.Limit(1).All(setContextOp(ctx, sq.ctx, ent.OpQueryFirst))
+func (q *SessionQuery) First(ctx context.Context) (*Session, error) {
+	nodes, err := q.Limit(1).All(setContextOp(ctx, q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -102,8 +102,8 @@ func (sq *SessionQuery) First(ctx context.Context) (*Session, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (sq *SessionQuery) FirstX(ctx context.Context) *Session {
-	node, err := sq.First(ctx)
+func (q *SessionQuery) FirstX(ctx context.Context) *Session {
+	node, err := q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -112,9 +112,9 @@ func (sq *SessionQuery) FirstX(ctx context.Context) *Session {
 
 // FirstID returns the first Session ID from the query.
 // Returns a *NotFoundError when no Session ID was found.
-func (sq *SessionQuery) FirstID(ctx context.Context) (id schema.ID, err error) {
+func (q *SessionQuery) FirstID(ctx context.Context) (id schema.ID, err error) {
 	var ids []schema.ID
-	if ids, err = sq.Limit(1).IDs(setContextOp(ctx, sq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = q.Limit(1).IDs(setContextOp(ctx, q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -125,8 +125,8 @@ func (sq *SessionQuery) FirstID(ctx context.Context) (id schema.ID, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (sq *SessionQuery) FirstIDX(ctx context.Context) schema.ID {
-	id, err := sq.FirstID(ctx)
+func (q *SessionQuery) FirstIDX(ctx context.Context) schema.ID {
+	id, err := q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -136,8 +136,8 @@ func (sq *SessionQuery) FirstIDX(ctx context.Context) schema.ID {
 // Only returns a single Session entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Session entity is found.
 // Returns a *NotFoundError when no Session entities are found.
-func (sq *SessionQuery) Only(ctx context.Context) (*Session, error) {
-	nodes, err := sq.Limit(2).All(setContextOp(ctx, sq.ctx, ent.OpQueryOnly))
+func (q *SessionQuery) Only(ctx context.Context) (*Session, error) {
+	nodes, err := q.Limit(2).All(setContextOp(ctx, q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -152,8 +152,8 @@ func (sq *SessionQuery) Only(ctx context.Context) (*Session, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (sq *SessionQuery) OnlyX(ctx context.Context) *Session {
-	node, err := sq.Only(ctx)
+func (q *SessionQuery) OnlyX(ctx context.Context) *Session {
+	node, err := q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -163,9 +163,9 @@ func (sq *SessionQuery) OnlyX(ctx context.Context) *Session {
 // OnlyID is like Only, but returns the only Session ID in the query.
 // Returns a *NotSingularError when more than one Session ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (sq *SessionQuery) OnlyID(ctx context.Context) (id schema.ID, err error) {
+func (q *SessionQuery) OnlyID(ctx context.Context) (id schema.ID, err error) {
 	var ids []schema.ID
-	if ids, err = sq.Limit(2).IDs(setContextOp(ctx, sq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = q.Limit(2).IDs(setContextOp(ctx, q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -180,8 +180,8 @@ func (sq *SessionQuery) OnlyID(ctx context.Context) (id schema.ID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (sq *SessionQuery) OnlyIDX(ctx context.Context) schema.ID {
-	id, err := sq.OnlyID(ctx)
+func (q *SessionQuery) OnlyIDX(ctx context.Context) schema.ID {
+	id, err := q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -189,18 +189,18 @@ func (sq *SessionQuery) OnlyIDX(ctx context.Context) schema.ID {
 }
 
 // All executes the query and returns a list of Sessions.
-func (sq *SessionQuery) All(ctx context.Context) ([]*Session, error) {
-	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryAll)
-	if err := sq.prepareQuery(ctx); err != nil {
+func (q *SessionQuery) All(ctx context.Context) ([]*Session, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryAll)
+	if err := q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Session, *SessionQuery]()
-	return withInterceptors[[]*Session](ctx, sq, qr, sq.inters)
+	return withInterceptors[[]*Session](ctx, q, qr, q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (sq *SessionQuery) AllX(ctx context.Context) []*Session {
-	nodes, err := sq.All(ctx)
+func (q *SessionQuery) AllX(ctx context.Context) []*Session {
+	nodes, err := q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -208,20 +208,20 @@ func (sq *SessionQuery) AllX(ctx context.Context) []*Session {
 }
 
 // IDs executes the query and returns a list of Session IDs.
-func (sq *SessionQuery) IDs(ctx context.Context) (ids []schema.ID, err error) {
-	if sq.ctx.Unique == nil && sq.path != nil {
-		sq.Unique(true)
+func (q *SessionQuery) IDs(ctx context.Context) (ids []schema.ID, err error) {
+	if q.ctx.Unique == nil && q.path != nil {
+		q.Unique(true)
 	}
-	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryIDs)
-	if err = sq.Select(session.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryIDs)
+	if err = q.Select(session.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (sq *SessionQuery) IDsX(ctx context.Context) []schema.ID {
-	ids, err := sq.IDs(ctx)
+func (q *SessionQuery) IDsX(ctx context.Context) []schema.ID {
+	ids, err := q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -229,17 +229,17 @@ func (sq *SessionQuery) IDsX(ctx context.Context) []schema.ID {
 }
 
 // Count returns the count of the given query.
-func (sq *SessionQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryCount)
-	if err := sq.prepareQuery(ctx); err != nil {
+func (q *SessionQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryCount)
+	if err := q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, sq, querierCount[*SessionQuery](), sq.inters)
+	return withInterceptors[int](ctx, q, querierCount[*SessionQuery](), q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (sq *SessionQuery) CountX(ctx context.Context) int {
-	count, err := sq.Count(ctx)
+func (q *SessionQuery) CountX(ctx context.Context) int {
+	count, err := q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -247,9 +247,9 @@ func (sq *SessionQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (sq *SessionQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryExist)
-	switch _, err := sq.FirstID(ctx); {
+func (q *SessionQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryExist)
+	switch _, err := q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -260,8 +260,8 @@ func (sq *SessionQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (sq *SessionQuery) ExistX(ctx context.Context) bool {
-	exist, err := sq.Exist(ctx)
+func (q *SessionQuery) ExistX(ctx context.Context) bool {
+	exist, err := q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -270,40 +270,40 @@ func (sq *SessionQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the SessionQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (sq *SessionQuery) Clone() *SessionQuery {
-	if sq == nil {
+func (q *SessionQuery) Clone() *SessionQuery {
+	if q == nil {
 		return nil
 	}
 	return &SessionQuery{
-		config:     sq.config,
-		ctx:        sq.ctx.Clone(),
-		order:      append([]session.OrderOption{}, sq.order...),
-		inters:     append([]Interceptor{}, sq.inters...),
-		predicates: append([]predicate.Session{}, sq.predicates...),
-		withDevice: sq.withDevice.Clone(),
+		config:     q.config,
+		ctx:        q.ctx.Clone(),
+		order:      append([]session.OrderOption{}, q.order...),
+		inters:     append([]Interceptor{}, q.inters...),
+		predicates: append([]predicate.Session{}, q.predicates...),
+		withDevice: q.withDevice.Clone(),
 		// clone intermediate query.
-		sql:  sq.sql.Clone(),
-		path: sq.path,
+		sql:  q.sql.Clone(),
+		path: q.path,
 	}
 }
 
 // WithDevice tells the query-builder to eager-load the nodes that are connected to
 // the "device" edge. The optional arguments are used to configure the query builder of the edge.
-func (sq *SessionQuery) WithDevice(opts ...func(*DeviceQuery)) *SessionQuery {
-	query := (&DeviceClient{config: sq.config}).Query()
+func (q *SessionQuery) WithDevice(opts ...func(*DeviceQuery)) *SessionQuery {
+	query := (&DeviceClient{config: q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	sq.withDevice = query
-	return sq
+	q.withDevice = query
+	return q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
-func (sq *SessionQuery) GroupBy(field string, fields ...string) *SessionGroupBy {
-	sq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &SessionGroupBy{build: sq}
-	grbuild.flds = &sq.ctx.Fields
+func (q *SessionQuery) GroupBy(field string, fields ...string) *SessionGroupBy {
+	q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &SessionGroupBy{build: q}
+	grbuild.flds = &q.ctx.Fields
 	grbuild.label = session.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -311,55 +311,55 @@ func (sq *SessionQuery) GroupBy(field string, fields ...string) *SessionGroupBy 
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (sq *SessionQuery) Select(fields ...string) *SessionSelect {
-	sq.ctx.Fields = append(sq.ctx.Fields, fields...)
-	sbuild := &SessionSelect{SessionQuery: sq}
+func (q *SessionQuery) Select(fields ...string) *SessionSelect {
+	q.ctx.Fields = append(q.ctx.Fields, fields...)
+	sbuild := &SessionSelect{SessionQuery: q}
 	sbuild.label = session.Label
-	sbuild.flds, sbuild.scan = &sq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a SessionSelect configured with the given aggregations.
-func (sq *SessionQuery) Aggregate(fns ...AggregateFunc) *SessionSelect {
-	return sq.Select().Aggregate(fns...)
+func (q *SessionQuery) Aggregate(fns ...AggregateFunc) *SessionSelect {
+	return q.Select().Aggregate(fns...)
 }
 
-func (sq *SessionQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range sq.inters {
+func (q *SessionQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, sq); err != nil {
+			if err := trv.Traverse(ctx, q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range sq.ctx.Fields {
+	for _, f := range q.ctx.Fields {
 		if !session.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if sq.path != nil {
-		prev, err := sq.path(ctx)
+	if q.path != nil {
+		prev, err := q.path(ctx)
 		if err != nil {
 			return err
 		}
-		sq.sql = prev
+		q.sql = prev
 	}
 	return nil
 }
 
-func (sq *SessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Session, error) {
+func (q *SessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Session, error) {
 	var (
 		nodes       = []*Session{}
-		withFKs     = sq.withFKs
-		_spec       = sq.querySpec()
+		withFKs     = q.withFKs
+		_spec       = q.querySpec()
 		loadedTypes = [1]bool{
-			sq.withDevice != nil,
+			q.withDevice != nil,
 		}
 	)
-	if sq.withDevice != nil {
+	if q.withDevice != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -369,7 +369,7 @@ func (sq *SessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Sess
 		return (*Session).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Session{config: sq.config}
+		node := &Session{config: q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -377,14 +377,14 @@ func (sq *SessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Sess
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, sq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := sq.withDevice; query != nil {
-		if err := sq.loadDevice(ctx, query, nodes, nil,
+	if query := q.withDevice; query != nil {
+		if err := q.loadDevice(ctx, query, nodes, nil,
 			func(n *Session, e *Device) { n.Edges.Device = e }); err != nil {
 			return nil, err
 		}
@@ -392,7 +392,7 @@ func (sq *SessionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Sess
 	return nodes, nil
 }
 
-func (sq *SessionQuery) loadDevice(ctx context.Context, query *DeviceQuery, nodes []*Session, init func(*Session), assign func(*Session, *Device)) error {
+func (q *SessionQuery) loadDevice(ctx context.Context, query *DeviceQuery, nodes []*Session, init func(*Session), assign func(*Session, *Device)) error {
 	ids := make([]schema.ID, 0, len(nodes))
 	nodeids := make(map[schema.ID][]*Session)
 	for i := range nodes {
@@ -425,24 +425,24 @@ func (sq *SessionQuery) loadDevice(ctx context.Context, query *DeviceQuery, node
 	return nil
 }
 
-func (sq *SessionQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := sq.querySpec()
-	_spec.Node.Columns = sq.ctx.Fields
-	if len(sq.ctx.Fields) > 0 {
-		_spec.Unique = sq.ctx.Unique != nil && *sq.ctx.Unique
+func (q *SessionQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := q.querySpec()
+	_spec.Node.Columns = q.ctx.Fields
+	if len(q.ctx.Fields) > 0 {
+		_spec.Unique = q.ctx.Unique != nil && *q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, sq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, q.driver, _spec)
 }
 
-func (sq *SessionQuery) querySpec() *sqlgraph.QuerySpec {
+func (q *SessionQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(session.Table, session.Columns, sqlgraph.NewFieldSpec(session.FieldID, field.TypeBytes))
-	_spec.From = sq.sql
-	if unique := sq.ctx.Unique; unique != nil {
+	_spec.From = q.sql
+	if unique := q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if sq.path != nil {
+	} else if q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := sq.ctx.Fields; len(fields) > 0 {
+	if fields := q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, session.FieldID)
 		for i := range fields {
@@ -451,20 +451,20 @@ func (sq *SessionQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := sq.predicates; len(ps) > 0 {
+	if ps := q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := sq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := sq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := sq.order; len(ps) > 0 {
+	if ps := q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -474,33 +474,33 @@ func (sq *SessionQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (sq *SessionQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(sq.driver.Dialect())
+func (q *SessionQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(q.driver.Dialect())
 	t1 := builder.Table(session.Table)
-	columns := sq.ctx.Fields
+	columns := q.ctx.Fields
 	if len(columns) == 0 {
 		columns = session.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if sq.sql != nil {
-		selector = sq.sql
+	if q.sql != nil {
+		selector = q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if sq.ctx.Unique != nil && *sq.ctx.Unique {
+	if q.ctx.Unique != nil && *q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range sq.predicates {
+	for _, p := range q.predicates {
 		p(selector)
 	}
-	for _, p := range sq.order {
+	for _, p := range q.order {
 		p(selector)
 	}
-	if offset := sq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := sq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -527,27 +527,27 @@ func (sgb *SessionGroupBy) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*SessionQuery, *SessionGroupBy](ctx, sgb.build, sgb, sgb.build.inters, v)
 }
 
-func (sgb *SessionGroupBy) sqlScan(ctx context.Context, root *SessionQuery, v any) error {
+func (q *SessionGroupBy) sqlScan(ctx context.Context, root *SessionQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(sgb.fns))
-	for _, fn := range sgb.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*sgb.flds)+len(sgb.fns))
-		for _, f := range *sgb.flds {
+		columns := make([]string, 0, len(*q.flds)+len(q.fns))
+		for _, f := range *q.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*sgb.flds...)...)
+	selector.GroupBy(selector.Columns(*q.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := sgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -575,13 +575,13 @@ func (ss *SessionSelect) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*SessionQuery, *SessionSelect](ctx, ss.SessionQuery, ss, ss.inters, v)
 }
 
-func (ss *SessionSelect) sqlScan(ctx context.Context, root *SessionQuery, v any) error {
+func (q *SessionSelect) sqlScan(ctx context.Context, root *SessionQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(ss.fns))
-	for _, fn := range ss.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*ss.selector.flds); {
+	switch n := len(*q.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -589,7 +589,7 @@ func (ss *SessionSelect) sqlScan(ctx context.Context, root *SessionQuery, v any)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ss.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

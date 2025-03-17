@@ -307,241 +307,241 @@ func (ft *FieldType) FromResponse(res *gremlin.Response) error {
 // Update returns a builder for updating this FieldType.
 // Note that you need to call FieldType.Unwrap() before calling this method if this FieldType
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (ft *FieldType) Update() *FieldTypeUpdateOne {
-	return NewFieldTypeClient(ft.config).UpdateOne(ft)
+func (m *FieldType) Update() *FieldTypeUpdateOne {
+	return NewFieldTypeClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the FieldType entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (ft *FieldType) Unwrap() *FieldType {
-	_tx, ok := ft.config.driver.(*txDriver)
+func (m *FieldType) Unwrap() *FieldType {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: FieldType is not a transactional entity")
 	}
-	ft.config.driver = _tx.drv
-	return ft
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (ft *FieldType) String() string {
+func (m *FieldType) String() string {
 	var builder strings.Builder
 	builder.WriteString("FieldType(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", ft.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("int=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Int))
+	builder.WriteString(fmt.Sprintf("%v", m.Int))
 	builder.WriteString(", ")
 	builder.WriteString("int8=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Int8))
+	builder.WriteString(fmt.Sprintf("%v", m.Int8))
 	builder.WriteString(", ")
 	builder.WriteString("int16=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Int16))
+	builder.WriteString(fmt.Sprintf("%v", m.Int16))
 	builder.WriteString(", ")
 	builder.WriteString("int32=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Int32))
+	builder.WriteString(fmt.Sprintf("%v", m.Int32))
 	builder.WriteString(", ")
 	builder.WriteString("int64=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Int64))
+	builder.WriteString(fmt.Sprintf("%v", m.Int64))
 	builder.WriteString(", ")
 	builder.WriteString("optional_int=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalInt))
+	builder.WriteString(fmt.Sprintf("%v", m.OptionalInt))
 	builder.WriteString(", ")
 	builder.WriteString("optional_int8=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalInt8))
+	builder.WriteString(fmt.Sprintf("%v", m.OptionalInt8))
 	builder.WriteString(", ")
 	builder.WriteString("optional_int16=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalInt16))
+	builder.WriteString(fmt.Sprintf("%v", m.OptionalInt16))
 	builder.WriteString(", ")
 	builder.WriteString("optional_int32=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalInt32))
+	builder.WriteString(fmt.Sprintf("%v", m.OptionalInt32))
 	builder.WriteString(", ")
 	builder.WriteString("optional_int64=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalInt64))
+	builder.WriteString(fmt.Sprintf("%v", m.OptionalInt64))
 	builder.WriteString(", ")
-	if v := ft.NillableInt; v != nil {
+	if v := m.NillableInt; v != nil {
 		builder.WriteString("nillable_int=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := ft.NillableInt8; v != nil {
+	if v := m.NillableInt8; v != nil {
 		builder.WriteString("nillable_int8=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := ft.NillableInt16; v != nil {
+	if v := m.NillableInt16; v != nil {
 		builder.WriteString("nillable_int16=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := ft.NillableInt32; v != nil {
+	if v := m.NillableInt32; v != nil {
 		builder.WriteString("nillable_int32=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := ft.NillableInt64; v != nil {
+	if v := m.NillableInt64; v != nil {
 		builder.WriteString("nillable_int64=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("validate_optional_int32=")
-	builder.WriteString(fmt.Sprintf("%v", ft.ValidateOptionalInt32))
+	builder.WriteString(fmt.Sprintf("%v", m.ValidateOptionalInt32))
 	builder.WriteString(", ")
 	builder.WriteString("optional_uint=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint))
+	builder.WriteString(fmt.Sprintf("%v", m.OptionalUint))
 	builder.WriteString(", ")
 	builder.WriteString("optional_uint8=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint8))
+	builder.WriteString(fmt.Sprintf("%v", m.OptionalUint8))
 	builder.WriteString(", ")
 	builder.WriteString("optional_uint16=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint16))
+	builder.WriteString(fmt.Sprintf("%v", m.OptionalUint16))
 	builder.WriteString(", ")
 	builder.WriteString("optional_uint32=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint32))
+	builder.WriteString(fmt.Sprintf("%v", m.OptionalUint32))
 	builder.WriteString(", ")
 	builder.WriteString("optional_uint64=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUint64))
+	builder.WriteString(fmt.Sprintf("%v", m.OptionalUint64))
 	builder.WriteString(", ")
 	builder.WriteString("state=")
-	builder.WriteString(fmt.Sprintf("%v", ft.State))
+	builder.WriteString(fmt.Sprintf("%v", m.State))
 	builder.WriteString(", ")
 	builder.WriteString("optional_float=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat))
+	builder.WriteString(fmt.Sprintf("%v", m.OptionalFloat))
 	builder.WriteString(", ")
 	builder.WriteString("optional_float32=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalFloat32))
+	builder.WriteString(fmt.Sprintf("%v", m.OptionalFloat32))
 	builder.WriteString(", ")
 	builder.WriteString("text=")
-	builder.WriteString(ft.Text)
+	builder.WriteString(m.Text)
 	builder.WriteString(", ")
 	builder.WriteString("datetime=")
-	builder.WriteString(ft.Datetime.Format(time.ANSIC))
+	builder.WriteString(m.Datetime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("decimal=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Decimal))
+	builder.WriteString(fmt.Sprintf("%v", m.Decimal))
 	builder.WriteString(", ")
 	builder.WriteString("link_other=")
-	builder.WriteString(fmt.Sprintf("%v", ft.LinkOther))
+	builder.WriteString(fmt.Sprintf("%v", m.LinkOther))
 	builder.WriteString(", ")
 	builder.WriteString("link_other_func=")
-	builder.WriteString(fmt.Sprintf("%v", ft.LinkOtherFunc))
+	builder.WriteString(fmt.Sprintf("%v", m.LinkOtherFunc))
 	builder.WriteString(", ")
 	builder.WriteString("mac=")
-	builder.WriteString(fmt.Sprintf("%v", ft.MAC))
+	builder.WriteString(fmt.Sprintf("%v", m.MAC))
 	builder.WriteString(", ")
 	builder.WriteString("string_array=")
-	builder.WriteString(fmt.Sprintf("%v", ft.StringArray))
+	builder.WriteString(fmt.Sprintf("%v", m.StringArray))
 	builder.WriteString(", ")
 	builder.WriteString("password=<sensitive>")
 	builder.WriteString(", ")
-	if v := ft.StringScanner; v != nil {
+	if v := m.StringScanner; v != nil {
 		builder.WriteString("string_scanner=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("duration=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Duration))
+	builder.WriteString(fmt.Sprintf("%v", m.Duration))
 	builder.WriteString(", ")
 	builder.WriteString("dir=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Dir))
+	builder.WriteString(fmt.Sprintf("%v", m.Dir))
 	builder.WriteString(", ")
-	if v := ft.Ndir; v != nil {
+	if v := m.Ndir; v != nil {
 		builder.WriteString("ndir=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("str=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Str))
+	builder.WriteString(fmt.Sprintf("%v", m.Str))
 	builder.WriteString(", ")
-	if v := ft.NullStr; v != nil {
+	if v := m.NullStr; v != nil {
 		builder.WriteString("null_str=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("link=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Link))
+	builder.WriteString(fmt.Sprintf("%v", m.Link))
 	builder.WriteString(", ")
-	if v := ft.NullLink; v != nil {
+	if v := m.NullLink; v != nil {
 		builder.WriteString("null_link=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("active=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Active))
+	builder.WriteString(fmt.Sprintf("%v", m.Active))
 	builder.WriteString(", ")
-	if v := ft.NullActive; v != nil {
+	if v := m.NullActive; v != nil {
 		builder.WriteString("null_active=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := ft.Deleted; v != nil {
+	if v := m.Deleted; v != nil {
 		builder.WriteString("deleted=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("deleted_at=")
-	builder.WriteString(fmt.Sprintf("%v", ft.DeletedAt))
+	builder.WriteString(fmt.Sprintf("%v", m.DeletedAt))
 	builder.WriteString(", ")
 	builder.WriteString("raw_data=")
-	builder.WriteString(fmt.Sprintf("%v", ft.RawData))
+	builder.WriteString(fmt.Sprintf("%v", m.RawData))
 	builder.WriteString(", ")
 	builder.WriteString("sensitive=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("ip=")
-	builder.WriteString(fmt.Sprintf("%v", ft.IP))
+	builder.WriteString(fmt.Sprintf("%v", m.IP))
 	builder.WriteString(", ")
 	builder.WriteString("null_int64=")
-	builder.WriteString(fmt.Sprintf("%v", ft.NullInt64))
+	builder.WriteString(fmt.Sprintf("%v", m.NullInt64))
 	builder.WriteString(", ")
 	builder.WriteString("schema_int=")
-	builder.WriteString(fmt.Sprintf("%v", ft.SchemaInt))
+	builder.WriteString(fmt.Sprintf("%v", m.SchemaInt))
 	builder.WriteString(", ")
 	builder.WriteString("schema_int8=")
-	builder.WriteString(fmt.Sprintf("%v", ft.SchemaInt8))
+	builder.WriteString(fmt.Sprintf("%v", m.SchemaInt8))
 	builder.WriteString(", ")
 	builder.WriteString("schema_int64=")
-	builder.WriteString(fmt.Sprintf("%v", ft.SchemaInt64))
+	builder.WriteString(fmt.Sprintf("%v", m.SchemaInt64))
 	builder.WriteString(", ")
 	builder.WriteString("schema_float=")
-	builder.WriteString(fmt.Sprintf("%v", ft.SchemaFloat))
+	builder.WriteString(fmt.Sprintf("%v", m.SchemaFloat))
 	builder.WriteString(", ")
 	builder.WriteString("schema_float32=")
-	builder.WriteString(fmt.Sprintf("%v", ft.SchemaFloat32))
+	builder.WriteString(fmt.Sprintf("%v", m.SchemaFloat32))
 	builder.WriteString(", ")
 	builder.WriteString("null_float=")
-	builder.WriteString(fmt.Sprintf("%v", ft.NullFloat))
+	builder.WriteString(fmt.Sprintf("%v", m.NullFloat))
 	builder.WriteString(", ")
 	builder.WriteString("role=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Role))
+	builder.WriteString(fmt.Sprintf("%v", m.Role))
 	builder.WriteString(", ")
 	builder.WriteString("priority=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Priority))
+	builder.WriteString(fmt.Sprintf("%v", m.Priority))
 	builder.WriteString(", ")
 	builder.WriteString("optional_uuid=")
-	builder.WriteString(fmt.Sprintf("%v", ft.OptionalUUID))
+	builder.WriteString(fmt.Sprintf("%v", m.OptionalUUID))
 	builder.WriteString(", ")
-	if v := ft.NillableUUID; v != nil {
+	if v := m.NillableUUID; v != nil {
 		builder.WriteString("nillable_uuid=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("strings=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Strings))
+	builder.WriteString(fmt.Sprintf("%v", m.Strings))
 	builder.WriteString(", ")
 	builder.WriteString("pair=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Pair))
+	builder.WriteString(fmt.Sprintf("%v", m.Pair))
 	builder.WriteString(", ")
-	if v := ft.NilPair; v != nil {
+	if v := m.NilPair; v != nil {
 		builder.WriteString("nil_pair=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("vstring=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Vstring))
+	builder.WriteString(fmt.Sprintf("%v", m.Vstring))
 	builder.WriteString(", ")
 	builder.WriteString("triple=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Triple))
+	builder.WriteString(fmt.Sprintf("%v", m.Triple))
 	builder.WriteString(", ")
 	builder.WriteString("big_int=")
-	builder.WriteString(fmt.Sprintf("%v", ft.BigInt))
+	builder.WriteString(fmt.Sprintf("%v", m.BigInt))
 	builder.WriteString(", ")
 	builder.WriteString("password_other=<sensitive>")
 	builder.WriteByte(')')

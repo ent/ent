@@ -87,9 +87,9 @@ func (*Friendship) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Friendship fields.
-func (f *Friendship) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Friendship) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -98,33 +98,33 @@ func (f *Friendship) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			f.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case friendship.FieldWeight:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field weight", values[i])
 			} else if value.Valid {
-				f.Weight = int(value.Int64)
+				m.Weight = int(value.Int64)
 			}
 		case friendship.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				f.CreatedAt = value.Time
+				m.CreatedAt = value.Time
 			}
 		case friendship.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				f.UserID = int(value.Int64)
+				m.UserID = int(value.Int64)
 			}
 		case friendship.FieldFriendID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field friend_id", values[i])
 			} else if value.Valid {
-				f.FriendID = int(value.Int64)
+				m.FriendID = int(value.Int64)
 			}
 		default:
-			f.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -132,54 +132,54 @@ func (f *Friendship) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Friendship.
 // This includes values selected through modifiers, order, etc.
-func (f *Friendship) Value(name string) (ent.Value, error) {
-	return f.selectValues.Get(name)
+func (m *Friendship) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryUser queries the "user" edge of the Friendship entity.
-func (f *Friendship) QueryUser() *UserQuery {
-	return NewFriendshipClient(f.config).QueryUser(f)
+func (m *Friendship) QueryUser() *UserQuery {
+	return NewFriendshipClient(m.config).QueryUser(m)
 }
 
 // QueryFriend queries the "friend" edge of the Friendship entity.
-func (f *Friendship) QueryFriend() *UserQuery {
-	return NewFriendshipClient(f.config).QueryFriend(f)
+func (m *Friendship) QueryFriend() *UserQuery {
+	return NewFriendshipClient(m.config).QueryFriend(m)
 }
 
 // Update returns a builder for updating this Friendship.
 // Note that you need to call Friendship.Unwrap() before calling this method if this Friendship
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (f *Friendship) Update() *FriendshipUpdateOne {
-	return NewFriendshipClient(f.config).UpdateOne(f)
+func (m *Friendship) Update() *FriendshipUpdateOne {
+	return NewFriendshipClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Friendship entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (f *Friendship) Unwrap() *Friendship {
-	_tx, ok := f.config.driver.(*txDriver)
+func (m *Friendship) Unwrap() *Friendship {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Friendship is not a transactional entity")
 	}
-	f.config.driver = _tx.drv
-	return f
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (f *Friendship) String() string {
+func (m *Friendship) String() string {
 	var builder strings.Builder
 	builder.WriteString("Friendship(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", f.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("weight=")
-	builder.WriteString(fmt.Sprintf("%v", f.Weight))
+	builder.WriteString(fmt.Sprintf("%v", m.Weight))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
-	builder.WriteString(f.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", f.UserID))
+	builder.WriteString(fmt.Sprintf("%v", m.UserID))
 	builder.WriteString(", ")
 	builder.WriteString("friend_id=")
-	builder.WriteString(fmt.Sprintf("%v", f.FriendID))
+	builder.WriteString(fmt.Sprintf("%v", m.FriendID))
 	builder.WriteByte(')')
 	return builder.String()
 }

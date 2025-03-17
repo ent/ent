@@ -24,56 +24,56 @@ type LinkDelete struct {
 }
 
 // Where appends a list predicates to the LinkDelete builder.
-func (ld *LinkDelete) Where(ps ...predicate.Link) *LinkDelete {
-	ld.mutation.Where(ps...)
-	return ld
+func (d *LinkDelete) Where(ps ...predicate.Link) *LinkDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (ld *LinkDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, ld.sqlExec, ld.mutation, ld.hooks)
+func (d *LinkDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ld *LinkDelete) ExecX(ctx context.Context) int {
-	n, err := ld.Exec(ctx)
+func (d *LinkDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (ld *LinkDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *LinkDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(link.Table, sqlgraph.NewFieldSpec(link.FieldID, field.TypeUUID))
-	if ps := ld.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, ld.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	ld.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // LinkDeleteOne is the builder for deleting a single Link entity.
 type LinkDeleteOne struct {
-	ld *LinkDelete
+	d *LinkDelete
 }
 
 // Where appends a list predicates to the LinkDelete builder.
-func (ldo *LinkDeleteOne) Where(ps ...predicate.Link) *LinkDeleteOne {
-	ldo.ld.mutation.Where(ps...)
-	return ldo
+func (d *LinkDeleteOne) Where(ps ...predicate.Link) *LinkDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (ldo *LinkDeleteOne) Exec(ctx context.Context) error {
-	n, err := ldo.ld.Exec(ctx)
+func (d *LinkDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (ldo *LinkDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ldo *LinkDeleteOne) ExecX(ctx context.Context) {
-	if err := ldo.Exec(ctx); err != nil {
+func (d *LinkDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

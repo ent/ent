@@ -29,133 +29,133 @@ type PetCreate struct {
 }
 
 // SetAge sets the "age" field.
-func (pc *PetCreate) SetAge(f float64) *PetCreate {
-	pc.mutation.SetAge(f)
-	return pc
+func (m *PetCreate) SetAge(v float64) *PetCreate {
+	m.mutation.SetAge(v)
+	return m
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (pc *PetCreate) SetNillableAge(f *float64) *PetCreate {
-	if f != nil {
-		pc.SetAge(*f)
+func (m *PetCreate) SetNillableAge(v *float64) *PetCreate {
+	if v != nil {
+		m.SetAge(*v)
 	}
-	return pc
+	return m
 }
 
 // SetName sets the "name" field.
-func (pc *PetCreate) SetName(s string) *PetCreate {
-	pc.mutation.SetName(s)
-	return pc
+func (m *PetCreate) SetName(v string) *PetCreate {
+	m.mutation.SetName(v)
+	return m
 }
 
 // SetUUID sets the "uuid" field.
-func (pc *PetCreate) SetUUID(u uuid.UUID) *PetCreate {
-	pc.mutation.SetUUID(u)
-	return pc
+func (m *PetCreate) SetUUID(v uuid.UUID) *PetCreate {
+	m.mutation.SetUUID(v)
+	return m
 }
 
 // SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (pc *PetCreate) SetNillableUUID(u *uuid.UUID) *PetCreate {
-	if u != nil {
-		pc.SetUUID(*u)
+func (m *PetCreate) SetNillableUUID(v *uuid.UUID) *PetCreate {
+	if v != nil {
+		m.SetUUID(*v)
 	}
-	return pc
+	return m
 }
 
 // SetNickname sets the "nickname" field.
-func (pc *PetCreate) SetNickname(s string) *PetCreate {
-	pc.mutation.SetNickname(s)
-	return pc
+func (m *PetCreate) SetNickname(v string) *PetCreate {
+	m.mutation.SetNickname(v)
+	return m
 }
 
 // SetNillableNickname sets the "nickname" field if the given value is not nil.
-func (pc *PetCreate) SetNillableNickname(s *string) *PetCreate {
-	if s != nil {
-		pc.SetNickname(*s)
+func (m *PetCreate) SetNillableNickname(v *string) *PetCreate {
+	if v != nil {
+		m.SetNickname(*v)
 	}
-	return pc
+	return m
 }
 
 // SetTrained sets the "trained" field.
-func (pc *PetCreate) SetTrained(b bool) *PetCreate {
-	pc.mutation.SetTrained(b)
-	return pc
+func (m *PetCreate) SetTrained(v bool) *PetCreate {
+	m.mutation.SetTrained(v)
+	return m
 }
 
 // SetNillableTrained sets the "trained" field if the given value is not nil.
-func (pc *PetCreate) SetNillableTrained(b *bool) *PetCreate {
-	if b != nil {
-		pc.SetTrained(*b)
+func (m *PetCreate) SetNillableTrained(v *bool) *PetCreate {
+	if v != nil {
+		m.SetTrained(*v)
 	}
-	return pc
+	return m
 }
 
 // SetOptionalTime sets the "optional_time" field.
-func (pc *PetCreate) SetOptionalTime(t time.Time) *PetCreate {
-	pc.mutation.SetOptionalTime(t)
-	return pc
+func (m *PetCreate) SetOptionalTime(v time.Time) *PetCreate {
+	m.mutation.SetOptionalTime(v)
+	return m
 }
 
 // SetNillableOptionalTime sets the "optional_time" field if the given value is not nil.
-func (pc *PetCreate) SetNillableOptionalTime(t *time.Time) *PetCreate {
-	if t != nil {
-		pc.SetOptionalTime(*t)
+func (m *PetCreate) SetNillableOptionalTime(v *time.Time) *PetCreate {
+	if v != nil {
+		m.SetOptionalTime(*v)
 	}
-	return pc
+	return m
 }
 
 // SetTeamID sets the "team" edge to the User entity by ID.
-func (pc *PetCreate) SetTeamID(id string) *PetCreate {
-	pc.mutation.SetTeamID(id)
-	return pc
+func (m *PetCreate) SetTeamID(id string) *PetCreate {
+	m.mutation.SetTeamID(id)
+	return m
 }
 
 // SetNillableTeamID sets the "team" edge to the User entity by ID if the given value is not nil.
-func (pc *PetCreate) SetNillableTeamID(id *string) *PetCreate {
+func (m *PetCreate) SetNillableTeamID(id *string) *PetCreate {
 	if id != nil {
-		pc = pc.SetTeamID(*id)
+		m = m.SetTeamID(*id)
 	}
-	return pc
+	return m
 }
 
 // SetTeam sets the "team" edge to the User entity.
-func (pc *PetCreate) SetTeam(u *User) *PetCreate {
-	return pc.SetTeamID(u.ID)
+func (m *PetCreate) SetTeam(v *User) *PetCreate {
+	return m.SetTeamID(v.ID)
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
-func (pc *PetCreate) SetOwnerID(id string) *PetCreate {
-	pc.mutation.SetOwnerID(id)
-	return pc
+func (m *PetCreate) SetOwnerID(id string) *PetCreate {
+	m.mutation.SetOwnerID(id)
+	return m
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (pc *PetCreate) SetNillableOwnerID(id *string) *PetCreate {
+func (m *PetCreate) SetNillableOwnerID(id *string) *PetCreate {
 	if id != nil {
-		pc = pc.SetOwnerID(*id)
+		m = m.SetOwnerID(*id)
 	}
-	return pc
+	return m
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (pc *PetCreate) SetOwner(u *User) *PetCreate {
-	return pc.SetOwnerID(u.ID)
+func (m *PetCreate) SetOwner(v *User) *PetCreate {
+	return m.SetOwnerID(v.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.
-func (pc *PetCreate) Mutation() *PetMutation {
-	return pc.mutation
+func (m *PetCreate) Mutation() *PetMutation {
+	return m.mutation
 }
 
 // Save creates the Pet in the database.
-func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
-	pc.defaults()
-	return withHooks(ctx, pc.gremlinSave, pc.mutation, pc.hooks)
+func (c *PetCreate) Save(ctx context.Context) (*Pet, error) {
+	c.defaults()
+	return withHooks(ctx, c.gremlinSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (pc *PetCreate) SaveX(ctx context.Context) *Pet {
-	v, err := pc.Save(ctx)
+func (c *PetCreate) SaveX(ctx context.Context) *Pet {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -163,98 +163,98 @@ func (pc *PetCreate) SaveX(ctx context.Context) *Pet {
 }
 
 // Exec executes the query.
-func (pc *PetCreate) Exec(ctx context.Context) error {
-	_, err := pc.Save(ctx)
+func (c *PetCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pc *PetCreate) ExecX(ctx context.Context) {
-	if err := pc.Exec(ctx); err != nil {
+func (c *PetCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (pc *PetCreate) defaults() {
-	if _, ok := pc.mutation.Age(); !ok {
+func (c *PetCreate) defaults() {
+	if _, ok := c.mutation.Age(); !ok {
 		v := pet.DefaultAge
-		pc.mutation.SetAge(v)
+		c.mutation.SetAge(v)
 	}
-	if _, ok := pc.mutation.Trained(); !ok {
+	if _, ok := c.mutation.Trained(); !ok {
 		v := pet.DefaultTrained
-		pc.mutation.SetTrained(v)
+		c.mutation.SetTrained(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (pc *PetCreate) check() error {
-	if _, ok := pc.mutation.Age(); !ok {
+func (c *PetCreate) check() error {
+	if _, ok := c.mutation.Age(); !ok {
 		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "Pet.age"`)}
 	}
-	if _, ok := pc.mutation.Name(); !ok {
+	if _, ok := c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Pet.name"`)}
 	}
-	if _, ok := pc.mutation.Trained(); !ok {
+	if _, ok := c.mutation.Trained(); !ok {
 		return &ValidationError{Name: "trained", err: errors.New(`ent: missing required field "Pet.trained"`)}
 	}
 	return nil
 }
 
-func (pc *PetCreate) gremlinSave(ctx context.Context) (*Pet, error) {
-	if err := pc.check(); err != nil {
+func (c *PetCreate) gremlinSave(ctx context.Context) (*Pet, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := pc.gremlin().Query()
-	if err := pc.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := c.gremlin().Query()
+	if err := c.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	rnode := &Pet{config: pc.config}
+	rnode := &Pet{config: c.config}
 	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	pc.mutation.id = &rnode.ID
-	pc.mutation.done = true
+	c.mutation.id = &rnode.ID
+	c.mutation.done = true
 	return rnode, nil
 }
 
-func (pc *PetCreate) gremlin() *dsl.Traversal {
+func (c *PetCreate) gremlin() *dsl.Traversal {
 	type constraint struct {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
 	constraints := make([]*constraint, 0, 1)
 	v := g.AddV(pet.Label)
-	if value, ok := pc.mutation.Age(); ok {
+	if value, ok := c.mutation.Age(); ok {
 		v.Property(dsl.Single, pet.FieldAge, value)
 	}
-	if value, ok := pc.mutation.Name(); ok {
+	if value, ok := c.mutation.Name(); ok {
 		v.Property(dsl.Single, pet.FieldName, value)
 	}
-	if value, ok := pc.mutation.UUID(); ok {
+	if value, ok := c.mutation.UUID(); ok {
 		v.Property(dsl.Single, pet.FieldUUID, value)
 	}
-	if value, ok := pc.mutation.Nickname(); ok {
+	if value, ok := c.mutation.Nickname(); ok {
 		v.Property(dsl.Single, pet.FieldNickname, value)
 	}
-	if value, ok := pc.mutation.Trained(); ok {
+	if value, ok := c.mutation.Trained(); ok {
 		v.Property(dsl.Single, pet.FieldTrained, value)
 	}
-	if value, ok := pc.mutation.OptionalTime(); ok {
+	if value, ok := c.mutation.OptionalTime(); ok {
 		v.Property(dsl.Single, pet.FieldOptionalTime, value)
 	}
-	for _, id := range pc.mutation.TeamIDs() {
+	for _, id := range c.mutation.TeamIDs() {
 		v.AddE(user.TeamLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.TeamLabel).OutV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(pet.Label, user.TeamLabel, id)),
 		})
 	}
-	for _, id := range pc.mutation.OwnerIDs() {
+	for _, id := range c.mutation.OwnerIDs() {
 		v.AddE(user.PetsLabel).From(g.V(id)).InV()
 	}
 	if len(constraints) == 0 {

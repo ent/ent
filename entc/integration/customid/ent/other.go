@@ -40,9 +40,9 @@ func (*Other) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Other fields.
-func (o *Other) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Other) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -50,10 +50,10 @@ func (o *Other) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sid.ID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				o.ID = *value
+				m.ID = *value
 			}
 		default:
-			o.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -61,33 +61,33 @@ func (o *Other) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Other.
 // This includes values selected through modifiers, order, etc.
-func (o *Other) Value(name string) (ent.Value, error) {
-	return o.selectValues.Get(name)
+func (m *Other) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Other.
 // Note that you need to call Other.Unwrap() before calling this method if this Other
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (o *Other) Update() *OtherUpdateOne {
-	return NewOtherClient(o.config).UpdateOne(o)
+func (m *Other) Update() *OtherUpdateOne {
+	return NewOtherClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Other entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (o *Other) Unwrap() *Other {
-	_tx, ok := o.config.driver.(*txDriver)
+func (m *Other) Unwrap() *Other {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Other is not a transactional entity")
 	}
-	o.config.driver = _tx.drv
-	return o
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (o *Other) String() string {
+func (m *Other) String() string {
 	var builder strings.Builder
 	builder.WriteString("Other(")
-	builder.WriteString(fmt.Sprintf("id=%v", o.ID))
+	builder.WriteString(fmt.Sprintf("id=%v", m.ID))
 	builder.WriteByte(')')
 	return builder.String()
 }

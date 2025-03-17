@@ -79,9 +79,9 @@ func (*Note) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Note fields.
-func (n *Note) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Note) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -89,23 +89,23 @@ func (n *Note) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value.Valid {
-				n.ID = schema.NoteID(value.String)
+				m.ID = schema.NoteID(value.String)
 			}
 		case note.FieldText:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field text", values[i])
 			} else if value.Valid {
-				n.Text = value.String
+				m.Text = value.String
 			}
 		case note.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field note_children", values[i])
 			} else if value.Valid {
-				n.note_children = new(schema.NoteID)
-				*n.note_children = schema.NoteID(value.String)
+				m.note_children = new(schema.NoteID)
+				*m.note_children = schema.NoteID(value.String)
 			}
 		default:
-			n.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -113,45 +113,45 @@ func (n *Note) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Note.
 // This includes values selected through modifiers, order, etc.
-func (n *Note) Value(name string) (ent.Value, error) {
-	return n.selectValues.Get(name)
+func (m *Note) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryParent queries the "parent" edge of the Note entity.
-func (n *Note) QueryParent() *NoteQuery {
-	return NewNoteClient(n.config).QueryParent(n)
+func (m *Note) QueryParent() *NoteQuery {
+	return NewNoteClient(m.config).QueryParent(m)
 }
 
 // QueryChildren queries the "children" edge of the Note entity.
-func (n *Note) QueryChildren() *NoteQuery {
-	return NewNoteClient(n.config).QueryChildren(n)
+func (m *Note) QueryChildren() *NoteQuery {
+	return NewNoteClient(m.config).QueryChildren(m)
 }
 
 // Update returns a builder for updating this Note.
 // Note that you need to call Note.Unwrap() before calling this method if this Note
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (n *Note) Update() *NoteUpdateOne {
-	return NewNoteClient(n.config).UpdateOne(n)
+func (m *Note) Update() *NoteUpdateOne {
+	return NewNoteClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Note entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (n *Note) Unwrap() *Note {
-	_tx, ok := n.config.driver.(*txDriver)
+func (m *Note) Unwrap() *Note {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Note is not a transactional entity")
 	}
-	n.config.driver = _tx.drv
-	return n
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (n *Note) String() string {
+func (m *Note) String() string {
 	var builder strings.Builder
 	builder.WriteString("Note(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", n.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("text=")
-	builder.WriteString(n.Text)
+	builder.WriteString(m.Text)
 	builder.WriteByte(')')
 	return builder.String()
 }

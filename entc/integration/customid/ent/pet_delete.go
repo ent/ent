@@ -24,56 +24,56 @@ type PetDelete struct {
 }
 
 // Where appends a list predicates to the PetDelete builder.
-func (pd *PetDelete) Where(ps ...predicate.Pet) *PetDelete {
-	pd.mutation.Where(ps...)
-	return pd
+func (d *PetDelete) Where(ps ...predicate.Pet) *PetDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (pd *PetDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, pd.sqlExec, pd.mutation, pd.hooks)
+func (d *PetDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pd *PetDelete) ExecX(ctx context.Context) int {
-	n, err := pd.Exec(ctx)
+func (d *PetDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (pd *PetDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *PetDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(pet.Table, sqlgraph.NewFieldSpec(pet.FieldID, field.TypeString))
-	if ps := pd.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, pd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	pd.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // PetDeleteOne is the builder for deleting a single Pet entity.
 type PetDeleteOne struct {
-	pd *PetDelete
+	d *PetDelete
 }
 
 // Where appends a list predicates to the PetDelete builder.
-func (pdo *PetDeleteOne) Where(ps ...predicate.Pet) *PetDeleteOne {
-	pdo.pd.mutation.Where(ps...)
-	return pdo
+func (d *PetDeleteOne) Where(ps ...predicate.Pet) *PetDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (pdo *PetDeleteOne) Exec(ctx context.Context) error {
-	n, err := pdo.pd.Exec(ctx)
+func (d *PetDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (pdo *PetDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pdo *PetDeleteOne) ExecX(ctx context.Context) {
-	if err := pdo.Exec(ctx); err != nil {
+func (d *PetDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

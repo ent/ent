@@ -25,43 +25,43 @@ type PostCreate struct {
 }
 
 // SetText sets the "text" field.
-func (pc *PostCreate) SetText(s string) *PostCreate {
-	pc.mutation.SetText(s)
-	return pc
+func (m *PostCreate) SetText(v string) *PostCreate {
+	m.mutation.SetText(v)
+	return m
 }
 
 // SetAuthorID sets the "author_id" field.
-func (pc *PostCreate) SetAuthorID(i int) *PostCreate {
-	pc.mutation.SetAuthorID(i)
-	return pc
+func (m *PostCreate) SetAuthorID(v int) *PostCreate {
+	m.mutation.SetAuthorID(v)
+	return m
 }
 
 // SetNillableAuthorID sets the "author_id" field if the given value is not nil.
-func (pc *PostCreate) SetNillableAuthorID(i *int) *PostCreate {
-	if i != nil {
-		pc.SetAuthorID(*i)
+func (m *PostCreate) SetNillableAuthorID(v *int) *PostCreate {
+	if v != nil {
+		m.SetAuthorID(*v)
 	}
-	return pc
+	return m
 }
 
 // SetAuthor sets the "author" edge to the User entity.
-func (pc *PostCreate) SetAuthor(u *User) *PostCreate {
-	return pc.SetAuthorID(u.ID)
+func (m *PostCreate) SetAuthor(v *User) *PostCreate {
+	return m.SetAuthorID(v.ID)
 }
 
 // Mutation returns the PostMutation object of the builder.
-func (pc *PostCreate) Mutation() *PostMutation {
-	return pc.mutation
+func (m *PostCreate) Mutation() *PostMutation {
+	return m.mutation
 }
 
 // Save creates the Post in the database.
-func (pc *PostCreate) Save(ctx context.Context) (*Post, error) {
-	return withHooks(ctx, pc.sqlSave, pc.mutation, pc.hooks)
+func (c *PostCreate) Save(ctx context.Context) (*Post, error) {
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (pc *PostCreate) SaveX(ctx context.Context) *Post {
-	v, err := pc.Save(ctx)
+func (c *PostCreate) SaveX(ctx context.Context) *Post {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -69,32 +69,32 @@ func (pc *PostCreate) SaveX(ctx context.Context) *Post {
 }
 
 // Exec executes the query.
-func (pc *PostCreate) Exec(ctx context.Context) error {
-	_, err := pc.Save(ctx)
+func (c *PostCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pc *PostCreate) ExecX(ctx context.Context) {
-	if err := pc.Exec(ctx); err != nil {
+func (c *PostCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (pc *PostCreate) check() error {
-	if _, ok := pc.mutation.Text(); !ok {
+func (c *PostCreate) check() error {
+	if _, ok := c.mutation.Text(); !ok {
 		return &ValidationError{Name: "text", err: errors.New(`ent: missing required field "Post.text"`)}
 	}
 	return nil
 }
 
-func (pc *PostCreate) sqlSave(ctx context.Context) (*Post, error) {
-	if err := pc.check(); err != nil {
+func (c *PostCreate) sqlSave(ctx context.Context) (*Post, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := pc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -102,21 +102,21 @@ func (pc *PostCreate) sqlSave(ctx context.Context) (*Post, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	pc.mutation.id = &_node.ID
-	pc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (pc *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
+func (c *PostCreate) createSpec() (*Post, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Post{config: pc.config}
+		_node = &Post{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(post.Table, sqlgraph.NewFieldSpec(post.FieldID, field.TypeInt))
 	)
-	if value, ok := pc.mutation.Text(); ok {
+	if value, ok := c.mutation.Text(); ok {
 		_spec.SetField(post.FieldText, field.TypeString, value)
 		_node.Text = value
 	}
-	if nodes := pc.mutation.AuthorIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.AuthorIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -144,16 +144,16 @@ type PostCreateBulk struct {
 }
 
 // Save creates the Post entities in the database.
-func (pcb *PostCreateBulk) Save(ctx context.Context) ([]*Post, error) {
-	if pcb.err != nil {
-		return nil, pcb.err
+func (c *PostCreateBulk) Save(ctx context.Context) ([]*Post, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(pcb.builders))
-	nodes := make([]*Post, len(pcb.builders))
-	mutators := make([]Mutator, len(pcb.builders))
-	for i := range pcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Post, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := pcb.builders[i]
+			builder := c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PostMutation)
 				if !ok {
@@ -166,11 +166,11 @@ func (pcb *PostCreateBulk) Save(ctx context.Context) ([]*Post, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, pcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, pcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -194,7 +194,7 @@ func (pcb *PostCreateBulk) Save(ctx context.Context) ([]*Post, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, pcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -202,8 +202,8 @@ func (pcb *PostCreateBulk) Save(ctx context.Context) ([]*Post, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (pcb *PostCreateBulk) SaveX(ctx context.Context) []*Post {
-	v, err := pcb.Save(ctx)
+func (c *PostCreateBulk) SaveX(ctx context.Context) []*Post {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -211,14 +211,14 @@ func (pcb *PostCreateBulk) SaveX(ctx context.Context) []*Post {
 }
 
 // Exec executes the query.
-func (pcb *PostCreateBulk) Exec(ctx context.Context) error {
-	_, err := pcb.Save(ctx)
+func (c *PostCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pcb *PostCreateBulk) ExecX(ctx context.Context) {
-	if err := pcb.Exec(ctx); err != nil {
+func (c *PostCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

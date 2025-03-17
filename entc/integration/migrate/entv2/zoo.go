@@ -39,9 +39,9 @@ func (*Zoo) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Zoo fields.
-func (z *Zoo) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Zoo) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -50,9 +50,9 @@ func (z *Zoo) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			z.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		default:
-			z.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -60,33 +60,33 @@ func (z *Zoo) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Zoo.
 // This includes values selected through modifiers, order, etc.
-func (z *Zoo) Value(name string) (ent.Value, error) {
-	return z.selectValues.Get(name)
+func (m *Zoo) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Zoo.
 // Note that you need to call Zoo.Unwrap() before calling this method if this Zoo
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (z *Zoo) Update() *ZooUpdateOne {
-	return NewZooClient(z.config).UpdateOne(z)
+func (m *Zoo) Update() *ZooUpdateOne {
+	return NewZooClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Zoo entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (z *Zoo) Unwrap() *Zoo {
-	_tx, ok := z.config.driver.(*txDriver)
+func (m *Zoo) Unwrap() *Zoo {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("entv2: Zoo is not a transactional entity")
 	}
-	z.config.driver = _tx.drv
-	return z
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (z *Zoo) String() string {
+func (m *Zoo) String() string {
 	var builder strings.Builder
 	builder.WriteString("Zoo(")
-	builder.WriteString(fmt.Sprintf("id=%v", z.ID))
+	builder.WriteString(fmt.Sprintf("id=%v", m.ID))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -25,58 +25,58 @@ type FriendshipDelete struct {
 }
 
 // Where appends a list predicates to the FriendshipDelete builder.
-func (fd *FriendshipDelete) Where(ps ...predicate.Friendship) *FriendshipDelete {
-	fd.mutation.Where(ps...)
-	return fd
+func (d *FriendshipDelete) Where(ps ...predicate.Friendship) *FriendshipDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (fd *FriendshipDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, fd.sqlExec, fd.mutation, fd.hooks)
+func (d *FriendshipDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (fd *FriendshipDelete) ExecX(ctx context.Context) int {
-	n, err := fd.Exec(ctx)
+func (d *FriendshipDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (fd *FriendshipDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *FriendshipDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(friendship.Table, sqlgraph.NewFieldSpec(friendship.FieldID, field.TypeInt))
-	_spec.Node.Schema = fd.schemaConfig.Friendship
-	ctx = internal.NewSchemaConfigContext(ctx, fd.schemaConfig)
-	if ps := fd.mutation.predicates; len(ps) > 0 {
+	_spec.Node.Schema = d.schemaConfig.Friendship
+	ctx = internal.NewSchemaConfigContext(ctx, d.schemaConfig)
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, fd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	fd.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // FriendshipDeleteOne is the builder for deleting a single Friendship entity.
 type FriendshipDeleteOne struct {
-	fd *FriendshipDelete
+	d *FriendshipDelete
 }
 
 // Where appends a list predicates to the FriendshipDelete builder.
-func (fdo *FriendshipDeleteOne) Where(ps ...predicate.Friendship) *FriendshipDeleteOne {
-	fdo.fd.mutation.Where(ps...)
-	return fdo
+func (d *FriendshipDeleteOne) Where(ps ...predicate.Friendship) *FriendshipDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (fdo *FriendshipDeleteOne) Exec(ctx context.Context) error {
-	n, err := fdo.fd.Exec(ctx)
+func (d *FriendshipDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -88,8 +88,8 @@ func (fdo *FriendshipDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (fdo *FriendshipDeleteOne) ExecX(ctx context.Context) {
-	if err := fdo.Exec(ctx); err != nil {
+func (d *FriendshipDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

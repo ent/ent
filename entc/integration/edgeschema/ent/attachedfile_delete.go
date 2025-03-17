@@ -24,56 +24,56 @@ type AttachedFileDelete struct {
 }
 
 // Where appends a list predicates to the AttachedFileDelete builder.
-func (afd *AttachedFileDelete) Where(ps ...predicate.AttachedFile) *AttachedFileDelete {
-	afd.mutation.Where(ps...)
-	return afd
+func (d *AttachedFileDelete) Where(ps ...predicate.AttachedFile) *AttachedFileDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (afd *AttachedFileDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, afd.sqlExec, afd.mutation, afd.hooks)
+func (d *AttachedFileDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (afd *AttachedFileDelete) ExecX(ctx context.Context) int {
-	n, err := afd.Exec(ctx)
+func (d *AttachedFileDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (afd *AttachedFileDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *AttachedFileDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(attachedfile.Table, sqlgraph.NewFieldSpec(attachedfile.FieldID, field.TypeInt))
-	if ps := afd.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, afd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	afd.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // AttachedFileDeleteOne is the builder for deleting a single AttachedFile entity.
 type AttachedFileDeleteOne struct {
-	afd *AttachedFileDelete
+	d *AttachedFileDelete
 }
 
 // Where appends a list predicates to the AttachedFileDelete builder.
-func (afdo *AttachedFileDeleteOne) Where(ps ...predicate.AttachedFile) *AttachedFileDeleteOne {
-	afdo.afd.mutation.Where(ps...)
-	return afdo
+func (d *AttachedFileDeleteOne) Where(ps ...predicate.AttachedFile) *AttachedFileDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (afdo *AttachedFileDeleteOne) Exec(ctx context.Context) error {
-	n, err := afdo.afd.Exec(ctx)
+func (d *AttachedFileDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (afdo *AttachedFileDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (afdo *AttachedFileDeleteOne) ExecX(ctx context.Context) {
-	if err := afdo.Exec(ctx); err != nil {
+func (d *AttachedFileDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

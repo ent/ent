@@ -100,55 +100,55 @@ func (pe *Pet) FromResponse(res *gremlin.Response) error {
 }
 
 // QueryTeam queries the "team" edge of the Pet entity.
-func (pe *Pet) QueryTeam() *UserQuery {
-	return NewPetClient(pe.config).QueryTeam(pe)
+func (m *Pet) QueryTeam() *UserQuery {
+	return NewPetClient(m.config).QueryTeam(m)
 }
 
 // QueryOwner queries the "owner" edge of the Pet entity.
-func (pe *Pet) QueryOwner() *UserQuery {
-	return NewPetClient(pe.config).QueryOwner(pe)
+func (m *Pet) QueryOwner() *UserQuery {
+	return NewPetClient(m.config).QueryOwner(m)
 }
 
 // Update returns a builder for updating this Pet.
 // Note that you need to call Pet.Unwrap() before calling this method if this Pet
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (pe *Pet) Update() *PetUpdateOne {
-	return NewPetClient(pe.config).UpdateOne(pe)
+func (m *Pet) Update() *PetUpdateOne {
+	return NewPetClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Pet entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (pe *Pet) Unwrap() *Pet {
-	_tx, ok := pe.config.driver.(*txDriver)
+func (m *Pet) Unwrap() *Pet {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Pet is not a transactional entity")
 	}
-	pe.config.driver = _tx.drv
-	return pe
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (pe *Pet) String() string {
+func (m *Pet) String() string {
 	var builder strings.Builder
 	builder.WriteString("Pet(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", pe.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("age=")
-	builder.WriteString(fmt.Sprintf("%v", pe.Age))
+	builder.WriteString(fmt.Sprintf("%v", m.Age))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(pe.Name)
+	builder.WriteString(m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("uuid=")
-	builder.WriteString(fmt.Sprintf("%v", pe.UUID))
+	builder.WriteString(fmt.Sprintf("%v", m.UUID))
 	builder.WriteString(", ")
 	builder.WriteString("nickname=")
-	builder.WriteString(pe.Nickname)
+	builder.WriteString(m.Nickname)
 	builder.WriteString(", ")
 	builder.WriteString("trained=")
-	builder.WriteString(fmt.Sprintf("%v", pe.Trained))
+	builder.WriteString(fmt.Sprintf("%v", m.Trained))
 	builder.WriteString(", ")
 	builder.WriteString("optional_time=")
-	builder.WriteString(pe.OptionalTime.Format(time.ANSIC))
+	builder.WriteString(m.OptionalTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

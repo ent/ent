@@ -26,54 +26,54 @@ type TeamCreate struct {
 }
 
 // SetName sets the "name" field.
-func (tc *TeamCreate) SetName(s string) *TeamCreate {
-	tc.mutation.SetName(s)
-	return tc
+func (m *TeamCreate) SetName(v string) *TeamCreate {
+	m.mutation.SetName(v)
+	return m
 }
 
 // AddTaskIDs adds the "tasks" edge to the Task entity by IDs.
-func (tc *TeamCreate) AddTaskIDs(ids ...int) *TeamCreate {
-	tc.mutation.AddTaskIDs(ids...)
-	return tc
+func (m *TeamCreate) AddTaskIDs(ids ...int) *TeamCreate {
+	m.mutation.AddTaskIDs(ids...)
+	return m
 }
 
 // AddTasks adds the "tasks" edges to the Task entity.
-func (tc *TeamCreate) AddTasks(t ...*Task) *TeamCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (m *TeamCreate) AddTasks(v ...*Task) *TeamCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tc.AddTaskIDs(ids...)
+	return m.AddTaskIDs(ids...)
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
-func (tc *TeamCreate) AddUserIDs(ids ...int) *TeamCreate {
-	tc.mutation.AddUserIDs(ids...)
-	return tc
+func (m *TeamCreate) AddUserIDs(ids ...int) *TeamCreate {
+	m.mutation.AddUserIDs(ids...)
+	return m
 }
 
 // AddUsers adds the "users" edges to the User entity.
-func (tc *TeamCreate) AddUsers(u ...*User) *TeamCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (m *TeamCreate) AddUsers(v ...*User) *TeamCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tc.AddUserIDs(ids...)
+	return m.AddUserIDs(ids...)
 }
 
 // Mutation returns the TeamMutation object of the builder.
-func (tc *TeamCreate) Mutation() *TeamMutation {
-	return tc.mutation
+func (m *TeamCreate) Mutation() *TeamMutation {
+	return m.mutation
 }
 
 // Save creates the Team in the database.
-func (tc *TeamCreate) Save(ctx context.Context) (*Team, error) {
-	return withHooks(ctx, tc.sqlSave, tc.mutation, tc.hooks)
+func (c *TeamCreate) Save(ctx context.Context) (*Team, error) {
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (tc *TeamCreate) SaveX(ctx context.Context) *Team {
-	v, err := tc.Save(ctx)
+func (c *TeamCreate) SaveX(ctx context.Context) *Team {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -81,24 +81,24 @@ func (tc *TeamCreate) SaveX(ctx context.Context) *Team {
 }
 
 // Exec executes the query.
-func (tc *TeamCreate) Exec(ctx context.Context) error {
-	_, err := tc.Save(ctx)
+func (c *TeamCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tc *TeamCreate) ExecX(ctx context.Context) {
-	if err := tc.Exec(ctx); err != nil {
+func (c *TeamCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (tc *TeamCreate) check() error {
-	if _, ok := tc.mutation.Name(); !ok {
+func (c *TeamCreate) check() error {
+	if _, ok := c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Team.name"`)}
 	}
-	if v, ok := tc.mutation.Name(); ok {
+	if v, ok := c.mutation.Name(); ok {
 		if err := team.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Team.name": %w`, err)}
 		}
@@ -106,12 +106,12 @@ func (tc *TeamCreate) check() error {
 	return nil
 }
 
-func (tc *TeamCreate) sqlSave(ctx context.Context) (*Team, error) {
-	if err := tc.check(); err != nil {
+func (c *TeamCreate) sqlSave(ctx context.Context) (*Team, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := tc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, tc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -119,21 +119,21 @@ func (tc *TeamCreate) sqlSave(ctx context.Context) (*Team, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	tc.mutation.id = &_node.ID
-	tc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
+func (c *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Team{config: tc.config}
+		_node = &Team{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(team.Table, sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt))
 	)
-	if value, ok := tc.mutation.Name(); ok {
+	if value, ok := c.mutation.Name(); ok {
 		_spec.SetField(team.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if nodes := tc.mutation.TasksIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.TasksIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -149,7 +149,7 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := tc.mutation.UsersIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.UsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -176,16 +176,16 @@ type TeamCreateBulk struct {
 }
 
 // Save creates the Team entities in the database.
-func (tcb *TeamCreateBulk) Save(ctx context.Context) ([]*Team, error) {
-	if tcb.err != nil {
-		return nil, tcb.err
+func (c *TeamCreateBulk) Save(ctx context.Context) ([]*Team, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(tcb.builders))
-	nodes := make([]*Team, len(tcb.builders))
-	mutators := make([]Mutator, len(tcb.builders))
-	for i := range tcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Team, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := tcb.builders[i]
+			builder := c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TeamMutation)
 				if !ok {
@@ -198,11 +198,11 @@ func (tcb *TeamCreateBulk) Save(ctx context.Context) ([]*Team, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, tcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, tcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -226,7 +226,7 @@ func (tcb *TeamCreateBulk) Save(ctx context.Context) ([]*Team, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, tcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -234,8 +234,8 @@ func (tcb *TeamCreateBulk) Save(ctx context.Context) ([]*Team, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (tcb *TeamCreateBulk) SaveX(ctx context.Context) []*Team {
-	v, err := tcb.Save(ctx)
+func (c *TeamCreateBulk) SaveX(ctx context.Context) []*Team {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -243,14 +243,14 @@ func (tcb *TeamCreateBulk) SaveX(ctx context.Context) []*Team {
 }
 
 // Exec executes the query.
-func (tcb *TeamCreateBulk) Exec(ctx context.Context) error {
-	_, err := tcb.Save(ctx)
+func (c *TeamCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tcb *TeamCreateBulk) ExecX(ctx context.Context) {
-	if err := tcb.Exec(ctx); err != nil {
+func (c *TeamCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

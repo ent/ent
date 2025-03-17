@@ -66,9 +66,9 @@ func (*Car) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Car fields.
-func (c *Car) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Car) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -76,16 +76,16 @@ func (c *Car) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				c.ID = *value
+				m.ID = *value
 			}
 		case car.FieldNumber:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field number", values[i])
 			} else if value.Valid {
-				c.Number = value.String
+				m.Number = value.String
 			}
 		default:
-			c.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -93,65 +93,65 @@ func (c *Car) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Car.
 // This includes values selected through modifiers, order, etc.
-func (c *Car) Value(name string) (ent.Value, error) {
-	return c.selectValues.Get(name)
+func (m *Car) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryRentals queries the "rentals" edge of the Car entity.
-func (c *Car) QueryRentals() *RentalQuery {
-	return NewCarClient(c.config).QueryRentals(c)
+func (m *Car) QueryRentals() *RentalQuery {
+	return NewCarClient(m.config).QueryRentals(m)
 }
 
 // Update returns a builder for updating this Car.
 // Note that you need to call Car.Unwrap() before calling this method if this Car
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (c *Car) Update() *CarUpdateOne {
-	return NewCarClient(c.config).UpdateOne(c)
+func (m *Car) Update() *CarUpdateOne {
+	return NewCarClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Car entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (c *Car) Unwrap() *Car {
-	_tx, ok := c.config.driver.(*txDriver)
+func (m *Car) Unwrap() *Car {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Car is not a transactional entity")
 	}
-	c.config.driver = _tx.drv
-	return c
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (c *Car) String() string {
+func (m *Car) String() string {
 	var builder strings.Builder
 	builder.WriteString("Car(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("number=")
-	builder.WriteString(c.Number)
+	builder.WriteString(m.Number)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedRentals returns the Rentals named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (c *Car) NamedRentals(name string) ([]*Rental, error) {
-	if c.Edges.namedRentals == nil {
+func (m *Car) NamedRentals(name string) ([]*Rental, error) {
+	if m.Edges.namedRentals == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := c.Edges.namedRentals[name]
+	nodes, ok := m.Edges.namedRentals[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (c *Car) appendNamedRentals(name string, edges ...*Rental) {
-	if c.Edges.namedRentals == nil {
-		c.Edges.namedRentals = make(map[string][]*Rental)
+func (m *Car) appendNamedRentals(name string, edges ...*Rental) {
+	if m.Edges.namedRentals == nil {
+		m.Edges.namedRentals = make(map[string][]*Rental)
 	}
 	if len(edges) == 0 {
-		c.Edges.namedRentals[name] = []*Rental{}
+		m.Edges.namedRentals[name] = []*Rental{}
 	} else {
-		c.Edges.namedRentals[name] = append(c.Edges.namedRentals[name], edges...)
+		m.Edges.namedRentals[name] = append(m.Edges.namedRentals[name], edges...)
 	}
 }
 

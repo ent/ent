@@ -58,33 +58,33 @@ func (s *Spec) FromResponse(res *gremlin.Response) error {
 }
 
 // QueryCard queries the "card" edge of the Spec entity.
-func (s *Spec) QueryCard() *CardQuery {
-	return NewSpecClient(s.config).QueryCard(s)
+func (m *Spec) QueryCard() *CardQuery {
+	return NewSpecClient(m.config).QueryCard(m)
 }
 
 // Update returns a builder for updating this Spec.
 // Note that you need to call Spec.Unwrap() before calling this method if this Spec
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (s *Spec) Update() *SpecUpdateOne {
-	return NewSpecClient(s.config).UpdateOne(s)
+func (m *Spec) Update() *SpecUpdateOne {
+	return NewSpecClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Spec entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (s *Spec) Unwrap() *Spec {
-	_tx, ok := s.config.driver.(*txDriver)
+func (m *Spec) Unwrap() *Spec {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Spec is not a transactional entity")
 	}
-	s.config.driver = _tx.drv
-	return s
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (s *Spec) String() string {
+func (m *Spec) String() string {
 	var builder strings.Builder
 	builder.WriteString("Spec(")
-	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
+	builder.WriteString(fmt.Sprintf("id=%v", m.ID))
 	builder.WriteByte(')')
 	return builder.String()
 }

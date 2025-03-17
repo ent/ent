@@ -24,56 +24,56 @@ type RelationshipInfoDelete struct {
 }
 
 // Where appends a list predicates to the RelationshipInfoDelete builder.
-func (rid *RelationshipInfoDelete) Where(ps ...predicate.RelationshipInfo) *RelationshipInfoDelete {
-	rid.mutation.Where(ps...)
-	return rid
+func (d *RelationshipInfoDelete) Where(ps ...predicate.RelationshipInfo) *RelationshipInfoDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (rid *RelationshipInfoDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, rid.sqlExec, rid.mutation, rid.hooks)
+func (d *RelationshipInfoDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rid *RelationshipInfoDelete) ExecX(ctx context.Context) int {
-	n, err := rid.Exec(ctx)
+func (d *RelationshipInfoDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (rid *RelationshipInfoDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *RelationshipInfoDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(relationshipinfo.Table, sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt))
-	if ps := rid.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, rid.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	rid.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // RelationshipInfoDeleteOne is the builder for deleting a single RelationshipInfo entity.
 type RelationshipInfoDeleteOne struct {
-	rid *RelationshipInfoDelete
+	d *RelationshipInfoDelete
 }
 
 // Where appends a list predicates to the RelationshipInfoDelete builder.
-func (rido *RelationshipInfoDeleteOne) Where(ps ...predicate.RelationshipInfo) *RelationshipInfoDeleteOne {
-	rido.rid.mutation.Where(ps...)
-	return rido
+func (d *RelationshipInfoDeleteOne) Where(ps ...predicate.RelationshipInfo) *RelationshipInfoDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (rido *RelationshipInfoDeleteOne) Exec(ctx context.Context) error {
-	n, err := rido.rid.Exec(ctx)
+func (d *RelationshipInfoDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (rido *RelationshipInfoDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rido *RelationshipInfoDeleteOne) ExecX(ctx context.Context) {
-	if err := rido.Exec(ctx); err != nil {
+func (d *RelationshipInfoDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

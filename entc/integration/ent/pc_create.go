@@ -26,18 +26,18 @@ type PCCreate struct {
 }
 
 // Mutation returns the PCMutation object of the builder.
-func (_pc *PCCreate) Mutation() *PCMutation {
-	return _pc.mutation
+func (m *PCCreate) Mutation() *PCMutation {
+	return m.mutation
 }
 
 // Save creates the PC in the database.
-func (_pc *PCCreate) Save(ctx context.Context) (*PC, error) {
-	return withHooks(ctx, _pc.sqlSave, _pc.mutation, _pc.hooks)
+func (c *PCCreate) Save(ctx context.Context) (*PC, error) {
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_pc *PCCreate) SaveX(ctx context.Context) *PC {
-	v, err := _pc.Save(ctx)
+func (c *PCCreate) SaveX(ctx context.Context) *PC {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -45,29 +45,29 @@ func (_pc *PCCreate) SaveX(ctx context.Context) *PC {
 }
 
 // Exec executes the query.
-func (_pc *PCCreate) Exec(ctx context.Context) error {
-	_, err := _pc.Save(ctx)
+func (c *PCCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_pc *PCCreate) ExecX(ctx context.Context) {
-	if err := _pc.Exec(ctx); err != nil {
+func (c *PCCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_pc *PCCreate) check() error {
+func (c *PCCreate) check() error {
 	return nil
 }
 
-func (_pc *PCCreate) sqlSave(ctx context.Context) (*PC, error) {
-	if err := _pc.check(); err != nil {
+func (c *PCCreate) sqlSave(ctx context.Context) (*PC, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := _pc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, _pc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -75,17 +75,17 @@ func (_pc *PCCreate) sqlSave(ctx context.Context) (*PC, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	_pc.mutation.id = &_node.ID
-	_pc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (_pc *PCCreate) createSpec() (*PC, *sqlgraph.CreateSpec) {
+func (c *PCCreate) createSpec() (*PC, *sqlgraph.CreateSpec) {
 	var (
-		_node = &PC{config: _pc.config}
+		_node = &PC{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(pc.Table, sqlgraph.NewFieldSpec(pc.FieldID, field.TypeInt))
 	)
-	_spec.OnConflict = _pc.conflict
+	_spec.OnConflict = c.conflict
 	return _node, _spec
 }
 
@@ -99,11 +99,9 @@ func (_pc *PCCreate) createSpec() (*PC, *sqlgraph.CreateSpec) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-func (_pc *PCCreate) OnConflict(opts ...sql.ConflictOption) *PCUpsertOne {
-	_pc.conflict = opts
-	return &PCUpsertOne{
-		create: _pc,
-	}
+func (c *PCCreate) OnConflict(opts ...sql.ConflictOption) *PCUpsertOne {
+	c.conflict = opts
+	return &PCUpsertOne{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -112,11 +110,9 @@ func (_pc *PCCreate) OnConflict(opts ...sql.ConflictOption) *PCUpsertOne {
 //	client.PC.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (_pc *PCCreate) OnConflictColumns(columns ...string) *PCUpsertOne {
-	_pc.conflict = append(_pc.conflict, sql.ConflictColumns(columns...))
-	return &PCUpsertOne{
-		create: _pc,
-	}
+func (c *PCCreate) OnConflictColumns(columns ...string) *PCUpsertOne {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &PCUpsertOne{create: c}
 }
 
 type (
@@ -214,16 +210,16 @@ type PCCreateBulk struct {
 }
 
 // Save creates the PC entities in the database.
-func (pcb *PCCreateBulk) Save(ctx context.Context) ([]*PC, error) {
-	if pcb.err != nil {
-		return nil, pcb.err
+func (c *PCCreateBulk) Save(ctx context.Context) ([]*PC, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(pcb.builders))
-	nodes := make([]*PC, len(pcb.builders))
-	mutators := make([]Mutator, len(pcb.builders))
-	for i := range pcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*PC, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := pcb.builders[i]
+			builder := c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PCMutation)
 				if !ok {
@@ -236,12 +232,12 @@ func (pcb *PCCreateBulk) Save(ctx context.Context) ([]*PC, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, pcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = pcb.conflict
+					spec.OnConflict = c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, pcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -265,7 +261,7 @@ func (pcb *PCCreateBulk) Save(ctx context.Context) ([]*PC, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, pcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -273,8 +269,8 @@ func (pcb *PCCreateBulk) Save(ctx context.Context) ([]*PC, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (pcb *PCCreateBulk) SaveX(ctx context.Context) []*PC {
-	v, err := pcb.Save(ctx)
+func (c *PCCreateBulk) SaveX(ctx context.Context) []*PC {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -282,14 +278,14 @@ func (pcb *PCCreateBulk) SaveX(ctx context.Context) []*PC {
 }
 
 // Exec executes the query.
-func (pcb *PCCreateBulk) Exec(ctx context.Context) error {
-	_, err := pcb.Save(ctx)
+func (c *PCCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pcb *PCCreateBulk) ExecX(ctx context.Context) {
-	if err := pcb.Exec(ctx); err != nil {
+func (c *PCCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -304,11 +300,9 @@ func (pcb *PCCreateBulk) ExecX(ctx context.Context) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-func (pcb *PCCreateBulk) OnConflict(opts ...sql.ConflictOption) *PCUpsertBulk {
-	pcb.conflict = opts
-	return &PCUpsertBulk{
-		create: pcb,
-	}
+func (c *PCCreateBulk) OnConflict(opts ...sql.ConflictOption) *PCUpsertBulk {
+	c.conflict = opts
+	return &PCUpsertBulk{create: c}
 }
 
 // OnConflictColumns calls `OnConflict` and configures the columns
@@ -317,11 +311,9 @@ func (pcb *PCCreateBulk) OnConflict(opts ...sql.ConflictOption) *PCUpsertBulk {
 //	client.PC.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (pcb *PCCreateBulk) OnConflictColumns(columns ...string) *PCUpsertBulk {
-	pcb.conflict = append(pcb.conflict, sql.ConflictColumns(columns...))
-	return &PCUpsertBulk{
-		create: pcb,
-	}
+func (c *PCCreateBulk) OnConflictColumns(columns ...string) *PCUpsertBulk {
+	c.conflict = append(c.conflict, sql.ConflictColumns(columns...))
+	return &PCUpsertBulk{create: c}
 }
 
 // PCUpsertBulk is the builder for "upsert"-ing
