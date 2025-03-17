@@ -33,40 +33,40 @@ type BuilderQuery struct {
 }
 
 // Where adds a new predicate for the BuilderQuery builder.
-func (bq *BuilderQuery) Where(ps ...predicate.Builder) *BuilderQuery {
-	bq.predicates = append(bq.predicates, ps...)
-	return bq
+func (_q *BuilderQuery) Where(ps ...predicate.Builder) *BuilderQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (bq *BuilderQuery) Limit(limit int) *BuilderQuery {
-	bq.ctx.Limit = &limit
-	return bq
+func (_q *BuilderQuery) Limit(limit int) *BuilderQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (bq *BuilderQuery) Offset(offset int) *BuilderQuery {
-	bq.ctx.Offset = &offset
-	return bq
+func (_q *BuilderQuery) Offset(offset int) *BuilderQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (bq *BuilderQuery) Unique(unique bool) *BuilderQuery {
-	bq.ctx.Unique = &unique
-	return bq
+func (_q *BuilderQuery) Unique(unique bool) *BuilderQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (bq *BuilderQuery) Order(o ...builder.OrderOption) *BuilderQuery {
-	bq.order = append(bq.order, o...)
-	return bq
+func (_q *BuilderQuery) Order(o ...builder.OrderOption) *BuilderQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // First returns the first Builder entity from the query.
 // Returns a *NotFoundError when no Builder was found.
-func (bq *BuilderQuery) First(ctx context.Context) (*Builder, error) {
-	nodes, err := bq.Limit(1).All(setContextOp(ctx, bq.ctx, ent.OpQueryFirst))
+func (_q *BuilderQuery) First(ctx context.Context) (*Builder, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -77,8 +77,8 @@ func (bq *BuilderQuery) First(ctx context.Context) (*Builder, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (bq *BuilderQuery) FirstX(ctx context.Context) *Builder {
-	node, err := bq.First(ctx)
+func (_q *BuilderQuery) FirstX(ctx context.Context) *Builder {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -87,9 +87,9 @@ func (bq *BuilderQuery) FirstX(ctx context.Context) *Builder {
 
 // FirstID returns the first Builder ID from the query.
 // Returns a *NotFoundError when no Builder ID was found.
-func (bq *BuilderQuery) FirstID(ctx context.Context) (id string, err error) {
+func (_q *BuilderQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = bq.Limit(1).IDs(setContextOp(ctx, bq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -100,8 +100,8 @@ func (bq *BuilderQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (bq *BuilderQuery) FirstIDX(ctx context.Context) string {
-	id, err := bq.FirstID(ctx)
+func (_q *BuilderQuery) FirstIDX(ctx context.Context) string {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -111,8 +111,8 @@ func (bq *BuilderQuery) FirstIDX(ctx context.Context) string {
 // Only returns a single Builder entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Builder entity is found.
 // Returns a *NotFoundError when no Builder entities are found.
-func (bq *BuilderQuery) Only(ctx context.Context) (*Builder, error) {
-	nodes, err := bq.Limit(2).All(setContextOp(ctx, bq.ctx, ent.OpQueryOnly))
+func (_q *BuilderQuery) Only(ctx context.Context) (*Builder, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -127,8 +127,8 @@ func (bq *BuilderQuery) Only(ctx context.Context) (*Builder, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (bq *BuilderQuery) OnlyX(ctx context.Context) *Builder {
-	node, err := bq.Only(ctx)
+func (_q *BuilderQuery) OnlyX(ctx context.Context) *Builder {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -138,9 +138,9 @@ func (bq *BuilderQuery) OnlyX(ctx context.Context) *Builder {
 // OnlyID is like Only, but returns the only Builder ID in the query.
 // Returns a *NotSingularError when more than one Builder ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (bq *BuilderQuery) OnlyID(ctx context.Context) (id string, err error) {
+func (_q *BuilderQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = bq.Limit(2).IDs(setContextOp(ctx, bq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -155,8 +155,8 @@ func (bq *BuilderQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (bq *BuilderQuery) OnlyIDX(ctx context.Context) string {
-	id, err := bq.OnlyID(ctx)
+func (_q *BuilderQuery) OnlyIDX(ctx context.Context) string {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -164,18 +164,18 @@ func (bq *BuilderQuery) OnlyIDX(ctx context.Context) string {
 }
 
 // All executes the query and returns a list of Builders.
-func (bq *BuilderQuery) All(ctx context.Context) ([]*Builder, error) {
-	ctx = setContextOp(ctx, bq.ctx, ent.OpQueryAll)
-	if err := bq.prepareQuery(ctx); err != nil {
+func (_q *BuilderQuery) All(ctx context.Context) ([]*Builder, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Builder, *BuilderQuery]()
-	return withInterceptors[[]*Builder](ctx, bq, qr, bq.inters)
+	return withInterceptors[[]*Builder](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (bq *BuilderQuery) AllX(ctx context.Context) []*Builder {
-	nodes, err := bq.All(ctx)
+func (_q *BuilderQuery) AllX(ctx context.Context) []*Builder {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -183,20 +183,20 @@ func (bq *BuilderQuery) AllX(ctx context.Context) []*Builder {
 }
 
 // IDs executes the query and returns a list of Builder IDs.
-func (bq *BuilderQuery) IDs(ctx context.Context) (ids []string, err error) {
-	if bq.ctx.Unique == nil && bq.path != nil {
-		bq.Unique(true)
+func (_q *BuilderQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, bq.ctx, ent.OpQueryIDs)
-	if err = bq.Select(builder.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(builder.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (bq *BuilderQuery) IDsX(ctx context.Context) []string {
-	ids, err := bq.IDs(ctx)
+func (_q *BuilderQuery) IDsX(ctx context.Context) []string {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -204,17 +204,17 @@ func (bq *BuilderQuery) IDsX(ctx context.Context) []string {
 }
 
 // Count returns the count of the given query.
-func (bq *BuilderQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, bq.ctx, ent.OpQueryCount)
-	if err := bq.prepareQuery(ctx); err != nil {
+func (_q *BuilderQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, bq, querierCount[*BuilderQuery](), bq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*BuilderQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (bq *BuilderQuery) CountX(ctx context.Context) int {
-	count, err := bq.Count(ctx)
+func (_q *BuilderQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -222,9 +222,9 @@ func (bq *BuilderQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (bq *BuilderQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, bq.ctx, ent.OpQueryExist)
-	switch _, err := bq.FirstID(ctx); {
+func (_q *BuilderQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -235,8 +235,8 @@ func (bq *BuilderQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (bq *BuilderQuery) ExistX(ctx context.Context) bool {
-	exist, err := bq.Exist(ctx)
+func (_q *BuilderQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -245,28 +245,28 @@ func (bq *BuilderQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the BuilderQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (bq *BuilderQuery) Clone() *BuilderQuery {
-	if bq == nil {
+func (_q *BuilderQuery) Clone() *BuilderQuery {
+	if _q == nil {
 		return nil
 	}
 	return &BuilderQuery{
-		config:     bq.config,
-		ctx:        bq.ctx.Clone(),
-		order:      append([]builder.OrderOption{}, bq.order...),
-		inters:     append([]Interceptor{}, bq.inters...),
-		predicates: append([]predicate.Builder{}, bq.predicates...),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]builder.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.Builder{}, _q.predicates...),
 		// clone intermediate query.
-		gremlin: bq.gremlin.Clone(),
-		path:    bq.path,
+		gremlin: _q.gremlin.Clone(),
+		path:    _q.path,
 	}
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
-func (bq *BuilderQuery) GroupBy(field string, fields ...string) *BuilderGroupBy {
-	bq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &BuilderGroupBy{build: bq}
-	grbuild.flds = &bq.ctx.Fields
+func (_q *BuilderQuery) GroupBy(field string, fields ...string) *BuilderGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &BuilderGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = builder.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -274,46 +274,46 @@ func (bq *BuilderQuery) GroupBy(field string, fields ...string) *BuilderGroupBy 
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (bq *BuilderQuery) Select(fields ...string) *BuilderSelect {
-	bq.ctx.Fields = append(bq.ctx.Fields, fields...)
-	sbuild := &BuilderSelect{BuilderQuery: bq}
+func (_q *BuilderQuery) Select(fields ...string) *BuilderSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &BuilderSelect{BuilderQuery: _q}
 	sbuild.label = builder.Label
-	sbuild.flds, sbuild.scan = &bq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a BuilderSelect configured with the given aggregations.
-func (bq *BuilderQuery) Aggregate(fns ...AggregateFunc) *BuilderSelect {
-	return bq.Select().Aggregate(fns...)
+func (_q *BuilderQuery) Aggregate(fns ...AggregateFunc) *BuilderSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (bq *BuilderQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range bq.inters {
+func (_q *BuilderQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, bq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	if bq.path != nil {
-		prev, err := bq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		bq.gremlin = prev
+		_q.gremlin = prev
 	}
 	return nil
 }
 
-func (bq *BuilderQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Builder, error) {
+func (_q *BuilderQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Builder, error) {
 	res := &gremlin.Response{}
-	traversal := bq.gremlinQuery(ctx)
-	if len(bq.ctx.Fields) > 0 {
-		fields := make([]any, len(bq.ctx.Fields))
-		for i, f := range bq.ctx.Fields {
+	traversal := _q.gremlinQuery(ctx)
+	if len(_q.ctx.Fields) > 0 {
+		fields := make([]any, len(_q.ctx.Fields))
+		for i, f := range _q.ctx.Fields {
 			fields[i] = f
 		}
 		traversal.ValueMap(fields...)
@@ -321,43 +321,43 @@ func (bq *BuilderQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := bq.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
-	var bs Builders
-	if err := bs.FromResponse(res); err != nil {
+	var _ms Builders
+	if err := _ms.FromResponse(res); err != nil {
 		return nil, err
 	}
-	for i := range bs {
-		bs[i].config = bq.config
+	for i := range _ms {
+		_ms[i].config = _q.config
 	}
-	return bs, nil
+	return _ms, nil
 }
 
-func (bq *BuilderQuery) gremlinCount(ctx context.Context) (int, error) {
+func (_q *BuilderQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := bq.gremlinQuery(ctx).Count().Query()
-	if err := bq.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _q.gremlinQuery(ctx).Count().Query()
+	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
 }
 
-func (bq *BuilderQuery) gremlinQuery(context.Context) *dsl.Traversal {
+func (_q *BuilderQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(builder.Label)
-	if bq.gremlin != nil {
-		v = bq.gremlin.Clone()
+	if _q.gremlin != nil {
+		v = _q.gremlin.Clone()
 	}
-	for _, p := range bq.predicates {
+	for _, p := range _q.predicates {
 		p(v)
 	}
-	if len(bq.order) > 0 {
+	if len(_q.order) > 0 {
 		v.Order()
-		for _, p := range bq.order {
+		for _, p := range _q.order {
 			p(v)
 		}
 	}
-	switch limit, offset := bq.ctx.Limit, bq.ctx.Offset; {
+	switch limit, offset := _q.ctx.Limit, _q.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset+*limit)
 	case offset != nil:
@@ -365,7 +365,7 @@ func (bq *BuilderQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := bq.ctx.Unique; unique == nil || *unique {
+	if unique := _q.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v

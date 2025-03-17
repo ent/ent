@@ -71,7 +71,7 @@ func (*Process) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Process fields.
-func (pr *Process) assignValues(columns []string, values []any) error {
+func (_m *Process) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -82,9 +82,9 @@ func (pr *Process) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			pr.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		default:
-			pr.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -92,43 +92,43 @@ func (pr *Process) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Process.
 // This includes values selected through modifiers, order, etc.
-func (pr *Process) Value(name string) (ent.Value, error) {
-	return pr.selectValues.Get(name)
+func (_m *Process) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryFiles queries the "files" edge of the Process entity.
-func (pr *Process) QueryFiles() *FileQuery {
-	return NewProcessClient(pr.config).QueryFiles(pr)
+func (_m *Process) QueryFiles() *FileQuery {
+	return NewProcessClient(_m.config).QueryFiles(_m)
 }
 
 // QueryAttachedFiles queries the "attached_files" edge of the Process entity.
-func (pr *Process) QueryAttachedFiles() *AttachedFileQuery {
-	return NewProcessClient(pr.config).QueryAttachedFiles(pr)
+func (_m *Process) QueryAttachedFiles() *AttachedFileQuery {
+	return NewProcessClient(_m.config).QueryAttachedFiles(_m)
 }
 
 // Update returns a builder for updating this Process.
 // Note that you need to call Process.Unwrap() before calling this method if this Process
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (pr *Process) Update() *ProcessUpdateOne {
-	return NewProcessClient(pr.config).UpdateOne(pr)
+func (_m *Process) Update() *ProcessUpdateOne {
+	return NewProcessClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Process entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (pr *Process) Unwrap() *Process {
-	_tx, ok := pr.config.driver.(*txDriver)
+func (_m *Process) Unwrap() *Process {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Process is not a transactional entity")
 	}
-	pr.config.driver = _tx.drv
-	return pr
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (pr *Process) String() string {
+func (_m *Process) String() string {
 	var builder strings.Builder
 	builder.WriteString("Process(")
-	builder.WriteString(fmt.Sprintf("id=%v", pr.ID))
+	builder.WriteString(fmt.Sprintf("id=%v", _m.ID))
 	builder.WriteByte(')')
 	return builder.String()
 }

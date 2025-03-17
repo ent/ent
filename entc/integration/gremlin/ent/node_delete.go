@@ -25,38 +25,38 @@ type NodeDelete struct {
 }
 
 // Where appends a list predicates to the NodeDelete builder.
-func (nd *NodeDelete) Where(ps ...predicate.Node) *NodeDelete {
-	nd.mutation.Where(ps...)
-	return nd
+func (_d *NodeDelete) Where(ps ...predicate.Node) *NodeDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (nd *NodeDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, nd.gremlinExec, nd.mutation, nd.hooks)
+func (_d *NodeDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.gremlinExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (nd *NodeDelete) ExecX(ctx context.Context) int {
-	n, err := nd.Exec(ctx)
+func (_d *NodeDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (nd *NodeDelete) gremlinExec(ctx context.Context) (int, error) {
+func (_d *NodeDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := nd.gremlin().Query()
-	if err := nd.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _d.gremlin().Query()
+	if err := _d.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
-	nd.mutation.done = true
+	_d.mutation.done = true
 	return res.ReadInt()
 }
 
-func (nd *NodeDelete) gremlin() *dsl.Traversal {
+func (_d *NodeDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(node.Label)
-	for _, p := range nd.mutation.predicates {
+	for _, p := range _d.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()
@@ -64,18 +64,18 @@ func (nd *NodeDelete) gremlin() *dsl.Traversal {
 
 // NodeDeleteOne is the builder for deleting a single Node entity.
 type NodeDeleteOne struct {
-	nd *NodeDelete
+	_d *NodeDelete
 }
 
 // Where appends a list predicates to the NodeDelete builder.
-func (ndo *NodeDeleteOne) Where(ps ...predicate.Node) *NodeDeleteOne {
-	ndo.nd.mutation.Where(ps...)
-	return ndo
+func (_d *NodeDeleteOne) Where(ps ...predicate.Node) *NodeDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (ndo *NodeDeleteOne) Exec(ctx context.Context) error {
-	n, err := ndo.nd.Exec(ctx)
+func (_d *NodeDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -87,8 +87,8 @@ func (ndo *NodeDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ndo *NodeDeleteOne) ExecX(ctx context.Context) {
-	if err := ndo.Exec(ctx); err != nil {
+func (_d *NodeDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

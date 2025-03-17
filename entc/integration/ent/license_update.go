@@ -28,31 +28,31 @@ type LicenseUpdate struct {
 }
 
 // Where appends a list predicates to the LicenseUpdate builder.
-func (lu *LicenseUpdate) Where(ps ...predicate.License) *LicenseUpdate {
-	lu.mutation.Where(ps...)
-	return lu
+func (_u *LicenseUpdate) Where(ps ...predicate.License) *LicenseUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetUpdateTime sets the "update_time" field.
-func (lu *LicenseUpdate) SetUpdateTime(t time.Time) *LicenseUpdate {
-	lu.mutation.SetUpdateTime(t)
-	return lu
+func (_u *LicenseUpdate) SetUpdateTime(t time.Time) *LicenseUpdate {
+	_u.mutation.SetUpdateTime(t)
+	return _u
 }
 
 // Mutation returns the LicenseMutation object of the builder.
-func (lu *LicenseUpdate) Mutation() *LicenseMutation {
-	return lu.mutation
+func (_u *LicenseUpdate) Mutation() *LicenseMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (lu *LicenseUpdate) Save(ctx context.Context) (int, error) {
-	lu.defaults()
-	return withHooks(ctx, lu.sqlSave, lu.mutation, lu.hooks)
+func (_u *LicenseUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (lu *LicenseUpdate) SaveX(ctx context.Context) int {
-	affected, err := lu.Save(ctx)
+func (_u *LicenseUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -60,46 +60,46 @@ func (lu *LicenseUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (lu *LicenseUpdate) Exec(ctx context.Context) error {
-	_, err := lu.Save(ctx)
+func (_u *LicenseUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (lu *LicenseUpdate) ExecX(ctx context.Context) {
-	if err := lu.Exec(ctx); err != nil {
+func (_u *LicenseUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (lu *LicenseUpdate) defaults() {
-	if _, ok := lu.mutation.UpdateTime(); !ok {
+func (_u *LicenseUpdate) defaults() {
+	if _, ok := _u.mutation.UpdateTime(); !ok {
 		v := license.UpdateDefaultUpdateTime()
-		lu.mutation.SetUpdateTime(v)
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (lu *LicenseUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *LicenseUpdate {
-	lu.modifiers = append(lu.modifiers, modifiers...)
-	return lu
+func (_u *LicenseUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *LicenseUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
-func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(license.Table, license.Columns, sqlgraph.NewFieldSpec(license.FieldID, field.TypeInt))
-	if ps := lu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := lu.mutation.UpdateTime(); ok {
+	if value, ok := _u.mutation.UpdateTime(); ok {
 		_spec.SetField(license.FieldUpdateTime, field.TypeTime, value)
 	}
-	_spec.AddModifiers(lu.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, lu.driver, _spec); err != nil {
+	_spec.AddModifiers(_u.modifiers...)
+	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{license.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -107,7 +107,7 @@ func (lu *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	lu.mutation.done = true
+	_u.mutation.done = true
 	return n, nil
 }
 
@@ -121,38 +121,38 @@ type LicenseUpdateOne struct {
 }
 
 // SetUpdateTime sets the "update_time" field.
-func (luo *LicenseUpdateOne) SetUpdateTime(t time.Time) *LicenseUpdateOne {
-	luo.mutation.SetUpdateTime(t)
-	return luo
+func (_u *LicenseUpdateOne) SetUpdateTime(t time.Time) *LicenseUpdateOne {
+	_u.mutation.SetUpdateTime(t)
+	return _u
 }
 
 // Mutation returns the LicenseMutation object of the builder.
-func (luo *LicenseUpdateOne) Mutation() *LicenseMutation {
-	return luo.mutation
+func (_u *LicenseUpdateOne) Mutation() *LicenseMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the LicenseUpdate builder.
-func (luo *LicenseUpdateOne) Where(ps ...predicate.License) *LicenseUpdateOne {
-	luo.mutation.Where(ps...)
-	return luo
+func (_u *LicenseUpdateOne) Where(ps ...predicate.License) *LicenseUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (luo *LicenseUpdateOne) Select(field string, fields ...string) *LicenseUpdateOne {
-	luo.fields = append([]string{field}, fields...)
-	return luo
+func (_u *LicenseUpdateOne) Select(field string, fields ...string) *LicenseUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated License entity.
-func (luo *LicenseUpdateOne) Save(ctx context.Context) (*License, error) {
-	luo.defaults()
-	return withHooks(ctx, luo.sqlSave, luo.mutation, luo.hooks)
+func (_u *LicenseUpdateOne) Save(ctx context.Context) (*License, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (luo *LicenseUpdateOne) SaveX(ctx context.Context) *License {
-	node, err := luo.Save(ctx)
+func (_u *LicenseUpdateOne) SaveX(ctx context.Context) *License {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -160,40 +160,40 @@ func (luo *LicenseUpdateOne) SaveX(ctx context.Context) *License {
 }
 
 // Exec executes the query on the entity.
-func (luo *LicenseUpdateOne) Exec(ctx context.Context) error {
-	_, err := luo.Save(ctx)
+func (_u *LicenseUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (luo *LicenseUpdateOne) ExecX(ctx context.Context) {
-	if err := luo.Exec(ctx); err != nil {
+func (_u *LicenseUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (luo *LicenseUpdateOne) defaults() {
-	if _, ok := luo.mutation.UpdateTime(); !ok {
+func (_u *LicenseUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdateTime(); !ok {
 		v := license.UpdateDefaultUpdateTime()
-		luo.mutation.SetUpdateTime(v)
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (luo *LicenseUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *LicenseUpdateOne {
-	luo.modifiers = append(luo.modifiers, modifiers...)
-	return luo
+func (_u *LicenseUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *LicenseUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
-func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err error) {
+func (_u *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err error) {
 	_spec := sqlgraph.NewUpdateSpec(license.Table, license.Columns, sqlgraph.NewFieldSpec(license.FieldID, field.TypeInt))
-	id, ok := luo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "License.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := luo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, license.FieldID)
 		for _, f := range fields {
@@ -205,21 +205,21 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 			}
 		}
 	}
-	if ps := luo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := luo.mutation.UpdateTime(); ok {
+	if value, ok := _u.mutation.UpdateTime(); ok {
 		_spec.SetField(license.FieldUpdateTime, field.TypeTime, value)
 	}
-	_spec.AddModifiers(luo.modifiers...)
-	_node = &License{config: luo.config}
+	_spec.AddModifiers(_u.modifiers...)
+	_node = &License{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, luo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{license.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -227,6 +227,6 @@ func (luo *LicenseUpdateOne) sqlSave(ctx context.Context) (_node *License, err e
 		}
 		return nil, err
 	}
-	luo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

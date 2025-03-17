@@ -69,12 +69,12 @@ func (e CardEdges) SpecOrErr() ([]*Spec, error) {
 }
 
 // FromResponse scans the gremlin response data into Card.
-func (c *Card) FromResponse(res *gremlin.Response) error {
+func (_m *Card) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scanc struct {
+	var scan_m struct {
 		ID         string  `json:"id,omitempty"`
 		CreateTime int64   `json:"create_time,omitempty"`
 		UpdateTime int64   `json:"update_time,omitempty"`
@@ -82,65 +82,65 @@ func (c *Card) FromResponse(res *gremlin.Response) error {
 		Number     string  `json:"number,omitempty"`
 		Name       string  `json:"name,omitempty"`
 	}
-	if err := vmap.Decode(&scanc); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	c.ID = scanc.ID
-	c.CreateTime = time.Unix(0, scanc.CreateTime)
-	c.UpdateTime = time.Unix(0, scanc.UpdateTime)
-	c.Balance = scanc.Balance
-	c.Number = scanc.Number
-	c.Name = scanc.Name
+	_m.ID = scan_m.ID
+	_m.CreateTime = time.Unix(0, scan_m.CreateTime)
+	_m.UpdateTime = time.Unix(0, scan_m.UpdateTime)
+	_m.Balance = scan_m.Balance
+	_m.Number = scan_m.Number
+	_m.Name = scan_m.Name
 	return nil
 }
 
 // QueryOwner queries the "owner" edge of the Card entity.
-func (c *Card) QueryOwner() *UserQuery {
-	return NewCardClient(c.config).QueryOwner(c)
+func (_m *Card) QueryOwner() *UserQuery {
+	return NewCardClient(_m.config).QueryOwner(_m)
 }
 
 // QuerySpec queries the "spec" edge of the Card entity.
-func (c *Card) QuerySpec() *SpecQuery {
-	return NewCardClient(c.config).QuerySpec(c)
+func (_m *Card) QuerySpec() *SpecQuery {
+	return NewCardClient(_m.config).QuerySpec(_m)
 }
 
 // Update returns a builder for updating this Card.
 // Note that you need to call Card.Unwrap() before calling this method if this Card
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (c *Card) Update() *CardUpdateOne {
-	return NewCardClient(c.config).UpdateOne(c)
+func (_m *Card) Update() *CardUpdateOne {
+	return NewCardClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Card entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (c *Card) Unwrap() *Card {
-	_tx, ok := c.config.driver.(*txDriver)
+func (_m *Card) Unwrap() *Card {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Card is not a transactional entity")
 	}
-	c.config.driver = _tx.drv
-	return c
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (c *Card) String() string {
+func (_m *Card) String() string {
 	var builder strings.Builder
 	builder.WriteString("Card(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("create_time=")
-	builder.WriteString(c.CreateTime.Format(time.ANSIC))
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("update_time=")
-	builder.WriteString(c.UpdateTime.Format(time.ANSIC))
+	builder.WriteString(_m.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("balance=")
-	builder.WriteString(fmt.Sprintf("%v", c.Balance))
+	builder.WriteString(fmt.Sprintf("%v", _m.Balance))
 	builder.WriteString(", ")
 	builder.WriteString("number=")
-	builder.WriteString(c.Number)
+	builder.WriteString(_m.Number)
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(c.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -149,12 +149,12 @@ func (c *Card) String() string {
 type Cards []*Card
 
 // FromResponse scans the gremlin response data into Cards.
-func (c *Cards) FromResponse(res *gremlin.Response) error {
+func (_m *Cards) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scanc []struct {
+	var scan_m []struct {
 		ID         string  `json:"id,omitempty"`
 		CreateTime int64   `json:"create_time,omitempty"`
 		UpdateTime int64   `json:"update_time,omitempty"`
@@ -162,17 +162,17 @@ func (c *Cards) FromResponse(res *gremlin.Response) error {
 		Number     string  `json:"number,omitempty"`
 		Name       string  `json:"name,omitempty"`
 	}
-	if err := vmap.Decode(&scanc); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	for _, v := range scanc {
+	for _, v := range scan_m {
 		node := &Card{ID: v.ID}
 		node.CreateTime = time.Unix(0, v.CreateTime)
 		node.UpdateTime = time.Unix(0, v.UpdateTime)
 		node.Balance = v.Balance
 		node.Number = v.Number
 		node.Name = v.Name
-		*c = append(*c, node)
+		*_m = append(*_m, node)
 	}
 	return nil
 }

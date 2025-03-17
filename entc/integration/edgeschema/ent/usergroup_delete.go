@@ -24,56 +24,56 @@ type UserGroupDelete struct {
 }
 
 // Where appends a list predicates to the UserGroupDelete builder.
-func (ugd *UserGroupDelete) Where(ps ...predicate.UserGroup) *UserGroupDelete {
-	ugd.mutation.Where(ps...)
-	return ugd
+func (_d *UserGroupDelete) Where(ps ...predicate.UserGroup) *UserGroupDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (ugd *UserGroupDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, ugd.sqlExec, ugd.mutation, ugd.hooks)
+func (_d *UserGroupDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ugd *UserGroupDelete) ExecX(ctx context.Context) int {
-	n, err := ugd.Exec(ctx)
+func (_d *UserGroupDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (ugd *UserGroupDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *UserGroupDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(usergroup.Table, sqlgraph.NewFieldSpec(usergroup.FieldID, field.TypeInt))
-	if ps := ugd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, ugd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	ugd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // UserGroupDeleteOne is the builder for deleting a single UserGroup entity.
 type UserGroupDeleteOne struct {
-	ugd *UserGroupDelete
+	_d *UserGroupDelete
 }
 
 // Where appends a list predicates to the UserGroupDelete builder.
-func (ugdo *UserGroupDeleteOne) Where(ps ...predicate.UserGroup) *UserGroupDeleteOne {
-	ugdo.ugd.mutation.Where(ps...)
-	return ugdo
+func (_d *UserGroupDeleteOne) Where(ps ...predicate.UserGroup) *UserGroupDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (ugdo *UserGroupDeleteOne) Exec(ctx context.Context) error {
-	n, err := ugdo.ugd.Exec(ctx)
+func (_d *UserGroupDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (ugdo *UserGroupDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ugdo *UserGroupDeleteOne) ExecX(ctx context.Context) {
-	if err := ugdo.Exec(ctx); err != nil {
+func (_d *UserGroupDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

@@ -28,74 +28,74 @@ type ExValueScanCreate struct {
 }
 
 // SetBinary sets the "binary" field.
-func (evsc *ExValueScanCreate) SetBinary(u *url.URL) *ExValueScanCreate {
-	evsc.mutation.SetBinary(u)
-	return evsc
+func (_c *ExValueScanCreate) SetBinary(u *url.URL) *ExValueScanCreate {
+	_c.mutation.SetBinary(u)
+	return _c
 }
 
 // SetBinaryBytes sets the "binary_bytes" field.
-func (evsc *ExValueScanCreate) SetBinaryBytes(u *url.URL) *ExValueScanCreate {
-	evsc.mutation.SetBinaryBytes(u)
-	return evsc
+func (_c *ExValueScanCreate) SetBinaryBytes(u *url.URL) *ExValueScanCreate {
+	_c.mutation.SetBinaryBytes(u)
+	return _c
 }
 
 // SetBinaryOptional sets the "binary_optional" field.
-func (evsc *ExValueScanCreate) SetBinaryOptional(u *url.URL) *ExValueScanCreate {
-	evsc.mutation.SetBinaryOptional(u)
-	return evsc
+func (_c *ExValueScanCreate) SetBinaryOptional(u *url.URL) *ExValueScanCreate {
+	_c.mutation.SetBinaryOptional(u)
+	return _c
 }
 
 // SetText sets the "text" field.
-func (evsc *ExValueScanCreate) SetText(b *big.Int) *ExValueScanCreate {
-	evsc.mutation.SetText(b)
-	return evsc
+func (_c *ExValueScanCreate) SetText(b *big.Int) *ExValueScanCreate {
+	_c.mutation.SetText(b)
+	return _c
 }
 
 // SetTextOptional sets the "text_optional" field.
-func (evsc *ExValueScanCreate) SetTextOptional(b *big.Int) *ExValueScanCreate {
-	evsc.mutation.SetTextOptional(b)
-	return evsc
+func (_c *ExValueScanCreate) SetTextOptional(b *big.Int) *ExValueScanCreate {
+	_c.mutation.SetTextOptional(b)
+	return _c
 }
 
 // SetBase64 sets the "base64" field.
-func (evsc *ExValueScanCreate) SetBase64(s string) *ExValueScanCreate {
-	evsc.mutation.SetBase64(s)
-	return evsc
+func (_c *ExValueScanCreate) SetBase64(s string) *ExValueScanCreate {
+	_c.mutation.SetBase64(s)
+	return _c
 }
 
 // SetCustom sets the "custom" field.
-func (evsc *ExValueScanCreate) SetCustom(s string) *ExValueScanCreate {
-	evsc.mutation.SetCustom(s)
-	return evsc
+func (_c *ExValueScanCreate) SetCustom(s string) *ExValueScanCreate {
+	_c.mutation.SetCustom(s)
+	return _c
 }
 
 // SetCustomOptional sets the "custom_optional" field.
-func (evsc *ExValueScanCreate) SetCustomOptional(s string) *ExValueScanCreate {
-	evsc.mutation.SetCustomOptional(s)
-	return evsc
+func (_c *ExValueScanCreate) SetCustomOptional(s string) *ExValueScanCreate {
+	_c.mutation.SetCustomOptional(s)
+	return _c
 }
 
 // SetNillableCustomOptional sets the "custom_optional" field if the given value is not nil.
-func (evsc *ExValueScanCreate) SetNillableCustomOptional(s *string) *ExValueScanCreate {
+func (_c *ExValueScanCreate) SetNillableCustomOptional(s *string) *ExValueScanCreate {
 	if s != nil {
-		evsc.SetCustomOptional(*s)
+		_c.SetCustomOptional(*s)
 	}
-	return evsc
+	return _c
 }
 
 // Mutation returns the ExValueScanMutation object of the builder.
-func (evsc *ExValueScanCreate) Mutation() *ExValueScanMutation {
-	return evsc.mutation
+func (_c *ExValueScanCreate) Mutation() *ExValueScanMutation {
+	return _c.mutation
 }
 
 // Save creates the ExValueScan in the database.
-func (evsc *ExValueScanCreate) Save(ctx context.Context) (*ExValueScan, error) {
-	return withHooks(ctx, evsc.sqlSave, evsc.mutation, evsc.hooks)
+func (_c *ExValueScanCreate) Save(ctx context.Context) (*ExValueScan, error) {
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (evsc *ExValueScanCreate) SaveX(ctx context.Context) *ExValueScan {
-	v, err := evsc.Save(ctx)
+func (_c *ExValueScanCreate) SaveX(ctx context.Context) *ExValueScan {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -103,47 +103,47 @@ func (evsc *ExValueScanCreate) SaveX(ctx context.Context) *ExValueScan {
 }
 
 // Exec executes the query.
-func (evsc *ExValueScanCreate) Exec(ctx context.Context) error {
-	_, err := evsc.Save(ctx)
+func (_c *ExValueScanCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (evsc *ExValueScanCreate) ExecX(ctx context.Context) {
-	if err := evsc.Exec(ctx); err != nil {
+func (_c *ExValueScanCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (evsc *ExValueScanCreate) check() error {
-	if _, ok := evsc.mutation.Binary(); !ok {
+func (_c *ExValueScanCreate) check() error {
+	if _, ok := _c.mutation.Binary(); !ok {
 		return &ValidationError{Name: "binary", err: errors.New(`ent: missing required field "ExValueScan.binary"`)}
 	}
-	if _, ok := evsc.mutation.BinaryBytes(); !ok {
+	if _, ok := _c.mutation.BinaryBytes(); !ok {
 		return &ValidationError{Name: "binary_bytes", err: errors.New(`ent: missing required field "ExValueScan.binary_bytes"`)}
 	}
-	if _, ok := evsc.mutation.Text(); !ok {
+	if _, ok := _c.mutation.Text(); !ok {
 		return &ValidationError{Name: "text", err: errors.New(`ent: missing required field "ExValueScan.text"`)}
 	}
-	if _, ok := evsc.mutation.Base64(); !ok {
+	if _, ok := _c.mutation.Base64(); !ok {
 		return &ValidationError{Name: "base64", err: errors.New(`ent: missing required field "ExValueScan.base64"`)}
 	}
-	if _, ok := evsc.mutation.Custom(); !ok {
+	if _, ok := _c.mutation.Custom(); !ok {
 		return &ValidationError{Name: "custom", err: errors.New(`ent: missing required field "ExValueScan.custom"`)}
 	}
 	return nil
 }
 
-func (evsc *ExValueScanCreate) sqlSave(ctx context.Context) (*ExValueScan, error) {
-	if err := evsc.check(); err != nil {
+func (_c *ExValueScanCreate) sqlSave(ctx context.Context) (*ExValueScan, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec, err := evsc.createSpec()
+	_node, _spec, err := _c.createSpec()
 	if err != nil {
 		return nil, err
 	}
-	if err := sqlgraph.CreateNode(ctx, evsc.driver, _spec); err != nil {
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -151,18 +151,18 @@ func (evsc *ExValueScanCreate) sqlSave(ctx context.Context) (*ExValueScan, error
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	evsc.mutation.id = &_node.ID
-	evsc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (evsc *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec, error) {
+func (_c *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec, error) {
 	var (
-		_node = &ExValueScan{config: evsc.config}
+		_node = &ExValueScan{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(exvaluescan.Table, sqlgraph.NewFieldSpec(exvaluescan.FieldID, field.TypeInt))
 	)
-	_spec.OnConflict = evsc.conflict
-	if value, ok := evsc.mutation.Binary(); ok {
+	_spec.OnConflict = _c.conflict
+	if value, ok := _c.mutation.Binary(); ok {
 		vv, err := exvaluescan.ValueScanner.Binary.Value(value)
 		if err != nil {
 			return nil, nil, err
@@ -170,7 +170,7 @@ func (evsc *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec,
 		_spec.SetField(exvaluescan.FieldBinary, field.TypeString, vv)
 		_node.Binary = value
 	}
-	if value, ok := evsc.mutation.BinaryBytes(); ok {
+	if value, ok := _c.mutation.BinaryBytes(); ok {
 		vv, err := exvaluescan.ValueScanner.BinaryBytes.Value(value)
 		if err != nil {
 			return nil, nil, err
@@ -178,7 +178,7 @@ func (evsc *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec,
 		_spec.SetField(exvaluescan.FieldBinaryBytes, field.TypeBytes, vv)
 		_node.BinaryBytes = value
 	}
-	if value, ok := evsc.mutation.BinaryOptional(); ok {
+	if value, ok := _c.mutation.BinaryOptional(); ok {
 		vv, err := exvaluescan.ValueScanner.BinaryOptional.Value(value)
 		if err != nil {
 			return nil, nil, err
@@ -186,7 +186,7 @@ func (evsc *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec,
 		_spec.SetField(exvaluescan.FieldBinaryOptional, field.TypeString, vv)
 		_node.BinaryOptional = value
 	}
-	if value, ok := evsc.mutation.Text(); ok {
+	if value, ok := _c.mutation.Text(); ok {
 		vv, err := exvaluescan.ValueScanner.Text.Value(value)
 		if err != nil {
 			return nil, nil, err
@@ -194,7 +194,7 @@ func (evsc *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec,
 		_spec.SetField(exvaluescan.FieldText, field.TypeString, vv)
 		_node.Text = value
 	}
-	if value, ok := evsc.mutation.TextOptional(); ok {
+	if value, ok := _c.mutation.TextOptional(); ok {
 		vv, err := exvaluescan.ValueScanner.TextOptional.Value(value)
 		if err != nil {
 			return nil, nil, err
@@ -202,7 +202,7 @@ func (evsc *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec,
 		_spec.SetField(exvaluescan.FieldTextOptional, field.TypeString, vv)
 		_node.TextOptional = value
 	}
-	if value, ok := evsc.mutation.Base64(); ok {
+	if value, ok := _c.mutation.Base64(); ok {
 		vv, err := exvaluescan.ValueScanner.Base64.Value(value)
 		if err != nil {
 			return nil, nil, err
@@ -210,7 +210,7 @@ func (evsc *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec,
 		_spec.SetField(exvaluescan.FieldBase64, field.TypeString, vv)
 		_node.Base64 = value
 	}
-	if value, ok := evsc.mutation.Custom(); ok {
+	if value, ok := _c.mutation.Custom(); ok {
 		vv, err := exvaluescan.ValueScanner.Custom.Value(value)
 		if err != nil {
 			return nil, nil, err
@@ -218,7 +218,7 @@ func (evsc *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec,
 		_spec.SetField(exvaluescan.FieldCustom, field.TypeString, vv)
 		_node.Custom = value
 	}
-	if value, ok := evsc.mutation.CustomOptional(); ok {
+	if value, ok := _c.mutation.CustomOptional(); ok {
 		vv, err := exvaluescan.ValueScanner.CustomOptional.Value(value)
 		if err != nil {
 			return nil, nil, err
@@ -245,10 +245,10 @@ func (evsc *ExValueScanCreate) createSpec() (*ExValueScan, *sqlgraph.CreateSpec,
 //			SetBinary(v+v).
 //		}).
 //		Exec(ctx)
-func (evsc *ExValueScanCreate) OnConflict(opts ...sql.ConflictOption) *ExValueScanUpsertOne {
-	evsc.conflict = opts
+func (_c *ExValueScanCreate) OnConflict(opts ...sql.ConflictOption) *ExValueScanUpsertOne {
+	_c.conflict = opts
 	return &ExValueScanUpsertOne{
-		create: evsc,
+		create: _c,
 	}
 }
 
@@ -258,10 +258,10 @@ func (evsc *ExValueScanCreate) OnConflict(opts ...sql.ConflictOption) *ExValueSc
 //	client.ExValueScan.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (evsc *ExValueScanCreate) OnConflictColumns(columns ...string) *ExValueScanUpsertOne {
-	evsc.conflict = append(evsc.conflict, sql.ConflictColumns(columns...))
+func (_c *ExValueScanCreate) OnConflictColumns(columns ...string) *ExValueScanUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &ExValueScanUpsertOne{
-		create: evsc,
+		create: _c,
 	}
 }
 
@@ -607,16 +607,16 @@ type ExValueScanCreateBulk struct {
 }
 
 // Save creates the ExValueScan entities in the database.
-func (evscb *ExValueScanCreateBulk) Save(ctx context.Context) ([]*ExValueScan, error) {
-	if evscb.err != nil {
-		return nil, evscb.err
+func (_c *ExValueScanCreateBulk) Save(ctx context.Context) ([]*ExValueScan, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(evscb.builders))
-	nodes := make([]*ExValueScan, len(evscb.builders))
-	mutators := make([]Mutator, len(evscb.builders))
-	for i := range evscb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*ExValueScan, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := evscb.builders[i]
+			builder := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ExValueScanMutation)
 				if !ok {
@@ -632,12 +632,12 @@ func (evscb *ExValueScanCreateBulk) Save(ctx context.Context) ([]*ExValueScan, e
 					return nil, err
 				}
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, evscb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = evscb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, evscb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -661,7 +661,7 @@ func (evscb *ExValueScanCreateBulk) Save(ctx context.Context) ([]*ExValueScan, e
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, evscb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -669,8 +669,8 @@ func (evscb *ExValueScanCreateBulk) Save(ctx context.Context) ([]*ExValueScan, e
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (evscb *ExValueScanCreateBulk) SaveX(ctx context.Context) []*ExValueScan {
-	v, err := evscb.Save(ctx)
+func (_c *ExValueScanCreateBulk) SaveX(ctx context.Context) []*ExValueScan {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -678,14 +678,14 @@ func (evscb *ExValueScanCreateBulk) SaveX(ctx context.Context) []*ExValueScan {
 }
 
 // Exec executes the query.
-func (evscb *ExValueScanCreateBulk) Exec(ctx context.Context) error {
-	_, err := evscb.Save(ctx)
+func (_c *ExValueScanCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (evscb *ExValueScanCreateBulk) ExecX(ctx context.Context) {
-	if err := evscb.Exec(ctx); err != nil {
+func (_c *ExValueScanCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -705,10 +705,10 @@ func (evscb *ExValueScanCreateBulk) ExecX(ctx context.Context) {
 //			SetBinary(v+v).
 //		}).
 //		Exec(ctx)
-func (evscb *ExValueScanCreateBulk) OnConflict(opts ...sql.ConflictOption) *ExValueScanUpsertBulk {
-	evscb.conflict = opts
+func (_c *ExValueScanCreateBulk) OnConflict(opts ...sql.ConflictOption) *ExValueScanUpsertBulk {
+	_c.conflict = opts
 	return &ExValueScanUpsertBulk{
-		create: evscb,
+		create: _c,
 	}
 }
 
@@ -718,10 +718,10 @@ func (evscb *ExValueScanCreateBulk) OnConflict(opts ...sql.ConflictOption) *ExVa
 //	client.ExValueScan.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (evscb *ExValueScanCreateBulk) OnConflictColumns(columns ...string) *ExValueScanUpsertBulk {
-	evscb.conflict = append(evscb.conflict, sql.ConflictColumns(columns...))
+func (_c *ExValueScanCreateBulk) OnConflictColumns(columns ...string) *ExValueScanUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &ExValueScanUpsertBulk{
-		create: evscb,
+		create: _c,
 	}
 }
 

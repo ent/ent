@@ -73,7 +73,7 @@ func (*ExValueScan) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the ExValueScan fields.
-func (evs *ExValueScan) assignValues(columns []string, values []any) error {
+func (_m *ExValueScan) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -84,57 +84,57 @@ func (evs *ExValueScan) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			evs.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case exvaluescan.FieldBinary:
 			if value, err := exvaluescan.ValueScanner.Binary.FromValue(values[i]); err != nil {
 				return err
 			} else {
-				evs.Binary = value
+				_m.Binary = value
 			}
 		case exvaluescan.FieldBinaryBytes:
 			if value, err := exvaluescan.ValueScanner.BinaryBytes.FromValue(values[i]); err != nil {
 				return err
 			} else {
-				evs.BinaryBytes = value
+				_m.BinaryBytes = value
 			}
 		case exvaluescan.FieldBinaryOptional:
 			if value, err := exvaluescan.ValueScanner.BinaryOptional.FromValue(values[i]); err != nil {
 				return err
 			} else {
-				evs.BinaryOptional = value
+				_m.BinaryOptional = value
 			}
 		case exvaluescan.FieldText:
 			if value, err := exvaluescan.ValueScanner.Text.FromValue(values[i]); err != nil {
 				return err
 			} else {
-				evs.Text = value
+				_m.Text = value
 			}
 		case exvaluescan.FieldTextOptional:
 			if value, err := exvaluescan.ValueScanner.TextOptional.FromValue(values[i]); err != nil {
 				return err
 			} else {
-				evs.TextOptional = value
+				_m.TextOptional = value
 			}
 		case exvaluescan.FieldBase64:
 			if value, err := exvaluescan.ValueScanner.Base64.FromValue(values[i]); err != nil {
 				return err
 			} else {
-				evs.Base64 = value
+				_m.Base64 = value
 			}
 		case exvaluescan.FieldCustom:
 			if value, err := exvaluescan.ValueScanner.Custom.FromValue(values[i]); err != nil {
 				return err
 			} else {
-				evs.Custom = value
+				_m.Custom = value
 			}
 		case exvaluescan.FieldCustomOptional:
 			if value, err := exvaluescan.ValueScanner.CustomOptional.FromValue(values[i]); err != nil {
 				return err
 			} else {
-				evs.CustomOptional = value
+				_m.CustomOptional = value
 			}
 		default:
-			evs.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -142,56 +142,56 @@ func (evs *ExValueScan) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the ExValueScan.
 // This includes values selected through modifiers, order, etc.
-func (evs *ExValueScan) Value(name string) (ent.Value, error) {
-	return evs.selectValues.Get(name)
+func (_m *ExValueScan) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this ExValueScan.
 // Note that you need to call ExValueScan.Unwrap() before calling this method if this ExValueScan
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (evs *ExValueScan) Update() *ExValueScanUpdateOne {
-	return NewExValueScanClient(evs.config).UpdateOne(evs)
+func (_m *ExValueScan) Update() *ExValueScanUpdateOne {
+	return NewExValueScanClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the ExValueScan entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (evs *ExValueScan) Unwrap() *ExValueScan {
-	_tx, ok := evs.config.driver.(*txDriver)
+func (_m *ExValueScan) Unwrap() *ExValueScan {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: ExValueScan is not a transactional entity")
 	}
-	evs.config.driver = _tx.drv
-	return evs
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (evs *ExValueScan) String() string {
+func (_m *ExValueScan) String() string {
 	var builder strings.Builder
 	builder.WriteString("ExValueScan(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", evs.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("binary=")
-	builder.WriteString(fmt.Sprintf("%v", evs.Binary))
+	builder.WriteString(fmt.Sprintf("%v", _m.Binary))
 	builder.WriteString(", ")
 	builder.WriteString("binary_bytes=")
-	builder.WriteString(fmt.Sprintf("%v", evs.BinaryBytes))
+	builder.WriteString(fmt.Sprintf("%v", _m.BinaryBytes))
 	builder.WriteString(", ")
 	builder.WriteString("binary_optional=")
-	builder.WriteString(fmt.Sprintf("%v", evs.BinaryOptional))
+	builder.WriteString(fmt.Sprintf("%v", _m.BinaryOptional))
 	builder.WriteString(", ")
 	builder.WriteString("text=")
-	builder.WriteString(fmt.Sprintf("%v", evs.Text))
+	builder.WriteString(fmt.Sprintf("%v", _m.Text))
 	builder.WriteString(", ")
 	builder.WriteString("text_optional=")
-	builder.WriteString(fmt.Sprintf("%v", evs.TextOptional))
+	builder.WriteString(fmt.Sprintf("%v", _m.TextOptional))
 	builder.WriteString(", ")
 	builder.WriteString("base64=")
-	builder.WriteString(evs.Base64)
+	builder.WriteString(_m.Base64)
 	builder.WriteString(", ")
 	builder.WriteString("custom=")
-	builder.WriteString(evs.Custom)
+	builder.WriteString(_m.Custom)
 	builder.WriteString(", ")
 	builder.WriteString("custom_optional=")
-	builder.WriteString(evs.CustomOptional)
+	builder.WriteString(_m.CustomOptional)
 	builder.WriteByte(')')
 	return builder.String()
 }

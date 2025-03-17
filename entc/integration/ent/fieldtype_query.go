@@ -35,40 +35,40 @@ type FieldTypeQuery struct {
 }
 
 // Where adds a new predicate for the FieldTypeQuery builder.
-func (ftq *FieldTypeQuery) Where(ps ...predicate.FieldType) *FieldTypeQuery {
-	ftq.predicates = append(ftq.predicates, ps...)
-	return ftq
+func (_q *FieldTypeQuery) Where(ps ...predicate.FieldType) *FieldTypeQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (ftq *FieldTypeQuery) Limit(limit int) *FieldTypeQuery {
-	ftq.ctx.Limit = &limit
-	return ftq
+func (_q *FieldTypeQuery) Limit(limit int) *FieldTypeQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (ftq *FieldTypeQuery) Offset(offset int) *FieldTypeQuery {
-	ftq.ctx.Offset = &offset
-	return ftq
+func (_q *FieldTypeQuery) Offset(offset int) *FieldTypeQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (ftq *FieldTypeQuery) Unique(unique bool) *FieldTypeQuery {
-	ftq.ctx.Unique = &unique
-	return ftq
+func (_q *FieldTypeQuery) Unique(unique bool) *FieldTypeQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (ftq *FieldTypeQuery) Order(o ...fieldtype.OrderOption) *FieldTypeQuery {
-	ftq.order = append(ftq.order, o...)
-	return ftq
+func (_q *FieldTypeQuery) Order(o ...fieldtype.OrderOption) *FieldTypeQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // First returns the first FieldType entity from the query.
 // Returns a *NotFoundError when no FieldType was found.
-func (ftq *FieldTypeQuery) First(ctx context.Context) (*FieldType, error) {
-	nodes, err := ftq.Limit(1).All(setContextOp(ctx, ftq.ctx, ent.OpQueryFirst))
+func (_q *FieldTypeQuery) First(ctx context.Context) (*FieldType, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -79,8 +79,8 @@ func (ftq *FieldTypeQuery) First(ctx context.Context) (*FieldType, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (ftq *FieldTypeQuery) FirstX(ctx context.Context) *FieldType {
-	node, err := ftq.First(ctx)
+func (_q *FieldTypeQuery) FirstX(ctx context.Context) *FieldType {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -89,9 +89,9 @@ func (ftq *FieldTypeQuery) FirstX(ctx context.Context) *FieldType {
 
 // FirstID returns the first FieldType ID from the query.
 // Returns a *NotFoundError when no FieldType ID was found.
-func (ftq *FieldTypeQuery) FirstID(ctx context.Context) (id int, err error) {
+func (_q *FieldTypeQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = ftq.Limit(1).IDs(setContextOp(ctx, ftq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -102,8 +102,8 @@ func (ftq *FieldTypeQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (ftq *FieldTypeQuery) FirstIDX(ctx context.Context) int {
-	id, err := ftq.FirstID(ctx)
+func (_q *FieldTypeQuery) FirstIDX(ctx context.Context) int {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -113,8 +113,8 @@ func (ftq *FieldTypeQuery) FirstIDX(ctx context.Context) int {
 // Only returns a single FieldType entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one FieldType entity is found.
 // Returns a *NotFoundError when no FieldType entities are found.
-func (ftq *FieldTypeQuery) Only(ctx context.Context) (*FieldType, error) {
-	nodes, err := ftq.Limit(2).All(setContextOp(ctx, ftq.ctx, ent.OpQueryOnly))
+func (_q *FieldTypeQuery) Only(ctx context.Context) (*FieldType, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -129,8 +129,8 @@ func (ftq *FieldTypeQuery) Only(ctx context.Context) (*FieldType, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (ftq *FieldTypeQuery) OnlyX(ctx context.Context) *FieldType {
-	node, err := ftq.Only(ctx)
+func (_q *FieldTypeQuery) OnlyX(ctx context.Context) *FieldType {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -140,9 +140,9 @@ func (ftq *FieldTypeQuery) OnlyX(ctx context.Context) *FieldType {
 // OnlyID is like Only, but returns the only FieldType ID in the query.
 // Returns a *NotSingularError when more than one FieldType ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (ftq *FieldTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *FieldTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = ftq.Limit(2).IDs(setContextOp(ctx, ftq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -157,8 +157,8 @@ func (ftq *FieldTypeQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (ftq *FieldTypeQuery) OnlyIDX(ctx context.Context) int {
-	id, err := ftq.OnlyID(ctx)
+func (_q *FieldTypeQuery) OnlyIDX(ctx context.Context) int {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -166,18 +166,18 @@ func (ftq *FieldTypeQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of FieldTypes.
-func (ftq *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
-	ctx = setContextOp(ctx, ftq.ctx, ent.OpQueryAll)
-	if err := ftq.prepareQuery(ctx); err != nil {
+func (_q *FieldTypeQuery) All(ctx context.Context) ([]*FieldType, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*FieldType, *FieldTypeQuery]()
-	return withInterceptors[[]*FieldType](ctx, ftq, qr, ftq.inters)
+	return withInterceptors[[]*FieldType](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (ftq *FieldTypeQuery) AllX(ctx context.Context) []*FieldType {
-	nodes, err := ftq.All(ctx)
+func (_q *FieldTypeQuery) AllX(ctx context.Context) []*FieldType {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -185,20 +185,20 @@ func (ftq *FieldTypeQuery) AllX(ctx context.Context) []*FieldType {
 }
 
 // IDs executes the query and returns a list of FieldType IDs.
-func (ftq *FieldTypeQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if ftq.ctx.Unique == nil && ftq.path != nil {
-		ftq.Unique(true)
+func (_q *FieldTypeQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, ftq.ctx, ent.OpQueryIDs)
-	if err = ftq.Select(fieldtype.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(fieldtype.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (ftq *FieldTypeQuery) IDsX(ctx context.Context) []int {
-	ids, err := ftq.IDs(ctx)
+func (_q *FieldTypeQuery) IDsX(ctx context.Context) []int {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -206,17 +206,17 @@ func (ftq *FieldTypeQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (ftq *FieldTypeQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, ftq.ctx, ent.OpQueryCount)
-	if err := ftq.prepareQuery(ctx); err != nil {
+func (_q *FieldTypeQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, ftq, querierCount[*FieldTypeQuery](), ftq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*FieldTypeQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (ftq *FieldTypeQuery) CountX(ctx context.Context) int {
-	count, err := ftq.Count(ctx)
+func (_q *FieldTypeQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -224,9 +224,9 @@ func (ftq *FieldTypeQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (ftq *FieldTypeQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, ftq.ctx, ent.OpQueryExist)
-	switch _, err := ftq.FirstID(ctx); {
+func (_q *FieldTypeQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -237,8 +237,8 @@ func (ftq *FieldTypeQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (ftq *FieldTypeQuery) ExistX(ctx context.Context) bool {
-	exist, err := ftq.Exist(ctx)
+func (_q *FieldTypeQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -247,20 +247,20 @@ func (ftq *FieldTypeQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the FieldTypeQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
-	if ftq == nil {
+func (_q *FieldTypeQuery) Clone() *FieldTypeQuery {
+	if _q == nil {
 		return nil
 	}
 	return &FieldTypeQuery{
-		config:     ftq.config,
-		ctx:        ftq.ctx.Clone(),
-		order:      append([]fieldtype.OrderOption{}, ftq.order...),
-		inters:     append([]Interceptor{}, ftq.inters...),
-		predicates: append([]predicate.FieldType{}, ftq.predicates...),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]fieldtype.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.FieldType{}, _q.predicates...),
 		// clone intermediate query.
-		sql:       ftq.sql.Clone(),
-		path:      ftq.path,
-		modifiers: append([]func(*sql.Selector){}, ftq.modifiers...),
+		sql:       _q.sql.Clone(),
+		path:      _q.path,
+		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
@@ -278,10 +278,10 @@ func (ftq *FieldTypeQuery) Clone() *FieldTypeQuery {
 //		GroupBy(fieldtype.FieldInt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGroupBy {
-	ftq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &FieldTypeGroupBy{build: ftq}
-	grbuild.flds = &ftq.ctx.Fields
+func (_q *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &FieldTypeGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = fieldtype.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -299,50 +299,50 @@ func (ftq *FieldTypeQuery) GroupBy(field string, fields ...string) *FieldTypeGro
 //	client.FieldType.Query().
 //		Select(fieldtype.FieldInt).
 //		Scan(ctx, &v)
-func (ftq *FieldTypeQuery) Select(fields ...string) *FieldTypeSelect {
-	ftq.ctx.Fields = append(ftq.ctx.Fields, fields...)
-	sbuild := &FieldTypeSelect{FieldTypeQuery: ftq}
+func (_q *FieldTypeQuery) Select(fields ...string) *FieldTypeSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &FieldTypeSelect{FieldTypeQuery: _q}
 	sbuild.label = fieldtype.Label
-	sbuild.flds, sbuild.scan = &ftq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a FieldTypeSelect configured with the given aggregations.
-func (ftq *FieldTypeQuery) Aggregate(fns ...AggregateFunc) *FieldTypeSelect {
-	return ftq.Select().Aggregate(fns...)
+func (_q *FieldTypeQuery) Aggregate(fns ...AggregateFunc) *FieldTypeSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (ftq *FieldTypeQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range ftq.inters {
+func (_q *FieldTypeQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, ftq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range ftq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !fieldtype.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if ftq.path != nil {
-		prev, err := ftq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		ftq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (ftq *FieldTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*FieldType, error) {
+func (_q *FieldTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*FieldType, error) {
 	var (
 		nodes   = []*FieldType{}
-		withFKs = ftq.withFKs
-		_spec   = ftq.querySpec()
+		withFKs = _q.withFKs
+		_spec   = _q.querySpec()
 	)
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, fieldtype.ForeignKeys...)
@@ -351,17 +351,17 @@ func (ftq *FieldTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*F
 		return (*FieldType).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &FieldType{config: ftq.config}
+		node := &FieldType{config: _q.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
-	if len(ftq.modifiers) > 0 {
-		_spec.Modifiers = ftq.modifiers
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, ftq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -370,27 +370,27 @@ func (ftq *FieldTypeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*F
 	return nodes, nil
 }
 
-func (ftq *FieldTypeQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := ftq.querySpec()
-	if len(ftq.modifiers) > 0 {
-		_spec.Modifiers = ftq.modifiers
+func (_q *FieldTypeQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
-	_spec.Node.Columns = ftq.ctx.Fields
-	if len(ftq.ctx.Fields) > 0 {
-		_spec.Unique = ftq.ctx.Unique != nil && *ftq.ctx.Unique
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, ftq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (ftq *FieldTypeQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *FieldTypeQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(fieldtype.Table, fieldtype.Columns, sqlgraph.NewFieldSpec(fieldtype.FieldID, field.TypeInt))
-	_spec.From = ftq.sql
-	if unique := ftq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if ftq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := ftq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, fieldtype.FieldID)
 		for i := range fields {
@@ -399,20 +399,20 @@ func (ftq *FieldTypeQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := ftq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := ftq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := ftq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := ftq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -422,36 +422,36 @@ func (ftq *FieldTypeQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (ftq *FieldTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(ftq.driver.Dialect())
+func (_q *FieldTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(fieldtype.Table)
-	columns := ftq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = fieldtype.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if ftq.sql != nil {
-		selector = ftq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if ftq.ctx.Unique != nil && *ftq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, m := range ftq.modifiers {
+	for _, m := range _q.modifiers {
 		m(selector)
 	}
-	for _, p := range ftq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range ftq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := ftq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := ftq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -460,33 +460,33 @@ func (ftq *FieldTypeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // ForUpdate locks the selected rows against concurrent updates, and prevent them from being
 // updated, deleted or "selected ... for update" by other sessions, until the transaction is
 // either committed or rolled-back.
-func (ftq *FieldTypeQuery) ForUpdate(opts ...sql.LockOption) *FieldTypeQuery {
-	if ftq.driver.Dialect() == dialect.Postgres {
-		ftq.Unique(false)
+func (_q *FieldTypeQuery) ForUpdate(opts ...sql.LockOption) *FieldTypeQuery {
+	if _q.driver.Dialect() == dialect.Postgres {
+		_q.Unique(false)
 	}
-	ftq.modifiers = append(ftq.modifiers, func(s *sql.Selector) {
+	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
 		s.ForUpdate(opts...)
 	})
-	return ftq
+	return _q
 }
 
 // ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
 // on any rows that are read. Other sessions can read the rows, but cannot modify them
 // until your transaction commits.
-func (ftq *FieldTypeQuery) ForShare(opts ...sql.LockOption) *FieldTypeQuery {
-	if ftq.driver.Dialect() == dialect.Postgres {
-		ftq.Unique(false)
+func (_q *FieldTypeQuery) ForShare(opts ...sql.LockOption) *FieldTypeQuery {
+	if _q.driver.Dialect() == dialect.Postgres {
+		_q.Unique(false)
 	}
-	ftq.modifiers = append(ftq.modifiers, func(s *sql.Selector) {
+	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
 		s.ForShare(opts...)
 	})
-	return ftq
+	return _q
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (ftq *FieldTypeQuery) Modify(modifiers ...func(s *sql.Selector)) *FieldTypeSelect {
-	ftq.modifiers = append(ftq.modifiers, modifiers...)
-	return ftq.Select()
+func (_q *FieldTypeQuery) Modify(modifiers ...func(s *sql.Selector)) *FieldTypeSelect {
+	_q.modifiers = append(_q.modifiers, modifiers...)
+	return _q.Select()
 }
 
 // FieldTypeGroupBy is the group-by builder for FieldType entities.

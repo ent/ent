@@ -33,40 +33,40 @@ type CommentQuery struct {
 }
 
 // Where adds a new predicate for the CommentQuery builder.
-func (cq *CommentQuery) Where(ps ...predicate.Comment) *CommentQuery {
-	cq.predicates = append(cq.predicates, ps...)
-	return cq
+func (_q *CommentQuery) Where(ps ...predicate.Comment) *CommentQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (cq *CommentQuery) Limit(limit int) *CommentQuery {
-	cq.ctx.Limit = &limit
-	return cq
+func (_q *CommentQuery) Limit(limit int) *CommentQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (cq *CommentQuery) Offset(offset int) *CommentQuery {
-	cq.ctx.Offset = &offset
-	return cq
+func (_q *CommentQuery) Offset(offset int) *CommentQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (cq *CommentQuery) Unique(unique bool) *CommentQuery {
-	cq.ctx.Unique = &unique
-	return cq
+func (_q *CommentQuery) Unique(unique bool) *CommentQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (cq *CommentQuery) Order(o ...comment.OrderOption) *CommentQuery {
-	cq.order = append(cq.order, o...)
-	return cq
+func (_q *CommentQuery) Order(o ...comment.OrderOption) *CommentQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // First returns the first Comment entity from the query.
 // Returns a *NotFoundError when no Comment was found.
-func (cq *CommentQuery) First(ctx context.Context) (*Comment, error) {
-	nodes, err := cq.Limit(1).All(setContextOp(ctx, cq.ctx, ent.OpQueryFirst))
+func (_q *CommentQuery) First(ctx context.Context) (*Comment, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -77,8 +77,8 @@ func (cq *CommentQuery) First(ctx context.Context) (*Comment, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (cq *CommentQuery) FirstX(ctx context.Context) *Comment {
-	node, err := cq.First(ctx)
+func (_q *CommentQuery) FirstX(ctx context.Context) *Comment {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -87,9 +87,9 @@ func (cq *CommentQuery) FirstX(ctx context.Context) *Comment {
 
 // FirstID returns the first Comment ID from the query.
 // Returns a *NotFoundError when no Comment ID was found.
-func (cq *CommentQuery) FirstID(ctx context.Context) (id string, err error) {
+func (_q *CommentQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = cq.Limit(1).IDs(setContextOp(ctx, cq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -100,8 +100,8 @@ func (cq *CommentQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (cq *CommentQuery) FirstIDX(ctx context.Context) string {
-	id, err := cq.FirstID(ctx)
+func (_q *CommentQuery) FirstIDX(ctx context.Context) string {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -111,8 +111,8 @@ func (cq *CommentQuery) FirstIDX(ctx context.Context) string {
 // Only returns a single Comment entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Comment entity is found.
 // Returns a *NotFoundError when no Comment entities are found.
-func (cq *CommentQuery) Only(ctx context.Context) (*Comment, error) {
-	nodes, err := cq.Limit(2).All(setContextOp(ctx, cq.ctx, ent.OpQueryOnly))
+func (_q *CommentQuery) Only(ctx context.Context) (*Comment, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -127,8 +127,8 @@ func (cq *CommentQuery) Only(ctx context.Context) (*Comment, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (cq *CommentQuery) OnlyX(ctx context.Context) *Comment {
-	node, err := cq.Only(ctx)
+func (_q *CommentQuery) OnlyX(ctx context.Context) *Comment {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -138,9 +138,9 @@ func (cq *CommentQuery) OnlyX(ctx context.Context) *Comment {
 // OnlyID is like Only, but returns the only Comment ID in the query.
 // Returns a *NotSingularError when more than one Comment ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (cq *CommentQuery) OnlyID(ctx context.Context) (id string, err error) {
+func (_q *CommentQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = cq.Limit(2).IDs(setContextOp(ctx, cq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -155,8 +155,8 @@ func (cq *CommentQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (cq *CommentQuery) OnlyIDX(ctx context.Context) string {
-	id, err := cq.OnlyID(ctx)
+func (_q *CommentQuery) OnlyIDX(ctx context.Context) string {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -164,18 +164,18 @@ func (cq *CommentQuery) OnlyIDX(ctx context.Context) string {
 }
 
 // All executes the query and returns a list of Comments.
-func (cq *CommentQuery) All(ctx context.Context) ([]*Comment, error) {
-	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryAll)
-	if err := cq.prepareQuery(ctx); err != nil {
+func (_q *CommentQuery) All(ctx context.Context) ([]*Comment, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Comment, *CommentQuery]()
-	return withInterceptors[[]*Comment](ctx, cq, qr, cq.inters)
+	return withInterceptors[[]*Comment](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (cq *CommentQuery) AllX(ctx context.Context) []*Comment {
-	nodes, err := cq.All(ctx)
+func (_q *CommentQuery) AllX(ctx context.Context) []*Comment {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -183,20 +183,20 @@ func (cq *CommentQuery) AllX(ctx context.Context) []*Comment {
 }
 
 // IDs executes the query and returns a list of Comment IDs.
-func (cq *CommentQuery) IDs(ctx context.Context) (ids []string, err error) {
-	if cq.ctx.Unique == nil && cq.path != nil {
-		cq.Unique(true)
+func (_q *CommentQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryIDs)
-	if err = cq.Select(comment.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(comment.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (cq *CommentQuery) IDsX(ctx context.Context) []string {
-	ids, err := cq.IDs(ctx)
+func (_q *CommentQuery) IDsX(ctx context.Context) []string {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -204,17 +204,17 @@ func (cq *CommentQuery) IDsX(ctx context.Context) []string {
 }
 
 // Count returns the count of the given query.
-func (cq *CommentQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryCount)
-	if err := cq.prepareQuery(ctx); err != nil {
+func (_q *CommentQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, cq, querierCount[*CommentQuery](), cq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*CommentQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (cq *CommentQuery) CountX(ctx context.Context) int {
-	count, err := cq.Count(ctx)
+func (_q *CommentQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -222,9 +222,9 @@ func (cq *CommentQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (cq *CommentQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryExist)
-	switch _, err := cq.FirstID(ctx); {
+func (_q *CommentQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -235,8 +235,8 @@ func (cq *CommentQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (cq *CommentQuery) ExistX(ctx context.Context) bool {
-	exist, err := cq.Exist(ctx)
+func (_q *CommentQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -245,19 +245,19 @@ func (cq *CommentQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the CommentQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (cq *CommentQuery) Clone() *CommentQuery {
-	if cq == nil {
+func (_q *CommentQuery) Clone() *CommentQuery {
+	if _q == nil {
 		return nil
 	}
 	return &CommentQuery{
-		config:     cq.config,
-		ctx:        cq.ctx.Clone(),
-		order:      append([]comment.OrderOption{}, cq.order...),
-		inters:     append([]Interceptor{}, cq.inters...),
-		predicates: append([]predicate.Comment{}, cq.predicates...),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]comment.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.Comment{}, _q.predicates...),
 		// clone intermediate query.
-		gremlin: cq.gremlin.Clone(),
-		path:    cq.path,
+		gremlin: _q.gremlin.Clone(),
+		path:    _q.path,
 	}
 }
 
@@ -275,10 +275,10 @@ func (cq *CommentQuery) Clone() *CommentQuery {
 //		GroupBy(comment.FieldUniqueInt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy {
-	cq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &CommentGroupBy{build: cq}
-	grbuild.flds = &cq.ctx.Fields
+func (_q *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &CommentGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = comment.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -296,46 +296,46 @@ func (cq *CommentQuery) GroupBy(field string, fields ...string) *CommentGroupBy 
 //	client.Comment.Query().
 //		Select(comment.FieldUniqueInt).
 //		Scan(ctx, &v)
-func (cq *CommentQuery) Select(fields ...string) *CommentSelect {
-	cq.ctx.Fields = append(cq.ctx.Fields, fields...)
-	sbuild := &CommentSelect{CommentQuery: cq}
+func (_q *CommentQuery) Select(fields ...string) *CommentSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &CommentSelect{CommentQuery: _q}
 	sbuild.label = comment.Label
-	sbuild.flds, sbuild.scan = &cq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a CommentSelect configured with the given aggregations.
-func (cq *CommentQuery) Aggregate(fns ...AggregateFunc) *CommentSelect {
-	return cq.Select().Aggregate(fns...)
+func (_q *CommentQuery) Aggregate(fns ...AggregateFunc) *CommentSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (cq *CommentQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range cq.inters {
+func (_q *CommentQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, cq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	if cq.path != nil {
-		prev, err := cq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		cq.gremlin = prev
+		_q.gremlin = prev
 	}
 	return nil
 }
 
-func (cq *CommentQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Comment, error) {
+func (_q *CommentQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Comment, error) {
 	res := &gremlin.Response{}
-	traversal := cq.gremlinQuery(ctx)
-	if len(cq.ctx.Fields) > 0 {
-		fields := make([]any, len(cq.ctx.Fields))
-		for i, f := range cq.ctx.Fields {
+	traversal := _q.gremlinQuery(ctx)
+	if len(_q.ctx.Fields) > 0 {
+		fields := make([]any, len(_q.ctx.Fields))
+		for i, f := range _q.ctx.Fields {
 			fields[i] = f
 		}
 		traversal.ValueMap(fields...)
@@ -343,43 +343,43 @@ func (cq *CommentQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := cq.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
-	var cs Comments
-	if err := cs.FromResponse(res); err != nil {
+	var _ms Comments
+	if err := _ms.FromResponse(res); err != nil {
 		return nil, err
 	}
-	for i := range cs {
-		cs[i].config = cq.config
+	for i := range _ms {
+		_ms[i].config = _q.config
 	}
-	return cs, nil
+	return _ms, nil
 }
 
-func (cq *CommentQuery) gremlinCount(ctx context.Context) (int, error) {
+func (_q *CommentQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := cq.gremlinQuery(ctx).Count().Query()
-	if err := cq.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _q.gremlinQuery(ctx).Count().Query()
+	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
 }
 
-func (cq *CommentQuery) gremlinQuery(context.Context) *dsl.Traversal {
+func (_q *CommentQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(comment.Label)
-	if cq.gremlin != nil {
-		v = cq.gremlin.Clone()
+	if _q.gremlin != nil {
+		v = _q.gremlin.Clone()
 	}
-	for _, p := range cq.predicates {
+	for _, p := range _q.predicates {
 		p(v)
 	}
-	if len(cq.order) > 0 {
+	if len(_q.order) > 0 {
 		v.Order()
-		for _, p := range cq.order {
+		for _, p := range _q.order {
 			p(v)
 		}
 	}
-	switch limit, offset := cq.ctx.Limit, cq.ctx.Offset; {
+	switch limit, offset := _q.ctx.Limit, _q.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset+*limit)
 	case offset != nil:
@@ -387,7 +387,7 @@ func (cq *CommentQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := cq.ctx.Unique; unique == nil || *unique {
+	if unique := _q.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v

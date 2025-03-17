@@ -42,44 +42,44 @@ type UserQuery struct {
 }
 
 // Where adds a new predicate for the UserQuery builder.
-func (uq *UserQuery) Where(ps ...predicate.User) *UserQuery {
-	uq.predicates = append(uq.predicates, ps...)
-	return uq
+func (_q *UserQuery) Where(ps ...predicate.User) *UserQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (uq *UserQuery) Limit(limit int) *UserQuery {
-	uq.ctx.Limit = &limit
-	return uq
+func (_q *UserQuery) Limit(limit int) *UserQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (uq *UserQuery) Offset(offset int) *UserQuery {
-	uq.ctx.Offset = &offset
-	return uq
+func (_q *UserQuery) Offset(offset int) *UserQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (uq *UserQuery) Unique(unique bool) *UserQuery {
-	uq.ctx.Unique = &unique
-	return uq
+func (_q *UserQuery) Unique(unique bool) *UserQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (uq *UserQuery) Order(o ...user.OrderOption) *UserQuery {
-	uq.order = append(uq.order, o...)
-	return uq
+func (_q *UserQuery) Order(o ...user.OrderOption) *UserQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryPets chains the current query on the "pets" edge.
-func (uq *UserQuery) QueryPets() *PetQuery {
-	query := (&PetClient{config: uq.config}).Query()
+func (_q *UserQuery) QueryPets() *PetQuery {
+	query := (&PetClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := uq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := uq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -88,23 +88,23 @@ func (uq *UserQuery) QueryPets() *PetQuery {
 			sqlgraph.To(pet.Table, pet.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.PetsTable, user.PetsColumn),
 		)
-		schemaConfig := uq.schemaConfig
+		schemaConfig := _q.schemaConfig
 		step.To.Schema = schemaConfig.Pet
 		step.Edge.Schema = schemaConfig.Pet
-		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryGroups chains the current query on the "groups" edge.
-func (uq *UserQuery) QueryGroups() *GroupQuery {
-	query := (&GroupClient{config: uq.config}).Query()
+func (_q *UserQuery) QueryGroups() *GroupQuery {
+	query := (&GroupClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := uq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := uq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -113,23 +113,23 @@ func (uq *UserQuery) QueryGroups() *GroupQuery {
 			sqlgraph.To(group.Table, group.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, user.GroupsTable, user.GroupsPrimaryKey...),
 		)
-		schemaConfig := uq.schemaConfig
+		schemaConfig := _q.schemaConfig
 		step.To.Schema = schemaConfig.Group
 		step.Edge.Schema = schemaConfig.GroupUsers
-		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryFriends chains the current query on the "friends" edge.
-func (uq *UserQuery) QueryFriends() *UserQuery {
-	query := (&UserClient{config: uq.config}).Query()
+func (_q *UserQuery) QueryFriends() *UserQuery {
+	query := (&UserClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := uq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := uq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -138,23 +138,23 @@ func (uq *UserQuery) QueryFriends() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.FriendsTable, user.FriendsPrimaryKey...),
 		)
-		schemaConfig := uq.schemaConfig
+		schemaConfig := _q.schemaConfig
 		step.To.Schema = schemaConfig.User
 		step.Edge.Schema = schemaConfig.Friendship
-		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryFriendships chains the current query on the "friendships" edge.
-func (uq *UserQuery) QueryFriendships() *FriendshipQuery {
-	query := (&FriendshipClient{config: uq.config}).Query()
+func (_q *UserQuery) QueryFriendships() *FriendshipQuery {
+	query := (&FriendshipClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := uq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := uq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -163,10 +163,10 @@ func (uq *UserQuery) QueryFriendships() *FriendshipQuery {
 			sqlgraph.To(friendship.Table, friendship.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, user.FriendshipsTable, user.FriendshipsColumn),
 		)
-		schemaConfig := uq.schemaConfig
+		schemaConfig := _q.schemaConfig
 		step.To.Schema = schemaConfig.Friendship
 		step.Edge.Schema = schemaConfig.Friendship
-		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -174,8 +174,8 @@ func (uq *UserQuery) QueryFriendships() *FriendshipQuery {
 
 // First returns the first User entity from the query.
 // Returns a *NotFoundError when no User was found.
-func (uq *UserQuery) First(ctx context.Context) (*User, error) {
-	nodes, err := uq.Limit(1).All(setContextOp(ctx, uq.ctx, ent.OpQueryFirst))
+func (_q *UserQuery) First(ctx context.Context) (*User, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -186,8 +186,8 @@ func (uq *UserQuery) First(ctx context.Context) (*User, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (uq *UserQuery) FirstX(ctx context.Context) *User {
-	node, err := uq.First(ctx)
+func (_q *UserQuery) FirstX(ctx context.Context) *User {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -196,9 +196,9 @@ func (uq *UserQuery) FirstX(ctx context.Context) *User {
 
 // FirstID returns the first User ID from the query.
 // Returns a *NotFoundError when no User ID was found.
-func (uq *UserQuery) FirstID(ctx context.Context) (id int, err error) {
+func (_q *UserQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = uq.Limit(1).IDs(setContextOp(ctx, uq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -209,8 +209,8 @@ func (uq *UserQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (uq *UserQuery) FirstIDX(ctx context.Context) int {
-	id, err := uq.FirstID(ctx)
+func (_q *UserQuery) FirstIDX(ctx context.Context) int {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -220,8 +220,8 @@ func (uq *UserQuery) FirstIDX(ctx context.Context) int {
 // Only returns a single User entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one User entity is found.
 // Returns a *NotFoundError when no User entities are found.
-func (uq *UserQuery) Only(ctx context.Context) (*User, error) {
-	nodes, err := uq.Limit(2).All(setContextOp(ctx, uq.ctx, ent.OpQueryOnly))
+func (_q *UserQuery) Only(ctx context.Context) (*User, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -236,8 +236,8 @@ func (uq *UserQuery) Only(ctx context.Context) (*User, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (uq *UserQuery) OnlyX(ctx context.Context) *User {
-	node, err := uq.Only(ctx)
+func (_q *UserQuery) OnlyX(ctx context.Context) *User {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -247,9 +247,9 @@ func (uq *UserQuery) OnlyX(ctx context.Context) *User {
 // OnlyID is like Only, but returns the only User ID in the query.
 // Returns a *NotSingularError when more than one User ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (uq *UserQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *UserQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = uq.Limit(2).IDs(setContextOp(ctx, uq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -264,8 +264,8 @@ func (uq *UserQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (uq *UserQuery) OnlyIDX(ctx context.Context) int {
-	id, err := uq.OnlyID(ctx)
+func (_q *UserQuery) OnlyIDX(ctx context.Context) int {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -273,18 +273,18 @@ func (uq *UserQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Users.
-func (uq *UserQuery) All(ctx context.Context) ([]*User, error) {
-	ctx = setContextOp(ctx, uq.ctx, ent.OpQueryAll)
-	if err := uq.prepareQuery(ctx); err != nil {
+func (_q *UserQuery) All(ctx context.Context) ([]*User, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*User, *UserQuery]()
-	return withInterceptors[[]*User](ctx, uq, qr, uq.inters)
+	return withInterceptors[[]*User](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (uq *UserQuery) AllX(ctx context.Context) []*User {
-	nodes, err := uq.All(ctx)
+func (_q *UserQuery) AllX(ctx context.Context) []*User {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -292,20 +292,20 @@ func (uq *UserQuery) AllX(ctx context.Context) []*User {
 }
 
 // IDs executes the query and returns a list of User IDs.
-func (uq *UserQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if uq.ctx.Unique == nil && uq.path != nil {
-		uq.Unique(true)
+func (_q *UserQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, uq.ctx, ent.OpQueryIDs)
-	if err = uq.Select(user.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(user.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (uq *UserQuery) IDsX(ctx context.Context) []int {
-	ids, err := uq.IDs(ctx)
+func (_q *UserQuery) IDsX(ctx context.Context) []int {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -313,17 +313,17 @@ func (uq *UserQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (uq *UserQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, uq.ctx, ent.OpQueryCount)
-	if err := uq.prepareQuery(ctx); err != nil {
+func (_q *UserQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, uq, querierCount[*UserQuery](), uq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*UserQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (uq *UserQuery) CountX(ctx context.Context) int {
-	count, err := uq.Count(ctx)
+func (_q *UserQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -331,9 +331,9 @@ func (uq *UserQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (uq *UserQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, uq.ctx, ent.OpQueryExist)
-	switch _, err := uq.FirstID(ctx); {
+func (_q *UserQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -344,8 +344,8 @@ func (uq *UserQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (uq *UserQuery) ExistX(ctx context.Context) bool {
-	exist, err := uq.Exist(ctx)
+func (_q *UserQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -354,69 +354,69 @@ func (uq *UserQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the UserQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (uq *UserQuery) Clone() *UserQuery {
-	if uq == nil {
+func (_q *UserQuery) Clone() *UserQuery {
+	if _q == nil {
 		return nil
 	}
 	return &UserQuery{
-		config:          uq.config,
-		ctx:             uq.ctx.Clone(),
-		order:           append([]user.OrderOption{}, uq.order...),
-		inters:          append([]Interceptor{}, uq.inters...),
-		predicates:      append([]predicate.User{}, uq.predicates...),
-		withPets:        uq.withPets.Clone(),
-		withGroups:      uq.withGroups.Clone(),
-		withFriends:     uq.withFriends.Clone(),
-		withFriendships: uq.withFriendships.Clone(),
+		config:          _q.config,
+		ctx:             _q.ctx.Clone(),
+		order:           append([]user.OrderOption{}, _q.order...),
+		inters:          append([]Interceptor{}, _q.inters...),
+		predicates:      append([]predicate.User{}, _q.predicates...),
+		withPets:        _q.withPets.Clone(),
+		withGroups:      _q.withGroups.Clone(),
+		withFriends:     _q.withFriends.Clone(),
+		withFriendships: _q.withFriendships.Clone(),
 		// clone intermediate query.
-		sql:       uq.sql.Clone(),
-		path:      uq.path,
-		modifiers: append([]func(*sql.Selector){}, uq.modifiers...),
+		sql:       _q.sql.Clone(),
+		path:      _q.path,
+		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
 // WithPets tells the query-builder to eager-load the nodes that are connected to
 // the "pets" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithPets(opts ...func(*PetQuery)) *UserQuery {
-	query := (&PetClient{config: uq.config}).Query()
+func (_q *UserQuery) WithPets(opts ...func(*PetQuery)) *UserQuery {
+	query := (&PetClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withPets = query
-	return uq
+	_q.withPets = query
+	return _q
 }
 
 // WithGroups tells the query-builder to eager-load the nodes that are connected to
 // the "groups" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithGroups(opts ...func(*GroupQuery)) *UserQuery {
-	query := (&GroupClient{config: uq.config}).Query()
+func (_q *UserQuery) WithGroups(opts ...func(*GroupQuery)) *UserQuery {
+	query := (&GroupClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withGroups = query
-	return uq
+	_q.withGroups = query
+	return _q
 }
 
 // WithFriends tells the query-builder to eager-load the nodes that are connected to
 // the "friends" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithFriends(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: uq.config}).Query()
+func (_q *UserQuery) WithFriends(opts ...func(*UserQuery)) *UserQuery {
+	query := (&UserClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withFriends = query
-	return uq
+	_q.withFriends = query
+	return _q
 }
 
 // WithFriendships tells the query-builder to eager-load the nodes that are connected to
 // the "friendships" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithFriendships(opts ...func(*FriendshipQuery)) *UserQuery {
-	query := (&FriendshipClient{config: uq.config}).Query()
+func (_q *UserQuery) WithFriendships(opts ...func(*FriendshipQuery)) *UserQuery {
+	query := (&FriendshipClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withFriendships = query
-	return uq
+	_q.withFriendships = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -433,10 +433,10 @@ func (uq *UserQuery) WithFriendships(opts ...func(*FriendshipQuery)) *UserQuery 
 //		GroupBy(user.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
-	uq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &UserGroupBy{build: uq}
-	grbuild.flds = &uq.ctx.Fields
+func (_q *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &UserGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = user.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -454,102 +454,102 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 //	client.User.Query().
 //		Select(user.FieldName).
 //		Scan(ctx, &v)
-func (uq *UserQuery) Select(fields ...string) *UserSelect {
-	uq.ctx.Fields = append(uq.ctx.Fields, fields...)
-	sbuild := &UserSelect{UserQuery: uq}
+func (_q *UserQuery) Select(fields ...string) *UserSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &UserSelect{UserQuery: _q}
 	sbuild.label = user.Label
-	sbuild.flds, sbuild.scan = &uq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a UserSelect configured with the given aggregations.
-func (uq *UserQuery) Aggregate(fns ...AggregateFunc) *UserSelect {
-	return uq.Select().Aggregate(fns...)
+func (_q *UserQuery) Aggregate(fns ...AggregateFunc) *UserSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (uq *UserQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range uq.inters {
+func (_q *UserQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, uq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range uq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !user.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if uq.path != nil {
-		prev, err := uq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		uq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, error) {
+func (_q *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, error) {
 	var (
 		nodes       = []*User{}
-		_spec       = uq.querySpec()
+		_spec       = _q.querySpec()
 		loadedTypes = [4]bool{
-			uq.withPets != nil,
-			uq.withGroups != nil,
-			uq.withFriends != nil,
-			uq.withFriendships != nil,
+			_q.withPets != nil,
+			_q.withGroups != nil,
+			_q.withFriends != nil,
+			_q.withFriendships != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*User).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &User{config: uq.config}
+		node := &User{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
-	_spec.Node.Schema = uq.schemaConfig.User
-	ctx = internal.NewSchemaConfigContext(ctx, uq.schemaConfig)
-	if len(uq.modifiers) > 0 {
-		_spec.Modifiers = uq.modifiers
+	_spec.Node.Schema = _q.schemaConfig.User
+	ctx = internal.NewSchemaConfigContext(ctx, _q.schemaConfig)
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, uq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := uq.withPets; query != nil {
-		if err := uq.loadPets(ctx, query, nodes,
+	if query := _q.withPets; query != nil {
+		if err := _q.loadPets(ctx, query, nodes,
 			func(n *User) { n.Edges.Pets = []*Pet{} },
 			func(n *User, e *Pet) { n.Edges.Pets = append(n.Edges.Pets, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := uq.withGroups; query != nil {
-		if err := uq.loadGroups(ctx, query, nodes,
+	if query := _q.withGroups; query != nil {
+		if err := _q.loadGroups(ctx, query, nodes,
 			func(n *User) { n.Edges.Groups = []*Group{} },
 			func(n *User, e *Group) { n.Edges.Groups = append(n.Edges.Groups, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := uq.withFriends; query != nil {
-		if err := uq.loadFriends(ctx, query, nodes,
+	if query := _q.withFriends; query != nil {
+		if err := _q.loadFriends(ctx, query, nodes,
 			func(n *User) { n.Edges.Friends = []*User{} },
 			func(n *User, e *User) { n.Edges.Friends = append(n.Edges.Friends, e) }); err != nil {
 			return nil, err
 		}
 	}
-	if query := uq.withFriendships; query != nil {
-		if err := uq.loadFriendships(ctx, query, nodes,
+	if query := _q.withFriendships; query != nil {
+		if err := _q.loadFriendships(ctx, query, nodes,
 			func(n *User) { n.Edges.Friendships = []*Friendship{} },
 			func(n *User, e *Friendship) { n.Edges.Friendships = append(n.Edges.Friendships, e) }); err != nil {
 			return nil, err
@@ -558,7 +558,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	return nodes, nil
 }
 
-func (uq *UserQuery) loadPets(ctx context.Context, query *PetQuery, nodes []*User, init func(*User), assign func(*User, *Pet)) error {
+func (_q *UserQuery) loadPets(ctx context.Context, query *PetQuery, nodes []*User, init func(*User), assign func(*User, *Pet)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*User)
 	for i := range nodes {
@@ -588,7 +588,7 @@ func (uq *UserQuery) loadPets(ctx context.Context, query *PetQuery, nodes []*Use
 	}
 	return nil
 }
-func (uq *UserQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []*User, init func(*User), assign func(*User, *Group)) error {
+func (_q *UserQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []*User, init func(*User), assign func(*User, *Group)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[int]*User)
 	nids := make(map[int]map[*User]struct{})
@@ -601,7 +601,7 @@ func (uq *UserQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []
 	}
 	query.Where(func(s *sql.Selector) {
 		joinT := sql.Table(user.GroupsTable)
-		joinT.Schema(uq.schemaConfig.GroupUsers)
+		joinT.Schema(_q.schemaConfig.GroupUsers)
 		s.Join(joinT).On(s.C(group.FieldID), joinT.C(user.GroupsPrimaryKey[0]))
 		s.Where(sql.InValues(joinT.C(user.GroupsPrimaryKey[1]), edgeIDs...))
 		columns := s.SelectedColumns()
@@ -650,7 +650,7 @@ func (uq *UserQuery) loadGroups(ctx context.Context, query *GroupQuery, nodes []
 	}
 	return nil
 }
-func (uq *UserQuery) loadFriends(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
+func (_q *UserQuery) loadFriends(ctx context.Context, query *UserQuery, nodes []*User, init func(*User), assign func(*User, *User)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[int]*User)
 	nids := make(map[int]map[*User]struct{})
@@ -663,7 +663,7 @@ func (uq *UserQuery) loadFriends(ctx context.Context, query *UserQuery, nodes []
 	}
 	query.Where(func(s *sql.Selector) {
 		joinT := sql.Table(user.FriendsTable)
-		joinT.Schema(uq.schemaConfig.Friendship)
+		joinT.Schema(_q.schemaConfig.Friendship)
 		s.Join(joinT).On(s.C(user.FieldID), joinT.C(user.FriendsPrimaryKey[1]))
 		s.Where(sql.InValues(joinT.C(user.FriendsPrimaryKey[0]), edgeIDs...))
 		columns := s.SelectedColumns()
@@ -712,7 +712,7 @@ func (uq *UserQuery) loadFriends(ctx context.Context, query *UserQuery, nodes []
 	}
 	return nil
 }
-func (uq *UserQuery) loadFriendships(ctx context.Context, query *FriendshipQuery, nodes []*User, init func(*User), assign func(*User, *Friendship)) error {
+func (_q *UserQuery) loadFriendships(ctx context.Context, query *FriendshipQuery, nodes []*User, init func(*User), assign func(*User, *Friendship)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*User)
 	for i := range nodes {
@@ -743,29 +743,29 @@ func (uq *UserQuery) loadFriendships(ctx context.Context, query *FriendshipQuery
 	return nil
 }
 
-func (uq *UserQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := uq.querySpec()
-	_spec.Node.Schema = uq.schemaConfig.User
-	ctx = internal.NewSchemaConfigContext(ctx, uq.schemaConfig)
-	if len(uq.modifiers) > 0 {
-		_spec.Modifiers = uq.modifiers
+func (_q *UserQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	_spec.Node.Schema = _q.schemaConfig.User
+	ctx = internal.NewSchemaConfigContext(ctx, _q.schemaConfig)
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
-	_spec.Node.Columns = uq.ctx.Fields
-	if len(uq.ctx.Fields) > 0 {
-		_spec.Unique = uq.ctx.Unique != nil && *uq.ctx.Unique
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, uq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *UserQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
-	_spec.From = uq.sql
-	if unique := uq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if uq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := uq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, user.FieldID)
 		for i := range fields {
@@ -774,20 +774,20 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := uq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := uq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := uq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := uq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -797,48 +797,48 @@ func (uq *UserQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (uq *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(uq.driver.Dialect())
+func (_q *UserQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(user.Table)
-	columns := uq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = user.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if uq.sql != nil {
-		selector = uq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if uq.ctx.Unique != nil && *uq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	t1.Schema(uq.schemaConfig.User)
-	ctx = internal.NewSchemaConfigContext(ctx, uq.schemaConfig)
+	t1.Schema(_q.schemaConfig.User)
+	ctx = internal.NewSchemaConfigContext(ctx, _q.schemaConfig)
 	selector.WithContext(ctx)
-	for _, m := range uq.modifiers {
+	for _, m := range _q.modifiers {
 		m(selector)
 	}
-	for _, p := range uq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range uq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := uq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := uq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (uq *UserQuery) Modify(modifiers ...func(s *sql.Selector)) *UserSelect {
-	uq.modifiers = append(uq.modifiers, modifiers...)
-	return uq.Select()
+func (_q *UserQuery) Modify(modifiers ...func(s *sql.Selector)) *UserSelect {
+	_q.modifiers = append(_q.modifiers, modifiers...)
+	return _q.Select()
 }
 
 // UserGroupBy is the group-by builder for User entities.

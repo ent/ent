@@ -32,236 +32,236 @@ type UserUpdate struct {
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	uu.mutation.Where(ps...)
-	return uu
+func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetT sets the "t" field.
-func (uu *UserUpdate) SetT(s *schema.T) *UserUpdate {
-	uu.mutation.SetT(s)
-	return uu
+func (_u *UserUpdate) SetT(s *schema.T) *UserUpdate {
+	_u.mutation.SetT(s)
+	return _u
 }
 
 // ClearT clears the value of the "t" field.
-func (uu *UserUpdate) ClearT() *UserUpdate {
-	uu.mutation.ClearT()
-	return uu
+func (_u *UserUpdate) ClearT() *UserUpdate {
+	_u.mutation.ClearT()
+	return _u
 }
 
 // SetURL sets the "url" field.
-func (uu *UserUpdate) SetURL(u *url.URL) *UserUpdate {
-	uu.mutation.SetURL(u)
-	return uu
+func (_u *UserUpdate) SetURL(u *url.URL) *UserUpdate {
+	_u.mutation.SetURL(u)
+	return _u
 }
 
 // ClearURL clears the value of the "url" field.
-func (uu *UserUpdate) ClearURL() *UserUpdate {
-	uu.mutation.ClearURL()
-	return uu
+func (_u *UserUpdate) ClearURL() *UserUpdate {
+	_u.mutation.ClearURL()
+	return _u
 }
 
 // SetURLs sets the "URLs" field.
-func (uu *UserUpdate) SetURLs(u []*url.URL) *UserUpdate {
-	uu.mutation.SetURLs(u)
-	return uu
+func (_u *UserUpdate) SetURLs(u []*url.URL) *UserUpdate {
+	_u.mutation.SetURLs(u)
+	return _u
 }
 
 // AppendURLs appends u to the "URLs" field.
-func (uu *UserUpdate) AppendURLs(u []*url.URL) *UserUpdate {
-	uu.mutation.AppendURLs(u)
-	return uu
+func (_u *UserUpdate) AppendURLs(u []*url.URL) *UserUpdate {
+	_u.mutation.AppendURLs(u)
+	return _u
 }
 
 // ClearURLs clears the value of the "URLs" field.
-func (uu *UserUpdate) ClearURLs() *UserUpdate {
-	uu.mutation.ClearURLs()
-	return uu
+func (_u *UserUpdate) ClearURLs() *UserUpdate {
+	_u.mutation.ClearURLs()
+	return _u
 }
 
 // SetRaw sets the "raw" field.
-func (uu *UserUpdate) SetRaw(jm json.RawMessage) *UserUpdate {
-	uu.mutation.SetRaw(jm)
-	return uu
+func (_u *UserUpdate) SetRaw(jm json.RawMessage) *UserUpdate {
+	_u.mutation.SetRaw(jm)
+	return _u
 }
 
 // AppendRaw appends jm to the "raw" field.
-func (uu *UserUpdate) AppendRaw(jm json.RawMessage) *UserUpdate {
-	uu.mutation.AppendRaw(jm)
-	return uu
+func (_u *UserUpdate) AppendRaw(jm json.RawMessage) *UserUpdate {
+	_u.mutation.AppendRaw(jm)
+	return _u
 }
 
 // ClearRaw clears the value of the "raw" field.
-func (uu *UserUpdate) ClearRaw() *UserUpdate {
-	uu.mutation.ClearRaw()
-	return uu
+func (_u *UserUpdate) ClearRaw() *UserUpdate {
+	_u.mutation.ClearRaw()
+	return _u
 }
 
 // SetDirs sets the "dirs" field.
-func (uu *UserUpdate) SetDirs(h []http.Dir) *UserUpdate {
-	uu.mutation.SetDirs(h)
-	return uu
+func (_u *UserUpdate) SetDirs(h []http.Dir) *UserUpdate {
+	_u.mutation.SetDirs(h)
+	return _u
 }
 
 // AppendDirs appends h to the "dirs" field.
-func (uu *UserUpdate) AppendDirs(h []http.Dir) *UserUpdate {
-	uu.mutation.AppendDirs(h)
-	return uu
+func (_u *UserUpdate) AppendDirs(h []http.Dir) *UserUpdate {
+	_u.mutation.AppendDirs(h)
+	return _u
 }
 
 // SetInts sets the "ints" field.
-func (uu *UserUpdate) SetInts(i []int) *UserUpdate {
-	uu.mutation.SetInts(i)
-	return uu
+func (_u *UserUpdate) SetInts(i []int) *UserUpdate {
+	_u.mutation.SetInts(i)
+	return _u
 }
 
 // AppendInts appends i to the "ints" field.
-func (uu *UserUpdate) AppendInts(i []int) *UserUpdate {
-	uu.mutation.AppendInts(i)
-	return uu
+func (_u *UserUpdate) AppendInts(i []int) *UserUpdate {
+	_u.mutation.AppendInts(i)
+	return _u
 }
 
 // ClearInts clears the value of the "ints" field.
-func (uu *UserUpdate) ClearInts() *UserUpdate {
-	uu.mutation.ClearInts()
-	return uu
+func (_u *UserUpdate) ClearInts() *UserUpdate {
+	_u.mutation.ClearInts()
+	return _u
 }
 
 // SetFloats sets the "floats" field.
-func (uu *UserUpdate) SetFloats(f []float64) *UserUpdate {
-	uu.mutation.SetFloats(f)
-	return uu
+func (_u *UserUpdate) SetFloats(f []float64) *UserUpdate {
+	_u.mutation.SetFloats(f)
+	return _u
 }
 
 // AppendFloats appends f to the "floats" field.
-func (uu *UserUpdate) AppendFloats(f []float64) *UserUpdate {
-	uu.mutation.AppendFloats(f)
-	return uu
+func (_u *UserUpdate) AppendFloats(f []float64) *UserUpdate {
+	_u.mutation.AppendFloats(f)
+	return _u
 }
 
 // ClearFloats clears the value of the "floats" field.
-func (uu *UserUpdate) ClearFloats() *UserUpdate {
-	uu.mutation.ClearFloats()
-	return uu
+func (_u *UserUpdate) ClearFloats() *UserUpdate {
+	_u.mutation.ClearFloats()
+	return _u
 }
 
 // SetStrings sets the "strings" field.
-func (uu *UserUpdate) SetStrings(s []string) *UserUpdate {
-	uu.mutation.SetStrings(s)
-	return uu
+func (_u *UserUpdate) SetStrings(s []string) *UserUpdate {
+	_u.mutation.SetStrings(s)
+	return _u
 }
 
 // AppendStrings appends s to the "strings" field.
-func (uu *UserUpdate) AppendStrings(s []string) *UserUpdate {
-	uu.mutation.AppendStrings(s)
-	return uu
+func (_u *UserUpdate) AppendStrings(s []string) *UserUpdate {
+	_u.mutation.AppendStrings(s)
+	return _u
 }
 
 // ClearStrings clears the value of the "strings" field.
-func (uu *UserUpdate) ClearStrings() *UserUpdate {
-	uu.mutation.ClearStrings()
-	return uu
+func (_u *UserUpdate) ClearStrings() *UserUpdate {
+	_u.mutation.ClearStrings()
+	return _u
 }
 
 // SetIntsValidate sets the "ints_validate" field.
-func (uu *UserUpdate) SetIntsValidate(i []int) *UserUpdate {
-	uu.mutation.SetIntsValidate(i)
-	return uu
+func (_u *UserUpdate) SetIntsValidate(i []int) *UserUpdate {
+	_u.mutation.SetIntsValidate(i)
+	return _u
 }
 
 // AppendIntsValidate appends i to the "ints_validate" field.
-func (uu *UserUpdate) AppendIntsValidate(i []int) *UserUpdate {
-	uu.mutation.AppendIntsValidate(i)
-	return uu
+func (_u *UserUpdate) AppendIntsValidate(i []int) *UserUpdate {
+	_u.mutation.AppendIntsValidate(i)
+	return _u
 }
 
 // ClearIntsValidate clears the value of the "ints_validate" field.
-func (uu *UserUpdate) ClearIntsValidate() *UserUpdate {
-	uu.mutation.ClearIntsValidate()
-	return uu
+func (_u *UserUpdate) ClearIntsValidate() *UserUpdate {
+	_u.mutation.ClearIntsValidate()
+	return _u
 }
 
 // SetFloatsValidate sets the "floats_validate" field.
-func (uu *UserUpdate) SetFloatsValidate(f []float64) *UserUpdate {
-	uu.mutation.SetFloatsValidate(f)
-	return uu
+func (_u *UserUpdate) SetFloatsValidate(f []float64) *UserUpdate {
+	_u.mutation.SetFloatsValidate(f)
+	return _u
 }
 
 // AppendFloatsValidate appends f to the "floats_validate" field.
-func (uu *UserUpdate) AppendFloatsValidate(f []float64) *UserUpdate {
-	uu.mutation.AppendFloatsValidate(f)
-	return uu
+func (_u *UserUpdate) AppendFloatsValidate(f []float64) *UserUpdate {
+	_u.mutation.AppendFloatsValidate(f)
+	return _u
 }
 
 // ClearFloatsValidate clears the value of the "floats_validate" field.
-func (uu *UserUpdate) ClearFloatsValidate() *UserUpdate {
-	uu.mutation.ClearFloatsValidate()
-	return uu
+func (_u *UserUpdate) ClearFloatsValidate() *UserUpdate {
+	_u.mutation.ClearFloatsValidate()
+	return _u
 }
 
 // SetStringsValidate sets the "strings_validate" field.
-func (uu *UserUpdate) SetStringsValidate(s []string) *UserUpdate {
-	uu.mutation.SetStringsValidate(s)
-	return uu
+func (_u *UserUpdate) SetStringsValidate(s []string) *UserUpdate {
+	_u.mutation.SetStringsValidate(s)
+	return _u
 }
 
 // AppendStringsValidate appends s to the "strings_validate" field.
-func (uu *UserUpdate) AppendStringsValidate(s []string) *UserUpdate {
-	uu.mutation.AppendStringsValidate(s)
-	return uu
+func (_u *UserUpdate) AppendStringsValidate(s []string) *UserUpdate {
+	_u.mutation.AppendStringsValidate(s)
+	return _u
 }
 
 // ClearStringsValidate clears the value of the "strings_validate" field.
-func (uu *UserUpdate) ClearStringsValidate() *UserUpdate {
-	uu.mutation.ClearStringsValidate()
-	return uu
+func (_u *UserUpdate) ClearStringsValidate() *UserUpdate {
+	_u.mutation.ClearStringsValidate()
+	return _u
 }
 
 // SetAddr sets the "addr" field.
-func (uu *UserUpdate) SetAddr(s schema.Addr) *UserUpdate {
-	uu.mutation.SetAddr(s)
-	return uu
+func (_u *UserUpdate) SetAddr(s schema.Addr) *UserUpdate {
+	_u.mutation.SetAddr(s)
+	return _u
 }
 
 // SetNillableAddr sets the "addr" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableAddr(s *schema.Addr) *UserUpdate {
+func (_u *UserUpdate) SetNillableAddr(s *schema.Addr) *UserUpdate {
 	if s != nil {
-		uu.SetAddr(*s)
+		_u.SetAddr(*s)
 	}
-	return uu
+	return _u
 }
 
 // ClearAddr clears the value of the "addr" field.
-func (uu *UserUpdate) ClearAddr() *UserUpdate {
-	uu.mutation.ClearAddr()
-	return uu
+func (_u *UserUpdate) ClearAddr() *UserUpdate {
+	_u.mutation.ClearAddr()
+	return _u
 }
 
 // SetUnknown sets the "unknown" field.
-func (uu *UserUpdate) SetUnknown(a any) *UserUpdate {
-	uu.mutation.SetUnknown(a)
-	return uu
+func (_u *UserUpdate) SetUnknown(a any) *UserUpdate {
+	_u.mutation.SetUnknown(a)
+	return _u
 }
 
 // ClearUnknown clears the value of the "unknown" field.
-func (uu *UserUpdate) ClearUnknown() *UserUpdate {
-	uu.mutation.ClearUnknown()
-	return uu
+func (_u *UserUpdate) ClearUnknown() *UserUpdate {
+	_u.mutation.ClearUnknown()
+	return _u
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uu *UserUpdate) Mutation() *UserMutation {
-	return uu.mutation
+func (_u *UserUpdate) Mutation() *UserMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, uu.sqlSave, uu.mutation, uu.hooks)
+func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uu *UserUpdate) SaveX(ctx context.Context) int {
-	affected, err := uu.Save(ctx)
+func (_u *UserUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -269,31 +269,31 @@ func (uu *UserUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (uu *UserUpdate) Exec(ctx context.Context) error {
-	_, err := uu.Save(ctx)
+func (_u *UserUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uu *UserUpdate) ExecX(ctx context.Context) {
-	if err := uu.Exec(ctx); err != nil {
+func (_u *UserUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uu *UserUpdate) check() error {
-	if v, ok := uu.mutation.IntsValidate(); ok {
+func (_u *UserUpdate) check() error {
+	if v, ok := _u.mutation.IntsValidate(); ok {
 		if err := user.IntsValidateValidator(v); err != nil {
 			return &ValidationError{Name: "ints_validate", err: fmt.Errorf(`ent: validator failed for field "User.ints_validate": %w`, err)}
 		}
 	}
-	if v, ok := uu.mutation.FloatsValidate(); ok {
+	if v, ok := _u.mutation.FloatsValidate(); ok {
 		if err := user.FloatsValidateValidator(v); err != nil {
 			return &ValidationError{Name: "floats_validate", err: fmt.Errorf(`ent: validator failed for field "User.floats_validate": %w`, err)}
 		}
 	}
-	if v, ok := uu.mutation.StringsValidate(); ok {
+	if v, ok := _u.mutation.StringsValidate(); ok {
 		if err := user.StringsValidateValidator(v); err != nil {
 			return &ValidationError{Name: "strings_validate", err: fmt.Errorf(`ent: validator failed for field "User.strings_validate": %w`, err)}
 		}
@@ -302,145 +302,145 @@ func (uu *UserUpdate) check() error {
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (uu *UserUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserUpdate {
-	uu.modifiers = append(uu.modifiers, modifiers...)
-	return uu
+func (_u *UserUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
-func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := uu.check(); err != nil {
+func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := _u.check(); err != nil {
 		return n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
-	if ps := uu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uu.mutation.T(); ok {
+	if value, ok := _u.mutation.T(); ok {
 		_spec.SetField(user.FieldT, field.TypeJSON, value)
 	}
-	if uu.mutation.TCleared() {
+	if _u.mutation.TCleared() {
 		_spec.ClearField(user.FieldT, field.TypeJSON)
 	}
-	if value, ok := uu.mutation.URL(); ok {
+	if value, ok := _u.mutation.URL(); ok {
 		_spec.SetField(user.FieldURL, field.TypeJSON, value)
 	}
-	if uu.mutation.URLCleared() {
+	if _u.mutation.URLCleared() {
 		_spec.ClearField(user.FieldURL, field.TypeJSON)
 	}
-	if value, ok := uu.mutation.URLs(); ok {
+	if value, ok := _u.mutation.URLs(); ok {
 		_spec.SetField(user.FieldURLs, field.TypeJSON, value)
 	}
-	if value, ok := uu.mutation.AppendedURLs(); ok {
+	if value, ok := _u.mutation.AppendedURLs(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldURLs, value)
 		})
 	}
-	if uu.mutation.URLsCleared() {
+	if _u.mutation.URLsCleared() {
 		_spec.ClearField(user.FieldURLs, field.TypeJSON)
 	}
-	if value, ok := uu.mutation.Raw(); ok {
+	if value, ok := _u.mutation.Raw(); ok {
 		_spec.SetField(user.FieldRaw, field.TypeJSON, value)
 	}
-	if value, ok := uu.mutation.AppendedRaw(); ok {
+	if value, ok := _u.mutation.AppendedRaw(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldRaw, value)
 		})
 	}
-	if uu.mutation.RawCleared() {
+	if _u.mutation.RawCleared() {
 		_spec.ClearField(user.FieldRaw, field.TypeJSON)
 	}
-	if value, ok := uu.mutation.Dirs(); ok {
+	if value, ok := _u.mutation.Dirs(); ok {
 		_spec.SetField(user.FieldDirs, field.TypeJSON, value)
 	}
-	if value, ok := uu.mutation.AppendedDirs(); ok {
+	if value, ok := _u.mutation.AppendedDirs(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldDirs, value)
 		})
 	}
-	if value, ok := uu.mutation.Ints(); ok {
+	if value, ok := _u.mutation.Ints(); ok {
 		_spec.SetField(user.FieldInts, field.TypeJSON, value)
 	}
-	if value, ok := uu.mutation.AppendedInts(); ok {
+	if value, ok := _u.mutation.AppendedInts(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldInts, value)
 		})
 	}
-	if uu.mutation.IntsCleared() {
+	if _u.mutation.IntsCleared() {
 		_spec.ClearField(user.FieldInts, field.TypeJSON)
 	}
-	if value, ok := uu.mutation.Floats(); ok {
+	if value, ok := _u.mutation.Floats(); ok {
 		_spec.SetField(user.FieldFloats, field.TypeJSON, value)
 	}
-	if value, ok := uu.mutation.AppendedFloats(); ok {
+	if value, ok := _u.mutation.AppendedFloats(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldFloats, value)
 		})
 	}
-	if uu.mutation.FloatsCleared() {
+	if _u.mutation.FloatsCleared() {
 		_spec.ClearField(user.FieldFloats, field.TypeJSON)
 	}
-	if value, ok := uu.mutation.Strings(); ok {
+	if value, ok := _u.mutation.Strings(); ok {
 		_spec.SetField(user.FieldStrings, field.TypeJSON, value)
 	}
-	if value, ok := uu.mutation.AppendedStrings(); ok {
+	if value, ok := _u.mutation.AppendedStrings(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldStrings, value)
 		})
 	}
-	if uu.mutation.StringsCleared() {
+	if _u.mutation.StringsCleared() {
 		_spec.ClearField(user.FieldStrings, field.TypeJSON)
 	}
-	if value, ok := uu.mutation.IntsValidate(); ok {
+	if value, ok := _u.mutation.IntsValidate(); ok {
 		_spec.SetField(user.FieldIntsValidate, field.TypeJSON, value)
 	}
-	if value, ok := uu.mutation.AppendedIntsValidate(); ok {
+	if value, ok := _u.mutation.AppendedIntsValidate(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldIntsValidate, value)
 		})
 	}
-	if uu.mutation.IntsValidateCleared() {
+	if _u.mutation.IntsValidateCleared() {
 		_spec.ClearField(user.FieldIntsValidate, field.TypeJSON)
 	}
-	if value, ok := uu.mutation.FloatsValidate(); ok {
+	if value, ok := _u.mutation.FloatsValidate(); ok {
 		_spec.SetField(user.FieldFloatsValidate, field.TypeJSON, value)
 	}
-	if value, ok := uu.mutation.AppendedFloatsValidate(); ok {
+	if value, ok := _u.mutation.AppendedFloatsValidate(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldFloatsValidate, value)
 		})
 	}
-	if uu.mutation.FloatsValidateCleared() {
+	if _u.mutation.FloatsValidateCleared() {
 		_spec.ClearField(user.FieldFloatsValidate, field.TypeJSON)
 	}
-	if value, ok := uu.mutation.StringsValidate(); ok {
+	if value, ok := _u.mutation.StringsValidate(); ok {
 		_spec.SetField(user.FieldStringsValidate, field.TypeJSON, value)
 	}
-	if value, ok := uu.mutation.AppendedStringsValidate(); ok {
+	if value, ok := _u.mutation.AppendedStringsValidate(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldStringsValidate, value)
 		})
 	}
-	if uu.mutation.StringsValidateCleared() {
+	if _u.mutation.StringsValidateCleared() {
 		_spec.ClearField(user.FieldStringsValidate, field.TypeJSON)
 	}
-	if value, ok := uu.mutation.Addr(); ok {
+	if value, ok := _u.mutation.Addr(); ok {
 		_spec.SetField(user.FieldAddr, field.TypeJSON, value)
 	}
-	if uu.mutation.AddrCleared() {
+	if _u.mutation.AddrCleared() {
 		_spec.ClearField(user.FieldAddr, field.TypeJSON)
 	}
-	if value, ok := uu.mutation.Unknown(); ok {
+	if value, ok := _u.mutation.Unknown(); ok {
 		_spec.SetField(user.FieldUnknown, field.TypeJSON, value)
 	}
-	if uu.mutation.UnknownCleared() {
+	if _u.mutation.UnknownCleared() {
 		_spec.ClearField(user.FieldUnknown, field.TypeJSON)
 	}
-	_spec.AddModifiers(uu.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
+	_spec.AddModifiers(_u.modifiers...)
+	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -448,7 +448,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	uu.mutation.done = true
+	_u.mutation.done = true
 	return n, nil
 }
 
@@ -462,243 +462,243 @@ type UserUpdateOne struct {
 }
 
 // SetT sets the "t" field.
-func (uuo *UserUpdateOne) SetT(s *schema.T) *UserUpdateOne {
-	uuo.mutation.SetT(s)
-	return uuo
+func (_u *UserUpdateOne) SetT(s *schema.T) *UserUpdateOne {
+	_u.mutation.SetT(s)
+	return _u
 }
 
 // ClearT clears the value of the "t" field.
-func (uuo *UserUpdateOne) ClearT() *UserUpdateOne {
-	uuo.mutation.ClearT()
-	return uuo
+func (_u *UserUpdateOne) ClearT() *UserUpdateOne {
+	_u.mutation.ClearT()
+	return _u
 }
 
 // SetURL sets the "url" field.
-func (uuo *UserUpdateOne) SetURL(u *url.URL) *UserUpdateOne {
-	uuo.mutation.SetURL(u)
-	return uuo
+func (_u *UserUpdateOne) SetURL(u *url.URL) *UserUpdateOne {
+	_u.mutation.SetURL(u)
+	return _u
 }
 
 // ClearURL clears the value of the "url" field.
-func (uuo *UserUpdateOne) ClearURL() *UserUpdateOne {
-	uuo.mutation.ClearURL()
-	return uuo
+func (_u *UserUpdateOne) ClearURL() *UserUpdateOne {
+	_u.mutation.ClearURL()
+	return _u
 }
 
 // SetURLs sets the "URLs" field.
-func (uuo *UserUpdateOne) SetURLs(u []*url.URL) *UserUpdateOne {
-	uuo.mutation.SetURLs(u)
-	return uuo
+func (_u *UserUpdateOne) SetURLs(u []*url.URL) *UserUpdateOne {
+	_u.mutation.SetURLs(u)
+	return _u
 }
 
 // AppendURLs appends u to the "URLs" field.
-func (uuo *UserUpdateOne) AppendURLs(u []*url.URL) *UserUpdateOne {
-	uuo.mutation.AppendURLs(u)
-	return uuo
+func (_u *UserUpdateOne) AppendURLs(u []*url.URL) *UserUpdateOne {
+	_u.mutation.AppendURLs(u)
+	return _u
 }
 
 // ClearURLs clears the value of the "URLs" field.
-func (uuo *UserUpdateOne) ClearURLs() *UserUpdateOne {
-	uuo.mutation.ClearURLs()
-	return uuo
+func (_u *UserUpdateOne) ClearURLs() *UserUpdateOne {
+	_u.mutation.ClearURLs()
+	return _u
 }
 
 // SetRaw sets the "raw" field.
-func (uuo *UserUpdateOne) SetRaw(jm json.RawMessage) *UserUpdateOne {
-	uuo.mutation.SetRaw(jm)
-	return uuo
+func (_u *UserUpdateOne) SetRaw(jm json.RawMessage) *UserUpdateOne {
+	_u.mutation.SetRaw(jm)
+	return _u
 }
 
 // AppendRaw appends jm to the "raw" field.
-func (uuo *UserUpdateOne) AppendRaw(jm json.RawMessage) *UserUpdateOne {
-	uuo.mutation.AppendRaw(jm)
-	return uuo
+func (_u *UserUpdateOne) AppendRaw(jm json.RawMessage) *UserUpdateOne {
+	_u.mutation.AppendRaw(jm)
+	return _u
 }
 
 // ClearRaw clears the value of the "raw" field.
-func (uuo *UserUpdateOne) ClearRaw() *UserUpdateOne {
-	uuo.mutation.ClearRaw()
-	return uuo
+func (_u *UserUpdateOne) ClearRaw() *UserUpdateOne {
+	_u.mutation.ClearRaw()
+	return _u
 }
 
 // SetDirs sets the "dirs" field.
-func (uuo *UserUpdateOne) SetDirs(h []http.Dir) *UserUpdateOne {
-	uuo.mutation.SetDirs(h)
-	return uuo
+func (_u *UserUpdateOne) SetDirs(h []http.Dir) *UserUpdateOne {
+	_u.mutation.SetDirs(h)
+	return _u
 }
 
 // AppendDirs appends h to the "dirs" field.
-func (uuo *UserUpdateOne) AppendDirs(h []http.Dir) *UserUpdateOne {
-	uuo.mutation.AppendDirs(h)
-	return uuo
+func (_u *UserUpdateOne) AppendDirs(h []http.Dir) *UserUpdateOne {
+	_u.mutation.AppendDirs(h)
+	return _u
 }
 
 // SetInts sets the "ints" field.
-func (uuo *UserUpdateOne) SetInts(i []int) *UserUpdateOne {
-	uuo.mutation.SetInts(i)
-	return uuo
+func (_u *UserUpdateOne) SetInts(i []int) *UserUpdateOne {
+	_u.mutation.SetInts(i)
+	return _u
 }
 
 // AppendInts appends i to the "ints" field.
-func (uuo *UserUpdateOne) AppendInts(i []int) *UserUpdateOne {
-	uuo.mutation.AppendInts(i)
-	return uuo
+func (_u *UserUpdateOne) AppendInts(i []int) *UserUpdateOne {
+	_u.mutation.AppendInts(i)
+	return _u
 }
 
 // ClearInts clears the value of the "ints" field.
-func (uuo *UserUpdateOne) ClearInts() *UserUpdateOne {
-	uuo.mutation.ClearInts()
-	return uuo
+func (_u *UserUpdateOne) ClearInts() *UserUpdateOne {
+	_u.mutation.ClearInts()
+	return _u
 }
 
 // SetFloats sets the "floats" field.
-func (uuo *UserUpdateOne) SetFloats(f []float64) *UserUpdateOne {
-	uuo.mutation.SetFloats(f)
-	return uuo
+func (_u *UserUpdateOne) SetFloats(f []float64) *UserUpdateOne {
+	_u.mutation.SetFloats(f)
+	return _u
 }
 
 // AppendFloats appends f to the "floats" field.
-func (uuo *UserUpdateOne) AppendFloats(f []float64) *UserUpdateOne {
-	uuo.mutation.AppendFloats(f)
-	return uuo
+func (_u *UserUpdateOne) AppendFloats(f []float64) *UserUpdateOne {
+	_u.mutation.AppendFloats(f)
+	return _u
 }
 
 // ClearFloats clears the value of the "floats" field.
-func (uuo *UserUpdateOne) ClearFloats() *UserUpdateOne {
-	uuo.mutation.ClearFloats()
-	return uuo
+func (_u *UserUpdateOne) ClearFloats() *UserUpdateOne {
+	_u.mutation.ClearFloats()
+	return _u
 }
 
 // SetStrings sets the "strings" field.
-func (uuo *UserUpdateOne) SetStrings(s []string) *UserUpdateOne {
-	uuo.mutation.SetStrings(s)
-	return uuo
+func (_u *UserUpdateOne) SetStrings(s []string) *UserUpdateOne {
+	_u.mutation.SetStrings(s)
+	return _u
 }
 
 // AppendStrings appends s to the "strings" field.
-func (uuo *UserUpdateOne) AppendStrings(s []string) *UserUpdateOne {
-	uuo.mutation.AppendStrings(s)
-	return uuo
+func (_u *UserUpdateOne) AppendStrings(s []string) *UserUpdateOne {
+	_u.mutation.AppendStrings(s)
+	return _u
 }
 
 // ClearStrings clears the value of the "strings" field.
-func (uuo *UserUpdateOne) ClearStrings() *UserUpdateOne {
-	uuo.mutation.ClearStrings()
-	return uuo
+func (_u *UserUpdateOne) ClearStrings() *UserUpdateOne {
+	_u.mutation.ClearStrings()
+	return _u
 }
 
 // SetIntsValidate sets the "ints_validate" field.
-func (uuo *UserUpdateOne) SetIntsValidate(i []int) *UserUpdateOne {
-	uuo.mutation.SetIntsValidate(i)
-	return uuo
+func (_u *UserUpdateOne) SetIntsValidate(i []int) *UserUpdateOne {
+	_u.mutation.SetIntsValidate(i)
+	return _u
 }
 
 // AppendIntsValidate appends i to the "ints_validate" field.
-func (uuo *UserUpdateOne) AppendIntsValidate(i []int) *UserUpdateOne {
-	uuo.mutation.AppendIntsValidate(i)
-	return uuo
+func (_u *UserUpdateOne) AppendIntsValidate(i []int) *UserUpdateOne {
+	_u.mutation.AppendIntsValidate(i)
+	return _u
 }
 
 // ClearIntsValidate clears the value of the "ints_validate" field.
-func (uuo *UserUpdateOne) ClearIntsValidate() *UserUpdateOne {
-	uuo.mutation.ClearIntsValidate()
-	return uuo
+func (_u *UserUpdateOne) ClearIntsValidate() *UserUpdateOne {
+	_u.mutation.ClearIntsValidate()
+	return _u
 }
 
 // SetFloatsValidate sets the "floats_validate" field.
-func (uuo *UserUpdateOne) SetFloatsValidate(f []float64) *UserUpdateOne {
-	uuo.mutation.SetFloatsValidate(f)
-	return uuo
+func (_u *UserUpdateOne) SetFloatsValidate(f []float64) *UserUpdateOne {
+	_u.mutation.SetFloatsValidate(f)
+	return _u
 }
 
 // AppendFloatsValidate appends f to the "floats_validate" field.
-func (uuo *UserUpdateOne) AppendFloatsValidate(f []float64) *UserUpdateOne {
-	uuo.mutation.AppendFloatsValidate(f)
-	return uuo
+func (_u *UserUpdateOne) AppendFloatsValidate(f []float64) *UserUpdateOne {
+	_u.mutation.AppendFloatsValidate(f)
+	return _u
 }
 
 // ClearFloatsValidate clears the value of the "floats_validate" field.
-func (uuo *UserUpdateOne) ClearFloatsValidate() *UserUpdateOne {
-	uuo.mutation.ClearFloatsValidate()
-	return uuo
+func (_u *UserUpdateOne) ClearFloatsValidate() *UserUpdateOne {
+	_u.mutation.ClearFloatsValidate()
+	return _u
 }
 
 // SetStringsValidate sets the "strings_validate" field.
-func (uuo *UserUpdateOne) SetStringsValidate(s []string) *UserUpdateOne {
-	uuo.mutation.SetStringsValidate(s)
-	return uuo
+func (_u *UserUpdateOne) SetStringsValidate(s []string) *UserUpdateOne {
+	_u.mutation.SetStringsValidate(s)
+	return _u
 }
 
 // AppendStringsValidate appends s to the "strings_validate" field.
-func (uuo *UserUpdateOne) AppendStringsValidate(s []string) *UserUpdateOne {
-	uuo.mutation.AppendStringsValidate(s)
-	return uuo
+func (_u *UserUpdateOne) AppendStringsValidate(s []string) *UserUpdateOne {
+	_u.mutation.AppendStringsValidate(s)
+	return _u
 }
 
 // ClearStringsValidate clears the value of the "strings_validate" field.
-func (uuo *UserUpdateOne) ClearStringsValidate() *UserUpdateOne {
-	uuo.mutation.ClearStringsValidate()
-	return uuo
+func (_u *UserUpdateOne) ClearStringsValidate() *UserUpdateOne {
+	_u.mutation.ClearStringsValidate()
+	return _u
 }
 
 // SetAddr sets the "addr" field.
-func (uuo *UserUpdateOne) SetAddr(s schema.Addr) *UserUpdateOne {
-	uuo.mutation.SetAddr(s)
-	return uuo
+func (_u *UserUpdateOne) SetAddr(s schema.Addr) *UserUpdateOne {
+	_u.mutation.SetAddr(s)
+	return _u
 }
 
 // SetNillableAddr sets the "addr" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableAddr(s *schema.Addr) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillableAddr(s *schema.Addr) *UserUpdateOne {
 	if s != nil {
-		uuo.SetAddr(*s)
+		_u.SetAddr(*s)
 	}
-	return uuo
+	return _u
 }
 
 // ClearAddr clears the value of the "addr" field.
-func (uuo *UserUpdateOne) ClearAddr() *UserUpdateOne {
-	uuo.mutation.ClearAddr()
-	return uuo
+func (_u *UserUpdateOne) ClearAddr() *UserUpdateOne {
+	_u.mutation.ClearAddr()
+	return _u
 }
 
 // SetUnknown sets the "unknown" field.
-func (uuo *UserUpdateOne) SetUnknown(a any) *UserUpdateOne {
-	uuo.mutation.SetUnknown(a)
-	return uuo
+func (_u *UserUpdateOne) SetUnknown(a any) *UserUpdateOne {
+	_u.mutation.SetUnknown(a)
+	return _u
 }
 
 // ClearUnknown clears the value of the "unknown" field.
-func (uuo *UserUpdateOne) ClearUnknown() *UserUpdateOne {
-	uuo.mutation.ClearUnknown()
-	return uuo
+func (_u *UserUpdateOne) ClearUnknown() *UserUpdateOne {
+	_u.mutation.ClearUnknown()
+	return _u
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uuo *UserUpdateOne) Mutation() *UserMutation {
-	return uuo.mutation
+func (_u *UserUpdateOne) Mutation() *UserMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uuo *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
-	uuo.mutation.Where(ps...)
-	return uuo
+func (_u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
-	uuo.fields = append([]string{field}, fields...)
-	return uuo
+func (_u *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated User entity.
-func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	return withHooks(ctx, uuo.sqlSave, uuo.mutation, uuo.hooks)
+func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
-	node, err := uuo.Save(ctx)
+func (_u *UserUpdateOne) SaveX(ctx context.Context) *User {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -706,31 +706,31 @@ func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
 }
 
 // Exec executes the query on the entity.
-func (uuo *UserUpdateOne) Exec(ctx context.Context) error {
-	_, err := uuo.Save(ctx)
+func (_u *UserUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
-	if err := uuo.Exec(ctx); err != nil {
+func (_u *UserUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uuo *UserUpdateOne) check() error {
-	if v, ok := uuo.mutation.IntsValidate(); ok {
+func (_u *UserUpdateOne) check() error {
+	if v, ok := _u.mutation.IntsValidate(); ok {
 		if err := user.IntsValidateValidator(v); err != nil {
 			return &ValidationError{Name: "ints_validate", err: fmt.Errorf(`ent: validator failed for field "User.ints_validate": %w`, err)}
 		}
 	}
-	if v, ok := uuo.mutation.FloatsValidate(); ok {
+	if v, ok := _u.mutation.FloatsValidate(); ok {
 		if err := user.FloatsValidateValidator(v); err != nil {
 			return &ValidationError{Name: "floats_validate", err: fmt.Errorf(`ent: validator failed for field "User.floats_validate": %w`, err)}
 		}
 	}
-	if v, ok := uuo.mutation.StringsValidate(); ok {
+	if v, ok := _u.mutation.StringsValidate(); ok {
 		if err := user.StringsValidateValidator(v); err != nil {
 			return &ValidationError{Name: "strings_validate", err: fmt.Errorf(`ent: validator failed for field "User.strings_validate": %w`, err)}
 		}
@@ -739,22 +739,22 @@ func (uuo *UserUpdateOne) check() error {
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (uuo *UserUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserUpdateOne {
-	uuo.modifiers = append(uuo.modifiers, modifiers...)
-	return uuo
+func (_u *UserUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
-func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
-	if err := uuo.check(); err != nil {
+func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
-	id, ok := uuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := uuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, user.FieldID)
 		for _, f := range fields {
@@ -766,138 +766,138 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			}
 		}
 	}
-	if ps := uuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uuo.mutation.T(); ok {
+	if value, ok := _u.mutation.T(); ok {
 		_spec.SetField(user.FieldT, field.TypeJSON, value)
 	}
-	if uuo.mutation.TCleared() {
+	if _u.mutation.TCleared() {
 		_spec.ClearField(user.FieldT, field.TypeJSON)
 	}
-	if value, ok := uuo.mutation.URL(); ok {
+	if value, ok := _u.mutation.URL(); ok {
 		_spec.SetField(user.FieldURL, field.TypeJSON, value)
 	}
-	if uuo.mutation.URLCleared() {
+	if _u.mutation.URLCleared() {
 		_spec.ClearField(user.FieldURL, field.TypeJSON)
 	}
-	if value, ok := uuo.mutation.URLs(); ok {
+	if value, ok := _u.mutation.URLs(); ok {
 		_spec.SetField(user.FieldURLs, field.TypeJSON, value)
 	}
-	if value, ok := uuo.mutation.AppendedURLs(); ok {
+	if value, ok := _u.mutation.AppendedURLs(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldURLs, value)
 		})
 	}
-	if uuo.mutation.URLsCleared() {
+	if _u.mutation.URLsCleared() {
 		_spec.ClearField(user.FieldURLs, field.TypeJSON)
 	}
-	if value, ok := uuo.mutation.Raw(); ok {
+	if value, ok := _u.mutation.Raw(); ok {
 		_spec.SetField(user.FieldRaw, field.TypeJSON, value)
 	}
-	if value, ok := uuo.mutation.AppendedRaw(); ok {
+	if value, ok := _u.mutation.AppendedRaw(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldRaw, value)
 		})
 	}
-	if uuo.mutation.RawCleared() {
+	if _u.mutation.RawCleared() {
 		_spec.ClearField(user.FieldRaw, field.TypeJSON)
 	}
-	if value, ok := uuo.mutation.Dirs(); ok {
+	if value, ok := _u.mutation.Dirs(); ok {
 		_spec.SetField(user.FieldDirs, field.TypeJSON, value)
 	}
-	if value, ok := uuo.mutation.AppendedDirs(); ok {
+	if value, ok := _u.mutation.AppendedDirs(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldDirs, value)
 		})
 	}
-	if value, ok := uuo.mutation.Ints(); ok {
+	if value, ok := _u.mutation.Ints(); ok {
 		_spec.SetField(user.FieldInts, field.TypeJSON, value)
 	}
-	if value, ok := uuo.mutation.AppendedInts(); ok {
+	if value, ok := _u.mutation.AppendedInts(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldInts, value)
 		})
 	}
-	if uuo.mutation.IntsCleared() {
+	if _u.mutation.IntsCleared() {
 		_spec.ClearField(user.FieldInts, field.TypeJSON)
 	}
-	if value, ok := uuo.mutation.Floats(); ok {
+	if value, ok := _u.mutation.Floats(); ok {
 		_spec.SetField(user.FieldFloats, field.TypeJSON, value)
 	}
-	if value, ok := uuo.mutation.AppendedFloats(); ok {
+	if value, ok := _u.mutation.AppendedFloats(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldFloats, value)
 		})
 	}
-	if uuo.mutation.FloatsCleared() {
+	if _u.mutation.FloatsCleared() {
 		_spec.ClearField(user.FieldFloats, field.TypeJSON)
 	}
-	if value, ok := uuo.mutation.Strings(); ok {
+	if value, ok := _u.mutation.Strings(); ok {
 		_spec.SetField(user.FieldStrings, field.TypeJSON, value)
 	}
-	if value, ok := uuo.mutation.AppendedStrings(); ok {
+	if value, ok := _u.mutation.AppendedStrings(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldStrings, value)
 		})
 	}
-	if uuo.mutation.StringsCleared() {
+	if _u.mutation.StringsCleared() {
 		_spec.ClearField(user.FieldStrings, field.TypeJSON)
 	}
-	if value, ok := uuo.mutation.IntsValidate(); ok {
+	if value, ok := _u.mutation.IntsValidate(); ok {
 		_spec.SetField(user.FieldIntsValidate, field.TypeJSON, value)
 	}
-	if value, ok := uuo.mutation.AppendedIntsValidate(); ok {
+	if value, ok := _u.mutation.AppendedIntsValidate(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldIntsValidate, value)
 		})
 	}
-	if uuo.mutation.IntsValidateCleared() {
+	if _u.mutation.IntsValidateCleared() {
 		_spec.ClearField(user.FieldIntsValidate, field.TypeJSON)
 	}
-	if value, ok := uuo.mutation.FloatsValidate(); ok {
+	if value, ok := _u.mutation.FloatsValidate(); ok {
 		_spec.SetField(user.FieldFloatsValidate, field.TypeJSON, value)
 	}
-	if value, ok := uuo.mutation.AppendedFloatsValidate(); ok {
+	if value, ok := _u.mutation.AppendedFloatsValidate(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldFloatsValidate, value)
 		})
 	}
-	if uuo.mutation.FloatsValidateCleared() {
+	if _u.mutation.FloatsValidateCleared() {
 		_spec.ClearField(user.FieldFloatsValidate, field.TypeJSON)
 	}
-	if value, ok := uuo.mutation.StringsValidate(); ok {
+	if value, ok := _u.mutation.StringsValidate(); ok {
 		_spec.SetField(user.FieldStringsValidate, field.TypeJSON, value)
 	}
-	if value, ok := uuo.mutation.AppendedStringsValidate(); ok {
+	if value, ok := _u.mutation.AppendedStringsValidate(); ok {
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, user.FieldStringsValidate, value)
 		})
 	}
-	if uuo.mutation.StringsValidateCleared() {
+	if _u.mutation.StringsValidateCleared() {
 		_spec.ClearField(user.FieldStringsValidate, field.TypeJSON)
 	}
-	if value, ok := uuo.mutation.Addr(); ok {
+	if value, ok := _u.mutation.Addr(); ok {
 		_spec.SetField(user.FieldAddr, field.TypeJSON, value)
 	}
-	if uuo.mutation.AddrCleared() {
+	if _u.mutation.AddrCleared() {
 		_spec.ClearField(user.FieldAddr, field.TypeJSON)
 	}
-	if value, ok := uuo.mutation.Unknown(); ok {
+	if value, ok := _u.mutation.Unknown(); ok {
 		_spec.SetField(user.FieldUnknown, field.TypeJSON, value)
 	}
-	if uuo.mutation.UnknownCleared() {
+	if _u.mutation.UnknownCleared() {
 		_spec.ClearField(user.FieldUnknown, field.TypeJSON)
 	}
-	_spec.AddModifiers(uuo.modifiers...)
-	_node = &User{config: uuo.config}
+	_spec.AddModifiers(_u.modifiers...)
+	_node = &User{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, uuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -905,6 +905,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		return nil, err
 	}
-	uuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

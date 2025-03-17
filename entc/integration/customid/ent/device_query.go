@@ -38,44 +38,44 @@ type DeviceQuery struct {
 }
 
 // Where adds a new predicate for the DeviceQuery builder.
-func (dq *DeviceQuery) Where(ps ...predicate.Device) *DeviceQuery {
-	dq.predicates = append(dq.predicates, ps...)
-	return dq
+func (_q *DeviceQuery) Where(ps ...predicate.Device) *DeviceQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (dq *DeviceQuery) Limit(limit int) *DeviceQuery {
-	dq.ctx.Limit = &limit
-	return dq
+func (_q *DeviceQuery) Limit(limit int) *DeviceQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (dq *DeviceQuery) Offset(offset int) *DeviceQuery {
-	dq.ctx.Offset = &offset
-	return dq
+func (_q *DeviceQuery) Offset(offset int) *DeviceQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (dq *DeviceQuery) Unique(unique bool) *DeviceQuery {
-	dq.ctx.Unique = &unique
-	return dq
+func (_q *DeviceQuery) Unique(unique bool) *DeviceQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (dq *DeviceQuery) Order(o ...device.OrderOption) *DeviceQuery {
-	dq.order = append(dq.order, o...)
-	return dq
+func (_q *DeviceQuery) Order(o ...device.OrderOption) *DeviceQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryActiveSession chains the current query on the "active_session" edge.
-func (dq *DeviceQuery) QueryActiveSession() *SessionQuery {
-	query := (&SessionClient{config: dq.config}).Query()
+func (_q *DeviceQuery) QueryActiveSession() *SessionQuery {
+	query := (&SessionClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := dq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := dq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -84,20 +84,20 @@ func (dq *DeviceQuery) QueryActiveSession() *SessionQuery {
 			sqlgraph.To(session.Table, session.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, device.ActiveSessionTable, device.ActiveSessionColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(dq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QuerySessions chains the current query on the "sessions" edge.
-func (dq *DeviceQuery) QuerySessions() *SessionQuery {
-	query := (&SessionClient{config: dq.config}).Query()
+func (_q *DeviceQuery) QuerySessions() *SessionQuery {
+	query := (&SessionClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := dq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := dq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -106,7 +106,7 @@ func (dq *DeviceQuery) QuerySessions() *SessionQuery {
 			sqlgraph.To(session.Table, session.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, device.SessionsTable, device.SessionsColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(dq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -114,8 +114,8 @@ func (dq *DeviceQuery) QuerySessions() *SessionQuery {
 
 // First returns the first Device entity from the query.
 // Returns a *NotFoundError when no Device was found.
-func (dq *DeviceQuery) First(ctx context.Context) (*Device, error) {
-	nodes, err := dq.Limit(1).All(setContextOp(ctx, dq.ctx, ent.OpQueryFirst))
+func (_q *DeviceQuery) First(ctx context.Context) (*Device, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -126,8 +126,8 @@ func (dq *DeviceQuery) First(ctx context.Context) (*Device, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (dq *DeviceQuery) FirstX(ctx context.Context) *Device {
-	node, err := dq.First(ctx)
+func (_q *DeviceQuery) FirstX(ctx context.Context) *Device {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -136,9 +136,9 @@ func (dq *DeviceQuery) FirstX(ctx context.Context) *Device {
 
 // FirstID returns the first Device ID from the query.
 // Returns a *NotFoundError when no Device ID was found.
-func (dq *DeviceQuery) FirstID(ctx context.Context) (id schema.ID, err error) {
+func (_q *DeviceQuery) FirstID(ctx context.Context) (id schema.ID, err error) {
 	var ids []schema.ID
-	if ids, err = dq.Limit(1).IDs(setContextOp(ctx, dq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -149,8 +149,8 @@ func (dq *DeviceQuery) FirstID(ctx context.Context) (id schema.ID, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (dq *DeviceQuery) FirstIDX(ctx context.Context) schema.ID {
-	id, err := dq.FirstID(ctx)
+func (_q *DeviceQuery) FirstIDX(ctx context.Context) schema.ID {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -160,8 +160,8 @@ func (dq *DeviceQuery) FirstIDX(ctx context.Context) schema.ID {
 // Only returns a single Device entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Device entity is found.
 // Returns a *NotFoundError when no Device entities are found.
-func (dq *DeviceQuery) Only(ctx context.Context) (*Device, error) {
-	nodes, err := dq.Limit(2).All(setContextOp(ctx, dq.ctx, ent.OpQueryOnly))
+func (_q *DeviceQuery) Only(ctx context.Context) (*Device, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -176,8 +176,8 @@ func (dq *DeviceQuery) Only(ctx context.Context) (*Device, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (dq *DeviceQuery) OnlyX(ctx context.Context) *Device {
-	node, err := dq.Only(ctx)
+func (_q *DeviceQuery) OnlyX(ctx context.Context) *Device {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -187,9 +187,9 @@ func (dq *DeviceQuery) OnlyX(ctx context.Context) *Device {
 // OnlyID is like Only, but returns the only Device ID in the query.
 // Returns a *NotSingularError when more than one Device ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (dq *DeviceQuery) OnlyID(ctx context.Context) (id schema.ID, err error) {
+func (_q *DeviceQuery) OnlyID(ctx context.Context) (id schema.ID, err error) {
 	var ids []schema.ID
-	if ids, err = dq.Limit(2).IDs(setContextOp(ctx, dq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -204,8 +204,8 @@ func (dq *DeviceQuery) OnlyID(ctx context.Context) (id schema.ID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (dq *DeviceQuery) OnlyIDX(ctx context.Context) schema.ID {
-	id, err := dq.OnlyID(ctx)
+func (_q *DeviceQuery) OnlyIDX(ctx context.Context) schema.ID {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -213,18 +213,18 @@ func (dq *DeviceQuery) OnlyIDX(ctx context.Context) schema.ID {
 }
 
 // All executes the query and returns a list of Devices.
-func (dq *DeviceQuery) All(ctx context.Context) ([]*Device, error) {
-	ctx = setContextOp(ctx, dq.ctx, ent.OpQueryAll)
-	if err := dq.prepareQuery(ctx); err != nil {
+func (_q *DeviceQuery) All(ctx context.Context) ([]*Device, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Device, *DeviceQuery]()
-	return withInterceptors[[]*Device](ctx, dq, qr, dq.inters)
+	return withInterceptors[[]*Device](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (dq *DeviceQuery) AllX(ctx context.Context) []*Device {
-	nodes, err := dq.All(ctx)
+func (_q *DeviceQuery) AllX(ctx context.Context) []*Device {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -232,20 +232,20 @@ func (dq *DeviceQuery) AllX(ctx context.Context) []*Device {
 }
 
 // IDs executes the query and returns a list of Device IDs.
-func (dq *DeviceQuery) IDs(ctx context.Context) (ids []schema.ID, err error) {
-	if dq.ctx.Unique == nil && dq.path != nil {
-		dq.Unique(true)
+func (_q *DeviceQuery) IDs(ctx context.Context) (ids []schema.ID, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, dq.ctx, ent.OpQueryIDs)
-	if err = dq.Select(device.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(device.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (dq *DeviceQuery) IDsX(ctx context.Context) []schema.ID {
-	ids, err := dq.IDs(ctx)
+func (_q *DeviceQuery) IDsX(ctx context.Context) []schema.ID {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -253,17 +253,17 @@ func (dq *DeviceQuery) IDsX(ctx context.Context) []schema.ID {
 }
 
 // Count returns the count of the given query.
-func (dq *DeviceQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, dq.ctx, ent.OpQueryCount)
-	if err := dq.prepareQuery(ctx); err != nil {
+func (_q *DeviceQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, dq, querierCount[*DeviceQuery](), dq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*DeviceQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (dq *DeviceQuery) CountX(ctx context.Context) int {
-	count, err := dq.Count(ctx)
+func (_q *DeviceQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -271,9 +271,9 @@ func (dq *DeviceQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (dq *DeviceQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, dq.ctx, ent.OpQueryExist)
-	switch _, err := dq.FirstID(ctx); {
+func (_q *DeviceQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -284,8 +284,8 @@ func (dq *DeviceQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (dq *DeviceQuery) ExistX(ctx context.Context) bool {
-	exist, err := dq.Exist(ctx)
+func (_q *DeviceQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -294,52 +294,52 @@ func (dq *DeviceQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the DeviceQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (dq *DeviceQuery) Clone() *DeviceQuery {
-	if dq == nil {
+func (_q *DeviceQuery) Clone() *DeviceQuery {
+	if _q == nil {
 		return nil
 	}
 	return &DeviceQuery{
-		config:            dq.config,
-		ctx:               dq.ctx.Clone(),
-		order:             append([]device.OrderOption{}, dq.order...),
-		inters:            append([]Interceptor{}, dq.inters...),
-		predicates:        append([]predicate.Device{}, dq.predicates...),
-		withActiveSession: dq.withActiveSession.Clone(),
-		withSessions:      dq.withSessions.Clone(),
+		config:            _q.config,
+		ctx:               _q.ctx.Clone(),
+		order:             append([]device.OrderOption{}, _q.order...),
+		inters:            append([]Interceptor{}, _q.inters...),
+		predicates:        append([]predicate.Device{}, _q.predicates...),
+		withActiveSession: _q.withActiveSession.Clone(),
+		withSessions:      _q.withSessions.Clone(),
 		// clone intermediate query.
-		sql:  dq.sql.Clone(),
-		path: dq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithActiveSession tells the query-builder to eager-load the nodes that are connected to
 // the "active_session" edge. The optional arguments are used to configure the query builder of the edge.
-func (dq *DeviceQuery) WithActiveSession(opts ...func(*SessionQuery)) *DeviceQuery {
-	query := (&SessionClient{config: dq.config}).Query()
+func (_q *DeviceQuery) WithActiveSession(opts ...func(*SessionQuery)) *DeviceQuery {
+	query := (&SessionClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	dq.withActiveSession = query
-	return dq
+	_q.withActiveSession = query
+	return _q
 }
 
 // WithSessions tells the query-builder to eager-load the nodes that are connected to
 // the "sessions" edge. The optional arguments are used to configure the query builder of the edge.
-func (dq *DeviceQuery) WithSessions(opts ...func(*SessionQuery)) *DeviceQuery {
-	query := (&SessionClient{config: dq.config}).Query()
+func (_q *DeviceQuery) WithSessions(opts ...func(*SessionQuery)) *DeviceQuery {
+	query := (&SessionClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	dq.withSessions = query
-	return dq
+	_q.withSessions = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
-func (dq *DeviceQuery) GroupBy(field string, fields ...string) *DeviceGroupBy {
-	dq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &DeviceGroupBy{build: dq}
-	grbuild.flds = &dq.ctx.Fields
+func (_q *DeviceQuery) GroupBy(field string, fields ...string) *DeviceGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &DeviceGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = device.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -347,56 +347,56 @@ func (dq *DeviceQuery) GroupBy(field string, fields ...string) *DeviceGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (dq *DeviceQuery) Select(fields ...string) *DeviceSelect {
-	dq.ctx.Fields = append(dq.ctx.Fields, fields...)
-	sbuild := &DeviceSelect{DeviceQuery: dq}
+func (_q *DeviceQuery) Select(fields ...string) *DeviceSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &DeviceSelect{DeviceQuery: _q}
 	sbuild.label = device.Label
-	sbuild.flds, sbuild.scan = &dq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a DeviceSelect configured with the given aggregations.
-func (dq *DeviceQuery) Aggregate(fns ...AggregateFunc) *DeviceSelect {
-	return dq.Select().Aggregate(fns...)
+func (_q *DeviceQuery) Aggregate(fns ...AggregateFunc) *DeviceSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (dq *DeviceQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range dq.inters {
+func (_q *DeviceQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, dq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range dq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !device.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if dq.path != nil {
-		prev, err := dq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		dq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (dq *DeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Device, error) {
+func (_q *DeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Device, error) {
 	var (
 		nodes       = []*Device{}
-		withFKs     = dq.withFKs
-		_spec       = dq.querySpec()
+		withFKs     = _q.withFKs
+		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
-			dq.withActiveSession != nil,
-			dq.withSessions != nil,
+			_q.withActiveSession != nil,
+			_q.withSessions != nil,
 		}
 	)
-	if dq.withActiveSession != nil {
+	if _q.withActiveSession != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -406,7 +406,7 @@ func (dq *DeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Devic
 		return (*Device).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Device{config: dq.config}
+		node := &Device{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -414,20 +414,20 @@ func (dq *DeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Devic
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, dq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := dq.withActiveSession; query != nil {
-		if err := dq.loadActiveSession(ctx, query, nodes, nil,
+	if query := _q.withActiveSession; query != nil {
+		if err := _q.loadActiveSession(ctx, query, nodes, nil,
 			func(n *Device, e *Session) { n.Edges.ActiveSession = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := dq.withSessions; query != nil {
-		if err := dq.loadSessions(ctx, query, nodes,
+	if query := _q.withSessions; query != nil {
+		if err := _q.loadSessions(ctx, query, nodes,
 			func(n *Device) { n.Edges.Sessions = []*Session{} },
 			func(n *Device, e *Session) { n.Edges.Sessions = append(n.Edges.Sessions, e) }); err != nil {
 			return nil, err
@@ -436,7 +436,7 @@ func (dq *DeviceQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Devic
 	return nodes, nil
 }
 
-func (dq *DeviceQuery) loadActiveSession(ctx context.Context, query *SessionQuery, nodes []*Device, init func(*Device), assign func(*Device, *Session)) error {
+func (_q *DeviceQuery) loadActiveSession(ctx context.Context, query *SessionQuery, nodes []*Device, init func(*Device), assign func(*Device, *Session)) error {
 	ids := make([]schema.ID, 0, len(nodes))
 	nodeids := make(map[schema.ID][]*Device)
 	for i := range nodes {
@@ -468,7 +468,7 @@ func (dq *DeviceQuery) loadActiveSession(ctx context.Context, query *SessionQuer
 	}
 	return nil
 }
-func (dq *DeviceQuery) loadSessions(ctx context.Context, query *SessionQuery, nodes []*Device, init func(*Device), assign func(*Device, *Session)) error {
+func (_q *DeviceQuery) loadSessions(ctx context.Context, query *SessionQuery, nodes []*Device, init func(*Device), assign func(*Device, *Session)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[schema.ID]*Device)
 	for i := range nodes {
@@ -500,24 +500,24 @@ func (dq *DeviceQuery) loadSessions(ctx context.Context, query *SessionQuery, no
 	return nil
 }
 
-func (dq *DeviceQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := dq.querySpec()
-	_spec.Node.Columns = dq.ctx.Fields
-	if len(dq.ctx.Fields) > 0 {
-		_spec.Unique = dq.ctx.Unique != nil && *dq.ctx.Unique
+func (_q *DeviceQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, dq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (dq *DeviceQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *DeviceQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(device.Table, device.Columns, sqlgraph.NewFieldSpec(device.FieldID, field.TypeBytes))
-	_spec.From = dq.sql
-	if unique := dq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if dq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := dq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, device.FieldID)
 		for i := range fields {
@@ -526,20 +526,20 @@ func (dq *DeviceQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := dq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := dq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := dq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := dq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -549,33 +549,33 @@ func (dq *DeviceQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (dq *DeviceQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(dq.driver.Dialect())
+func (_q *DeviceQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(device.Table)
-	columns := dq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = device.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if dq.sql != nil {
-		selector = dq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if dq.ctx.Unique != nil && *dq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range dq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range dq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := dq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := dq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector

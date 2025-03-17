@@ -69,7 +69,7 @@ func (*Post) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Post fields.
-func (po *Post) assignValues(columns []string, values []any) error {
+func (_m *Post) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -80,22 +80,22 @@ func (po *Post) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			po.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case post.FieldText:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field text", values[i])
 			} else if value.Valid {
-				po.Text = value.String
+				_m.Text = value.String
 			}
 		case post.FieldAuthorID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field author_id", values[i])
 			} else if value.Valid {
-				po.AuthorID = new(int)
-				*po.AuthorID = int(value.Int64)
+				_m.AuthorID = new(int)
+				*_m.AuthorID = int(value.Int64)
 			}
 		default:
-			po.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -103,42 +103,42 @@ func (po *Post) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Post.
 // This includes values selected through modifiers, order, etc.
-func (po *Post) Value(name string) (ent.Value, error) {
-	return po.selectValues.Get(name)
+func (_m *Post) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryAuthor queries the "author" edge of the Post entity.
-func (po *Post) QueryAuthor() *UserQuery {
-	return NewPostClient(po.config).QueryAuthor(po)
+func (_m *Post) QueryAuthor() *UserQuery {
+	return NewPostClient(_m.config).QueryAuthor(_m)
 }
 
 // Update returns a builder for updating this Post.
 // Note that you need to call Post.Unwrap() before calling this method if this Post
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (po *Post) Update() *PostUpdateOne {
-	return NewPostClient(po.config).UpdateOne(po)
+func (_m *Post) Update() *PostUpdateOne {
+	return NewPostClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Post entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (po *Post) Unwrap() *Post {
-	_tx, ok := po.config.driver.(*txDriver)
+func (_m *Post) Unwrap() *Post {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Post is not a transactional entity")
 	}
-	po.config.driver = _tx.drv
-	return po
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (po *Post) String() string {
+func (_m *Post) String() string {
 	var builder strings.Builder
 	builder.WriteString("Post(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", po.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("text=")
-	builder.WriteString(po.Text)
+	builder.WriteString(_m.Text)
 	builder.WriteString(", ")
-	if v := po.AuthorID; v != nil {
+	if v := _m.AuthorID; v != nil {
 		builder.WriteString("author_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}

@@ -23,32 +23,32 @@ type CustomTypeCreate struct {
 }
 
 // SetCustom sets the "custom" field.
-func (ctc *CustomTypeCreate) SetCustom(s string) *CustomTypeCreate {
-	ctc.mutation.SetCustom(s)
-	return ctc
+func (_c *CustomTypeCreate) SetCustom(s string) *CustomTypeCreate {
+	_c.mutation.SetCustom(s)
+	return _c
 }
 
 // SetNillableCustom sets the "custom" field if the given value is not nil.
-func (ctc *CustomTypeCreate) SetNillableCustom(s *string) *CustomTypeCreate {
+func (_c *CustomTypeCreate) SetNillableCustom(s *string) *CustomTypeCreate {
 	if s != nil {
-		ctc.SetCustom(*s)
+		_c.SetCustom(*s)
 	}
-	return ctc
+	return _c
 }
 
 // Mutation returns the CustomTypeMutation object of the builder.
-func (ctc *CustomTypeCreate) Mutation() *CustomTypeMutation {
-	return ctc.mutation
+func (_c *CustomTypeCreate) Mutation() *CustomTypeMutation {
+	return _c.mutation
 }
 
 // Save creates the CustomType in the database.
-func (ctc *CustomTypeCreate) Save(ctx context.Context) (*CustomType, error) {
-	return withHooks(ctx, ctc.sqlSave, ctc.mutation, ctc.hooks)
+func (_c *CustomTypeCreate) Save(ctx context.Context) (*CustomType, error) {
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (ctc *CustomTypeCreate) SaveX(ctx context.Context) *CustomType {
-	v, err := ctc.Save(ctx)
+func (_c *CustomTypeCreate) SaveX(ctx context.Context) *CustomType {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -56,29 +56,29 @@ func (ctc *CustomTypeCreate) SaveX(ctx context.Context) *CustomType {
 }
 
 // Exec executes the query.
-func (ctc *CustomTypeCreate) Exec(ctx context.Context) error {
-	_, err := ctc.Save(ctx)
+func (_c *CustomTypeCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ctc *CustomTypeCreate) ExecX(ctx context.Context) {
-	if err := ctc.Exec(ctx); err != nil {
+func (_c *CustomTypeCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ctc *CustomTypeCreate) check() error {
+func (_c *CustomTypeCreate) check() error {
 	return nil
 }
 
-func (ctc *CustomTypeCreate) sqlSave(ctx context.Context) (*CustomType, error) {
-	if err := ctc.check(); err != nil {
+func (_c *CustomTypeCreate) sqlSave(ctx context.Context) (*CustomType, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := ctc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, ctc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -86,17 +86,17 @@ func (ctc *CustomTypeCreate) sqlSave(ctx context.Context) (*CustomType, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	ctc.mutation.id = &_node.ID
-	ctc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (ctc *CustomTypeCreate) createSpec() (*CustomType, *sqlgraph.CreateSpec) {
+func (_c *CustomTypeCreate) createSpec() (*CustomType, *sqlgraph.CreateSpec) {
 	var (
-		_node = &CustomType{config: ctc.config}
+		_node = &CustomType{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(customtype.Table, sqlgraph.NewFieldSpec(customtype.FieldID, field.TypeInt))
 	)
-	if value, ok := ctc.mutation.Custom(); ok {
+	if value, ok := _c.mutation.Custom(); ok {
 		_spec.SetField(customtype.FieldCustom, field.TypeString, value)
 		_node.Custom = value
 	}
@@ -111,16 +111,16 @@ type CustomTypeCreateBulk struct {
 }
 
 // Save creates the CustomType entities in the database.
-func (ctcb *CustomTypeCreateBulk) Save(ctx context.Context) ([]*CustomType, error) {
-	if ctcb.err != nil {
-		return nil, ctcb.err
+func (_c *CustomTypeCreateBulk) Save(ctx context.Context) ([]*CustomType, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(ctcb.builders))
-	nodes := make([]*CustomType, len(ctcb.builders))
-	mutators := make([]Mutator, len(ctcb.builders))
-	for i := range ctcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*CustomType, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := ctcb.builders[i]
+			builder := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CustomTypeMutation)
 				if !ok {
@@ -133,11 +133,11 @@ func (ctcb *CustomTypeCreateBulk) Save(ctx context.Context) ([]*CustomType, erro
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, ctcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ctcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -161,7 +161,7 @@ func (ctcb *CustomTypeCreateBulk) Save(ctx context.Context) ([]*CustomType, erro
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, ctcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -169,8 +169,8 @@ func (ctcb *CustomTypeCreateBulk) Save(ctx context.Context) ([]*CustomType, erro
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ctcb *CustomTypeCreateBulk) SaveX(ctx context.Context) []*CustomType {
-	v, err := ctcb.Save(ctx)
+func (_c *CustomTypeCreateBulk) SaveX(ctx context.Context) []*CustomType {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -178,14 +178,14 @@ func (ctcb *CustomTypeCreateBulk) SaveX(ctx context.Context) []*CustomType {
 }
 
 // Exec executes the query.
-func (ctcb *CustomTypeCreateBulk) Exec(ctx context.Context) error {
-	_, err := ctcb.Save(ctx)
+func (_c *CustomTypeCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ctcb *CustomTypeCreateBulk) ExecX(ctx context.Context) {
-	if err := ctcb.Exec(ctx); err != nil {
+func (_c *CustomTypeCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

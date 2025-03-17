@@ -87,12 +87,12 @@ func (e FileEdges) FieldOrErr() ([]*FieldType, error) {
 }
 
 // FromResponse scans the gremlin response data into File.
-func (f *File) FromResponse(res *gremlin.Response) error {
+func (_m *File) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scanf struct {
+	var scan_m struct {
 		ID         string  `json:"id,omitempty"`
 		SetID      int     `json:"set_id,omitempty"`
 		Size       int     `json:"fsize,omitempty"`
@@ -103,84 +103,84 @@ func (f *File) FromResponse(res *gremlin.Response) error {
 		FieldID    int     `json:"field_id,omitempty"`
 		CreateTime int64   `json:"create_time,omitempty"`
 	}
-	if err := vmap.Decode(&scanf); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	f.ID = scanf.ID
-	f.SetID = scanf.SetID
-	f.Size = scanf.Size
-	f.Name = scanf.Name
-	f.User = scanf.User
-	f.Group = scanf.Group
-	f.Op = scanf.Op
-	f.FieldID = scanf.FieldID
-	f.CreateTime = time.Unix(0, scanf.CreateTime)
+	_m.ID = scan_m.ID
+	_m.SetID = scan_m.SetID
+	_m.Size = scan_m.Size
+	_m.Name = scan_m.Name
+	_m.User = scan_m.User
+	_m.Group = scan_m.Group
+	_m.Op = scan_m.Op
+	_m.FieldID = scan_m.FieldID
+	_m.CreateTime = time.Unix(0, scan_m.CreateTime)
 	return nil
 }
 
 // QueryOwner queries the "owner" edge of the File entity.
-func (f *File) QueryOwner() *UserQuery {
-	return NewFileClient(f.config).QueryOwner(f)
+func (_m *File) QueryOwner() *UserQuery {
+	return NewFileClient(_m.config).QueryOwner(_m)
 }
 
 // QueryType queries the "type" edge of the File entity.
-func (f *File) QueryType() *FileTypeQuery {
-	return NewFileClient(f.config).QueryType(f)
+func (_m *File) QueryType() *FileTypeQuery {
+	return NewFileClient(_m.config).QueryType(_m)
 }
 
 // QueryField queries the "field" edge of the File entity.
-func (f *File) QueryField() *FieldTypeQuery {
-	return NewFileClient(f.config).QueryField(f)
+func (_m *File) QueryField() *FieldTypeQuery {
+	return NewFileClient(_m.config).QueryField(_m)
 }
 
 // Update returns a builder for updating this File.
 // Note that you need to call File.Unwrap() before calling this method if this File
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (f *File) Update() *FileUpdateOne {
-	return NewFileClient(f.config).UpdateOne(f)
+func (_m *File) Update() *FileUpdateOne {
+	return NewFileClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the File entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (f *File) Unwrap() *File {
-	_tx, ok := f.config.driver.(*txDriver)
+func (_m *File) Unwrap() *File {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: File is not a transactional entity")
 	}
-	f.config.driver = _tx.drv
-	return f
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (f *File) String() string {
+func (_m *File) String() string {
 	var builder strings.Builder
 	builder.WriteString("File(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", f.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("set_id=")
-	builder.WriteString(fmt.Sprintf("%v", f.SetID))
+	builder.WriteString(fmt.Sprintf("%v", _m.SetID))
 	builder.WriteString(", ")
 	builder.WriteString("size=")
-	builder.WriteString(fmt.Sprintf("%v", f.Size))
+	builder.WriteString(fmt.Sprintf("%v", _m.Size))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(f.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
-	if v := f.User; v != nil {
+	if v := _m.User; v != nil {
 		builder.WriteString("user=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
 	builder.WriteString("group=")
-	builder.WriteString(f.Group)
+	builder.WriteString(_m.Group)
 	builder.WriteString(", ")
 	builder.WriteString("op=")
-	builder.WriteString(fmt.Sprintf("%v", f.Op))
+	builder.WriteString(fmt.Sprintf("%v", _m.Op))
 	builder.WriteString(", ")
 	builder.WriteString("field_id=")
-	builder.WriteString(fmt.Sprintf("%v", f.FieldID))
+	builder.WriteString(fmt.Sprintf("%v", _m.FieldID))
 	builder.WriteString(", ")
 	builder.WriteString("create_time=")
-	builder.WriteString(f.CreateTime.Format(time.ANSIC))
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -189,12 +189,12 @@ func (f *File) String() string {
 type Files []*File
 
 // FromResponse scans the gremlin response data into Files.
-func (f *Files) FromResponse(res *gremlin.Response) error {
+func (_m *Files) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scanf []struct {
+	var scan_m []struct {
 		ID         string  `json:"id,omitempty"`
 		SetID      int     `json:"set_id,omitempty"`
 		Size       int     `json:"fsize,omitempty"`
@@ -205,10 +205,10 @@ func (f *Files) FromResponse(res *gremlin.Response) error {
 		FieldID    int     `json:"field_id,omitempty"`
 		CreateTime int64   `json:"create_time,omitempty"`
 	}
-	if err := vmap.Decode(&scanf); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	for _, v := range scanf {
+	for _, v := range scan_m {
 		node := &File{ID: v.ID}
 		node.SetID = v.SetID
 		node.Size = v.Size
@@ -218,7 +218,7 @@ func (f *Files) FromResponse(res *gremlin.Response) error {
 		node.Op = v.Op
 		node.FieldID = v.FieldID
 		node.CreateTime = time.Unix(0, v.CreateTime)
-		*f = append(*f, node)
+		*_m = append(*_m, node)
 	}
 	return nil
 }

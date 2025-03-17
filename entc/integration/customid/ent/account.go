@@ -65,7 +65,7 @@ func (*Account) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Account fields.
-func (a *Account) assignValues(columns []string, values []any) error {
+func (_m *Account) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -75,16 +75,16 @@ func (a *Account) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sid.ID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				a.ID = *value
+				_m.ID = *value
 			}
 		case account.FieldEmail:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field email", values[i])
 			} else if value.Valid {
-				a.Email = value.String
+				_m.Email = value.String
 			}
 		default:
-			a.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -92,40 +92,40 @@ func (a *Account) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Account.
 // This includes values selected through modifiers, order, etc.
-func (a *Account) Value(name string) (ent.Value, error) {
-	return a.selectValues.Get(name)
+func (_m *Account) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryToken queries the "token" edge of the Account entity.
-func (a *Account) QueryToken() *TokenQuery {
-	return NewAccountClient(a.config).QueryToken(a)
+func (_m *Account) QueryToken() *TokenQuery {
+	return NewAccountClient(_m.config).QueryToken(_m)
 }
 
 // Update returns a builder for updating this Account.
 // Note that you need to call Account.Unwrap() before calling this method if this Account
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (a *Account) Update() *AccountUpdateOne {
-	return NewAccountClient(a.config).UpdateOne(a)
+func (_m *Account) Update() *AccountUpdateOne {
+	return NewAccountClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Account entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (a *Account) Unwrap() *Account {
-	_tx, ok := a.config.driver.(*txDriver)
+func (_m *Account) Unwrap() *Account {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Account is not a transactional entity")
 	}
-	a.config.driver = _tx.drv
-	return a
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (a *Account) String() string {
+func (_m *Account) String() string {
 	var builder strings.Builder
 	builder.WriteString("Account(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", a.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("email=")
-	builder.WriteString(a.Email)
+	builder.WriteString(_m.Email)
 	builder.WriteByte(')')
 	return builder.String()
 }

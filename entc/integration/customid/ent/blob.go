@@ -94,7 +94,7 @@ func (*Blob) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Blob fields.
-func (b *Blob) assignValues(columns []string, values []any) error {
+func (_m *Blob) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -104,29 +104,29 @@ func (b *Blob) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				b.ID = *value
+				_m.ID = *value
 			}
 		case blob.FieldUUID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field uuid", values[i])
 			} else if value != nil {
-				b.UUID = *value
+				_m.UUID = *value
 			}
 		case blob.FieldCount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field count", values[i])
 			} else if value.Valid {
-				b.Count = int(value.Int64)
+				_m.Count = int(value.Int64)
 			}
 		case blob.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field blob_parent", values[i])
 			} else if value.Valid {
-				b.blob_parent = new(uuid.UUID)
-				*b.blob_parent = *value.S.(*uuid.UUID)
+				_m.blob_parent = new(uuid.UUID)
+				*_m.blob_parent = *value.S.(*uuid.UUID)
 			}
 		default:
-			b.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -134,53 +134,53 @@ func (b *Blob) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Blob.
 // This includes values selected through modifiers, order, etc.
-func (b *Blob) Value(name string) (ent.Value, error) {
-	return b.selectValues.Get(name)
+func (_m *Blob) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryParent queries the "parent" edge of the Blob entity.
-func (b *Blob) QueryParent() *BlobQuery {
-	return NewBlobClient(b.config).QueryParent(b)
+func (_m *Blob) QueryParent() *BlobQuery {
+	return NewBlobClient(_m.config).QueryParent(_m)
 }
 
 // QueryLinks queries the "links" edge of the Blob entity.
-func (b *Blob) QueryLinks() *BlobQuery {
-	return NewBlobClient(b.config).QueryLinks(b)
+func (_m *Blob) QueryLinks() *BlobQuery {
+	return NewBlobClient(_m.config).QueryLinks(_m)
 }
 
 // QueryBlobLinks queries the "blob_links" edge of the Blob entity.
-func (b *Blob) QueryBlobLinks() *BlobLinkQuery {
-	return NewBlobClient(b.config).QueryBlobLinks(b)
+func (_m *Blob) QueryBlobLinks() *BlobLinkQuery {
+	return NewBlobClient(_m.config).QueryBlobLinks(_m)
 }
 
 // Update returns a builder for updating this Blob.
 // Note that you need to call Blob.Unwrap() before calling this method if this Blob
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (b *Blob) Update() *BlobUpdateOne {
-	return NewBlobClient(b.config).UpdateOne(b)
+func (_m *Blob) Update() *BlobUpdateOne {
+	return NewBlobClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Blob entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (b *Blob) Unwrap() *Blob {
-	_tx, ok := b.config.driver.(*txDriver)
+func (_m *Blob) Unwrap() *Blob {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Blob is not a transactional entity")
 	}
-	b.config.driver = _tx.drv
-	return b
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (b *Blob) String() string {
+func (_m *Blob) String() string {
 	var builder strings.Builder
 	builder.WriteString("Blob(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", b.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("uuid=")
-	builder.WriteString(fmt.Sprintf("%v", b.UUID))
+	builder.WriteString(fmt.Sprintf("%v", _m.UUID))
 	builder.WriteString(", ")
 	builder.WriteString("count=")
-	builder.WriteString(fmt.Sprintf("%v", b.Count))
+	builder.WriteString(fmt.Sprintf("%v", _m.Count))
 	builder.WriteByte(')')
 	return builder.String()
 }

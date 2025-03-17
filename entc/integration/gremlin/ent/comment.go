@@ -34,12 +34,12 @@ type Comment struct {
 }
 
 // FromResponse scans the gremlin response data into Comment.
-func (c *Comment) FromResponse(res *gremlin.Response) error {
+func (_m *Comment) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scanc struct {
+	var scan_m struct {
 		ID          string        `json:"id,omitempty"`
 		UniqueInt   int           `json:"unique_int,omitempty"`
 		UniqueFloat float64       `json:"unique_float,omitempty"`
@@ -48,61 +48,61 @@ func (c *Comment) FromResponse(res *gremlin.Response) error {
 		Dir         schemadir.Dir `json:"dir,omitempty"`
 		Client      string        `json:"client,omitempty"`
 	}
-	if err := vmap.Decode(&scanc); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	c.ID = scanc.ID
-	c.UniqueInt = scanc.UniqueInt
-	c.UniqueFloat = scanc.UniqueFloat
-	c.NillableInt = scanc.NillableInt
-	c.Table = scanc.Table
-	c.Dir = scanc.Dir
-	c.Client = scanc.Client
+	_m.ID = scan_m.ID
+	_m.UniqueInt = scan_m.UniqueInt
+	_m.UniqueFloat = scan_m.UniqueFloat
+	_m.NillableInt = scan_m.NillableInt
+	_m.Table = scan_m.Table
+	_m.Dir = scan_m.Dir
+	_m.Client = scan_m.Client
 	return nil
 }
 
 // Update returns a builder for updating this Comment.
 // Note that you need to call Comment.Unwrap() before calling this method if this Comment
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (c *Comment) Update() *CommentUpdateOne {
-	return NewCommentClient(c.config).UpdateOne(c)
+func (_m *Comment) Update() *CommentUpdateOne {
+	return NewCommentClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Comment entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (c *Comment) Unwrap() *Comment {
-	_tx, ok := c.config.driver.(*txDriver)
+func (_m *Comment) Unwrap() *Comment {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Comment is not a transactional entity")
 	}
-	c.config.driver = _tx.drv
-	return c
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (c *Comment) String() string {
+func (_m *Comment) String() string {
 	var builder strings.Builder
 	builder.WriteString("Comment(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("unique_int=")
-	builder.WriteString(fmt.Sprintf("%v", c.UniqueInt))
+	builder.WriteString(fmt.Sprintf("%v", _m.UniqueInt))
 	builder.WriteString(", ")
 	builder.WriteString("unique_float=")
-	builder.WriteString(fmt.Sprintf("%v", c.UniqueFloat))
+	builder.WriteString(fmt.Sprintf("%v", _m.UniqueFloat))
 	builder.WriteString(", ")
-	if v := c.NillableInt; v != nil {
+	if v := _m.NillableInt; v != nil {
 		builder.WriteString("nillable_int=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("table=")
-	builder.WriteString(c.Table)
+	builder.WriteString(_m.Table)
 	builder.WriteString(", ")
 	builder.WriteString("dir=")
-	builder.WriteString(fmt.Sprintf("%v", c.Dir))
+	builder.WriteString(fmt.Sprintf("%v", _m.Dir))
 	builder.WriteString(", ")
 	builder.WriteString("client=")
-	builder.WriteString(c.Client)
+	builder.WriteString(_m.Client)
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -111,12 +111,12 @@ func (c *Comment) String() string {
 type Comments []*Comment
 
 // FromResponse scans the gremlin response data into Comments.
-func (c *Comments) FromResponse(res *gremlin.Response) error {
+func (_m *Comments) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scanc []struct {
+	var scan_m []struct {
 		ID          string        `json:"id,omitempty"`
 		UniqueInt   int           `json:"unique_int,omitempty"`
 		UniqueFloat float64       `json:"unique_float,omitempty"`
@@ -125,10 +125,10 @@ func (c *Comments) FromResponse(res *gremlin.Response) error {
 		Dir         schemadir.Dir `json:"dir,omitempty"`
 		Client      string        `json:"client,omitempty"`
 	}
-	if err := vmap.Decode(&scanc); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	for _, v := range scanc {
+	for _, v := range scan_m {
 		node := &Comment{ID: v.ID}
 		node.UniqueInt = v.UniqueInt
 		node.UniqueFloat = v.UniqueFloat
@@ -136,7 +136,7 @@ func (c *Comments) FromResponse(res *gremlin.Response) error {
 		node.Table = v.Table
 		node.Dir = v.Dir
 		node.Client = v.Client
-		*c = append(*c, node)
+		*_m = append(*_m, node)
 	}
 	return nil
 }

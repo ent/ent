@@ -27,68 +27,68 @@ type FileTypeCreate struct {
 }
 
 // SetName sets the "name" field.
-func (ftc *FileTypeCreate) SetName(s string) *FileTypeCreate {
-	ftc.mutation.SetName(s)
-	return ftc
+func (_c *FileTypeCreate) SetName(s string) *FileTypeCreate {
+	_c.mutation.SetName(s)
+	return _c
 }
 
 // SetType sets the "type" field.
-func (ftc *FileTypeCreate) SetType(f filetype.Type) *FileTypeCreate {
-	ftc.mutation.SetType(f)
-	return ftc
+func (_c *FileTypeCreate) SetType(f filetype.Type) *FileTypeCreate {
+	_c.mutation.SetType(f)
+	return _c
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (ftc *FileTypeCreate) SetNillableType(f *filetype.Type) *FileTypeCreate {
+func (_c *FileTypeCreate) SetNillableType(f *filetype.Type) *FileTypeCreate {
 	if f != nil {
-		ftc.SetType(*f)
+		_c.SetType(*f)
 	}
-	return ftc
+	return _c
 }
 
 // SetState sets the "state" field.
-func (ftc *FileTypeCreate) SetState(f filetype.State) *FileTypeCreate {
-	ftc.mutation.SetState(f)
-	return ftc
+func (_c *FileTypeCreate) SetState(f filetype.State) *FileTypeCreate {
+	_c.mutation.SetState(f)
+	return _c
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
-func (ftc *FileTypeCreate) SetNillableState(f *filetype.State) *FileTypeCreate {
+func (_c *FileTypeCreate) SetNillableState(f *filetype.State) *FileTypeCreate {
 	if f != nil {
-		ftc.SetState(*f)
+		_c.SetState(*f)
 	}
-	return ftc
+	return _c
 }
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
-func (ftc *FileTypeCreate) AddFileIDs(ids ...int) *FileTypeCreate {
-	ftc.mutation.AddFileIDs(ids...)
-	return ftc
+func (_c *FileTypeCreate) AddFileIDs(ids ...int) *FileTypeCreate {
+	_c.mutation.AddFileIDs(ids...)
+	return _c
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (ftc *FileTypeCreate) AddFiles(f ...*File) *FileTypeCreate {
+func (_c *FileTypeCreate) AddFiles(f ...*File) *FileTypeCreate {
 	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return ftc.AddFileIDs(ids...)
+	return _c.AddFileIDs(ids...)
 }
 
 // Mutation returns the FileTypeMutation object of the builder.
-func (ftc *FileTypeCreate) Mutation() *FileTypeMutation {
-	return ftc.mutation
+func (_c *FileTypeCreate) Mutation() *FileTypeMutation {
+	return _c.mutation
 }
 
 // Save creates the FileType in the database.
-func (ftc *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
-	ftc.defaults()
-	return withHooks(ctx, ftc.sqlSave, ftc.mutation, ftc.hooks)
+func (_c *FileTypeCreate) Save(ctx context.Context) (*FileType, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (ftc *FileTypeCreate) SaveX(ctx context.Context) *FileType {
-	v, err := ftc.Save(ctx)
+func (_c *FileTypeCreate) SaveX(ctx context.Context) *FileType {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -96,47 +96,47 @@ func (ftc *FileTypeCreate) SaveX(ctx context.Context) *FileType {
 }
 
 // Exec executes the query.
-func (ftc *FileTypeCreate) Exec(ctx context.Context) error {
-	_, err := ftc.Save(ctx)
+func (_c *FileTypeCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ftc *FileTypeCreate) ExecX(ctx context.Context) {
-	if err := ftc.Exec(ctx); err != nil {
+func (_c *FileTypeCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (ftc *FileTypeCreate) defaults() {
-	if _, ok := ftc.mutation.GetType(); !ok {
+func (_c *FileTypeCreate) defaults() {
+	if _, ok := _c.mutation.GetType(); !ok {
 		v := filetype.DefaultType
-		ftc.mutation.SetType(v)
+		_c.mutation.SetType(v)
 	}
-	if _, ok := ftc.mutation.State(); !ok {
+	if _, ok := _c.mutation.State(); !ok {
 		v := filetype.DefaultState
-		ftc.mutation.SetState(v)
+		_c.mutation.SetState(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ftc *FileTypeCreate) check() error {
-	if _, ok := ftc.mutation.Name(); !ok {
+func (_c *FileTypeCreate) check() error {
+	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "FileType.name"`)}
 	}
-	if _, ok := ftc.mutation.GetType(); !ok {
+	if _, ok := _c.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "FileType.type"`)}
 	}
-	if v, ok := ftc.mutation.GetType(); ok {
+	if v, ok := _c.mutation.GetType(); ok {
 		if err := filetype.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "FileType.type": %w`, err)}
 		}
 	}
-	if _, ok := ftc.mutation.State(); !ok {
+	if _, ok := _c.mutation.State(); !ok {
 		return &ValidationError{Name: "state", err: errors.New(`ent: missing required field "FileType.state"`)}
 	}
-	if v, ok := ftc.mutation.State(); ok {
+	if v, ok := _c.mutation.State(); ok {
 		if err := filetype.StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "FileType.state": %w`, err)}
 		}
@@ -144,12 +144,12 @@ func (ftc *FileTypeCreate) check() error {
 	return nil
 }
 
-func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
-	if err := ftc.check(); err != nil {
+func (_c *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := ftc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, ftc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -157,30 +157,30 @@ func (ftc *FileTypeCreate) sqlSave(ctx context.Context) (*FileType, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	ftc.mutation.id = &_node.ID
-	ftc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
+func (_c *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 	var (
-		_node = &FileType{config: ftc.config}
+		_node = &FileType{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(filetype.Table, sqlgraph.NewFieldSpec(filetype.FieldID, field.TypeInt))
 	)
-	_spec.OnConflict = ftc.conflict
-	if value, ok := ftc.mutation.Name(); ok {
+	_spec.OnConflict = _c.conflict
+	if value, ok := _c.mutation.Name(); ok {
 		_spec.SetField(filetype.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := ftc.mutation.GetType(); ok {
+	if value, ok := _c.mutation.GetType(); ok {
 		_spec.SetField(filetype.FieldType, field.TypeEnum, value)
 		_node.Type = value
 	}
-	if value, ok := ftc.mutation.State(); ok {
+	if value, ok := _c.mutation.State(); ok {
 		_spec.SetField(filetype.FieldState, field.TypeEnum, value)
 		_node.State = value
 	}
-	if nodes := ftc.mutation.FilesIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.FilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -215,10 +215,10 @@ func (ftc *FileTypeCreate) createSpec() (*FileType, *sqlgraph.CreateSpec) {
 //			SetName(v+v).
 //		}).
 //		Exec(ctx)
-func (ftc *FileTypeCreate) OnConflict(opts ...sql.ConflictOption) *FileTypeUpsertOne {
-	ftc.conflict = opts
+func (_c *FileTypeCreate) OnConflict(opts ...sql.ConflictOption) *FileTypeUpsertOne {
+	_c.conflict = opts
 	return &FileTypeUpsertOne{
-		create: ftc,
+		create: _c,
 	}
 }
 
@@ -228,10 +228,10 @@ func (ftc *FileTypeCreate) OnConflict(opts ...sql.ConflictOption) *FileTypeUpser
 //	client.FileType.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (ftc *FileTypeCreate) OnConflictColumns(columns ...string) *FileTypeUpsertOne {
-	ftc.conflict = append(ftc.conflict, sql.ConflictColumns(columns...))
+func (_c *FileTypeCreate) OnConflictColumns(columns ...string) *FileTypeUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &FileTypeUpsertOne{
-		create: ftc,
+		create: _c,
 	}
 }
 
@@ -408,16 +408,16 @@ type FileTypeCreateBulk struct {
 }
 
 // Save creates the FileType entities in the database.
-func (ftcb *FileTypeCreateBulk) Save(ctx context.Context) ([]*FileType, error) {
-	if ftcb.err != nil {
-		return nil, ftcb.err
+func (_c *FileTypeCreateBulk) Save(ctx context.Context) ([]*FileType, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(ftcb.builders))
-	nodes := make([]*FileType, len(ftcb.builders))
-	mutators := make([]Mutator, len(ftcb.builders))
-	for i := range ftcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*FileType, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := ftcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*FileTypeMutation)
@@ -431,12 +431,12 @@ func (ftcb *FileTypeCreateBulk) Save(ctx context.Context) ([]*FileType, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, ftcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = ftcb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ftcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -460,7 +460,7 @@ func (ftcb *FileTypeCreateBulk) Save(ctx context.Context) ([]*FileType, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, ftcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -468,8 +468,8 @@ func (ftcb *FileTypeCreateBulk) Save(ctx context.Context) ([]*FileType, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ftcb *FileTypeCreateBulk) SaveX(ctx context.Context) []*FileType {
-	v, err := ftcb.Save(ctx)
+func (_c *FileTypeCreateBulk) SaveX(ctx context.Context) []*FileType {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -477,14 +477,14 @@ func (ftcb *FileTypeCreateBulk) SaveX(ctx context.Context) []*FileType {
 }
 
 // Exec executes the query.
-func (ftcb *FileTypeCreateBulk) Exec(ctx context.Context) error {
-	_, err := ftcb.Save(ctx)
+func (_c *FileTypeCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ftcb *FileTypeCreateBulk) ExecX(ctx context.Context) {
-	if err := ftcb.Exec(ctx); err != nil {
+func (_c *FileTypeCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -504,10 +504,10 @@ func (ftcb *FileTypeCreateBulk) ExecX(ctx context.Context) {
 //			SetName(v+v).
 //		}).
 //		Exec(ctx)
-func (ftcb *FileTypeCreateBulk) OnConflict(opts ...sql.ConflictOption) *FileTypeUpsertBulk {
-	ftcb.conflict = opts
+func (_c *FileTypeCreateBulk) OnConflict(opts ...sql.ConflictOption) *FileTypeUpsertBulk {
+	_c.conflict = opts
 	return &FileTypeUpsertBulk{
-		create: ftcb,
+		create: _c,
 	}
 }
 
@@ -517,10 +517,10 @@ func (ftcb *FileTypeCreateBulk) OnConflict(opts ...sql.ConflictOption) *FileType
 //	client.FileType.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (ftcb *FileTypeCreateBulk) OnConflictColumns(columns ...string) *FileTypeUpsertBulk {
-	ftcb.conflict = append(ftcb.conflict, sql.ConflictColumns(columns...))
+func (_c *FileTypeCreateBulk) OnConflictColumns(columns ...string) *FileTypeUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &FileTypeUpsertBulk{
-		create: ftcb,
+		create: _c,
 	}
 }
 

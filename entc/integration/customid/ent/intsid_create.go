@@ -27,58 +27,58 @@ type IntSIDCreate struct {
 }
 
 // SetID sets the "id" field.
-func (isc *IntSIDCreate) SetID(s sid.ID) *IntSIDCreate {
-	isc.mutation.SetID(s)
-	return isc
+func (_c *IntSIDCreate) SetID(s sid.ID) *IntSIDCreate {
+	_c.mutation.SetID(s)
+	return _c
 }
 
 // SetParentID sets the "parent" edge to the IntSID entity by ID.
-func (isc *IntSIDCreate) SetParentID(id sid.ID) *IntSIDCreate {
-	isc.mutation.SetParentID(id)
-	return isc
+func (_c *IntSIDCreate) SetParentID(id sid.ID) *IntSIDCreate {
+	_c.mutation.SetParentID(id)
+	return _c
 }
 
 // SetNillableParentID sets the "parent" edge to the IntSID entity by ID if the given value is not nil.
-func (isc *IntSIDCreate) SetNillableParentID(id *sid.ID) *IntSIDCreate {
+func (_c *IntSIDCreate) SetNillableParentID(id *sid.ID) *IntSIDCreate {
 	if id != nil {
-		isc = isc.SetParentID(*id)
+		_c = _c.SetParentID(*id)
 	}
-	return isc
+	return _c
 }
 
 // SetParent sets the "parent" edge to the IntSID entity.
-func (isc *IntSIDCreate) SetParent(i *IntSID) *IntSIDCreate {
-	return isc.SetParentID(i.ID)
+func (_c *IntSIDCreate) SetParent(i *IntSID) *IntSIDCreate {
+	return _c.SetParentID(i.ID)
 }
 
 // AddChildIDs adds the "children" edge to the IntSID entity by IDs.
-func (isc *IntSIDCreate) AddChildIDs(ids ...sid.ID) *IntSIDCreate {
-	isc.mutation.AddChildIDs(ids...)
-	return isc
+func (_c *IntSIDCreate) AddChildIDs(ids ...sid.ID) *IntSIDCreate {
+	_c.mutation.AddChildIDs(ids...)
+	return _c
 }
 
 // AddChildren adds the "children" edges to the IntSID entity.
-func (isc *IntSIDCreate) AddChildren(i ...*IntSID) *IntSIDCreate {
+func (_c *IntSIDCreate) AddChildren(i ...*IntSID) *IntSIDCreate {
 	ids := make([]sid.ID, len(i))
 	for j := range i {
 		ids[j] = i[j].ID
 	}
-	return isc.AddChildIDs(ids...)
+	return _c.AddChildIDs(ids...)
 }
 
 // Mutation returns the IntSIDMutation object of the builder.
-func (isc *IntSIDCreate) Mutation() *IntSIDMutation {
-	return isc.mutation
+func (_c *IntSIDCreate) Mutation() *IntSIDMutation {
+	return _c.mutation
 }
 
 // Save creates the IntSID in the database.
-func (isc *IntSIDCreate) Save(ctx context.Context) (*IntSID, error) {
-	return withHooks(ctx, isc.sqlSave, isc.mutation, isc.hooks)
+func (_c *IntSIDCreate) Save(ctx context.Context) (*IntSID, error) {
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (isc *IntSIDCreate) SaveX(ctx context.Context) *IntSID {
-	v, err := isc.Save(ctx)
+func (_c *IntSIDCreate) SaveX(ctx context.Context) *IntSID {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -86,29 +86,29 @@ func (isc *IntSIDCreate) SaveX(ctx context.Context) *IntSID {
 }
 
 // Exec executes the query.
-func (isc *IntSIDCreate) Exec(ctx context.Context) error {
-	_, err := isc.Save(ctx)
+func (_c *IntSIDCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (isc *IntSIDCreate) ExecX(ctx context.Context) {
-	if err := isc.Exec(ctx); err != nil {
+func (_c *IntSIDCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (isc *IntSIDCreate) check() error {
+func (_c *IntSIDCreate) check() error {
 	return nil
 }
 
-func (isc *IntSIDCreate) sqlSave(ctx context.Context) (*IntSID, error) {
-	if err := isc.check(); err != nil {
+func (_c *IntSIDCreate) sqlSave(ctx context.Context) (*IntSID, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := isc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, isc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -121,22 +121,22 @@ func (isc *IntSIDCreate) sqlSave(ctx context.Context) (*IntSID, error) {
 			return nil, err
 		}
 	}
-	isc.mutation.id = &_node.ID
-	isc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (isc *IntSIDCreate) createSpec() (*IntSID, *sqlgraph.CreateSpec) {
+func (_c *IntSIDCreate) createSpec() (*IntSID, *sqlgraph.CreateSpec) {
 	var (
-		_node = &IntSID{config: isc.config}
+		_node = &IntSID{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(intsid.Table, sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64))
 	)
-	_spec.OnConflict = isc.conflict
-	if id, ok := isc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if nodes := isc.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -153,7 +153,7 @@ func (isc *IntSIDCreate) createSpec() (*IntSID, *sqlgraph.CreateSpec) {
 		_node.int_sid_parent = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := isc.mutation.ChildrenIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -182,10 +182,10 @@ func (isc *IntSIDCreate) createSpec() (*IntSID, *sqlgraph.CreateSpec) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-func (isc *IntSIDCreate) OnConflict(opts ...sql.ConflictOption) *IntSIDUpsertOne {
-	isc.conflict = opts
+func (_c *IntSIDCreate) OnConflict(opts ...sql.ConflictOption) *IntSIDUpsertOne {
+	_c.conflict = opts
 	return &IntSIDUpsertOne{
-		create: isc,
+		create: _c,
 	}
 }
 
@@ -195,10 +195,10 @@ func (isc *IntSIDCreate) OnConflict(opts ...sql.ConflictOption) *IntSIDUpsertOne
 //	client.IntSID.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (isc *IntSIDCreate) OnConflictColumns(columns ...string) *IntSIDUpsertOne {
-	isc.conflict = append(isc.conflict, sql.ConflictColumns(columns...))
+func (_c *IntSIDCreate) OnConflictColumns(columns ...string) *IntSIDUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &IntSIDUpsertOne{
-		create: isc,
+		create: _c,
 	}
 }
 
@@ -305,16 +305,16 @@ type IntSIDCreateBulk struct {
 }
 
 // Save creates the IntSID entities in the database.
-func (iscb *IntSIDCreateBulk) Save(ctx context.Context) ([]*IntSID, error) {
-	if iscb.err != nil {
-		return nil, iscb.err
+func (_c *IntSIDCreateBulk) Save(ctx context.Context) ([]*IntSID, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(iscb.builders))
-	nodes := make([]*IntSID, len(iscb.builders))
-	mutators := make([]Mutator, len(iscb.builders))
-	for i := range iscb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*IntSID, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := iscb.builders[i]
+			builder := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*IntSIDMutation)
 				if !ok {
@@ -327,12 +327,12 @@ func (iscb *IntSIDCreateBulk) Save(ctx context.Context) ([]*IntSID, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, iscb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = iscb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, iscb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -357,7 +357,7 @@ func (iscb *IntSIDCreateBulk) Save(ctx context.Context) ([]*IntSID, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, iscb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -365,8 +365,8 @@ func (iscb *IntSIDCreateBulk) Save(ctx context.Context) ([]*IntSID, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (iscb *IntSIDCreateBulk) SaveX(ctx context.Context) []*IntSID {
-	v, err := iscb.Save(ctx)
+func (_c *IntSIDCreateBulk) SaveX(ctx context.Context) []*IntSID {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -374,14 +374,14 @@ func (iscb *IntSIDCreateBulk) SaveX(ctx context.Context) []*IntSID {
 }
 
 // Exec executes the query.
-func (iscb *IntSIDCreateBulk) Exec(ctx context.Context) error {
-	_, err := iscb.Save(ctx)
+func (_c *IntSIDCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (iscb *IntSIDCreateBulk) ExecX(ctx context.Context) {
-	if err := iscb.Exec(ctx); err != nil {
+func (_c *IntSIDCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -396,10 +396,10 @@ func (iscb *IntSIDCreateBulk) ExecX(ctx context.Context) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-func (iscb *IntSIDCreateBulk) OnConflict(opts ...sql.ConflictOption) *IntSIDUpsertBulk {
-	iscb.conflict = opts
+func (_c *IntSIDCreateBulk) OnConflict(opts ...sql.ConflictOption) *IntSIDUpsertBulk {
+	_c.conflict = opts
 	return &IntSIDUpsertBulk{
-		create: iscb,
+		create: _c,
 	}
 }
 
@@ -409,10 +409,10 @@ func (iscb *IntSIDCreateBulk) OnConflict(opts ...sql.ConflictOption) *IntSIDUpse
 //	client.IntSID.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (iscb *IntSIDCreateBulk) OnConflictColumns(columns ...string) *IntSIDUpsertBulk {
-	iscb.conflict = append(iscb.conflict, sql.ConflictColumns(columns...))
+func (_c *IntSIDCreateBulk) OnConflictColumns(columns ...string) *IntSIDUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &IntSIDUpsertBulk{
-		create: iscb,
+		create: _c,
 	}
 }
 

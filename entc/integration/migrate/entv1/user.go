@@ -134,7 +134,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
-func (u *User) assignValues(columns []string, values []any) error {
+func (_m *User) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -145,95 +145,95 @@ func (u *User) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			u.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case user.FieldAge:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field age", values[i])
 			} else if value.Valid {
-				u.Age = int32(value.Int64)
+				_m.Age = int32(value.Int64)
 			}
 		case user.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				u.Name = value.String
+				_m.Name = value.String
 			}
 		case user.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
-				u.Description = value.String
+				_m.Description = value.String
 			}
 		case user.FieldNickname:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field nickname", values[i])
 			} else if value.Valid {
-				u.Nickname = value.String
+				_m.Nickname = value.String
 			}
 		case user.FieldAddress:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field address", values[i])
 			} else if value.Valid {
-				u.Address = value.String
+				_m.Address = value.String
 			}
 		case user.FieldRenamed:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field renamed", values[i])
 			} else if value.Valid {
-				u.Renamed = value.String
+				_m.Renamed = value.String
 			}
 		case user.FieldOldToken:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field old_token", values[i])
 			} else if value.Valid {
-				u.OldToken = value.String
+				_m.OldToken = value.String
 			}
 		case user.FieldBlob:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field blob", values[i])
 			} else if value != nil {
-				u.Blob = *value
+				_m.Blob = *value
 			}
 		case user.FieldState:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field state", values[i])
 			} else if value.Valid {
-				u.State = user.State(value.String)
+				_m.State = user.State(value.String)
 			}
 		case user.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				u.Status = value.String
+				_m.Status = value.String
 			}
 		case user.FieldWorkplace:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field workplace", values[i])
 			} else if value.Valid {
-				u.Workplace = value.String
+				_m.Workplace = value.String
 			}
 		case user.FieldDropOptional:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field drop_optional", values[i])
 			} else if value.Valid {
-				u.DropOptional = value.String
+				_m.DropOptional = value.String
 			}
 		case user.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field user_children", value)
 			} else if value.Valid {
-				u.user_children = new(int)
-				*u.user_children = int(value.Int64)
+				_m.user_children = new(int)
+				*_m.user_children = int(value.Int64)
 			}
 		case user.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field user_spouse", value)
 			} else if value.Valid {
-				u.user_spouse = new(int)
-				*u.user_spouse = int(value.Int64)
+				_m.user_spouse = new(int)
+				*_m.user_spouse = int(value.Int64)
 			}
 		default:
-			u.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -241,88 +241,88 @@ func (u *User) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the User.
 // This includes values selected through modifiers, order, etc.
-func (u *User) Value(name string) (ent.Value, error) {
-	return u.selectValues.Get(name)
+func (_m *User) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryParent queries the "parent" edge of the User entity.
-func (u *User) QueryParent() *UserQuery {
-	return NewUserClient(u.config).QueryParent(u)
+func (_m *User) QueryParent() *UserQuery {
+	return NewUserClient(_m.config).QueryParent(_m)
 }
 
 // QueryChildren queries the "children" edge of the User entity.
-func (u *User) QueryChildren() *UserQuery {
-	return NewUserClient(u.config).QueryChildren(u)
+func (_m *User) QueryChildren() *UserQuery {
+	return NewUserClient(_m.config).QueryChildren(_m)
 }
 
 // QuerySpouse queries the "spouse" edge of the User entity.
-func (u *User) QuerySpouse() *UserQuery {
-	return NewUserClient(u.config).QuerySpouse(u)
+func (_m *User) QuerySpouse() *UserQuery {
+	return NewUserClient(_m.config).QuerySpouse(_m)
 }
 
 // QueryCar queries the "car" edge of the User entity.
-func (u *User) QueryCar() *CarQuery {
-	return NewUserClient(u.config).QueryCar(u)
+func (_m *User) QueryCar() *CarQuery {
+	return NewUserClient(_m.config).QueryCar(_m)
 }
 
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (u *User) Update() *UserUpdateOne {
-	return NewUserClient(u.config).UpdateOne(u)
+func (_m *User) Update() *UserUpdateOne {
+	return NewUserClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the User entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (u *User) Unwrap() *User {
-	_tx, ok := u.config.driver.(*txDriver)
+func (_m *User) Unwrap() *User {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("entv1: User is not a transactional entity")
 	}
-	u.config.driver = _tx.drv
-	return u
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (u *User) String() string {
+func (_m *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("age=")
-	builder.WriteString(fmt.Sprintf("%v", u.Age))
+	builder.WriteString(fmt.Sprintf("%v", _m.Age))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(u.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("description=")
-	builder.WriteString(u.Description)
+	builder.WriteString(_m.Description)
 	builder.WriteString(", ")
 	builder.WriteString("nickname=")
-	builder.WriteString(u.Nickname)
+	builder.WriteString(_m.Nickname)
 	builder.WriteString(", ")
 	builder.WriteString("address=")
-	builder.WriteString(u.Address)
+	builder.WriteString(_m.Address)
 	builder.WriteString(", ")
 	builder.WriteString("renamed=")
-	builder.WriteString(u.Renamed)
+	builder.WriteString(_m.Renamed)
 	builder.WriteString(", ")
 	builder.WriteString("old_token=")
-	builder.WriteString(u.OldToken)
+	builder.WriteString(_m.OldToken)
 	builder.WriteString(", ")
 	builder.WriteString("blob=")
-	builder.WriteString(fmt.Sprintf("%v", u.Blob))
+	builder.WriteString(fmt.Sprintf("%v", _m.Blob))
 	builder.WriteString(", ")
 	builder.WriteString("state=")
-	builder.WriteString(fmt.Sprintf("%v", u.State))
+	builder.WriteString(fmt.Sprintf("%v", _m.State))
 	builder.WriteString(", ")
 	builder.WriteString("status=")
-	builder.WriteString(u.Status)
+	builder.WriteString(_m.Status)
 	builder.WriteString(", ")
 	builder.WriteString("workplace=")
-	builder.WriteString(u.Workplace)
+	builder.WriteString(_m.Workplace)
 	builder.WriteString(", ")
 	builder.WriteString("drop_optional=")
-	builder.WriteString(u.DropOptional)
+	builder.WriteString(_m.DropOptional)
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -26,60 +26,60 @@ type SpecUpdate struct {
 }
 
 // Where appends a list predicates to the SpecUpdate builder.
-func (su *SpecUpdate) Where(ps ...predicate.Spec) *SpecUpdate {
-	su.mutation.Where(ps...)
-	return su
+func (_u *SpecUpdate) Where(ps ...predicate.Spec) *SpecUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // AddCardIDs adds the "card" edge to the Card entity by IDs.
-func (su *SpecUpdate) AddCardIDs(ids ...string) *SpecUpdate {
-	su.mutation.AddCardIDs(ids...)
-	return su
+func (_u *SpecUpdate) AddCardIDs(ids ...string) *SpecUpdate {
+	_u.mutation.AddCardIDs(ids...)
+	return _u
 }
 
 // AddCard adds the "card" edges to the Card entity.
-func (su *SpecUpdate) AddCard(c ...*Card) *SpecUpdate {
+func (_u *SpecUpdate) AddCard(c ...*Card) *SpecUpdate {
 	ids := make([]string, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
-	return su.AddCardIDs(ids...)
+	return _u.AddCardIDs(ids...)
 }
 
 // Mutation returns the SpecMutation object of the builder.
-func (su *SpecUpdate) Mutation() *SpecMutation {
-	return su.mutation
+func (_u *SpecUpdate) Mutation() *SpecMutation {
+	return _u.mutation
 }
 
 // ClearCard clears all "card" edges to the Card entity.
-func (su *SpecUpdate) ClearCard() *SpecUpdate {
-	su.mutation.ClearCard()
-	return su
+func (_u *SpecUpdate) ClearCard() *SpecUpdate {
+	_u.mutation.ClearCard()
+	return _u
 }
 
 // RemoveCardIDs removes the "card" edge to Card entities by IDs.
-func (su *SpecUpdate) RemoveCardIDs(ids ...string) *SpecUpdate {
-	su.mutation.RemoveCardIDs(ids...)
-	return su
+func (_u *SpecUpdate) RemoveCardIDs(ids ...string) *SpecUpdate {
+	_u.mutation.RemoveCardIDs(ids...)
+	return _u
 }
 
 // RemoveCard removes "card" edges to Card entities.
-func (su *SpecUpdate) RemoveCard(c ...*Card) *SpecUpdate {
+func (_u *SpecUpdate) RemoveCard(c ...*Card) *SpecUpdate {
 	ids := make([]string, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
-	return su.RemoveCardIDs(ids...)
+	return _u.RemoveCardIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (su *SpecUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, su.gremlinSave, su.mutation, su.hooks)
+func (_u *SpecUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (su *SpecUpdate) SaveX(ctx context.Context) int {
-	affected, err := su.Save(ctx)
+func (_u *SpecUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -87,34 +87,34 @@ func (su *SpecUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (su *SpecUpdate) Exec(ctx context.Context) error {
-	_, err := su.Save(ctx)
+func (_u *SpecUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (su *SpecUpdate) ExecX(ctx context.Context) {
-	if err := su.Exec(ctx); err != nil {
+func (_u *SpecUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (su *SpecUpdate) gremlinSave(ctx context.Context) (int, error) {
+func (_u *SpecUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := su.gremlin().Query()
-	if err := su.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _u.gremlin().Query()
+	if err := _u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return 0, err
 	}
-	su.mutation.done = true
+	_u.mutation.done = true
 	return res.ReadInt()
 }
 
-func (su *SpecUpdate) gremlin() *dsl.Traversal {
+func (_u *SpecUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(spec.Label)
-	for _, p := range su.mutation.predicates {
+	for _, p := range _u.mutation.predicates {
 		p(v)
 	}
 	var (
@@ -123,11 +123,11 @@ func (su *SpecUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	for _, id := range su.mutation.RemovedCardIDs() {
+	for _, id := range _u.mutation.RemovedCardIDs() {
 		tr := rv.Clone().OutE(spec.CardLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for _, id := range su.mutation.CardIDs() {
+	for _, id := range _u.mutation.CardIDs() {
 		v.AddE(spec.CardLabel).To(g.V(id)).OutV()
 	}
 	v.Count()
@@ -144,67 +144,67 @@ type SpecUpdateOne struct {
 }
 
 // AddCardIDs adds the "card" edge to the Card entity by IDs.
-func (suo *SpecUpdateOne) AddCardIDs(ids ...string) *SpecUpdateOne {
-	suo.mutation.AddCardIDs(ids...)
-	return suo
+func (_u *SpecUpdateOne) AddCardIDs(ids ...string) *SpecUpdateOne {
+	_u.mutation.AddCardIDs(ids...)
+	return _u
 }
 
 // AddCard adds the "card" edges to the Card entity.
-func (suo *SpecUpdateOne) AddCard(c ...*Card) *SpecUpdateOne {
+func (_u *SpecUpdateOne) AddCard(c ...*Card) *SpecUpdateOne {
 	ids := make([]string, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
-	return suo.AddCardIDs(ids...)
+	return _u.AddCardIDs(ids...)
 }
 
 // Mutation returns the SpecMutation object of the builder.
-func (suo *SpecUpdateOne) Mutation() *SpecMutation {
-	return suo.mutation
+func (_u *SpecUpdateOne) Mutation() *SpecMutation {
+	return _u.mutation
 }
 
 // ClearCard clears all "card" edges to the Card entity.
-func (suo *SpecUpdateOne) ClearCard() *SpecUpdateOne {
-	suo.mutation.ClearCard()
-	return suo
+func (_u *SpecUpdateOne) ClearCard() *SpecUpdateOne {
+	_u.mutation.ClearCard()
+	return _u
 }
 
 // RemoveCardIDs removes the "card" edge to Card entities by IDs.
-func (suo *SpecUpdateOne) RemoveCardIDs(ids ...string) *SpecUpdateOne {
-	suo.mutation.RemoveCardIDs(ids...)
-	return suo
+func (_u *SpecUpdateOne) RemoveCardIDs(ids ...string) *SpecUpdateOne {
+	_u.mutation.RemoveCardIDs(ids...)
+	return _u
 }
 
 // RemoveCard removes "card" edges to Card entities.
-func (suo *SpecUpdateOne) RemoveCard(c ...*Card) *SpecUpdateOne {
+func (_u *SpecUpdateOne) RemoveCard(c ...*Card) *SpecUpdateOne {
 	ids := make([]string, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
-	return suo.RemoveCardIDs(ids...)
+	return _u.RemoveCardIDs(ids...)
 }
 
 // Where appends a list predicates to the SpecUpdate builder.
-func (suo *SpecUpdateOne) Where(ps ...predicate.Spec) *SpecUpdateOne {
-	suo.mutation.Where(ps...)
-	return suo
+func (_u *SpecUpdateOne) Where(ps ...predicate.Spec) *SpecUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (suo *SpecUpdateOne) Select(field string, fields ...string) *SpecUpdateOne {
-	suo.fields = append([]string{field}, fields...)
-	return suo
+func (_u *SpecUpdateOne) Select(field string, fields ...string) *SpecUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Spec entity.
-func (suo *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
-	return withHooks(ctx, suo.gremlinSave, suo.mutation, suo.hooks)
+func (_u *SpecUpdateOne) Save(ctx context.Context) (*Spec, error) {
+	return withHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (suo *SpecUpdateOne) SaveX(ctx context.Context) *Spec {
-	node, err := suo.Save(ctx)
+func (_u *SpecUpdateOne) SaveX(ctx context.Context) *Spec {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -212,40 +212,40 @@ func (suo *SpecUpdateOne) SaveX(ctx context.Context) *Spec {
 }
 
 // Exec executes the query on the entity.
-func (suo *SpecUpdateOne) Exec(ctx context.Context) error {
-	_, err := suo.Save(ctx)
+func (_u *SpecUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (suo *SpecUpdateOne) ExecX(ctx context.Context) {
-	if err := suo.Exec(ctx); err != nil {
+func (_u *SpecUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (suo *SpecUpdateOne) gremlinSave(ctx context.Context) (*Spec, error) {
+func (_u *SpecUpdateOne) gremlinSave(ctx context.Context) (*Spec, error) {
 	res := &gremlin.Response{}
-	id, ok := suo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Spec.id" for update`)}
 	}
-	query, bindings := suo.gremlin(id).Query()
-	if err := suo.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _u.gremlin(id).Query()
+	if err := _u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	suo.mutation.done = true
-	s := &Spec{config: suo.config}
-	if err := s.FromResponse(res); err != nil {
+	_u.mutation.done = true
+	_m := &Spec{config: _u.config}
+	if err := _m.FromResponse(res); err != nil {
 		return nil, err
 	}
-	return s, nil
+	return _m, nil
 }
 
-func (suo *SpecUpdateOne) gremlin(id string) *dsl.Traversal {
+func (_u *SpecUpdateOne) gremlin(id string) *dsl.Traversal {
 	v := g.V(id)
 	var (
 		rv = v.Clone()
@@ -253,17 +253,17 @@ func (suo *SpecUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	for _, id := range suo.mutation.RemovedCardIDs() {
+	for _, id := range _u.mutation.RemovedCardIDs() {
 		tr := rv.Clone().OutE(spec.CardLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for _, id := range suo.mutation.CardIDs() {
+	for _, id := range _u.mutation.CardIDs() {
 		v.AddE(spec.CardLabel).To(g.V(id)).OutV()
 	}
-	if len(suo.fields) > 0 {
-		fields := make([]any, 0, len(suo.fields)+1)
+	if len(_u.fields) > 0 {
+		fields := make([]any, 0, len(_u.fields)+1)
 		fields = append(fields, true)
-		for _, f := range suo.fields {
+		for _, f := range _u.fields {
 			fields = append(fields, f)
 		}
 		v.ValueMap(fields...)

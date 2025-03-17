@@ -27,54 +27,54 @@ type GroupInfoCreate struct {
 }
 
 // SetDesc sets the "desc" field.
-func (gic *GroupInfoCreate) SetDesc(s string) *GroupInfoCreate {
-	gic.mutation.SetDesc(s)
-	return gic
+func (_c *GroupInfoCreate) SetDesc(s string) *GroupInfoCreate {
+	_c.mutation.SetDesc(s)
+	return _c
 }
 
 // SetMaxUsers sets the "max_users" field.
-func (gic *GroupInfoCreate) SetMaxUsers(i int) *GroupInfoCreate {
-	gic.mutation.SetMaxUsers(i)
-	return gic
+func (_c *GroupInfoCreate) SetMaxUsers(i int) *GroupInfoCreate {
+	_c.mutation.SetMaxUsers(i)
+	return _c
 }
 
 // SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (gic *GroupInfoCreate) SetNillableMaxUsers(i *int) *GroupInfoCreate {
+func (_c *GroupInfoCreate) SetNillableMaxUsers(i *int) *GroupInfoCreate {
 	if i != nil {
-		gic.SetMaxUsers(*i)
+		_c.SetMaxUsers(*i)
 	}
-	return gic
+	return _c
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (gic *GroupInfoCreate) AddGroupIDs(ids ...string) *GroupInfoCreate {
-	gic.mutation.AddGroupIDs(ids...)
-	return gic
+func (_c *GroupInfoCreate) AddGroupIDs(ids ...string) *GroupInfoCreate {
+	_c.mutation.AddGroupIDs(ids...)
+	return _c
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (gic *GroupInfoCreate) AddGroups(g ...*Group) *GroupInfoCreate {
+func (_c *GroupInfoCreate) AddGroups(g ...*Group) *GroupInfoCreate {
 	ids := make([]string, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
-	return gic.AddGroupIDs(ids...)
+	return _c.AddGroupIDs(ids...)
 }
 
 // Mutation returns the GroupInfoMutation object of the builder.
-func (gic *GroupInfoCreate) Mutation() *GroupInfoMutation {
-	return gic.mutation
+func (_c *GroupInfoCreate) Mutation() *GroupInfoMutation {
+	return _c.mutation
 }
 
 // Save creates the GroupInfo in the database.
-func (gic *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
-	gic.defaults()
-	return withHooks(ctx, gic.gremlinSave, gic.mutation, gic.hooks)
+func (_c *GroupInfoCreate) Save(ctx context.Context) (*GroupInfo, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (gic *GroupInfoCreate) SaveX(ctx context.Context) *GroupInfo {
-	v, err := gic.Save(ctx)
+func (_c *GroupInfoCreate) SaveX(ctx context.Context) *GroupInfo {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -82,72 +82,72 @@ func (gic *GroupInfoCreate) SaveX(ctx context.Context) *GroupInfo {
 }
 
 // Exec executes the query.
-func (gic *GroupInfoCreate) Exec(ctx context.Context) error {
-	_, err := gic.Save(ctx)
+func (_c *GroupInfoCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gic *GroupInfoCreate) ExecX(ctx context.Context) {
-	if err := gic.Exec(ctx); err != nil {
+func (_c *GroupInfoCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (gic *GroupInfoCreate) defaults() {
-	if _, ok := gic.mutation.MaxUsers(); !ok {
+func (_c *GroupInfoCreate) defaults() {
+	if _, ok := _c.mutation.MaxUsers(); !ok {
 		v := groupinfo.DefaultMaxUsers
-		gic.mutation.SetMaxUsers(v)
+		_c.mutation.SetMaxUsers(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (gic *GroupInfoCreate) check() error {
-	if _, ok := gic.mutation.Desc(); !ok {
+func (_c *GroupInfoCreate) check() error {
+	if _, ok := _c.mutation.Desc(); !ok {
 		return &ValidationError{Name: "desc", err: errors.New(`ent: missing required field "GroupInfo.desc"`)}
 	}
-	if _, ok := gic.mutation.MaxUsers(); !ok {
+	if _, ok := _c.mutation.MaxUsers(); !ok {
 		return &ValidationError{Name: "max_users", err: errors.New(`ent: missing required field "GroupInfo.max_users"`)}
 	}
 	return nil
 }
 
-func (gic *GroupInfoCreate) gremlinSave(ctx context.Context) (*GroupInfo, error) {
-	if err := gic.check(); err != nil {
+func (_c *GroupInfoCreate) gremlinSave(ctx context.Context) (*GroupInfo, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := gic.gremlin().Query()
-	if err := gic.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _c.gremlin().Query()
+	if err := _c.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	rnode := &GroupInfo{config: gic.config}
+	rnode := &GroupInfo{config: _c.config}
 	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	gic.mutation.id = &rnode.ID
-	gic.mutation.done = true
+	_c.mutation.id = &rnode.ID
+	_c.mutation.done = true
 	return rnode, nil
 }
 
-func (gic *GroupInfoCreate) gremlin() *dsl.Traversal {
+func (_c *GroupInfoCreate) gremlin() *dsl.Traversal {
 	type constraint struct {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
 	constraints := make([]*constraint, 0, 1)
 	v := g.AddV(groupinfo.Label)
-	if value, ok := gic.mutation.Desc(); ok {
+	if value, ok := _c.mutation.Desc(); ok {
 		v.Property(dsl.Single, groupinfo.FieldDesc, value)
 	}
-	if value, ok := gic.mutation.MaxUsers(); ok {
+	if value, ok := _c.mutation.MaxUsers(); ok {
 		v.Property(dsl.Single, groupinfo.FieldMaxUsers, value)
 	}
-	for _, id := range gic.mutation.GroupsIDs() {
+	for _, id := range _c.mutation.GroupsIDs() {
 		v.AddE(group.InfoLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(group.InfoLabel).OutV().HasID(id).Count(),

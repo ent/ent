@@ -27,30 +27,30 @@ type LinkUpdate struct {
 }
 
 // Where appends a list predicates to the LinkUpdate builder.
-func (lu *LinkUpdate) Where(ps ...predicate.Link) *LinkUpdate {
-	lu.mutation.Where(ps...)
-	return lu
+func (_u *LinkUpdate) Where(ps ...predicate.Link) *LinkUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetLinkInformation sets the "link_information" field.
-func (lu *LinkUpdate) SetLinkInformation(mi map[string]schema.LinkInformation) *LinkUpdate {
-	lu.mutation.SetLinkInformation(mi)
-	return lu
+func (_u *LinkUpdate) SetLinkInformation(mi map[string]schema.LinkInformation) *LinkUpdate {
+	_u.mutation.SetLinkInformation(mi)
+	return _u
 }
 
 // Mutation returns the LinkMutation object of the builder.
-func (lu *LinkUpdate) Mutation() *LinkMutation {
-	return lu.mutation
+func (_u *LinkUpdate) Mutation() *LinkMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (lu *LinkUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, lu.sqlSave, lu.mutation, lu.hooks)
+func (_u *LinkUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (lu *LinkUpdate) SaveX(ctx context.Context) int {
-	affected, err := lu.Save(ctx)
+func (_u *LinkUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -58,31 +58,31 @@ func (lu *LinkUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (lu *LinkUpdate) Exec(ctx context.Context) error {
-	_, err := lu.Save(ctx)
+func (_u *LinkUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (lu *LinkUpdate) ExecX(ctx context.Context) {
-	if err := lu.Exec(ctx); err != nil {
+func (_u *LinkUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (lu *LinkUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *LinkUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(link.Table, link.Columns, sqlgraph.NewFieldSpec(link.FieldID, field.TypeUUID))
-	if ps := lu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := lu.mutation.LinkInformation(); ok {
+	if value, ok := _u.mutation.LinkInformation(); ok {
 		_spec.SetField(link.FieldLinkInformation, field.TypeJSON, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, lu.driver, _spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{link.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -90,7 +90,7 @@ func (lu *LinkUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	lu.mutation.done = true
+	_u.mutation.done = true
 	return n, nil
 }
 
@@ -103,37 +103,37 @@ type LinkUpdateOne struct {
 }
 
 // SetLinkInformation sets the "link_information" field.
-func (luo *LinkUpdateOne) SetLinkInformation(mi map[string]schema.LinkInformation) *LinkUpdateOne {
-	luo.mutation.SetLinkInformation(mi)
-	return luo
+func (_u *LinkUpdateOne) SetLinkInformation(mi map[string]schema.LinkInformation) *LinkUpdateOne {
+	_u.mutation.SetLinkInformation(mi)
+	return _u
 }
 
 // Mutation returns the LinkMutation object of the builder.
-func (luo *LinkUpdateOne) Mutation() *LinkMutation {
-	return luo.mutation
+func (_u *LinkUpdateOne) Mutation() *LinkMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the LinkUpdate builder.
-func (luo *LinkUpdateOne) Where(ps ...predicate.Link) *LinkUpdateOne {
-	luo.mutation.Where(ps...)
-	return luo
+func (_u *LinkUpdateOne) Where(ps ...predicate.Link) *LinkUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (luo *LinkUpdateOne) Select(field string, fields ...string) *LinkUpdateOne {
-	luo.fields = append([]string{field}, fields...)
-	return luo
+func (_u *LinkUpdateOne) Select(field string, fields ...string) *LinkUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Link entity.
-func (luo *LinkUpdateOne) Save(ctx context.Context) (*Link, error) {
-	return withHooks(ctx, luo.sqlSave, luo.mutation, luo.hooks)
+func (_u *LinkUpdateOne) Save(ctx context.Context) (*Link, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (luo *LinkUpdateOne) SaveX(ctx context.Context) *Link {
-	node, err := luo.Save(ctx)
+func (_u *LinkUpdateOne) SaveX(ctx context.Context) *Link {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -141,26 +141,26 @@ func (luo *LinkUpdateOne) SaveX(ctx context.Context) *Link {
 }
 
 // Exec executes the query on the entity.
-func (luo *LinkUpdateOne) Exec(ctx context.Context) error {
-	_, err := luo.Save(ctx)
+func (_u *LinkUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (luo *LinkUpdateOne) ExecX(ctx context.Context) {
-	if err := luo.Exec(ctx); err != nil {
+func (_u *LinkUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (luo *LinkUpdateOne) sqlSave(ctx context.Context) (_node *Link, err error) {
+func (_u *LinkUpdateOne) sqlSave(ctx context.Context) (_node *Link, err error) {
 	_spec := sqlgraph.NewUpdateSpec(link.Table, link.Columns, sqlgraph.NewFieldSpec(link.FieldID, field.TypeUUID))
-	id, ok := luo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Link.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := luo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, link.FieldID)
 		for _, f := range fields {
@@ -172,20 +172,20 @@ func (luo *LinkUpdateOne) sqlSave(ctx context.Context) (_node *Link, err error) 
 			}
 		}
 	}
-	if ps := luo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := luo.mutation.LinkInformation(); ok {
+	if value, ok := _u.mutation.LinkInformation(); ok {
 		_spec.SetField(link.FieldLinkInformation, field.TypeJSON, value)
 	}
-	_node = &Link{config: luo.config}
+	_node = &Link{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, luo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{link.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -193,6 +193,6 @@ func (luo *LinkUpdateOne) sqlSave(ctx context.Context) (_node *Link, err error) 
 		}
 		return nil, err
 	}
-	luo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

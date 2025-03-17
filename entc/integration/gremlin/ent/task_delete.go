@@ -26,38 +26,38 @@ type TaskDelete struct {
 }
 
 // Where appends a list predicates to the TaskDelete builder.
-func (td *TaskDelete) Where(ps ...predicate.Task) *TaskDelete {
-	td.mutation.Where(ps...)
-	return td
+func (_d *TaskDelete) Where(ps ...predicate.Task) *TaskDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (td *TaskDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, td.gremlinExec, td.mutation, td.hooks)
+func (_d *TaskDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.gremlinExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (td *TaskDelete) ExecX(ctx context.Context) int {
-	n, err := td.Exec(ctx)
+func (_d *TaskDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (td *TaskDelete) gremlinExec(ctx context.Context) (int, error) {
+func (_d *TaskDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := td.gremlin().Query()
-	if err := td.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _d.gremlin().Query()
+	if err := _d.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
-	td.mutation.done = true
+	_d.mutation.done = true
 	return res.ReadInt()
 }
 
-func (td *TaskDelete) gremlin() *dsl.Traversal {
+func (_d *TaskDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(enttask.Label)
-	for _, p := range td.mutation.predicates {
+	for _, p := range _d.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()
@@ -65,18 +65,18 @@ func (td *TaskDelete) gremlin() *dsl.Traversal {
 
 // TaskDeleteOne is the builder for deleting a single Task entity.
 type TaskDeleteOne struct {
-	td *TaskDelete
+	_d *TaskDelete
 }
 
 // Where appends a list predicates to the TaskDelete builder.
-func (tdo *TaskDeleteOne) Where(ps ...predicate.Task) *TaskDeleteOne {
-	tdo.td.mutation.Where(ps...)
-	return tdo
+func (_d *TaskDeleteOne) Where(ps ...predicate.Task) *TaskDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (tdo *TaskDeleteOne) Exec(ctx context.Context) error {
-	n, err := tdo.td.Exec(ctx)
+func (_d *TaskDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -88,8 +88,8 @@ func (tdo *TaskDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tdo *TaskDeleteOne) ExecX(ctx context.Context) {
-	if err := tdo.Exec(ctx); err != nil {
+func (_d *TaskDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

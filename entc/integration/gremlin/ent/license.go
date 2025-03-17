@@ -26,53 +26,53 @@ type License struct {
 }
 
 // FromResponse scans the gremlin response data into License.
-func (l *License) FromResponse(res *gremlin.Response) error {
+func (_m *License) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scanl struct {
+	var scan_m struct {
 		ID         int   `json:"id,omitempty"`
 		CreateTime int64 `json:"create_time,omitempty"`
 		UpdateTime int64 `json:"update_time,omitempty"`
 	}
-	if err := vmap.Decode(&scanl); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	l.ID = scanl.ID
-	l.CreateTime = time.Unix(0, scanl.CreateTime)
-	l.UpdateTime = time.Unix(0, scanl.UpdateTime)
+	_m.ID = scan_m.ID
+	_m.CreateTime = time.Unix(0, scan_m.CreateTime)
+	_m.UpdateTime = time.Unix(0, scan_m.UpdateTime)
 	return nil
 }
 
 // Update returns a builder for updating this License.
 // Note that you need to call License.Unwrap() before calling this method if this License
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (l *License) Update() *LicenseUpdateOne {
-	return NewLicenseClient(l.config).UpdateOne(l)
+func (_m *License) Update() *LicenseUpdateOne {
+	return NewLicenseClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the License entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (l *License) Unwrap() *License {
-	_tx, ok := l.config.driver.(*txDriver)
+func (_m *License) Unwrap() *License {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: License is not a transactional entity")
 	}
-	l.config.driver = _tx.drv
-	return l
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (l *License) String() string {
+func (_m *License) String() string {
 	var builder strings.Builder
 	builder.WriteString("License(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", l.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("create_time=")
-	builder.WriteString(l.CreateTime.Format(time.ANSIC))
+	builder.WriteString(_m.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("update_time=")
-	builder.WriteString(l.UpdateTime.Format(time.ANSIC))
+	builder.WriteString(_m.UpdateTime.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -81,24 +81,24 @@ func (l *License) String() string {
 type Licenses []*License
 
 // FromResponse scans the gremlin response data into Licenses.
-func (l *Licenses) FromResponse(res *gremlin.Response) error {
+func (_m *Licenses) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scanl []struct {
+	var scan_m []struct {
 		ID         int   `json:"id,omitempty"`
 		CreateTime int64 `json:"create_time,omitempty"`
 		UpdateTime int64 `json:"update_time,omitempty"`
 	}
-	if err := vmap.Decode(&scanl); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	for _, v := range scanl {
+	for _, v := range scan_m {
 		node := &License{ID: v.ID}
 		node.CreateTime = time.Unix(0, v.CreateTime)
 		node.UpdateTime = time.Unix(0, v.UpdateTime)
-		*l = append(*l, node)
+		*_m = append(*_m, node)
 	}
 	return nil
 }

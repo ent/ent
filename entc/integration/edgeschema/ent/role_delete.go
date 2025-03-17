@@ -24,56 +24,56 @@ type RoleDelete struct {
 }
 
 // Where appends a list predicates to the RoleDelete builder.
-func (rd *RoleDelete) Where(ps ...predicate.Role) *RoleDelete {
-	rd.mutation.Where(ps...)
-	return rd
+func (_d *RoleDelete) Where(ps ...predicate.Role) *RoleDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (rd *RoleDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, rd.sqlExec, rd.mutation, rd.hooks)
+func (_d *RoleDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rd *RoleDelete) ExecX(ctx context.Context) int {
-	n, err := rd.Exec(ctx)
+func (_d *RoleDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (rd *RoleDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *RoleDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(role.Table, sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt))
-	if ps := rd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, rd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	rd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // RoleDeleteOne is the builder for deleting a single Role entity.
 type RoleDeleteOne struct {
-	rd *RoleDelete
+	_d *RoleDelete
 }
 
 // Where appends a list predicates to the RoleDelete builder.
-func (rdo *RoleDeleteOne) Where(ps ...predicate.Role) *RoleDeleteOne {
-	rdo.rd.mutation.Where(ps...)
-	return rdo
+func (_d *RoleDeleteOne) Where(ps ...predicate.Role) *RoleDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (rdo *RoleDeleteOne) Exec(ctx context.Context) error {
-	n, err := rdo.rd.Exec(ctx)
+func (_d *RoleDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (rdo *RoleDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rdo *RoleDeleteOne) ExecX(ctx context.Context) {
-	if err := rdo.Exec(ctx); err != nil {
+func (_d *RoleDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

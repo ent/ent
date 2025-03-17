@@ -25,38 +25,38 @@ type GroupInfoDelete struct {
 }
 
 // Where appends a list predicates to the GroupInfoDelete builder.
-func (gid *GroupInfoDelete) Where(ps ...predicate.GroupInfo) *GroupInfoDelete {
-	gid.mutation.Where(ps...)
-	return gid
+func (_d *GroupInfoDelete) Where(ps ...predicate.GroupInfo) *GroupInfoDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (gid *GroupInfoDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, gid.gremlinExec, gid.mutation, gid.hooks)
+func (_d *GroupInfoDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.gremlinExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gid *GroupInfoDelete) ExecX(ctx context.Context) int {
-	n, err := gid.Exec(ctx)
+func (_d *GroupInfoDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (gid *GroupInfoDelete) gremlinExec(ctx context.Context) (int, error) {
+func (_d *GroupInfoDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := gid.gremlin().Query()
-	if err := gid.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _d.gremlin().Query()
+	if err := _d.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
-	gid.mutation.done = true
+	_d.mutation.done = true
 	return res.ReadInt()
 }
 
-func (gid *GroupInfoDelete) gremlin() *dsl.Traversal {
+func (_d *GroupInfoDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(groupinfo.Label)
-	for _, p := range gid.mutation.predicates {
+	for _, p := range _d.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()
@@ -64,18 +64,18 @@ func (gid *GroupInfoDelete) gremlin() *dsl.Traversal {
 
 // GroupInfoDeleteOne is the builder for deleting a single GroupInfo entity.
 type GroupInfoDeleteOne struct {
-	gid *GroupInfoDelete
+	_d *GroupInfoDelete
 }
 
 // Where appends a list predicates to the GroupInfoDelete builder.
-func (gido *GroupInfoDeleteOne) Where(ps ...predicate.GroupInfo) *GroupInfoDeleteOne {
-	gido.gid.mutation.Where(ps...)
-	return gido
+func (_d *GroupInfoDeleteOne) Where(ps ...predicate.GroupInfo) *GroupInfoDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (gido *GroupInfoDeleteOne) Exec(ctx context.Context) error {
-	n, err := gido.gid.Exec(ctx)
+func (_d *GroupInfoDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -87,8 +87,8 @@ func (gido *GroupInfoDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gido *GroupInfoDeleteOne) ExecX(ctx context.Context) {
-	if err := gido.Exec(ctx); err != nil {
+func (_d *GroupInfoDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

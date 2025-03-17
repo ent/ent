@@ -38,44 +38,44 @@ type SpecQuery struct {
 }
 
 // Where adds a new predicate for the SpecQuery builder.
-func (sq *SpecQuery) Where(ps ...predicate.Spec) *SpecQuery {
-	sq.predicates = append(sq.predicates, ps...)
-	return sq
+func (_q *SpecQuery) Where(ps ...predicate.Spec) *SpecQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (sq *SpecQuery) Limit(limit int) *SpecQuery {
-	sq.ctx.Limit = &limit
-	return sq
+func (_q *SpecQuery) Limit(limit int) *SpecQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (sq *SpecQuery) Offset(offset int) *SpecQuery {
-	sq.ctx.Offset = &offset
-	return sq
+func (_q *SpecQuery) Offset(offset int) *SpecQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (sq *SpecQuery) Unique(unique bool) *SpecQuery {
-	sq.ctx.Unique = &unique
-	return sq
+func (_q *SpecQuery) Unique(unique bool) *SpecQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (sq *SpecQuery) Order(o ...spec.OrderOption) *SpecQuery {
-	sq.order = append(sq.order, o...)
-	return sq
+func (_q *SpecQuery) Order(o ...spec.OrderOption) *SpecQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryCard chains the current query on the "card" edge.
-func (sq *SpecQuery) QueryCard() *CardQuery {
-	query := (&CardClient{config: sq.config}).Query()
+func (_q *SpecQuery) QueryCard() *CardQuery {
+	query := (&CardClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := sq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := sq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -84,7 +84,7 @@ func (sq *SpecQuery) QueryCard() *CardQuery {
 			sqlgraph.To(card.Table, card.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, spec.CardTable, spec.CardPrimaryKey...),
 		)
-		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -92,8 +92,8 @@ func (sq *SpecQuery) QueryCard() *CardQuery {
 
 // First returns the first Spec entity from the query.
 // Returns a *NotFoundError when no Spec was found.
-func (sq *SpecQuery) First(ctx context.Context) (*Spec, error) {
-	nodes, err := sq.Limit(1).All(setContextOp(ctx, sq.ctx, ent.OpQueryFirst))
+func (_q *SpecQuery) First(ctx context.Context) (*Spec, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -104,8 +104,8 @@ func (sq *SpecQuery) First(ctx context.Context) (*Spec, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (sq *SpecQuery) FirstX(ctx context.Context) *Spec {
-	node, err := sq.First(ctx)
+func (_q *SpecQuery) FirstX(ctx context.Context) *Spec {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -114,9 +114,9 @@ func (sq *SpecQuery) FirstX(ctx context.Context) *Spec {
 
 // FirstID returns the first Spec ID from the query.
 // Returns a *NotFoundError when no Spec ID was found.
-func (sq *SpecQuery) FirstID(ctx context.Context) (id int, err error) {
+func (_q *SpecQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = sq.Limit(1).IDs(setContextOp(ctx, sq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -127,8 +127,8 @@ func (sq *SpecQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (sq *SpecQuery) FirstIDX(ctx context.Context) int {
-	id, err := sq.FirstID(ctx)
+func (_q *SpecQuery) FirstIDX(ctx context.Context) int {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -138,8 +138,8 @@ func (sq *SpecQuery) FirstIDX(ctx context.Context) int {
 // Only returns a single Spec entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Spec entity is found.
 // Returns a *NotFoundError when no Spec entities are found.
-func (sq *SpecQuery) Only(ctx context.Context) (*Spec, error) {
-	nodes, err := sq.Limit(2).All(setContextOp(ctx, sq.ctx, ent.OpQueryOnly))
+func (_q *SpecQuery) Only(ctx context.Context) (*Spec, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -154,8 +154,8 @@ func (sq *SpecQuery) Only(ctx context.Context) (*Spec, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (sq *SpecQuery) OnlyX(ctx context.Context) *Spec {
-	node, err := sq.Only(ctx)
+func (_q *SpecQuery) OnlyX(ctx context.Context) *Spec {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -165,9 +165,9 @@ func (sq *SpecQuery) OnlyX(ctx context.Context) *Spec {
 // OnlyID is like Only, but returns the only Spec ID in the query.
 // Returns a *NotSingularError when more than one Spec ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (sq *SpecQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *SpecQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = sq.Limit(2).IDs(setContextOp(ctx, sq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -182,8 +182,8 @@ func (sq *SpecQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (sq *SpecQuery) OnlyIDX(ctx context.Context) int {
-	id, err := sq.OnlyID(ctx)
+func (_q *SpecQuery) OnlyIDX(ctx context.Context) int {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -191,18 +191,18 @@ func (sq *SpecQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Specs.
-func (sq *SpecQuery) All(ctx context.Context) ([]*Spec, error) {
-	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryAll)
-	if err := sq.prepareQuery(ctx); err != nil {
+func (_q *SpecQuery) All(ctx context.Context) ([]*Spec, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Spec, *SpecQuery]()
-	return withInterceptors[[]*Spec](ctx, sq, qr, sq.inters)
+	return withInterceptors[[]*Spec](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (sq *SpecQuery) AllX(ctx context.Context) []*Spec {
-	nodes, err := sq.All(ctx)
+func (_q *SpecQuery) AllX(ctx context.Context) []*Spec {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -210,20 +210,20 @@ func (sq *SpecQuery) AllX(ctx context.Context) []*Spec {
 }
 
 // IDs executes the query and returns a list of Spec IDs.
-func (sq *SpecQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if sq.ctx.Unique == nil && sq.path != nil {
-		sq.Unique(true)
+func (_q *SpecQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryIDs)
-	if err = sq.Select(spec.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(spec.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (sq *SpecQuery) IDsX(ctx context.Context) []int {
-	ids, err := sq.IDs(ctx)
+func (_q *SpecQuery) IDsX(ctx context.Context) []int {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -231,17 +231,17 @@ func (sq *SpecQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (sq *SpecQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryCount)
-	if err := sq.prepareQuery(ctx); err != nil {
+func (_q *SpecQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, sq, querierCount[*SpecQuery](), sq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*SpecQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (sq *SpecQuery) CountX(ctx context.Context) int {
-	count, err := sq.Count(ctx)
+func (_q *SpecQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -249,9 +249,9 @@ func (sq *SpecQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (sq *SpecQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, sq.ctx, ent.OpQueryExist)
-	switch _, err := sq.FirstID(ctx); {
+func (_q *SpecQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -262,8 +262,8 @@ func (sq *SpecQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (sq *SpecQuery) ExistX(ctx context.Context) bool {
-	exist, err := sq.Exist(ctx)
+func (_q *SpecQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -272,41 +272,41 @@ func (sq *SpecQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the SpecQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (sq *SpecQuery) Clone() *SpecQuery {
-	if sq == nil {
+func (_q *SpecQuery) Clone() *SpecQuery {
+	if _q == nil {
 		return nil
 	}
 	return &SpecQuery{
-		config:     sq.config,
-		ctx:        sq.ctx.Clone(),
-		order:      append([]spec.OrderOption{}, sq.order...),
-		inters:     append([]Interceptor{}, sq.inters...),
-		predicates: append([]predicate.Spec{}, sq.predicates...),
-		withCard:   sq.withCard.Clone(),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]spec.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.Spec{}, _q.predicates...),
+		withCard:   _q.withCard.Clone(),
 		// clone intermediate query.
-		sql:       sq.sql.Clone(),
-		path:      sq.path,
-		modifiers: append([]func(*sql.Selector){}, sq.modifiers...),
+		sql:       _q.sql.Clone(),
+		path:      _q.path,
+		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
 // WithCard tells the query-builder to eager-load the nodes that are connected to
 // the "card" edge. The optional arguments are used to configure the query builder of the edge.
-func (sq *SpecQuery) WithCard(opts ...func(*CardQuery)) *SpecQuery {
-	query := (&CardClient{config: sq.config}).Query()
+func (_q *SpecQuery) WithCard(opts ...func(*CardQuery)) *SpecQuery {
+	query := (&CardClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	sq.withCard = query
-	return sq
+	_q.withCard = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
-func (sq *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
-	sq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &SpecGroupBy{build: sq}
-	grbuild.flds = &sq.ctx.Fields
+func (_q *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &SpecGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = spec.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -314,83 +314,83 @@ func (sq *SpecQuery) GroupBy(field string, fields ...string) *SpecGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (sq *SpecQuery) Select(fields ...string) *SpecSelect {
-	sq.ctx.Fields = append(sq.ctx.Fields, fields...)
-	sbuild := &SpecSelect{SpecQuery: sq}
+func (_q *SpecQuery) Select(fields ...string) *SpecSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &SpecSelect{SpecQuery: _q}
 	sbuild.label = spec.Label
-	sbuild.flds, sbuild.scan = &sq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a SpecSelect configured with the given aggregations.
-func (sq *SpecQuery) Aggregate(fns ...AggregateFunc) *SpecSelect {
-	return sq.Select().Aggregate(fns...)
+func (_q *SpecQuery) Aggregate(fns ...AggregateFunc) *SpecSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (sq *SpecQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range sq.inters {
+func (_q *SpecQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, sq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range sq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !spec.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if sq.path != nil {
-		prev, err := sq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		sq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (sq *SpecQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Spec, error) {
+func (_q *SpecQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Spec, error) {
 	var (
 		nodes       = []*Spec{}
-		_spec       = sq.querySpec()
+		_spec       = _q.querySpec()
 		loadedTypes = [1]bool{
-			sq.withCard != nil,
+			_q.withCard != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Spec).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Spec{config: sq.config}
+		node := &Spec{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
-	if len(sq.modifiers) > 0 {
-		_spec.Modifiers = sq.modifiers
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, sq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := sq.withCard; query != nil {
-		if err := sq.loadCard(ctx, query, nodes,
+	if query := _q.withCard; query != nil {
+		if err := _q.loadCard(ctx, query, nodes,
 			func(n *Spec) { n.Edges.Card = []*Card{} },
 			func(n *Spec, e *Card) { n.Edges.Card = append(n.Edges.Card, e) }); err != nil {
 			return nil, err
 		}
 	}
-	for name, query := range sq.withNamedCard {
-		if err := sq.loadCard(ctx, query, nodes,
+	for name, query := range _q.withNamedCard {
+		if err := _q.loadCard(ctx, query, nodes,
 			func(n *Spec) { n.appendNamedCard(name) },
 			func(n *Spec, e *Card) { n.appendNamedCard(name, e) }); err != nil {
 			return nil, err
@@ -399,7 +399,7 @@ func (sq *SpecQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Spec, e
 	return nodes, nil
 }
 
-func (sq *SpecQuery) loadCard(ctx context.Context, query *CardQuery, nodes []*Spec, init func(*Spec), assign func(*Spec, *Card)) error {
+func (_q *SpecQuery) loadCard(ctx context.Context, query *CardQuery, nodes []*Spec, init func(*Spec), assign func(*Spec, *Card)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[int]*Spec)
 	nids := make(map[int]map[*Spec]struct{})
@@ -461,27 +461,27 @@ func (sq *SpecQuery) loadCard(ctx context.Context, query *CardQuery, nodes []*Sp
 	return nil
 }
 
-func (sq *SpecQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := sq.querySpec()
-	if len(sq.modifiers) > 0 {
-		_spec.Modifiers = sq.modifiers
+func (_q *SpecQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
-	_spec.Node.Columns = sq.ctx.Fields
-	if len(sq.ctx.Fields) > 0 {
-		_spec.Unique = sq.ctx.Unique != nil && *sq.ctx.Unique
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, sq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (sq *SpecQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *SpecQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(spec.Table, spec.Columns, sqlgraph.NewFieldSpec(spec.FieldID, field.TypeInt))
-	_spec.From = sq.sql
-	if unique := sq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if sq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := sq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, spec.FieldID)
 		for i := range fields {
@@ -490,20 +490,20 @@ func (sq *SpecQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := sq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := sq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := sq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := sq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -513,36 +513,36 @@ func (sq *SpecQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (sq *SpecQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(sq.driver.Dialect())
+func (_q *SpecQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(spec.Table)
-	columns := sq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = spec.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if sq.sql != nil {
-		selector = sq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if sq.ctx.Unique != nil && *sq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, m := range sq.modifiers {
+	for _, m := range _q.modifiers {
 		m(selector)
 	}
-	for _, p := range sq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range sq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := sq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := sq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -551,47 +551,47 @@ func (sq *SpecQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // ForUpdate locks the selected rows against concurrent updates, and prevent them from being
 // updated, deleted or "selected ... for update" by other sessions, until the transaction is
 // either committed or rolled-back.
-func (sq *SpecQuery) ForUpdate(opts ...sql.LockOption) *SpecQuery {
-	if sq.driver.Dialect() == dialect.Postgres {
-		sq.Unique(false)
+func (_q *SpecQuery) ForUpdate(opts ...sql.LockOption) *SpecQuery {
+	if _q.driver.Dialect() == dialect.Postgres {
+		_q.Unique(false)
 	}
-	sq.modifiers = append(sq.modifiers, func(s *sql.Selector) {
+	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
 		s.ForUpdate(opts...)
 	})
-	return sq
+	return _q
 }
 
 // ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
 // on any rows that are read. Other sessions can read the rows, but cannot modify them
 // until your transaction commits.
-func (sq *SpecQuery) ForShare(opts ...sql.LockOption) *SpecQuery {
-	if sq.driver.Dialect() == dialect.Postgres {
-		sq.Unique(false)
+func (_q *SpecQuery) ForShare(opts ...sql.LockOption) *SpecQuery {
+	if _q.driver.Dialect() == dialect.Postgres {
+		_q.Unique(false)
 	}
-	sq.modifiers = append(sq.modifiers, func(s *sql.Selector) {
+	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
 		s.ForShare(opts...)
 	})
-	return sq
+	return _q
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (sq *SpecQuery) Modify(modifiers ...func(s *sql.Selector)) *SpecSelect {
-	sq.modifiers = append(sq.modifiers, modifiers...)
-	return sq.Select()
+func (_q *SpecQuery) Modify(modifiers ...func(s *sql.Selector)) *SpecSelect {
+	_q.modifiers = append(_q.modifiers, modifiers...)
+	return _q.Select()
 }
 
 // WithNamedCard tells the query-builder to eager-load the nodes that are connected to the "card"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (sq *SpecQuery) WithNamedCard(name string, opts ...func(*CardQuery)) *SpecQuery {
-	query := (&CardClient{config: sq.config}).Query()
+func (_q *SpecQuery) WithNamedCard(name string, opts ...func(*CardQuery)) *SpecQuery {
+	query := (&CardClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	if sq.withNamedCard == nil {
-		sq.withNamedCard = make(map[string]*CardQuery)
+	if _q.withNamedCard == nil {
+		_q.withNamedCard = make(map[string]*CardQuery)
 	}
-	sq.withNamedCard[name] = query
-	return sq
+	_q.withNamedCard[name] = query
+	return _q
 }
 
 // SpecGroupBy is the group-by builder for Spec entities.

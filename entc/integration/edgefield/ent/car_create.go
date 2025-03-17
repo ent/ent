@@ -25,62 +25,62 @@ type CarCreate struct {
 }
 
 // SetNumber sets the "number" field.
-func (cc *CarCreate) SetNumber(s string) *CarCreate {
-	cc.mutation.SetNumber(s)
-	return cc
+func (_c *CarCreate) SetNumber(s string) *CarCreate {
+	_c.mutation.SetNumber(s)
+	return _c
 }
 
 // SetNillableNumber sets the "number" field if the given value is not nil.
-func (cc *CarCreate) SetNillableNumber(s *string) *CarCreate {
+func (_c *CarCreate) SetNillableNumber(s *string) *CarCreate {
 	if s != nil {
-		cc.SetNumber(*s)
+		_c.SetNumber(*s)
 	}
-	return cc
+	return _c
 }
 
 // SetID sets the "id" field.
-func (cc *CarCreate) SetID(u uuid.UUID) *CarCreate {
-	cc.mutation.SetID(u)
-	return cc
+func (_c *CarCreate) SetID(u uuid.UUID) *CarCreate {
+	_c.mutation.SetID(u)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (cc *CarCreate) SetNillableID(u *uuid.UUID) *CarCreate {
+func (_c *CarCreate) SetNillableID(u *uuid.UUID) *CarCreate {
 	if u != nil {
-		cc.SetID(*u)
+		_c.SetID(*u)
 	}
-	return cc
+	return _c
 }
 
 // AddRentalIDs adds the "rentals" edge to the Rental entity by IDs.
-func (cc *CarCreate) AddRentalIDs(ids ...int) *CarCreate {
-	cc.mutation.AddRentalIDs(ids...)
-	return cc
+func (_c *CarCreate) AddRentalIDs(ids ...int) *CarCreate {
+	_c.mutation.AddRentalIDs(ids...)
+	return _c
 }
 
 // AddRentals adds the "rentals" edges to the Rental entity.
-func (cc *CarCreate) AddRentals(r ...*Rental) *CarCreate {
+func (_c *CarCreate) AddRentals(r ...*Rental) *CarCreate {
 	ids := make([]int, len(r))
 	for i := range r {
 		ids[i] = r[i].ID
 	}
-	return cc.AddRentalIDs(ids...)
+	return _c.AddRentalIDs(ids...)
 }
 
 // Mutation returns the CarMutation object of the builder.
-func (cc *CarCreate) Mutation() *CarMutation {
-	return cc.mutation
+func (_c *CarCreate) Mutation() *CarMutation {
+	return _c.mutation
 }
 
 // Save creates the Car in the database.
-func (cc *CarCreate) Save(ctx context.Context) (*Car, error) {
-	cc.defaults()
-	return withHooks(ctx, cc.sqlSave, cc.mutation, cc.hooks)
+func (_c *CarCreate) Save(ctx context.Context) (*Car, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (cc *CarCreate) SaveX(ctx context.Context) *Car {
-	v, err := cc.Save(ctx)
+func (_c *CarCreate) SaveX(ctx context.Context) *Car {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -88,37 +88,37 @@ func (cc *CarCreate) SaveX(ctx context.Context) *Car {
 }
 
 // Exec executes the query.
-func (cc *CarCreate) Exec(ctx context.Context) error {
-	_, err := cc.Save(ctx)
+func (_c *CarCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cc *CarCreate) ExecX(ctx context.Context) {
-	if err := cc.Exec(ctx); err != nil {
+func (_c *CarCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (cc *CarCreate) defaults() {
-	if _, ok := cc.mutation.ID(); !ok {
+func (_c *CarCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := car.DefaultID()
-		cc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cc *CarCreate) check() error {
+func (_c *CarCreate) check() error {
 	return nil
 }
 
-func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
-	if err := cc.check(); err != nil {
+func (_c *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := cc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -131,25 +131,25 @@ func (cc *CarCreate) sqlSave(ctx context.Context) (*Car, error) {
 			return nil, err
 		}
 	}
-	cc.mutation.id = &_node.ID
-	cc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (cc *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
+func (_c *CarCreate) createSpec() (*Car, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Car{config: cc.config}
+		_node = &Car{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(car.Table, sqlgraph.NewFieldSpec(car.FieldID, field.TypeUUID))
 	)
-	if id, ok := cc.mutation.ID(); ok {
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := cc.mutation.Number(); ok {
+	if value, ok := _c.mutation.Number(); ok {
 		_spec.SetField(car.FieldNumber, field.TypeString, value)
 		_node.Number = value
 	}
-	if nodes := cc.mutation.RentalsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.RentalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -176,16 +176,16 @@ type CarCreateBulk struct {
 }
 
 // Save creates the Car entities in the database.
-func (ccb *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
-	if ccb.err != nil {
-		return nil, ccb.err
+func (_c *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
-	nodes := make([]*Car, len(ccb.builders))
-	mutators := make([]Mutator, len(ccb.builders))
-	for i := range ccb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Car, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := ccb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CarMutation)
@@ -199,11 +199,11 @@ func (ccb *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, ccb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ccb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -223,7 +223,7 @@ func (ccb *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, ccb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -231,8 +231,8 @@ func (ccb *CarCreateBulk) Save(ctx context.Context) ([]*Car, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ccb *CarCreateBulk) SaveX(ctx context.Context) []*Car {
-	v, err := ccb.Save(ctx)
+func (_c *CarCreateBulk) SaveX(ctx context.Context) []*Car {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -240,14 +240,14 @@ func (ccb *CarCreateBulk) SaveX(ctx context.Context) []*Car {
 }
 
 // Exec executes the query.
-func (ccb *CarCreateBulk) Exec(ctx context.Context) error {
-	_, err := ccb.Save(ctx)
+func (_c *CarCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ccb *CarCreateBulk) ExecX(ctx context.Context) {
-	if err := ccb.Exec(ctx); err != nil {
+func (_c *CarCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

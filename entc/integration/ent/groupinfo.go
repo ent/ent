@@ -67,7 +67,7 @@ func (*GroupInfo) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the GroupInfo fields.
-func (gi *GroupInfo) assignValues(columns []string, values []any) error {
+func (_m *GroupInfo) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -78,21 +78,21 @@ func (gi *GroupInfo) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			gi.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case groupinfo.FieldDesc:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field desc", values[i])
 			} else if value.Valid {
-				gi.Desc = value.String
+				_m.Desc = value.String
 			}
 		case groupinfo.FieldMaxUsers:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field max_users", values[i])
 			} else if value.Valid {
-				gi.MaxUsers = int(value.Int64)
+				_m.MaxUsers = int(value.Int64)
 			}
 		default:
-			gi.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -100,68 +100,68 @@ func (gi *GroupInfo) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the GroupInfo.
 // This includes values selected through modifiers, order, etc.
-func (gi *GroupInfo) Value(name string) (ent.Value, error) {
-	return gi.selectValues.Get(name)
+func (_m *GroupInfo) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryGroups queries the "groups" edge of the GroupInfo entity.
-func (gi *GroupInfo) QueryGroups() *GroupQuery {
-	return NewGroupInfoClient(gi.config).QueryGroups(gi)
+func (_m *GroupInfo) QueryGroups() *GroupQuery {
+	return NewGroupInfoClient(_m.config).QueryGroups(_m)
 }
 
 // Update returns a builder for updating this GroupInfo.
 // Note that you need to call GroupInfo.Unwrap() before calling this method if this GroupInfo
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (gi *GroupInfo) Update() *GroupInfoUpdateOne {
-	return NewGroupInfoClient(gi.config).UpdateOne(gi)
+func (_m *GroupInfo) Update() *GroupInfoUpdateOne {
+	return NewGroupInfoClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the GroupInfo entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (gi *GroupInfo) Unwrap() *GroupInfo {
-	_tx, ok := gi.config.driver.(*txDriver)
+func (_m *GroupInfo) Unwrap() *GroupInfo {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: GroupInfo is not a transactional entity")
 	}
-	gi.config.driver = _tx.drv
-	return gi
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (gi *GroupInfo) String() string {
+func (_m *GroupInfo) String() string {
 	var builder strings.Builder
 	builder.WriteString("GroupInfo(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", gi.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("desc=")
-	builder.WriteString(gi.Desc)
+	builder.WriteString(_m.Desc)
 	builder.WriteString(", ")
 	builder.WriteString("max_users=")
-	builder.WriteString(fmt.Sprintf("%v", gi.MaxUsers))
+	builder.WriteString(fmt.Sprintf("%v", _m.MaxUsers))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedGroups returns the Groups named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (gi *GroupInfo) NamedGroups(name string) ([]*Group, error) {
-	if gi.Edges.namedGroups == nil {
+func (_m *GroupInfo) NamedGroups(name string) ([]*Group, error) {
+	if _m.Edges.namedGroups == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := gi.Edges.namedGroups[name]
+	nodes, ok := _m.Edges.namedGroups[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (gi *GroupInfo) appendNamedGroups(name string, edges ...*Group) {
-	if gi.Edges.namedGroups == nil {
-		gi.Edges.namedGroups = make(map[string][]*Group)
+func (_m *GroupInfo) appendNamedGroups(name string, edges ...*Group) {
+	if _m.Edges.namedGroups == nil {
+		_m.Edges.namedGroups = make(map[string][]*Group)
 	}
 	if len(edges) == 0 {
-		gi.Edges.namedGroups[name] = []*Group{}
+		_m.Edges.namedGroups[name] = []*Group{}
 	} else {
-		gi.Edges.namedGroups[name] = append(gi.Edges.namedGroups[name], edges...)
+		_m.Edges.namedGroups[name] = append(_m.Edges.namedGroups[name], edges...)
 	}
 }
 

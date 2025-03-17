@@ -66,7 +66,7 @@ func (*Car) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Car fields.
-func (c *Car) assignValues(columns []string, values []any) error {
+func (_m *Car) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -77,16 +77,16 @@ func (c *Car) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			c.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case car.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field user_car", value)
 			} else if value.Valid {
-				c.user_car = new(int)
-				*c.user_car = int(value.Int64)
+				_m.user_car = new(int)
+				*_m.user_car = int(value.Int64)
 			}
 		default:
-			c.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -94,38 +94,38 @@ func (c *Car) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Car.
 // This includes values selected through modifiers, order, etc.
-func (c *Car) Value(name string) (ent.Value, error) {
-	return c.selectValues.Get(name)
+func (_m *Car) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryOwner queries the "owner" edge of the Car entity.
-func (c *Car) QueryOwner() *UserQuery {
-	return NewCarClient(c.config).QueryOwner(c)
+func (_m *Car) QueryOwner() *UserQuery {
+	return NewCarClient(_m.config).QueryOwner(_m)
 }
 
 // Update returns a builder for updating this Car.
 // Note that you need to call Car.Unwrap() before calling this method if this Car
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (c *Car) Update() *CarUpdateOne {
-	return NewCarClient(c.config).UpdateOne(c)
+func (_m *Car) Update() *CarUpdateOne {
+	return NewCarClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Car entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (c *Car) Unwrap() *Car {
-	_tx, ok := c.config.driver.(*txDriver)
+func (_m *Car) Unwrap() *Car {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("entv1: Car is not a transactional entity")
 	}
-	c.config.driver = _tx.drv
-	return c
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (c *Car) String() string {
+func (_m *Car) String() string {
 	var builder strings.Builder
 	builder.WriteString("Car(")
-	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
+	builder.WriteString(fmt.Sprintf("id=%v", _m.ID))
 	builder.WriteByte(')')
 	return builder.String()
 }

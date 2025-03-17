@@ -919,13 +919,13 @@ type predicateAdder interface {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (afq *AttachedFileQuery) addPredicate(pred func(s *sql.Selector)) {
-	afq.predicates = append(afq.predicates, pred)
+func (_q *AttachedFileQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the AttachedFileQuery builder.
-func (afq *AttachedFileQuery) Filter() *AttachedFileFilter {
-	return &AttachedFileFilter{config: afq.config, predicateAdder: afq}
+func (_q *AttachedFileQuery) Filter() *AttachedFileFilter {
+	return &AttachedFileFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1002,13 +1002,13 @@ func (f *AttachedFileFilter) WhereHasProcWith(preds ...predicate.Process) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (fq *FileQuery) addPredicate(pred func(s *sql.Selector)) {
-	fq.predicates = append(fq.predicates, pred)
+func (_q *FileQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the FileQuery builder.
-func (fq *FileQuery) Filter() *FileFilter {
-	return &FileFilter{config: fq.config, predicateAdder: fq}
+func (_q *FileQuery) Filter() *FileFilter {
+	return &FileFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1061,13 +1061,13 @@ func (f *FileFilter) WhereHasProcessesWith(preds ...predicate.Process) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (fq *FriendshipQuery) addPredicate(pred func(s *sql.Selector)) {
-	fq.predicates = append(fq.predicates, pred)
+func (_q *FriendshipQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the FriendshipQuery builder.
-func (fq *FriendshipQuery) Filter() *FriendshipFilter {
-	return &FriendshipFilter{config: fq.config, predicateAdder: fq}
+func (_q *FriendshipQuery) Filter() *FriendshipFilter {
+	return &FriendshipFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1149,13 +1149,13 @@ func (f *FriendshipFilter) WhereHasFriendWith(preds ...predicate.User) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (gq *GroupQuery) addPredicate(pred func(s *sql.Selector)) {
-	gq.predicates = append(gq.predicates, pred)
+func (_q *GroupQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the GroupQuery builder.
-func (gq *GroupQuery) Filter() *GroupFilter {
-	return &GroupFilter{config: gq.config, predicateAdder: gq}
+func (_q *GroupQuery) Filter() *GroupFilter {
+	return &GroupFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1250,13 +1250,13 @@ func (f *GroupFilter) WhereHasGroupTagsWith(preds ...predicate.GroupTag) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (gtq *GroupTagQuery) addPredicate(pred func(s *sql.Selector)) {
-	gtq.predicates = append(gtq.predicates, pred)
+func (_q *GroupTagQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the GroupTagQuery builder.
-func (gtq *GroupTagQuery) Filter() *GroupTagFilter {
-	return &GroupTagFilter{config: gtq.config, predicateAdder: gtq}
+func (_q *GroupTagQuery) Filter() *GroupTagFilter {
+	return &GroupTagFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1328,13 +1328,13 @@ func (f *GroupTagFilter) WhereHasGroupWith(preds ...predicate.Group) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (pq *ProcessQuery) addPredicate(pred func(s *sql.Selector)) {
-	pq.predicates = append(pq.predicates, pred)
+func (_q *ProcessQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the ProcessQuery builder.
-func (pq *ProcessQuery) Filter() *ProcessFilter {
-	return &ProcessFilter{config: pq.config, predicateAdder: pq}
+func (_q *ProcessQuery) Filter() *ProcessFilter {
+	return &ProcessFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1396,13 +1396,13 @@ func (f *ProcessFilter) WhereHasAttachedFilesWith(preds ...predicate.AttachedFil
 }
 
 // addPredicate implements the predicateAdder interface.
-func (rq *RelationshipQuery) addPredicate(pred func(s *sql.Selector)) {
-	rq.predicates = append(rq.predicates, pred)
+func (_q *RelationshipQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the RelationshipQuery builder.
-func (rq *RelationshipQuery) Filter() *RelationshipFilter {
-	return &RelationshipFilter{config: rq.config, predicateAdder: rq}
+func (_q *RelationshipQuery) Filter() *RelationshipFilter {
+	return &RelationshipFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1493,13 +1493,13 @@ func (f *RelationshipFilter) WhereHasInfoWith(preds ...predicate.RelationshipInf
 }
 
 // addPredicate implements the predicateAdder interface.
-func (riq *RelationshipInfoQuery) addPredicate(pred func(s *sql.Selector)) {
-	riq.predicates = append(riq.predicates, pred)
+func (_q *RelationshipInfoQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the RelationshipInfoQuery builder.
-func (riq *RelationshipInfoQuery) Filter() *RelationshipInfoFilter {
-	return &RelationshipInfoFilter{config: riq.config, predicateAdder: riq}
+func (_q *RelationshipInfoQuery) Filter() *RelationshipInfoFilter {
+	return &RelationshipInfoFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1538,13 +1538,13 @@ func (f *RelationshipInfoFilter) WhereText(p entql.StringP) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (rq *RoleQuery) addPredicate(pred func(s *sql.Selector)) {
-	rq.predicates = append(rq.predicates, pred)
+func (_q *RoleQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the RoleQuery builder.
-func (rq *RoleQuery) Filter() *RoleFilter {
-	return &RoleFilter{config: rq.config, predicateAdder: rq}
+func (_q *RoleQuery) Filter() *RoleFilter {
+	return &RoleFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1616,13 +1616,13 @@ func (f *RoleFilter) WhereHasRolesUsersWith(preds ...predicate.RoleUser) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (ruq *RoleUserQuery) addPredicate(pred func(s *sql.Selector)) {
-	ruq.predicates = append(ruq.predicates, pred)
+func (_q *RoleUserQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the RoleUserQuery builder.
-func (ruq *RoleUserQuery) Filter() *RoleUserFilter {
-	return &RoleUserFilter{config: ruq.config, predicateAdder: ruq}
+func (_q *RoleUserQuery) Filter() *RoleUserFilter {
+	return &RoleUserFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1694,13 +1694,13 @@ func (f *RoleUserFilter) WhereHasUserWith(preds ...predicate.User) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (tq *TagQuery) addPredicate(pred func(s *sql.Selector)) {
-	tq.predicates = append(tq.predicates, pred)
+func (_q *TagQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the TagQuery builder.
-func (tq *TagQuery) Filter() *TagFilter {
-	return &TagFilter{config: tq.config, predicateAdder: tq}
+func (_q *TagQuery) Filter() *TagFilter {
+	return &TagFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1795,13 +1795,13 @@ func (f *TagFilter) WhereHasGroupTagsWith(preds ...predicate.GroupTag) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (tq *TweetQuery) addPredicate(pred func(s *sql.Selector)) {
-	tq.predicates = append(tq.predicates, pred)
+func (_q *TweetQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the TweetQuery builder.
-func (tq *TweetQuery) Filter() *TweetFilter {
-	return &TweetFilter{config: tq.config, predicateAdder: tq}
+func (_q *TweetQuery) Filter() *TweetFilter {
+	return &TweetFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -1924,13 +1924,13 @@ func (f *TweetFilter) WhereHasTweetTagsWith(preds ...predicate.TweetTag) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (tlq *TweetLikeQuery) addPredicate(pred func(s *sql.Selector)) {
-	tlq.predicates = append(tlq.predicates, pred)
+func (_q *TweetLikeQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the TweetLikeQuery builder.
-func (tlq *TweetLikeQuery) Filter() *TweetLikeFilter {
-	return &TweetLikeFilter{config: tlq.config, predicateAdder: tlq}
+func (_q *TweetLikeQuery) Filter() *TweetLikeFilter {
+	return &TweetLikeFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -2002,13 +2002,13 @@ func (f *TweetLikeFilter) WhereHasUserWith(preds ...predicate.User) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (ttq *TweetTagQuery) addPredicate(pred func(s *sql.Selector)) {
-	ttq.predicates = append(ttq.predicates, pred)
+func (_q *TweetTagQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the TweetTagQuery builder.
-func (ttq *TweetTagQuery) Filter() *TweetTagFilter {
-	return &TweetTagFilter{config: ttq.config, predicateAdder: ttq}
+func (_q *TweetTagQuery) Filter() *TweetTagFilter {
+	return &TweetTagFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -2085,13 +2085,13 @@ func (f *TweetTagFilter) WhereHasTweetWith(preds ...predicate.Tweet) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (uq *UserQuery) addPredicate(pred func(s *sql.Selector)) {
-	uq.predicates = append(uq.predicates, pred)
+func (_q *UserQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the UserQuery builder.
-func (uq *UserQuery) Filter() *UserFilter {
-	return &UserFilter{config: uq.config, predicateAdder: uq}
+func (_q *UserQuery) Filter() *UserFilter {
+	return &UserFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -2298,13 +2298,13 @@ func (f *UserFilter) WhereHasRolesUsersWith(preds ...predicate.RoleUser) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (ugq *UserGroupQuery) addPredicate(pred func(s *sql.Selector)) {
-	ugq.predicates = append(ugq.predicates, pred)
+func (_q *UserGroupQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the UserGroupQuery builder.
-func (ugq *UserGroupQuery) Filter() *UserGroupFilter {
-	return &UserGroupFilter{config: ugq.config, predicateAdder: ugq}
+func (_q *UserGroupQuery) Filter() *UserGroupFilter {
+	return &UserGroupFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -2381,13 +2381,13 @@ func (f *UserGroupFilter) WhereHasGroupWith(preds ...predicate.Group) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (utq *UserTweetQuery) addPredicate(pred func(s *sql.Selector)) {
-	utq.predicates = append(utq.predicates, pred)
+func (_q *UserTweetQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the UserTweetQuery builder.
-func (utq *UserTweetQuery) Filter() *UserTweetFilter {
-	return &UserTweetFilter{config: utq.config, predicateAdder: utq}
+func (_q *UserTweetQuery) Filter() *UserTweetFilter {
+	return &UserTweetFilter{config: _q.config, predicateAdder: _q}
 }
 
 // addPredicate implements the predicateAdder interface.

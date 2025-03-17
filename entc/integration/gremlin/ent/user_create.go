@@ -27,352 +27,352 @@ type UserCreate struct {
 }
 
 // SetOptionalInt sets the "optional_int" field.
-func (uc *UserCreate) SetOptionalInt(i int) *UserCreate {
-	uc.mutation.SetOptionalInt(i)
-	return uc
+func (_c *UserCreate) SetOptionalInt(i int) *UserCreate {
+	_c.mutation.SetOptionalInt(i)
+	return _c
 }
 
 // SetNillableOptionalInt sets the "optional_int" field if the given value is not nil.
-func (uc *UserCreate) SetNillableOptionalInt(i *int) *UserCreate {
+func (_c *UserCreate) SetNillableOptionalInt(i *int) *UserCreate {
 	if i != nil {
-		uc.SetOptionalInt(*i)
+		_c.SetOptionalInt(*i)
 	}
-	return uc
+	return _c
 }
 
 // SetAge sets the "age" field.
-func (uc *UserCreate) SetAge(i int) *UserCreate {
-	uc.mutation.SetAge(i)
-	return uc
+func (_c *UserCreate) SetAge(i int) *UserCreate {
+	_c.mutation.SetAge(i)
+	return _c
 }
 
 // SetName sets the "name" field.
-func (uc *UserCreate) SetName(s string) *UserCreate {
-	uc.mutation.SetName(s)
-	return uc
+func (_c *UserCreate) SetName(s string) *UserCreate {
+	_c.mutation.SetName(s)
+	return _c
 }
 
 // SetLast sets the "last" field.
-func (uc *UserCreate) SetLast(s string) *UserCreate {
-	uc.mutation.SetLast(s)
-	return uc
+func (_c *UserCreate) SetLast(s string) *UserCreate {
+	_c.mutation.SetLast(s)
+	return _c
 }
 
 // SetNillableLast sets the "last" field if the given value is not nil.
-func (uc *UserCreate) SetNillableLast(s *string) *UserCreate {
+func (_c *UserCreate) SetNillableLast(s *string) *UserCreate {
 	if s != nil {
-		uc.SetLast(*s)
+		_c.SetLast(*s)
 	}
-	return uc
+	return _c
 }
 
 // SetNickname sets the "nickname" field.
-func (uc *UserCreate) SetNickname(s string) *UserCreate {
-	uc.mutation.SetNickname(s)
-	return uc
+func (_c *UserCreate) SetNickname(s string) *UserCreate {
+	_c.mutation.SetNickname(s)
+	return _c
 }
 
 // SetNillableNickname sets the "nickname" field if the given value is not nil.
-func (uc *UserCreate) SetNillableNickname(s *string) *UserCreate {
+func (_c *UserCreate) SetNillableNickname(s *string) *UserCreate {
 	if s != nil {
-		uc.SetNickname(*s)
+		_c.SetNickname(*s)
 	}
-	return uc
+	return _c
 }
 
 // SetAddress sets the "address" field.
-func (uc *UserCreate) SetAddress(s string) *UserCreate {
-	uc.mutation.SetAddress(s)
-	return uc
+func (_c *UserCreate) SetAddress(s string) *UserCreate {
+	_c.mutation.SetAddress(s)
+	return _c
 }
 
 // SetNillableAddress sets the "address" field if the given value is not nil.
-func (uc *UserCreate) SetNillableAddress(s *string) *UserCreate {
+func (_c *UserCreate) SetNillableAddress(s *string) *UserCreate {
 	if s != nil {
-		uc.SetAddress(*s)
+		_c.SetAddress(*s)
 	}
-	return uc
+	return _c
 }
 
 // SetPhone sets the "phone" field.
-func (uc *UserCreate) SetPhone(s string) *UserCreate {
-	uc.mutation.SetPhone(s)
-	return uc
+func (_c *UserCreate) SetPhone(s string) *UserCreate {
+	_c.mutation.SetPhone(s)
+	return _c
 }
 
 // SetNillablePhone sets the "phone" field if the given value is not nil.
-func (uc *UserCreate) SetNillablePhone(s *string) *UserCreate {
+func (_c *UserCreate) SetNillablePhone(s *string) *UserCreate {
 	if s != nil {
-		uc.SetPhone(*s)
+		_c.SetPhone(*s)
 	}
-	return uc
+	return _c
 }
 
 // SetPassword sets the "password" field.
-func (uc *UserCreate) SetPassword(s string) *UserCreate {
-	uc.mutation.SetPassword(s)
-	return uc
+func (_c *UserCreate) SetPassword(s string) *UserCreate {
+	_c.mutation.SetPassword(s)
+	return _c
 }
 
 // SetNillablePassword sets the "password" field if the given value is not nil.
-func (uc *UserCreate) SetNillablePassword(s *string) *UserCreate {
+func (_c *UserCreate) SetNillablePassword(s *string) *UserCreate {
 	if s != nil {
-		uc.SetPassword(*s)
+		_c.SetPassword(*s)
 	}
-	return uc
+	return _c
 }
 
 // SetRole sets the "role" field.
-func (uc *UserCreate) SetRole(u user.Role) *UserCreate {
-	uc.mutation.SetRole(u)
-	return uc
+func (_c *UserCreate) SetRole(u user.Role) *UserCreate {
+	_c.mutation.SetRole(u)
+	return _c
 }
 
 // SetNillableRole sets the "role" field if the given value is not nil.
-func (uc *UserCreate) SetNillableRole(u *user.Role) *UserCreate {
+func (_c *UserCreate) SetNillableRole(u *user.Role) *UserCreate {
 	if u != nil {
-		uc.SetRole(*u)
+		_c.SetRole(*u)
 	}
-	return uc
+	return _c
 }
 
 // SetEmployment sets the "employment" field.
-func (uc *UserCreate) SetEmployment(u user.Employment) *UserCreate {
-	uc.mutation.SetEmployment(u)
-	return uc
+func (_c *UserCreate) SetEmployment(u user.Employment) *UserCreate {
+	_c.mutation.SetEmployment(u)
+	return _c
 }
 
 // SetNillableEmployment sets the "employment" field if the given value is not nil.
-func (uc *UserCreate) SetNillableEmployment(u *user.Employment) *UserCreate {
+func (_c *UserCreate) SetNillableEmployment(u *user.Employment) *UserCreate {
 	if u != nil {
-		uc.SetEmployment(*u)
+		_c.SetEmployment(*u)
 	}
-	return uc
+	return _c
 }
 
 // SetSSOCert sets the "SSOCert" field.
-func (uc *UserCreate) SetSSOCert(s string) *UserCreate {
-	uc.mutation.SetSSOCert(s)
-	return uc
+func (_c *UserCreate) SetSSOCert(s string) *UserCreate {
+	_c.mutation.SetSSOCert(s)
+	return _c
 }
 
 // SetNillableSSOCert sets the "SSOCert" field if the given value is not nil.
-func (uc *UserCreate) SetNillableSSOCert(s *string) *UserCreate {
+func (_c *UserCreate) SetNillableSSOCert(s *string) *UserCreate {
 	if s != nil {
-		uc.SetSSOCert(*s)
+		_c.SetSSOCert(*s)
 	}
-	return uc
+	return _c
 }
 
 // SetFilesCount sets the "files_count" field.
-func (uc *UserCreate) SetFilesCount(i int) *UserCreate {
-	uc.mutation.SetFilesCount(i)
-	return uc
+func (_c *UserCreate) SetFilesCount(i int) *UserCreate {
+	_c.mutation.SetFilesCount(i)
+	return _c
 }
 
 // SetNillableFilesCount sets the "files_count" field if the given value is not nil.
-func (uc *UserCreate) SetNillableFilesCount(i *int) *UserCreate {
+func (_c *UserCreate) SetNillableFilesCount(i *int) *UserCreate {
 	if i != nil {
-		uc.SetFilesCount(*i)
+		_c.SetFilesCount(*i)
 	}
-	return uc
+	return _c
 }
 
 // SetCardID sets the "card" edge to the Card entity by ID.
-func (uc *UserCreate) SetCardID(id string) *UserCreate {
-	uc.mutation.SetCardID(id)
-	return uc
+func (_c *UserCreate) SetCardID(id string) *UserCreate {
+	_c.mutation.SetCardID(id)
+	return _c
 }
 
 // SetNillableCardID sets the "card" edge to the Card entity by ID if the given value is not nil.
-func (uc *UserCreate) SetNillableCardID(id *string) *UserCreate {
+func (_c *UserCreate) SetNillableCardID(id *string) *UserCreate {
 	if id != nil {
-		uc = uc.SetCardID(*id)
+		_c = _c.SetCardID(*id)
 	}
-	return uc
+	return _c
 }
 
 // SetCard sets the "card" edge to the Card entity.
-func (uc *UserCreate) SetCard(c *Card) *UserCreate {
-	return uc.SetCardID(c.ID)
+func (_c *UserCreate) SetCard(c *Card) *UserCreate {
+	return _c.SetCardID(c.ID)
 }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
-func (uc *UserCreate) AddPetIDs(ids ...string) *UserCreate {
-	uc.mutation.AddPetIDs(ids...)
-	return uc
+func (_c *UserCreate) AddPetIDs(ids ...string) *UserCreate {
+	_c.mutation.AddPetIDs(ids...)
+	return _c
 }
 
 // AddPets adds the "pets" edges to the Pet entity.
-func (uc *UserCreate) AddPets(p ...*Pet) *UserCreate {
+func (_c *UserCreate) AddPets(p ...*Pet) *UserCreate {
 	ids := make([]string, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return uc.AddPetIDs(ids...)
+	return _c.AddPetIDs(ids...)
 }
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
-func (uc *UserCreate) AddFileIDs(ids ...string) *UserCreate {
-	uc.mutation.AddFileIDs(ids...)
-	return uc
+func (_c *UserCreate) AddFileIDs(ids ...string) *UserCreate {
+	_c.mutation.AddFileIDs(ids...)
+	return _c
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (uc *UserCreate) AddFiles(f ...*File) *UserCreate {
+func (_c *UserCreate) AddFiles(f ...*File) *UserCreate {
 	ids := make([]string, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return uc.AddFileIDs(ids...)
+	return _c.AddFileIDs(ids...)
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (uc *UserCreate) AddGroupIDs(ids ...string) *UserCreate {
-	uc.mutation.AddGroupIDs(ids...)
-	return uc
+func (_c *UserCreate) AddGroupIDs(ids ...string) *UserCreate {
+	_c.mutation.AddGroupIDs(ids...)
+	return _c
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (uc *UserCreate) AddGroups(g ...*Group) *UserCreate {
+func (_c *UserCreate) AddGroups(g ...*Group) *UserCreate {
 	ids := make([]string, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
-	return uc.AddGroupIDs(ids...)
+	return _c.AddGroupIDs(ids...)
 }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
-func (uc *UserCreate) AddFriendIDs(ids ...string) *UserCreate {
-	uc.mutation.AddFriendIDs(ids...)
-	return uc
+func (_c *UserCreate) AddFriendIDs(ids ...string) *UserCreate {
+	_c.mutation.AddFriendIDs(ids...)
+	return _c
 }
 
 // AddFriends adds the "friends" edges to the User entity.
-func (uc *UserCreate) AddFriends(u ...*User) *UserCreate {
+func (_c *UserCreate) AddFriends(u ...*User) *UserCreate {
 	ids := make([]string, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uc.AddFriendIDs(ids...)
+	return _c.AddFriendIDs(ids...)
 }
 
 // AddFollowerIDs adds the "followers" edge to the User entity by IDs.
-func (uc *UserCreate) AddFollowerIDs(ids ...string) *UserCreate {
-	uc.mutation.AddFollowerIDs(ids...)
-	return uc
+func (_c *UserCreate) AddFollowerIDs(ids ...string) *UserCreate {
+	_c.mutation.AddFollowerIDs(ids...)
+	return _c
 }
 
 // AddFollowers adds the "followers" edges to the User entity.
-func (uc *UserCreate) AddFollowers(u ...*User) *UserCreate {
+func (_c *UserCreate) AddFollowers(u ...*User) *UserCreate {
 	ids := make([]string, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uc.AddFollowerIDs(ids...)
+	return _c.AddFollowerIDs(ids...)
 }
 
 // AddFollowingIDs adds the "following" edge to the User entity by IDs.
-func (uc *UserCreate) AddFollowingIDs(ids ...string) *UserCreate {
-	uc.mutation.AddFollowingIDs(ids...)
-	return uc
+func (_c *UserCreate) AddFollowingIDs(ids ...string) *UserCreate {
+	_c.mutation.AddFollowingIDs(ids...)
+	return _c
 }
 
 // AddFollowing adds the "following" edges to the User entity.
-func (uc *UserCreate) AddFollowing(u ...*User) *UserCreate {
+func (_c *UserCreate) AddFollowing(u ...*User) *UserCreate {
 	ids := make([]string, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uc.AddFollowingIDs(ids...)
+	return _c.AddFollowingIDs(ids...)
 }
 
 // SetTeamID sets the "team" edge to the Pet entity by ID.
-func (uc *UserCreate) SetTeamID(id string) *UserCreate {
-	uc.mutation.SetTeamID(id)
-	return uc
+func (_c *UserCreate) SetTeamID(id string) *UserCreate {
+	_c.mutation.SetTeamID(id)
+	return _c
 }
 
 // SetNillableTeamID sets the "team" edge to the Pet entity by ID if the given value is not nil.
-func (uc *UserCreate) SetNillableTeamID(id *string) *UserCreate {
+func (_c *UserCreate) SetNillableTeamID(id *string) *UserCreate {
 	if id != nil {
-		uc = uc.SetTeamID(*id)
+		_c = _c.SetTeamID(*id)
 	}
-	return uc
+	return _c
 }
 
 // SetTeam sets the "team" edge to the Pet entity.
-func (uc *UserCreate) SetTeam(p *Pet) *UserCreate {
-	return uc.SetTeamID(p.ID)
+func (_c *UserCreate) SetTeam(p *Pet) *UserCreate {
+	return _c.SetTeamID(p.ID)
 }
 
 // SetSpouseID sets the "spouse" edge to the User entity by ID.
-func (uc *UserCreate) SetSpouseID(id string) *UserCreate {
-	uc.mutation.SetSpouseID(id)
-	return uc
+func (_c *UserCreate) SetSpouseID(id string) *UserCreate {
+	_c.mutation.SetSpouseID(id)
+	return _c
 }
 
 // SetNillableSpouseID sets the "spouse" edge to the User entity by ID if the given value is not nil.
-func (uc *UserCreate) SetNillableSpouseID(id *string) *UserCreate {
+func (_c *UserCreate) SetNillableSpouseID(id *string) *UserCreate {
 	if id != nil {
-		uc = uc.SetSpouseID(*id)
+		_c = _c.SetSpouseID(*id)
 	}
-	return uc
+	return _c
 }
 
 // SetSpouse sets the "spouse" edge to the User entity.
-func (uc *UserCreate) SetSpouse(u *User) *UserCreate {
-	return uc.SetSpouseID(u.ID)
+func (_c *UserCreate) SetSpouse(u *User) *UserCreate {
+	return _c.SetSpouseID(u.ID)
 }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
-func (uc *UserCreate) AddChildIDs(ids ...string) *UserCreate {
-	uc.mutation.AddChildIDs(ids...)
-	return uc
+func (_c *UserCreate) AddChildIDs(ids ...string) *UserCreate {
+	_c.mutation.AddChildIDs(ids...)
+	return _c
 }
 
 // AddChildren adds the "children" edges to the User entity.
-func (uc *UserCreate) AddChildren(u ...*User) *UserCreate {
+func (_c *UserCreate) AddChildren(u ...*User) *UserCreate {
 	ids := make([]string, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uc.AddChildIDs(ids...)
+	return _c.AddChildIDs(ids...)
 }
 
 // SetParentID sets the "parent" edge to the User entity by ID.
-func (uc *UserCreate) SetParentID(id string) *UserCreate {
-	uc.mutation.SetParentID(id)
-	return uc
+func (_c *UserCreate) SetParentID(id string) *UserCreate {
+	_c.mutation.SetParentID(id)
+	return _c
 }
 
 // SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
-func (uc *UserCreate) SetNillableParentID(id *string) *UserCreate {
+func (_c *UserCreate) SetNillableParentID(id *string) *UserCreate {
 	if id != nil {
-		uc = uc.SetParentID(*id)
+		_c = _c.SetParentID(*id)
 	}
-	return uc
+	return _c
 }
 
 // SetParent sets the "parent" edge to the User entity.
-func (uc *UserCreate) SetParent(u *User) *UserCreate {
-	return uc.SetParentID(u.ID)
+func (_c *UserCreate) SetParent(u *User) *UserCreate {
+	return _c.SetParentID(u.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uc *UserCreate) Mutation() *UserMutation {
-	return uc.mutation
+func (_c *UserCreate) Mutation() *UserMutation {
+	return _c.mutation
 }
 
 // Save creates the User in the database.
-func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
-	uc.defaults()
-	return withHooks(ctx, uc.gremlinSave, uc.mutation, uc.hooks)
+func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (uc *UserCreate) SaveX(ctx context.Context) *User {
-	v, err := uc.Save(ctx)
+func (_c *UserCreate) SaveX(ctx context.Context) *User {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -380,66 +380,66 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 }
 
 // Exec executes the query.
-func (uc *UserCreate) Exec(ctx context.Context) error {
-	_, err := uc.Save(ctx)
+func (_c *UserCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uc *UserCreate) ExecX(ctx context.Context) {
-	if err := uc.Exec(ctx); err != nil {
+func (_c *UserCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (uc *UserCreate) defaults() {
-	if _, ok := uc.mutation.Last(); !ok {
+func (_c *UserCreate) defaults() {
+	if _, ok := _c.mutation.Last(); !ok {
 		v := user.DefaultLast
-		uc.mutation.SetLast(v)
+		_c.mutation.SetLast(v)
 	}
-	if _, ok := uc.mutation.Address(); !ok {
+	if _, ok := _c.mutation.Address(); !ok {
 		v := user.DefaultAddress()
-		uc.mutation.SetAddress(v)
+		_c.mutation.SetAddress(v)
 	}
-	if _, ok := uc.mutation.Role(); !ok {
+	if _, ok := _c.mutation.Role(); !ok {
 		v := user.DefaultRole
-		uc.mutation.SetRole(v)
+		_c.mutation.SetRole(v)
 	}
-	if _, ok := uc.mutation.Employment(); !ok {
+	if _, ok := _c.mutation.Employment(); !ok {
 		v := user.DefaultEmployment
-		uc.mutation.SetEmployment(v)
+		_c.mutation.SetEmployment(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uc *UserCreate) check() error {
-	if v, ok := uc.mutation.OptionalInt(); ok {
+func (_c *UserCreate) check() error {
+	if v, ok := _c.mutation.OptionalInt(); ok {
 		if err := user.OptionalIntValidator(v); err != nil {
 			return &ValidationError{Name: "optional_int", err: fmt.Errorf(`ent: validator failed for field "User.optional_int": %w`, err)}
 		}
 	}
-	if _, ok := uc.mutation.Age(); !ok {
+	if _, ok := _c.mutation.Age(); !ok {
 		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "User.age"`)}
 	}
-	if _, ok := uc.mutation.Name(); !ok {
+	if _, ok := _c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
 	}
-	if _, ok := uc.mutation.Last(); !ok {
+	if _, ok := _c.mutation.Last(); !ok {
 		return &ValidationError{Name: "last", err: errors.New(`ent: missing required field "User.last"`)}
 	}
-	if _, ok := uc.mutation.Role(); !ok {
+	if _, ok := _c.mutation.Role(); !ok {
 		return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "User.role"`)}
 	}
-	if v, ok := uc.mutation.Role(); ok {
+	if v, ok := _c.mutation.Role(); ok {
 		if err := user.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
 		}
 	}
-	if _, ok := uc.mutation.Employment(); !ok {
+	if _, ok := _c.mutation.Employment(); !ok {
 		return &ValidationError{Name: "employment", err: errors.New(`ent: missing required field "User.employment"`)}
 	}
-	if v, ok := uc.mutation.Employment(); ok {
+	if v, ok := _c.mutation.Employment(); ok {
 		if err := user.EmploymentValidator(v); err != nil {
 			return &ValidationError{Name: "employment", err: fmt.Errorf(`ent: validator failed for field "User.employment": %w`, err)}
 		}
@@ -447,133 +447,133 @@ func (uc *UserCreate) check() error {
 	return nil
 }
 
-func (uc *UserCreate) gremlinSave(ctx context.Context) (*User, error) {
-	if err := uc.check(); err != nil {
+func (_c *UserCreate) gremlinSave(ctx context.Context) (*User, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := uc.gremlin().Query()
-	if err := uc.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _c.gremlin().Query()
+	if err := _c.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	rnode := &User{config: uc.config}
+	rnode := &User{config: _c.config}
 	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	uc.mutation.id = &rnode.ID
-	uc.mutation.done = true
+	_c.mutation.id = &rnode.ID
+	_c.mutation.done = true
 	return rnode, nil
 }
 
-func (uc *UserCreate) gremlin() *dsl.Traversal {
+func (_c *UserCreate) gremlin() *dsl.Traversal {
 	type constraint struct {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
 	constraints := make([]*constraint, 0, 8)
 	v := g.AddV(user.Label)
-	if value, ok := uc.mutation.OptionalInt(); ok {
+	if value, ok := _c.mutation.OptionalInt(); ok {
 		v.Property(dsl.Single, user.FieldOptionalInt, value)
 	}
-	if value, ok := uc.mutation.Age(); ok {
+	if value, ok := _c.mutation.Age(); ok {
 		v.Property(dsl.Single, user.FieldAge, value)
 	}
-	if value, ok := uc.mutation.Name(); ok {
+	if value, ok := _c.mutation.Name(); ok {
 		v.Property(dsl.Single, user.FieldName, value)
 	}
-	if value, ok := uc.mutation.Last(); ok {
+	if value, ok := _c.mutation.Last(); ok {
 		v.Property(dsl.Single, user.FieldLast, value)
 	}
-	if value, ok := uc.mutation.Nickname(); ok {
+	if value, ok := _c.mutation.Nickname(); ok {
 		constraints = append(constraints, &constraint{
 			pred: g.V().Has(user.Label, user.FieldNickname, value).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldNickname, value)),
 		})
 		v.Property(dsl.Single, user.FieldNickname, value)
 	}
-	if value, ok := uc.mutation.Address(); ok {
+	if value, ok := _c.mutation.Address(); ok {
 		v.Property(dsl.Single, user.FieldAddress, value)
 	}
-	if value, ok := uc.mutation.Phone(); ok {
+	if value, ok := _c.mutation.Phone(); ok {
 		constraints = append(constraints, &constraint{
 			pred: g.V().Has(user.Label, user.FieldPhone, value).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(user.Label, user.FieldPhone, value)),
 		})
 		v.Property(dsl.Single, user.FieldPhone, value)
 	}
-	if value, ok := uc.mutation.Password(); ok {
+	if value, ok := _c.mutation.Password(); ok {
 		v.Property(dsl.Single, user.FieldPassword, value)
 	}
-	if value, ok := uc.mutation.Role(); ok {
+	if value, ok := _c.mutation.Role(); ok {
 		v.Property(dsl.Single, user.FieldRole, value)
 	}
-	if value, ok := uc.mutation.Employment(); ok {
+	if value, ok := _c.mutation.Employment(); ok {
 		v.Property(dsl.Single, user.FieldEmployment, value)
 	}
-	if value, ok := uc.mutation.SSOCert(); ok {
+	if value, ok := _c.mutation.SSOCert(); ok {
 		v.Property(dsl.Single, user.FieldSSOCert, value)
 	}
-	if value, ok := uc.mutation.FilesCount(); ok {
+	if value, ok := _c.mutation.FilesCount(); ok {
 		v.Property(dsl.Single, user.FieldFilesCount, value)
 	}
-	for _, id := range uc.mutation.CardIDs() {
+	for _, id := range _c.mutation.CardIDs() {
 		v.AddE(user.CardLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.CardLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.CardLabel, id)),
 		})
 	}
-	for _, id := range uc.mutation.PetsIDs() {
+	for _, id := range _c.mutation.PetsIDs() {
 		v.AddE(user.PetsLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.PetsLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.PetsLabel, id)),
 		})
 	}
-	for _, id := range uc.mutation.FilesIDs() {
+	for _, id := range _c.mutation.FilesIDs() {
 		v.AddE(user.FilesLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.FilesLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.FilesLabel, id)),
 		})
 	}
-	for _, id := range uc.mutation.GroupsIDs() {
+	for _, id := range _c.mutation.GroupsIDs() {
 		v.AddE(user.GroupsLabel).To(g.V(id)).OutV()
 	}
-	for _, id := range uc.mutation.FriendsIDs() {
+	for _, id := range _c.mutation.FriendsIDs() {
 		v.AddE(user.FriendsLabel).To(g.V(id)).OutV()
 	}
-	for _, id := range uc.mutation.FollowersIDs() {
+	for _, id := range _c.mutation.FollowersIDs() {
 		v.AddE(user.FollowingLabel).From(g.V(id)).InV()
 	}
-	for _, id := range uc.mutation.FollowingIDs() {
+	for _, id := range _c.mutation.FollowingIDs() {
 		v.AddE(user.FollowingLabel).To(g.V(id)).OutV()
 	}
-	for _, id := range uc.mutation.TeamIDs() {
+	for _, id := range _c.mutation.TeamIDs() {
 		v.AddE(user.TeamLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.TeamLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.TeamLabel, id)),
 		})
 	}
-	for _, id := range uc.mutation.SpouseIDs() {
+	for _, id := range _c.mutation.SpouseIDs() {
 		v.AddE(user.SpouseLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.SpouseLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.SpouseLabel, id)),
 		})
 	}
-	for _, id := range uc.mutation.ChildrenIDs() {
+	for _, id := range _c.mutation.ChildrenIDs() {
 		v.AddE(user.ParentLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.ParentLabel).OutV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(user.Label, user.ParentLabel, id)),
 		})
 	}
-	for _, id := range uc.mutation.ParentIDs() {
+	for _, id := range _c.mutation.ParentIDs() {
 		v.AddE(user.ParentLabel).To(g.V(id)).OutV()
 	}
 	if len(constraints) == 0 {

@@ -43,7 +43,7 @@ func (*RelationshipInfo) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the RelationshipInfo fields.
-func (ri *RelationshipInfo) assignValues(columns []string, values []any) error {
+func (_m *RelationshipInfo) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -54,15 +54,15 @@ func (ri *RelationshipInfo) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			ri.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case relationshipinfo.FieldText:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field text", values[i])
 			} else if value.Valid {
-				ri.Text = value.String
+				_m.Text = value.String
 			}
 		default:
-			ri.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -70,35 +70,35 @@ func (ri *RelationshipInfo) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the RelationshipInfo.
 // This includes values selected through modifiers, order, etc.
-func (ri *RelationshipInfo) Value(name string) (ent.Value, error) {
-	return ri.selectValues.Get(name)
+func (_m *RelationshipInfo) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this RelationshipInfo.
 // Note that you need to call RelationshipInfo.Unwrap() before calling this method if this RelationshipInfo
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (ri *RelationshipInfo) Update() *RelationshipInfoUpdateOne {
-	return NewRelationshipInfoClient(ri.config).UpdateOne(ri)
+func (_m *RelationshipInfo) Update() *RelationshipInfoUpdateOne {
+	return NewRelationshipInfoClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the RelationshipInfo entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (ri *RelationshipInfo) Unwrap() *RelationshipInfo {
-	_tx, ok := ri.config.driver.(*txDriver)
+func (_m *RelationshipInfo) Unwrap() *RelationshipInfo {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: RelationshipInfo is not a transactional entity")
 	}
-	ri.config.driver = _tx.drv
-	return ri
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (ri *RelationshipInfo) String() string {
+func (_m *RelationshipInfo) String() string {
 	var builder strings.Builder
 	builder.WriteString("RelationshipInfo(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", ri.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("text=")
-	builder.WriteString(ri.Text)
+	builder.WriteString(_m.Text)
 	builder.WriteByte(')')
 	return builder.String()
 }

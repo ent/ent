@@ -35,44 +35,44 @@ type BlobLinkQuery struct {
 }
 
 // Where adds a new predicate for the BlobLinkQuery builder.
-func (blq *BlobLinkQuery) Where(ps ...predicate.BlobLink) *BlobLinkQuery {
-	blq.predicates = append(blq.predicates, ps...)
-	return blq
+func (_q *BlobLinkQuery) Where(ps ...predicate.BlobLink) *BlobLinkQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (blq *BlobLinkQuery) Limit(limit int) *BlobLinkQuery {
-	blq.ctx.Limit = &limit
-	return blq
+func (_q *BlobLinkQuery) Limit(limit int) *BlobLinkQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (blq *BlobLinkQuery) Offset(offset int) *BlobLinkQuery {
-	blq.ctx.Offset = &offset
-	return blq
+func (_q *BlobLinkQuery) Offset(offset int) *BlobLinkQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (blq *BlobLinkQuery) Unique(unique bool) *BlobLinkQuery {
-	blq.ctx.Unique = &unique
-	return blq
+func (_q *BlobLinkQuery) Unique(unique bool) *BlobLinkQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (blq *BlobLinkQuery) Order(o ...bloblink.OrderOption) *BlobLinkQuery {
-	blq.order = append(blq.order, o...)
-	return blq
+func (_q *BlobLinkQuery) Order(o ...bloblink.OrderOption) *BlobLinkQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryBlob chains the current query on the "blob" edge.
-func (blq *BlobLinkQuery) QueryBlob() *BlobQuery {
-	query := (&BlobClient{config: blq.config}).Query()
+func (_q *BlobLinkQuery) QueryBlob() *BlobQuery {
+	query := (&BlobClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := blq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := blq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -81,20 +81,20 @@ func (blq *BlobLinkQuery) QueryBlob() *BlobQuery {
 			sqlgraph.To(blob.Table, blob.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, bloblink.BlobTable, bloblink.BlobColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(blq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryLink chains the current query on the "link" edge.
-func (blq *BlobLinkQuery) QueryLink() *BlobQuery {
-	query := (&BlobClient{config: blq.config}).Query()
+func (_q *BlobLinkQuery) QueryLink() *BlobQuery {
+	query := (&BlobClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := blq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := blq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -103,7 +103,7 @@ func (blq *BlobLinkQuery) QueryLink() *BlobQuery {
 			sqlgraph.To(blob.Table, blob.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, bloblink.LinkTable, bloblink.LinkColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(blq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -111,8 +111,8 @@ func (blq *BlobLinkQuery) QueryLink() *BlobQuery {
 
 // First returns the first BlobLink entity from the query.
 // Returns a *NotFoundError when no BlobLink was found.
-func (blq *BlobLinkQuery) First(ctx context.Context) (*BlobLink, error) {
-	nodes, err := blq.Limit(1).All(setContextOp(ctx, blq.ctx, ent.OpQueryFirst))
+func (_q *BlobLinkQuery) First(ctx context.Context) (*BlobLink, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -123,8 +123,8 @@ func (blq *BlobLinkQuery) First(ctx context.Context) (*BlobLink, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (blq *BlobLinkQuery) FirstX(ctx context.Context) *BlobLink {
-	node, err := blq.First(ctx)
+func (_q *BlobLinkQuery) FirstX(ctx context.Context) *BlobLink {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -134,8 +134,8 @@ func (blq *BlobLinkQuery) FirstX(ctx context.Context) *BlobLink {
 // Only returns a single BlobLink entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one BlobLink entity is found.
 // Returns a *NotFoundError when no BlobLink entities are found.
-func (blq *BlobLinkQuery) Only(ctx context.Context) (*BlobLink, error) {
-	nodes, err := blq.Limit(2).All(setContextOp(ctx, blq.ctx, ent.OpQueryOnly))
+func (_q *BlobLinkQuery) Only(ctx context.Context) (*BlobLink, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -150,8 +150,8 @@ func (blq *BlobLinkQuery) Only(ctx context.Context) (*BlobLink, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (blq *BlobLinkQuery) OnlyX(ctx context.Context) *BlobLink {
-	node, err := blq.Only(ctx)
+func (_q *BlobLinkQuery) OnlyX(ctx context.Context) *BlobLink {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -159,18 +159,18 @@ func (blq *BlobLinkQuery) OnlyX(ctx context.Context) *BlobLink {
 }
 
 // All executes the query and returns a list of BlobLinks.
-func (blq *BlobLinkQuery) All(ctx context.Context) ([]*BlobLink, error) {
-	ctx = setContextOp(ctx, blq.ctx, ent.OpQueryAll)
-	if err := blq.prepareQuery(ctx); err != nil {
+func (_q *BlobLinkQuery) All(ctx context.Context) ([]*BlobLink, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*BlobLink, *BlobLinkQuery]()
-	return withInterceptors[[]*BlobLink](ctx, blq, qr, blq.inters)
+	return withInterceptors[[]*BlobLink](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (blq *BlobLinkQuery) AllX(ctx context.Context) []*BlobLink {
-	nodes, err := blq.All(ctx)
+func (_q *BlobLinkQuery) AllX(ctx context.Context) []*BlobLink {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -178,17 +178,17 @@ func (blq *BlobLinkQuery) AllX(ctx context.Context) []*BlobLink {
 }
 
 // Count returns the count of the given query.
-func (blq *BlobLinkQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, blq.ctx, ent.OpQueryCount)
-	if err := blq.prepareQuery(ctx); err != nil {
+func (_q *BlobLinkQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, blq, querierCount[*BlobLinkQuery](), blq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*BlobLinkQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (blq *BlobLinkQuery) CountX(ctx context.Context) int {
-	count, err := blq.Count(ctx)
+func (_q *BlobLinkQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -196,9 +196,9 @@ func (blq *BlobLinkQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (blq *BlobLinkQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, blq.ctx, ent.OpQueryExist)
-	switch _, err := blq.First(ctx); {
+func (_q *BlobLinkQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.First(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -209,8 +209,8 @@ func (blq *BlobLinkQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (blq *BlobLinkQuery) ExistX(ctx context.Context) bool {
-	exist, err := blq.Exist(ctx)
+func (_q *BlobLinkQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -219,44 +219,44 @@ func (blq *BlobLinkQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the BlobLinkQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (blq *BlobLinkQuery) Clone() *BlobLinkQuery {
-	if blq == nil {
+func (_q *BlobLinkQuery) Clone() *BlobLinkQuery {
+	if _q == nil {
 		return nil
 	}
 	return &BlobLinkQuery{
-		config:     blq.config,
-		ctx:        blq.ctx.Clone(),
-		order:      append([]bloblink.OrderOption{}, blq.order...),
-		inters:     append([]Interceptor{}, blq.inters...),
-		predicates: append([]predicate.BlobLink{}, blq.predicates...),
-		withBlob:   blq.withBlob.Clone(),
-		withLink:   blq.withLink.Clone(),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]bloblink.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.BlobLink{}, _q.predicates...),
+		withBlob:   _q.withBlob.Clone(),
+		withLink:   _q.withLink.Clone(),
 		// clone intermediate query.
-		sql:  blq.sql.Clone(),
-		path: blq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithBlob tells the query-builder to eager-load the nodes that are connected to
 // the "blob" edge. The optional arguments are used to configure the query builder of the edge.
-func (blq *BlobLinkQuery) WithBlob(opts ...func(*BlobQuery)) *BlobLinkQuery {
-	query := (&BlobClient{config: blq.config}).Query()
+func (_q *BlobLinkQuery) WithBlob(opts ...func(*BlobQuery)) *BlobLinkQuery {
+	query := (&BlobClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	blq.withBlob = query
-	return blq
+	_q.withBlob = query
+	return _q
 }
 
 // WithLink tells the query-builder to eager-load the nodes that are connected to
 // the "link" edge. The optional arguments are used to configure the query builder of the edge.
-func (blq *BlobLinkQuery) WithLink(opts ...func(*BlobQuery)) *BlobLinkQuery {
-	query := (&BlobClient{config: blq.config}).Query()
+func (_q *BlobLinkQuery) WithLink(opts ...func(*BlobQuery)) *BlobLinkQuery {
+	query := (&BlobClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	blq.withLink = query
-	return blq
+	_q.withLink = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -273,10 +273,10 @@ func (blq *BlobLinkQuery) WithLink(opts ...func(*BlobQuery)) *BlobLinkQuery {
 //		GroupBy(bloblink.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (blq *BlobLinkQuery) GroupBy(field string, fields ...string) *BlobLinkGroupBy {
-	blq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &BlobLinkGroupBy{build: blq}
-	grbuild.flds = &blq.ctx.Fields
+func (_q *BlobLinkQuery) GroupBy(field string, fields ...string) *BlobLinkGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &BlobLinkGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = bloblink.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -294,59 +294,59 @@ func (blq *BlobLinkQuery) GroupBy(field string, fields ...string) *BlobLinkGroup
 //	client.BlobLink.Query().
 //		Select(bloblink.FieldCreatedAt).
 //		Scan(ctx, &v)
-func (blq *BlobLinkQuery) Select(fields ...string) *BlobLinkSelect {
-	blq.ctx.Fields = append(blq.ctx.Fields, fields...)
-	sbuild := &BlobLinkSelect{BlobLinkQuery: blq}
+func (_q *BlobLinkQuery) Select(fields ...string) *BlobLinkSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &BlobLinkSelect{BlobLinkQuery: _q}
 	sbuild.label = bloblink.Label
-	sbuild.flds, sbuild.scan = &blq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a BlobLinkSelect configured with the given aggregations.
-func (blq *BlobLinkQuery) Aggregate(fns ...AggregateFunc) *BlobLinkSelect {
-	return blq.Select().Aggregate(fns...)
+func (_q *BlobLinkQuery) Aggregate(fns ...AggregateFunc) *BlobLinkSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (blq *BlobLinkQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range blq.inters {
+func (_q *BlobLinkQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, blq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range blq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !bloblink.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if blq.path != nil {
-		prev, err := blq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		blq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (blq *BlobLinkQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*BlobLink, error) {
+func (_q *BlobLinkQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*BlobLink, error) {
 	var (
 		nodes       = []*BlobLink{}
-		_spec       = blq.querySpec()
+		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
-			blq.withBlob != nil,
-			blq.withLink != nil,
+			_q.withBlob != nil,
+			_q.withLink != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*BlobLink).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &BlobLink{config: blq.config}
+		node := &BlobLink{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -354,20 +354,20 @@ func (blq *BlobLinkQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bl
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, blq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := blq.withBlob; query != nil {
-		if err := blq.loadBlob(ctx, query, nodes, nil,
+	if query := _q.withBlob; query != nil {
+		if err := _q.loadBlob(ctx, query, nodes, nil,
 			func(n *BlobLink, e *Blob) { n.Edges.Blob = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := blq.withLink; query != nil {
-		if err := blq.loadLink(ctx, query, nodes, nil,
+	if query := _q.withLink; query != nil {
+		if err := _q.loadLink(ctx, query, nodes, nil,
 			func(n *BlobLink, e *Blob) { n.Edges.Link = e }); err != nil {
 			return nil, err
 		}
@@ -375,7 +375,7 @@ func (blq *BlobLinkQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Bl
 	return nodes, nil
 }
 
-func (blq *BlobLinkQuery) loadBlob(ctx context.Context, query *BlobQuery, nodes []*BlobLink, init func(*BlobLink), assign func(*BlobLink, *Blob)) error {
+func (_q *BlobLinkQuery) loadBlob(ctx context.Context, query *BlobQuery, nodes []*BlobLink, init func(*BlobLink), assign func(*BlobLink, *Blob)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*BlobLink)
 	for i := range nodes {
@@ -404,7 +404,7 @@ func (blq *BlobLinkQuery) loadBlob(ctx context.Context, query *BlobQuery, nodes 
 	}
 	return nil
 }
-func (blq *BlobLinkQuery) loadLink(ctx context.Context, query *BlobQuery, nodes []*BlobLink, init func(*BlobLink), assign func(*BlobLink, *Blob)) error {
+func (_q *BlobLinkQuery) loadLink(ctx context.Context, query *BlobQuery, nodes []*BlobLink, init func(*BlobLink), assign func(*BlobLink, *Blob)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*BlobLink)
 	for i := range nodes {
@@ -434,47 +434,47 @@ func (blq *BlobLinkQuery) loadLink(ctx context.Context, query *BlobQuery, nodes 
 	return nil
 }
 
-func (blq *BlobLinkQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := blq.querySpec()
+func (_q *BlobLinkQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
 	_spec.Unique = false
 	_spec.Node.Columns = nil
-	return sqlgraph.CountNodes(ctx, blq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (blq *BlobLinkQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *BlobLinkQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(bloblink.Table, bloblink.Columns, nil)
-	_spec.From = blq.sql
-	if unique := blq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if blq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := blq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		for i := range fields {
 			_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 		}
-		if blq.withBlob != nil {
+		if _q.withBlob != nil {
 			_spec.Node.AddColumnOnce(bloblink.FieldBlobID)
 		}
-		if blq.withLink != nil {
+		if _q.withLink != nil {
 			_spec.Node.AddColumnOnce(bloblink.FieldLinkID)
 		}
 	}
-	if ps := blq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := blq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := blq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := blq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -484,33 +484,33 @@ func (blq *BlobLinkQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (blq *BlobLinkQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(blq.driver.Dialect())
+func (_q *BlobLinkQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(bloblink.Table)
-	columns := blq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = bloblink.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if blq.sql != nil {
-		selector = blq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if blq.ctx.Unique != nil && *blq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range blq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range blq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := blq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := blq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector

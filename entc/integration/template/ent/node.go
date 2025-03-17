@@ -49,15 +49,15 @@ type Edge struct {
 	IDs  []int  `json:"ids,omitempty"`  // node ids (where this edge point to).
 }
 
-func (gr *Group) Node(ctx context.Context) (node *Node, err error) {
+func (_m *Group) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
-		ID:     gr.ID,
+		ID:     _m.ID,
 		Type:   "Group",
 		Fields: make([]*Field, 1),
 		Edges:  make([]*Edge, 0),
 	}
 	var buf []byte
-	if buf, err = json.Marshal(gr.MaxUsers); err != nil {
+	if buf, err = json.Marshal(_m.MaxUsers); err != nil {
 		return nil, err
 	}
 	node.Fields[0] = &Field{
@@ -68,15 +68,15 @@ func (gr *Group) Node(ctx context.Context) (node *Node, err error) {
 	return node, nil
 }
 
-func (pe *Pet) Node(ctx context.Context) (node *Node, err error) {
+func (_m *Pet) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
-		ID:     pe.ID,
+		ID:     _m.ID,
 		Type:   "Pet",
 		Fields: make([]*Field, 2),
 		Edges:  make([]*Edge, 1),
 	}
 	var buf []byte
-	if buf, err = json.Marshal(pe.Age); err != nil {
+	if buf, err = json.Marshal(_m.Age); err != nil {
 		return nil, err
 	}
 	node.Fields[0] = &Field{
@@ -84,7 +84,7 @@ func (pe *Pet) Node(ctx context.Context) (node *Node, err error) {
 		Name:  "Age",
 		Value: string(buf),
 	}
-	if buf, err = json.Marshal(pe.LicensedAt); err != nil {
+	if buf, err = json.Marshal(_m.LicensedAt); err != nil {
 		return nil, err
 	}
 	node.Fields[1] = &Field{
@@ -93,7 +93,7 @@ func (pe *Pet) Node(ctx context.Context) (node *Node, err error) {
 		Value: string(buf),
 	}
 	var ids []int
-	ids, err = pe.QueryOwner().
+	ids, err = _m.QueryOwner().
 		Select(user.FieldID).
 		Ints(ctx)
 	if err != nil {
@@ -107,15 +107,15 @@ func (pe *Pet) Node(ctx context.Context) (node *Node, err error) {
 	return node, nil
 }
 
-func (u *User) Node(ctx context.Context) (node *Node, err error) {
+func (_m *User) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
-		ID:     u.ID,
+		ID:     _m.ID,
 		Type:   "User",
 		Fields: make([]*Field, 1),
 		Edges:  make([]*Edge, 2),
 	}
 	var buf []byte
-	if buf, err = json.Marshal(u.Name); err != nil {
+	if buf, err = json.Marshal(_m.Name); err != nil {
 		return nil, err
 	}
 	node.Fields[0] = &Field{
@@ -124,7 +124,7 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 		Value: string(buf),
 	}
 	var ids []int
-	ids, err = u.QueryPets().
+	ids, err = _m.QueryPets().
 		Select(pet.FieldID).
 		Ints(ctx)
 	if err != nil {
@@ -135,7 +135,7 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 		Type: "Pet",
 		Name: "Pets",
 	}
-	ids, err = u.QueryFriends().
+	ids, err = _m.QueryFriends().
 		Select(user.FieldID).
 		Ints(ctx)
 	if err != nil {

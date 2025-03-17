@@ -29,94 +29,94 @@ type AttachedFileUpdate struct {
 }
 
 // Where appends a list predicates to the AttachedFileUpdate builder.
-func (afu *AttachedFileUpdate) Where(ps ...predicate.AttachedFile) *AttachedFileUpdate {
-	afu.mutation.Where(ps...)
-	return afu
+func (_u *AttachedFileUpdate) Where(ps ...predicate.AttachedFile) *AttachedFileUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetAttachTime sets the "attach_time" field.
-func (afu *AttachedFileUpdate) SetAttachTime(t time.Time) *AttachedFileUpdate {
-	afu.mutation.SetAttachTime(t)
-	return afu
+func (_u *AttachedFileUpdate) SetAttachTime(t time.Time) *AttachedFileUpdate {
+	_u.mutation.SetAttachTime(t)
+	return _u
 }
 
 // SetNillableAttachTime sets the "attach_time" field if the given value is not nil.
-func (afu *AttachedFileUpdate) SetNillableAttachTime(t *time.Time) *AttachedFileUpdate {
+func (_u *AttachedFileUpdate) SetNillableAttachTime(t *time.Time) *AttachedFileUpdate {
 	if t != nil {
-		afu.SetAttachTime(*t)
+		_u.SetAttachTime(*t)
 	}
-	return afu
+	return _u
 }
 
 // SetFID sets the "f_id" field.
-func (afu *AttachedFileUpdate) SetFID(i int) *AttachedFileUpdate {
-	afu.mutation.SetFID(i)
-	return afu
+func (_u *AttachedFileUpdate) SetFID(i int) *AttachedFileUpdate {
+	_u.mutation.SetFID(i)
+	return _u
 }
 
 // SetNillableFID sets the "f_id" field if the given value is not nil.
-func (afu *AttachedFileUpdate) SetNillableFID(i *int) *AttachedFileUpdate {
+func (_u *AttachedFileUpdate) SetNillableFID(i *int) *AttachedFileUpdate {
 	if i != nil {
-		afu.SetFID(*i)
+		_u.SetFID(*i)
 	}
-	return afu
+	return _u
 }
 
 // SetProcID sets the "proc_id" field.
-func (afu *AttachedFileUpdate) SetProcID(i int) *AttachedFileUpdate {
-	afu.mutation.SetProcID(i)
-	return afu
+func (_u *AttachedFileUpdate) SetProcID(i int) *AttachedFileUpdate {
+	_u.mutation.SetProcID(i)
+	return _u
 }
 
 // SetNillableProcID sets the "proc_id" field if the given value is not nil.
-func (afu *AttachedFileUpdate) SetNillableProcID(i *int) *AttachedFileUpdate {
+func (_u *AttachedFileUpdate) SetNillableProcID(i *int) *AttachedFileUpdate {
 	if i != nil {
-		afu.SetProcID(*i)
+		_u.SetProcID(*i)
 	}
-	return afu
+	return _u
 }
 
 // SetFiID sets the "fi" edge to the File entity by ID.
-func (afu *AttachedFileUpdate) SetFiID(id int) *AttachedFileUpdate {
-	afu.mutation.SetFiID(id)
-	return afu
+func (_u *AttachedFileUpdate) SetFiID(id int) *AttachedFileUpdate {
+	_u.mutation.SetFiID(id)
+	return _u
 }
 
 // SetFi sets the "fi" edge to the File entity.
-func (afu *AttachedFileUpdate) SetFi(f *File) *AttachedFileUpdate {
-	return afu.SetFiID(f.ID)
+func (_u *AttachedFileUpdate) SetFi(f *File) *AttachedFileUpdate {
+	return _u.SetFiID(f.ID)
 }
 
 // SetProc sets the "proc" edge to the Process entity.
-func (afu *AttachedFileUpdate) SetProc(p *Process) *AttachedFileUpdate {
-	return afu.SetProcID(p.ID)
+func (_u *AttachedFileUpdate) SetProc(p *Process) *AttachedFileUpdate {
+	return _u.SetProcID(p.ID)
 }
 
 // Mutation returns the AttachedFileMutation object of the builder.
-func (afu *AttachedFileUpdate) Mutation() *AttachedFileMutation {
-	return afu.mutation
+func (_u *AttachedFileUpdate) Mutation() *AttachedFileMutation {
+	return _u.mutation
 }
 
 // ClearFi clears the "fi" edge to the File entity.
-func (afu *AttachedFileUpdate) ClearFi() *AttachedFileUpdate {
-	afu.mutation.ClearFi()
-	return afu
+func (_u *AttachedFileUpdate) ClearFi() *AttachedFileUpdate {
+	_u.mutation.ClearFi()
+	return _u
 }
 
 // ClearProc clears the "proc" edge to the Process entity.
-func (afu *AttachedFileUpdate) ClearProc() *AttachedFileUpdate {
-	afu.mutation.ClearProc()
-	return afu
+func (_u *AttachedFileUpdate) ClearProc() *AttachedFileUpdate {
+	_u.mutation.ClearProc()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (afu *AttachedFileUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, afu.sqlSave, afu.mutation, afu.hooks)
+func (_u *AttachedFileUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (afu *AttachedFileUpdate) SaveX(ctx context.Context) int {
-	affected, err := afu.Save(ctx)
+func (_u *AttachedFileUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -124,45 +124,45 @@ func (afu *AttachedFileUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (afu *AttachedFileUpdate) Exec(ctx context.Context) error {
-	_, err := afu.Save(ctx)
+func (_u *AttachedFileUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (afu *AttachedFileUpdate) ExecX(ctx context.Context) {
-	if err := afu.Exec(ctx); err != nil {
+func (_u *AttachedFileUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (afu *AttachedFileUpdate) check() error {
-	if afu.mutation.FiCleared() && len(afu.mutation.FiIDs()) > 0 {
+func (_u *AttachedFileUpdate) check() error {
+	if _u.mutation.FiCleared() && len(_u.mutation.FiIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "AttachedFile.fi"`)
 	}
-	if afu.mutation.ProcCleared() && len(afu.mutation.ProcIDs()) > 0 {
+	if _u.mutation.ProcCleared() && len(_u.mutation.ProcIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "AttachedFile.proc"`)
 	}
 	return nil
 }
 
-func (afu *AttachedFileUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := afu.check(); err != nil {
+func (_u *AttachedFileUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := _u.check(); err != nil {
 		return n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(attachedfile.Table, attachedfile.Columns, sqlgraph.NewFieldSpec(attachedfile.FieldID, field.TypeInt))
-	if ps := afu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := afu.mutation.AttachTime(); ok {
+	if value, ok := _u.mutation.AttachTime(); ok {
 		_spec.SetField(attachedfile.FieldAttachTime, field.TypeTime, value)
 	}
-	if afu.mutation.FiCleared() {
+	if _u.mutation.FiCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -175,7 +175,7 @@ func (afu *AttachedFileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := afu.mutation.FiIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.FiIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -191,7 +191,7 @@ func (afu *AttachedFileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if afu.mutation.ProcCleared() {
+	if _u.mutation.ProcCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -204,7 +204,7 @@ func (afu *AttachedFileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := afu.mutation.ProcIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ProcIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -220,7 +220,7 @@ func (afu *AttachedFileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, afu.driver, _spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{attachedfile.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -228,7 +228,7 @@ func (afu *AttachedFileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	afu.mutation.done = true
+	_u.mutation.done = true
 	return n, nil
 }
 
@@ -241,101 +241,101 @@ type AttachedFileUpdateOne struct {
 }
 
 // SetAttachTime sets the "attach_time" field.
-func (afuo *AttachedFileUpdateOne) SetAttachTime(t time.Time) *AttachedFileUpdateOne {
-	afuo.mutation.SetAttachTime(t)
-	return afuo
+func (_u *AttachedFileUpdateOne) SetAttachTime(t time.Time) *AttachedFileUpdateOne {
+	_u.mutation.SetAttachTime(t)
+	return _u
 }
 
 // SetNillableAttachTime sets the "attach_time" field if the given value is not nil.
-func (afuo *AttachedFileUpdateOne) SetNillableAttachTime(t *time.Time) *AttachedFileUpdateOne {
+func (_u *AttachedFileUpdateOne) SetNillableAttachTime(t *time.Time) *AttachedFileUpdateOne {
 	if t != nil {
-		afuo.SetAttachTime(*t)
+		_u.SetAttachTime(*t)
 	}
-	return afuo
+	return _u
 }
 
 // SetFID sets the "f_id" field.
-func (afuo *AttachedFileUpdateOne) SetFID(i int) *AttachedFileUpdateOne {
-	afuo.mutation.SetFID(i)
-	return afuo
+func (_u *AttachedFileUpdateOne) SetFID(i int) *AttachedFileUpdateOne {
+	_u.mutation.SetFID(i)
+	return _u
 }
 
 // SetNillableFID sets the "f_id" field if the given value is not nil.
-func (afuo *AttachedFileUpdateOne) SetNillableFID(i *int) *AttachedFileUpdateOne {
+func (_u *AttachedFileUpdateOne) SetNillableFID(i *int) *AttachedFileUpdateOne {
 	if i != nil {
-		afuo.SetFID(*i)
+		_u.SetFID(*i)
 	}
-	return afuo
+	return _u
 }
 
 // SetProcID sets the "proc_id" field.
-func (afuo *AttachedFileUpdateOne) SetProcID(i int) *AttachedFileUpdateOne {
-	afuo.mutation.SetProcID(i)
-	return afuo
+func (_u *AttachedFileUpdateOne) SetProcID(i int) *AttachedFileUpdateOne {
+	_u.mutation.SetProcID(i)
+	return _u
 }
 
 // SetNillableProcID sets the "proc_id" field if the given value is not nil.
-func (afuo *AttachedFileUpdateOne) SetNillableProcID(i *int) *AttachedFileUpdateOne {
+func (_u *AttachedFileUpdateOne) SetNillableProcID(i *int) *AttachedFileUpdateOne {
 	if i != nil {
-		afuo.SetProcID(*i)
+		_u.SetProcID(*i)
 	}
-	return afuo
+	return _u
 }
 
 // SetFiID sets the "fi" edge to the File entity by ID.
-func (afuo *AttachedFileUpdateOne) SetFiID(id int) *AttachedFileUpdateOne {
-	afuo.mutation.SetFiID(id)
-	return afuo
+func (_u *AttachedFileUpdateOne) SetFiID(id int) *AttachedFileUpdateOne {
+	_u.mutation.SetFiID(id)
+	return _u
 }
 
 // SetFi sets the "fi" edge to the File entity.
-func (afuo *AttachedFileUpdateOne) SetFi(f *File) *AttachedFileUpdateOne {
-	return afuo.SetFiID(f.ID)
+func (_u *AttachedFileUpdateOne) SetFi(f *File) *AttachedFileUpdateOne {
+	return _u.SetFiID(f.ID)
 }
 
 // SetProc sets the "proc" edge to the Process entity.
-func (afuo *AttachedFileUpdateOne) SetProc(p *Process) *AttachedFileUpdateOne {
-	return afuo.SetProcID(p.ID)
+func (_u *AttachedFileUpdateOne) SetProc(p *Process) *AttachedFileUpdateOne {
+	return _u.SetProcID(p.ID)
 }
 
 // Mutation returns the AttachedFileMutation object of the builder.
-func (afuo *AttachedFileUpdateOne) Mutation() *AttachedFileMutation {
-	return afuo.mutation
+func (_u *AttachedFileUpdateOne) Mutation() *AttachedFileMutation {
+	return _u.mutation
 }
 
 // ClearFi clears the "fi" edge to the File entity.
-func (afuo *AttachedFileUpdateOne) ClearFi() *AttachedFileUpdateOne {
-	afuo.mutation.ClearFi()
-	return afuo
+func (_u *AttachedFileUpdateOne) ClearFi() *AttachedFileUpdateOne {
+	_u.mutation.ClearFi()
+	return _u
 }
 
 // ClearProc clears the "proc" edge to the Process entity.
-func (afuo *AttachedFileUpdateOne) ClearProc() *AttachedFileUpdateOne {
-	afuo.mutation.ClearProc()
-	return afuo
+func (_u *AttachedFileUpdateOne) ClearProc() *AttachedFileUpdateOne {
+	_u.mutation.ClearProc()
+	return _u
 }
 
 // Where appends a list predicates to the AttachedFileUpdate builder.
-func (afuo *AttachedFileUpdateOne) Where(ps ...predicate.AttachedFile) *AttachedFileUpdateOne {
-	afuo.mutation.Where(ps...)
-	return afuo
+func (_u *AttachedFileUpdateOne) Where(ps ...predicate.AttachedFile) *AttachedFileUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (afuo *AttachedFileUpdateOne) Select(field string, fields ...string) *AttachedFileUpdateOne {
-	afuo.fields = append([]string{field}, fields...)
-	return afuo
+func (_u *AttachedFileUpdateOne) Select(field string, fields ...string) *AttachedFileUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated AttachedFile entity.
-func (afuo *AttachedFileUpdateOne) Save(ctx context.Context) (*AttachedFile, error) {
-	return withHooks(ctx, afuo.sqlSave, afuo.mutation, afuo.hooks)
+func (_u *AttachedFileUpdateOne) Save(ctx context.Context) (*AttachedFile, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (afuo *AttachedFileUpdateOne) SaveX(ctx context.Context) *AttachedFile {
-	node, err := afuo.Save(ctx)
+func (_u *AttachedFileUpdateOne) SaveX(ctx context.Context) *AttachedFile {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -343,40 +343,40 @@ func (afuo *AttachedFileUpdateOne) SaveX(ctx context.Context) *AttachedFile {
 }
 
 // Exec executes the query on the entity.
-func (afuo *AttachedFileUpdateOne) Exec(ctx context.Context) error {
-	_, err := afuo.Save(ctx)
+func (_u *AttachedFileUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (afuo *AttachedFileUpdateOne) ExecX(ctx context.Context) {
-	if err := afuo.Exec(ctx); err != nil {
+func (_u *AttachedFileUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (afuo *AttachedFileUpdateOne) check() error {
-	if afuo.mutation.FiCleared() && len(afuo.mutation.FiIDs()) > 0 {
+func (_u *AttachedFileUpdateOne) check() error {
+	if _u.mutation.FiCleared() && len(_u.mutation.FiIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "AttachedFile.fi"`)
 	}
-	if afuo.mutation.ProcCleared() && len(afuo.mutation.ProcIDs()) > 0 {
+	if _u.mutation.ProcCleared() && len(_u.mutation.ProcIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "AttachedFile.proc"`)
 	}
 	return nil
 }
 
-func (afuo *AttachedFileUpdateOne) sqlSave(ctx context.Context) (_node *AttachedFile, err error) {
-	if err := afuo.check(); err != nil {
+func (_u *AttachedFileUpdateOne) sqlSave(ctx context.Context) (_node *AttachedFile, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(attachedfile.Table, attachedfile.Columns, sqlgraph.NewFieldSpec(attachedfile.FieldID, field.TypeInt))
-	id, ok := afuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "AttachedFile.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := afuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, attachedfile.FieldID)
 		for _, f := range fields {
@@ -388,17 +388,17 @@ func (afuo *AttachedFileUpdateOne) sqlSave(ctx context.Context) (_node *Attached
 			}
 		}
 	}
-	if ps := afuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := afuo.mutation.AttachTime(); ok {
+	if value, ok := _u.mutation.AttachTime(); ok {
 		_spec.SetField(attachedfile.FieldAttachTime, field.TypeTime, value)
 	}
-	if afuo.mutation.FiCleared() {
+	if _u.mutation.FiCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -411,7 +411,7 @@ func (afuo *AttachedFileUpdateOne) sqlSave(ctx context.Context) (_node *Attached
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := afuo.mutation.FiIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.FiIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -427,7 +427,7 @@ func (afuo *AttachedFileUpdateOne) sqlSave(ctx context.Context) (_node *Attached
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if afuo.mutation.ProcCleared() {
+	if _u.mutation.ProcCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -440,7 +440,7 @@ func (afuo *AttachedFileUpdateOne) sqlSave(ctx context.Context) (_node *Attached
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := afuo.mutation.ProcIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ProcIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -456,10 +456,10 @@ func (afuo *AttachedFileUpdateOne) sqlSave(ctx context.Context) (_node *Attached
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &AttachedFile{config: afuo.config}
+	_node = &AttachedFile{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, afuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{attachedfile.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -467,6 +467,6 @@ func (afuo *AttachedFileUpdateOne) sqlSave(ctx context.Context) (_node *Attached
 		}
 		return nil, err
 	}
-	afuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

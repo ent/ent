@@ -36,44 +36,44 @@ type AttachedFileQuery struct {
 }
 
 // Where adds a new predicate for the AttachedFileQuery builder.
-func (afq *AttachedFileQuery) Where(ps ...predicate.AttachedFile) *AttachedFileQuery {
-	afq.predicates = append(afq.predicates, ps...)
-	return afq
+func (_q *AttachedFileQuery) Where(ps ...predicate.AttachedFile) *AttachedFileQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (afq *AttachedFileQuery) Limit(limit int) *AttachedFileQuery {
-	afq.ctx.Limit = &limit
-	return afq
+func (_q *AttachedFileQuery) Limit(limit int) *AttachedFileQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (afq *AttachedFileQuery) Offset(offset int) *AttachedFileQuery {
-	afq.ctx.Offset = &offset
-	return afq
+func (_q *AttachedFileQuery) Offset(offset int) *AttachedFileQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (afq *AttachedFileQuery) Unique(unique bool) *AttachedFileQuery {
-	afq.ctx.Unique = &unique
-	return afq
+func (_q *AttachedFileQuery) Unique(unique bool) *AttachedFileQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (afq *AttachedFileQuery) Order(o ...attachedfile.OrderOption) *AttachedFileQuery {
-	afq.order = append(afq.order, o...)
-	return afq
+func (_q *AttachedFileQuery) Order(o ...attachedfile.OrderOption) *AttachedFileQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryFi chains the current query on the "fi" edge.
-func (afq *AttachedFileQuery) QueryFi() *FileQuery {
-	query := (&FileClient{config: afq.config}).Query()
+func (_q *AttachedFileQuery) QueryFi() *FileQuery {
+	query := (&FileClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := afq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := afq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -82,20 +82,20 @@ func (afq *AttachedFileQuery) QueryFi() *FileQuery {
 			sqlgraph.To(file.Table, file.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, attachedfile.FiTable, attachedfile.FiColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(afq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryProc chains the current query on the "proc" edge.
-func (afq *AttachedFileQuery) QueryProc() *ProcessQuery {
-	query := (&ProcessClient{config: afq.config}).Query()
+func (_q *AttachedFileQuery) QueryProc() *ProcessQuery {
+	query := (&ProcessClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := afq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := afq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -104,7 +104,7 @@ func (afq *AttachedFileQuery) QueryProc() *ProcessQuery {
 			sqlgraph.To(process.Table, process.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, attachedfile.ProcTable, attachedfile.ProcColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(afq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -112,8 +112,8 @@ func (afq *AttachedFileQuery) QueryProc() *ProcessQuery {
 
 // First returns the first AttachedFile entity from the query.
 // Returns a *NotFoundError when no AttachedFile was found.
-func (afq *AttachedFileQuery) First(ctx context.Context) (*AttachedFile, error) {
-	nodes, err := afq.Limit(1).All(setContextOp(ctx, afq.ctx, ent.OpQueryFirst))
+func (_q *AttachedFileQuery) First(ctx context.Context) (*AttachedFile, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -124,8 +124,8 @@ func (afq *AttachedFileQuery) First(ctx context.Context) (*AttachedFile, error) 
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (afq *AttachedFileQuery) FirstX(ctx context.Context) *AttachedFile {
-	node, err := afq.First(ctx)
+func (_q *AttachedFileQuery) FirstX(ctx context.Context) *AttachedFile {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -134,9 +134,9 @@ func (afq *AttachedFileQuery) FirstX(ctx context.Context) *AttachedFile {
 
 // FirstID returns the first AttachedFile ID from the query.
 // Returns a *NotFoundError when no AttachedFile ID was found.
-func (afq *AttachedFileQuery) FirstID(ctx context.Context) (id int, err error) {
+func (_q *AttachedFileQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = afq.Limit(1).IDs(setContextOp(ctx, afq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -147,8 +147,8 @@ func (afq *AttachedFileQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (afq *AttachedFileQuery) FirstIDX(ctx context.Context) int {
-	id, err := afq.FirstID(ctx)
+func (_q *AttachedFileQuery) FirstIDX(ctx context.Context) int {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -158,8 +158,8 @@ func (afq *AttachedFileQuery) FirstIDX(ctx context.Context) int {
 // Only returns a single AttachedFile entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one AttachedFile entity is found.
 // Returns a *NotFoundError when no AttachedFile entities are found.
-func (afq *AttachedFileQuery) Only(ctx context.Context) (*AttachedFile, error) {
-	nodes, err := afq.Limit(2).All(setContextOp(ctx, afq.ctx, ent.OpQueryOnly))
+func (_q *AttachedFileQuery) Only(ctx context.Context) (*AttachedFile, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -174,8 +174,8 @@ func (afq *AttachedFileQuery) Only(ctx context.Context) (*AttachedFile, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (afq *AttachedFileQuery) OnlyX(ctx context.Context) *AttachedFile {
-	node, err := afq.Only(ctx)
+func (_q *AttachedFileQuery) OnlyX(ctx context.Context) *AttachedFile {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -185,9 +185,9 @@ func (afq *AttachedFileQuery) OnlyX(ctx context.Context) *AttachedFile {
 // OnlyID is like Only, but returns the only AttachedFile ID in the query.
 // Returns a *NotSingularError when more than one AttachedFile ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (afq *AttachedFileQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *AttachedFileQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = afq.Limit(2).IDs(setContextOp(ctx, afq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -202,8 +202,8 @@ func (afq *AttachedFileQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (afq *AttachedFileQuery) OnlyIDX(ctx context.Context) int {
-	id, err := afq.OnlyID(ctx)
+func (_q *AttachedFileQuery) OnlyIDX(ctx context.Context) int {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -211,18 +211,18 @@ func (afq *AttachedFileQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of AttachedFiles.
-func (afq *AttachedFileQuery) All(ctx context.Context) ([]*AttachedFile, error) {
-	ctx = setContextOp(ctx, afq.ctx, ent.OpQueryAll)
-	if err := afq.prepareQuery(ctx); err != nil {
+func (_q *AttachedFileQuery) All(ctx context.Context) ([]*AttachedFile, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*AttachedFile, *AttachedFileQuery]()
-	return withInterceptors[[]*AttachedFile](ctx, afq, qr, afq.inters)
+	return withInterceptors[[]*AttachedFile](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (afq *AttachedFileQuery) AllX(ctx context.Context) []*AttachedFile {
-	nodes, err := afq.All(ctx)
+func (_q *AttachedFileQuery) AllX(ctx context.Context) []*AttachedFile {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -230,20 +230,20 @@ func (afq *AttachedFileQuery) AllX(ctx context.Context) []*AttachedFile {
 }
 
 // IDs executes the query and returns a list of AttachedFile IDs.
-func (afq *AttachedFileQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if afq.ctx.Unique == nil && afq.path != nil {
-		afq.Unique(true)
+func (_q *AttachedFileQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, afq.ctx, ent.OpQueryIDs)
-	if err = afq.Select(attachedfile.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(attachedfile.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (afq *AttachedFileQuery) IDsX(ctx context.Context) []int {
-	ids, err := afq.IDs(ctx)
+func (_q *AttachedFileQuery) IDsX(ctx context.Context) []int {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -251,17 +251,17 @@ func (afq *AttachedFileQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (afq *AttachedFileQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, afq.ctx, ent.OpQueryCount)
-	if err := afq.prepareQuery(ctx); err != nil {
+func (_q *AttachedFileQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, afq, querierCount[*AttachedFileQuery](), afq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*AttachedFileQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (afq *AttachedFileQuery) CountX(ctx context.Context) int {
-	count, err := afq.Count(ctx)
+func (_q *AttachedFileQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -269,9 +269,9 @@ func (afq *AttachedFileQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (afq *AttachedFileQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, afq.ctx, ent.OpQueryExist)
-	switch _, err := afq.FirstID(ctx); {
+func (_q *AttachedFileQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -282,8 +282,8 @@ func (afq *AttachedFileQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (afq *AttachedFileQuery) ExistX(ctx context.Context) bool {
-	exist, err := afq.Exist(ctx)
+func (_q *AttachedFileQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -292,44 +292,44 @@ func (afq *AttachedFileQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the AttachedFileQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (afq *AttachedFileQuery) Clone() *AttachedFileQuery {
-	if afq == nil {
+func (_q *AttachedFileQuery) Clone() *AttachedFileQuery {
+	if _q == nil {
 		return nil
 	}
 	return &AttachedFileQuery{
-		config:     afq.config,
-		ctx:        afq.ctx.Clone(),
-		order:      append([]attachedfile.OrderOption{}, afq.order...),
-		inters:     append([]Interceptor{}, afq.inters...),
-		predicates: append([]predicate.AttachedFile{}, afq.predicates...),
-		withFi:     afq.withFi.Clone(),
-		withProc:   afq.withProc.Clone(),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]attachedfile.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.AttachedFile{}, _q.predicates...),
+		withFi:     _q.withFi.Clone(),
+		withProc:   _q.withProc.Clone(),
 		// clone intermediate query.
-		sql:  afq.sql.Clone(),
-		path: afq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithFi tells the query-builder to eager-load the nodes that are connected to
 // the "fi" edge. The optional arguments are used to configure the query builder of the edge.
-func (afq *AttachedFileQuery) WithFi(opts ...func(*FileQuery)) *AttachedFileQuery {
-	query := (&FileClient{config: afq.config}).Query()
+func (_q *AttachedFileQuery) WithFi(opts ...func(*FileQuery)) *AttachedFileQuery {
+	query := (&FileClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	afq.withFi = query
-	return afq
+	_q.withFi = query
+	return _q
 }
 
 // WithProc tells the query-builder to eager-load the nodes that are connected to
 // the "proc" edge. The optional arguments are used to configure the query builder of the edge.
-func (afq *AttachedFileQuery) WithProc(opts ...func(*ProcessQuery)) *AttachedFileQuery {
-	query := (&ProcessClient{config: afq.config}).Query()
+func (_q *AttachedFileQuery) WithProc(opts ...func(*ProcessQuery)) *AttachedFileQuery {
+	query := (&ProcessClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	afq.withProc = query
-	return afq
+	_q.withProc = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -346,10 +346,10 @@ func (afq *AttachedFileQuery) WithProc(opts ...func(*ProcessQuery)) *AttachedFil
 //		GroupBy(attachedfile.FieldAttachTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (afq *AttachedFileQuery) GroupBy(field string, fields ...string) *AttachedFileGroupBy {
-	afq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &AttachedFileGroupBy{build: afq}
-	grbuild.flds = &afq.ctx.Fields
+func (_q *AttachedFileQuery) GroupBy(field string, fields ...string) *AttachedFileGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &AttachedFileGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = attachedfile.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -367,59 +367,59 @@ func (afq *AttachedFileQuery) GroupBy(field string, fields ...string) *AttachedF
 //	client.AttachedFile.Query().
 //		Select(attachedfile.FieldAttachTime).
 //		Scan(ctx, &v)
-func (afq *AttachedFileQuery) Select(fields ...string) *AttachedFileSelect {
-	afq.ctx.Fields = append(afq.ctx.Fields, fields...)
-	sbuild := &AttachedFileSelect{AttachedFileQuery: afq}
+func (_q *AttachedFileQuery) Select(fields ...string) *AttachedFileSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &AttachedFileSelect{AttachedFileQuery: _q}
 	sbuild.label = attachedfile.Label
-	sbuild.flds, sbuild.scan = &afq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a AttachedFileSelect configured with the given aggregations.
-func (afq *AttachedFileQuery) Aggregate(fns ...AggregateFunc) *AttachedFileSelect {
-	return afq.Select().Aggregate(fns...)
+func (_q *AttachedFileQuery) Aggregate(fns ...AggregateFunc) *AttachedFileSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (afq *AttachedFileQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range afq.inters {
+func (_q *AttachedFileQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, afq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range afq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !attachedfile.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if afq.path != nil {
-		prev, err := afq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		afq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (afq *AttachedFileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*AttachedFile, error) {
+func (_q *AttachedFileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*AttachedFile, error) {
 	var (
 		nodes       = []*AttachedFile{}
-		_spec       = afq.querySpec()
+		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
-			afq.withFi != nil,
-			afq.withProc != nil,
+			_q.withFi != nil,
+			_q.withProc != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*AttachedFile).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &AttachedFile{config: afq.config}
+		node := &AttachedFile{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -427,20 +427,20 @@ func (afq *AttachedFileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, afq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := afq.withFi; query != nil {
-		if err := afq.loadFi(ctx, query, nodes, nil,
+	if query := _q.withFi; query != nil {
+		if err := _q.loadFi(ctx, query, nodes, nil,
 			func(n *AttachedFile, e *File) { n.Edges.Fi = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := afq.withProc; query != nil {
-		if err := afq.loadProc(ctx, query, nodes, nil,
+	if query := _q.withProc; query != nil {
+		if err := _q.loadProc(ctx, query, nodes, nil,
 			func(n *AttachedFile, e *Process) { n.Edges.Proc = e }); err != nil {
 			return nil, err
 		}
@@ -448,7 +448,7 @@ func (afq *AttachedFileQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	return nodes, nil
 }
 
-func (afq *AttachedFileQuery) loadFi(ctx context.Context, query *FileQuery, nodes []*AttachedFile, init func(*AttachedFile), assign func(*AttachedFile, *File)) error {
+func (_q *AttachedFileQuery) loadFi(ctx context.Context, query *FileQuery, nodes []*AttachedFile, init func(*AttachedFile), assign func(*AttachedFile, *File)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*AttachedFile)
 	for i := range nodes {
@@ -477,7 +477,7 @@ func (afq *AttachedFileQuery) loadFi(ctx context.Context, query *FileQuery, node
 	}
 	return nil
 }
-func (afq *AttachedFileQuery) loadProc(ctx context.Context, query *ProcessQuery, nodes []*AttachedFile, init func(*AttachedFile), assign func(*AttachedFile, *Process)) error {
+func (_q *AttachedFileQuery) loadProc(ctx context.Context, query *ProcessQuery, nodes []*AttachedFile, init func(*AttachedFile), assign func(*AttachedFile, *Process)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*AttachedFile)
 	for i := range nodes {
@@ -507,24 +507,24 @@ func (afq *AttachedFileQuery) loadProc(ctx context.Context, query *ProcessQuery,
 	return nil
 }
 
-func (afq *AttachedFileQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := afq.querySpec()
-	_spec.Node.Columns = afq.ctx.Fields
-	if len(afq.ctx.Fields) > 0 {
-		_spec.Unique = afq.ctx.Unique != nil && *afq.ctx.Unique
+func (_q *AttachedFileQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, afq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (afq *AttachedFileQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *AttachedFileQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(attachedfile.Table, attachedfile.Columns, sqlgraph.NewFieldSpec(attachedfile.FieldID, field.TypeInt))
-	_spec.From = afq.sql
-	if unique := afq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if afq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := afq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, attachedfile.FieldID)
 		for i := range fields {
@@ -532,27 +532,27 @@ func (afq *AttachedFileQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if afq.withFi != nil {
+		if _q.withFi != nil {
 			_spec.Node.AddColumnOnce(attachedfile.FieldFID)
 		}
-		if afq.withProc != nil {
+		if _q.withProc != nil {
 			_spec.Node.AddColumnOnce(attachedfile.FieldProcID)
 		}
 	}
-	if ps := afq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := afq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := afq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := afq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -562,33 +562,33 @@ func (afq *AttachedFileQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (afq *AttachedFileQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(afq.driver.Dialect())
+func (_q *AttachedFileQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(attachedfile.Table)
-	columns := afq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = attachedfile.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if afq.sql != nil {
-		selector = afq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if afq.ctx.Unique != nil && *afq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range afq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range afq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := afq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := afq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector

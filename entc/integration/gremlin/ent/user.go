@@ -187,12 +187,12 @@ func (e UserEdges) ParentOrErr() (*User, error) {
 }
 
 // FromResponse scans the gremlin response data into User.
-func (u *User) FromResponse(res *gremlin.Response) error {
+func (_m *User) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scanu struct {
+	var scan_m struct {
 		ID          string          `json:"id,omitempty"`
 		OptionalInt int             `json:"optional_int,omitempty"`
 		Age         int             `json:"age,omitempty"`
@@ -207,137 +207,137 @@ func (u *User) FromResponse(res *gremlin.Response) error {
 		SSOCert     string          `json:"sso_cert,omitempty"`
 		FilesCount  int             `json:"files_count,omitempty"`
 	}
-	if err := vmap.Decode(&scanu); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	u.ID = scanu.ID
-	u.OptionalInt = scanu.OptionalInt
-	u.Age = scanu.Age
-	u.Name = scanu.Name
-	u.Last = scanu.Last
-	u.Nickname = scanu.Nickname
-	u.Address = scanu.Address
-	u.Phone = scanu.Phone
-	u.Password = scanu.Password
-	u.Role = scanu.Role
-	u.Employment = scanu.Employment
-	u.SSOCert = scanu.SSOCert
-	u.FilesCount = scanu.FilesCount
+	_m.ID = scan_m.ID
+	_m.OptionalInt = scan_m.OptionalInt
+	_m.Age = scan_m.Age
+	_m.Name = scan_m.Name
+	_m.Last = scan_m.Last
+	_m.Nickname = scan_m.Nickname
+	_m.Address = scan_m.Address
+	_m.Phone = scan_m.Phone
+	_m.Password = scan_m.Password
+	_m.Role = scan_m.Role
+	_m.Employment = scan_m.Employment
+	_m.SSOCert = scan_m.SSOCert
+	_m.FilesCount = scan_m.FilesCount
 	return nil
 }
 
 // QueryCard queries the "card" edge of the User entity.
-func (u *User) QueryCard() *CardQuery {
-	return NewUserClient(u.config).QueryCard(u)
+func (_m *User) QueryCard() *CardQuery {
+	return NewUserClient(_m.config).QueryCard(_m)
 }
 
 // QueryPets queries the "pets" edge of the User entity.
-func (u *User) QueryPets() *PetQuery {
-	return NewUserClient(u.config).QueryPets(u)
+func (_m *User) QueryPets() *PetQuery {
+	return NewUserClient(_m.config).QueryPets(_m)
 }
 
 // QueryFiles queries the "files" edge of the User entity.
-func (u *User) QueryFiles() *FileQuery {
-	return NewUserClient(u.config).QueryFiles(u)
+func (_m *User) QueryFiles() *FileQuery {
+	return NewUserClient(_m.config).QueryFiles(_m)
 }
 
 // QueryGroups queries the "groups" edge of the User entity.
-func (u *User) QueryGroups() *GroupQuery {
-	return NewUserClient(u.config).QueryGroups(u)
+func (_m *User) QueryGroups() *GroupQuery {
+	return NewUserClient(_m.config).QueryGroups(_m)
 }
 
 // QueryFriends queries the "friends" edge of the User entity.
-func (u *User) QueryFriends() *UserQuery {
-	return NewUserClient(u.config).QueryFriends(u)
+func (_m *User) QueryFriends() *UserQuery {
+	return NewUserClient(_m.config).QueryFriends(_m)
 }
 
 // QueryFollowers queries the "followers" edge of the User entity.
-func (u *User) QueryFollowers() *UserQuery {
-	return NewUserClient(u.config).QueryFollowers(u)
+func (_m *User) QueryFollowers() *UserQuery {
+	return NewUserClient(_m.config).QueryFollowers(_m)
 }
 
 // QueryFollowing queries the "following" edge of the User entity.
-func (u *User) QueryFollowing() *UserQuery {
-	return NewUserClient(u.config).QueryFollowing(u)
+func (_m *User) QueryFollowing() *UserQuery {
+	return NewUserClient(_m.config).QueryFollowing(_m)
 }
 
 // QueryTeam queries the "team" edge of the User entity.
-func (u *User) QueryTeam() *PetQuery {
-	return NewUserClient(u.config).QueryTeam(u)
+func (_m *User) QueryTeam() *PetQuery {
+	return NewUserClient(_m.config).QueryTeam(_m)
 }
 
 // QuerySpouse queries the "spouse" edge of the User entity.
-func (u *User) QuerySpouse() *UserQuery {
-	return NewUserClient(u.config).QuerySpouse(u)
+func (_m *User) QuerySpouse() *UserQuery {
+	return NewUserClient(_m.config).QuerySpouse(_m)
 }
 
 // QueryChildren queries the "children" edge of the User entity.
-func (u *User) QueryChildren() *UserQuery {
-	return NewUserClient(u.config).QueryChildren(u)
+func (_m *User) QueryChildren() *UserQuery {
+	return NewUserClient(_m.config).QueryChildren(_m)
 }
 
 // QueryParent queries the "parent" edge of the User entity.
-func (u *User) QueryParent() *UserQuery {
-	return NewUserClient(u.config).QueryParent(u)
+func (_m *User) QueryParent() *UserQuery {
+	return NewUserClient(_m.config).QueryParent(_m)
 }
 
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (u *User) Update() *UserUpdateOne {
-	return NewUserClient(u.config).UpdateOne(u)
+func (_m *User) Update() *UserUpdateOne {
+	return NewUserClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the User entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (u *User) Unwrap() *User {
-	_tx, ok := u.config.driver.(*txDriver)
+func (_m *User) Unwrap() *User {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: User is not a transactional entity")
 	}
-	u.config.driver = _tx.drv
-	return u
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (u *User) String() string {
+func (_m *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("optional_int=")
-	builder.WriteString(fmt.Sprintf("%v", u.OptionalInt))
+	builder.WriteString(fmt.Sprintf("%v", _m.OptionalInt))
 	builder.WriteString(", ")
 	builder.WriteString("age=")
-	builder.WriteString(fmt.Sprintf("%v", u.Age))
+	builder.WriteString(fmt.Sprintf("%v", _m.Age))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(u.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("last=")
-	builder.WriteString(u.Last)
+	builder.WriteString(_m.Last)
 	builder.WriteString(", ")
 	builder.WriteString("nickname=")
-	builder.WriteString(u.Nickname)
+	builder.WriteString(_m.Nickname)
 	builder.WriteString(", ")
 	builder.WriteString("address=")
-	builder.WriteString(u.Address)
+	builder.WriteString(_m.Address)
 	builder.WriteString(", ")
 	builder.WriteString("phone=")
-	builder.WriteString(u.Phone)
+	builder.WriteString(_m.Phone)
 	builder.WriteString(", ")
 	builder.WriteString("password=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("role=")
-	builder.WriteString(fmt.Sprintf("%v", u.Role))
+	builder.WriteString(fmt.Sprintf("%v", _m.Role))
 	builder.WriteString(", ")
 	builder.WriteString("employment=")
-	builder.WriteString(fmt.Sprintf("%v", u.Employment))
+	builder.WriteString(fmt.Sprintf("%v", _m.Employment))
 	builder.WriteString(", ")
 	builder.WriteString("SSOCert=")
-	builder.WriteString(u.SSOCert)
+	builder.WriteString(_m.SSOCert)
 	builder.WriteString(", ")
 	builder.WriteString("files_count=")
-	builder.WriteString(fmt.Sprintf("%v", u.FilesCount))
+	builder.WriteString(fmt.Sprintf("%v", _m.FilesCount))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -346,12 +346,12 @@ func (u *User) String() string {
 type Users []*User
 
 // FromResponse scans the gremlin response data into Users.
-func (u *Users) FromResponse(res *gremlin.Response) error {
+func (_m *Users) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scanu []struct {
+	var scan_m []struct {
 		ID          string          `json:"id,omitempty"`
 		OptionalInt int             `json:"optional_int,omitempty"`
 		Age         int             `json:"age,omitempty"`
@@ -366,10 +366,10 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 		SSOCert     string          `json:"sso_cert,omitempty"`
 		FilesCount  int             `json:"files_count,omitempty"`
 	}
-	if err := vmap.Decode(&scanu); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	for _, v := range scanu {
+	for _, v := range scan_m {
 		node := &User{ID: v.ID}
 		node.OptionalInt = v.OptionalInt
 		node.Age = v.Age
@@ -383,7 +383,7 @@ func (u *Users) FromResponse(res *gremlin.Response) error {
 		node.Employment = v.Employment
 		node.SSOCert = v.SSOCert
 		node.FilesCount = v.FilesCount
-		*u = append(*u, node)
+		*_m = append(*_m, node)
 	}
 	return nil
 }

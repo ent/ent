@@ -24,56 +24,56 @@ type DocDelete struct {
 }
 
 // Where appends a list predicates to the DocDelete builder.
-func (dd *DocDelete) Where(ps ...predicate.Doc) *DocDelete {
-	dd.mutation.Where(ps...)
-	return dd
+func (_d *DocDelete) Where(ps ...predicate.Doc) *DocDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (dd *DocDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, dd.sqlExec, dd.mutation, dd.hooks)
+func (_d *DocDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (dd *DocDelete) ExecX(ctx context.Context) int {
-	n, err := dd.Exec(ctx)
+func (_d *DocDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (dd *DocDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *DocDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(doc.Table, sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString))
-	if ps := dd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, dd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	dd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // DocDeleteOne is the builder for deleting a single Doc entity.
 type DocDeleteOne struct {
-	dd *DocDelete
+	_d *DocDelete
 }
 
 // Where appends a list predicates to the DocDelete builder.
-func (ddo *DocDeleteOne) Where(ps ...predicate.Doc) *DocDeleteOne {
-	ddo.dd.mutation.Where(ps...)
-	return ddo
+func (_d *DocDeleteOne) Where(ps ...predicate.Doc) *DocDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (ddo *DocDeleteOne) Exec(ctx context.Context) error {
-	n, err := ddo.dd.Exec(ctx)
+func (_d *DocDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (ddo *DocDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ddo *DocDeleteOne) ExecX(ctx context.Context) {
-	if err := ddo.Exec(ctx); err != nil {
+func (_d *DocDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

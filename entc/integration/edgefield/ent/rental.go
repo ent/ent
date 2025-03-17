@@ -89,7 +89,7 @@ func (*Rental) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Rental fields.
-func (r *Rental) assignValues(columns []string, values []any) error {
+func (_m *Rental) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -100,27 +100,27 @@ func (r *Rental) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			r.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case rental.FieldDate:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field date", values[i])
 			} else if value.Valid {
-				r.Date = value.Time
+				_m.Date = value.Time
 			}
 		case rental.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				r.UserID = int(value.Int64)
+				_m.UserID = int(value.Int64)
 			}
 		case rental.FieldCarID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field car_id", values[i])
 			} else if value != nil {
-				r.CarID = *value
+				_m.CarID = *value
 			}
 		default:
-			r.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -128,51 +128,51 @@ func (r *Rental) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Rental.
 // This includes values selected through modifiers, order, etc.
-func (r *Rental) Value(name string) (ent.Value, error) {
-	return r.selectValues.Get(name)
+func (_m *Rental) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryUser queries the "user" edge of the Rental entity.
-func (r *Rental) QueryUser() *UserQuery {
-	return NewRentalClient(r.config).QueryUser(r)
+func (_m *Rental) QueryUser() *UserQuery {
+	return NewRentalClient(_m.config).QueryUser(_m)
 }
 
 // QueryCar queries the "car" edge of the Rental entity.
-func (r *Rental) QueryCar() *CarQuery {
-	return NewRentalClient(r.config).QueryCar(r)
+func (_m *Rental) QueryCar() *CarQuery {
+	return NewRentalClient(_m.config).QueryCar(_m)
 }
 
 // Update returns a builder for updating this Rental.
 // Note that you need to call Rental.Unwrap() before calling this method if this Rental
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (r *Rental) Update() *RentalUpdateOne {
-	return NewRentalClient(r.config).UpdateOne(r)
+func (_m *Rental) Update() *RentalUpdateOne {
+	return NewRentalClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Rental entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (r *Rental) Unwrap() *Rental {
-	_tx, ok := r.config.driver.(*txDriver)
+func (_m *Rental) Unwrap() *Rental {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Rental is not a transactional entity")
 	}
-	r.config.driver = _tx.drv
-	return r
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (r *Rental) String() string {
+func (_m *Rental) String() string {
 	var builder strings.Builder
 	builder.WriteString("Rental(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", r.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("date=")
-	builder.WriteString(r.Date.Format(time.ANSIC))
+	builder.WriteString(_m.Date.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", r.UserID))
+	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteString(", ")
 	builder.WriteString("car_id=")
-	builder.WriteString(fmt.Sprintf("%v", r.CarID))
+	builder.WriteString(fmt.Sprintf("%v", _m.CarID))
 	builder.WriteByte(')')
 	return builder.String()
 }

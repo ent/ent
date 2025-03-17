@@ -26,31 +26,31 @@ type LicenseUpdate struct {
 }
 
 // Where appends a list predicates to the LicenseUpdate builder.
-func (lu *LicenseUpdate) Where(ps ...predicate.License) *LicenseUpdate {
-	lu.mutation.Where(ps...)
-	return lu
+func (_u *LicenseUpdate) Where(ps ...predicate.License) *LicenseUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetUpdateTime sets the "update_time" field.
-func (lu *LicenseUpdate) SetUpdateTime(t time.Time) *LicenseUpdate {
-	lu.mutation.SetUpdateTime(t)
-	return lu
+func (_u *LicenseUpdate) SetUpdateTime(t time.Time) *LicenseUpdate {
+	_u.mutation.SetUpdateTime(t)
+	return _u
 }
 
 // Mutation returns the LicenseMutation object of the builder.
-func (lu *LicenseUpdate) Mutation() *LicenseMutation {
-	return lu.mutation
+func (_u *LicenseUpdate) Mutation() *LicenseMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (lu *LicenseUpdate) Save(ctx context.Context) (int, error) {
-	lu.defaults()
-	return withHooks(ctx, lu.gremlinSave, lu.mutation, lu.hooks)
+func (_u *LicenseUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (lu *LicenseUpdate) SaveX(ctx context.Context) int {
-	affected, err := lu.Save(ctx)
+func (_u *LicenseUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -58,48 +58,48 @@ func (lu *LicenseUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (lu *LicenseUpdate) Exec(ctx context.Context) error {
-	_, err := lu.Save(ctx)
+func (_u *LicenseUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (lu *LicenseUpdate) ExecX(ctx context.Context) {
-	if err := lu.Exec(ctx); err != nil {
+func (_u *LicenseUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (lu *LicenseUpdate) defaults() {
-	if _, ok := lu.mutation.UpdateTime(); !ok {
+func (_u *LicenseUpdate) defaults() {
+	if _, ok := _u.mutation.UpdateTime(); !ok {
 		v := license.UpdateDefaultUpdateTime()
-		lu.mutation.SetUpdateTime(v)
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
-func (lu *LicenseUpdate) gremlinSave(ctx context.Context) (int, error) {
+func (_u *LicenseUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := lu.gremlin().Query()
-	if err := lu.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _u.gremlin().Query()
+	if err := _u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return 0, err
 	}
-	lu.mutation.done = true
+	_u.mutation.done = true
 	return res.ReadInt()
 }
 
-func (lu *LicenseUpdate) gremlin() *dsl.Traversal {
+func (_u *LicenseUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(license.Label)
-	for _, p := range lu.mutation.predicates {
+	for _, p := range _u.mutation.predicates {
 		p(v)
 	}
 	var (
 		trs []*dsl.Traversal
 	)
-	if value, ok := lu.mutation.UpdateTime(); ok {
+	if value, ok := _u.mutation.UpdateTime(); ok {
 		v.Property(dsl.Single, license.FieldUpdateTime, value)
 	}
 	v.Count()
@@ -116,38 +116,38 @@ type LicenseUpdateOne struct {
 }
 
 // SetUpdateTime sets the "update_time" field.
-func (luo *LicenseUpdateOne) SetUpdateTime(t time.Time) *LicenseUpdateOne {
-	luo.mutation.SetUpdateTime(t)
-	return luo
+func (_u *LicenseUpdateOne) SetUpdateTime(t time.Time) *LicenseUpdateOne {
+	_u.mutation.SetUpdateTime(t)
+	return _u
 }
 
 // Mutation returns the LicenseMutation object of the builder.
-func (luo *LicenseUpdateOne) Mutation() *LicenseMutation {
-	return luo.mutation
+func (_u *LicenseUpdateOne) Mutation() *LicenseMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the LicenseUpdate builder.
-func (luo *LicenseUpdateOne) Where(ps ...predicate.License) *LicenseUpdateOne {
-	luo.mutation.Where(ps...)
-	return luo
+func (_u *LicenseUpdateOne) Where(ps ...predicate.License) *LicenseUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (luo *LicenseUpdateOne) Select(field string, fields ...string) *LicenseUpdateOne {
-	luo.fields = append([]string{field}, fields...)
-	return luo
+func (_u *LicenseUpdateOne) Select(field string, fields ...string) *LicenseUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated License entity.
-func (luo *LicenseUpdateOne) Save(ctx context.Context) (*License, error) {
-	luo.defaults()
-	return withHooks(ctx, luo.gremlinSave, luo.mutation, luo.hooks)
+func (_u *LicenseUpdateOne) Save(ctx context.Context) (*License, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (luo *LicenseUpdateOne) SaveX(ctx context.Context) *License {
-	node, err := luo.Save(ctx)
+func (_u *LicenseUpdateOne) SaveX(ctx context.Context) *License {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -155,59 +155,59 @@ func (luo *LicenseUpdateOne) SaveX(ctx context.Context) *License {
 }
 
 // Exec executes the query on the entity.
-func (luo *LicenseUpdateOne) Exec(ctx context.Context) error {
-	_, err := luo.Save(ctx)
+func (_u *LicenseUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (luo *LicenseUpdateOne) ExecX(ctx context.Context) {
-	if err := luo.Exec(ctx); err != nil {
+func (_u *LicenseUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (luo *LicenseUpdateOne) defaults() {
-	if _, ok := luo.mutation.UpdateTime(); !ok {
+func (_u *LicenseUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdateTime(); !ok {
 		v := license.UpdateDefaultUpdateTime()
-		luo.mutation.SetUpdateTime(v)
+		_u.mutation.SetUpdateTime(v)
 	}
 }
 
-func (luo *LicenseUpdateOne) gremlinSave(ctx context.Context) (*License, error) {
+func (_u *LicenseUpdateOne) gremlinSave(ctx context.Context) (*License, error) {
 	res := &gremlin.Response{}
-	id, ok := luo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "License.id" for update`)}
 	}
-	query, bindings := luo.gremlin(id).Query()
-	if err := luo.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _u.gremlin(id).Query()
+	if err := _u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	luo.mutation.done = true
-	l := &License{config: luo.config}
-	if err := l.FromResponse(res); err != nil {
+	_u.mutation.done = true
+	_m := &License{config: _u.config}
+	if err := _m.FromResponse(res); err != nil {
 		return nil, err
 	}
-	return l, nil
+	return _m, nil
 }
 
-func (luo *LicenseUpdateOne) gremlin(id int) *dsl.Traversal {
+func (_u *LicenseUpdateOne) gremlin(id int) *dsl.Traversal {
 	v := g.V(id)
 	var (
 		trs []*dsl.Traversal
 	)
-	if value, ok := luo.mutation.UpdateTime(); ok {
+	if value, ok := _u.mutation.UpdateTime(); ok {
 		v.Property(dsl.Single, license.FieldUpdateTime, value)
 	}
-	if len(luo.fields) > 0 {
-		fields := make([]any, 0, len(luo.fields)+1)
+	if len(_u.fields) > 0 {
+		fields := make([]any, 0, len(_u.fields)+1)
 		fields = append(fields, true)
-		for _, f := range luo.fields {
+		for _, f := range _u.fields {
 			fields = append(fields, f)
 		}
 		v.ValueMap(fields...)

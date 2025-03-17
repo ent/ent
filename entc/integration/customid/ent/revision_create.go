@@ -27,24 +27,24 @@ type RevisionCreate struct {
 }
 
 // SetID sets the "id" field.
-func (rc *RevisionCreate) SetID(s string) *RevisionCreate {
-	rc.mutation.SetID(s)
-	return rc
+func (_c *RevisionCreate) SetID(s string) *RevisionCreate {
+	_c.mutation.SetID(s)
+	return _c
 }
 
 // Mutation returns the RevisionMutation object of the builder.
-func (rc *RevisionCreate) Mutation() *RevisionMutation {
-	return rc.mutation
+func (_c *RevisionCreate) Mutation() *RevisionMutation {
+	return _c.mutation
 }
 
 // Save creates the Revision in the database.
-func (rc *RevisionCreate) Save(ctx context.Context) (*Revision, error) {
-	return withHooks(ctx, rc.sqlSave, rc.mutation, rc.hooks)
+func (_c *RevisionCreate) Save(ctx context.Context) (*Revision, error) {
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (rc *RevisionCreate) SaveX(ctx context.Context) *Revision {
-	v, err := rc.Save(ctx)
+func (_c *RevisionCreate) SaveX(ctx context.Context) *Revision {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -52,29 +52,29 @@ func (rc *RevisionCreate) SaveX(ctx context.Context) *Revision {
 }
 
 // Exec executes the query.
-func (rc *RevisionCreate) Exec(ctx context.Context) error {
-	_, err := rc.Save(ctx)
+func (_c *RevisionCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rc *RevisionCreate) ExecX(ctx context.Context) {
-	if err := rc.Exec(ctx); err != nil {
+func (_c *RevisionCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (rc *RevisionCreate) check() error {
+func (_c *RevisionCreate) check() error {
 	return nil
 }
 
-func (rc *RevisionCreate) sqlSave(ctx context.Context) (*Revision, error) {
-	if err := rc.check(); err != nil {
+func (_c *RevisionCreate) sqlSave(ctx context.Context) (*Revision, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := rc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, rc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -87,18 +87,18 @@ func (rc *RevisionCreate) sqlSave(ctx context.Context) (*Revision, error) {
 			return nil, fmt.Errorf("unexpected Revision.ID type: %T", _spec.ID.Value)
 		}
 	}
-	rc.mutation.id = &_node.ID
-	rc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (rc *RevisionCreate) createSpec() (*Revision, *sqlgraph.CreateSpec) {
+func (_c *RevisionCreate) createSpec() (*Revision, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Revision{config: rc.config}
+		_node = &Revision{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(revision.Table, sqlgraph.NewFieldSpec(revision.FieldID, field.TypeString))
 	)
-	_spec.OnConflict = rc.conflict
-	if id, ok := rc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
@@ -115,10 +115,10 @@ func (rc *RevisionCreate) createSpec() (*Revision, *sqlgraph.CreateSpec) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-func (rc *RevisionCreate) OnConflict(opts ...sql.ConflictOption) *RevisionUpsertOne {
-	rc.conflict = opts
+func (_c *RevisionCreate) OnConflict(opts ...sql.ConflictOption) *RevisionUpsertOne {
+	_c.conflict = opts
 	return &RevisionUpsertOne{
-		create: rc,
+		create: _c,
 	}
 }
 
@@ -128,10 +128,10 @@ func (rc *RevisionCreate) OnConflict(opts ...sql.ConflictOption) *RevisionUpsert
 //	client.Revision.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (rc *RevisionCreate) OnConflictColumns(columns ...string) *RevisionUpsertOne {
-	rc.conflict = append(rc.conflict, sql.ConflictColumns(columns...))
+func (_c *RevisionCreate) OnConflictColumns(columns ...string) *RevisionUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &RevisionUpsertOne{
-		create: rc,
+		create: _c,
 	}
 }
 
@@ -243,16 +243,16 @@ type RevisionCreateBulk struct {
 }
 
 // Save creates the Revision entities in the database.
-func (rcb *RevisionCreateBulk) Save(ctx context.Context) ([]*Revision, error) {
-	if rcb.err != nil {
-		return nil, rcb.err
+func (_c *RevisionCreateBulk) Save(ctx context.Context) ([]*Revision, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(rcb.builders))
-	nodes := make([]*Revision, len(rcb.builders))
-	mutators := make([]Mutator, len(rcb.builders))
-	for i := range rcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Revision, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := rcb.builders[i]
+			builder := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*RevisionMutation)
 				if !ok {
@@ -265,12 +265,12 @@ func (rcb *RevisionCreateBulk) Save(ctx context.Context) ([]*Revision, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, rcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = rcb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, rcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -290,7 +290,7 @@ func (rcb *RevisionCreateBulk) Save(ctx context.Context) ([]*Revision, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, rcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -298,8 +298,8 @@ func (rcb *RevisionCreateBulk) Save(ctx context.Context) ([]*Revision, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (rcb *RevisionCreateBulk) SaveX(ctx context.Context) []*Revision {
-	v, err := rcb.Save(ctx)
+func (_c *RevisionCreateBulk) SaveX(ctx context.Context) []*Revision {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -307,14 +307,14 @@ func (rcb *RevisionCreateBulk) SaveX(ctx context.Context) []*Revision {
 }
 
 // Exec executes the query.
-func (rcb *RevisionCreateBulk) Exec(ctx context.Context) error {
-	_, err := rcb.Save(ctx)
+func (_c *RevisionCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rcb *RevisionCreateBulk) ExecX(ctx context.Context) {
-	if err := rcb.Exec(ctx); err != nil {
+func (_c *RevisionCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -329,10 +329,10 @@ func (rcb *RevisionCreateBulk) ExecX(ctx context.Context) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-func (rcb *RevisionCreateBulk) OnConflict(opts ...sql.ConflictOption) *RevisionUpsertBulk {
-	rcb.conflict = opts
+func (_c *RevisionCreateBulk) OnConflict(opts ...sql.ConflictOption) *RevisionUpsertBulk {
+	_c.conflict = opts
 	return &RevisionUpsertBulk{
-		create: rcb,
+		create: _c,
 	}
 }
 
@@ -342,10 +342,10 @@ func (rcb *RevisionCreateBulk) OnConflict(opts ...sql.ConflictOption) *RevisionU
 //	client.Revision.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (rcb *RevisionCreateBulk) OnConflictColumns(columns ...string) *RevisionUpsertBulk {
-	rcb.conflict = append(rcb.conflict, sql.ConflictColumns(columns...))
+func (_c *RevisionCreateBulk) OnConflictColumns(columns ...string) *RevisionUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &RevisionUpsertBulk{
-		create: rcb,
+		create: _c,
 	}
 }
 

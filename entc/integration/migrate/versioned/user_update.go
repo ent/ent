@@ -26,79 +26,79 @@ type UserUpdate struct {
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	uu.mutation.Where(ps...)
-	return uu
+func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetAge sets the "age" field.
-func (uu *UserUpdate) SetAge(i int32) *UserUpdate {
-	uu.mutation.ResetAge()
-	uu.mutation.SetAge(i)
-	return uu
+func (_u *UserUpdate) SetAge(i int32) *UserUpdate {
+	_u.mutation.ResetAge()
+	_u.mutation.SetAge(i)
+	return _u
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableAge(i *int32) *UserUpdate {
+func (_u *UserUpdate) SetNillableAge(i *int32) *UserUpdate {
 	if i != nil {
-		uu.SetAge(*i)
+		_u.SetAge(*i)
 	}
-	return uu
+	return _u
 }
 
 // AddAge adds i to the "age" field.
-func (uu *UserUpdate) AddAge(i int32) *UserUpdate {
-	uu.mutation.AddAge(i)
-	return uu
+func (_u *UserUpdate) AddAge(i int32) *UserUpdate {
+	_u.mutation.AddAge(i)
+	return _u
 }
 
 // SetName sets the "name" field.
-func (uu *UserUpdate) SetName(s string) *UserUpdate {
-	uu.mutation.SetName(s)
-	return uu
+func (_u *UserUpdate) SetName(s string) *UserUpdate {
+	_u.mutation.SetName(s)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableName(s *string) *UserUpdate {
+func (_u *UserUpdate) SetNillableName(s *string) *UserUpdate {
 	if s != nil {
-		uu.SetName(*s)
+		_u.SetName(*s)
 	}
-	return uu
+	return _u
 }
 
 // SetAddress sets the "address" field.
-func (uu *UserUpdate) SetAddress(s string) *UserUpdate {
-	uu.mutation.SetAddress(s)
-	return uu
+func (_u *UserUpdate) SetAddress(s string) *UserUpdate {
+	_u.mutation.SetAddress(s)
+	return _u
 }
 
 // SetNillableAddress sets the "address" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableAddress(s *string) *UserUpdate {
+func (_u *UserUpdate) SetNillableAddress(s *string) *UserUpdate {
 	if s != nil {
-		uu.SetAddress(*s)
+		_u.SetAddress(*s)
 	}
-	return uu
+	return _u
 }
 
 // ClearAddress clears the value of the "address" field.
-func (uu *UserUpdate) ClearAddress() *UserUpdate {
-	uu.mutation.ClearAddress()
-	return uu
+func (_u *UserUpdate) ClearAddress() *UserUpdate {
+	_u.mutation.ClearAddress()
+	return _u
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uu *UserUpdate) Mutation() *UserMutation {
-	return uu.mutation
+func (_u *UserUpdate) Mutation() *UserMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, uu.sqlSave, uu.mutation, uu.hooks)
+func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uu *UserUpdate) SaveX(ctx context.Context) int {
-	affected, err := uu.Save(ctx)
+func (_u *UserUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -106,21 +106,21 @@ func (uu *UserUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (uu *UserUpdate) Exec(ctx context.Context) error {
-	_, err := uu.Save(ctx)
+func (_u *UserUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uu *UserUpdate) ExecX(ctx context.Context) {
-	if err := uu.Exec(ctx); err != nil {
+func (_u *UserUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uu *UserUpdate) check() error {
-	if v, ok := uu.mutation.Name(); ok {
+func (_u *UserUpdate) check() error {
+	if v, ok := _u.mutation.Name(); ok {
 		if err := user.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`versioned: validator failed for field "User.name": %w`, err)}
 		}
@@ -128,34 +128,34 @@ func (uu *UserUpdate) check() error {
 	return nil
 }
 
-func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := uu.check(); err != nil {
+func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := _u.check(); err != nil {
 		return n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
-	if ps := uu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uu.mutation.Age(); ok {
+	if value, ok := _u.mutation.Age(); ok {
 		_spec.SetField(user.FieldAge, field.TypeInt32, value)
 	}
-	if value, ok := uu.mutation.AddedAge(); ok {
+	if value, ok := _u.mutation.AddedAge(); ok {
 		_spec.AddField(user.FieldAge, field.TypeInt32, value)
 	}
-	if value, ok := uu.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
 	}
-	if value, ok := uu.mutation.Address(); ok {
+	if value, ok := _u.mutation.Address(); ok {
 		_spec.SetField(user.FieldAddress, field.TypeString, value)
 	}
-	if uu.mutation.AddressCleared() {
+	if _u.mutation.AddressCleared() {
 		_spec.ClearField(user.FieldAddress, field.TypeString)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -163,7 +163,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	uu.mutation.done = true
+	_u.mutation.done = true
 	return n, nil
 }
 
@@ -176,86 +176,86 @@ type UserUpdateOne struct {
 }
 
 // SetAge sets the "age" field.
-func (uuo *UserUpdateOne) SetAge(i int32) *UserUpdateOne {
-	uuo.mutation.ResetAge()
-	uuo.mutation.SetAge(i)
-	return uuo
+func (_u *UserUpdateOne) SetAge(i int32) *UserUpdateOne {
+	_u.mutation.ResetAge()
+	_u.mutation.SetAge(i)
+	return _u
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableAge(i *int32) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillableAge(i *int32) *UserUpdateOne {
 	if i != nil {
-		uuo.SetAge(*i)
+		_u.SetAge(*i)
 	}
-	return uuo
+	return _u
 }
 
 // AddAge adds i to the "age" field.
-func (uuo *UserUpdateOne) AddAge(i int32) *UserUpdateOne {
-	uuo.mutation.AddAge(i)
-	return uuo
+func (_u *UserUpdateOne) AddAge(i int32) *UserUpdateOne {
+	_u.mutation.AddAge(i)
+	return _u
 }
 
 // SetName sets the "name" field.
-func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
-	uuo.mutation.SetName(s)
-	return uuo
+func (_u *UserUpdateOne) SetName(s string) *UserUpdateOne {
+	_u.mutation.SetName(s)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
 	if s != nil {
-		uuo.SetName(*s)
+		_u.SetName(*s)
 	}
-	return uuo
+	return _u
 }
 
 // SetAddress sets the "address" field.
-func (uuo *UserUpdateOne) SetAddress(s string) *UserUpdateOne {
-	uuo.mutation.SetAddress(s)
-	return uuo
+func (_u *UserUpdateOne) SetAddress(s string) *UserUpdateOne {
+	_u.mutation.SetAddress(s)
+	return _u
 }
 
 // SetNillableAddress sets the "address" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableAddress(s *string) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillableAddress(s *string) *UserUpdateOne {
 	if s != nil {
-		uuo.SetAddress(*s)
+		_u.SetAddress(*s)
 	}
-	return uuo
+	return _u
 }
 
 // ClearAddress clears the value of the "address" field.
-func (uuo *UserUpdateOne) ClearAddress() *UserUpdateOne {
-	uuo.mutation.ClearAddress()
-	return uuo
+func (_u *UserUpdateOne) ClearAddress() *UserUpdateOne {
+	_u.mutation.ClearAddress()
+	return _u
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uuo *UserUpdateOne) Mutation() *UserMutation {
-	return uuo.mutation
+func (_u *UserUpdateOne) Mutation() *UserMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uuo *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
-	uuo.mutation.Where(ps...)
-	return uuo
+func (_u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
-	uuo.fields = append([]string{field}, fields...)
-	return uuo
+func (_u *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated User entity.
-func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	return withHooks(ctx, uuo.sqlSave, uuo.mutation, uuo.hooks)
+func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
-	node, err := uuo.Save(ctx)
+func (_u *UserUpdateOne) SaveX(ctx context.Context) *User {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -263,21 +263,21 @@ func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
 }
 
 // Exec executes the query on the entity.
-func (uuo *UserUpdateOne) Exec(ctx context.Context) error {
-	_, err := uuo.Save(ctx)
+func (_u *UserUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
-	if err := uuo.Exec(ctx); err != nil {
+func (_u *UserUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uuo *UserUpdateOne) check() error {
-	if v, ok := uuo.mutation.Name(); ok {
+func (_u *UserUpdateOne) check() error {
+	if v, ok := _u.mutation.Name(); ok {
 		if err := user.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`versioned: validator failed for field "User.name": %w`, err)}
 		}
@@ -285,17 +285,17 @@ func (uuo *UserUpdateOne) check() error {
 	return nil
 }
 
-func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
-	if err := uuo.check(); err != nil {
+func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
-	id, ok := uuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`versioned: missing "User.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := uuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, user.FieldID)
 		for _, f := range fields {
@@ -307,32 +307,32 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			}
 		}
 	}
-	if ps := uuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uuo.mutation.Age(); ok {
+	if value, ok := _u.mutation.Age(); ok {
 		_spec.SetField(user.FieldAge, field.TypeInt32, value)
 	}
-	if value, ok := uuo.mutation.AddedAge(); ok {
+	if value, ok := _u.mutation.AddedAge(); ok {
 		_spec.AddField(user.FieldAge, field.TypeInt32, value)
 	}
-	if value, ok := uuo.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
 	}
-	if value, ok := uuo.mutation.Address(); ok {
+	if value, ok := _u.mutation.Address(); ok {
 		_spec.SetField(user.FieldAddress, field.TypeString, value)
 	}
-	if uuo.mutation.AddressCleared() {
+	if _u.mutation.AddressCleared() {
 		_spec.ClearField(user.FieldAddress, field.TypeString)
 	}
-	_node = &User{config: uuo.config}
+	_node = &User{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, uuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -340,6 +340,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		return nil, err
 	}
-	uuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

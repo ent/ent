@@ -27,120 +27,120 @@ type BlobUpdate struct {
 }
 
 // Where appends a list predicates to the BlobUpdate builder.
-func (bu *BlobUpdate) Where(ps ...predicate.Blob) *BlobUpdate {
-	bu.mutation.Where(ps...)
-	return bu
+func (_u *BlobUpdate) Where(ps ...predicate.Blob) *BlobUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetUUID sets the "uuid" field.
-func (bu *BlobUpdate) SetUUID(u uuid.UUID) *BlobUpdate {
-	bu.mutation.SetUUID(u)
-	return bu
+func (_u *BlobUpdate) SetUUID(u uuid.UUID) *BlobUpdate {
+	_u.mutation.SetUUID(u)
+	return _u
 }
 
 // SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (bu *BlobUpdate) SetNillableUUID(u *uuid.UUID) *BlobUpdate {
+func (_u *BlobUpdate) SetNillableUUID(u *uuid.UUID) *BlobUpdate {
 	if u != nil {
-		bu.SetUUID(*u)
+		_u.SetUUID(*u)
 	}
-	return bu
+	return _u
 }
 
 // SetCount sets the "count" field.
-func (bu *BlobUpdate) SetCount(i int) *BlobUpdate {
-	bu.mutation.ResetCount()
-	bu.mutation.SetCount(i)
-	return bu
+func (_u *BlobUpdate) SetCount(i int) *BlobUpdate {
+	_u.mutation.ResetCount()
+	_u.mutation.SetCount(i)
+	return _u
 }
 
 // SetNillableCount sets the "count" field if the given value is not nil.
-func (bu *BlobUpdate) SetNillableCount(i *int) *BlobUpdate {
+func (_u *BlobUpdate) SetNillableCount(i *int) *BlobUpdate {
 	if i != nil {
-		bu.SetCount(*i)
+		_u.SetCount(*i)
 	}
-	return bu
+	return _u
 }
 
 // AddCount adds i to the "count" field.
-func (bu *BlobUpdate) AddCount(i int) *BlobUpdate {
-	bu.mutation.AddCount(i)
-	return bu
+func (_u *BlobUpdate) AddCount(i int) *BlobUpdate {
+	_u.mutation.AddCount(i)
+	return _u
 }
 
 // SetParentID sets the "parent" edge to the Blob entity by ID.
-func (bu *BlobUpdate) SetParentID(id uuid.UUID) *BlobUpdate {
-	bu.mutation.SetParentID(id)
-	return bu
+func (_u *BlobUpdate) SetParentID(id uuid.UUID) *BlobUpdate {
+	_u.mutation.SetParentID(id)
+	return _u
 }
 
 // SetNillableParentID sets the "parent" edge to the Blob entity by ID if the given value is not nil.
-func (bu *BlobUpdate) SetNillableParentID(id *uuid.UUID) *BlobUpdate {
+func (_u *BlobUpdate) SetNillableParentID(id *uuid.UUID) *BlobUpdate {
 	if id != nil {
-		bu = bu.SetParentID(*id)
+		_u = _u.SetParentID(*id)
 	}
-	return bu
+	return _u
 }
 
 // SetParent sets the "parent" edge to the Blob entity.
-func (bu *BlobUpdate) SetParent(b *Blob) *BlobUpdate {
-	return bu.SetParentID(b.ID)
+func (_u *BlobUpdate) SetParent(b *Blob) *BlobUpdate {
+	return _u.SetParentID(b.ID)
 }
 
 // AddLinkIDs adds the "links" edge to the Blob entity by IDs.
-func (bu *BlobUpdate) AddLinkIDs(ids ...uuid.UUID) *BlobUpdate {
-	bu.mutation.AddLinkIDs(ids...)
-	return bu
+func (_u *BlobUpdate) AddLinkIDs(ids ...uuid.UUID) *BlobUpdate {
+	_u.mutation.AddLinkIDs(ids...)
+	return _u
 }
 
 // AddLinks adds the "links" edges to the Blob entity.
-func (bu *BlobUpdate) AddLinks(b ...*Blob) *BlobUpdate {
+func (_u *BlobUpdate) AddLinks(b ...*Blob) *BlobUpdate {
 	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
-	return bu.AddLinkIDs(ids...)
+	return _u.AddLinkIDs(ids...)
 }
 
 // Mutation returns the BlobMutation object of the builder.
-func (bu *BlobUpdate) Mutation() *BlobMutation {
-	return bu.mutation
+func (_u *BlobUpdate) Mutation() *BlobMutation {
+	return _u.mutation
 }
 
 // ClearParent clears the "parent" edge to the Blob entity.
-func (bu *BlobUpdate) ClearParent() *BlobUpdate {
-	bu.mutation.ClearParent()
-	return bu
+func (_u *BlobUpdate) ClearParent() *BlobUpdate {
+	_u.mutation.ClearParent()
+	return _u
 }
 
 // ClearLinks clears all "links" edges to the Blob entity.
-func (bu *BlobUpdate) ClearLinks() *BlobUpdate {
-	bu.mutation.ClearLinks()
-	return bu
+func (_u *BlobUpdate) ClearLinks() *BlobUpdate {
+	_u.mutation.ClearLinks()
+	return _u
 }
 
 // RemoveLinkIDs removes the "links" edge to Blob entities by IDs.
-func (bu *BlobUpdate) RemoveLinkIDs(ids ...uuid.UUID) *BlobUpdate {
-	bu.mutation.RemoveLinkIDs(ids...)
-	return bu
+func (_u *BlobUpdate) RemoveLinkIDs(ids ...uuid.UUID) *BlobUpdate {
+	_u.mutation.RemoveLinkIDs(ids...)
+	return _u
 }
 
 // RemoveLinks removes "links" edges to Blob entities.
-func (bu *BlobUpdate) RemoveLinks(b ...*Blob) *BlobUpdate {
+func (_u *BlobUpdate) RemoveLinks(b ...*Blob) *BlobUpdate {
 	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
-	return bu.RemoveLinkIDs(ids...)
+	return _u.RemoveLinkIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (bu *BlobUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, bu.sqlSave, bu.mutation, bu.hooks)
+func (_u *BlobUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (bu *BlobUpdate) SaveX(ctx context.Context) int {
-	affected, err := bu.Save(ctx)
+func (_u *BlobUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -148,37 +148,37 @@ func (bu *BlobUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (bu *BlobUpdate) Exec(ctx context.Context) error {
-	_, err := bu.Save(ctx)
+func (_u *BlobUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bu *BlobUpdate) ExecX(ctx context.Context) {
-	if err := bu.Exec(ctx); err != nil {
+func (_u *BlobUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(blob.Table, blob.Columns, sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID))
-	if ps := bu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := bu.mutation.UUID(); ok {
+	if value, ok := _u.mutation.UUID(); ok {
 		_spec.SetField(blob.FieldUUID, field.TypeUUID, value)
 	}
-	if value, ok := bu.mutation.Count(); ok {
+	if value, ok := _u.mutation.Count(); ok {
 		_spec.SetField(blob.FieldCount, field.TypeInt, value)
 	}
-	if value, ok := bu.mutation.AddedCount(); ok {
+	if value, ok := _u.mutation.AddedCount(); ok {
 		_spec.AddField(blob.FieldCount, field.TypeInt, value)
 	}
-	if bu.mutation.ParentCleared() {
+	if _u.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -191,7 +191,7 @@ func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bu.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -207,7 +207,7 @@ func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if bu.mutation.LinksCleared() {
+	if _u.mutation.LinksCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -218,13 +218,13 @@ func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
 			},
 		}
-		createE := &BlobLinkCreate{config: bu.config, mutation: newBlobLinkMutation(bu.config, OpCreate)}
+		createE := &BlobLinkCreate{config: _u.config, mutation: newBlobLinkMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bu.mutation.RemovedLinksIDs(); len(nodes) > 0 && !bu.mutation.LinksCleared() {
+	if nodes := _u.mutation.RemovedLinksIDs(); len(nodes) > 0 && !_u.mutation.LinksCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -238,13 +238,13 @@ func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &BlobLinkCreate{config: bu.config, mutation: newBlobLinkMutation(bu.config, OpCreate)}
+		createE := &BlobLinkCreate{config: _u.config, mutation: newBlobLinkMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bu.mutation.LinksIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.LinksIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -258,13 +258,13 @@ func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &BlobLinkCreate{config: bu.config, mutation: newBlobLinkMutation(bu.config, OpCreate)}
+		createE := &BlobLinkCreate{config: _u.config, mutation: newBlobLinkMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, bu.driver, _spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{blob.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -272,7 +272,7 @@ func (bu *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	bu.mutation.done = true
+	_u.mutation.done = true
 	return n, nil
 }
 
@@ -285,127 +285,127 @@ type BlobUpdateOne struct {
 }
 
 // SetUUID sets the "uuid" field.
-func (buo *BlobUpdateOne) SetUUID(u uuid.UUID) *BlobUpdateOne {
-	buo.mutation.SetUUID(u)
-	return buo
+func (_u *BlobUpdateOne) SetUUID(u uuid.UUID) *BlobUpdateOne {
+	_u.mutation.SetUUID(u)
+	return _u
 }
 
 // SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (buo *BlobUpdateOne) SetNillableUUID(u *uuid.UUID) *BlobUpdateOne {
+func (_u *BlobUpdateOne) SetNillableUUID(u *uuid.UUID) *BlobUpdateOne {
 	if u != nil {
-		buo.SetUUID(*u)
+		_u.SetUUID(*u)
 	}
-	return buo
+	return _u
 }
 
 // SetCount sets the "count" field.
-func (buo *BlobUpdateOne) SetCount(i int) *BlobUpdateOne {
-	buo.mutation.ResetCount()
-	buo.mutation.SetCount(i)
-	return buo
+func (_u *BlobUpdateOne) SetCount(i int) *BlobUpdateOne {
+	_u.mutation.ResetCount()
+	_u.mutation.SetCount(i)
+	return _u
 }
 
 // SetNillableCount sets the "count" field if the given value is not nil.
-func (buo *BlobUpdateOne) SetNillableCount(i *int) *BlobUpdateOne {
+func (_u *BlobUpdateOne) SetNillableCount(i *int) *BlobUpdateOne {
 	if i != nil {
-		buo.SetCount(*i)
+		_u.SetCount(*i)
 	}
-	return buo
+	return _u
 }
 
 // AddCount adds i to the "count" field.
-func (buo *BlobUpdateOne) AddCount(i int) *BlobUpdateOne {
-	buo.mutation.AddCount(i)
-	return buo
+func (_u *BlobUpdateOne) AddCount(i int) *BlobUpdateOne {
+	_u.mutation.AddCount(i)
+	return _u
 }
 
 // SetParentID sets the "parent" edge to the Blob entity by ID.
-func (buo *BlobUpdateOne) SetParentID(id uuid.UUID) *BlobUpdateOne {
-	buo.mutation.SetParentID(id)
-	return buo
+func (_u *BlobUpdateOne) SetParentID(id uuid.UUID) *BlobUpdateOne {
+	_u.mutation.SetParentID(id)
+	return _u
 }
 
 // SetNillableParentID sets the "parent" edge to the Blob entity by ID if the given value is not nil.
-func (buo *BlobUpdateOne) SetNillableParentID(id *uuid.UUID) *BlobUpdateOne {
+func (_u *BlobUpdateOne) SetNillableParentID(id *uuid.UUID) *BlobUpdateOne {
 	if id != nil {
-		buo = buo.SetParentID(*id)
+		_u = _u.SetParentID(*id)
 	}
-	return buo
+	return _u
 }
 
 // SetParent sets the "parent" edge to the Blob entity.
-func (buo *BlobUpdateOne) SetParent(b *Blob) *BlobUpdateOne {
-	return buo.SetParentID(b.ID)
+func (_u *BlobUpdateOne) SetParent(b *Blob) *BlobUpdateOne {
+	return _u.SetParentID(b.ID)
 }
 
 // AddLinkIDs adds the "links" edge to the Blob entity by IDs.
-func (buo *BlobUpdateOne) AddLinkIDs(ids ...uuid.UUID) *BlobUpdateOne {
-	buo.mutation.AddLinkIDs(ids...)
-	return buo
+func (_u *BlobUpdateOne) AddLinkIDs(ids ...uuid.UUID) *BlobUpdateOne {
+	_u.mutation.AddLinkIDs(ids...)
+	return _u
 }
 
 // AddLinks adds the "links" edges to the Blob entity.
-func (buo *BlobUpdateOne) AddLinks(b ...*Blob) *BlobUpdateOne {
+func (_u *BlobUpdateOne) AddLinks(b ...*Blob) *BlobUpdateOne {
 	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
-	return buo.AddLinkIDs(ids...)
+	return _u.AddLinkIDs(ids...)
 }
 
 // Mutation returns the BlobMutation object of the builder.
-func (buo *BlobUpdateOne) Mutation() *BlobMutation {
-	return buo.mutation
+func (_u *BlobUpdateOne) Mutation() *BlobMutation {
+	return _u.mutation
 }
 
 // ClearParent clears the "parent" edge to the Blob entity.
-func (buo *BlobUpdateOne) ClearParent() *BlobUpdateOne {
-	buo.mutation.ClearParent()
-	return buo
+func (_u *BlobUpdateOne) ClearParent() *BlobUpdateOne {
+	_u.mutation.ClearParent()
+	return _u
 }
 
 // ClearLinks clears all "links" edges to the Blob entity.
-func (buo *BlobUpdateOne) ClearLinks() *BlobUpdateOne {
-	buo.mutation.ClearLinks()
-	return buo
+func (_u *BlobUpdateOne) ClearLinks() *BlobUpdateOne {
+	_u.mutation.ClearLinks()
+	return _u
 }
 
 // RemoveLinkIDs removes the "links" edge to Blob entities by IDs.
-func (buo *BlobUpdateOne) RemoveLinkIDs(ids ...uuid.UUID) *BlobUpdateOne {
-	buo.mutation.RemoveLinkIDs(ids...)
-	return buo
+func (_u *BlobUpdateOne) RemoveLinkIDs(ids ...uuid.UUID) *BlobUpdateOne {
+	_u.mutation.RemoveLinkIDs(ids...)
+	return _u
 }
 
 // RemoveLinks removes "links" edges to Blob entities.
-func (buo *BlobUpdateOne) RemoveLinks(b ...*Blob) *BlobUpdateOne {
+func (_u *BlobUpdateOne) RemoveLinks(b ...*Blob) *BlobUpdateOne {
 	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
-	return buo.RemoveLinkIDs(ids...)
+	return _u.RemoveLinkIDs(ids...)
 }
 
 // Where appends a list predicates to the BlobUpdate builder.
-func (buo *BlobUpdateOne) Where(ps ...predicate.Blob) *BlobUpdateOne {
-	buo.mutation.Where(ps...)
-	return buo
+func (_u *BlobUpdateOne) Where(ps ...predicate.Blob) *BlobUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (buo *BlobUpdateOne) Select(field string, fields ...string) *BlobUpdateOne {
-	buo.fields = append([]string{field}, fields...)
-	return buo
+func (_u *BlobUpdateOne) Select(field string, fields ...string) *BlobUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Blob entity.
-func (buo *BlobUpdateOne) Save(ctx context.Context) (*Blob, error) {
-	return withHooks(ctx, buo.sqlSave, buo.mutation, buo.hooks)
+func (_u *BlobUpdateOne) Save(ctx context.Context) (*Blob, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (buo *BlobUpdateOne) SaveX(ctx context.Context) *Blob {
-	node, err := buo.Save(ctx)
+func (_u *BlobUpdateOne) SaveX(ctx context.Context) *Blob {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -413,26 +413,26 @@ func (buo *BlobUpdateOne) SaveX(ctx context.Context) *Blob {
 }
 
 // Exec executes the query on the entity.
-func (buo *BlobUpdateOne) Exec(ctx context.Context) error {
-	_, err := buo.Save(ctx)
+func (_u *BlobUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (buo *BlobUpdateOne) ExecX(ctx context.Context) {
-	if err := buo.Exec(ctx); err != nil {
+func (_u *BlobUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) {
+func (_u *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) {
 	_spec := sqlgraph.NewUpdateSpec(blob.Table, blob.Columns, sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID))
-	id, ok := buo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Blob.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := buo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, blob.FieldID)
 		for _, f := range fields {
@@ -444,23 +444,23 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) 
 			}
 		}
 	}
-	if ps := buo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := buo.mutation.UUID(); ok {
+	if value, ok := _u.mutation.UUID(); ok {
 		_spec.SetField(blob.FieldUUID, field.TypeUUID, value)
 	}
-	if value, ok := buo.mutation.Count(); ok {
+	if value, ok := _u.mutation.Count(); ok {
 		_spec.SetField(blob.FieldCount, field.TypeInt, value)
 	}
-	if value, ok := buo.mutation.AddedCount(); ok {
+	if value, ok := _u.mutation.AddedCount(); ok {
 		_spec.AddField(blob.FieldCount, field.TypeInt, value)
 	}
-	if buo.mutation.ParentCleared() {
+	if _u.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -473,7 +473,7 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := buo.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -489,7 +489,7 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if buo.mutation.LinksCleared() {
+	if _u.mutation.LinksCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -500,13 +500,13 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) 
 				IDSpec: sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID),
 			},
 		}
-		createE := &BlobLinkCreate{config: buo.config, mutation: newBlobLinkMutation(buo.config, OpCreate)}
+		createE := &BlobLinkCreate{config: _u.config, mutation: newBlobLinkMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := buo.mutation.RemovedLinksIDs(); len(nodes) > 0 && !buo.mutation.LinksCleared() {
+	if nodes := _u.mutation.RemovedLinksIDs(); len(nodes) > 0 && !_u.mutation.LinksCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -520,13 +520,13 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &BlobLinkCreate{config: buo.config, mutation: newBlobLinkMutation(buo.config, OpCreate)}
+		createE := &BlobLinkCreate{config: _u.config, mutation: newBlobLinkMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := buo.mutation.LinksIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.LinksIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -540,16 +540,16 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &BlobLinkCreate{config: buo.config, mutation: newBlobLinkMutation(buo.config, OpCreate)}
+		createE := &BlobLinkCreate{config: _u.config, mutation: newBlobLinkMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Blob{config: buo.config}
+	_node = &Blob{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, buo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{blob.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -557,6 +557,6 @@ func (buo *BlobUpdateOne) sqlSave(ctx context.Context) (_node *Blob, err error) 
 		}
 		return nil, err
 	}
-	buo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

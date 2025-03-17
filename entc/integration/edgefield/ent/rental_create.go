@@ -28,55 +28,55 @@ type RentalCreate struct {
 }
 
 // SetDate sets the "date" field.
-func (rc *RentalCreate) SetDate(t time.Time) *RentalCreate {
-	rc.mutation.SetDate(t)
-	return rc
+func (_c *RentalCreate) SetDate(t time.Time) *RentalCreate {
+	_c.mutation.SetDate(t)
+	return _c
 }
 
 // SetNillableDate sets the "date" field if the given value is not nil.
-func (rc *RentalCreate) SetNillableDate(t *time.Time) *RentalCreate {
+func (_c *RentalCreate) SetNillableDate(t *time.Time) *RentalCreate {
 	if t != nil {
-		rc.SetDate(*t)
+		_c.SetDate(*t)
 	}
-	return rc
+	return _c
 }
 
 // SetUserID sets the "user_id" field.
-func (rc *RentalCreate) SetUserID(i int) *RentalCreate {
-	rc.mutation.SetUserID(i)
-	return rc
+func (_c *RentalCreate) SetUserID(i int) *RentalCreate {
+	_c.mutation.SetUserID(i)
+	return _c
 }
 
 // SetCarID sets the "car_id" field.
-func (rc *RentalCreate) SetCarID(u uuid.UUID) *RentalCreate {
-	rc.mutation.SetCarID(u)
-	return rc
+func (_c *RentalCreate) SetCarID(u uuid.UUID) *RentalCreate {
+	_c.mutation.SetCarID(u)
+	return _c
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (rc *RentalCreate) SetUser(u *User) *RentalCreate {
-	return rc.SetUserID(u.ID)
+func (_c *RentalCreate) SetUser(u *User) *RentalCreate {
+	return _c.SetUserID(u.ID)
 }
 
 // SetCar sets the "car" edge to the Car entity.
-func (rc *RentalCreate) SetCar(c *Car) *RentalCreate {
-	return rc.SetCarID(c.ID)
+func (_c *RentalCreate) SetCar(c *Car) *RentalCreate {
+	return _c.SetCarID(c.ID)
 }
 
 // Mutation returns the RentalMutation object of the builder.
-func (rc *RentalCreate) Mutation() *RentalMutation {
-	return rc.mutation
+func (_c *RentalCreate) Mutation() *RentalMutation {
+	return _c.mutation
 }
 
 // Save creates the Rental in the database.
-func (rc *RentalCreate) Save(ctx context.Context) (*Rental, error) {
-	rc.defaults()
-	return withHooks(ctx, rc.sqlSave, rc.mutation, rc.hooks)
+func (_c *RentalCreate) Save(ctx context.Context) (*Rental, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (rc *RentalCreate) SaveX(ctx context.Context) *Rental {
-	v, err := rc.Save(ctx)
+func (_c *RentalCreate) SaveX(ctx context.Context) *Rental {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -84,52 +84,52 @@ func (rc *RentalCreate) SaveX(ctx context.Context) *Rental {
 }
 
 // Exec executes the query.
-func (rc *RentalCreate) Exec(ctx context.Context) error {
-	_, err := rc.Save(ctx)
+func (_c *RentalCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rc *RentalCreate) ExecX(ctx context.Context) {
-	if err := rc.Exec(ctx); err != nil {
+func (_c *RentalCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (rc *RentalCreate) defaults() {
-	if _, ok := rc.mutation.Date(); !ok {
+func (_c *RentalCreate) defaults() {
+	if _, ok := _c.mutation.Date(); !ok {
 		v := rental.DefaultDate()
-		rc.mutation.SetDate(v)
+		_c.mutation.SetDate(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (rc *RentalCreate) check() error {
-	if _, ok := rc.mutation.Date(); !ok {
+func (_c *RentalCreate) check() error {
+	if _, ok := _c.mutation.Date(); !ok {
 		return &ValidationError{Name: "date", err: errors.New(`ent: missing required field "Rental.date"`)}
 	}
-	if _, ok := rc.mutation.UserID(); !ok {
+	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Rental.user_id"`)}
 	}
-	if _, ok := rc.mutation.CarID(); !ok {
+	if _, ok := _c.mutation.CarID(); !ok {
 		return &ValidationError{Name: "car_id", err: errors.New(`ent: missing required field "Rental.car_id"`)}
 	}
-	if len(rc.mutation.UserIDs()) == 0 {
+	if len(_c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Rental.user"`)}
 	}
-	if len(rc.mutation.CarIDs()) == 0 {
+	if len(_c.mutation.CarIDs()) == 0 {
 		return &ValidationError{Name: "car", err: errors.New(`ent: missing required edge "Rental.car"`)}
 	}
 	return nil
 }
 
-func (rc *RentalCreate) sqlSave(ctx context.Context) (*Rental, error) {
-	if err := rc.check(); err != nil {
+func (_c *RentalCreate) sqlSave(ctx context.Context) (*Rental, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := rc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, rc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -137,21 +137,21 @@ func (rc *RentalCreate) sqlSave(ctx context.Context) (*Rental, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	rc.mutation.id = &_node.ID
-	rc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (rc *RentalCreate) createSpec() (*Rental, *sqlgraph.CreateSpec) {
+func (_c *RentalCreate) createSpec() (*Rental, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Rental{config: rc.config}
+		_node = &Rental{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(rental.Table, sqlgraph.NewFieldSpec(rental.FieldID, field.TypeInt))
 	)
-	if value, ok := rc.mutation.Date(); ok {
+	if value, ok := _c.mutation.Date(); ok {
 		_spec.SetField(rental.FieldDate, field.TypeTime, value)
 		_node.Date = value
 	}
-	if nodes := rc.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -168,7 +168,7 @@ func (rc *RentalCreate) createSpec() (*Rental, *sqlgraph.CreateSpec) {
 		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := rc.mutation.CarIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.CarIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -196,16 +196,16 @@ type RentalCreateBulk struct {
 }
 
 // Save creates the Rental entities in the database.
-func (rcb *RentalCreateBulk) Save(ctx context.Context) ([]*Rental, error) {
-	if rcb.err != nil {
-		return nil, rcb.err
+func (_c *RentalCreateBulk) Save(ctx context.Context) ([]*Rental, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(rcb.builders))
-	nodes := make([]*Rental, len(rcb.builders))
-	mutators := make([]Mutator, len(rcb.builders))
-	for i := range rcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Rental, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := rcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*RentalMutation)
@@ -219,11 +219,11 @@ func (rcb *RentalCreateBulk) Save(ctx context.Context) ([]*Rental, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, rcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, rcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -247,7 +247,7 @@ func (rcb *RentalCreateBulk) Save(ctx context.Context) ([]*Rental, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, rcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -255,8 +255,8 @@ func (rcb *RentalCreateBulk) Save(ctx context.Context) ([]*Rental, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (rcb *RentalCreateBulk) SaveX(ctx context.Context) []*Rental {
-	v, err := rcb.Save(ctx)
+func (_c *RentalCreateBulk) SaveX(ctx context.Context) []*Rental {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -264,14 +264,14 @@ func (rcb *RentalCreateBulk) SaveX(ctx context.Context) []*Rental {
 }
 
 // Exec executes the query.
-func (rcb *RentalCreateBulk) Exec(ctx context.Context) error {
-	_, err := rcb.Save(ctx)
+func (_c *RentalCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rcb *RentalCreateBulk) ExecX(ctx context.Context) {
-	if err := rcb.Exec(ctx); err != nil {
+func (_c *RentalCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

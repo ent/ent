@@ -27,49 +27,49 @@ type CarUpdate struct {
 }
 
 // Where appends a list predicates to the CarUpdate builder.
-func (cu *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
-	cu.mutation.Where(ps...)
-	return cu
+func (_u *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
-func (cu *CarUpdate) SetOwnerID(id int) *CarUpdate {
-	cu.mutation.SetOwnerID(id)
-	return cu
+func (_u *CarUpdate) SetOwnerID(id int) *CarUpdate {
+	_u.mutation.SetOwnerID(id)
+	return _u
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (cu *CarUpdate) SetNillableOwnerID(id *int) *CarUpdate {
+func (_u *CarUpdate) SetNillableOwnerID(id *int) *CarUpdate {
 	if id != nil {
-		cu = cu.SetOwnerID(*id)
+		_u = _u.SetOwnerID(*id)
 	}
-	return cu
+	return _u
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (cu *CarUpdate) SetOwner(u *User) *CarUpdate {
-	return cu.SetOwnerID(u.ID)
+func (_u *CarUpdate) SetOwner(u *User) *CarUpdate {
+	return _u.SetOwnerID(u.ID)
 }
 
 // Mutation returns the CarMutation object of the builder.
-func (cu *CarUpdate) Mutation() *CarMutation {
-	return cu.mutation
+func (_u *CarUpdate) Mutation() *CarMutation {
+	return _u.mutation
 }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (cu *CarUpdate) ClearOwner() *CarUpdate {
-	cu.mutation.ClearOwner()
-	return cu
+func (_u *CarUpdate) ClearOwner() *CarUpdate {
+	_u.mutation.ClearOwner()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (cu *CarUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, cu.sqlSave, cu.mutation, cu.hooks)
+func (_u *CarUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cu *CarUpdate) SaveX(ctx context.Context) int {
-	affected, err := cu.Save(ctx)
+func (_u *CarUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -77,28 +77,28 @@ func (cu *CarUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (cu *CarUpdate) Exec(ctx context.Context) error {
-	_, err := cu.Save(ctx)
+func (_u *CarUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cu *CarUpdate) ExecX(ctx context.Context) {
-	if err := cu.Exec(ctx); err != nil {
+func (_u *CarUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(car.Table, car.Columns, sqlgraph.NewFieldSpec(car.FieldID, field.TypeInt))
-	if ps := cu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if cu.mutation.OwnerCleared() {
+	if _u.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -111,7 +111,7 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -127,7 +127,7 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{car.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -135,7 +135,7 @@ func (cu *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	cu.mutation.done = true
+	_u.mutation.done = true
 	return n, nil
 }
 
@@ -148,56 +148,56 @@ type CarUpdateOne struct {
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
-func (cuo *CarUpdateOne) SetOwnerID(id int) *CarUpdateOne {
-	cuo.mutation.SetOwnerID(id)
-	return cuo
+func (_u *CarUpdateOne) SetOwnerID(id int) *CarUpdateOne {
+	_u.mutation.SetOwnerID(id)
+	return _u
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (cuo *CarUpdateOne) SetNillableOwnerID(id *int) *CarUpdateOne {
+func (_u *CarUpdateOne) SetNillableOwnerID(id *int) *CarUpdateOne {
 	if id != nil {
-		cuo = cuo.SetOwnerID(*id)
+		_u = _u.SetOwnerID(*id)
 	}
-	return cuo
+	return _u
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (cuo *CarUpdateOne) SetOwner(u *User) *CarUpdateOne {
-	return cuo.SetOwnerID(u.ID)
+func (_u *CarUpdateOne) SetOwner(u *User) *CarUpdateOne {
+	return _u.SetOwnerID(u.ID)
 }
 
 // Mutation returns the CarMutation object of the builder.
-func (cuo *CarUpdateOne) Mutation() *CarMutation {
-	return cuo.mutation
+func (_u *CarUpdateOne) Mutation() *CarMutation {
+	return _u.mutation
 }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (cuo *CarUpdateOne) ClearOwner() *CarUpdateOne {
-	cuo.mutation.ClearOwner()
-	return cuo
+func (_u *CarUpdateOne) ClearOwner() *CarUpdateOne {
+	_u.mutation.ClearOwner()
+	return _u
 }
 
 // Where appends a list predicates to the CarUpdate builder.
-func (cuo *CarUpdateOne) Where(ps ...predicate.Car) *CarUpdateOne {
-	cuo.mutation.Where(ps...)
-	return cuo
+func (_u *CarUpdateOne) Where(ps ...predicate.Car) *CarUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (cuo *CarUpdateOne) Select(field string, fields ...string) *CarUpdateOne {
-	cuo.fields = append([]string{field}, fields...)
-	return cuo
+func (_u *CarUpdateOne) Select(field string, fields ...string) *CarUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Car entity.
-func (cuo *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
-	return withHooks(ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
+func (_u *CarUpdateOne) Save(ctx context.Context) (*Car, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cuo *CarUpdateOne) SaveX(ctx context.Context) *Car {
-	node, err := cuo.Save(ctx)
+func (_u *CarUpdateOne) SaveX(ctx context.Context) *Car {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -205,26 +205,26 @@ func (cuo *CarUpdateOne) SaveX(ctx context.Context) *Car {
 }
 
 // Exec executes the query on the entity.
-func (cuo *CarUpdateOne) Exec(ctx context.Context) error {
-	_, err := cuo.Save(ctx)
+func (_u *CarUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cuo *CarUpdateOne) ExecX(ctx context.Context) {
-	if err := cuo.Exec(ctx); err != nil {
+func (_u *CarUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
+func (_u *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 	_spec := sqlgraph.NewUpdateSpec(car.Table, car.Columns, sqlgraph.NewFieldSpec(car.FieldID, field.TypeInt))
-	id, ok := cuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`entv1: missing "Car.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := cuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, car.FieldID)
 		for _, f := range fields {
@@ -236,14 +236,14 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 			}
 		}
 	}
-	if ps := cuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if cuo.mutation.OwnerCleared() {
+	if _u.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -256,7 +256,7 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: true,
@@ -272,10 +272,10 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Car{config: cuo.config}
+	_node = &Car{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{car.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -283,6 +283,6 @@ func (cuo *CarUpdateOne) sqlSave(ctx context.Context) (_node *Car, err error) {
 		}
 		return nil, err
 	}
-	cuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

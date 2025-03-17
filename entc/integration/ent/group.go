@@ -119,7 +119,7 @@ func (*Group) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Group fields.
-func (gr *Group) assignValues(columns []string, values []any) error {
+func (_m *Group) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -130,47 +130,47 @@ func (gr *Group) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			gr.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case group.FieldActive:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field active", values[i])
 			} else if value.Valid {
-				gr.Active = value.Bool
+				_m.Active = value.Bool
 			}
 		case group.FieldExpire:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field expire", values[i])
 			} else if value.Valid {
-				gr.Expire = value.Time
+				_m.Expire = value.Time
 			}
 		case group.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				gr.Type = new(string)
-				*gr.Type = value.String
+				_m.Type = new(string)
+				*_m.Type = value.String
 			}
 		case group.FieldMaxUsers:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field max_users", values[i])
 			} else if value.Valid {
-				gr.MaxUsers = int(value.Int64)
+				_m.MaxUsers = int(value.Int64)
 			}
 		case group.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				gr.Name = value.String
+				_m.Name = value.String
 			}
 		case group.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field group_info", value)
 			} else if value.Valid {
-				gr.group_info = new(int)
-				*gr.group_info = int(value.Int64)
+				_m.group_info = new(int)
+				*_m.group_info = int(value.Int64)
 			}
 		default:
-			gr.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -178,142 +178,142 @@ func (gr *Group) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Group.
 // This includes values selected through modifiers, order, etc.
-func (gr *Group) Value(name string) (ent.Value, error) {
-	return gr.selectValues.Get(name)
+func (_m *Group) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryFiles queries the "files" edge of the Group entity.
-func (gr *Group) QueryFiles() *FileQuery {
-	return NewGroupClient(gr.config).QueryFiles(gr)
+func (_m *Group) QueryFiles() *FileQuery {
+	return NewGroupClient(_m.config).QueryFiles(_m)
 }
 
 // QueryBlocked queries the "blocked" edge of the Group entity.
-func (gr *Group) QueryBlocked() *UserQuery {
-	return NewGroupClient(gr.config).QueryBlocked(gr)
+func (_m *Group) QueryBlocked() *UserQuery {
+	return NewGroupClient(_m.config).QueryBlocked(_m)
 }
 
 // QueryUsers queries the "users" edge of the Group entity.
-func (gr *Group) QueryUsers() *UserQuery {
-	return NewGroupClient(gr.config).QueryUsers(gr)
+func (_m *Group) QueryUsers() *UserQuery {
+	return NewGroupClient(_m.config).QueryUsers(_m)
 }
 
 // QueryInfo queries the "info" edge of the Group entity.
-func (gr *Group) QueryInfo() *GroupInfoQuery {
-	return NewGroupClient(gr.config).QueryInfo(gr)
+func (_m *Group) QueryInfo() *GroupInfoQuery {
+	return NewGroupClient(_m.config).QueryInfo(_m)
 }
 
 // Update returns a builder for updating this Group.
 // Note that you need to call Group.Unwrap() before calling this method if this Group
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (gr *Group) Update() *GroupUpdateOne {
-	return NewGroupClient(gr.config).UpdateOne(gr)
+func (_m *Group) Update() *GroupUpdateOne {
+	return NewGroupClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Group entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (gr *Group) Unwrap() *Group {
-	_tx, ok := gr.config.driver.(*txDriver)
+func (_m *Group) Unwrap() *Group {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Group is not a transactional entity")
 	}
-	gr.config.driver = _tx.drv
-	return gr
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (gr *Group) String() string {
+func (_m *Group) String() string {
 	var builder strings.Builder
 	builder.WriteString("Group(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", gr.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("active=")
-	builder.WriteString(fmt.Sprintf("%v", gr.Active))
+	builder.WriteString(fmt.Sprintf("%v", _m.Active))
 	builder.WriteString(", ")
 	builder.WriteString("expire=")
-	builder.WriteString(gr.Expire.Format(time.ANSIC))
+	builder.WriteString(_m.Expire.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := gr.Type; v != nil {
+	if v := _m.Type; v != nil {
 		builder.WriteString("type=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
 	builder.WriteString("max_users=")
-	builder.WriteString(fmt.Sprintf("%v", gr.MaxUsers))
+	builder.WriteString(fmt.Sprintf("%v", _m.MaxUsers))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(gr.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedFiles returns the Files named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (gr *Group) NamedFiles(name string) ([]*File, error) {
-	if gr.Edges.namedFiles == nil {
+func (_m *Group) NamedFiles(name string) ([]*File, error) {
+	if _m.Edges.namedFiles == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := gr.Edges.namedFiles[name]
+	nodes, ok := _m.Edges.namedFiles[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (gr *Group) appendNamedFiles(name string, edges ...*File) {
-	if gr.Edges.namedFiles == nil {
-		gr.Edges.namedFiles = make(map[string][]*File)
+func (_m *Group) appendNamedFiles(name string, edges ...*File) {
+	if _m.Edges.namedFiles == nil {
+		_m.Edges.namedFiles = make(map[string][]*File)
 	}
 	if len(edges) == 0 {
-		gr.Edges.namedFiles[name] = []*File{}
+		_m.Edges.namedFiles[name] = []*File{}
 	} else {
-		gr.Edges.namedFiles[name] = append(gr.Edges.namedFiles[name], edges...)
+		_m.Edges.namedFiles[name] = append(_m.Edges.namedFiles[name], edges...)
 	}
 }
 
 // NamedBlocked returns the Blocked named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (gr *Group) NamedBlocked(name string) ([]*User, error) {
-	if gr.Edges.namedBlocked == nil {
+func (_m *Group) NamedBlocked(name string) ([]*User, error) {
+	if _m.Edges.namedBlocked == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := gr.Edges.namedBlocked[name]
+	nodes, ok := _m.Edges.namedBlocked[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (gr *Group) appendNamedBlocked(name string, edges ...*User) {
-	if gr.Edges.namedBlocked == nil {
-		gr.Edges.namedBlocked = make(map[string][]*User)
+func (_m *Group) appendNamedBlocked(name string, edges ...*User) {
+	if _m.Edges.namedBlocked == nil {
+		_m.Edges.namedBlocked = make(map[string][]*User)
 	}
 	if len(edges) == 0 {
-		gr.Edges.namedBlocked[name] = []*User{}
+		_m.Edges.namedBlocked[name] = []*User{}
 	} else {
-		gr.Edges.namedBlocked[name] = append(gr.Edges.namedBlocked[name], edges...)
+		_m.Edges.namedBlocked[name] = append(_m.Edges.namedBlocked[name], edges...)
 	}
 }
 
 // NamedUsers returns the Users named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (gr *Group) NamedUsers(name string) ([]*User, error) {
-	if gr.Edges.namedUsers == nil {
+func (_m *Group) NamedUsers(name string) ([]*User, error) {
+	if _m.Edges.namedUsers == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := gr.Edges.namedUsers[name]
+	nodes, ok := _m.Edges.namedUsers[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (gr *Group) appendNamedUsers(name string, edges ...*User) {
-	if gr.Edges.namedUsers == nil {
-		gr.Edges.namedUsers = make(map[string][]*User)
+func (_m *Group) appendNamedUsers(name string, edges ...*User) {
+	if _m.Edges.namedUsers == nil {
+		_m.Edges.namedUsers = make(map[string][]*User)
 	}
 	if len(edges) == 0 {
-		gr.Edges.namedUsers[name] = []*User{}
+		_m.Edges.namedUsers[name] = []*User{}
 	} else {
-		gr.Edges.namedUsers[name] = append(gr.Edges.namedUsers[name], edges...)
+		_m.Edges.namedUsers[name] = append(_m.Edges.namedUsers[name], edges...)
 	}
 }
 

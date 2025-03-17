@@ -27,24 +27,24 @@ type GoodsUpdate struct {
 }
 
 // Where appends a list predicates to the GoodsUpdate builder.
-func (gu *GoodsUpdate) Where(ps ...predicate.Goods) *GoodsUpdate {
-	gu.mutation.Where(ps...)
-	return gu
+func (_u *GoodsUpdate) Where(ps ...predicate.Goods) *GoodsUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Mutation returns the GoodsMutation object of the builder.
-func (gu *GoodsUpdate) Mutation() *GoodsMutation {
-	return gu.mutation
+func (_u *GoodsUpdate) Mutation() *GoodsMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (gu *GoodsUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, gu.sqlSave, gu.mutation, gu.hooks)
+func (_u *GoodsUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (gu *GoodsUpdate) SaveX(ctx context.Context) int {
-	affected, err := gu.Save(ctx)
+func (_u *GoodsUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -52,35 +52,35 @@ func (gu *GoodsUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (gu *GoodsUpdate) Exec(ctx context.Context) error {
-	_, err := gu.Save(ctx)
+func (_u *GoodsUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gu *GoodsUpdate) ExecX(ctx context.Context) {
-	if err := gu.Exec(ctx); err != nil {
+func (_u *GoodsUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (gu *GoodsUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *GoodsUpdate {
-	gu.modifiers = append(gu.modifiers, modifiers...)
-	return gu
+func (_u *GoodsUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *GoodsUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
-func (gu *GoodsUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *GoodsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(goods.Table, goods.Columns, sqlgraph.NewFieldSpec(goods.FieldID, field.TypeInt))
-	if ps := gu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	_spec.AddModifiers(gu.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, gu.driver, _spec); err != nil {
+	_spec.AddModifiers(_u.modifiers...)
+	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{goods.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -88,7 +88,7 @@ func (gu *GoodsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	gu.mutation.done = true
+	_u.mutation.done = true
 	return n, nil
 }
 
@@ -102,31 +102,31 @@ type GoodsUpdateOne struct {
 }
 
 // Mutation returns the GoodsMutation object of the builder.
-func (guo *GoodsUpdateOne) Mutation() *GoodsMutation {
-	return guo.mutation
+func (_u *GoodsUpdateOne) Mutation() *GoodsMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the GoodsUpdate builder.
-func (guo *GoodsUpdateOne) Where(ps ...predicate.Goods) *GoodsUpdateOne {
-	guo.mutation.Where(ps...)
-	return guo
+func (_u *GoodsUpdateOne) Where(ps ...predicate.Goods) *GoodsUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (guo *GoodsUpdateOne) Select(field string, fields ...string) *GoodsUpdateOne {
-	guo.fields = append([]string{field}, fields...)
-	return guo
+func (_u *GoodsUpdateOne) Select(field string, fields ...string) *GoodsUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Goods entity.
-func (guo *GoodsUpdateOne) Save(ctx context.Context) (*Goods, error) {
-	return withHooks(ctx, guo.sqlSave, guo.mutation, guo.hooks)
+func (_u *GoodsUpdateOne) Save(ctx context.Context) (*Goods, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (guo *GoodsUpdateOne) SaveX(ctx context.Context) *Goods {
-	node, err := guo.Save(ctx)
+func (_u *GoodsUpdateOne) SaveX(ctx context.Context) *Goods {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -134,32 +134,32 @@ func (guo *GoodsUpdateOne) SaveX(ctx context.Context) *Goods {
 }
 
 // Exec executes the query on the entity.
-func (guo *GoodsUpdateOne) Exec(ctx context.Context) error {
-	_, err := guo.Save(ctx)
+func (_u *GoodsUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (guo *GoodsUpdateOne) ExecX(ctx context.Context) {
-	if err := guo.Exec(ctx); err != nil {
+func (_u *GoodsUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (guo *GoodsUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *GoodsUpdateOne {
-	guo.modifiers = append(guo.modifiers, modifiers...)
-	return guo
+func (_u *GoodsUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *GoodsUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
-func (guo *GoodsUpdateOne) sqlSave(ctx context.Context) (_node *Goods, err error) {
+func (_u *GoodsUpdateOne) sqlSave(ctx context.Context) (_node *Goods, err error) {
 	_spec := sqlgraph.NewUpdateSpec(goods.Table, goods.Columns, sqlgraph.NewFieldSpec(goods.FieldID, field.TypeInt))
-	id, ok := guo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Goods.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := guo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, goods.FieldID)
 		for _, f := range fields {
@@ -171,18 +171,18 @@ func (guo *GoodsUpdateOne) sqlSave(ctx context.Context) (_node *Goods, err error
 			}
 		}
 	}
-	if ps := guo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	_spec.AddModifiers(guo.modifiers...)
-	_node = &Goods{config: guo.config}
+	_spec.AddModifiers(_u.modifiers...)
+	_node = &Goods{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, guo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{goods.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -190,6 +190,6 @@ func (guo *GoodsUpdateOne) sqlSave(ctx context.Context) (_node *Goods, err error
 		}
 		return nil, err
 	}
-	guo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

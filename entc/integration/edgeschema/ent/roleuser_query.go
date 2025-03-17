@@ -35,44 +35,44 @@ type RoleUserQuery struct {
 }
 
 // Where adds a new predicate for the RoleUserQuery builder.
-func (ruq *RoleUserQuery) Where(ps ...predicate.RoleUser) *RoleUserQuery {
-	ruq.predicates = append(ruq.predicates, ps...)
-	return ruq
+func (_q *RoleUserQuery) Where(ps ...predicate.RoleUser) *RoleUserQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (ruq *RoleUserQuery) Limit(limit int) *RoleUserQuery {
-	ruq.ctx.Limit = &limit
-	return ruq
+func (_q *RoleUserQuery) Limit(limit int) *RoleUserQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (ruq *RoleUserQuery) Offset(offset int) *RoleUserQuery {
-	ruq.ctx.Offset = &offset
-	return ruq
+func (_q *RoleUserQuery) Offset(offset int) *RoleUserQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (ruq *RoleUserQuery) Unique(unique bool) *RoleUserQuery {
-	ruq.ctx.Unique = &unique
-	return ruq
+func (_q *RoleUserQuery) Unique(unique bool) *RoleUserQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (ruq *RoleUserQuery) Order(o ...roleuser.OrderOption) *RoleUserQuery {
-	ruq.order = append(ruq.order, o...)
-	return ruq
+func (_q *RoleUserQuery) Order(o ...roleuser.OrderOption) *RoleUserQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryRole chains the current query on the "role" edge.
-func (ruq *RoleUserQuery) QueryRole() *RoleQuery {
-	query := (&RoleClient{config: ruq.config}).Query()
+func (_q *RoleUserQuery) QueryRole() *RoleQuery {
+	query := (&RoleClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := ruq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := ruq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -81,20 +81,20 @@ func (ruq *RoleUserQuery) QueryRole() *RoleQuery {
 			sqlgraph.To(role.Table, role.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, roleuser.RoleTable, roleuser.RoleColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(ruq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryUser chains the current query on the "user" edge.
-func (ruq *RoleUserQuery) QueryUser() *UserQuery {
-	query := (&UserClient{config: ruq.config}).Query()
+func (_q *RoleUserQuery) QueryUser() *UserQuery {
+	query := (&UserClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := ruq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := ruq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -103,7 +103,7 @@ func (ruq *RoleUserQuery) QueryUser() *UserQuery {
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, roleuser.UserTable, roleuser.UserColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(ruq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -111,8 +111,8 @@ func (ruq *RoleUserQuery) QueryUser() *UserQuery {
 
 // First returns the first RoleUser entity from the query.
 // Returns a *NotFoundError when no RoleUser was found.
-func (ruq *RoleUserQuery) First(ctx context.Context) (*RoleUser, error) {
-	nodes, err := ruq.Limit(1).All(setContextOp(ctx, ruq.ctx, ent.OpQueryFirst))
+func (_q *RoleUserQuery) First(ctx context.Context) (*RoleUser, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -123,8 +123,8 @@ func (ruq *RoleUserQuery) First(ctx context.Context) (*RoleUser, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (ruq *RoleUserQuery) FirstX(ctx context.Context) *RoleUser {
-	node, err := ruq.First(ctx)
+func (_q *RoleUserQuery) FirstX(ctx context.Context) *RoleUser {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -134,8 +134,8 @@ func (ruq *RoleUserQuery) FirstX(ctx context.Context) *RoleUser {
 // Only returns a single RoleUser entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one RoleUser entity is found.
 // Returns a *NotFoundError when no RoleUser entities are found.
-func (ruq *RoleUserQuery) Only(ctx context.Context) (*RoleUser, error) {
-	nodes, err := ruq.Limit(2).All(setContextOp(ctx, ruq.ctx, ent.OpQueryOnly))
+func (_q *RoleUserQuery) Only(ctx context.Context) (*RoleUser, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -150,8 +150,8 @@ func (ruq *RoleUserQuery) Only(ctx context.Context) (*RoleUser, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (ruq *RoleUserQuery) OnlyX(ctx context.Context) *RoleUser {
-	node, err := ruq.Only(ctx)
+func (_q *RoleUserQuery) OnlyX(ctx context.Context) *RoleUser {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -159,18 +159,18 @@ func (ruq *RoleUserQuery) OnlyX(ctx context.Context) *RoleUser {
 }
 
 // All executes the query and returns a list of RoleUsers.
-func (ruq *RoleUserQuery) All(ctx context.Context) ([]*RoleUser, error) {
-	ctx = setContextOp(ctx, ruq.ctx, ent.OpQueryAll)
-	if err := ruq.prepareQuery(ctx); err != nil {
+func (_q *RoleUserQuery) All(ctx context.Context) ([]*RoleUser, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*RoleUser, *RoleUserQuery]()
-	return withInterceptors[[]*RoleUser](ctx, ruq, qr, ruq.inters)
+	return withInterceptors[[]*RoleUser](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (ruq *RoleUserQuery) AllX(ctx context.Context) []*RoleUser {
-	nodes, err := ruq.All(ctx)
+func (_q *RoleUserQuery) AllX(ctx context.Context) []*RoleUser {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -178,17 +178,17 @@ func (ruq *RoleUserQuery) AllX(ctx context.Context) []*RoleUser {
 }
 
 // Count returns the count of the given query.
-func (ruq *RoleUserQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, ruq.ctx, ent.OpQueryCount)
-	if err := ruq.prepareQuery(ctx); err != nil {
+func (_q *RoleUserQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, ruq, querierCount[*RoleUserQuery](), ruq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*RoleUserQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (ruq *RoleUserQuery) CountX(ctx context.Context) int {
-	count, err := ruq.Count(ctx)
+func (_q *RoleUserQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -196,9 +196,9 @@ func (ruq *RoleUserQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (ruq *RoleUserQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, ruq.ctx, ent.OpQueryExist)
-	switch _, err := ruq.First(ctx); {
+func (_q *RoleUserQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.First(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -209,8 +209,8 @@ func (ruq *RoleUserQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (ruq *RoleUserQuery) ExistX(ctx context.Context) bool {
-	exist, err := ruq.Exist(ctx)
+func (_q *RoleUserQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -219,44 +219,44 @@ func (ruq *RoleUserQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the RoleUserQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (ruq *RoleUserQuery) Clone() *RoleUserQuery {
-	if ruq == nil {
+func (_q *RoleUserQuery) Clone() *RoleUserQuery {
+	if _q == nil {
 		return nil
 	}
 	return &RoleUserQuery{
-		config:     ruq.config,
-		ctx:        ruq.ctx.Clone(),
-		order:      append([]roleuser.OrderOption{}, ruq.order...),
-		inters:     append([]Interceptor{}, ruq.inters...),
-		predicates: append([]predicate.RoleUser{}, ruq.predicates...),
-		withRole:   ruq.withRole.Clone(),
-		withUser:   ruq.withUser.Clone(),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]roleuser.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.RoleUser{}, _q.predicates...),
+		withRole:   _q.withRole.Clone(),
+		withUser:   _q.withUser.Clone(),
 		// clone intermediate query.
-		sql:  ruq.sql.Clone(),
-		path: ruq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithRole tells the query-builder to eager-load the nodes that are connected to
 // the "role" edge. The optional arguments are used to configure the query builder of the edge.
-func (ruq *RoleUserQuery) WithRole(opts ...func(*RoleQuery)) *RoleUserQuery {
-	query := (&RoleClient{config: ruq.config}).Query()
+func (_q *RoleUserQuery) WithRole(opts ...func(*RoleQuery)) *RoleUserQuery {
+	query := (&RoleClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	ruq.withRole = query
-	return ruq
+	_q.withRole = query
+	return _q
 }
 
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
-func (ruq *RoleUserQuery) WithUser(opts ...func(*UserQuery)) *RoleUserQuery {
-	query := (&UserClient{config: ruq.config}).Query()
+func (_q *RoleUserQuery) WithUser(opts ...func(*UserQuery)) *RoleUserQuery {
+	query := (&UserClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	ruq.withUser = query
-	return ruq
+	_q.withUser = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -273,10 +273,10 @@ func (ruq *RoleUserQuery) WithUser(opts ...func(*UserQuery)) *RoleUserQuery {
 //		GroupBy(roleuser.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (ruq *RoleUserQuery) GroupBy(field string, fields ...string) *RoleUserGroupBy {
-	ruq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &RoleUserGroupBy{build: ruq}
-	grbuild.flds = &ruq.ctx.Fields
+func (_q *RoleUserQuery) GroupBy(field string, fields ...string) *RoleUserGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &RoleUserGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = roleuser.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -294,59 +294,59 @@ func (ruq *RoleUserQuery) GroupBy(field string, fields ...string) *RoleUserGroup
 //	client.RoleUser.Query().
 //		Select(roleuser.FieldCreatedAt).
 //		Scan(ctx, &v)
-func (ruq *RoleUserQuery) Select(fields ...string) *RoleUserSelect {
-	ruq.ctx.Fields = append(ruq.ctx.Fields, fields...)
-	sbuild := &RoleUserSelect{RoleUserQuery: ruq}
+func (_q *RoleUserQuery) Select(fields ...string) *RoleUserSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &RoleUserSelect{RoleUserQuery: _q}
 	sbuild.label = roleuser.Label
-	sbuild.flds, sbuild.scan = &ruq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a RoleUserSelect configured with the given aggregations.
-func (ruq *RoleUserQuery) Aggregate(fns ...AggregateFunc) *RoleUserSelect {
-	return ruq.Select().Aggregate(fns...)
+func (_q *RoleUserQuery) Aggregate(fns ...AggregateFunc) *RoleUserSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (ruq *RoleUserQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range ruq.inters {
+func (_q *RoleUserQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, ruq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range ruq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !roleuser.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if ruq.path != nil {
-		prev, err := ruq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		ruq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (ruq *RoleUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*RoleUser, error) {
+func (_q *RoleUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*RoleUser, error) {
 	var (
 		nodes       = []*RoleUser{}
-		_spec       = ruq.querySpec()
+		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
-			ruq.withRole != nil,
-			ruq.withUser != nil,
+			_q.withRole != nil,
+			_q.withUser != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*RoleUser).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &RoleUser{config: ruq.config}
+		node := &RoleUser{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -354,20 +354,20 @@ func (ruq *RoleUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ro
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, ruq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := ruq.withRole; query != nil {
-		if err := ruq.loadRole(ctx, query, nodes, nil,
+	if query := _q.withRole; query != nil {
+		if err := _q.loadRole(ctx, query, nodes, nil,
 			func(n *RoleUser, e *Role) { n.Edges.Role = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := ruq.withUser; query != nil {
-		if err := ruq.loadUser(ctx, query, nodes, nil,
+	if query := _q.withUser; query != nil {
+		if err := _q.loadUser(ctx, query, nodes, nil,
 			func(n *RoleUser, e *User) { n.Edges.User = e }); err != nil {
 			return nil, err
 		}
@@ -375,7 +375,7 @@ func (ruq *RoleUserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Ro
 	return nodes, nil
 }
 
-func (ruq *RoleUserQuery) loadRole(ctx context.Context, query *RoleQuery, nodes []*RoleUser, init func(*RoleUser), assign func(*RoleUser, *Role)) error {
+func (_q *RoleUserQuery) loadRole(ctx context.Context, query *RoleQuery, nodes []*RoleUser, init func(*RoleUser), assign func(*RoleUser, *Role)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*RoleUser)
 	for i := range nodes {
@@ -404,7 +404,7 @@ func (ruq *RoleUserQuery) loadRole(ctx context.Context, query *RoleQuery, nodes 
 	}
 	return nil
 }
-func (ruq *RoleUserQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*RoleUser, init func(*RoleUser), assign func(*RoleUser, *User)) error {
+func (_q *RoleUserQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*RoleUser, init func(*RoleUser), assign func(*RoleUser, *User)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*RoleUser)
 	for i := range nodes {
@@ -434,47 +434,47 @@ func (ruq *RoleUserQuery) loadUser(ctx context.Context, query *UserQuery, nodes 
 	return nil
 }
 
-func (ruq *RoleUserQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := ruq.querySpec()
+func (_q *RoleUserQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
 	_spec.Unique = false
 	_spec.Node.Columns = nil
-	return sqlgraph.CountNodes(ctx, ruq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (ruq *RoleUserQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *RoleUserQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(roleuser.Table, roleuser.Columns, nil)
-	_spec.From = ruq.sql
-	if unique := ruq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if ruq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := ruq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		for i := range fields {
 			_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 		}
-		if ruq.withRole != nil {
+		if _q.withRole != nil {
 			_spec.Node.AddColumnOnce(roleuser.FieldRoleID)
 		}
-		if ruq.withUser != nil {
+		if _q.withUser != nil {
 			_spec.Node.AddColumnOnce(roleuser.FieldUserID)
 		}
 	}
-	if ps := ruq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := ruq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := ruq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := ruq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -484,33 +484,33 @@ func (ruq *RoleUserQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (ruq *RoleUserQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(ruq.driver.Dialect())
+func (_q *RoleUserQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(roleuser.Table)
-	columns := ruq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = roleuser.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if ruq.sql != nil {
-		selector = ruq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if ruq.ctx.Unique != nil && *ruq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range ruq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range ruq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := ruq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := ruq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector

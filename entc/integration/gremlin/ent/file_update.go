@@ -31,279 +31,279 @@ type FileUpdate struct {
 }
 
 // Where appends a list predicates to the FileUpdate builder.
-func (fu *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
-	fu.mutation.Where(ps...)
-	return fu
+func (_u *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetSetID sets the "set_id" field.
-func (fu *FileUpdate) SetSetID(i int) *FileUpdate {
-	fu.mutation.ResetSetID()
-	fu.mutation.SetSetID(i)
-	return fu
+func (_u *FileUpdate) SetSetID(i int) *FileUpdate {
+	_u.mutation.ResetSetID()
+	_u.mutation.SetSetID(i)
+	return _u
 }
 
 // SetNillableSetID sets the "set_id" field if the given value is not nil.
-func (fu *FileUpdate) SetNillableSetID(i *int) *FileUpdate {
+func (_u *FileUpdate) SetNillableSetID(i *int) *FileUpdate {
 	if i != nil {
-		fu.SetSetID(*i)
+		_u.SetSetID(*i)
 	}
-	return fu
+	return _u
 }
 
 // AddSetID adds i to the "set_id" field.
-func (fu *FileUpdate) AddSetID(i int) *FileUpdate {
-	fu.mutation.AddSetID(i)
-	return fu
+func (_u *FileUpdate) AddSetID(i int) *FileUpdate {
+	_u.mutation.AddSetID(i)
+	return _u
 }
 
 // ClearSetID clears the value of the "set_id" field.
-func (fu *FileUpdate) ClearSetID() *FileUpdate {
-	fu.mutation.ClearSetID()
-	return fu
+func (_u *FileUpdate) ClearSetID() *FileUpdate {
+	_u.mutation.ClearSetID()
+	return _u
 }
 
 // SetSize sets the "size" field.
-func (fu *FileUpdate) SetSize(i int) *FileUpdate {
-	fu.mutation.ResetSize()
-	fu.mutation.SetSize(i)
-	return fu
+func (_u *FileUpdate) SetSize(i int) *FileUpdate {
+	_u.mutation.ResetSize()
+	_u.mutation.SetSize(i)
+	return _u
 }
 
 // SetNillableSize sets the "size" field if the given value is not nil.
-func (fu *FileUpdate) SetNillableSize(i *int) *FileUpdate {
+func (_u *FileUpdate) SetNillableSize(i *int) *FileUpdate {
 	if i != nil {
-		fu.SetSize(*i)
+		_u.SetSize(*i)
 	}
-	return fu
+	return _u
 }
 
 // AddSize adds i to the "size" field.
-func (fu *FileUpdate) AddSize(i int) *FileUpdate {
-	fu.mutation.AddSize(i)
-	return fu
+func (_u *FileUpdate) AddSize(i int) *FileUpdate {
+	_u.mutation.AddSize(i)
+	return _u
 }
 
 // SetName sets the "name" field.
-func (fu *FileUpdate) SetName(s string) *FileUpdate {
-	fu.mutation.SetName(s)
-	return fu
+func (_u *FileUpdate) SetName(s string) *FileUpdate {
+	_u.mutation.SetName(s)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (fu *FileUpdate) SetNillableName(s *string) *FileUpdate {
+func (_u *FileUpdate) SetNillableName(s *string) *FileUpdate {
 	if s != nil {
-		fu.SetName(*s)
+		_u.SetName(*s)
 	}
-	return fu
+	return _u
 }
 
 // SetUser sets the "user" field.
-func (fu *FileUpdate) SetUser(s string) *FileUpdate {
-	fu.mutation.SetUser(s)
-	return fu
+func (_u *FileUpdate) SetUser(s string) *FileUpdate {
+	_u.mutation.SetUser(s)
+	return _u
 }
 
 // SetNillableUser sets the "user" field if the given value is not nil.
-func (fu *FileUpdate) SetNillableUser(s *string) *FileUpdate {
+func (_u *FileUpdate) SetNillableUser(s *string) *FileUpdate {
 	if s != nil {
-		fu.SetUser(*s)
+		_u.SetUser(*s)
 	}
-	return fu
+	return _u
 }
 
 // ClearUser clears the value of the "user" field.
-func (fu *FileUpdate) ClearUser() *FileUpdate {
-	fu.mutation.ClearUser()
-	return fu
+func (_u *FileUpdate) ClearUser() *FileUpdate {
+	_u.mutation.ClearUser()
+	return _u
 }
 
 // SetGroup sets the "group" field.
-func (fu *FileUpdate) SetGroup(s string) *FileUpdate {
-	fu.mutation.SetGroup(s)
-	return fu
+func (_u *FileUpdate) SetGroup(s string) *FileUpdate {
+	_u.mutation.SetGroup(s)
+	return _u
 }
 
 // SetNillableGroup sets the "group" field if the given value is not nil.
-func (fu *FileUpdate) SetNillableGroup(s *string) *FileUpdate {
+func (_u *FileUpdate) SetNillableGroup(s *string) *FileUpdate {
 	if s != nil {
-		fu.SetGroup(*s)
+		_u.SetGroup(*s)
 	}
-	return fu
+	return _u
 }
 
 // ClearGroup clears the value of the "group" field.
-func (fu *FileUpdate) ClearGroup() *FileUpdate {
-	fu.mutation.ClearGroup()
-	return fu
+func (_u *FileUpdate) ClearGroup() *FileUpdate {
+	_u.mutation.ClearGroup()
+	return _u
 }
 
 // SetOp sets the "op" field.
-func (fu *FileUpdate) SetOp(b bool) *FileUpdate {
-	fu.mutation.SetOpField(b)
-	return fu
+func (_u *FileUpdate) SetOp(b bool) *FileUpdate {
+	_u.mutation.SetOpField(b)
+	return _u
 }
 
 // SetNillableOp sets the "op" field if the given value is not nil.
-func (fu *FileUpdate) SetNillableOp(b *bool) *FileUpdate {
+func (_u *FileUpdate) SetNillableOp(b *bool) *FileUpdate {
 	if b != nil {
-		fu.SetOp(*b)
+		_u.SetOp(*b)
 	}
-	return fu
+	return _u
 }
 
 // ClearOp clears the value of the "op" field.
-func (fu *FileUpdate) ClearOp() *FileUpdate {
-	fu.mutation.ClearOp()
-	return fu
+func (_u *FileUpdate) ClearOp() *FileUpdate {
+	_u.mutation.ClearOp()
+	return _u
 }
 
 // SetFieldID sets the "field_id" field.
-func (fu *FileUpdate) SetFieldID(i int) *FileUpdate {
-	fu.mutation.ResetFieldID()
-	fu.mutation.SetFieldID(i)
-	return fu
+func (_u *FileUpdate) SetFieldID(i int) *FileUpdate {
+	_u.mutation.ResetFieldID()
+	_u.mutation.SetFieldID(i)
+	return _u
 }
 
 // SetNillableFieldID sets the "field_id" field if the given value is not nil.
-func (fu *FileUpdate) SetNillableFieldID(i *int) *FileUpdate {
+func (_u *FileUpdate) SetNillableFieldID(i *int) *FileUpdate {
 	if i != nil {
-		fu.SetFieldID(*i)
+		_u.SetFieldID(*i)
 	}
-	return fu
+	return _u
 }
 
 // AddFieldID adds i to the "field_id" field.
-func (fu *FileUpdate) AddFieldID(i int) *FileUpdate {
-	fu.mutation.AddFieldID(i)
-	return fu
+func (_u *FileUpdate) AddFieldID(i int) *FileUpdate {
+	_u.mutation.AddFieldID(i)
+	return _u
 }
 
 // ClearFieldID clears the value of the "field_id" field.
-func (fu *FileUpdate) ClearFieldID() *FileUpdate {
-	fu.mutation.ClearFieldID()
-	return fu
+func (_u *FileUpdate) ClearFieldID() *FileUpdate {
+	_u.mutation.ClearFieldID()
+	return _u
 }
 
 // SetCreateTime sets the "create_time" field.
-func (fu *FileUpdate) SetCreateTime(t time.Time) *FileUpdate {
-	fu.mutation.SetCreateTime(t)
-	return fu
+func (_u *FileUpdate) SetCreateTime(t time.Time) *FileUpdate {
+	_u.mutation.SetCreateTime(t)
+	return _u
 }
 
 // SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (fu *FileUpdate) SetNillableCreateTime(t *time.Time) *FileUpdate {
+func (_u *FileUpdate) SetNillableCreateTime(t *time.Time) *FileUpdate {
 	if t != nil {
-		fu.SetCreateTime(*t)
+		_u.SetCreateTime(*t)
 	}
-	return fu
+	return _u
 }
 
 // ClearCreateTime clears the value of the "create_time" field.
-func (fu *FileUpdate) ClearCreateTime() *FileUpdate {
-	fu.mutation.ClearCreateTime()
-	return fu
+func (_u *FileUpdate) ClearCreateTime() *FileUpdate {
+	_u.mutation.ClearCreateTime()
+	return _u
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
-func (fu *FileUpdate) SetOwnerID(id string) *FileUpdate {
-	fu.mutation.SetOwnerID(id)
-	return fu
+func (_u *FileUpdate) SetOwnerID(id string) *FileUpdate {
+	_u.mutation.SetOwnerID(id)
+	return _u
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (fu *FileUpdate) SetNillableOwnerID(id *string) *FileUpdate {
+func (_u *FileUpdate) SetNillableOwnerID(id *string) *FileUpdate {
 	if id != nil {
-		fu = fu.SetOwnerID(*id)
+		_u = _u.SetOwnerID(*id)
 	}
-	return fu
+	return _u
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (fu *FileUpdate) SetOwner(u *User) *FileUpdate {
-	return fu.SetOwnerID(u.ID)
+func (_u *FileUpdate) SetOwner(u *User) *FileUpdate {
+	return _u.SetOwnerID(u.ID)
 }
 
 // SetTypeID sets the "type" edge to the FileType entity by ID.
-func (fu *FileUpdate) SetTypeID(id string) *FileUpdate {
-	fu.mutation.SetTypeID(id)
-	return fu
+func (_u *FileUpdate) SetTypeID(id string) *FileUpdate {
+	_u.mutation.SetTypeID(id)
+	return _u
 }
 
 // SetNillableTypeID sets the "type" edge to the FileType entity by ID if the given value is not nil.
-func (fu *FileUpdate) SetNillableTypeID(id *string) *FileUpdate {
+func (_u *FileUpdate) SetNillableTypeID(id *string) *FileUpdate {
 	if id != nil {
-		fu = fu.SetTypeID(*id)
+		_u = _u.SetTypeID(*id)
 	}
-	return fu
+	return _u
 }
 
 // SetType sets the "type" edge to the FileType entity.
-func (fu *FileUpdate) SetType(f *FileType) *FileUpdate {
-	return fu.SetTypeID(f.ID)
+func (_u *FileUpdate) SetType(f *FileType) *FileUpdate {
+	return _u.SetTypeID(f.ID)
 }
 
 // AddFieldIDs adds the "field" edge to the FieldType entity by IDs.
-func (fu *FileUpdate) AddFieldIDs(ids ...string) *FileUpdate {
-	fu.mutation.AddFieldIDs(ids...)
-	return fu
+func (_u *FileUpdate) AddFieldIDs(ids ...string) *FileUpdate {
+	_u.mutation.AddFieldIDs(ids...)
+	return _u
 }
 
 // AddField adds the "field" edges to the FieldType entity.
-func (fu *FileUpdate) AddField(f ...*FieldType) *FileUpdate {
+func (_u *FileUpdate) AddField(f ...*FieldType) *FileUpdate {
 	ids := make([]string, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return fu.AddFieldIDs(ids...)
+	return _u.AddFieldIDs(ids...)
 }
 
 // Mutation returns the FileMutation object of the builder.
-func (fu *FileUpdate) Mutation() *FileMutation {
-	return fu.mutation
+func (_u *FileUpdate) Mutation() *FileMutation {
+	return _u.mutation
 }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (fu *FileUpdate) ClearOwner() *FileUpdate {
-	fu.mutation.ClearOwner()
-	return fu
+func (_u *FileUpdate) ClearOwner() *FileUpdate {
+	_u.mutation.ClearOwner()
+	return _u
 }
 
 // ClearType clears the "type" edge to the FileType entity.
-func (fu *FileUpdate) ClearType() *FileUpdate {
-	fu.mutation.ClearType()
-	return fu
+func (_u *FileUpdate) ClearType() *FileUpdate {
+	_u.mutation.ClearType()
+	return _u
 }
 
 // ClearFieldEdge clears all "field" edges to the FieldType entity.
-func (fu *FileUpdate) ClearFieldEdge() *FileUpdate {
-	fu.mutation.ClearFieldEdge()
-	return fu
+func (_u *FileUpdate) ClearFieldEdge() *FileUpdate {
+	_u.mutation.ClearFieldEdge()
+	return _u
 }
 
 // RemoveFieldIDs removes the "field" edge to FieldType entities by IDs.
-func (fu *FileUpdate) RemoveFieldIDs(ids ...string) *FileUpdate {
-	fu.mutation.RemoveFieldIDs(ids...)
-	return fu
+func (_u *FileUpdate) RemoveFieldIDs(ids ...string) *FileUpdate {
+	_u.mutation.RemoveFieldIDs(ids...)
+	return _u
 }
 
 // RemoveField removes "field" edges to FieldType entities.
-func (fu *FileUpdate) RemoveField(f ...*FieldType) *FileUpdate {
+func (_u *FileUpdate) RemoveField(f ...*FieldType) *FileUpdate {
 	ids := make([]string, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return fu.RemoveFieldIDs(ids...)
+	return _u.RemoveFieldIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (fu *FileUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, fu.gremlinSave, fu.mutation, fu.hooks)
+func (_u *FileUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (fu *FileUpdate) SaveX(ctx context.Context) int {
-	affected, err := fu.Save(ctx)
+func (_u *FileUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -311,26 +311,26 @@ func (fu *FileUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (fu *FileUpdate) Exec(ctx context.Context) error {
-	_, err := fu.Save(ctx)
+func (_u *FileUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (fu *FileUpdate) ExecX(ctx context.Context) {
-	if err := fu.Exec(ctx); err != nil {
+func (_u *FileUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (fu *FileUpdate) check() error {
-	if v, ok := fu.mutation.SetID(); ok {
+func (_u *FileUpdate) check() error {
+	if v, ok := _u.mutation.SetID(); ok {
 		if err := file.SetIDValidator(v); err != nil {
 			return &ValidationError{Name: "set_id", err: fmt.Errorf(`ent: validator failed for field "File.set_id": %w`, err)}
 		}
 	}
-	if v, ok := fu.mutation.Size(); ok {
+	if v, ok := _u.mutation.Size(); ok {
 		if err := file.SizeValidator(v); err != nil {
 			return &ValidationError{Name: "size", err: fmt.Errorf(`ent: validator failed for field "File.size": %w`, err)}
 		}
@@ -338,30 +338,30 @@ func (fu *FileUpdate) check() error {
 	return nil
 }
 
-func (fu *FileUpdate) gremlinSave(ctx context.Context) (int, error) {
-	if err := fu.check(); err != nil {
+func (_u *FileUpdate) gremlinSave(ctx context.Context) (int, error) {
+	if err := _u.check(); err != nil {
 		return 0, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := fu.gremlin().Query()
-	if err := fu.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _u.gremlin().Query()
+	if err := _u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return 0, err
 	}
-	fu.mutation.done = true
+	_u.mutation.done = true
 	return res.ReadInt()
 }
 
-func (fu *FileUpdate) gremlin() *dsl.Traversal {
+func (_u *FileUpdate) gremlin() *dsl.Traversal {
 	type constraint struct {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
 	constraints := make([]*constraint, 0, 2)
 	v := g.V().HasLabel(file.Label)
-	for _, p := range fu.mutation.predicates {
+	for _, p := range _u.mutation.predicates {
 		p(v)
 	}
 	var (
@@ -370,37 +370,37 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value, ok := fu.mutation.SetID(); ok {
+	if value, ok := _u.mutation.SetID(); ok {
 		v.Property(dsl.Single, file.FieldSetID, value)
 	}
-	if value, ok := fu.mutation.AddedSetID(); ok {
+	if value, ok := _u.mutation.AddedSetID(); ok {
 		v.Property(dsl.Single, file.FieldSetID, __.Union(__.Values(file.FieldSetID), __.Constant(value)).Sum())
 	}
-	if value, ok := fu.mutation.Size(); ok {
+	if value, ok := _u.mutation.Size(); ok {
 		v.Property(dsl.Single, file.FieldSize, value)
 	}
-	if value, ok := fu.mutation.AddedSize(); ok {
+	if value, ok := _u.mutation.AddedSize(); ok {
 		v.Property(dsl.Single, file.FieldSize, __.Union(__.Values(file.FieldSize), __.Constant(value)).Sum())
 	}
-	if value, ok := fu.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		v.Property(dsl.Single, file.FieldName, value)
 	}
-	if value, ok := fu.mutation.User(); ok {
+	if value, ok := _u.mutation.User(); ok {
 		v.Property(dsl.Single, file.FieldUser, value)
 	}
-	if value, ok := fu.mutation.Group(); ok {
+	if value, ok := _u.mutation.Group(); ok {
 		v.Property(dsl.Single, file.FieldGroup, value)
 	}
-	if value, ok := fu.mutation.GetOp(); ok {
+	if value, ok := _u.mutation.GetOp(); ok {
 		v.Property(dsl.Single, file.FieldOp, value)
 	}
-	if value, ok := fu.mutation.FieldID(); ok {
+	if value, ok := _u.mutation.FieldID(); ok {
 		v.Property(dsl.Single, file.FieldFieldID, value)
 	}
-	if value, ok := fu.mutation.AddedFieldID(); ok {
+	if value, ok := _u.mutation.AddedFieldID(); ok {
 		v.Property(dsl.Single, file.FieldFieldID, __.Union(__.Values(file.FieldFieldID), __.Constant(value)).Sum())
 	}
-	if value, ok := fu.mutation.CreateTime(); ok {
+	if value, ok := _u.mutation.CreateTime(); ok {
 		constraints = append(constraints, &constraint{
 			pred: g.V().Has(file.Label, file.FieldCreateTime, value).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(file.Label, file.FieldCreateTime, value)),
@@ -408,46 +408,46 @@ func (fu *FileUpdate) gremlin() *dsl.Traversal {
 		v.Property(dsl.Single, file.FieldCreateTime, value)
 	}
 	var properties []any
-	if fu.mutation.SetIDCleared() {
+	if _u.mutation.SetIDCleared() {
 		properties = append(properties, file.FieldSetID)
 	}
-	if fu.mutation.UserCleared() {
+	if _u.mutation.UserCleared() {
 		properties = append(properties, file.FieldUser)
 	}
-	if fu.mutation.GroupCleared() {
+	if _u.mutation.GroupCleared() {
 		properties = append(properties, file.FieldGroup)
 	}
-	if fu.mutation.OpCleared() {
+	if _u.mutation.OpCleared() {
 		properties = append(properties, file.FieldOp)
 	}
-	if fu.mutation.FieldIDCleared() {
+	if _u.mutation.FieldIDCleared() {
 		properties = append(properties, file.FieldFieldID)
 	}
-	if fu.mutation.CreateTimeCleared() {
+	if _u.mutation.CreateTimeCleared() {
 		properties = append(properties, file.FieldCreateTime)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
 	}
-	if fu.mutation.OwnerCleared() {
+	if _u.mutation.OwnerCleared() {
 		tr := rv.Clone().InE(user.FilesLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for _, id := range fu.mutation.OwnerIDs() {
+	for _, id := range _u.mutation.OwnerIDs() {
 		v.AddE(user.FilesLabel).From(g.V(id)).InV()
 	}
-	if fu.mutation.TypeCleared() {
+	if _u.mutation.TypeCleared() {
 		tr := rv.Clone().InE(filetype.FilesLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for _, id := range fu.mutation.TypeIDs() {
+	for _, id := range _u.mutation.TypeIDs() {
 		v.AddE(filetype.FilesLabel).From(g.V(id)).InV()
 	}
-	for _, id := range fu.mutation.RemovedFieldIDs() {
+	for _, id := range _u.mutation.RemovedFieldIDs() {
 		tr := rv.Clone().OutE(file.FieldLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for _, id := range fu.mutation.FieldIDs() {
+	for _, id := range _u.mutation.FieldIDs() {
 		v.AddE(file.FieldLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(file.FieldLabel).InV().HasID(id).Count(),
@@ -478,286 +478,286 @@ type FileUpdateOne struct {
 }
 
 // SetSetID sets the "set_id" field.
-func (fuo *FileUpdateOne) SetSetID(i int) *FileUpdateOne {
-	fuo.mutation.ResetSetID()
-	fuo.mutation.SetSetID(i)
-	return fuo
+func (_u *FileUpdateOne) SetSetID(i int) *FileUpdateOne {
+	_u.mutation.ResetSetID()
+	_u.mutation.SetSetID(i)
+	return _u
 }
 
 // SetNillableSetID sets the "set_id" field if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableSetID(i *int) *FileUpdateOne {
+func (_u *FileUpdateOne) SetNillableSetID(i *int) *FileUpdateOne {
 	if i != nil {
-		fuo.SetSetID(*i)
+		_u.SetSetID(*i)
 	}
-	return fuo
+	return _u
 }
 
 // AddSetID adds i to the "set_id" field.
-func (fuo *FileUpdateOne) AddSetID(i int) *FileUpdateOne {
-	fuo.mutation.AddSetID(i)
-	return fuo
+func (_u *FileUpdateOne) AddSetID(i int) *FileUpdateOne {
+	_u.mutation.AddSetID(i)
+	return _u
 }
 
 // ClearSetID clears the value of the "set_id" field.
-func (fuo *FileUpdateOne) ClearSetID() *FileUpdateOne {
-	fuo.mutation.ClearSetID()
-	return fuo
+func (_u *FileUpdateOne) ClearSetID() *FileUpdateOne {
+	_u.mutation.ClearSetID()
+	return _u
 }
 
 // SetSize sets the "size" field.
-func (fuo *FileUpdateOne) SetSize(i int) *FileUpdateOne {
-	fuo.mutation.ResetSize()
-	fuo.mutation.SetSize(i)
-	return fuo
+func (_u *FileUpdateOne) SetSize(i int) *FileUpdateOne {
+	_u.mutation.ResetSize()
+	_u.mutation.SetSize(i)
+	return _u
 }
 
 // SetNillableSize sets the "size" field if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableSize(i *int) *FileUpdateOne {
+func (_u *FileUpdateOne) SetNillableSize(i *int) *FileUpdateOne {
 	if i != nil {
-		fuo.SetSize(*i)
+		_u.SetSize(*i)
 	}
-	return fuo
+	return _u
 }
 
 // AddSize adds i to the "size" field.
-func (fuo *FileUpdateOne) AddSize(i int) *FileUpdateOne {
-	fuo.mutation.AddSize(i)
-	return fuo
+func (_u *FileUpdateOne) AddSize(i int) *FileUpdateOne {
+	_u.mutation.AddSize(i)
+	return _u
 }
 
 // SetName sets the "name" field.
-func (fuo *FileUpdateOne) SetName(s string) *FileUpdateOne {
-	fuo.mutation.SetName(s)
-	return fuo
+func (_u *FileUpdateOne) SetName(s string) *FileUpdateOne {
+	_u.mutation.SetName(s)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableName(s *string) *FileUpdateOne {
+func (_u *FileUpdateOne) SetNillableName(s *string) *FileUpdateOne {
 	if s != nil {
-		fuo.SetName(*s)
+		_u.SetName(*s)
 	}
-	return fuo
+	return _u
 }
 
 // SetUser sets the "user" field.
-func (fuo *FileUpdateOne) SetUser(s string) *FileUpdateOne {
-	fuo.mutation.SetUser(s)
-	return fuo
+func (_u *FileUpdateOne) SetUser(s string) *FileUpdateOne {
+	_u.mutation.SetUser(s)
+	return _u
 }
 
 // SetNillableUser sets the "user" field if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableUser(s *string) *FileUpdateOne {
+func (_u *FileUpdateOne) SetNillableUser(s *string) *FileUpdateOne {
 	if s != nil {
-		fuo.SetUser(*s)
+		_u.SetUser(*s)
 	}
-	return fuo
+	return _u
 }
 
 // ClearUser clears the value of the "user" field.
-func (fuo *FileUpdateOne) ClearUser() *FileUpdateOne {
-	fuo.mutation.ClearUser()
-	return fuo
+func (_u *FileUpdateOne) ClearUser() *FileUpdateOne {
+	_u.mutation.ClearUser()
+	return _u
 }
 
 // SetGroup sets the "group" field.
-func (fuo *FileUpdateOne) SetGroup(s string) *FileUpdateOne {
-	fuo.mutation.SetGroup(s)
-	return fuo
+func (_u *FileUpdateOne) SetGroup(s string) *FileUpdateOne {
+	_u.mutation.SetGroup(s)
+	return _u
 }
 
 // SetNillableGroup sets the "group" field if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableGroup(s *string) *FileUpdateOne {
+func (_u *FileUpdateOne) SetNillableGroup(s *string) *FileUpdateOne {
 	if s != nil {
-		fuo.SetGroup(*s)
+		_u.SetGroup(*s)
 	}
-	return fuo
+	return _u
 }
 
 // ClearGroup clears the value of the "group" field.
-func (fuo *FileUpdateOne) ClearGroup() *FileUpdateOne {
-	fuo.mutation.ClearGroup()
-	return fuo
+func (_u *FileUpdateOne) ClearGroup() *FileUpdateOne {
+	_u.mutation.ClearGroup()
+	return _u
 }
 
 // SetOp sets the "op" field.
-func (fuo *FileUpdateOne) SetOp(b bool) *FileUpdateOne {
-	fuo.mutation.SetOpField(b)
-	return fuo
+func (_u *FileUpdateOne) SetOp(b bool) *FileUpdateOne {
+	_u.mutation.SetOpField(b)
+	return _u
 }
 
 // SetNillableOp sets the "op" field if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableOp(b *bool) *FileUpdateOne {
+func (_u *FileUpdateOne) SetNillableOp(b *bool) *FileUpdateOne {
 	if b != nil {
-		fuo.SetOp(*b)
+		_u.SetOp(*b)
 	}
-	return fuo
+	return _u
 }
 
 // ClearOp clears the value of the "op" field.
-func (fuo *FileUpdateOne) ClearOp() *FileUpdateOne {
-	fuo.mutation.ClearOp()
-	return fuo
+func (_u *FileUpdateOne) ClearOp() *FileUpdateOne {
+	_u.mutation.ClearOp()
+	return _u
 }
 
 // SetFieldID sets the "field_id" field.
-func (fuo *FileUpdateOne) SetFieldID(i int) *FileUpdateOne {
-	fuo.mutation.ResetFieldID()
-	fuo.mutation.SetFieldID(i)
-	return fuo
+func (_u *FileUpdateOne) SetFieldID(i int) *FileUpdateOne {
+	_u.mutation.ResetFieldID()
+	_u.mutation.SetFieldID(i)
+	return _u
 }
 
 // SetNillableFieldID sets the "field_id" field if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableFieldID(i *int) *FileUpdateOne {
+func (_u *FileUpdateOne) SetNillableFieldID(i *int) *FileUpdateOne {
 	if i != nil {
-		fuo.SetFieldID(*i)
+		_u.SetFieldID(*i)
 	}
-	return fuo
+	return _u
 }
 
 // AddFieldID adds i to the "field_id" field.
-func (fuo *FileUpdateOne) AddFieldID(i int) *FileUpdateOne {
-	fuo.mutation.AddFieldID(i)
-	return fuo
+func (_u *FileUpdateOne) AddFieldID(i int) *FileUpdateOne {
+	_u.mutation.AddFieldID(i)
+	return _u
 }
 
 // ClearFieldID clears the value of the "field_id" field.
-func (fuo *FileUpdateOne) ClearFieldID() *FileUpdateOne {
-	fuo.mutation.ClearFieldID()
-	return fuo
+func (_u *FileUpdateOne) ClearFieldID() *FileUpdateOne {
+	_u.mutation.ClearFieldID()
+	return _u
 }
 
 // SetCreateTime sets the "create_time" field.
-func (fuo *FileUpdateOne) SetCreateTime(t time.Time) *FileUpdateOne {
-	fuo.mutation.SetCreateTime(t)
-	return fuo
+func (_u *FileUpdateOne) SetCreateTime(t time.Time) *FileUpdateOne {
+	_u.mutation.SetCreateTime(t)
+	return _u
 }
 
 // SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableCreateTime(t *time.Time) *FileUpdateOne {
+func (_u *FileUpdateOne) SetNillableCreateTime(t *time.Time) *FileUpdateOne {
 	if t != nil {
-		fuo.SetCreateTime(*t)
+		_u.SetCreateTime(*t)
 	}
-	return fuo
+	return _u
 }
 
 // ClearCreateTime clears the value of the "create_time" field.
-func (fuo *FileUpdateOne) ClearCreateTime() *FileUpdateOne {
-	fuo.mutation.ClearCreateTime()
-	return fuo
+func (_u *FileUpdateOne) ClearCreateTime() *FileUpdateOne {
+	_u.mutation.ClearCreateTime()
+	return _u
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
-func (fuo *FileUpdateOne) SetOwnerID(id string) *FileUpdateOne {
-	fuo.mutation.SetOwnerID(id)
-	return fuo
+func (_u *FileUpdateOne) SetOwnerID(id string) *FileUpdateOne {
+	_u.mutation.SetOwnerID(id)
+	return _u
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableOwnerID(id *string) *FileUpdateOne {
+func (_u *FileUpdateOne) SetNillableOwnerID(id *string) *FileUpdateOne {
 	if id != nil {
-		fuo = fuo.SetOwnerID(*id)
+		_u = _u.SetOwnerID(*id)
 	}
-	return fuo
+	return _u
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (fuo *FileUpdateOne) SetOwner(u *User) *FileUpdateOne {
-	return fuo.SetOwnerID(u.ID)
+func (_u *FileUpdateOne) SetOwner(u *User) *FileUpdateOne {
+	return _u.SetOwnerID(u.ID)
 }
 
 // SetTypeID sets the "type" edge to the FileType entity by ID.
-func (fuo *FileUpdateOne) SetTypeID(id string) *FileUpdateOne {
-	fuo.mutation.SetTypeID(id)
-	return fuo
+func (_u *FileUpdateOne) SetTypeID(id string) *FileUpdateOne {
+	_u.mutation.SetTypeID(id)
+	return _u
 }
 
 // SetNillableTypeID sets the "type" edge to the FileType entity by ID if the given value is not nil.
-func (fuo *FileUpdateOne) SetNillableTypeID(id *string) *FileUpdateOne {
+func (_u *FileUpdateOne) SetNillableTypeID(id *string) *FileUpdateOne {
 	if id != nil {
-		fuo = fuo.SetTypeID(*id)
+		_u = _u.SetTypeID(*id)
 	}
-	return fuo
+	return _u
 }
 
 // SetType sets the "type" edge to the FileType entity.
-func (fuo *FileUpdateOne) SetType(f *FileType) *FileUpdateOne {
-	return fuo.SetTypeID(f.ID)
+func (_u *FileUpdateOne) SetType(f *FileType) *FileUpdateOne {
+	return _u.SetTypeID(f.ID)
 }
 
 // AddFieldIDs adds the "field" edge to the FieldType entity by IDs.
-func (fuo *FileUpdateOne) AddFieldIDs(ids ...string) *FileUpdateOne {
-	fuo.mutation.AddFieldIDs(ids...)
-	return fuo
+func (_u *FileUpdateOne) AddFieldIDs(ids ...string) *FileUpdateOne {
+	_u.mutation.AddFieldIDs(ids...)
+	return _u
 }
 
 // AddField adds the "field" edges to the FieldType entity.
-func (fuo *FileUpdateOne) AddField(f ...*FieldType) *FileUpdateOne {
+func (_u *FileUpdateOne) AddField(f ...*FieldType) *FileUpdateOne {
 	ids := make([]string, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return fuo.AddFieldIDs(ids...)
+	return _u.AddFieldIDs(ids...)
 }
 
 // Mutation returns the FileMutation object of the builder.
-func (fuo *FileUpdateOne) Mutation() *FileMutation {
-	return fuo.mutation
+func (_u *FileUpdateOne) Mutation() *FileMutation {
+	return _u.mutation
 }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (fuo *FileUpdateOne) ClearOwner() *FileUpdateOne {
-	fuo.mutation.ClearOwner()
-	return fuo
+func (_u *FileUpdateOne) ClearOwner() *FileUpdateOne {
+	_u.mutation.ClearOwner()
+	return _u
 }
 
 // ClearType clears the "type" edge to the FileType entity.
-func (fuo *FileUpdateOne) ClearType() *FileUpdateOne {
-	fuo.mutation.ClearType()
-	return fuo
+func (_u *FileUpdateOne) ClearType() *FileUpdateOne {
+	_u.mutation.ClearType()
+	return _u
 }
 
 // ClearFieldEdge clears all "field" edges to the FieldType entity.
-func (fuo *FileUpdateOne) ClearFieldEdge() *FileUpdateOne {
-	fuo.mutation.ClearFieldEdge()
-	return fuo
+func (_u *FileUpdateOne) ClearFieldEdge() *FileUpdateOne {
+	_u.mutation.ClearFieldEdge()
+	return _u
 }
 
 // RemoveFieldIDs removes the "field" edge to FieldType entities by IDs.
-func (fuo *FileUpdateOne) RemoveFieldIDs(ids ...string) *FileUpdateOne {
-	fuo.mutation.RemoveFieldIDs(ids...)
-	return fuo
+func (_u *FileUpdateOne) RemoveFieldIDs(ids ...string) *FileUpdateOne {
+	_u.mutation.RemoveFieldIDs(ids...)
+	return _u
 }
 
 // RemoveField removes "field" edges to FieldType entities.
-func (fuo *FileUpdateOne) RemoveField(f ...*FieldType) *FileUpdateOne {
+func (_u *FileUpdateOne) RemoveField(f ...*FieldType) *FileUpdateOne {
 	ids := make([]string, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return fuo.RemoveFieldIDs(ids...)
+	return _u.RemoveFieldIDs(ids...)
 }
 
 // Where appends a list predicates to the FileUpdate builder.
-func (fuo *FileUpdateOne) Where(ps ...predicate.File) *FileUpdateOne {
-	fuo.mutation.Where(ps...)
-	return fuo
+func (_u *FileUpdateOne) Where(ps ...predicate.File) *FileUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (fuo *FileUpdateOne) Select(field string, fields ...string) *FileUpdateOne {
-	fuo.fields = append([]string{field}, fields...)
-	return fuo
+func (_u *FileUpdateOne) Select(field string, fields ...string) *FileUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated File entity.
-func (fuo *FileUpdateOne) Save(ctx context.Context) (*File, error) {
-	return withHooks(ctx, fuo.gremlinSave, fuo.mutation, fuo.hooks)
+func (_u *FileUpdateOne) Save(ctx context.Context) (*File, error) {
+	return withHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (fuo *FileUpdateOne) SaveX(ctx context.Context) *File {
-	node, err := fuo.Save(ctx)
+func (_u *FileUpdateOne) SaveX(ctx context.Context) *File {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -765,26 +765,26 @@ func (fuo *FileUpdateOne) SaveX(ctx context.Context) *File {
 }
 
 // Exec executes the query on the entity.
-func (fuo *FileUpdateOne) Exec(ctx context.Context) error {
-	_, err := fuo.Save(ctx)
+func (_u *FileUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (fuo *FileUpdateOne) ExecX(ctx context.Context) {
-	if err := fuo.Exec(ctx); err != nil {
+func (_u *FileUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (fuo *FileUpdateOne) check() error {
-	if v, ok := fuo.mutation.SetID(); ok {
+func (_u *FileUpdateOne) check() error {
+	if v, ok := _u.mutation.SetID(); ok {
 		if err := file.SetIDValidator(v); err != nil {
 			return &ValidationError{Name: "set_id", err: fmt.Errorf(`ent: validator failed for field "File.set_id": %w`, err)}
 		}
 	}
-	if v, ok := fuo.mutation.Size(); ok {
+	if v, ok := _u.mutation.Size(); ok {
 		if err := file.SizeValidator(v); err != nil {
 			return &ValidationError{Name: "size", err: fmt.Errorf(`ent: validator failed for field "File.size": %w`, err)}
 		}
@@ -792,31 +792,31 @@ func (fuo *FileUpdateOne) check() error {
 	return nil
 }
 
-func (fuo *FileUpdateOne) gremlinSave(ctx context.Context) (*File, error) {
-	if err := fuo.check(); err != nil {
+func (_u *FileUpdateOne) gremlinSave(ctx context.Context) (*File, error) {
+	if err := _u.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	id, ok := fuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "File.id" for update`)}
 	}
-	query, bindings := fuo.gremlin(id).Query()
-	if err := fuo.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _u.gremlin(id).Query()
+	if err := _u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	fuo.mutation.done = true
-	f := &File{config: fuo.config}
-	if err := f.FromResponse(res); err != nil {
+	_u.mutation.done = true
+	_m := &File{config: _u.config}
+	if err := _m.FromResponse(res); err != nil {
 		return nil, err
 	}
-	return f, nil
+	return _m, nil
 }
 
-func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
+func (_u *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 	type constraint struct {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
@@ -829,37 +829,37 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value, ok := fuo.mutation.SetID(); ok {
+	if value, ok := _u.mutation.SetID(); ok {
 		v.Property(dsl.Single, file.FieldSetID, value)
 	}
-	if value, ok := fuo.mutation.AddedSetID(); ok {
+	if value, ok := _u.mutation.AddedSetID(); ok {
 		v.Property(dsl.Single, file.FieldSetID, __.Union(__.Values(file.FieldSetID), __.Constant(value)).Sum())
 	}
-	if value, ok := fuo.mutation.Size(); ok {
+	if value, ok := _u.mutation.Size(); ok {
 		v.Property(dsl.Single, file.FieldSize, value)
 	}
-	if value, ok := fuo.mutation.AddedSize(); ok {
+	if value, ok := _u.mutation.AddedSize(); ok {
 		v.Property(dsl.Single, file.FieldSize, __.Union(__.Values(file.FieldSize), __.Constant(value)).Sum())
 	}
-	if value, ok := fuo.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		v.Property(dsl.Single, file.FieldName, value)
 	}
-	if value, ok := fuo.mutation.User(); ok {
+	if value, ok := _u.mutation.User(); ok {
 		v.Property(dsl.Single, file.FieldUser, value)
 	}
-	if value, ok := fuo.mutation.Group(); ok {
+	if value, ok := _u.mutation.Group(); ok {
 		v.Property(dsl.Single, file.FieldGroup, value)
 	}
-	if value, ok := fuo.mutation.GetOp(); ok {
+	if value, ok := _u.mutation.GetOp(); ok {
 		v.Property(dsl.Single, file.FieldOp, value)
 	}
-	if value, ok := fuo.mutation.FieldID(); ok {
+	if value, ok := _u.mutation.FieldID(); ok {
 		v.Property(dsl.Single, file.FieldFieldID, value)
 	}
-	if value, ok := fuo.mutation.AddedFieldID(); ok {
+	if value, ok := _u.mutation.AddedFieldID(); ok {
 		v.Property(dsl.Single, file.FieldFieldID, __.Union(__.Values(file.FieldFieldID), __.Constant(value)).Sum())
 	}
-	if value, ok := fuo.mutation.CreateTime(); ok {
+	if value, ok := _u.mutation.CreateTime(); ok {
 		constraints = append(constraints, &constraint{
 			pred: g.V().Has(file.Label, file.FieldCreateTime, value).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(file.Label, file.FieldCreateTime, value)),
@@ -867,56 +867,56 @@ func (fuo *FileUpdateOne) gremlin(id string) *dsl.Traversal {
 		v.Property(dsl.Single, file.FieldCreateTime, value)
 	}
 	var properties []any
-	if fuo.mutation.SetIDCleared() {
+	if _u.mutation.SetIDCleared() {
 		properties = append(properties, file.FieldSetID)
 	}
-	if fuo.mutation.UserCleared() {
+	if _u.mutation.UserCleared() {
 		properties = append(properties, file.FieldUser)
 	}
-	if fuo.mutation.GroupCleared() {
+	if _u.mutation.GroupCleared() {
 		properties = append(properties, file.FieldGroup)
 	}
-	if fuo.mutation.OpCleared() {
+	if _u.mutation.OpCleared() {
 		properties = append(properties, file.FieldOp)
 	}
-	if fuo.mutation.FieldIDCleared() {
+	if _u.mutation.FieldIDCleared() {
 		properties = append(properties, file.FieldFieldID)
 	}
-	if fuo.mutation.CreateTimeCleared() {
+	if _u.mutation.CreateTimeCleared() {
 		properties = append(properties, file.FieldCreateTime)
 	}
 	if len(properties) > 0 {
 		v.SideEffect(__.Properties(properties...).Drop())
 	}
-	if fuo.mutation.OwnerCleared() {
+	if _u.mutation.OwnerCleared() {
 		tr := rv.Clone().InE(user.FilesLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for _, id := range fuo.mutation.OwnerIDs() {
+	for _, id := range _u.mutation.OwnerIDs() {
 		v.AddE(user.FilesLabel).From(g.V(id)).InV()
 	}
-	if fuo.mutation.TypeCleared() {
+	if _u.mutation.TypeCleared() {
 		tr := rv.Clone().InE(filetype.FilesLabel).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for _, id := range fuo.mutation.TypeIDs() {
+	for _, id := range _u.mutation.TypeIDs() {
 		v.AddE(filetype.FilesLabel).From(g.V(id)).InV()
 	}
-	for _, id := range fuo.mutation.RemovedFieldIDs() {
+	for _, id := range _u.mutation.RemovedFieldIDs() {
 		tr := rv.Clone().OutE(file.FieldLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for _, id := range fuo.mutation.FieldIDs() {
+	for _, id := range _u.mutation.FieldIDs() {
 		v.AddE(file.FieldLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(file.FieldLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(file.Label, file.FieldLabel, id)),
 		})
 	}
-	if len(fuo.fields) > 0 {
-		fields := make([]any, 0, len(fuo.fields)+1)
+	if len(_u.fields) > 0 {
+		fields := make([]any, 0, len(_u.fields)+1)
 		fields = append(fields, true)
-		for _, f := range fuo.fields {
+		for _, f := range _u.fields {
 			fields = append(fields, f)
 		}
 		v.ValueMap(fields...)

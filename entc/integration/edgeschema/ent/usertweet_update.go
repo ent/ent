@@ -29,88 +29,88 @@ type UserTweetUpdate struct {
 }
 
 // Where appends a list predicates to the UserTweetUpdate builder.
-func (utu *UserTweetUpdate) Where(ps ...predicate.UserTweet) *UserTweetUpdate {
-	utu.mutation.Where(ps...)
-	return utu
+func (_u *UserTweetUpdate) Where(ps ...predicate.UserTweet) *UserTweetUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (utu *UserTweetUpdate) SetCreatedAt(t time.Time) *UserTweetUpdate {
-	utu.mutation.SetCreatedAt(t)
-	return utu
+func (_u *UserTweetUpdate) SetCreatedAt(t time.Time) *UserTweetUpdate {
+	_u.mutation.SetCreatedAt(t)
+	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (utu *UserTweetUpdate) SetNillableCreatedAt(t *time.Time) *UserTweetUpdate {
+func (_u *UserTweetUpdate) SetNillableCreatedAt(t *time.Time) *UserTweetUpdate {
 	if t != nil {
-		utu.SetCreatedAt(*t)
+		_u.SetCreatedAt(*t)
 	}
-	return utu
+	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (utu *UserTweetUpdate) SetUserID(i int) *UserTweetUpdate {
-	utu.mutation.SetUserID(i)
-	return utu
+func (_u *UserTweetUpdate) SetUserID(i int) *UserTweetUpdate {
+	_u.mutation.SetUserID(i)
+	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (utu *UserTweetUpdate) SetNillableUserID(i *int) *UserTweetUpdate {
+func (_u *UserTweetUpdate) SetNillableUserID(i *int) *UserTweetUpdate {
 	if i != nil {
-		utu.SetUserID(*i)
+		_u.SetUserID(*i)
 	}
-	return utu
+	return _u
 }
 
 // SetTweetID sets the "tweet_id" field.
-func (utu *UserTweetUpdate) SetTweetID(i int) *UserTweetUpdate {
-	utu.mutation.SetTweetID(i)
-	return utu
+func (_u *UserTweetUpdate) SetTweetID(i int) *UserTweetUpdate {
+	_u.mutation.SetTweetID(i)
+	return _u
 }
 
 // SetNillableTweetID sets the "tweet_id" field if the given value is not nil.
-func (utu *UserTweetUpdate) SetNillableTweetID(i *int) *UserTweetUpdate {
+func (_u *UserTweetUpdate) SetNillableTweetID(i *int) *UserTweetUpdate {
 	if i != nil {
-		utu.SetTweetID(*i)
+		_u.SetTweetID(*i)
 	}
-	return utu
+	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (utu *UserTweetUpdate) SetUser(u *User) *UserTweetUpdate {
-	return utu.SetUserID(u.ID)
+func (_u *UserTweetUpdate) SetUser(u *User) *UserTweetUpdate {
+	return _u.SetUserID(u.ID)
 }
 
 // SetTweet sets the "tweet" edge to the Tweet entity.
-func (utu *UserTweetUpdate) SetTweet(t *Tweet) *UserTweetUpdate {
-	return utu.SetTweetID(t.ID)
+func (_u *UserTweetUpdate) SetTweet(t *Tweet) *UserTweetUpdate {
+	return _u.SetTweetID(t.ID)
 }
 
 // Mutation returns the UserTweetMutation object of the builder.
-func (utu *UserTweetUpdate) Mutation() *UserTweetMutation {
-	return utu.mutation
+func (_u *UserTweetUpdate) Mutation() *UserTweetMutation {
+	return _u.mutation
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (utu *UserTweetUpdate) ClearUser() *UserTweetUpdate {
-	utu.mutation.ClearUser()
-	return utu
+func (_u *UserTweetUpdate) ClearUser() *UserTweetUpdate {
+	_u.mutation.ClearUser()
+	return _u
 }
 
 // ClearTweet clears the "tweet" edge to the Tweet entity.
-func (utu *UserTweetUpdate) ClearTweet() *UserTweetUpdate {
-	utu.mutation.ClearTweet()
-	return utu
+func (_u *UserTweetUpdate) ClearTweet() *UserTweetUpdate {
+	_u.mutation.ClearTweet()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (utu *UserTweetUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, utu.sqlSave, utu.mutation, utu.hooks)
+func (_u *UserTweetUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (utu *UserTweetUpdate) SaveX(ctx context.Context) int {
-	affected, err := utu.Save(ctx)
+func (_u *UserTweetUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -118,45 +118,45 @@ func (utu *UserTweetUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (utu *UserTweetUpdate) Exec(ctx context.Context) error {
-	_, err := utu.Save(ctx)
+func (_u *UserTweetUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (utu *UserTweetUpdate) ExecX(ctx context.Context) {
-	if err := utu.Exec(ctx); err != nil {
+func (_u *UserTweetUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (utu *UserTweetUpdate) check() error {
-	if utu.mutation.UserCleared() && len(utu.mutation.UserIDs()) > 0 {
+func (_u *UserTweetUpdate) check() error {
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserTweet.user"`)
 	}
-	if utu.mutation.TweetCleared() && len(utu.mutation.TweetIDs()) > 0 {
+	if _u.mutation.TweetCleared() && len(_u.mutation.TweetIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserTweet.tweet"`)
 	}
 	return nil
 }
 
-func (utu *UserTweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := utu.check(); err != nil {
+func (_u *UserTweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := _u.check(); err != nil {
 		return n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(usertweet.Table, usertweet.Columns, sqlgraph.NewFieldSpec(usertweet.FieldID, field.TypeInt))
-	if ps := utu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := utu.mutation.CreatedAt(); ok {
+	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(usertweet.FieldCreatedAt, field.TypeTime, value)
 	}
-	if utu.mutation.UserCleared() {
+	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -169,7 +169,7 @@ func (utu *UserTweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := utu.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -185,7 +185,7 @@ func (utu *UserTweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if utu.mutation.TweetCleared() {
+	if _u.mutation.TweetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -198,7 +198,7 @@ func (utu *UserTweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := utu.mutation.TweetIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.TweetIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -214,7 +214,7 @@ func (utu *UserTweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, utu.driver, _spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{usertweet.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -222,7 +222,7 @@ func (utu *UserTweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	utu.mutation.done = true
+	_u.mutation.done = true
 	return n, nil
 }
 
@@ -235,95 +235,95 @@ type UserTweetUpdateOne struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (utuo *UserTweetUpdateOne) SetCreatedAt(t time.Time) *UserTweetUpdateOne {
-	utuo.mutation.SetCreatedAt(t)
-	return utuo
+func (_u *UserTweetUpdateOne) SetCreatedAt(t time.Time) *UserTweetUpdateOne {
+	_u.mutation.SetCreatedAt(t)
+	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (utuo *UserTweetUpdateOne) SetNillableCreatedAt(t *time.Time) *UserTweetUpdateOne {
+func (_u *UserTweetUpdateOne) SetNillableCreatedAt(t *time.Time) *UserTweetUpdateOne {
 	if t != nil {
-		utuo.SetCreatedAt(*t)
+		_u.SetCreatedAt(*t)
 	}
-	return utuo
+	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (utuo *UserTweetUpdateOne) SetUserID(i int) *UserTweetUpdateOne {
-	utuo.mutation.SetUserID(i)
-	return utuo
+func (_u *UserTweetUpdateOne) SetUserID(i int) *UserTweetUpdateOne {
+	_u.mutation.SetUserID(i)
+	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (utuo *UserTweetUpdateOne) SetNillableUserID(i *int) *UserTweetUpdateOne {
+func (_u *UserTweetUpdateOne) SetNillableUserID(i *int) *UserTweetUpdateOne {
 	if i != nil {
-		utuo.SetUserID(*i)
+		_u.SetUserID(*i)
 	}
-	return utuo
+	return _u
 }
 
 // SetTweetID sets the "tweet_id" field.
-func (utuo *UserTweetUpdateOne) SetTweetID(i int) *UserTweetUpdateOne {
-	utuo.mutation.SetTweetID(i)
-	return utuo
+func (_u *UserTweetUpdateOne) SetTweetID(i int) *UserTweetUpdateOne {
+	_u.mutation.SetTweetID(i)
+	return _u
 }
 
 // SetNillableTweetID sets the "tweet_id" field if the given value is not nil.
-func (utuo *UserTweetUpdateOne) SetNillableTweetID(i *int) *UserTweetUpdateOne {
+func (_u *UserTweetUpdateOne) SetNillableTweetID(i *int) *UserTweetUpdateOne {
 	if i != nil {
-		utuo.SetTweetID(*i)
+		_u.SetTweetID(*i)
 	}
-	return utuo
+	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (utuo *UserTweetUpdateOne) SetUser(u *User) *UserTweetUpdateOne {
-	return utuo.SetUserID(u.ID)
+func (_u *UserTweetUpdateOne) SetUser(u *User) *UserTweetUpdateOne {
+	return _u.SetUserID(u.ID)
 }
 
 // SetTweet sets the "tweet" edge to the Tweet entity.
-func (utuo *UserTweetUpdateOne) SetTweet(t *Tweet) *UserTweetUpdateOne {
-	return utuo.SetTweetID(t.ID)
+func (_u *UserTweetUpdateOne) SetTweet(t *Tweet) *UserTweetUpdateOne {
+	return _u.SetTweetID(t.ID)
 }
 
 // Mutation returns the UserTweetMutation object of the builder.
-func (utuo *UserTweetUpdateOne) Mutation() *UserTweetMutation {
-	return utuo.mutation
+func (_u *UserTweetUpdateOne) Mutation() *UserTweetMutation {
+	return _u.mutation
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (utuo *UserTweetUpdateOne) ClearUser() *UserTweetUpdateOne {
-	utuo.mutation.ClearUser()
-	return utuo
+func (_u *UserTweetUpdateOne) ClearUser() *UserTweetUpdateOne {
+	_u.mutation.ClearUser()
+	return _u
 }
 
 // ClearTweet clears the "tweet" edge to the Tweet entity.
-func (utuo *UserTweetUpdateOne) ClearTweet() *UserTweetUpdateOne {
-	utuo.mutation.ClearTweet()
-	return utuo
+func (_u *UserTweetUpdateOne) ClearTweet() *UserTweetUpdateOne {
+	_u.mutation.ClearTweet()
+	return _u
 }
 
 // Where appends a list predicates to the UserTweetUpdate builder.
-func (utuo *UserTweetUpdateOne) Where(ps ...predicate.UserTweet) *UserTweetUpdateOne {
-	utuo.mutation.Where(ps...)
-	return utuo
+func (_u *UserTweetUpdateOne) Where(ps ...predicate.UserTweet) *UserTweetUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (utuo *UserTweetUpdateOne) Select(field string, fields ...string) *UserTweetUpdateOne {
-	utuo.fields = append([]string{field}, fields...)
-	return utuo
+func (_u *UserTweetUpdateOne) Select(field string, fields ...string) *UserTweetUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated UserTweet entity.
-func (utuo *UserTweetUpdateOne) Save(ctx context.Context) (*UserTweet, error) {
-	return withHooks(ctx, utuo.sqlSave, utuo.mutation, utuo.hooks)
+func (_u *UserTweetUpdateOne) Save(ctx context.Context) (*UserTweet, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (utuo *UserTweetUpdateOne) SaveX(ctx context.Context) *UserTweet {
-	node, err := utuo.Save(ctx)
+func (_u *UserTweetUpdateOne) SaveX(ctx context.Context) *UserTweet {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -331,40 +331,40 @@ func (utuo *UserTweetUpdateOne) SaveX(ctx context.Context) *UserTweet {
 }
 
 // Exec executes the query on the entity.
-func (utuo *UserTweetUpdateOne) Exec(ctx context.Context) error {
-	_, err := utuo.Save(ctx)
+func (_u *UserTweetUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (utuo *UserTweetUpdateOne) ExecX(ctx context.Context) {
-	if err := utuo.Exec(ctx); err != nil {
+func (_u *UserTweetUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (utuo *UserTweetUpdateOne) check() error {
-	if utuo.mutation.UserCleared() && len(utuo.mutation.UserIDs()) > 0 {
+func (_u *UserTweetUpdateOne) check() error {
+	if _u.mutation.UserCleared() && len(_u.mutation.UserIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserTweet.user"`)
 	}
-	if utuo.mutation.TweetCleared() && len(utuo.mutation.TweetIDs()) > 0 {
+	if _u.mutation.TweetCleared() && len(_u.mutation.TweetIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "UserTweet.tweet"`)
 	}
 	return nil
 }
 
-func (utuo *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, err error) {
-	if err := utuo.check(); err != nil {
+func (_u *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(usertweet.Table, usertweet.Columns, sqlgraph.NewFieldSpec(usertweet.FieldID, field.TypeInt))
-	id, ok := utuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "UserTweet.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := utuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, usertweet.FieldID)
 		for _, f := range fields {
@@ -376,17 +376,17 @@ func (utuo *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, 
 			}
 		}
 	}
-	if ps := utuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := utuo.mutation.CreatedAt(); ok {
+	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(usertweet.FieldCreatedAt, field.TypeTime, value)
 	}
-	if utuo.mutation.UserCleared() {
+	if _u.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -399,7 +399,7 @@ func (utuo *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := utuo.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -415,7 +415,7 @@ func (utuo *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if utuo.mutation.TweetCleared() {
+	if _u.mutation.TweetCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -428,7 +428,7 @@ func (utuo *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := utuo.mutation.TweetIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.TweetIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -444,10 +444,10 @@ func (utuo *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &UserTweet{config: utuo.config}
+	_node = &UserTweet{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, utuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{usertweet.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -455,6 +455,6 @@ func (utuo *UserTweetUpdateOne) sqlSave(ctx context.Context) (_node *UserTweet, 
 		}
 		return nil, err
 	}
-	utuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

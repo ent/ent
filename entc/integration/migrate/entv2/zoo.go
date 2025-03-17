@@ -39,7 +39,7 @@ func (*Zoo) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Zoo fields.
-func (z *Zoo) assignValues(columns []string, values []any) error {
+func (_m *Zoo) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -50,9 +50,9 @@ func (z *Zoo) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			z.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		default:
-			z.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -60,33 +60,33 @@ func (z *Zoo) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Zoo.
 // This includes values selected through modifiers, order, etc.
-func (z *Zoo) Value(name string) (ent.Value, error) {
-	return z.selectValues.Get(name)
+func (_m *Zoo) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Zoo.
 // Note that you need to call Zoo.Unwrap() before calling this method if this Zoo
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (z *Zoo) Update() *ZooUpdateOne {
-	return NewZooClient(z.config).UpdateOne(z)
+func (_m *Zoo) Update() *ZooUpdateOne {
+	return NewZooClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Zoo entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (z *Zoo) Unwrap() *Zoo {
-	_tx, ok := z.config.driver.(*txDriver)
+func (_m *Zoo) Unwrap() *Zoo {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("entv2: Zoo is not a transactional entity")
 	}
-	z.config.driver = _tx.drv
-	return z
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (z *Zoo) String() string {
+func (_m *Zoo) String() string {
 	var builder strings.Builder
 	builder.WriteString("Zoo(")
-	builder.WriteString(fmt.Sprintf("id=%v", z.ID))
+	builder.WriteString(fmt.Sprintf("id=%v", _m.ID))
 	builder.WriteByte(')')
 	return builder.String()
 }

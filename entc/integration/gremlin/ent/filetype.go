@@ -49,63 +49,63 @@ func (e FileTypeEdges) FilesOrErr() ([]*File, error) {
 }
 
 // FromResponse scans the gremlin response data into FileType.
-func (ft *FileType) FromResponse(res *gremlin.Response) error {
+func (_m *FileType) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scanft struct {
+	var scan_m struct {
 		ID    string         `json:"id,omitempty"`
 		Name  string         `json:"name,omitempty"`
 		Type  filetype.Type  `json:"type,omitempty"`
 		State filetype.State `json:"state,omitempty"`
 	}
-	if err := vmap.Decode(&scanft); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	ft.ID = scanft.ID
-	ft.Name = scanft.Name
-	ft.Type = scanft.Type
-	ft.State = scanft.State
+	_m.ID = scan_m.ID
+	_m.Name = scan_m.Name
+	_m.Type = scan_m.Type
+	_m.State = scan_m.State
 	return nil
 }
 
 // QueryFiles queries the "files" edge of the FileType entity.
-func (ft *FileType) QueryFiles() *FileQuery {
-	return NewFileTypeClient(ft.config).QueryFiles(ft)
+func (_m *FileType) QueryFiles() *FileQuery {
+	return NewFileTypeClient(_m.config).QueryFiles(_m)
 }
 
 // Update returns a builder for updating this FileType.
 // Note that you need to call FileType.Unwrap() before calling this method if this FileType
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (ft *FileType) Update() *FileTypeUpdateOne {
-	return NewFileTypeClient(ft.config).UpdateOne(ft)
+func (_m *FileType) Update() *FileTypeUpdateOne {
+	return NewFileTypeClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the FileType entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (ft *FileType) Unwrap() *FileType {
-	_tx, ok := ft.config.driver.(*txDriver)
+func (_m *FileType) Unwrap() *FileType {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: FileType is not a transactional entity")
 	}
-	ft.config.driver = _tx.drv
-	return ft
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (ft *FileType) String() string {
+func (_m *FileType) String() string {
 	var builder strings.Builder
 	builder.WriteString("FileType(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", ft.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("name=")
-	builder.WriteString(ft.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("type=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Type))
+	builder.WriteString(fmt.Sprintf("%v", _m.Type))
 	builder.WriteString(", ")
 	builder.WriteString("state=")
-	builder.WriteString(fmt.Sprintf("%v", ft.State))
+	builder.WriteString(fmt.Sprintf("%v", _m.State))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -114,26 +114,26 @@ func (ft *FileType) String() string {
 type FileTypes []*FileType
 
 // FromResponse scans the gremlin response data into FileTypes.
-func (ft *FileTypes) FromResponse(res *gremlin.Response) error {
+func (_m *FileTypes) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scanft []struct {
+	var scan_m []struct {
 		ID    string         `json:"id,omitempty"`
 		Name  string         `json:"name,omitempty"`
 		Type  filetype.Type  `json:"type,omitempty"`
 		State filetype.State `json:"state,omitempty"`
 	}
-	if err := vmap.Decode(&scanft); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	for _, v := range scanft {
+	for _, v := range scan_m {
 		node := &FileType{ID: v.ID}
 		node.Name = v.Name
 		node.Type = v.Type
 		node.State = v.State
-		*ft = append(*ft, node)
+		*_m = append(*_m, node)
 	}
 	return nil
 }

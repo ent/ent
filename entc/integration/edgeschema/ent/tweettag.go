@@ -89,7 +89,7 @@ func (*TweetTag) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the TweetTag fields.
-func (tt *TweetTag) assignValues(columns []string, values []any) error {
+func (_m *TweetTag) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -99,28 +99,28 @@ func (tt *TweetTag) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				tt.ID = *value
+				_m.ID = *value
 			}
 		case tweettag.FieldAddedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field added_at", values[i])
 			} else if value.Valid {
-				tt.AddedAt = value.Time
+				_m.AddedAt = value.Time
 			}
 		case tweettag.FieldTagID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field tag_id", values[i])
 			} else if value.Valid {
-				tt.TagID = int(value.Int64)
+				_m.TagID = int(value.Int64)
 			}
 		case tweettag.FieldTweetID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field tweet_id", values[i])
 			} else if value.Valid {
-				tt.TweetID = int(value.Int64)
+				_m.TweetID = int(value.Int64)
 			}
 		default:
-			tt.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -128,51 +128,51 @@ func (tt *TweetTag) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the TweetTag.
 // This includes values selected through modifiers, order, etc.
-func (tt *TweetTag) Value(name string) (ent.Value, error) {
-	return tt.selectValues.Get(name)
+func (_m *TweetTag) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryTag queries the "tag" edge of the TweetTag entity.
-func (tt *TweetTag) QueryTag() *TagQuery {
-	return NewTweetTagClient(tt.config).QueryTag(tt)
+func (_m *TweetTag) QueryTag() *TagQuery {
+	return NewTweetTagClient(_m.config).QueryTag(_m)
 }
 
 // QueryTweet queries the "tweet" edge of the TweetTag entity.
-func (tt *TweetTag) QueryTweet() *TweetQuery {
-	return NewTweetTagClient(tt.config).QueryTweet(tt)
+func (_m *TweetTag) QueryTweet() *TweetQuery {
+	return NewTweetTagClient(_m.config).QueryTweet(_m)
 }
 
 // Update returns a builder for updating this TweetTag.
 // Note that you need to call TweetTag.Unwrap() before calling this method if this TweetTag
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (tt *TweetTag) Update() *TweetTagUpdateOne {
-	return NewTweetTagClient(tt.config).UpdateOne(tt)
+func (_m *TweetTag) Update() *TweetTagUpdateOne {
+	return NewTweetTagClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the TweetTag entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (tt *TweetTag) Unwrap() *TweetTag {
-	_tx, ok := tt.config.driver.(*txDriver)
+func (_m *TweetTag) Unwrap() *TweetTag {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: TweetTag is not a transactional entity")
 	}
-	tt.config.driver = _tx.drv
-	return tt
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (tt *TweetTag) String() string {
+func (_m *TweetTag) String() string {
 	var builder strings.Builder
 	builder.WriteString("TweetTag(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", tt.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("added_at=")
-	builder.WriteString(tt.AddedAt.Format(time.ANSIC))
+	builder.WriteString(_m.AddedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("tag_id=")
-	builder.WriteString(fmt.Sprintf("%v", tt.TagID))
+	builder.WriteString(fmt.Sprintf("%v", _m.TagID))
 	builder.WriteString(", ")
 	builder.WriteString("tweet_id=")
-	builder.WriteString(fmt.Sprintf("%v", tt.TweetID))
+	builder.WriteString(fmt.Sprintf("%v", _m.TweetID))
 	builder.WriteByte(')')
 	return builder.String()
 }

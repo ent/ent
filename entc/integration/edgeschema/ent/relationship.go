@@ -96,7 +96,7 @@ func (*Relationship) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Relationship fields.
-func (r *Relationship) assignValues(columns []string, values []any) error {
+func (_m *Relationship) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -106,28 +106,28 @@ func (r *Relationship) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field weight", values[i])
 			} else if value.Valid {
-				r.Weight = int(value.Int64)
+				_m.Weight = int(value.Int64)
 			}
 		case relationship.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				r.UserID = int(value.Int64)
+				_m.UserID = int(value.Int64)
 			}
 		case relationship.FieldRelativeID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field relative_id", values[i])
 			} else if value.Valid {
-				r.RelativeID = int(value.Int64)
+				_m.RelativeID = int(value.Int64)
 			}
 		case relationship.FieldInfoID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field info_id", values[i])
 			} else if value.Valid {
-				r.InfoID = int(value.Int64)
+				_m.InfoID = int(value.Int64)
 			}
 		default:
-			r.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -135,58 +135,58 @@ func (r *Relationship) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Relationship.
 // This includes values selected through modifiers, order, etc.
-func (r *Relationship) Value(name string) (ent.Value, error) {
-	return r.selectValues.Get(name)
+func (_m *Relationship) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryUser queries the "user" edge of the Relationship entity.
-func (r *Relationship) QueryUser() *UserQuery {
-	return NewRelationshipClient(r.config).QueryUser(r)
+func (_m *Relationship) QueryUser() *UserQuery {
+	return NewRelationshipClient(_m.config).QueryUser(_m)
 }
 
 // QueryRelative queries the "relative" edge of the Relationship entity.
-func (r *Relationship) QueryRelative() *UserQuery {
-	return NewRelationshipClient(r.config).QueryRelative(r)
+func (_m *Relationship) QueryRelative() *UserQuery {
+	return NewRelationshipClient(_m.config).QueryRelative(_m)
 }
 
 // QueryInfo queries the "info" edge of the Relationship entity.
-func (r *Relationship) QueryInfo() *RelationshipInfoQuery {
-	return NewRelationshipClient(r.config).QueryInfo(r)
+func (_m *Relationship) QueryInfo() *RelationshipInfoQuery {
+	return NewRelationshipClient(_m.config).QueryInfo(_m)
 }
 
 // Update returns a builder for updating this Relationship.
 // Note that you need to call Relationship.Unwrap() before calling this method if this Relationship
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (r *Relationship) Update() *RelationshipUpdateOne {
-	return NewRelationshipClient(r.config).UpdateOne(r)
+func (_m *Relationship) Update() *RelationshipUpdateOne {
+	return NewRelationshipClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Relationship entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (r *Relationship) Unwrap() *Relationship {
-	_tx, ok := r.config.driver.(*txDriver)
+func (_m *Relationship) Unwrap() *Relationship {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Relationship is not a transactional entity")
 	}
-	r.config.driver = _tx.drv
-	return r
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (r *Relationship) String() string {
+func (_m *Relationship) String() string {
 	var builder strings.Builder
 	builder.WriteString("Relationship(")
 	builder.WriteString("weight=")
-	builder.WriteString(fmt.Sprintf("%v", r.Weight))
+	builder.WriteString(fmt.Sprintf("%v", _m.Weight))
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", r.UserID))
+	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteString(", ")
 	builder.WriteString("relative_id=")
-	builder.WriteString(fmt.Sprintf("%v", r.RelativeID))
+	builder.WriteString(fmt.Sprintf("%v", _m.RelativeID))
 	builder.WriteString(", ")
 	builder.WriteString("info_id=")
-	builder.WriteString(fmt.Sprintf("%v", r.InfoID))
+	builder.WriteString(fmt.Sprintf("%v", _m.InfoID))
 	builder.WriteByte(')')
 	return builder.String()
 }

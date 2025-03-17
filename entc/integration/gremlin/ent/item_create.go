@@ -26,47 +26,47 @@ type ItemCreate struct {
 }
 
 // SetText sets the "text" field.
-func (ic *ItemCreate) SetText(s string) *ItemCreate {
-	ic.mutation.SetText(s)
-	return ic
+func (_c *ItemCreate) SetText(s string) *ItemCreate {
+	_c.mutation.SetText(s)
+	return _c
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (ic *ItemCreate) SetNillableText(s *string) *ItemCreate {
+func (_c *ItemCreate) SetNillableText(s *string) *ItemCreate {
 	if s != nil {
-		ic.SetText(*s)
+		_c.SetText(*s)
 	}
-	return ic
+	return _c
 }
 
 // SetID sets the "id" field.
-func (ic *ItemCreate) SetID(s string) *ItemCreate {
-	ic.mutation.SetID(s)
-	return ic
+func (_c *ItemCreate) SetID(s string) *ItemCreate {
+	_c.mutation.SetID(s)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (ic *ItemCreate) SetNillableID(s *string) *ItemCreate {
+func (_c *ItemCreate) SetNillableID(s *string) *ItemCreate {
 	if s != nil {
-		ic.SetID(*s)
+		_c.SetID(*s)
 	}
-	return ic
+	return _c
 }
 
 // Mutation returns the ItemMutation object of the builder.
-func (ic *ItemCreate) Mutation() *ItemMutation {
-	return ic.mutation
+func (_c *ItemCreate) Mutation() *ItemMutation {
+	return _c.mutation
 }
 
 // Save creates the Item in the database.
-func (ic *ItemCreate) Save(ctx context.Context) (*Item, error) {
-	ic.defaults()
-	return withHooks(ctx, ic.gremlinSave, ic.mutation, ic.hooks)
+func (_c *ItemCreate) Save(ctx context.Context) (*Item, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (ic *ItemCreate) SaveX(ctx context.Context) *Item {
-	v, err := ic.Save(ctx)
+func (_c *ItemCreate) SaveX(ctx context.Context) *Item {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -74,34 +74,34 @@ func (ic *ItemCreate) SaveX(ctx context.Context) *Item {
 }
 
 // Exec executes the query.
-func (ic *ItemCreate) Exec(ctx context.Context) error {
-	_, err := ic.Save(ctx)
+func (_c *ItemCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ic *ItemCreate) ExecX(ctx context.Context) {
-	if err := ic.Exec(ctx); err != nil {
+func (_c *ItemCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (ic *ItemCreate) defaults() {
-	if _, ok := ic.mutation.ID(); !ok {
+func (_c *ItemCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := item.DefaultID()
-		ic.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ic *ItemCreate) check() error {
-	if v, ok := ic.mutation.Text(); ok {
+func (_c *ItemCreate) check() error {
+	if v, ok := _c.mutation.Text(); ok {
 		if err := item.TextValidator(v); err != nil {
 			return &ValidationError{Name: "text", err: fmt.Errorf(`ent: validator failed for field "Item.text": %w`, err)}
 		}
 	}
-	if v, ok := ic.mutation.ID(); ok {
+	if v, ok := _c.mutation.ID(); ok {
 		if err := item.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Item.id": %w`, err)}
 		}
@@ -109,38 +109,38 @@ func (ic *ItemCreate) check() error {
 	return nil
 }
 
-func (ic *ItemCreate) gremlinSave(ctx context.Context) (*Item, error) {
-	if err := ic.check(); err != nil {
+func (_c *ItemCreate) gremlinSave(ctx context.Context) (*Item, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := ic.gremlin().Query()
-	if err := ic.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _c.gremlin().Query()
+	if err := _c.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	rnode := &Item{config: ic.config}
+	rnode := &Item{config: _c.config}
 	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	ic.mutation.id = &rnode.ID
-	ic.mutation.done = true
+	_c.mutation.id = &rnode.ID
+	_c.mutation.done = true
 	return rnode, nil
 }
 
-func (ic *ItemCreate) gremlin() *dsl.Traversal {
+func (_c *ItemCreate) gremlin() *dsl.Traversal {
 	type constraint struct {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
 	constraints := make([]*constraint, 0, 1)
 	v := g.AddV(item.Label)
-	if id, ok := ic.mutation.ID(); ok {
+	if id, ok := _c.mutation.ID(); ok {
 		v.Property(dsl.ID, id)
 	}
-	if value, ok := ic.mutation.Text(); ok {
+	if value, ok := _c.mutation.Text(); ok {
 		constraints = append(constraints, &constraint{
 			pred: g.V().Has(item.Label, item.FieldText, value).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(item.Label, item.FieldText, value)),

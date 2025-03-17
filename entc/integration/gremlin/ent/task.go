@@ -41,12 +41,12 @@ type Task struct {
 }
 
 // FromResponse scans the gremlin response data into Task.
-func (t *Task) FromResponse(res *gremlin.Response) error {
+func (_m *Task) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scant struct {
+	var scan_m struct {
 		ID          string                   `json:"id,omitempty"`
 		Priority    task.Priority            `json:"priority,omitempty"`
 		Priorities  map[string]task.Priority `json:"priorities,omitempty"`
@@ -57,70 +57,70 @@ func (t *Task) FromResponse(res *gremlin.Response) error {
 		OrderOption int                      `json:"order_option,omitempty"`
 		Op          string                   `json:"op,omitempty"`
 	}
-	if err := vmap.Decode(&scant); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	t.ID = scant.ID
-	t.Priority = scant.Priority
-	t.Priorities = scant.Priorities
-	v2 := time.Unix(0, scant.CreatedAt)
-	t.CreatedAt = &v2
-	t.Name = scant.Name
-	t.Owner = scant.Owner
-	t.Order = scant.Order
-	t.OrderOption = scant.OrderOption
-	t.Op = scant.Op
+	_m.ID = scan_m.ID
+	_m.Priority = scan_m.Priority
+	_m.Priorities = scan_m.Priorities
+	v2 := time.Unix(0, scan_m.CreatedAt)
+	_m.CreatedAt = &v2
+	_m.Name = scan_m.Name
+	_m.Owner = scan_m.Owner
+	_m.Order = scan_m.Order
+	_m.OrderOption = scan_m.OrderOption
+	_m.Op = scan_m.Op
 	return nil
 }
 
 // Update returns a builder for updating this Task.
 // Note that you need to call Task.Unwrap() before calling this method if this Task
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (t *Task) Update() *TaskUpdateOne {
-	return NewTaskClient(t.config).UpdateOne(t)
+func (_m *Task) Update() *TaskUpdateOne {
+	return NewTaskClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Task entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (t *Task) Unwrap() *Task {
-	_tx, ok := t.config.driver.(*txDriver)
+func (_m *Task) Unwrap() *Task {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Task is not a transactional entity")
 	}
-	t.config.driver = _tx.drv
-	return t
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (t *Task) String() string {
+func (_m *Task) String() string {
 	var builder strings.Builder
 	builder.WriteString("Task(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("priority=")
-	builder.WriteString(fmt.Sprintf("%v", t.Priority))
+	builder.WriteString(fmt.Sprintf("%v", _m.Priority))
 	builder.WriteString(", ")
 	builder.WriteString("priorities=")
-	builder.WriteString(fmt.Sprintf("%v", t.Priorities))
+	builder.WriteString(fmt.Sprintf("%v", _m.Priorities))
 	builder.WriteString(", ")
-	if v := t.CreatedAt; v != nil {
+	if v := _m.CreatedAt; v != nil {
 		builder.WriteString("created_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(t.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("owner=")
-	builder.WriteString(t.Owner)
+	builder.WriteString(_m.Owner)
 	builder.WriteString(", ")
 	builder.WriteString("order=")
-	builder.WriteString(fmt.Sprintf("%v", t.Order))
+	builder.WriteString(fmt.Sprintf("%v", _m.Order))
 	builder.WriteString(", ")
 	builder.WriteString("order_option=")
-	builder.WriteString(fmt.Sprintf("%v", t.OrderOption))
+	builder.WriteString(fmt.Sprintf("%v", _m.OrderOption))
 	builder.WriteString(", ")
 	builder.WriteString("op=")
-	builder.WriteString(t.Op)
+	builder.WriteString(_m.Op)
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -129,12 +129,12 @@ func (t *Task) String() string {
 type Tasks []*Task
 
 // FromResponse scans the gremlin response data into Tasks.
-func (t *Tasks) FromResponse(res *gremlin.Response) error {
+func (_m *Tasks) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scant []struct {
+	var scan_m []struct {
 		ID          string                   `json:"id,omitempty"`
 		Priority    task.Priority            `json:"priority,omitempty"`
 		Priorities  map[string]task.Priority `json:"priorities,omitempty"`
@@ -145,10 +145,10 @@ func (t *Tasks) FromResponse(res *gremlin.Response) error {
 		OrderOption int                      `json:"order_option,omitempty"`
 		Op          string                   `json:"op,omitempty"`
 	}
-	if err := vmap.Decode(&scant); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	for _, v := range scant {
+	for _, v := range scan_m {
 		node := &Task{ID: v.ID}
 		node.Priority = v.Priority
 		node.Priorities = v.Priorities
@@ -159,7 +159,7 @@ func (t *Tasks) FromResponse(res *gremlin.Response) error {
 		node.Order = v.Order
 		node.OrderOption = v.OrderOption
 		node.Op = v.Op
-		*t = append(*t, node)
+		*_m = append(*_m, node)
 	}
 	return nil
 }

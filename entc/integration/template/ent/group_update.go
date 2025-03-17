@@ -26,45 +26,45 @@ type GroupUpdate struct {
 }
 
 // Where appends a list predicates to the GroupUpdate builder.
-func (gu *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
-	gu.mutation.Where(ps...)
-	return gu
+func (_u *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetMaxUsers sets the "max_users" field.
-func (gu *GroupUpdate) SetMaxUsers(i int) *GroupUpdate {
-	gu.mutation.ResetMaxUsers()
-	gu.mutation.SetMaxUsers(i)
-	return gu
+func (_u *GroupUpdate) SetMaxUsers(i int) *GroupUpdate {
+	_u.mutation.ResetMaxUsers()
+	_u.mutation.SetMaxUsers(i)
+	return _u
 }
 
 // SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (gu *GroupUpdate) SetNillableMaxUsers(i *int) *GroupUpdate {
+func (_u *GroupUpdate) SetNillableMaxUsers(i *int) *GroupUpdate {
 	if i != nil {
-		gu.SetMaxUsers(*i)
+		_u.SetMaxUsers(*i)
 	}
-	return gu
+	return _u
 }
 
 // AddMaxUsers adds i to the "max_users" field.
-func (gu *GroupUpdate) AddMaxUsers(i int) *GroupUpdate {
-	gu.mutation.AddMaxUsers(i)
-	return gu
+func (_u *GroupUpdate) AddMaxUsers(i int) *GroupUpdate {
+	_u.mutation.AddMaxUsers(i)
+	return _u
 }
 
 // Mutation returns the GroupMutation object of the builder.
-func (gu *GroupUpdate) Mutation() *GroupMutation {
-	return gu.mutation
+func (_u *GroupUpdate) Mutation() *GroupMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (gu *GroupUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, gu.sqlSave, gu.mutation, gu.hooks)
+func (_u *GroupUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (gu *GroupUpdate) SaveX(ctx context.Context) int {
-	affected, err := gu.Save(ctx)
+func (_u *GroupUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -72,34 +72,34 @@ func (gu *GroupUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (gu *GroupUpdate) Exec(ctx context.Context) error {
-	_, err := gu.Save(ctx)
+func (_u *GroupUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gu *GroupUpdate) ExecX(ctx context.Context) {
-	if err := gu.Exec(ctx); err != nil {
+func (_u *GroupUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(group.Table, group.Columns, sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt))
-	if ps := gu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := gu.mutation.MaxUsers(); ok {
+	if value, ok := _u.mutation.MaxUsers(); ok {
 		_spec.SetField(group.FieldMaxUsers, field.TypeInt, value)
 	}
-	if value, ok := gu.mutation.AddedMaxUsers(); ok {
+	if value, ok := _u.mutation.AddedMaxUsers(); ok {
 		_spec.AddField(group.FieldMaxUsers, field.TypeInt, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, gu.driver, _spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{group.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -107,7 +107,7 @@ func (gu *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	gu.mutation.done = true
+	_u.mutation.done = true
 	return n, nil
 }
 
@@ -120,52 +120,52 @@ type GroupUpdateOne struct {
 }
 
 // SetMaxUsers sets the "max_users" field.
-func (guo *GroupUpdateOne) SetMaxUsers(i int) *GroupUpdateOne {
-	guo.mutation.ResetMaxUsers()
-	guo.mutation.SetMaxUsers(i)
-	return guo
+func (_u *GroupUpdateOne) SetMaxUsers(i int) *GroupUpdateOne {
+	_u.mutation.ResetMaxUsers()
+	_u.mutation.SetMaxUsers(i)
+	return _u
 }
 
 // SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (guo *GroupUpdateOne) SetNillableMaxUsers(i *int) *GroupUpdateOne {
+func (_u *GroupUpdateOne) SetNillableMaxUsers(i *int) *GroupUpdateOne {
 	if i != nil {
-		guo.SetMaxUsers(*i)
+		_u.SetMaxUsers(*i)
 	}
-	return guo
+	return _u
 }
 
 // AddMaxUsers adds i to the "max_users" field.
-func (guo *GroupUpdateOne) AddMaxUsers(i int) *GroupUpdateOne {
-	guo.mutation.AddMaxUsers(i)
-	return guo
+func (_u *GroupUpdateOne) AddMaxUsers(i int) *GroupUpdateOne {
+	_u.mutation.AddMaxUsers(i)
+	return _u
 }
 
 // Mutation returns the GroupMutation object of the builder.
-func (guo *GroupUpdateOne) Mutation() *GroupMutation {
-	return guo.mutation
+func (_u *GroupUpdateOne) Mutation() *GroupMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the GroupUpdate builder.
-func (guo *GroupUpdateOne) Where(ps ...predicate.Group) *GroupUpdateOne {
-	guo.mutation.Where(ps...)
-	return guo
+func (_u *GroupUpdateOne) Where(ps ...predicate.Group) *GroupUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (guo *GroupUpdateOne) Select(field string, fields ...string) *GroupUpdateOne {
-	guo.fields = append([]string{field}, fields...)
-	return guo
+func (_u *GroupUpdateOne) Select(field string, fields ...string) *GroupUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Group entity.
-func (guo *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
-	return withHooks(ctx, guo.sqlSave, guo.mutation, guo.hooks)
+func (_u *GroupUpdateOne) Save(ctx context.Context) (*Group, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (guo *GroupUpdateOne) SaveX(ctx context.Context) *Group {
-	node, err := guo.Save(ctx)
+func (_u *GroupUpdateOne) SaveX(ctx context.Context) *Group {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -173,26 +173,26 @@ func (guo *GroupUpdateOne) SaveX(ctx context.Context) *Group {
 }
 
 // Exec executes the query on the entity.
-func (guo *GroupUpdateOne) Exec(ctx context.Context) error {
-	_, err := guo.Save(ctx)
+func (_u *GroupUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (guo *GroupUpdateOne) ExecX(ctx context.Context) {
-	if err := guo.Exec(ctx); err != nil {
+func (_u *GroupUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error) {
+func (_u *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error) {
 	_spec := sqlgraph.NewUpdateSpec(group.Table, group.Columns, sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt))
-	id, ok := guo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Group.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := guo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, group.FieldID)
 		for _, f := range fields {
@@ -204,23 +204,23 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 			}
 		}
 	}
-	if ps := guo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := guo.mutation.MaxUsers(); ok {
+	if value, ok := _u.mutation.MaxUsers(); ok {
 		_spec.SetField(group.FieldMaxUsers, field.TypeInt, value)
 	}
-	if value, ok := guo.mutation.AddedMaxUsers(); ok {
+	if value, ok := _u.mutation.AddedMaxUsers(); ok {
 		_spec.AddField(group.FieldMaxUsers, field.TypeInt, value)
 	}
-	_node = &Group{config: guo.config}
+	_node = &Group{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, guo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{group.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -228,6 +228,6 @@ func (guo *GroupUpdateOne) sqlSave(ctx context.Context) (_node *Group, err error
 		}
 		return nil, err
 	}
-	guo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

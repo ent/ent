@@ -97,7 +97,7 @@ func (*Group) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Group fields.
-func (gr *Group) assignValues(columns []string, values []any) error {
+func (_m *Group) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -108,15 +108,15 @@ func (gr *Group) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			gr.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case group.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				gr.Name = value.String
+				_m.Name = value.String
 			}
 		default:
-			gr.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -124,55 +124,55 @@ func (gr *Group) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Group.
 // This includes values selected through modifiers, order, etc.
-func (gr *Group) Value(name string) (ent.Value, error) {
-	return gr.selectValues.Get(name)
+func (_m *Group) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryUsers queries the "users" edge of the Group entity.
-func (gr *Group) QueryUsers() *UserQuery {
-	return NewGroupClient(gr.config).QueryUsers(gr)
+func (_m *Group) QueryUsers() *UserQuery {
+	return NewGroupClient(_m.config).QueryUsers(_m)
 }
 
 // QueryTags queries the "tags" edge of the Group entity.
-func (gr *Group) QueryTags() *TagQuery {
-	return NewGroupClient(gr.config).QueryTags(gr)
+func (_m *Group) QueryTags() *TagQuery {
+	return NewGroupClient(_m.config).QueryTags(_m)
 }
 
 // QueryJoinedUsers queries the "joined_users" edge of the Group entity.
-func (gr *Group) QueryJoinedUsers() *UserGroupQuery {
-	return NewGroupClient(gr.config).QueryJoinedUsers(gr)
+func (_m *Group) QueryJoinedUsers() *UserGroupQuery {
+	return NewGroupClient(_m.config).QueryJoinedUsers(_m)
 }
 
 // QueryGroupTags queries the "group_tags" edge of the Group entity.
-func (gr *Group) QueryGroupTags() *GroupTagQuery {
-	return NewGroupClient(gr.config).QueryGroupTags(gr)
+func (_m *Group) QueryGroupTags() *GroupTagQuery {
+	return NewGroupClient(_m.config).QueryGroupTags(_m)
 }
 
 // Update returns a builder for updating this Group.
 // Note that you need to call Group.Unwrap() before calling this method if this Group
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (gr *Group) Update() *GroupUpdateOne {
-	return NewGroupClient(gr.config).UpdateOne(gr)
+func (_m *Group) Update() *GroupUpdateOne {
+	return NewGroupClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Group entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (gr *Group) Unwrap() *Group {
-	_tx, ok := gr.config.driver.(*txDriver)
+func (_m *Group) Unwrap() *Group {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Group is not a transactional entity")
 	}
-	gr.config.driver = _tx.drv
-	return gr
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (gr *Group) String() string {
+func (_m *Group) String() string {
 	var builder strings.Builder
 	builder.WriteString("Group(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", gr.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("name=")
-	builder.WriteString(gr.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }

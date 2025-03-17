@@ -30,115 +30,115 @@ type CardCreate struct {
 }
 
 // SetCreateTime sets the "create_time" field.
-func (cc *CardCreate) SetCreateTime(t time.Time) *CardCreate {
-	cc.mutation.SetCreateTime(t)
-	return cc
+func (_c *CardCreate) SetCreateTime(t time.Time) *CardCreate {
+	_c.mutation.SetCreateTime(t)
+	return _c
 }
 
 // SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (cc *CardCreate) SetNillableCreateTime(t *time.Time) *CardCreate {
+func (_c *CardCreate) SetNillableCreateTime(t *time.Time) *CardCreate {
 	if t != nil {
-		cc.SetCreateTime(*t)
+		_c.SetCreateTime(*t)
 	}
-	return cc
+	return _c
 }
 
 // SetUpdateTime sets the "update_time" field.
-func (cc *CardCreate) SetUpdateTime(t time.Time) *CardCreate {
-	cc.mutation.SetUpdateTime(t)
-	return cc
+func (_c *CardCreate) SetUpdateTime(t time.Time) *CardCreate {
+	_c.mutation.SetUpdateTime(t)
+	return _c
 }
 
 // SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (cc *CardCreate) SetNillableUpdateTime(t *time.Time) *CardCreate {
+func (_c *CardCreate) SetNillableUpdateTime(t *time.Time) *CardCreate {
 	if t != nil {
-		cc.SetUpdateTime(*t)
+		_c.SetUpdateTime(*t)
 	}
-	return cc
+	return _c
 }
 
 // SetBalance sets the "balance" field.
-func (cc *CardCreate) SetBalance(f float64) *CardCreate {
-	cc.mutation.SetBalance(f)
-	return cc
+func (_c *CardCreate) SetBalance(f float64) *CardCreate {
+	_c.mutation.SetBalance(f)
+	return _c
 }
 
 // SetNillableBalance sets the "balance" field if the given value is not nil.
-func (cc *CardCreate) SetNillableBalance(f *float64) *CardCreate {
+func (_c *CardCreate) SetNillableBalance(f *float64) *CardCreate {
 	if f != nil {
-		cc.SetBalance(*f)
+		_c.SetBalance(*f)
 	}
-	return cc
+	return _c
 }
 
 // SetNumber sets the "number" field.
-func (cc *CardCreate) SetNumber(s string) *CardCreate {
-	cc.mutation.SetNumber(s)
-	return cc
+func (_c *CardCreate) SetNumber(s string) *CardCreate {
+	_c.mutation.SetNumber(s)
+	return _c
 }
 
 // SetName sets the "name" field.
-func (cc *CardCreate) SetName(s string) *CardCreate {
-	cc.mutation.SetName(s)
-	return cc
+func (_c *CardCreate) SetName(s string) *CardCreate {
+	_c.mutation.SetName(s)
+	return _c
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (cc *CardCreate) SetNillableName(s *string) *CardCreate {
+func (_c *CardCreate) SetNillableName(s *string) *CardCreate {
 	if s != nil {
-		cc.SetName(*s)
+		_c.SetName(*s)
 	}
-	return cc
+	return _c
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
-func (cc *CardCreate) SetOwnerID(id string) *CardCreate {
-	cc.mutation.SetOwnerID(id)
-	return cc
+func (_c *CardCreate) SetOwnerID(id string) *CardCreate {
+	_c.mutation.SetOwnerID(id)
+	return _c
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (cc *CardCreate) SetNillableOwnerID(id *string) *CardCreate {
+func (_c *CardCreate) SetNillableOwnerID(id *string) *CardCreate {
 	if id != nil {
-		cc = cc.SetOwnerID(*id)
+		_c = _c.SetOwnerID(*id)
 	}
-	return cc
+	return _c
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (cc *CardCreate) SetOwner(u *User) *CardCreate {
-	return cc.SetOwnerID(u.ID)
+func (_c *CardCreate) SetOwner(u *User) *CardCreate {
+	return _c.SetOwnerID(u.ID)
 }
 
 // AddSpecIDs adds the "spec" edge to the Spec entity by IDs.
-func (cc *CardCreate) AddSpecIDs(ids ...string) *CardCreate {
-	cc.mutation.AddSpecIDs(ids...)
-	return cc
+func (_c *CardCreate) AddSpecIDs(ids ...string) *CardCreate {
+	_c.mutation.AddSpecIDs(ids...)
+	return _c
 }
 
 // AddSpec adds the "spec" edges to the Spec entity.
-func (cc *CardCreate) AddSpec(s ...*Spec) *CardCreate {
+func (_c *CardCreate) AddSpec(s ...*Spec) *CardCreate {
 	ids := make([]string, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
-	return cc.AddSpecIDs(ids...)
+	return _c.AddSpecIDs(ids...)
 }
 
 // Mutation returns the CardMutation object of the builder.
-func (cc *CardCreate) Mutation() *CardMutation {
-	return cc.mutation
+func (_c *CardCreate) Mutation() *CardMutation {
+	return _c.mutation
 }
 
 // Save creates the Card in the database.
-func (cc *CardCreate) Save(ctx context.Context) (*Card, error) {
-	cc.defaults()
-	return withHooks(ctx, cc.gremlinSave, cc.mutation, cc.hooks)
+func (_c *CardCreate) Save(ctx context.Context) (*Card, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (cc *CardCreate) SaveX(ctx context.Context) *Card {
-	v, err := cc.Save(ctx)
+func (_c *CardCreate) SaveX(ctx context.Context) *Card {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -146,54 +146,54 @@ func (cc *CardCreate) SaveX(ctx context.Context) *Card {
 }
 
 // Exec executes the query.
-func (cc *CardCreate) Exec(ctx context.Context) error {
-	_, err := cc.Save(ctx)
+func (_c *CardCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cc *CardCreate) ExecX(ctx context.Context) {
-	if err := cc.Exec(ctx); err != nil {
+func (_c *CardCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (cc *CardCreate) defaults() {
-	if _, ok := cc.mutation.CreateTime(); !ok {
+func (_c *CardCreate) defaults() {
+	if _, ok := _c.mutation.CreateTime(); !ok {
 		v := card.DefaultCreateTime()
-		cc.mutation.SetCreateTime(v)
+		_c.mutation.SetCreateTime(v)
 	}
-	if _, ok := cc.mutation.UpdateTime(); !ok {
+	if _, ok := _c.mutation.UpdateTime(); !ok {
 		v := card.DefaultUpdateTime()
-		cc.mutation.SetUpdateTime(v)
+		_c.mutation.SetUpdateTime(v)
 	}
-	if _, ok := cc.mutation.Balance(); !ok {
+	if _, ok := _c.mutation.Balance(); !ok {
 		v := card.DefaultBalance
-		cc.mutation.SetBalance(v)
+		_c.mutation.SetBalance(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cc *CardCreate) check() error {
-	if _, ok := cc.mutation.CreateTime(); !ok {
+func (_c *CardCreate) check() error {
+	if _, ok := _c.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Card.create_time"`)}
 	}
-	if _, ok := cc.mutation.UpdateTime(); !ok {
+	if _, ok := _c.mutation.UpdateTime(); !ok {
 		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Card.update_time"`)}
 	}
-	if _, ok := cc.mutation.Balance(); !ok {
+	if _, ok := _c.mutation.Balance(); !ok {
 		return &ValidationError{Name: "balance", err: errors.New(`ent: missing required field "Card.balance"`)}
 	}
-	if _, ok := cc.mutation.Number(); !ok {
+	if _, ok := _c.mutation.Number(); !ok {
 		return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "Card.number"`)}
 	}
-	if v, ok := cc.mutation.Number(); ok {
+	if v, ok := _c.mutation.Number(); ok {
 		if err := card.NumberValidator(v); err != nil {
 			return &ValidationError{Name: "number", err: fmt.Errorf(`ent: validator failed for field "Card.number": %w`, err)}
 		}
 	}
-	if v, ok := cc.mutation.Name(); ok {
+	if v, ok := _c.mutation.Name(); ok {
 		if err := card.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Card.name": %w`, err)}
 		}
@@ -201,57 +201,57 @@ func (cc *CardCreate) check() error {
 	return nil
 }
 
-func (cc *CardCreate) gremlinSave(ctx context.Context) (*Card, error) {
-	if err := cc.check(); err != nil {
+func (_c *CardCreate) gremlinSave(ctx context.Context) (*Card, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := cc.gremlin().Query()
-	if err := cc.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _c.gremlin().Query()
+	if err := _c.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	rnode := &Card{config: cc.config}
+	rnode := &Card{config: _c.config}
 	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	cc.mutation.id = &rnode.ID
-	cc.mutation.done = true
+	_c.mutation.id = &rnode.ID
+	_c.mutation.done = true
 	return rnode, nil
 }
 
-func (cc *CardCreate) gremlin() *dsl.Traversal {
+func (_c *CardCreate) gremlin() *dsl.Traversal {
 	type constraint struct {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
 	constraints := make([]*constraint, 0, 1)
 	v := g.AddV(card.Label)
-	if value, ok := cc.mutation.CreateTime(); ok {
+	if value, ok := _c.mutation.CreateTime(); ok {
 		v.Property(dsl.Single, card.FieldCreateTime, value)
 	}
-	if value, ok := cc.mutation.UpdateTime(); ok {
+	if value, ok := _c.mutation.UpdateTime(); ok {
 		v.Property(dsl.Single, card.FieldUpdateTime, value)
 	}
-	if value, ok := cc.mutation.Balance(); ok {
+	if value, ok := _c.mutation.Balance(); ok {
 		v.Property(dsl.Single, card.FieldBalance, value)
 	}
-	if value, ok := cc.mutation.Number(); ok {
+	if value, ok := _c.mutation.Number(); ok {
 		v.Property(dsl.Single, card.FieldNumber, value)
 	}
-	if value, ok := cc.mutation.Name(); ok {
+	if value, ok := _c.mutation.Name(); ok {
 		v.Property(dsl.Single, card.FieldName, value)
 	}
-	for _, id := range cc.mutation.OwnerIDs() {
+	for _, id := range _c.mutation.OwnerIDs() {
 		v.AddE(user.CardLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(user.CardLabel).OutV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(card.Label, user.CardLabel, id)),
 		})
 	}
-	for _, id := range cc.mutation.SpecIDs() {
+	for _, id := range _c.mutation.SpecIDs() {
 		v.AddE(spec.CardLabel).From(g.V(id)).InV()
 	}
 	if len(constraints) == 0 {

@@ -32,362 +32,362 @@ type UserUpdate struct {
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	uu.mutation.Where(ps...)
-	return uu
+func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetName sets the "name" field.
-func (uu *UserUpdate) SetName(s string) *UserUpdate {
-	uu.mutation.SetName(s)
-	return uu
+func (_u *UserUpdate) SetName(s string) *UserUpdate {
+	_u.mutation.SetName(s)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableName(s *string) *UserUpdate {
+func (_u *UserUpdate) SetNillableName(s *string) *UserUpdate {
 	if s != nil {
-		uu.SetName(*s)
+		_u.SetName(*s)
 	}
-	return uu
+	return _u
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (uu *UserUpdate) AddGroupIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddGroupIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddGroupIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddGroupIDs(ids...)
+	return _u
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (uu *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
+func (_u *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
 	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
-	return uu.AddGroupIDs(ids...)
+	return _u.AddGroupIDs(ids...)
 }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
-func (uu *UserUpdate) AddFriendIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddFriendIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddFriendIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddFriendIDs(ids...)
+	return _u
 }
 
 // AddFriends adds the "friends" edges to the User entity.
-func (uu *UserUpdate) AddFriends(u ...*User) *UserUpdate {
+func (_u *UserUpdate) AddFriends(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uu.AddFriendIDs(ids...)
+	return _u.AddFriendIDs(ids...)
 }
 
 // AddRelativeIDs adds the "relatives" edge to the User entity by IDs.
-func (uu *UserUpdate) AddRelativeIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddRelativeIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddRelativeIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddRelativeIDs(ids...)
+	return _u
 }
 
 // AddRelatives adds the "relatives" edges to the User entity.
-func (uu *UserUpdate) AddRelatives(u ...*User) *UserUpdate {
+func (_u *UserUpdate) AddRelatives(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uu.AddRelativeIDs(ids...)
+	return _u.AddRelativeIDs(ids...)
 }
 
 // AddLikedTweetIDs adds the "liked_tweets" edge to the Tweet entity by IDs.
-func (uu *UserUpdate) AddLikedTweetIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddLikedTweetIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddLikedTweetIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddLikedTweetIDs(ids...)
+	return _u
 }
 
 // AddLikedTweets adds the "liked_tweets" edges to the Tweet entity.
-func (uu *UserUpdate) AddLikedTweets(t ...*Tweet) *UserUpdate {
+func (_u *UserUpdate) AddLikedTweets(t ...*Tweet) *UserUpdate {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return uu.AddLikedTweetIDs(ids...)
+	return _u.AddLikedTweetIDs(ids...)
 }
 
 // AddTweetIDs adds the "tweets" edge to the Tweet entity by IDs.
-func (uu *UserUpdate) AddTweetIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddTweetIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddTweetIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddTweetIDs(ids...)
+	return _u
 }
 
 // AddTweets adds the "tweets" edges to the Tweet entity.
-func (uu *UserUpdate) AddTweets(t ...*Tweet) *UserUpdate {
+func (_u *UserUpdate) AddTweets(t ...*Tweet) *UserUpdate {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return uu.AddTweetIDs(ids...)
+	return _u.AddTweetIDs(ids...)
 }
 
 // AddRoleIDs adds the "roles" edge to the Role entity by IDs.
-func (uu *UserUpdate) AddRoleIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddRoleIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddRoleIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddRoleIDs(ids...)
+	return _u
 }
 
 // AddRoles adds the "roles" edges to the Role entity.
-func (uu *UserUpdate) AddRoles(r ...*Role) *UserUpdate {
+func (_u *UserUpdate) AddRoles(r ...*Role) *UserUpdate {
 	ids := make([]int, len(r))
 	for i := range r {
 		ids[i] = r[i].ID
 	}
-	return uu.AddRoleIDs(ids...)
+	return _u.AddRoleIDs(ids...)
 }
 
 // AddJoinedGroupIDs adds the "joined_groups" edge to the UserGroup entity by IDs.
-func (uu *UserUpdate) AddJoinedGroupIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddJoinedGroupIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddJoinedGroupIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddJoinedGroupIDs(ids...)
+	return _u
 }
 
 // AddJoinedGroups adds the "joined_groups" edges to the UserGroup entity.
-func (uu *UserUpdate) AddJoinedGroups(u ...*UserGroup) *UserUpdate {
+func (_u *UserUpdate) AddJoinedGroups(u ...*UserGroup) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uu.AddJoinedGroupIDs(ids...)
+	return _u.AddJoinedGroupIDs(ids...)
 }
 
 // AddFriendshipIDs adds the "friendships" edge to the Friendship entity by IDs.
-func (uu *UserUpdate) AddFriendshipIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddFriendshipIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddFriendshipIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddFriendshipIDs(ids...)
+	return _u
 }
 
 // AddFriendships adds the "friendships" edges to the Friendship entity.
-func (uu *UserUpdate) AddFriendships(f ...*Friendship) *UserUpdate {
+func (_u *UserUpdate) AddFriendships(f ...*Friendship) *UserUpdate {
 	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return uu.AddFriendshipIDs(ids...)
+	return _u.AddFriendshipIDs(ids...)
 }
 
 // AddUserTweetIDs adds the "user_tweets" edge to the UserTweet entity by IDs.
-func (uu *UserUpdate) AddUserTweetIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddUserTweetIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddUserTweetIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddUserTweetIDs(ids...)
+	return _u
 }
 
 // AddUserTweets adds the "user_tweets" edges to the UserTweet entity.
-func (uu *UserUpdate) AddUserTweets(u ...*UserTweet) *UserUpdate {
+func (_u *UserUpdate) AddUserTweets(u ...*UserTweet) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uu.AddUserTweetIDs(ids...)
+	return _u.AddUserTweetIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uu *UserUpdate) Mutation() *UserMutation {
-	return uu.mutation
+func (_u *UserUpdate) Mutation() *UserMutation {
+	return _u.mutation
 }
 
 // ClearGroups clears all "groups" edges to the Group entity.
-func (uu *UserUpdate) ClearGroups() *UserUpdate {
-	uu.mutation.ClearGroups()
-	return uu
+func (_u *UserUpdate) ClearGroups() *UserUpdate {
+	_u.mutation.ClearGroups()
+	return _u
 }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
-func (uu *UserUpdate) RemoveGroupIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveGroupIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveGroupIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveGroupIDs(ids...)
+	return _u
 }
 
 // RemoveGroups removes "groups" edges to Group entities.
-func (uu *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
+func (_u *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
 	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
-	return uu.RemoveGroupIDs(ids...)
+	return _u.RemoveGroupIDs(ids...)
 }
 
 // ClearFriends clears all "friends" edges to the User entity.
-func (uu *UserUpdate) ClearFriends() *UserUpdate {
-	uu.mutation.ClearFriends()
-	return uu
+func (_u *UserUpdate) ClearFriends() *UserUpdate {
+	_u.mutation.ClearFriends()
+	return _u
 }
 
 // RemoveFriendIDs removes the "friends" edge to User entities by IDs.
-func (uu *UserUpdate) RemoveFriendIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveFriendIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveFriendIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveFriendIDs(ids...)
+	return _u
 }
 
 // RemoveFriends removes "friends" edges to User entities.
-func (uu *UserUpdate) RemoveFriends(u ...*User) *UserUpdate {
+func (_u *UserUpdate) RemoveFriends(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uu.RemoveFriendIDs(ids...)
+	return _u.RemoveFriendIDs(ids...)
 }
 
 // ClearRelatives clears all "relatives" edges to the User entity.
-func (uu *UserUpdate) ClearRelatives() *UserUpdate {
-	uu.mutation.ClearRelatives()
-	return uu
+func (_u *UserUpdate) ClearRelatives() *UserUpdate {
+	_u.mutation.ClearRelatives()
+	return _u
 }
 
 // RemoveRelativeIDs removes the "relatives" edge to User entities by IDs.
-func (uu *UserUpdate) RemoveRelativeIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveRelativeIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveRelativeIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveRelativeIDs(ids...)
+	return _u
 }
 
 // RemoveRelatives removes "relatives" edges to User entities.
-func (uu *UserUpdate) RemoveRelatives(u ...*User) *UserUpdate {
+func (_u *UserUpdate) RemoveRelatives(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uu.RemoveRelativeIDs(ids...)
+	return _u.RemoveRelativeIDs(ids...)
 }
 
 // ClearLikedTweets clears all "liked_tweets" edges to the Tweet entity.
-func (uu *UserUpdate) ClearLikedTweets() *UserUpdate {
-	uu.mutation.ClearLikedTweets()
-	return uu
+func (_u *UserUpdate) ClearLikedTweets() *UserUpdate {
+	_u.mutation.ClearLikedTweets()
+	return _u
 }
 
 // RemoveLikedTweetIDs removes the "liked_tweets" edge to Tweet entities by IDs.
-func (uu *UserUpdate) RemoveLikedTweetIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveLikedTweetIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveLikedTweetIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveLikedTweetIDs(ids...)
+	return _u
 }
 
 // RemoveLikedTweets removes "liked_tweets" edges to Tweet entities.
-func (uu *UserUpdate) RemoveLikedTweets(t ...*Tweet) *UserUpdate {
+func (_u *UserUpdate) RemoveLikedTweets(t ...*Tweet) *UserUpdate {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return uu.RemoveLikedTweetIDs(ids...)
+	return _u.RemoveLikedTweetIDs(ids...)
 }
 
 // ClearTweets clears all "tweets" edges to the Tweet entity.
-func (uu *UserUpdate) ClearTweets() *UserUpdate {
-	uu.mutation.ClearTweets()
-	return uu
+func (_u *UserUpdate) ClearTweets() *UserUpdate {
+	_u.mutation.ClearTweets()
+	return _u
 }
 
 // RemoveTweetIDs removes the "tweets" edge to Tweet entities by IDs.
-func (uu *UserUpdate) RemoveTweetIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveTweetIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveTweetIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveTweetIDs(ids...)
+	return _u
 }
 
 // RemoveTweets removes "tweets" edges to Tweet entities.
-func (uu *UserUpdate) RemoveTweets(t ...*Tweet) *UserUpdate {
+func (_u *UserUpdate) RemoveTweets(t ...*Tweet) *UserUpdate {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return uu.RemoveTweetIDs(ids...)
+	return _u.RemoveTweetIDs(ids...)
 }
 
 // ClearRoles clears all "roles" edges to the Role entity.
-func (uu *UserUpdate) ClearRoles() *UserUpdate {
-	uu.mutation.ClearRoles()
-	return uu
+func (_u *UserUpdate) ClearRoles() *UserUpdate {
+	_u.mutation.ClearRoles()
+	return _u
 }
 
 // RemoveRoleIDs removes the "roles" edge to Role entities by IDs.
-func (uu *UserUpdate) RemoveRoleIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveRoleIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveRoleIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveRoleIDs(ids...)
+	return _u
 }
 
 // RemoveRoles removes "roles" edges to Role entities.
-func (uu *UserUpdate) RemoveRoles(r ...*Role) *UserUpdate {
+func (_u *UserUpdate) RemoveRoles(r ...*Role) *UserUpdate {
 	ids := make([]int, len(r))
 	for i := range r {
 		ids[i] = r[i].ID
 	}
-	return uu.RemoveRoleIDs(ids...)
+	return _u.RemoveRoleIDs(ids...)
 }
 
 // ClearJoinedGroups clears all "joined_groups" edges to the UserGroup entity.
-func (uu *UserUpdate) ClearJoinedGroups() *UserUpdate {
-	uu.mutation.ClearJoinedGroups()
-	return uu
+func (_u *UserUpdate) ClearJoinedGroups() *UserUpdate {
+	_u.mutation.ClearJoinedGroups()
+	return _u
 }
 
 // RemoveJoinedGroupIDs removes the "joined_groups" edge to UserGroup entities by IDs.
-func (uu *UserUpdate) RemoveJoinedGroupIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveJoinedGroupIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveJoinedGroupIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveJoinedGroupIDs(ids...)
+	return _u
 }
 
 // RemoveJoinedGroups removes "joined_groups" edges to UserGroup entities.
-func (uu *UserUpdate) RemoveJoinedGroups(u ...*UserGroup) *UserUpdate {
+func (_u *UserUpdate) RemoveJoinedGroups(u ...*UserGroup) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uu.RemoveJoinedGroupIDs(ids...)
+	return _u.RemoveJoinedGroupIDs(ids...)
 }
 
 // ClearFriendships clears all "friendships" edges to the Friendship entity.
-func (uu *UserUpdate) ClearFriendships() *UserUpdate {
-	uu.mutation.ClearFriendships()
-	return uu
+func (_u *UserUpdate) ClearFriendships() *UserUpdate {
+	_u.mutation.ClearFriendships()
+	return _u
 }
 
 // RemoveFriendshipIDs removes the "friendships" edge to Friendship entities by IDs.
-func (uu *UserUpdate) RemoveFriendshipIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveFriendshipIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveFriendshipIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveFriendshipIDs(ids...)
+	return _u
 }
 
 // RemoveFriendships removes "friendships" edges to Friendship entities.
-func (uu *UserUpdate) RemoveFriendships(f ...*Friendship) *UserUpdate {
+func (_u *UserUpdate) RemoveFriendships(f ...*Friendship) *UserUpdate {
 	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return uu.RemoveFriendshipIDs(ids...)
+	return _u.RemoveFriendshipIDs(ids...)
 }
 
 // ClearUserTweets clears all "user_tweets" edges to the UserTweet entity.
-func (uu *UserUpdate) ClearUserTweets() *UserUpdate {
-	uu.mutation.ClearUserTweets()
-	return uu
+func (_u *UserUpdate) ClearUserTweets() *UserUpdate {
+	_u.mutation.ClearUserTweets()
+	return _u
 }
 
 // RemoveUserTweetIDs removes the "user_tweets" edge to UserTweet entities by IDs.
-func (uu *UserUpdate) RemoveUserTweetIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveUserTweetIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveUserTweetIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveUserTweetIDs(ids...)
+	return _u
 }
 
 // RemoveUserTweets removes "user_tweets" edges to UserTweet entities.
-func (uu *UserUpdate) RemoveUserTweets(u ...*UserTweet) *UserUpdate {
+func (_u *UserUpdate) RemoveUserTweets(u ...*UserTweet) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uu.RemoveUserTweetIDs(ids...)
+	return _u.RemoveUserTweetIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, uu.sqlSave, uu.mutation, uu.hooks)
+func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uu *UserUpdate) SaveX(ctx context.Context) int {
-	affected, err := uu.Save(ctx)
+func (_u *UserUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -395,31 +395,31 @@ func (uu *UserUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (uu *UserUpdate) Exec(ctx context.Context) error {
-	_, err := uu.Save(ctx)
+func (_u *UserUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uu *UserUpdate) ExecX(ctx context.Context) {
-	if err := uu.Exec(ctx); err != nil {
+func (_u *UserUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
-	if ps := uu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uu.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
 	}
-	if uu.mutation.GroupsCleared() {
+	if _u.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -430,33 +430,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
 		}
-		createE := &UserGroupCreate{config: uu.config, mutation: newUserGroupMutation(uu.config, OpCreate)}
+		createE := &UserGroupCreate{config: _u.config, mutation: newUserGroupMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !uu.mutation.GroupsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.GroupsTable,
-			Columns: user.GroupsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		createE := &UserGroupCreate{config: uu.config, mutation: newUserGroupMutation(uu.config, OpCreate)}
-		createE.defaults()
-		_, specE := createE.createSpec()
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.GroupsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !_u.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -470,13 +450,33 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &UserGroupCreate{config: uu.config, mutation: newUserGroupMutation(uu.config, OpCreate)}
+		createE := &UserGroupCreate{config: _u.config, mutation: newUserGroupMutation(_u.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.GroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.GroupsTable,
+			Columns: user.GroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &UserGroupCreate{config: _u.config, mutation: newUserGroupMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.FriendsCleared() {
+	if _u.mutation.FriendsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -487,13 +487,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
-		createE := &FriendshipCreate{config: uu.config, mutation: newFriendshipMutation(uu.config, OpCreate)}
+		createE := &FriendshipCreate{config: _u.config, mutation: newFriendshipMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedFriendsIDs(); len(nodes) > 0 && !uu.mutation.FriendsCleared() {
+	if nodes := _u.mutation.RemovedFriendsIDs(); len(nodes) > 0 && !_u.mutation.FriendsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -507,13 +507,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &FriendshipCreate{config: uu.config, mutation: newFriendshipMutation(uu.config, OpCreate)}
+		createE := &FriendshipCreate{config: _u.config, mutation: newFriendshipMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.FriendsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.FriendsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -527,13 +527,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &FriendshipCreate{config: uu.config, mutation: newFriendshipMutation(uu.config, OpCreate)}
+		createE := &FriendshipCreate{config: _u.config, mutation: newFriendshipMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.RelativesCleared() {
+	if _u.mutation.RelativesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -544,33 +544,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
-		createE := &RelationshipCreate{config: uu.config, mutation: newRelationshipMutation(uu.config, OpCreate)}
+		createE := &RelationshipCreate{config: _u.config, mutation: newRelationshipMutation(_u.config, OpCreate)}
 		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedRelativesIDs(); len(nodes) > 0 && !uu.mutation.RelativesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.RelativesTable,
-			Columns: user.RelativesPrimaryKey,
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		createE := &RelationshipCreate{config: uu.config, mutation: newRelationshipMutation(uu.config, OpCreate)}
-		_ = createE.defaults()
-		_, specE := createE.createSpec()
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.RelativesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedRelativesIDs(); len(nodes) > 0 && !_u.mutation.RelativesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -584,13 +564,33 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &RelationshipCreate{config: uu.config, mutation: newRelationshipMutation(uu.config, OpCreate)}
+		createE := &RelationshipCreate{config: _u.config, mutation: newRelationshipMutation(_u.config, OpCreate)}
+		_ = createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RelativesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.RelativesTable,
+			Columns: user.RelativesPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &RelationshipCreate{config: _u.config, mutation: newRelationshipMutation(_u.config, OpCreate)}
 		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.LikedTweetsCleared() {
+	if _u.mutation.LikedTweetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -601,13 +601,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
 			},
 		}
-		createE := &TweetLikeCreate{config: uu.config, mutation: newTweetLikeMutation(uu.config, OpCreate)}
+		createE := &TweetLikeCreate{config: _u.config, mutation: newTweetLikeMutation(_u.config, OpCreate)}
 		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedLikedTweetsIDs(); len(nodes) > 0 && !uu.mutation.LikedTweetsCleared() {
+	if nodes := _u.mutation.RemovedLikedTweetsIDs(); len(nodes) > 0 && !_u.mutation.LikedTweetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -621,13 +621,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &TweetLikeCreate{config: uu.config, mutation: newTweetLikeMutation(uu.config, OpCreate)}
+		createE := &TweetLikeCreate{config: _u.config, mutation: newTweetLikeMutation(_u.config, OpCreate)}
 		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.LikedTweetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.LikedTweetsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -641,13 +641,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &TweetLikeCreate{config: uu.config, mutation: newTweetLikeMutation(uu.config, OpCreate)}
+		createE := &TweetLikeCreate{config: _u.config, mutation: newTweetLikeMutation(_u.config, OpCreate)}
 		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.TweetsCleared() {
+	if _u.mutation.TweetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -658,13 +658,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
 			},
 		}
-		createE := &UserTweetCreate{config: uu.config, mutation: newUserTweetMutation(uu.config, OpCreate)}
+		createE := &UserTweetCreate{config: _u.config, mutation: newUserTweetMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedTweetsIDs(); len(nodes) > 0 && !uu.mutation.TweetsCleared() {
+	if nodes := _u.mutation.RemovedTweetsIDs(); len(nodes) > 0 && !_u.mutation.TweetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -678,13 +678,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &UserTweetCreate{config: uu.config, mutation: newUserTweetMutation(uu.config, OpCreate)}
+		createE := &UserTweetCreate{config: _u.config, mutation: newUserTweetMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.TweetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.TweetsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -698,13 +698,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &UserTweetCreate{config: uu.config, mutation: newUserTweetMutation(uu.config, OpCreate)}
+		createE := &UserTweetCreate{config: _u.config, mutation: newUserTweetMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.RolesCleared() {
+	if _u.mutation.RolesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -715,13 +715,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt),
 			},
 		}
-		createE := &RoleUserCreate{config: uu.config, mutation: newRoleUserMutation(uu.config, OpCreate)}
+		createE := &RoleUserCreate{config: _u.config, mutation: newRoleUserMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedRolesIDs(); len(nodes) > 0 && !uu.mutation.RolesCleared() {
+	if nodes := _u.mutation.RemovedRolesIDs(); len(nodes) > 0 && !_u.mutation.RolesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -735,13 +735,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &RoleUserCreate{config: uu.config, mutation: newRoleUserMutation(uu.config, OpCreate)}
+		createE := &RoleUserCreate{config: _u.config, mutation: newRoleUserMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RolesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RolesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -755,13 +755,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &RoleUserCreate{config: uu.config, mutation: newRoleUserMutation(uu.config, OpCreate)}
+		createE := &RoleUserCreate{config: _u.config, mutation: newRoleUserMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.JoinedGroupsCleared() {
+	if _u.mutation.JoinedGroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -774,7 +774,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedJoinedGroupsIDs(); len(nodes) > 0 && !uu.mutation.JoinedGroupsCleared() {
+	if nodes := _u.mutation.RemovedJoinedGroupsIDs(); len(nodes) > 0 && !_u.mutation.JoinedGroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -790,7 +790,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.JoinedGroupsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.JoinedGroupsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -806,7 +806,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.FriendshipsCleared() {
+	if _u.mutation.FriendshipsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -819,7 +819,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedFriendshipsIDs(); len(nodes) > 0 && !uu.mutation.FriendshipsCleared() {
+	if nodes := _u.mutation.RemovedFriendshipsIDs(); len(nodes) > 0 && !_u.mutation.FriendshipsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -835,7 +835,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.FriendshipsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.FriendshipsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -851,7 +851,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.UserTweetsCleared() {
+	if _u.mutation.UserTweetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -864,7 +864,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedUserTweetsIDs(); len(nodes) > 0 && !uu.mutation.UserTweetsCleared() {
+	if nodes := _u.mutation.RemovedUserTweetsIDs(); len(nodes) > 0 && !_u.mutation.UserTweetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -880,7 +880,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.UserTweetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.UserTweetsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -896,7 +896,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -904,7 +904,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	uu.mutation.done = true
+	_u.mutation.done = true
 	return n, nil
 }
 
@@ -917,369 +917,369 @@ type UserUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
-	uuo.mutation.SetName(s)
-	return uuo
+func (_u *UserUpdateOne) SetName(s string) *UserUpdateOne {
+	_u.mutation.SetName(s)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
 	if s != nil {
-		uuo.SetName(*s)
+		_u.SetName(*s)
 	}
-	return uuo
+	return _u
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (uuo *UserUpdateOne) AddGroupIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddGroupIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddGroupIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddGroupIDs(ids...)
+	return _u
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (uuo *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
+func (_u *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
 	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
-	return uuo.AddGroupIDs(ids...)
+	return _u.AddGroupIDs(ids...)
 }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
-func (uuo *UserUpdateOne) AddFriendIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddFriendIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddFriendIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddFriendIDs(ids...)
+	return _u
 }
 
 // AddFriends adds the "friends" edges to the User entity.
-func (uuo *UserUpdateOne) AddFriends(u ...*User) *UserUpdateOne {
+func (_u *UserUpdateOne) AddFriends(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uuo.AddFriendIDs(ids...)
+	return _u.AddFriendIDs(ids...)
 }
 
 // AddRelativeIDs adds the "relatives" edge to the User entity by IDs.
-func (uuo *UserUpdateOne) AddRelativeIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddRelativeIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddRelativeIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddRelativeIDs(ids...)
+	return _u
 }
 
 // AddRelatives adds the "relatives" edges to the User entity.
-func (uuo *UserUpdateOne) AddRelatives(u ...*User) *UserUpdateOne {
+func (_u *UserUpdateOne) AddRelatives(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uuo.AddRelativeIDs(ids...)
+	return _u.AddRelativeIDs(ids...)
 }
 
 // AddLikedTweetIDs adds the "liked_tweets" edge to the Tweet entity by IDs.
-func (uuo *UserUpdateOne) AddLikedTweetIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddLikedTweetIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddLikedTweetIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddLikedTweetIDs(ids...)
+	return _u
 }
 
 // AddLikedTweets adds the "liked_tweets" edges to the Tweet entity.
-func (uuo *UserUpdateOne) AddLikedTweets(t ...*Tweet) *UserUpdateOne {
+func (_u *UserUpdateOne) AddLikedTweets(t ...*Tweet) *UserUpdateOne {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return uuo.AddLikedTweetIDs(ids...)
+	return _u.AddLikedTweetIDs(ids...)
 }
 
 // AddTweetIDs adds the "tweets" edge to the Tweet entity by IDs.
-func (uuo *UserUpdateOne) AddTweetIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddTweetIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddTweetIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddTweetIDs(ids...)
+	return _u
 }
 
 // AddTweets adds the "tweets" edges to the Tweet entity.
-func (uuo *UserUpdateOne) AddTweets(t ...*Tweet) *UserUpdateOne {
+func (_u *UserUpdateOne) AddTweets(t ...*Tweet) *UserUpdateOne {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return uuo.AddTweetIDs(ids...)
+	return _u.AddTweetIDs(ids...)
 }
 
 // AddRoleIDs adds the "roles" edge to the Role entity by IDs.
-func (uuo *UserUpdateOne) AddRoleIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddRoleIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddRoleIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddRoleIDs(ids...)
+	return _u
 }
 
 // AddRoles adds the "roles" edges to the Role entity.
-func (uuo *UserUpdateOne) AddRoles(r ...*Role) *UserUpdateOne {
+func (_u *UserUpdateOne) AddRoles(r ...*Role) *UserUpdateOne {
 	ids := make([]int, len(r))
 	for i := range r {
 		ids[i] = r[i].ID
 	}
-	return uuo.AddRoleIDs(ids...)
+	return _u.AddRoleIDs(ids...)
 }
 
 // AddJoinedGroupIDs adds the "joined_groups" edge to the UserGroup entity by IDs.
-func (uuo *UserUpdateOne) AddJoinedGroupIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddJoinedGroupIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddJoinedGroupIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddJoinedGroupIDs(ids...)
+	return _u
 }
 
 // AddJoinedGroups adds the "joined_groups" edges to the UserGroup entity.
-func (uuo *UserUpdateOne) AddJoinedGroups(u ...*UserGroup) *UserUpdateOne {
+func (_u *UserUpdateOne) AddJoinedGroups(u ...*UserGroup) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uuo.AddJoinedGroupIDs(ids...)
+	return _u.AddJoinedGroupIDs(ids...)
 }
 
 // AddFriendshipIDs adds the "friendships" edge to the Friendship entity by IDs.
-func (uuo *UserUpdateOne) AddFriendshipIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddFriendshipIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddFriendshipIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddFriendshipIDs(ids...)
+	return _u
 }
 
 // AddFriendships adds the "friendships" edges to the Friendship entity.
-func (uuo *UserUpdateOne) AddFriendships(f ...*Friendship) *UserUpdateOne {
+func (_u *UserUpdateOne) AddFriendships(f ...*Friendship) *UserUpdateOne {
 	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return uuo.AddFriendshipIDs(ids...)
+	return _u.AddFriendshipIDs(ids...)
 }
 
 // AddUserTweetIDs adds the "user_tweets" edge to the UserTweet entity by IDs.
-func (uuo *UserUpdateOne) AddUserTweetIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddUserTweetIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddUserTweetIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddUserTweetIDs(ids...)
+	return _u
 }
 
 // AddUserTweets adds the "user_tweets" edges to the UserTweet entity.
-func (uuo *UserUpdateOne) AddUserTweets(u ...*UserTweet) *UserUpdateOne {
+func (_u *UserUpdateOne) AddUserTweets(u ...*UserTweet) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uuo.AddUserTweetIDs(ids...)
+	return _u.AddUserTweetIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uuo *UserUpdateOne) Mutation() *UserMutation {
-	return uuo.mutation
+func (_u *UserUpdateOne) Mutation() *UserMutation {
+	return _u.mutation
 }
 
 // ClearGroups clears all "groups" edges to the Group entity.
-func (uuo *UserUpdateOne) ClearGroups() *UserUpdateOne {
-	uuo.mutation.ClearGroups()
-	return uuo
+func (_u *UserUpdateOne) ClearGroups() *UserUpdateOne {
+	_u.mutation.ClearGroups()
+	return _u
 }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
-func (uuo *UserUpdateOne) RemoveGroupIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveGroupIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveGroupIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveGroupIDs(ids...)
+	return _u
 }
 
 // RemoveGroups removes "groups" edges to Group entities.
-func (uuo *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
 	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
-	return uuo.RemoveGroupIDs(ids...)
+	return _u.RemoveGroupIDs(ids...)
 }
 
 // ClearFriends clears all "friends" edges to the User entity.
-func (uuo *UserUpdateOne) ClearFriends() *UserUpdateOne {
-	uuo.mutation.ClearFriends()
-	return uuo
+func (_u *UserUpdateOne) ClearFriends() *UserUpdateOne {
+	_u.mutation.ClearFriends()
+	return _u
 }
 
 // RemoveFriendIDs removes the "friends" edge to User entities by IDs.
-func (uuo *UserUpdateOne) RemoveFriendIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveFriendIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveFriendIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveFriendIDs(ids...)
+	return _u
 }
 
 // RemoveFriends removes "friends" edges to User entities.
-func (uuo *UserUpdateOne) RemoveFriends(u ...*User) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveFriends(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uuo.RemoveFriendIDs(ids...)
+	return _u.RemoveFriendIDs(ids...)
 }
 
 // ClearRelatives clears all "relatives" edges to the User entity.
-func (uuo *UserUpdateOne) ClearRelatives() *UserUpdateOne {
-	uuo.mutation.ClearRelatives()
-	return uuo
+func (_u *UserUpdateOne) ClearRelatives() *UserUpdateOne {
+	_u.mutation.ClearRelatives()
+	return _u
 }
 
 // RemoveRelativeIDs removes the "relatives" edge to User entities by IDs.
-func (uuo *UserUpdateOne) RemoveRelativeIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveRelativeIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveRelativeIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveRelativeIDs(ids...)
+	return _u
 }
 
 // RemoveRelatives removes "relatives" edges to User entities.
-func (uuo *UserUpdateOne) RemoveRelatives(u ...*User) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveRelatives(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uuo.RemoveRelativeIDs(ids...)
+	return _u.RemoveRelativeIDs(ids...)
 }
 
 // ClearLikedTweets clears all "liked_tweets" edges to the Tweet entity.
-func (uuo *UserUpdateOne) ClearLikedTweets() *UserUpdateOne {
-	uuo.mutation.ClearLikedTweets()
-	return uuo
+func (_u *UserUpdateOne) ClearLikedTweets() *UserUpdateOne {
+	_u.mutation.ClearLikedTweets()
+	return _u
 }
 
 // RemoveLikedTweetIDs removes the "liked_tweets" edge to Tweet entities by IDs.
-func (uuo *UserUpdateOne) RemoveLikedTweetIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveLikedTweetIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveLikedTweetIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveLikedTweetIDs(ids...)
+	return _u
 }
 
 // RemoveLikedTweets removes "liked_tweets" edges to Tweet entities.
-func (uuo *UserUpdateOne) RemoveLikedTweets(t ...*Tweet) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveLikedTweets(t ...*Tweet) *UserUpdateOne {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return uuo.RemoveLikedTweetIDs(ids...)
+	return _u.RemoveLikedTweetIDs(ids...)
 }
 
 // ClearTweets clears all "tweets" edges to the Tweet entity.
-func (uuo *UserUpdateOne) ClearTweets() *UserUpdateOne {
-	uuo.mutation.ClearTweets()
-	return uuo
+func (_u *UserUpdateOne) ClearTweets() *UserUpdateOne {
+	_u.mutation.ClearTweets()
+	return _u
 }
 
 // RemoveTweetIDs removes the "tweets" edge to Tweet entities by IDs.
-func (uuo *UserUpdateOne) RemoveTweetIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveTweetIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveTweetIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveTweetIDs(ids...)
+	return _u
 }
 
 // RemoveTweets removes "tweets" edges to Tweet entities.
-func (uuo *UserUpdateOne) RemoveTweets(t ...*Tweet) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveTweets(t ...*Tweet) *UserUpdateOne {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return uuo.RemoveTweetIDs(ids...)
+	return _u.RemoveTweetIDs(ids...)
 }
 
 // ClearRoles clears all "roles" edges to the Role entity.
-func (uuo *UserUpdateOne) ClearRoles() *UserUpdateOne {
-	uuo.mutation.ClearRoles()
-	return uuo
+func (_u *UserUpdateOne) ClearRoles() *UserUpdateOne {
+	_u.mutation.ClearRoles()
+	return _u
 }
 
 // RemoveRoleIDs removes the "roles" edge to Role entities by IDs.
-func (uuo *UserUpdateOne) RemoveRoleIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveRoleIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveRoleIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveRoleIDs(ids...)
+	return _u
 }
 
 // RemoveRoles removes "roles" edges to Role entities.
-func (uuo *UserUpdateOne) RemoveRoles(r ...*Role) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveRoles(r ...*Role) *UserUpdateOne {
 	ids := make([]int, len(r))
 	for i := range r {
 		ids[i] = r[i].ID
 	}
-	return uuo.RemoveRoleIDs(ids...)
+	return _u.RemoveRoleIDs(ids...)
 }
 
 // ClearJoinedGroups clears all "joined_groups" edges to the UserGroup entity.
-func (uuo *UserUpdateOne) ClearJoinedGroups() *UserUpdateOne {
-	uuo.mutation.ClearJoinedGroups()
-	return uuo
+func (_u *UserUpdateOne) ClearJoinedGroups() *UserUpdateOne {
+	_u.mutation.ClearJoinedGroups()
+	return _u
 }
 
 // RemoveJoinedGroupIDs removes the "joined_groups" edge to UserGroup entities by IDs.
-func (uuo *UserUpdateOne) RemoveJoinedGroupIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveJoinedGroupIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveJoinedGroupIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveJoinedGroupIDs(ids...)
+	return _u
 }
 
 // RemoveJoinedGroups removes "joined_groups" edges to UserGroup entities.
-func (uuo *UserUpdateOne) RemoveJoinedGroups(u ...*UserGroup) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveJoinedGroups(u ...*UserGroup) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uuo.RemoveJoinedGroupIDs(ids...)
+	return _u.RemoveJoinedGroupIDs(ids...)
 }
 
 // ClearFriendships clears all "friendships" edges to the Friendship entity.
-func (uuo *UserUpdateOne) ClearFriendships() *UserUpdateOne {
-	uuo.mutation.ClearFriendships()
-	return uuo
+func (_u *UserUpdateOne) ClearFriendships() *UserUpdateOne {
+	_u.mutation.ClearFriendships()
+	return _u
 }
 
 // RemoveFriendshipIDs removes the "friendships" edge to Friendship entities by IDs.
-func (uuo *UserUpdateOne) RemoveFriendshipIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveFriendshipIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveFriendshipIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveFriendshipIDs(ids...)
+	return _u
 }
 
 // RemoveFriendships removes "friendships" edges to Friendship entities.
-func (uuo *UserUpdateOne) RemoveFriendships(f ...*Friendship) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveFriendships(f ...*Friendship) *UserUpdateOne {
 	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return uuo.RemoveFriendshipIDs(ids...)
+	return _u.RemoveFriendshipIDs(ids...)
 }
 
 // ClearUserTweets clears all "user_tweets" edges to the UserTweet entity.
-func (uuo *UserUpdateOne) ClearUserTweets() *UserUpdateOne {
-	uuo.mutation.ClearUserTweets()
-	return uuo
+func (_u *UserUpdateOne) ClearUserTweets() *UserUpdateOne {
+	_u.mutation.ClearUserTweets()
+	return _u
 }
 
 // RemoveUserTweetIDs removes the "user_tweets" edge to UserTweet entities by IDs.
-func (uuo *UserUpdateOne) RemoveUserTweetIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveUserTweetIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveUserTweetIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveUserTweetIDs(ids...)
+	return _u
 }
 
 // RemoveUserTweets removes "user_tweets" edges to UserTweet entities.
-func (uuo *UserUpdateOne) RemoveUserTweets(u ...*UserTweet) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveUserTweets(u ...*UserTweet) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uuo.RemoveUserTweetIDs(ids...)
+	return _u.RemoveUserTweetIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uuo *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
-	uuo.mutation.Where(ps...)
-	return uuo
+func (_u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
-	uuo.fields = append([]string{field}, fields...)
-	return uuo
+func (_u *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated User entity.
-func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	return withHooks(ctx, uuo.sqlSave, uuo.mutation, uuo.hooks)
+func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
-	node, err := uuo.Save(ctx)
+func (_u *UserUpdateOne) SaveX(ctx context.Context) *User {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -1287,26 +1287,26 @@ func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
 }
 
 // Exec executes the query on the entity.
-func (uuo *UserUpdateOne) Exec(ctx context.Context) error {
-	_, err := uuo.Save(ctx)
+func (_u *UserUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
-	if err := uuo.Exec(ctx); err != nil {
+func (_u *UserUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
+func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
-	id, ok := uuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := uuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, user.FieldID)
 		for _, f := range fields {
@@ -1318,17 +1318,17 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			}
 		}
 	}
-	if ps := uuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uuo.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
 	}
-	if uuo.mutation.GroupsCleared() {
+	if _u.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1339,33 +1339,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
 			},
 		}
-		createE := &UserGroupCreate{config: uuo.config, mutation: newUserGroupMutation(uuo.config, OpCreate)}
+		createE := &UserGroupCreate{config: _u.config, mutation: newUserGroupMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !uuo.mutation.GroupsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.GroupsTable,
-			Columns: user.GroupsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		createE := &UserGroupCreate{config: uuo.config, mutation: newUserGroupMutation(uuo.config, OpCreate)}
-		createE.defaults()
-		_, specE := createE.createSpec()
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.GroupsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !_u.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1379,13 +1359,33 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &UserGroupCreate{config: uuo.config, mutation: newUserGroupMutation(uuo.config, OpCreate)}
+		createE := &UserGroupCreate{config: _u.config, mutation: newUserGroupMutation(_u.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.GroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.GroupsTable,
+			Columns: user.GroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &UserGroupCreate{config: _u.config, mutation: newUserGroupMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.FriendsCleared() {
+	if _u.mutation.FriendsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1396,13 +1396,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
-		createE := &FriendshipCreate{config: uuo.config, mutation: newFriendshipMutation(uuo.config, OpCreate)}
+		createE := &FriendshipCreate{config: _u.config, mutation: newFriendshipMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedFriendsIDs(); len(nodes) > 0 && !uuo.mutation.FriendsCleared() {
+	if nodes := _u.mutation.RemovedFriendsIDs(); len(nodes) > 0 && !_u.mutation.FriendsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1416,13 +1416,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &FriendshipCreate{config: uuo.config, mutation: newFriendshipMutation(uuo.config, OpCreate)}
+		createE := &FriendshipCreate{config: _u.config, mutation: newFriendshipMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.FriendsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.FriendsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1436,13 +1436,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &FriendshipCreate{config: uuo.config, mutation: newFriendshipMutation(uuo.config, OpCreate)}
+		createE := &FriendshipCreate{config: _u.config, mutation: newFriendshipMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.RelativesCleared() {
+	if _u.mutation.RelativesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1453,33 +1453,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
-		createE := &RelationshipCreate{config: uuo.config, mutation: newRelationshipMutation(uuo.config, OpCreate)}
+		createE := &RelationshipCreate{config: _u.config, mutation: newRelationshipMutation(_u.config, OpCreate)}
 		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedRelativesIDs(); len(nodes) > 0 && !uuo.mutation.RelativesCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.RelativesTable,
-			Columns: user.RelativesPrimaryKey,
-			Bidi:    true,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		createE := &RelationshipCreate{config: uuo.config, mutation: newRelationshipMutation(uuo.config, OpCreate)}
-		_ = createE.defaults()
-		_, specE := createE.createSpec()
-		edge.Target.Fields = specE.Fields
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.RelativesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedRelativesIDs(); len(nodes) > 0 && !_u.mutation.RelativesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1493,13 +1473,33 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &RelationshipCreate{config: uuo.config, mutation: newRelationshipMutation(uuo.config, OpCreate)}
+		createE := &RelationshipCreate{config: _u.config, mutation: newRelationshipMutation(_u.config, OpCreate)}
+		_ = createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RelativesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.RelativesTable,
+			Columns: user.RelativesPrimaryKey,
+			Bidi:    true,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &RelationshipCreate{config: _u.config, mutation: newRelationshipMutation(_u.config, OpCreate)}
 		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.LikedTweetsCleared() {
+	if _u.mutation.LikedTweetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1510,13 +1510,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
 			},
 		}
-		createE := &TweetLikeCreate{config: uuo.config, mutation: newTweetLikeMutation(uuo.config, OpCreate)}
+		createE := &TweetLikeCreate{config: _u.config, mutation: newTweetLikeMutation(_u.config, OpCreate)}
 		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedLikedTweetsIDs(); len(nodes) > 0 && !uuo.mutation.LikedTweetsCleared() {
+	if nodes := _u.mutation.RemovedLikedTweetsIDs(); len(nodes) > 0 && !_u.mutation.LikedTweetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1530,13 +1530,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &TweetLikeCreate{config: uuo.config, mutation: newTweetLikeMutation(uuo.config, OpCreate)}
+		createE := &TweetLikeCreate{config: _u.config, mutation: newTweetLikeMutation(_u.config, OpCreate)}
 		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.LikedTweetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.LikedTweetsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1550,13 +1550,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &TweetLikeCreate{config: uuo.config, mutation: newTweetLikeMutation(uuo.config, OpCreate)}
+		createE := &TweetLikeCreate{config: _u.config, mutation: newTweetLikeMutation(_u.config, OpCreate)}
 		_ = createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.TweetsCleared() {
+	if _u.mutation.TweetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1567,13 +1567,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: sqlgraph.NewFieldSpec(tweet.FieldID, field.TypeInt),
 			},
 		}
-		createE := &UserTweetCreate{config: uuo.config, mutation: newUserTweetMutation(uuo.config, OpCreate)}
+		createE := &UserTweetCreate{config: _u.config, mutation: newUserTweetMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedTweetsIDs(); len(nodes) > 0 && !uuo.mutation.TweetsCleared() {
+	if nodes := _u.mutation.RemovedTweetsIDs(); len(nodes) > 0 && !_u.mutation.TweetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1587,13 +1587,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &UserTweetCreate{config: uuo.config, mutation: newUserTweetMutation(uuo.config, OpCreate)}
+		createE := &UserTweetCreate{config: _u.config, mutation: newUserTweetMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.TweetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.TweetsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1607,13 +1607,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &UserTweetCreate{config: uuo.config, mutation: newUserTweetMutation(uuo.config, OpCreate)}
+		createE := &UserTweetCreate{config: _u.config, mutation: newUserTweetMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.RolesCleared() {
+	if _u.mutation.RolesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1624,13 +1624,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt),
 			},
 		}
-		createE := &RoleUserCreate{config: uuo.config, mutation: newRoleUserMutation(uuo.config, OpCreate)}
+		createE := &RoleUserCreate{config: _u.config, mutation: newRoleUserMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedRolesIDs(); len(nodes) > 0 && !uuo.mutation.RolesCleared() {
+	if nodes := _u.mutation.RemovedRolesIDs(); len(nodes) > 0 && !_u.mutation.RolesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1644,13 +1644,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &RoleUserCreate{config: uuo.config, mutation: newRoleUserMutation(uuo.config, OpCreate)}
+		createE := &RoleUserCreate{config: _u.config, mutation: newRoleUserMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RolesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RolesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1664,13 +1664,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &RoleUserCreate{config: uuo.config, mutation: newRoleUserMutation(uuo.config, OpCreate)}
+		createE := &RoleUserCreate{config: _u.config, mutation: newRoleUserMutation(_u.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.JoinedGroupsCleared() {
+	if _u.mutation.JoinedGroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1683,7 +1683,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedJoinedGroupsIDs(); len(nodes) > 0 && !uuo.mutation.JoinedGroupsCleared() {
+	if nodes := _u.mutation.RemovedJoinedGroupsIDs(); len(nodes) > 0 && !_u.mutation.JoinedGroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1699,7 +1699,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.JoinedGroupsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.JoinedGroupsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1715,7 +1715,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.FriendshipsCleared() {
+	if _u.mutation.FriendshipsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1728,7 +1728,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedFriendshipsIDs(); len(nodes) > 0 && !uuo.mutation.FriendshipsCleared() {
+	if nodes := _u.mutation.RemovedFriendshipsIDs(); len(nodes) > 0 && !_u.mutation.FriendshipsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1744,7 +1744,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.FriendshipsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.FriendshipsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1760,7 +1760,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.UserTweetsCleared() {
+	if _u.mutation.UserTweetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1773,7 +1773,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedUserTweetsIDs(); len(nodes) > 0 && !uuo.mutation.UserTweetsCleared() {
+	if nodes := _u.mutation.RemovedUserTweetsIDs(); len(nodes) > 0 && !_u.mutation.UserTweetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1789,7 +1789,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.UserTweetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.UserTweetsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1805,10 +1805,10 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &User{config: uuo.config}
+	_node = &User{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, uuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -1816,6 +1816,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		return nil, err
 	}
-	uuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

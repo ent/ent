@@ -25,24 +25,24 @@ type BuilderUpdate struct {
 }
 
 // Where appends a list predicates to the BuilderUpdate builder.
-func (bu *BuilderUpdate) Where(ps ...predicate.Builder) *BuilderUpdate {
-	bu.mutation.Where(ps...)
-	return bu
+func (_u *BuilderUpdate) Where(ps ...predicate.Builder) *BuilderUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Mutation returns the BuilderMutation object of the builder.
-func (bu *BuilderUpdate) Mutation() *BuilderMutation {
-	return bu.mutation
+func (_u *BuilderUpdate) Mutation() *BuilderMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (bu *BuilderUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, bu.gremlinSave, bu.mutation, bu.hooks)
+func (_u *BuilderUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (bu *BuilderUpdate) SaveX(ctx context.Context) int {
-	affected, err := bu.Save(ctx)
+func (_u *BuilderUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -50,34 +50,34 @@ func (bu *BuilderUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (bu *BuilderUpdate) Exec(ctx context.Context) error {
-	_, err := bu.Save(ctx)
+func (_u *BuilderUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bu *BuilderUpdate) ExecX(ctx context.Context) {
-	if err := bu.Exec(ctx); err != nil {
+func (_u *BuilderUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (bu *BuilderUpdate) gremlinSave(ctx context.Context) (int, error) {
+func (_u *BuilderUpdate) gremlinSave(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := bu.gremlin().Query()
-	if err := bu.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _u.gremlin().Query()
+	if err := _u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return 0, err
 	}
-	bu.mutation.done = true
+	_u.mutation.done = true
 	return res.ReadInt()
 }
 
-func (bu *BuilderUpdate) gremlin() *dsl.Traversal {
+func (_u *BuilderUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(builder.Label)
-	for _, p := range bu.mutation.predicates {
+	for _, p := range _u.mutation.predicates {
 		p(v)
 	}
 	var (
@@ -97,31 +97,31 @@ type BuilderUpdateOne struct {
 }
 
 // Mutation returns the BuilderMutation object of the builder.
-func (buo *BuilderUpdateOne) Mutation() *BuilderMutation {
-	return buo.mutation
+func (_u *BuilderUpdateOne) Mutation() *BuilderMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the BuilderUpdate builder.
-func (buo *BuilderUpdateOne) Where(ps ...predicate.Builder) *BuilderUpdateOne {
-	buo.mutation.Where(ps...)
-	return buo
+func (_u *BuilderUpdateOne) Where(ps ...predicate.Builder) *BuilderUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (buo *BuilderUpdateOne) Select(field string, fields ...string) *BuilderUpdateOne {
-	buo.fields = append([]string{field}, fields...)
-	return buo
+func (_u *BuilderUpdateOne) Select(field string, fields ...string) *BuilderUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Builder entity.
-func (buo *BuilderUpdateOne) Save(ctx context.Context) (*Builder, error) {
-	return withHooks(ctx, buo.gremlinSave, buo.mutation, buo.hooks)
+func (_u *BuilderUpdateOne) Save(ctx context.Context) (*Builder, error) {
+	return withHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (buo *BuilderUpdateOne) SaveX(ctx context.Context) *Builder {
-	node, err := buo.Save(ctx)
+func (_u *BuilderUpdateOne) SaveX(ctx context.Context) *Builder {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -129,48 +129,48 @@ func (buo *BuilderUpdateOne) SaveX(ctx context.Context) *Builder {
 }
 
 // Exec executes the query on the entity.
-func (buo *BuilderUpdateOne) Exec(ctx context.Context) error {
-	_, err := buo.Save(ctx)
+func (_u *BuilderUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (buo *BuilderUpdateOne) ExecX(ctx context.Context) {
-	if err := buo.Exec(ctx); err != nil {
+func (_u *BuilderUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (buo *BuilderUpdateOne) gremlinSave(ctx context.Context) (*Builder, error) {
+func (_u *BuilderUpdateOne) gremlinSave(ctx context.Context) (*Builder, error) {
 	res := &gremlin.Response{}
-	id, ok := buo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Builder.id" for update`)}
 	}
-	query, bindings := buo.gremlin(id).Query()
-	if err := buo.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _u.gremlin(id).Query()
+	if err := _u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	buo.mutation.done = true
-	b := &Builder{config: buo.config}
-	if err := b.FromResponse(res); err != nil {
+	_u.mutation.done = true
+	_m := &Builder{config: _u.config}
+	if err := _m.FromResponse(res); err != nil {
 		return nil, err
 	}
-	return b, nil
+	return _m, nil
 }
 
-func (buo *BuilderUpdateOne) gremlin(id string) *dsl.Traversal {
+func (_u *BuilderUpdateOne) gremlin(id string) *dsl.Traversal {
 	v := g.V(id)
 	var (
 		trs []*dsl.Traversal
 	)
-	if len(buo.fields) > 0 {
-		fields := make([]any, 0, len(buo.fields)+1)
+	if len(_u.fields) > 0 {
+		fields := make([]any, 0, len(_u.fields)+1)
 		fields = append(fields, true)
-		for _, f := range buo.fields {
+		for _, f := range _u.fields {
 			fields = append(fields, f)
 		}
 		v.ValueMap(fields...)

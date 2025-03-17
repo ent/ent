@@ -92,7 +92,7 @@ func (*Metadata) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Metadata fields.
-func (m *Metadata) assignValues(columns []string, values []any) error {
+func (_m *Metadata) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -103,21 +103,21 @@ func (m *Metadata) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			m.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case metadata.FieldAge:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field age", values[i])
 			} else if value.Valid {
-				m.Age = int(value.Int64)
+				_m.Age = int(value.Int64)
 			}
 		case metadata.FieldParentID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
 			} else if value.Valid {
-				m.ParentID = int(value.Int64)
+				_m.ParentID = int(value.Int64)
 			}
 		default:
-			m.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -125,78 +125,78 @@ func (m *Metadata) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Metadata.
 // This includes values selected through modifiers, order, etc.
-func (m *Metadata) Value(name string) (ent.Value, error) {
-	return m.selectValues.Get(name)
+func (_m *Metadata) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryUser queries the "user" edge of the Metadata entity.
-func (m *Metadata) QueryUser() *UserQuery {
-	return NewMetadataClient(m.config).QueryUser(m)
+func (_m *Metadata) QueryUser() *UserQuery {
+	return NewMetadataClient(_m.config).QueryUser(_m)
 }
 
 // QueryChildren queries the "children" edge of the Metadata entity.
-func (m *Metadata) QueryChildren() *MetadataQuery {
-	return NewMetadataClient(m.config).QueryChildren(m)
+func (_m *Metadata) QueryChildren() *MetadataQuery {
+	return NewMetadataClient(_m.config).QueryChildren(_m)
 }
 
 // QueryParent queries the "parent" edge of the Metadata entity.
-func (m *Metadata) QueryParent() *MetadataQuery {
-	return NewMetadataClient(m.config).QueryParent(m)
+func (_m *Metadata) QueryParent() *MetadataQuery {
+	return NewMetadataClient(_m.config).QueryParent(_m)
 }
 
 // Update returns a builder for updating this Metadata.
 // Note that you need to call Metadata.Unwrap() before calling this method if this Metadata
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (m *Metadata) Update() *MetadataUpdateOne {
-	return NewMetadataClient(m.config).UpdateOne(m)
+func (_m *Metadata) Update() *MetadataUpdateOne {
+	return NewMetadataClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Metadata entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (m *Metadata) Unwrap() *Metadata {
-	_tx, ok := m.config.driver.(*txDriver)
+func (_m *Metadata) Unwrap() *Metadata {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Metadata is not a transactional entity")
 	}
-	m.config.driver = _tx.drv
-	return m
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (m *Metadata) String() string {
+func (_m *Metadata) String() string {
 	var builder strings.Builder
 	builder.WriteString("Metadata(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("age=")
-	builder.WriteString(fmt.Sprintf("%v", m.Age))
+	builder.WriteString(fmt.Sprintf("%v", _m.Age))
 	builder.WriteString(", ")
 	builder.WriteString("parent_id=")
-	builder.WriteString(fmt.Sprintf("%v", m.ParentID))
+	builder.WriteString(fmt.Sprintf("%v", _m.ParentID))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedChildren returns the Children named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (m *Metadata) NamedChildren(name string) ([]*Metadata, error) {
-	if m.Edges.namedChildren == nil {
+func (_m *Metadata) NamedChildren(name string) ([]*Metadata, error) {
+	if _m.Edges.namedChildren == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := m.Edges.namedChildren[name]
+	nodes, ok := _m.Edges.namedChildren[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (m *Metadata) appendNamedChildren(name string, edges ...*Metadata) {
-	if m.Edges.namedChildren == nil {
-		m.Edges.namedChildren = make(map[string][]*Metadata)
+func (_m *Metadata) appendNamedChildren(name string, edges ...*Metadata) {
+	if _m.Edges.namedChildren == nil {
+		_m.Edges.namedChildren = make(map[string][]*Metadata)
 	}
 	if len(edges) == 0 {
-		m.Edges.namedChildren[name] = []*Metadata{}
+		_m.Edges.namedChildren[name] = []*Metadata{}
 	} else {
-		m.Edges.namedChildren[name] = append(m.Edges.namedChildren[name], edges...)
+		_m.Edges.namedChildren[name] = append(_m.Edges.namedChildren[name], edges...)
 	}
 }
 

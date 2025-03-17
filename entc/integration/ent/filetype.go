@@ -69,7 +69,7 @@ func (*FileType) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the FileType fields.
-func (ft *FileType) assignValues(columns []string, values []any) error {
+func (_m *FileType) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -80,27 +80,27 @@ func (ft *FileType) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			ft.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case filetype.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				ft.Name = value.String
+				_m.Name = value.String
 			}
 		case filetype.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				ft.Type = filetype.Type(value.String)
+				_m.Type = filetype.Type(value.String)
 			}
 		case filetype.FieldState:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field state", values[i])
 			} else if value.Valid {
-				ft.State = filetype.State(value.String)
+				_m.State = filetype.State(value.String)
 			}
 		default:
-			ft.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -108,71 +108,71 @@ func (ft *FileType) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the FileType.
 // This includes values selected through modifiers, order, etc.
-func (ft *FileType) Value(name string) (ent.Value, error) {
-	return ft.selectValues.Get(name)
+func (_m *FileType) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryFiles queries the "files" edge of the FileType entity.
-func (ft *FileType) QueryFiles() *FileQuery {
-	return NewFileTypeClient(ft.config).QueryFiles(ft)
+func (_m *FileType) QueryFiles() *FileQuery {
+	return NewFileTypeClient(_m.config).QueryFiles(_m)
 }
 
 // Update returns a builder for updating this FileType.
 // Note that you need to call FileType.Unwrap() before calling this method if this FileType
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (ft *FileType) Update() *FileTypeUpdateOne {
-	return NewFileTypeClient(ft.config).UpdateOne(ft)
+func (_m *FileType) Update() *FileTypeUpdateOne {
+	return NewFileTypeClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the FileType entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (ft *FileType) Unwrap() *FileType {
-	_tx, ok := ft.config.driver.(*txDriver)
+func (_m *FileType) Unwrap() *FileType {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: FileType is not a transactional entity")
 	}
-	ft.config.driver = _tx.drv
-	return ft
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (ft *FileType) String() string {
+func (_m *FileType) String() string {
 	var builder strings.Builder
 	builder.WriteString("FileType(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", ft.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("name=")
-	builder.WriteString(ft.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("type=")
-	builder.WriteString(fmt.Sprintf("%v", ft.Type))
+	builder.WriteString(fmt.Sprintf("%v", _m.Type))
 	builder.WriteString(", ")
 	builder.WriteString("state=")
-	builder.WriteString(fmt.Sprintf("%v", ft.State))
+	builder.WriteString(fmt.Sprintf("%v", _m.State))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedFiles returns the Files named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (ft *FileType) NamedFiles(name string) ([]*File, error) {
-	if ft.Edges.namedFiles == nil {
+func (_m *FileType) NamedFiles(name string) ([]*File, error) {
+	if _m.Edges.namedFiles == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := ft.Edges.namedFiles[name]
+	nodes, ok := _m.Edges.namedFiles[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (ft *FileType) appendNamedFiles(name string, edges ...*File) {
-	if ft.Edges.namedFiles == nil {
-		ft.Edges.namedFiles = make(map[string][]*File)
+func (_m *FileType) appendNamedFiles(name string, edges ...*File) {
+	if _m.Edges.namedFiles == nil {
+		_m.Edges.namedFiles = make(map[string][]*File)
 	}
 	if len(edges) == 0 {
-		ft.Edges.namedFiles[name] = []*File{}
+		_m.Edges.namedFiles[name] = []*File{}
 	} else {
-		ft.Edges.namedFiles[name] = append(ft.Edges.namedFiles[name], edges...)
+		_m.Edges.namedFiles[name] = append(_m.Edges.namedFiles[name], edges...)
 	}
 }
 

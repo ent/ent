@@ -46,58 +46,58 @@ func (e GroupInfoEdges) GroupsOrErr() ([]*Group, error) {
 }
 
 // FromResponse scans the gremlin response data into GroupInfo.
-func (gi *GroupInfo) FromResponse(res *gremlin.Response) error {
+func (_m *GroupInfo) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scangi struct {
+	var scan_m struct {
 		ID       string `json:"id,omitempty"`
 		Desc     string `json:"desc,omitempty"`
 		MaxUsers int    `json:"max_users,omitempty"`
 	}
-	if err := vmap.Decode(&scangi); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	gi.ID = scangi.ID
-	gi.Desc = scangi.Desc
-	gi.MaxUsers = scangi.MaxUsers
+	_m.ID = scan_m.ID
+	_m.Desc = scan_m.Desc
+	_m.MaxUsers = scan_m.MaxUsers
 	return nil
 }
 
 // QueryGroups queries the "groups" edge of the GroupInfo entity.
-func (gi *GroupInfo) QueryGroups() *GroupQuery {
-	return NewGroupInfoClient(gi.config).QueryGroups(gi)
+func (_m *GroupInfo) QueryGroups() *GroupQuery {
+	return NewGroupInfoClient(_m.config).QueryGroups(_m)
 }
 
 // Update returns a builder for updating this GroupInfo.
 // Note that you need to call GroupInfo.Unwrap() before calling this method if this GroupInfo
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (gi *GroupInfo) Update() *GroupInfoUpdateOne {
-	return NewGroupInfoClient(gi.config).UpdateOne(gi)
+func (_m *GroupInfo) Update() *GroupInfoUpdateOne {
+	return NewGroupInfoClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the GroupInfo entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (gi *GroupInfo) Unwrap() *GroupInfo {
-	_tx, ok := gi.config.driver.(*txDriver)
+func (_m *GroupInfo) Unwrap() *GroupInfo {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: GroupInfo is not a transactional entity")
 	}
-	gi.config.driver = _tx.drv
-	return gi
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (gi *GroupInfo) String() string {
+func (_m *GroupInfo) String() string {
 	var builder strings.Builder
 	builder.WriteString("GroupInfo(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", gi.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("desc=")
-	builder.WriteString(gi.Desc)
+	builder.WriteString(_m.Desc)
 	builder.WriteString(", ")
 	builder.WriteString("max_users=")
-	builder.WriteString(fmt.Sprintf("%v", gi.MaxUsers))
+	builder.WriteString(fmt.Sprintf("%v", _m.MaxUsers))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -106,24 +106,24 @@ func (gi *GroupInfo) String() string {
 type GroupInfos []*GroupInfo
 
 // FromResponse scans the gremlin response data into GroupInfos.
-func (gi *GroupInfos) FromResponse(res *gremlin.Response) error {
+func (_m *GroupInfos) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scangi []struct {
+	var scan_m []struct {
 		ID       string `json:"id,omitempty"`
 		Desc     string `json:"desc,omitempty"`
 		MaxUsers int    `json:"max_users,omitempty"`
 	}
-	if err := vmap.Decode(&scangi); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	for _, v := range scangi {
+	for _, v := range scan_m {
 		node := &GroupInfo{ID: v.ID}
 		node.Desc = v.Desc
 		node.MaxUsers = v.MaxUsers
-		*gi = append(*gi, node)
+		*_m = append(*_m, node)
 	}
 	return nil
 }
