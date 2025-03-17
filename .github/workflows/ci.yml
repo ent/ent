@@ -241,6 +241,30 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      postgres16:
+        image: postgres:16
+        env:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: pass
+        ports:
+          - 5436:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      postgres17:
+        image: postgres:17
+        env:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: pass
+        ports:
+          - 5437:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
       gremlin-server:
         image: entgo/gremlin-server
         ports:
@@ -414,6 +438,30 @@ jobs:
           POSTGRES_PASSWORD: pass
         ports:
           - 5435:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      postgres16:
+        image: postgres:16
+        env:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: pass
+        ports:
+          - 5436:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      postgres17:
+        image: postgres:17
+        env:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: pass
+        ports:
+          - 5437:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
