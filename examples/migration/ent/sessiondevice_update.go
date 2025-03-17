@@ -29,136 +29,136 @@ type SessionDeviceUpdate struct {
 }
 
 // Where appends a list predicates to the SessionDeviceUpdate builder.
-func (sdu *SessionDeviceUpdate) Where(ps ...predicate.SessionDevice) *SessionDeviceUpdate {
-	sdu.mutation.Where(ps...)
-	return sdu
+func (u *SessionDeviceUpdate) Where(ps ...predicate.SessionDevice) *SessionDeviceUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetIPAddress sets the "ip_address" field.
-func (sdu *SessionDeviceUpdate) SetIPAddress(s string) *SessionDeviceUpdate {
-	sdu.mutation.SetIPAddress(s)
-	return sdu
+func (m *SessionDeviceUpdate) SetIPAddress(v string) *SessionDeviceUpdate {
+	m.mutation.SetIPAddress(v)
+	return m
 }
 
 // SetNillableIPAddress sets the "ip_address" field if the given value is not nil.
-func (sdu *SessionDeviceUpdate) SetNillableIPAddress(s *string) *SessionDeviceUpdate {
-	if s != nil {
-		sdu.SetIPAddress(*s)
+func (m *SessionDeviceUpdate) SetNillableIPAddress(v *string) *SessionDeviceUpdate {
+	if v != nil {
+		m.SetIPAddress(*v)
 	}
-	return sdu
+	return m
 }
 
 // SetUserAgent sets the "user_agent" field.
-func (sdu *SessionDeviceUpdate) SetUserAgent(s string) *SessionDeviceUpdate {
-	sdu.mutation.SetUserAgent(s)
-	return sdu
+func (m *SessionDeviceUpdate) SetUserAgent(v string) *SessionDeviceUpdate {
+	m.mutation.SetUserAgent(v)
+	return m
 }
 
 // SetNillableUserAgent sets the "user_agent" field if the given value is not nil.
-func (sdu *SessionDeviceUpdate) SetNillableUserAgent(s *string) *SessionDeviceUpdate {
-	if s != nil {
-		sdu.SetUserAgent(*s)
+func (m *SessionDeviceUpdate) SetNillableUserAgent(v *string) *SessionDeviceUpdate {
+	if v != nil {
+		m.SetUserAgent(*v)
 	}
-	return sdu
+	return m
 }
 
 // SetLocation sets the "location" field.
-func (sdu *SessionDeviceUpdate) SetLocation(s string) *SessionDeviceUpdate {
-	sdu.mutation.SetLocation(s)
-	return sdu
+func (m *SessionDeviceUpdate) SetLocation(v string) *SessionDeviceUpdate {
+	m.mutation.SetLocation(v)
+	return m
 }
 
 // SetNillableLocation sets the "location" field if the given value is not nil.
-func (sdu *SessionDeviceUpdate) SetNillableLocation(s *string) *SessionDeviceUpdate {
-	if s != nil {
-		sdu.SetLocation(*s)
+func (m *SessionDeviceUpdate) SetNillableLocation(v *string) *SessionDeviceUpdate {
+	if v != nil {
+		m.SetLocation(*v)
 	}
-	return sdu
+	return m
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (sdu *SessionDeviceUpdate) SetCreatedAt(t time.Time) *SessionDeviceUpdate {
-	sdu.mutation.SetCreatedAt(t)
-	return sdu
+func (m *SessionDeviceUpdate) SetCreatedAt(v time.Time) *SessionDeviceUpdate {
+	m.mutation.SetCreatedAt(v)
+	return m
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (sdu *SessionDeviceUpdate) SetNillableCreatedAt(t *time.Time) *SessionDeviceUpdate {
-	if t != nil {
-		sdu.SetCreatedAt(*t)
+func (m *SessionDeviceUpdate) SetNillableCreatedAt(v *time.Time) *SessionDeviceUpdate {
+	if v != nil {
+		m.SetCreatedAt(*v)
 	}
-	return sdu
+	return m
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (sdu *SessionDeviceUpdate) SetUpdatedAt(t time.Time) *SessionDeviceUpdate {
-	sdu.mutation.SetUpdatedAt(t)
-	return sdu
+func (m *SessionDeviceUpdate) SetUpdatedAt(v time.Time) *SessionDeviceUpdate {
+	m.mutation.SetUpdatedAt(v)
+	return m
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (sdu *SessionDeviceUpdate) SetNillableUpdatedAt(t *time.Time) *SessionDeviceUpdate {
-	if t != nil {
-		sdu.SetUpdatedAt(*t)
+func (m *SessionDeviceUpdate) SetNillableUpdatedAt(v *time.Time) *SessionDeviceUpdate {
+	if v != nil {
+		m.SetUpdatedAt(*v)
 	}
-	return sdu
+	return m
 }
 
 // ClearUpdatedAt clears the value of the "updated_at" field.
-func (sdu *SessionDeviceUpdate) ClearUpdatedAt() *SessionDeviceUpdate {
-	sdu.mutation.ClearUpdatedAt()
-	return sdu
+func (m *SessionDeviceUpdate) ClearUpdatedAt() *SessionDeviceUpdate {
+	m.mutation.ClearUpdatedAt()
+	return m
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (sdu *SessionDeviceUpdate) AddSessionIDs(ids ...uuid.UUID) *SessionDeviceUpdate {
-	sdu.mutation.AddSessionIDs(ids...)
-	return sdu
+func (m *SessionDeviceUpdate) AddSessionIDs(ids ...uuid.UUID) *SessionDeviceUpdate {
+	m.mutation.AddSessionIDs(ids...)
+	return m
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
-func (sdu *SessionDeviceUpdate) AddSessions(s ...*Session) *SessionDeviceUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (m *SessionDeviceUpdate) AddSessions(v ...*Session) *SessionDeviceUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return sdu.AddSessionIDs(ids...)
+	return m.AddSessionIDs(ids...)
 }
 
 // Mutation returns the SessionDeviceMutation object of the builder.
-func (sdu *SessionDeviceUpdate) Mutation() *SessionDeviceMutation {
-	return sdu.mutation
+func (m *SessionDeviceUpdate) Mutation() *SessionDeviceMutation {
+	return m.mutation
 }
 
 // ClearSessions clears all "sessions" edges to the Session entity.
-func (sdu *SessionDeviceUpdate) ClearSessions() *SessionDeviceUpdate {
-	sdu.mutation.ClearSessions()
-	return sdu
+func (u *SessionDeviceUpdate) ClearSessions() *SessionDeviceUpdate {
+	u.mutation.ClearSessions()
+	return u
 }
 
 // RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
-func (sdu *SessionDeviceUpdate) RemoveSessionIDs(ids ...uuid.UUID) *SessionDeviceUpdate {
-	sdu.mutation.RemoveSessionIDs(ids...)
-	return sdu
+func (u *SessionDeviceUpdate) RemoveSessionIDs(ids ...uuid.UUID) *SessionDeviceUpdate {
+	u.mutation.RemoveSessionIDs(ids...)
+	return u
 }
 
 // RemoveSessions removes "sessions" edges to Session entities.
-func (sdu *SessionDeviceUpdate) RemoveSessions(s ...*Session) *SessionDeviceUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (u *SessionDeviceUpdate) RemoveSessions(v ...*Session) *SessionDeviceUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return sdu.RemoveSessionIDs(ids...)
+	return u.RemoveSessionIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (sdu *SessionDeviceUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, sdu.sqlSave, sdu.mutation, sdu.hooks)
+func (u *SessionDeviceUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (sdu *SessionDeviceUpdate) SaveX(ctx context.Context) int {
-	affected, err := sdu.Save(ctx)
+func (u *SessionDeviceUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -166,31 +166,31 @@ func (sdu *SessionDeviceUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (sdu *SessionDeviceUpdate) Exec(ctx context.Context) error {
-	_, err := sdu.Save(ctx)
+func (u *SessionDeviceUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (sdu *SessionDeviceUpdate) ExecX(ctx context.Context) {
-	if err := sdu.Exec(ctx); err != nil {
+func (u *SessionDeviceUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (sdu *SessionDeviceUpdate) check() error {
-	if v, ok := sdu.mutation.IPAddress(); ok {
+func (u *SessionDeviceUpdate) check() error {
+	if v, ok := u.mutation.IPAddress(); ok {
 		if err := sessiondevice.IPAddressValidator(v); err != nil {
 			return &ValidationError{Name: "ip_address", err: fmt.Errorf(`ent: validator failed for field "SessionDevice.ip_address": %w`, err)}
 		}
 	}
-	if v, ok := sdu.mutation.UserAgent(); ok {
+	if v, ok := u.mutation.UserAgent(); ok {
 		if err := sessiondevice.UserAgentValidator(v); err != nil {
 			return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "SessionDevice.user_agent": %w`, err)}
 		}
 	}
-	if v, ok := sdu.mutation.Location(); ok {
+	if v, ok := u.mutation.Location(); ok {
 		if err := sessiondevice.LocationValidator(v); err != nil {
 			return &ValidationError{Name: "location", err: fmt.Errorf(`ent: validator failed for field "SessionDevice.location": %w`, err)}
 		}
@@ -198,37 +198,37 @@ func (sdu *SessionDeviceUpdate) check() error {
 	return nil
 }
 
-func (sdu *SessionDeviceUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := sdu.check(); err != nil {
-		return n, err
+func (u *SessionDeviceUpdate) sqlSave(ctx context.Context) (_n int, err error) {
+	if err := u.check(); err != nil {
+		return _n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(sessiondevice.Table, sessiondevice.Columns, sqlgraph.NewFieldSpec(sessiondevice.FieldID, field.TypeUUID))
-	if ps := sdu.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := sdu.mutation.IPAddress(); ok {
+	if value, ok := u.mutation.IPAddress(); ok {
 		_spec.SetField(sessiondevice.FieldIPAddress, field.TypeString, value)
 	}
-	if value, ok := sdu.mutation.UserAgent(); ok {
+	if value, ok := u.mutation.UserAgent(); ok {
 		_spec.SetField(sessiondevice.FieldUserAgent, field.TypeString, value)
 	}
-	if value, ok := sdu.mutation.Location(); ok {
+	if value, ok := u.mutation.Location(); ok {
 		_spec.SetField(sessiondevice.FieldLocation, field.TypeString, value)
 	}
-	if value, ok := sdu.mutation.CreatedAt(); ok {
+	if value, ok := u.mutation.CreatedAt(); ok {
 		_spec.SetField(sessiondevice.FieldCreatedAt, field.TypeTime, value)
 	}
-	if value, ok := sdu.mutation.UpdatedAt(); ok {
+	if value, ok := u.mutation.UpdatedAt(); ok {
 		_spec.SetField(sessiondevice.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if sdu.mutation.UpdatedAtCleared() {
+	if u.mutation.UpdatedAtCleared() {
 		_spec.ClearField(sessiondevice.FieldUpdatedAt, field.TypeTime)
 	}
-	if sdu.mutation.SessionsCleared() {
+	if u.mutation.SessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -241,7 +241,7 @@ func (sdu *SessionDeviceUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := sdu.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !sdu.mutation.SessionsCleared() {
+	if nodes := u.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !u.mutation.SessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -257,7 +257,7 @@ func (sdu *SessionDeviceUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := sdu.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.SessionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -273,7 +273,7 @@ func (sdu *SessionDeviceUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, sdu.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{sessiondevice.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -281,8 +281,8 @@ func (sdu *SessionDeviceUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 		return 0, err
 	}
-	sdu.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // SessionDeviceUpdateOne is the builder for updating a single SessionDevice entity.
@@ -294,143 +294,143 @@ type SessionDeviceUpdateOne struct {
 }
 
 // SetIPAddress sets the "ip_address" field.
-func (sduo *SessionDeviceUpdateOne) SetIPAddress(s string) *SessionDeviceUpdateOne {
-	sduo.mutation.SetIPAddress(s)
-	return sduo
+func (m *SessionDeviceUpdateOne) SetIPAddress(v string) *SessionDeviceUpdateOne {
+	m.mutation.SetIPAddress(v)
+	return m
 }
 
 // SetNillableIPAddress sets the "ip_address" field if the given value is not nil.
-func (sduo *SessionDeviceUpdateOne) SetNillableIPAddress(s *string) *SessionDeviceUpdateOne {
-	if s != nil {
-		sduo.SetIPAddress(*s)
+func (m *SessionDeviceUpdateOne) SetNillableIPAddress(v *string) *SessionDeviceUpdateOne {
+	if v != nil {
+		m.SetIPAddress(*v)
 	}
-	return sduo
+	return m
 }
 
 // SetUserAgent sets the "user_agent" field.
-func (sduo *SessionDeviceUpdateOne) SetUserAgent(s string) *SessionDeviceUpdateOne {
-	sduo.mutation.SetUserAgent(s)
-	return sduo
+func (m *SessionDeviceUpdateOne) SetUserAgent(v string) *SessionDeviceUpdateOne {
+	m.mutation.SetUserAgent(v)
+	return m
 }
 
 // SetNillableUserAgent sets the "user_agent" field if the given value is not nil.
-func (sduo *SessionDeviceUpdateOne) SetNillableUserAgent(s *string) *SessionDeviceUpdateOne {
-	if s != nil {
-		sduo.SetUserAgent(*s)
+func (m *SessionDeviceUpdateOne) SetNillableUserAgent(v *string) *SessionDeviceUpdateOne {
+	if v != nil {
+		m.SetUserAgent(*v)
 	}
-	return sduo
+	return m
 }
 
 // SetLocation sets the "location" field.
-func (sduo *SessionDeviceUpdateOne) SetLocation(s string) *SessionDeviceUpdateOne {
-	sduo.mutation.SetLocation(s)
-	return sduo
+func (m *SessionDeviceUpdateOne) SetLocation(v string) *SessionDeviceUpdateOne {
+	m.mutation.SetLocation(v)
+	return m
 }
 
 // SetNillableLocation sets the "location" field if the given value is not nil.
-func (sduo *SessionDeviceUpdateOne) SetNillableLocation(s *string) *SessionDeviceUpdateOne {
-	if s != nil {
-		sduo.SetLocation(*s)
+func (m *SessionDeviceUpdateOne) SetNillableLocation(v *string) *SessionDeviceUpdateOne {
+	if v != nil {
+		m.SetLocation(*v)
 	}
-	return sduo
+	return m
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (sduo *SessionDeviceUpdateOne) SetCreatedAt(t time.Time) *SessionDeviceUpdateOne {
-	sduo.mutation.SetCreatedAt(t)
-	return sduo
+func (m *SessionDeviceUpdateOne) SetCreatedAt(v time.Time) *SessionDeviceUpdateOne {
+	m.mutation.SetCreatedAt(v)
+	return m
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (sduo *SessionDeviceUpdateOne) SetNillableCreatedAt(t *time.Time) *SessionDeviceUpdateOne {
-	if t != nil {
-		sduo.SetCreatedAt(*t)
+func (m *SessionDeviceUpdateOne) SetNillableCreatedAt(v *time.Time) *SessionDeviceUpdateOne {
+	if v != nil {
+		m.SetCreatedAt(*v)
 	}
-	return sduo
+	return m
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (sduo *SessionDeviceUpdateOne) SetUpdatedAt(t time.Time) *SessionDeviceUpdateOne {
-	sduo.mutation.SetUpdatedAt(t)
-	return sduo
+func (m *SessionDeviceUpdateOne) SetUpdatedAt(v time.Time) *SessionDeviceUpdateOne {
+	m.mutation.SetUpdatedAt(v)
+	return m
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (sduo *SessionDeviceUpdateOne) SetNillableUpdatedAt(t *time.Time) *SessionDeviceUpdateOne {
-	if t != nil {
-		sduo.SetUpdatedAt(*t)
+func (m *SessionDeviceUpdateOne) SetNillableUpdatedAt(v *time.Time) *SessionDeviceUpdateOne {
+	if v != nil {
+		m.SetUpdatedAt(*v)
 	}
-	return sduo
+	return m
 }
 
 // ClearUpdatedAt clears the value of the "updated_at" field.
-func (sduo *SessionDeviceUpdateOne) ClearUpdatedAt() *SessionDeviceUpdateOne {
-	sduo.mutation.ClearUpdatedAt()
-	return sduo
+func (m *SessionDeviceUpdateOne) ClearUpdatedAt() *SessionDeviceUpdateOne {
+	m.mutation.ClearUpdatedAt()
+	return m
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (sduo *SessionDeviceUpdateOne) AddSessionIDs(ids ...uuid.UUID) *SessionDeviceUpdateOne {
-	sduo.mutation.AddSessionIDs(ids...)
-	return sduo
+func (m *SessionDeviceUpdateOne) AddSessionIDs(ids ...uuid.UUID) *SessionDeviceUpdateOne {
+	m.mutation.AddSessionIDs(ids...)
+	return m
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
-func (sduo *SessionDeviceUpdateOne) AddSessions(s ...*Session) *SessionDeviceUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (m *SessionDeviceUpdateOne) AddSessions(v ...*Session) *SessionDeviceUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return sduo.AddSessionIDs(ids...)
+	return m.AddSessionIDs(ids...)
 }
 
 // Mutation returns the SessionDeviceMutation object of the builder.
-func (sduo *SessionDeviceUpdateOne) Mutation() *SessionDeviceMutation {
-	return sduo.mutation
+func (m *SessionDeviceUpdateOne) Mutation() *SessionDeviceMutation {
+	return m.mutation
 }
 
 // ClearSessions clears all "sessions" edges to the Session entity.
-func (sduo *SessionDeviceUpdateOne) ClearSessions() *SessionDeviceUpdateOne {
-	sduo.mutation.ClearSessions()
-	return sduo
+func (u *SessionDeviceUpdateOne) ClearSessions() *SessionDeviceUpdateOne {
+	u.mutation.ClearSessions()
+	return u
 }
 
 // RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
-func (sduo *SessionDeviceUpdateOne) RemoveSessionIDs(ids ...uuid.UUID) *SessionDeviceUpdateOne {
-	sduo.mutation.RemoveSessionIDs(ids...)
-	return sduo
+func (u *SessionDeviceUpdateOne) RemoveSessionIDs(ids ...uuid.UUID) *SessionDeviceUpdateOne {
+	u.mutation.RemoveSessionIDs(ids...)
+	return u
 }
 
 // RemoveSessions removes "sessions" edges to Session entities.
-func (sduo *SessionDeviceUpdateOne) RemoveSessions(s ...*Session) *SessionDeviceUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (u *SessionDeviceUpdateOne) RemoveSessions(v ...*Session) *SessionDeviceUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return sduo.RemoveSessionIDs(ids...)
+	return u.RemoveSessionIDs(ids...)
 }
 
 // Where appends a list predicates to the SessionDeviceUpdate builder.
-func (sduo *SessionDeviceUpdateOne) Where(ps ...predicate.SessionDevice) *SessionDeviceUpdateOne {
-	sduo.mutation.Where(ps...)
-	return sduo
+func (u *SessionDeviceUpdateOne) Where(ps ...predicate.SessionDevice) *SessionDeviceUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (sduo *SessionDeviceUpdateOne) Select(field string, fields ...string) *SessionDeviceUpdateOne {
-	sduo.fields = append([]string{field}, fields...)
-	return sduo
+func (u *SessionDeviceUpdateOne) Select(field string, fields ...string) *SessionDeviceUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated SessionDevice entity.
-func (sduo *SessionDeviceUpdateOne) Save(ctx context.Context) (*SessionDevice, error) {
-	return withHooks(ctx, sduo.sqlSave, sduo.mutation, sduo.hooks)
+func (u *SessionDeviceUpdateOne) Save(ctx context.Context) (*SessionDevice, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (sduo *SessionDeviceUpdateOne) SaveX(ctx context.Context) *SessionDevice {
-	node, err := sduo.Save(ctx)
+func (u *SessionDeviceUpdateOne) SaveX(ctx context.Context) *SessionDevice {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -438,31 +438,31 @@ func (sduo *SessionDeviceUpdateOne) SaveX(ctx context.Context) *SessionDevice {
 }
 
 // Exec executes the query on the entity.
-func (sduo *SessionDeviceUpdateOne) Exec(ctx context.Context) error {
-	_, err := sduo.Save(ctx)
+func (u *SessionDeviceUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (sduo *SessionDeviceUpdateOne) ExecX(ctx context.Context) {
-	if err := sduo.Exec(ctx); err != nil {
+func (u *SessionDeviceUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (sduo *SessionDeviceUpdateOne) check() error {
-	if v, ok := sduo.mutation.IPAddress(); ok {
+func (u *SessionDeviceUpdateOne) check() error {
+	if v, ok := u.mutation.IPAddress(); ok {
 		if err := sessiondevice.IPAddressValidator(v); err != nil {
 			return &ValidationError{Name: "ip_address", err: fmt.Errorf(`ent: validator failed for field "SessionDevice.ip_address": %w`, err)}
 		}
 	}
-	if v, ok := sduo.mutation.UserAgent(); ok {
+	if v, ok := u.mutation.UserAgent(); ok {
 		if err := sessiondevice.UserAgentValidator(v); err != nil {
 			return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "SessionDevice.user_agent": %w`, err)}
 		}
 	}
-	if v, ok := sduo.mutation.Location(); ok {
+	if v, ok := u.mutation.Location(); ok {
 		if err := sessiondevice.LocationValidator(v); err != nil {
 			return &ValidationError{Name: "location", err: fmt.Errorf(`ent: validator failed for field "SessionDevice.location": %w`, err)}
 		}
@@ -470,17 +470,17 @@ func (sduo *SessionDeviceUpdateOne) check() error {
 	return nil
 }
 
-func (sduo *SessionDeviceUpdateOne) sqlSave(ctx context.Context) (_node *SessionDevice, err error) {
-	if err := sduo.check(); err != nil {
-		return _node, err
+func (u *SessionDeviceUpdateOne) sqlSave(ctx context.Context) (_n *SessionDevice, err error) {
+	if err := u.check(); err != nil {
+		return _n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(sessiondevice.Table, sessiondevice.Columns, sqlgraph.NewFieldSpec(sessiondevice.FieldID, field.TypeUUID))
-	id, ok := sduo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "SessionDevice.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := sduo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, sessiondevice.FieldID)
 		for _, f := range fields {
@@ -492,32 +492,32 @@ func (sduo *SessionDeviceUpdateOne) sqlSave(ctx context.Context) (_node *Session
 			}
 		}
 	}
-	if ps := sduo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := sduo.mutation.IPAddress(); ok {
+	if value, ok := u.mutation.IPAddress(); ok {
 		_spec.SetField(sessiondevice.FieldIPAddress, field.TypeString, value)
 	}
-	if value, ok := sduo.mutation.UserAgent(); ok {
+	if value, ok := u.mutation.UserAgent(); ok {
 		_spec.SetField(sessiondevice.FieldUserAgent, field.TypeString, value)
 	}
-	if value, ok := sduo.mutation.Location(); ok {
+	if value, ok := u.mutation.Location(); ok {
 		_spec.SetField(sessiondevice.FieldLocation, field.TypeString, value)
 	}
-	if value, ok := sduo.mutation.CreatedAt(); ok {
+	if value, ok := u.mutation.CreatedAt(); ok {
 		_spec.SetField(sessiondevice.FieldCreatedAt, field.TypeTime, value)
 	}
-	if value, ok := sduo.mutation.UpdatedAt(); ok {
+	if value, ok := u.mutation.UpdatedAt(); ok {
 		_spec.SetField(sessiondevice.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if sduo.mutation.UpdatedAtCleared() {
+	if u.mutation.UpdatedAtCleared() {
 		_spec.ClearField(sessiondevice.FieldUpdatedAt, field.TypeTime)
 	}
-	if sduo.mutation.SessionsCleared() {
+	if u.mutation.SessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -530,7 +530,7 @@ func (sduo *SessionDeviceUpdateOne) sqlSave(ctx context.Context) (_node *Session
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := sduo.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !sduo.mutation.SessionsCleared() {
+	if nodes := u.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !u.mutation.SessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -546,7 +546,7 @@ func (sduo *SessionDeviceUpdateOne) sqlSave(ctx context.Context) (_node *Session
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := sduo.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.SessionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -562,10 +562,10 @@ func (sduo *SessionDeviceUpdateOne) sqlSave(ctx context.Context) (_node *Session
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &SessionDevice{config: sduo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, sduo.driver, _spec); err != nil {
+	_n = &SessionDevice{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{sessiondevice.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -573,6 +573,6 @@ func (sduo *SessionDeviceUpdateOne) sqlSave(ctx context.Context) (_node *Session
 		}
 		return nil, err
 	}
-	sduo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

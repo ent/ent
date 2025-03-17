@@ -34,44 +34,44 @@ type PaymentQuery struct {
 }
 
 // Where adds a new predicate for the PaymentQuery builder.
-func (pq *PaymentQuery) Where(ps ...predicate.Payment) *PaymentQuery {
-	pq.predicates = append(pq.predicates, ps...)
-	return pq
+func (q *PaymentQuery) Where(ps ...predicate.Payment) *PaymentQuery {
+	q.predicates = append(q.predicates, ps...)
+	return q
 }
 
 // Limit the number of records to be returned by this query.
-func (pq *PaymentQuery) Limit(limit int) *PaymentQuery {
-	pq.ctx.Limit = &limit
-	return pq
+func (q *PaymentQuery) Limit(limit int) *PaymentQuery {
+	q.ctx.Limit = &limit
+	return q
 }
 
 // Offset to start from.
-func (pq *PaymentQuery) Offset(offset int) *PaymentQuery {
-	pq.ctx.Offset = &offset
-	return pq
+func (q *PaymentQuery) Offset(offset int) *PaymentQuery {
+	q.ctx.Offset = &offset
+	return q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (pq *PaymentQuery) Unique(unique bool) *PaymentQuery {
-	pq.ctx.Unique = &unique
-	return pq
+func (q *PaymentQuery) Unique(unique bool) *PaymentQuery {
+	q.ctx.Unique = &unique
+	return q
 }
 
 // Order specifies how the records should be ordered.
-func (pq *PaymentQuery) Order(o ...payment.OrderOption) *PaymentQuery {
-	pq.order = append(pq.order, o...)
-	return pq
+func (q *PaymentQuery) Order(o ...payment.OrderOption) *PaymentQuery {
+	q.order = append(q.order, o...)
+	return q
 }
 
 // QueryCard chains the current query on the "card" edge.
-func (pq *PaymentQuery) QueryCard() *CardQuery {
-	query := (&CardClient{config: pq.config}).Query()
+func (q *PaymentQuery) QueryCard() *CardQuery {
+	query := (&CardClient{config: q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := pq.prepareQuery(ctx); err != nil {
+		if err := q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := pq.sqlQuery(ctx)
+		selector := q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -80,7 +80,7 @@ func (pq *PaymentQuery) QueryCard() *CardQuery {
 			sqlgraph.To(card.Table, card.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, payment.CardTable, payment.CardColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -88,8 +88,8 @@ func (pq *PaymentQuery) QueryCard() *CardQuery {
 
 // First returns the first Payment entity from the query.
 // Returns a *NotFoundError when no Payment was found.
-func (pq *PaymentQuery) First(ctx context.Context) (*Payment, error) {
-	nodes, err := pq.Limit(1).All(setContextOp(ctx, pq.ctx, ent.OpQueryFirst))
+func (q *PaymentQuery) First(ctx context.Context) (*Payment, error) {
+	nodes, err := q.Limit(1).All(setContextOp(ctx, q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -100,8 +100,8 @@ func (pq *PaymentQuery) First(ctx context.Context) (*Payment, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (pq *PaymentQuery) FirstX(ctx context.Context) *Payment {
-	node, err := pq.First(ctx)
+func (q *PaymentQuery) FirstX(ctx context.Context) *Payment {
+	node, err := q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -110,9 +110,9 @@ func (pq *PaymentQuery) FirstX(ctx context.Context) *Payment {
 
 // FirstID returns the first Payment ID from the query.
 // Returns a *NotFoundError when no Payment ID was found.
-func (pq *PaymentQuery) FirstID(ctx context.Context) (id int, err error) {
+func (q *PaymentQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = pq.Limit(1).IDs(setContextOp(ctx, pq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = q.Limit(1).IDs(setContextOp(ctx, q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -123,8 +123,8 @@ func (pq *PaymentQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (pq *PaymentQuery) FirstIDX(ctx context.Context) int {
-	id, err := pq.FirstID(ctx)
+func (q *PaymentQuery) FirstIDX(ctx context.Context) int {
+	id, err := q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -134,8 +134,8 @@ func (pq *PaymentQuery) FirstIDX(ctx context.Context) int {
 // Only returns a single Payment entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Payment entity is found.
 // Returns a *NotFoundError when no Payment entities are found.
-func (pq *PaymentQuery) Only(ctx context.Context) (*Payment, error) {
-	nodes, err := pq.Limit(2).All(setContextOp(ctx, pq.ctx, ent.OpQueryOnly))
+func (q *PaymentQuery) Only(ctx context.Context) (*Payment, error) {
+	nodes, err := q.Limit(2).All(setContextOp(ctx, q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -150,8 +150,8 @@ func (pq *PaymentQuery) Only(ctx context.Context) (*Payment, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (pq *PaymentQuery) OnlyX(ctx context.Context) *Payment {
-	node, err := pq.Only(ctx)
+func (q *PaymentQuery) OnlyX(ctx context.Context) *Payment {
+	node, err := q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -161,9 +161,9 @@ func (pq *PaymentQuery) OnlyX(ctx context.Context) *Payment {
 // OnlyID is like Only, but returns the only Payment ID in the query.
 // Returns a *NotSingularError when more than one Payment ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (pq *PaymentQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (q *PaymentQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = pq.Limit(2).IDs(setContextOp(ctx, pq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = q.Limit(2).IDs(setContextOp(ctx, q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -178,8 +178,8 @@ func (pq *PaymentQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (pq *PaymentQuery) OnlyIDX(ctx context.Context) int {
-	id, err := pq.OnlyID(ctx)
+func (q *PaymentQuery) OnlyIDX(ctx context.Context) int {
+	id, err := q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -187,18 +187,18 @@ func (pq *PaymentQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Payments.
-func (pq *PaymentQuery) All(ctx context.Context) ([]*Payment, error) {
-	ctx = setContextOp(ctx, pq.ctx, ent.OpQueryAll)
-	if err := pq.prepareQuery(ctx); err != nil {
+func (q *PaymentQuery) All(ctx context.Context) ([]*Payment, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryAll)
+	if err := q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Payment, *PaymentQuery]()
-	return withInterceptors[[]*Payment](ctx, pq, qr, pq.inters)
+	return withInterceptors[[]*Payment](ctx, q, qr, q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (pq *PaymentQuery) AllX(ctx context.Context) []*Payment {
-	nodes, err := pq.All(ctx)
+func (q *PaymentQuery) AllX(ctx context.Context) []*Payment {
+	nodes, err := q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -206,20 +206,20 @@ func (pq *PaymentQuery) AllX(ctx context.Context) []*Payment {
 }
 
 // IDs executes the query and returns a list of Payment IDs.
-func (pq *PaymentQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if pq.ctx.Unique == nil && pq.path != nil {
-		pq.Unique(true)
+func (q *PaymentQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if q.ctx.Unique == nil && q.path != nil {
+		q.Unique(true)
 	}
-	ctx = setContextOp(ctx, pq.ctx, ent.OpQueryIDs)
-	if err = pq.Select(payment.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryIDs)
+	if err = q.Select(payment.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pq *PaymentQuery) IDsX(ctx context.Context) []int {
-	ids, err := pq.IDs(ctx)
+func (q *PaymentQuery) IDsX(ctx context.Context) []int {
+	ids, err := q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -227,17 +227,17 @@ func (pq *PaymentQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (pq *PaymentQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, pq.ctx, ent.OpQueryCount)
-	if err := pq.prepareQuery(ctx); err != nil {
+func (q *PaymentQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryCount)
+	if err := q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, pq, querierCount[*PaymentQuery](), pq.inters)
+	return withInterceptors[int](ctx, q, querierCount[*PaymentQuery](), q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (pq *PaymentQuery) CountX(ctx context.Context) int {
-	count, err := pq.Count(ctx)
+func (q *PaymentQuery) CountX(ctx context.Context) int {
+	count, err := q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -245,9 +245,9 @@ func (pq *PaymentQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (pq *PaymentQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, pq.ctx, ent.OpQueryExist)
-	switch _, err := pq.FirstID(ctx); {
+func (q *PaymentQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryExist)
+	switch _, err := q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -258,8 +258,8 @@ func (pq *PaymentQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (pq *PaymentQuery) ExistX(ctx context.Context) bool {
-	exist, err := pq.Exist(ctx)
+func (q *PaymentQuery) ExistX(ctx context.Context) bool {
+	exist, err := q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -268,32 +268,32 @@ func (pq *PaymentQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the PaymentQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (pq *PaymentQuery) Clone() *PaymentQuery {
-	if pq == nil {
+func (q *PaymentQuery) Clone() *PaymentQuery {
+	if q == nil {
 		return nil
 	}
 	return &PaymentQuery{
-		config:     pq.config,
-		ctx:        pq.ctx.Clone(),
-		order:      append([]payment.OrderOption{}, pq.order...),
-		inters:     append([]Interceptor{}, pq.inters...),
-		predicates: append([]predicate.Payment{}, pq.predicates...),
-		withCard:   pq.withCard.Clone(),
+		config:     q.config,
+		ctx:        q.ctx.Clone(),
+		order:      append([]payment.OrderOption{}, q.order...),
+		inters:     append([]Interceptor{}, q.inters...),
+		predicates: append([]predicate.Payment{}, q.predicates...),
+		withCard:   q.withCard.Clone(),
 		// clone intermediate query.
-		sql:  pq.sql.Clone(),
-		path: pq.path,
+		sql:  q.sql.Clone(),
+		path: q.path,
 	}
 }
 
 // WithCard tells the query-builder to eager-load the nodes that are connected to
 // the "card" edge. The optional arguments are used to configure the query builder of the edge.
-func (pq *PaymentQuery) WithCard(opts ...func(*CardQuery)) *PaymentQuery {
-	query := (&CardClient{config: pq.config}).Query()
+func (q *PaymentQuery) WithCard(opts ...func(*CardQuery)) *PaymentQuery {
+	query := (&CardClient{config: q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	pq.withCard = query
-	return pq
+	q.withCard = query
+	return q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -310,10 +310,10 @@ func (pq *PaymentQuery) WithCard(opts ...func(*CardQuery)) *PaymentQuery {
 //		GroupBy(payment.FieldCardID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (pq *PaymentQuery) GroupBy(field string, fields ...string) *PaymentGroupBy {
-	pq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &PaymentGroupBy{build: pq}
-	grbuild.flds = &pq.ctx.Fields
+func (q *PaymentQuery) GroupBy(field string, fields ...string) *PaymentGroupBy {
+	q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &PaymentGroupBy{build: q}
+	grbuild.flds = &q.ctx.Fields
 	grbuild.label = payment.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -331,58 +331,58 @@ func (pq *PaymentQuery) GroupBy(field string, fields ...string) *PaymentGroupBy 
 //	client.Payment.Query().
 //		Select(payment.FieldCardID).
 //		Scan(ctx, &v)
-func (pq *PaymentQuery) Select(fields ...string) *PaymentSelect {
-	pq.ctx.Fields = append(pq.ctx.Fields, fields...)
-	sbuild := &PaymentSelect{PaymentQuery: pq}
+func (q *PaymentQuery) Select(fields ...string) *PaymentSelect {
+	q.ctx.Fields = append(q.ctx.Fields, fields...)
+	sbuild := &PaymentSelect{PaymentQuery: q}
 	sbuild.label = payment.Label
-	sbuild.flds, sbuild.scan = &pq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a PaymentSelect configured with the given aggregations.
-func (pq *PaymentQuery) Aggregate(fns ...AggregateFunc) *PaymentSelect {
-	return pq.Select().Aggregate(fns...)
+func (q *PaymentQuery) Aggregate(fns ...AggregateFunc) *PaymentSelect {
+	return q.Select().Aggregate(fns...)
 }
 
-func (pq *PaymentQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range pq.inters {
+func (q *PaymentQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, pq); err != nil {
+			if err := trv.Traverse(ctx, q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range pq.ctx.Fields {
+	for _, f := range q.ctx.Fields {
 		if !payment.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if pq.path != nil {
-		prev, err := pq.path(ctx)
+	if q.path != nil {
+		prev, err := q.path(ctx)
 		if err != nil {
 			return err
 		}
-		pq.sql = prev
+		q.sql = prev
 	}
 	return nil
 }
 
-func (pq *PaymentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Payment, error) {
+func (q *PaymentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Payment, error) {
 	var (
 		nodes       = []*Payment{}
-		_spec       = pq.querySpec()
+		_spec       = q.querySpec()
 		loadedTypes = [1]bool{
-			pq.withCard != nil,
+			q.withCard != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Payment).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Payment{config: pq.config}
+		node := &Payment{config: q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -390,14 +390,14 @@ func (pq *PaymentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Paym
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, pq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := pq.withCard; query != nil {
-		if err := pq.loadCard(ctx, query, nodes, nil,
+	if query := q.withCard; query != nil {
+		if err := q.loadCard(ctx, query, nodes, nil,
 			func(n *Payment, e *Card) { n.Edges.Card = e }); err != nil {
 			return nil, err
 		}
@@ -405,7 +405,7 @@ func (pq *PaymentQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Paym
 	return nodes, nil
 }
 
-func (pq *PaymentQuery) loadCard(ctx context.Context, query *CardQuery, nodes []*Payment, init func(*Payment), assign func(*Payment, *Card)) error {
+func (q *PaymentQuery) loadCard(ctx context.Context, query *CardQuery, nodes []*Payment, init func(*Payment), assign func(*Payment, *Card)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Payment)
 	for i := range nodes {
@@ -435,24 +435,24 @@ func (pq *PaymentQuery) loadCard(ctx context.Context, query *CardQuery, nodes []
 	return nil
 }
 
-func (pq *PaymentQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := pq.querySpec()
-	_spec.Node.Columns = pq.ctx.Fields
-	if len(pq.ctx.Fields) > 0 {
-		_spec.Unique = pq.ctx.Unique != nil && *pq.ctx.Unique
+func (q *PaymentQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := q.querySpec()
+	_spec.Node.Columns = q.ctx.Fields
+	if len(q.ctx.Fields) > 0 {
+		_spec.Unique = q.ctx.Unique != nil && *q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, pq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, q.driver, _spec)
 }
 
-func (pq *PaymentQuery) querySpec() *sqlgraph.QuerySpec {
+func (q *PaymentQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(payment.Table, payment.Columns, sqlgraph.NewFieldSpec(payment.FieldID, field.TypeInt))
-	_spec.From = pq.sql
-	if unique := pq.ctx.Unique; unique != nil {
+	_spec.From = q.sql
+	if unique := q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if pq.path != nil {
+	} else if q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := pq.ctx.Fields; len(fields) > 0 {
+	if fields := q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, payment.FieldID)
 		for i := range fields {
@@ -460,24 +460,24 @@ func (pq *PaymentQuery) querySpec() *sqlgraph.QuerySpec {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
-		if pq.withCard != nil {
+		if q.withCard != nil {
 			_spec.Node.AddColumnOnce(payment.FieldCardID)
 		}
 	}
-	if ps := pq.predicates; len(ps) > 0 {
+	if ps := q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := pq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := pq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := pq.order; len(ps) > 0 {
+	if ps := q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -487,33 +487,33 @@ func (pq *PaymentQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (pq *PaymentQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(pq.driver.Dialect())
+func (q *PaymentQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(q.driver.Dialect())
 	t1 := builder.Table(payment.Table)
-	columns := pq.ctx.Fields
+	columns := q.ctx.Fields
 	if len(columns) == 0 {
 		columns = payment.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if pq.sql != nil {
-		selector = pq.sql
+	if q.sql != nil {
+		selector = q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if pq.ctx.Unique != nil && *pq.ctx.Unique {
+	if q.ctx.Unique != nil && *q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range pq.predicates {
+	for _, p := range q.predicates {
 		p(selector)
 	}
-	for _, p := range pq.order {
+	for _, p := range q.order {
 		p(selector)
 	}
-	if offset := pq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := pq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -540,27 +540,27 @@ func (pgb *PaymentGroupBy) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*PaymentQuery, *PaymentGroupBy](ctx, pgb.build, pgb, pgb.build.inters, v)
 }
 
-func (pgb *PaymentGroupBy) sqlScan(ctx context.Context, root *PaymentQuery, v any) error {
+func (q *PaymentGroupBy) sqlScan(ctx context.Context, root *PaymentQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(pgb.fns))
-	for _, fn := range pgb.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*pgb.flds)+len(pgb.fns))
-		for _, f := range *pgb.flds {
+		columns := make([]string, 0, len(*q.flds)+len(q.fns))
+		for _, f := range *q.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*pgb.flds...)...)
+	selector.GroupBy(selector.Columns(*q.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := pgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -588,13 +588,13 @@ func (ps *PaymentSelect) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*PaymentQuery, *PaymentSelect](ctx, ps.PaymentQuery, ps, ps.inters, v)
 }
 
-func (ps *PaymentSelect) sqlScan(ctx context.Context, root *PaymentQuery, v any) error {
+func (q *PaymentSelect) sqlScan(ctx context.Context, root *PaymentQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(ps.fns))
-	for _, fn := range ps.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*ps.selector.flds); {
+	switch n := len(*q.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -602,7 +602,7 @@ func (ps *PaymentSelect) sqlScan(ctx context.Context, root *PaymentQuery, v any)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ps.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

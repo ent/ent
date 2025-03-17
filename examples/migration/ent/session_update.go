@@ -29,135 +29,135 @@ type SessionUpdate struct {
 }
 
 // Where appends a list predicates to the SessionUpdate builder.
-func (su *SessionUpdate) Where(ps ...predicate.Session) *SessionUpdate {
-	su.mutation.Where(ps...)
-	return su
+func (u *SessionUpdate) Where(ps ...predicate.Session) *SessionUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetActive sets the "active" field.
-func (su *SessionUpdate) SetActive(b bool) *SessionUpdate {
-	su.mutation.SetActive(b)
-	return su
+func (m *SessionUpdate) SetActive(v bool) *SessionUpdate {
+	m.mutation.SetActive(v)
+	return m
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
-func (su *SessionUpdate) SetNillableActive(b *bool) *SessionUpdate {
-	if b != nil {
-		su.SetActive(*b)
+func (m *SessionUpdate) SetNillableActive(v *bool) *SessionUpdate {
+	if v != nil {
+		m.SetActive(*v)
 	}
-	return su
+	return m
 }
 
 // SetIssuedAt sets the "issued_at" field.
-func (su *SessionUpdate) SetIssuedAt(t time.Time) *SessionUpdate {
-	su.mutation.SetIssuedAt(t)
-	return su
+func (m *SessionUpdate) SetIssuedAt(v time.Time) *SessionUpdate {
+	m.mutation.SetIssuedAt(v)
+	return m
 }
 
 // SetNillableIssuedAt sets the "issued_at" field if the given value is not nil.
-func (su *SessionUpdate) SetNillableIssuedAt(t *time.Time) *SessionUpdate {
-	if t != nil {
-		su.SetIssuedAt(*t)
+func (m *SessionUpdate) SetNillableIssuedAt(v *time.Time) *SessionUpdate {
+	if v != nil {
+		m.SetIssuedAt(*v)
 	}
-	return su
+	return m
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (su *SessionUpdate) SetExpiresAt(t time.Time) *SessionUpdate {
-	su.mutation.SetExpiresAt(t)
-	return su
+func (m *SessionUpdate) SetExpiresAt(v time.Time) *SessionUpdate {
+	m.mutation.SetExpiresAt(v)
+	return m
 }
 
 // SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
-func (su *SessionUpdate) SetNillableExpiresAt(t *time.Time) *SessionUpdate {
-	if t != nil {
-		su.SetExpiresAt(*t)
+func (m *SessionUpdate) SetNillableExpiresAt(v *time.Time) *SessionUpdate {
+	if v != nil {
+		m.SetExpiresAt(*v)
 	}
-	return su
+	return m
 }
 
 // ClearExpiresAt clears the value of the "expires_at" field.
-func (su *SessionUpdate) ClearExpiresAt() *SessionUpdate {
-	su.mutation.ClearExpiresAt()
-	return su
+func (m *SessionUpdate) ClearExpiresAt() *SessionUpdate {
+	m.mutation.ClearExpiresAt()
+	return m
 }
 
 // SetToken sets the "token" field.
-func (su *SessionUpdate) SetToken(s string) *SessionUpdate {
-	su.mutation.SetToken(s)
-	return su
+func (m *SessionUpdate) SetToken(v string) *SessionUpdate {
+	m.mutation.SetToken(v)
+	return m
 }
 
 // SetNillableToken sets the "token" field if the given value is not nil.
-func (su *SessionUpdate) SetNillableToken(s *string) *SessionUpdate {
-	if s != nil {
-		su.SetToken(*s)
+func (m *SessionUpdate) SetNillableToken(v *string) *SessionUpdate {
+	if v != nil {
+		m.SetToken(*v)
 	}
-	return su
+	return m
 }
 
 // ClearToken clears the value of the "token" field.
-func (su *SessionUpdate) ClearToken() *SessionUpdate {
-	su.mutation.ClearToken()
-	return su
+func (m *SessionUpdate) ClearToken() *SessionUpdate {
+	m.mutation.ClearToken()
+	return m
 }
 
 // SetMethod sets the "method" field.
-func (su *SessionUpdate) SetMethod(m map[string]interface{}) *SessionUpdate {
-	su.mutation.SetMethod(m)
-	return su
+func (m *SessionUpdate) SetMethod(v map[string]interface{}) *SessionUpdate {
+	m.mutation.SetMethod(v)
+	return m
 }
 
 // ClearMethod clears the value of the "method" field.
-func (su *SessionUpdate) ClearMethod() *SessionUpdate {
-	su.mutation.ClearMethod()
-	return su
+func (m *SessionUpdate) ClearMethod() *SessionUpdate {
+	m.mutation.ClearMethod()
+	return m
 }
 
 // SetDeviceID sets the "device_id" field.
-func (su *SessionUpdate) SetDeviceID(u uuid.UUID) *SessionUpdate {
-	su.mutation.SetDeviceID(u)
-	return su
+func (m *SessionUpdate) SetDeviceID(v uuid.UUID) *SessionUpdate {
+	m.mutation.SetDeviceID(v)
+	return m
 }
 
 // SetNillableDeviceID sets the "device_id" field if the given value is not nil.
-func (su *SessionUpdate) SetNillableDeviceID(u *uuid.UUID) *SessionUpdate {
-	if u != nil {
-		su.SetDeviceID(*u)
+func (m *SessionUpdate) SetNillableDeviceID(v *uuid.UUID) *SessionUpdate {
+	if v != nil {
+		m.SetDeviceID(*v)
 	}
-	return su
+	return m
 }
 
 // ClearDeviceID clears the value of the "device_id" field.
-func (su *SessionUpdate) ClearDeviceID() *SessionUpdate {
-	su.mutation.ClearDeviceID()
-	return su
+func (m *SessionUpdate) ClearDeviceID() *SessionUpdate {
+	m.mutation.ClearDeviceID()
+	return m
 }
 
 // SetDevice sets the "device" edge to the SessionDevice entity.
-func (su *SessionUpdate) SetDevice(s *SessionDevice) *SessionUpdate {
-	return su.SetDeviceID(s.ID)
+func (m *SessionUpdate) SetDevice(v *SessionDevice) *SessionUpdate {
+	return m.SetDeviceID(v.ID)
 }
 
 // Mutation returns the SessionMutation object of the builder.
-func (su *SessionUpdate) Mutation() *SessionMutation {
-	return su.mutation
+func (m *SessionUpdate) Mutation() *SessionMutation {
+	return m.mutation
 }
 
 // ClearDevice clears the "device" edge to the SessionDevice entity.
-func (su *SessionUpdate) ClearDevice() *SessionUpdate {
-	su.mutation.ClearDevice()
-	return su
+func (u *SessionUpdate) ClearDevice() *SessionUpdate {
+	u.mutation.ClearDevice()
+	return u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (su *SessionUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, su.sqlSave, su.mutation, su.hooks)
+func (u *SessionUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (su *SessionUpdate) SaveX(ctx context.Context) int {
-	affected, err := su.Save(ctx)
+func (u *SessionUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -165,52 +165,52 @@ func (su *SessionUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (su *SessionUpdate) Exec(ctx context.Context) error {
-	_, err := su.Save(ctx)
+func (u *SessionUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (su *SessionUpdate) ExecX(ctx context.Context) {
-	if err := su.Exec(ctx); err != nil {
+func (u *SessionUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (u *SessionUpdate) sqlSave(ctx context.Context) (_n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(session.Table, session.Columns, sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID))
-	if ps := su.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := su.mutation.Active(); ok {
+	if value, ok := u.mutation.Active(); ok {
 		_spec.SetField(session.FieldActive, field.TypeBool, value)
 	}
-	if value, ok := su.mutation.IssuedAt(); ok {
+	if value, ok := u.mutation.IssuedAt(); ok {
 		_spec.SetField(session.FieldIssuedAt, field.TypeTime, value)
 	}
-	if value, ok := su.mutation.ExpiresAt(); ok {
+	if value, ok := u.mutation.ExpiresAt(); ok {
 		_spec.SetField(session.FieldExpiresAt, field.TypeTime, value)
 	}
-	if su.mutation.ExpiresAtCleared() {
+	if u.mutation.ExpiresAtCleared() {
 		_spec.ClearField(session.FieldExpiresAt, field.TypeTime)
 	}
-	if value, ok := su.mutation.Token(); ok {
+	if value, ok := u.mutation.Token(); ok {
 		_spec.SetField(session.FieldToken, field.TypeString, value)
 	}
-	if su.mutation.TokenCleared() {
+	if u.mutation.TokenCleared() {
 		_spec.ClearField(session.FieldToken, field.TypeString)
 	}
-	if value, ok := su.mutation.Method(); ok {
+	if value, ok := u.mutation.Method(); ok {
 		_spec.SetField(session.FieldMethod, field.TypeJSON, value)
 	}
-	if su.mutation.MethodCleared() {
+	if u.mutation.MethodCleared() {
 		_spec.ClearField(session.FieldMethod, field.TypeJSON)
 	}
-	if su.mutation.DeviceCleared() {
+	if u.mutation.DeviceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -223,7 +223,7 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := su.mutation.DeviceIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.DeviceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -239,7 +239,7 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, su.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{session.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -247,8 +247,8 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	su.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // SessionUpdateOne is the builder for updating a single Session entity.
@@ -260,142 +260,142 @@ type SessionUpdateOne struct {
 }
 
 // SetActive sets the "active" field.
-func (suo *SessionUpdateOne) SetActive(b bool) *SessionUpdateOne {
-	suo.mutation.SetActive(b)
-	return suo
+func (m *SessionUpdateOne) SetActive(v bool) *SessionUpdateOne {
+	m.mutation.SetActive(v)
+	return m
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
-func (suo *SessionUpdateOne) SetNillableActive(b *bool) *SessionUpdateOne {
-	if b != nil {
-		suo.SetActive(*b)
+func (m *SessionUpdateOne) SetNillableActive(v *bool) *SessionUpdateOne {
+	if v != nil {
+		m.SetActive(*v)
 	}
-	return suo
+	return m
 }
 
 // SetIssuedAt sets the "issued_at" field.
-func (suo *SessionUpdateOne) SetIssuedAt(t time.Time) *SessionUpdateOne {
-	suo.mutation.SetIssuedAt(t)
-	return suo
+func (m *SessionUpdateOne) SetIssuedAt(v time.Time) *SessionUpdateOne {
+	m.mutation.SetIssuedAt(v)
+	return m
 }
 
 // SetNillableIssuedAt sets the "issued_at" field if the given value is not nil.
-func (suo *SessionUpdateOne) SetNillableIssuedAt(t *time.Time) *SessionUpdateOne {
-	if t != nil {
-		suo.SetIssuedAt(*t)
+func (m *SessionUpdateOne) SetNillableIssuedAt(v *time.Time) *SessionUpdateOne {
+	if v != nil {
+		m.SetIssuedAt(*v)
 	}
-	return suo
+	return m
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (suo *SessionUpdateOne) SetExpiresAt(t time.Time) *SessionUpdateOne {
-	suo.mutation.SetExpiresAt(t)
-	return suo
+func (m *SessionUpdateOne) SetExpiresAt(v time.Time) *SessionUpdateOne {
+	m.mutation.SetExpiresAt(v)
+	return m
 }
 
 // SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
-func (suo *SessionUpdateOne) SetNillableExpiresAt(t *time.Time) *SessionUpdateOne {
-	if t != nil {
-		suo.SetExpiresAt(*t)
+func (m *SessionUpdateOne) SetNillableExpiresAt(v *time.Time) *SessionUpdateOne {
+	if v != nil {
+		m.SetExpiresAt(*v)
 	}
-	return suo
+	return m
 }
 
 // ClearExpiresAt clears the value of the "expires_at" field.
-func (suo *SessionUpdateOne) ClearExpiresAt() *SessionUpdateOne {
-	suo.mutation.ClearExpiresAt()
-	return suo
+func (m *SessionUpdateOne) ClearExpiresAt() *SessionUpdateOne {
+	m.mutation.ClearExpiresAt()
+	return m
 }
 
 // SetToken sets the "token" field.
-func (suo *SessionUpdateOne) SetToken(s string) *SessionUpdateOne {
-	suo.mutation.SetToken(s)
-	return suo
+func (m *SessionUpdateOne) SetToken(v string) *SessionUpdateOne {
+	m.mutation.SetToken(v)
+	return m
 }
 
 // SetNillableToken sets the "token" field if the given value is not nil.
-func (suo *SessionUpdateOne) SetNillableToken(s *string) *SessionUpdateOne {
-	if s != nil {
-		suo.SetToken(*s)
+func (m *SessionUpdateOne) SetNillableToken(v *string) *SessionUpdateOne {
+	if v != nil {
+		m.SetToken(*v)
 	}
-	return suo
+	return m
 }
 
 // ClearToken clears the value of the "token" field.
-func (suo *SessionUpdateOne) ClearToken() *SessionUpdateOne {
-	suo.mutation.ClearToken()
-	return suo
+func (m *SessionUpdateOne) ClearToken() *SessionUpdateOne {
+	m.mutation.ClearToken()
+	return m
 }
 
 // SetMethod sets the "method" field.
-func (suo *SessionUpdateOne) SetMethod(m map[string]interface{}) *SessionUpdateOne {
-	suo.mutation.SetMethod(m)
-	return suo
+func (m *SessionUpdateOne) SetMethod(v map[string]interface{}) *SessionUpdateOne {
+	m.mutation.SetMethod(v)
+	return m
 }
 
 // ClearMethod clears the value of the "method" field.
-func (suo *SessionUpdateOne) ClearMethod() *SessionUpdateOne {
-	suo.mutation.ClearMethod()
-	return suo
+func (m *SessionUpdateOne) ClearMethod() *SessionUpdateOne {
+	m.mutation.ClearMethod()
+	return m
 }
 
 // SetDeviceID sets the "device_id" field.
-func (suo *SessionUpdateOne) SetDeviceID(u uuid.UUID) *SessionUpdateOne {
-	suo.mutation.SetDeviceID(u)
-	return suo
+func (m *SessionUpdateOne) SetDeviceID(v uuid.UUID) *SessionUpdateOne {
+	m.mutation.SetDeviceID(v)
+	return m
 }
 
 // SetNillableDeviceID sets the "device_id" field if the given value is not nil.
-func (suo *SessionUpdateOne) SetNillableDeviceID(u *uuid.UUID) *SessionUpdateOne {
-	if u != nil {
-		suo.SetDeviceID(*u)
+func (m *SessionUpdateOne) SetNillableDeviceID(v *uuid.UUID) *SessionUpdateOne {
+	if v != nil {
+		m.SetDeviceID(*v)
 	}
-	return suo
+	return m
 }
 
 // ClearDeviceID clears the value of the "device_id" field.
-func (suo *SessionUpdateOne) ClearDeviceID() *SessionUpdateOne {
-	suo.mutation.ClearDeviceID()
-	return suo
+func (m *SessionUpdateOne) ClearDeviceID() *SessionUpdateOne {
+	m.mutation.ClearDeviceID()
+	return m
 }
 
 // SetDevice sets the "device" edge to the SessionDevice entity.
-func (suo *SessionUpdateOne) SetDevice(s *SessionDevice) *SessionUpdateOne {
-	return suo.SetDeviceID(s.ID)
+func (m *SessionUpdateOne) SetDevice(v *SessionDevice) *SessionUpdateOne {
+	return m.SetDeviceID(v.ID)
 }
 
 // Mutation returns the SessionMutation object of the builder.
-func (suo *SessionUpdateOne) Mutation() *SessionMutation {
-	return suo.mutation
+func (m *SessionUpdateOne) Mutation() *SessionMutation {
+	return m.mutation
 }
 
 // ClearDevice clears the "device" edge to the SessionDevice entity.
-func (suo *SessionUpdateOne) ClearDevice() *SessionUpdateOne {
-	suo.mutation.ClearDevice()
-	return suo
+func (u *SessionUpdateOne) ClearDevice() *SessionUpdateOne {
+	u.mutation.ClearDevice()
+	return u
 }
 
 // Where appends a list predicates to the SessionUpdate builder.
-func (suo *SessionUpdateOne) Where(ps ...predicate.Session) *SessionUpdateOne {
-	suo.mutation.Where(ps...)
-	return suo
+func (u *SessionUpdateOne) Where(ps ...predicate.Session) *SessionUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (suo *SessionUpdateOne) Select(field string, fields ...string) *SessionUpdateOne {
-	suo.fields = append([]string{field}, fields...)
-	return suo
+func (u *SessionUpdateOne) Select(field string, fields ...string) *SessionUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated Session entity.
-func (suo *SessionUpdateOne) Save(ctx context.Context) (*Session, error) {
-	return withHooks(ctx, suo.sqlSave, suo.mutation, suo.hooks)
+func (u *SessionUpdateOne) Save(ctx context.Context) (*Session, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (suo *SessionUpdateOne) SaveX(ctx context.Context) *Session {
-	node, err := suo.Save(ctx)
+func (u *SessionUpdateOne) SaveX(ctx context.Context) *Session {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -403,26 +403,26 @@ func (suo *SessionUpdateOne) SaveX(ctx context.Context) *Session {
 }
 
 // Exec executes the query on the entity.
-func (suo *SessionUpdateOne) Exec(ctx context.Context) error {
-	_, err := suo.Save(ctx)
+func (u *SessionUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (suo *SessionUpdateOne) ExecX(ctx context.Context) {
-	if err := suo.Exec(ctx); err != nil {
+func (u *SessionUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err error) {
+func (u *SessionUpdateOne) sqlSave(ctx context.Context) (_n *Session, err error) {
 	_spec := sqlgraph.NewUpdateSpec(session.Table, session.Columns, sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID))
-	id, ok := suo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Session.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := suo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, session.FieldID)
 		for _, f := range fields {
@@ -434,38 +434,38 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 			}
 		}
 	}
-	if ps := suo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := suo.mutation.Active(); ok {
+	if value, ok := u.mutation.Active(); ok {
 		_spec.SetField(session.FieldActive, field.TypeBool, value)
 	}
-	if value, ok := suo.mutation.IssuedAt(); ok {
+	if value, ok := u.mutation.IssuedAt(); ok {
 		_spec.SetField(session.FieldIssuedAt, field.TypeTime, value)
 	}
-	if value, ok := suo.mutation.ExpiresAt(); ok {
+	if value, ok := u.mutation.ExpiresAt(); ok {
 		_spec.SetField(session.FieldExpiresAt, field.TypeTime, value)
 	}
-	if suo.mutation.ExpiresAtCleared() {
+	if u.mutation.ExpiresAtCleared() {
 		_spec.ClearField(session.FieldExpiresAt, field.TypeTime)
 	}
-	if value, ok := suo.mutation.Token(); ok {
+	if value, ok := u.mutation.Token(); ok {
 		_spec.SetField(session.FieldToken, field.TypeString, value)
 	}
-	if suo.mutation.TokenCleared() {
+	if u.mutation.TokenCleared() {
 		_spec.ClearField(session.FieldToken, field.TypeString)
 	}
-	if value, ok := suo.mutation.Method(); ok {
+	if value, ok := u.mutation.Method(); ok {
 		_spec.SetField(session.FieldMethod, field.TypeJSON, value)
 	}
-	if suo.mutation.MethodCleared() {
+	if u.mutation.MethodCleared() {
 		_spec.ClearField(session.FieldMethod, field.TypeJSON)
 	}
-	if suo.mutation.DeviceCleared() {
+	if u.mutation.DeviceCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -478,7 +478,7 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := suo.mutation.DeviceIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.DeviceIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -494,10 +494,10 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Session{config: suo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, suo.driver, _spec); err != nil {
+	_n = &Session{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{session.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -505,6 +505,6 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 		}
 		return nil, err
 	}
-	suo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

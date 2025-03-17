@@ -20,24 +20,24 @@ type PetCreate struct {
 }
 
 // SetName sets the "name" field.
-func (pc *PetCreate) SetName(s string) *PetCreate {
-	pc.mutation.SetName(s)
-	return pc
+func (m *PetCreate) SetName(v string) *PetCreate {
+	m.mutation.SetName(v)
+	return m
 }
 
 // Mutation returns the PetMutation object of the builder.
-func (pc *PetCreate) Mutation() *PetMutation {
-	return pc.mutation
+func (m *PetCreate) Mutation() *PetMutation {
+	return m.mutation
 }
 
 // Save creates the Pet in the database.
-func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
-	return withHooks(ctx, pc.sqlSave, pc.mutation, pc.hooks)
+func (c *PetCreate) Save(ctx context.Context) (*Pet, error) {
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (pc *PetCreate) SaveX(ctx context.Context) *Pet {
-	v, err := pc.Save(ctx)
+func (c *PetCreate) SaveX(ctx context.Context) *Pet {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -45,32 +45,32 @@ func (pc *PetCreate) SaveX(ctx context.Context) *Pet {
 }
 
 // Exec executes the query.
-func (pc *PetCreate) Exec(ctx context.Context) error {
-	_, err := pc.Save(ctx)
+func (c *PetCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pc *PetCreate) ExecX(ctx context.Context) {
-	if err := pc.Exec(ctx); err != nil {
+func (c *PetCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (pc *PetCreate) check() error {
-	if _, ok := pc.mutation.Name(); !ok {
+func (c *PetCreate) check() error {
+	if _, ok := c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Pet.name"`)}
 	}
 	return nil
 }
 
-func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
-	if err := pc.check(); err != nil {
+func (c *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := pc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -78,17 +78,17 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	pc.mutation.id = &_node.ID
-	pc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
+func (c *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Pet{config: pc.config}
+		_node = &Pet{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(pet.Table, sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt))
 	)
-	if value, ok := pc.mutation.Name(); ok {
+	if value, ok := c.mutation.Name(); ok {
 		_spec.SetField(pet.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
@@ -103,16 +103,16 @@ type PetCreateBulk struct {
 }
 
 // Save creates the Pet entities in the database.
-func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
-	if pcb.err != nil {
-		return nil, pcb.err
+func (c *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(pcb.builders))
-	nodes := make([]*Pet, len(pcb.builders))
-	mutators := make([]Mutator, len(pcb.builders))
-	for i := range pcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Pet, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := pcb.builders[i]
+			builder := c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PetMutation)
 				if !ok {
@@ -125,11 +125,11 @@ func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, pcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, pcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -153,7 +153,7 @@ func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, pcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -161,8 +161,8 @@ func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (pcb *PetCreateBulk) SaveX(ctx context.Context) []*Pet {
-	v, err := pcb.Save(ctx)
+func (c *PetCreateBulk) SaveX(ctx context.Context) []*Pet {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -170,14 +170,14 @@ func (pcb *PetCreateBulk) SaveX(ctx context.Context) []*Pet {
 }
 
 // Exec executes the query.
-func (pcb *PetCreateBulk) Exec(ctx context.Context) error {
-	_, err := pcb.Save(ctx)
+func (c *PetCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pcb *PetCreateBulk) ExecX(ctx context.Context) {
-	if err := pcb.Exec(ctx); err != nil {
+func (c *PetCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

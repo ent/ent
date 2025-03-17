@@ -39,9 +39,9 @@ func (*Pet) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Pet fields.
-func (pe *Pet) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Pet) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -50,15 +50,15 @@ func (pe *Pet) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			pe.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case pet.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				pe.Name = value.String
+				m.Name = value.String
 			}
 		default:
-			pe.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -66,35 +66,35 @@ func (pe *Pet) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Pet.
 // This includes values selected through modifiers, order, etc.
-func (pe *Pet) Value(name string) (ent.Value, error) {
-	return pe.selectValues.Get(name)
+func (m *Pet) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Pet.
 // Note that you need to call Pet.Unwrap() before calling this method if this Pet
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (pe *Pet) Update() *PetUpdateOne {
-	return NewPetClient(pe.config).UpdateOne(pe)
+func (m *Pet) Update() *PetUpdateOne {
+	return NewPetClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Pet entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (pe *Pet) Unwrap() *Pet {
-	_tx, ok := pe.config.driver.(*txDriver)
+func (m *Pet) Unwrap() *Pet {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Pet is not a transactional entity")
 	}
-	pe.config.driver = _tx.drv
-	return pe
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (pe *Pet) String() string {
+func (m *Pet) String() string {
 	var builder strings.Builder
 	builder.WriteString("Pet(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", pe.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("name=")
-	builder.WriteString(pe.Name)
+	builder.WriteString(m.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }

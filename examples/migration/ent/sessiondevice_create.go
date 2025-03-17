@@ -27,86 +27,86 @@ type SessionDeviceCreate struct {
 }
 
 // SetIPAddress sets the "ip_address" field.
-func (sdc *SessionDeviceCreate) SetIPAddress(s string) *SessionDeviceCreate {
-	sdc.mutation.SetIPAddress(s)
-	return sdc
+func (m *SessionDeviceCreate) SetIPAddress(v string) *SessionDeviceCreate {
+	m.mutation.SetIPAddress(v)
+	return m
 }
 
 // SetUserAgent sets the "user_agent" field.
-func (sdc *SessionDeviceCreate) SetUserAgent(s string) *SessionDeviceCreate {
-	sdc.mutation.SetUserAgent(s)
-	return sdc
+func (m *SessionDeviceCreate) SetUserAgent(v string) *SessionDeviceCreate {
+	m.mutation.SetUserAgent(v)
+	return m
 }
 
 // SetLocation sets the "location" field.
-func (sdc *SessionDeviceCreate) SetLocation(s string) *SessionDeviceCreate {
-	sdc.mutation.SetLocation(s)
-	return sdc
+func (m *SessionDeviceCreate) SetLocation(v string) *SessionDeviceCreate {
+	m.mutation.SetLocation(v)
+	return m
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (sdc *SessionDeviceCreate) SetCreatedAt(t time.Time) *SessionDeviceCreate {
-	sdc.mutation.SetCreatedAt(t)
-	return sdc
+func (m *SessionDeviceCreate) SetCreatedAt(v time.Time) *SessionDeviceCreate {
+	m.mutation.SetCreatedAt(v)
+	return m
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (sdc *SessionDeviceCreate) SetUpdatedAt(t time.Time) *SessionDeviceCreate {
-	sdc.mutation.SetUpdatedAt(t)
-	return sdc
+func (m *SessionDeviceCreate) SetUpdatedAt(v time.Time) *SessionDeviceCreate {
+	m.mutation.SetUpdatedAt(v)
+	return m
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (sdc *SessionDeviceCreate) SetNillableUpdatedAt(t *time.Time) *SessionDeviceCreate {
-	if t != nil {
-		sdc.SetUpdatedAt(*t)
+func (m *SessionDeviceCreate) SetNillableUpdatedAt(v *time.Time) *SessionDeviceCreate {
+	if v != nil {
+		m.SetUpdatedAt(*v)
 	}
-	return sdc
+	return m
 }
 
 // SetID sets the "id" field.
-func (sdc *SessionDeviceCreate) SetID(u uuid.UUID) *SessionDeviceCreate {
-	sdc.mutation.SetID(u)
-	return sdc
+func (m *SessionDeviceCreate) SetID(v uuid.UUID) *SessionDeviceCreate {
+	m.mutation.SetID(v)
+	return m
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (sdc *SessionDeviceCreate) SetNillableID(u *uuid.UUID) *SessionDeviceCreate {
-	if u != nil {
-		sdc.SetID(*u)
+func (m *SessionDeviceCreate) SetNillableID(v *uuid.UUID) *SessionDeviceCreate {
+	if v != nil {
+		m.SetID(*v)
 	}
-	return sdc
+	return m
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (sdc *SessionDeviceCreate) AddSessionIDs(ids ...uuid.UUID) *SessionDeviceCreate {
-	sdc.mutation.AddSessionIDs(ids...)
-	return sdc
+func (m *SessionDeviceCreate) AddSessionIDs(ids ...uuid.UUID) *SessionDeviceCreate {
+	m.mutation.AddSessionIDs(ids...)
+	return m
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
-func (sdc *SessionDeviceCreate) AddSessions(s ...*Session) *SessionDeviceCreate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (m *SessionDeviceCreate) AddSessions(v ...*Session) *SessionDeviceCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return sdc.AddSessionIDs(ids...)
+	return m.AddSessionIDs(ids...)
 }
 
 // Mutation returns the SessionDeviceMutation object of the builder.
-func (sdc *SessionDeviceCreate) Mutation() *SessionDeviceMutation {
-	return sdc.mutation
+func (m *SessionDeviceCreate) Mutation() *SessionDeviceMutation {
+	return m.mutation
 }
 
 // Save creates the SessionDevice in the database.
-func (sdc *SessionDeviceCreate) Save(ctx context.Context) (*SessionDevice, error) {
-	sdc.defaults()
-	return withHooks(ctx, sdc.sqlSave, sdc.mutation, sdc.hooks)
+func (c *SessionDeviceCreate) Save(ctx context.Context) (*SessionDevice, error) {
+	c.defaults()
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (sdc *SessionDeviceCreate) SaveX(ctx context.Context) *SessionDevice {
-	v, err := sdc.Save(ctx)
+func (c *SessionDeviceCreate) SaveX(ctx context.Context) *SessionDevice {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -114,64 +114,64 @@ func (sdc *SessionDeviceCreate) SaveX(ctx context.Context) *SessionDevice {
 }
 
 // Exec executes the query.
-func (sdc *SessionDeviceCreate) Exec(ctx context.Context) error {
-	_, err := sdc.Save(ctx)
+func (c *SessionDeviceCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (sdc *SessionDeviceCreate) ExecX(ctx context.Context) {
-	if err := sdc.Exec(ctx); err != nil {
+func (c *SessionDeviceCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (sdc *SessionDeviceCreate) defaults() {
-	if _, ok := sdc.mutation.ID(); !ok {
+func (c *SessionDeviceCreate) defaults() {
+	if _, ok := c.mutation.ID(); !ok {
 		v := sessiondevice.DefaultID()
-		sdc.mutation.SetID(v)
+		c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (sdc *SessionDeviceCreate) check() error {
-	if _, ok := sdc.mutation.IPAddress(); !ok {
+func (c *SessionDeviceCreate) check() error {
+	if _, ok := c.mutation.IPAddress(); !ok {
 		return &ValidationError{Name: "ip_address", err: errors.New(`ent: missing required field "SessionDevice.ip_address"`)}
 	}
-	if v, ok := sdc.mutation.IPAddress(); ok {
+	if v, ok := c.mutation.IPAddress(); ok {
 		if err := sessiondevice.IPAddressValidator(v); err != nil {
 			return &ValidationError{Name: "ip_address", err: fmt.Errorf(`ent: validator failed for field "SessionDevice.ip_address": %w`, err)}
 		}
 	}
-	if _, ok := sdc.mutation.UserAgent(); !ok {
+	if _, ok := c.mutation.UserAgent(); !ok {
 		return &ValidationError{Name: "user_agent", err: errors.New(`ent: missing required field "SessionDevice.user_agent"`)}
 	}
-	if v, ok := sdc.mutation.UserAgent(); ok {
+	if v, ok := c.mutation.UserAgent(); ok {
 		if err := sessiondevice.UserAgentValidator(v); err != nil {
 			return &ValidationError{Name: "user_agent", err: fmt.Errorf(`ent: validator failed for field "SessionDevice.user_agent": %w`, err)}
 		}
 	}
-	if _, ok := sdc.mutation.Location(); !ok {
+	if _, ok := c.mutation.Location(); !ok {
 		return &ValidationError{Name: "location", err: errors.New(`ent: missing required field "SessionDevice.location"`)}
 	}
-	if v, ok := sdc.mutation.Location(); ok {
+	if v, ok := c.mutation.Location(); ok {
 		if err := sessiondevice.LocationValidator(v); err != nil {
 			return &ValidationError{Name: "location", err: fmt.Errorf(`ent: validator failed for field "SessionDevice.location": %w`, err)}
 		}
 	}
-	if _, ok := sdc.mutation.CreatedAt(); !ok {
+	if _, ok := c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "SessionDevice.created_at"`)}
 	}
 	return nil
 }
 
-func (sdc *SessionDeviceCreate) sqlSave(ctx context.Context) (*SessionDevice, error) {
-	if err := sdc.check(); err != nil {
+func (c *SessionDeviceCreate) sqlSave(ctx context.Context) (*SessionDevice, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := sdc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, sdc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -184,41 +184,41 @@ func (sdc *SessionDeviceCreate) sqlSave(ctx context.Context) (*SessionDevice, er
 			return nil, err
 		}
 	}
-	sdc.mutation.id = &_node.ID
-	sdc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (sdc *SessionDeviceCreate) createSpec() (*SessionDevice, *sqlgraph.CreateSpec) {
+func (c *SessionDeviceCreate) createSpec() (*SessionDevice, *sqlgraph.CreateSpec) {
 	var (
-		_node = &SessionDevice{config: sdc.config}
+		_node = &SessionDevice{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(sessiondevice.Table, sqlgraph.NewFieldSpec(sessiondevice.FieldID, field.TypeUUID))
 	)
-	if id, ok := sdc.mutation.ID(); ok {
+	if id, ok := c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := sdc.mutation.IPAddress(); ok {
+	if value, ok := c.mutation.IPAddress(); ok {
 		_spec.SetField(sessiondevice.FieldIPAddress, field.TypeString, value)
 		_node.IPAddress = value
 	}
-	if value, ok := sdc.mutation.UserAgent(); ok {
+	if value, ok := c.mutation.UserAgent(); ok {
 		_spec.SetField(sessiondevice.FieldUserAgent, field.TypeString, value)
 		_node.UserAgent = value
 	}
-	if value, ok := sdc.mutation.Location(); ok {
+	if value, ok := c.mutation.Location(); ok {
 		_spec.SetField(sessiondevice.FieldLocation, field.TypeString, value)
 		_node.Location = value
 	}
-	if value, ok := sdc.mutation.CreatedAt(); ok {
+	if value, ok := c.mutation.CreatedAt(); ok {
 		_spec.SetField(sessiondevice.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if value, ok := sdc.mutation.UpdatedAt(); ok {
+	if value, ok := c.mutation.UpdatedAt(); ok {
 		_spec.SetField(sessiondevice.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if nodes := sdc.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.SessionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -245,16 +245,16 @@ type SessionDeviceCreateBulk struct {
 }
 
 // Save creates the SessionDevice entities in the database.
-func (sdcb *SessionDeviceCreateBulk) Save(ctx context.Context) ([]*SessionDevice, error) {
-	if sdcb.err != nil {
-		return nil, sdcb.err
+func (c *SessionDeviceCreateBulk) Save(ctx context.Context) ([]*SessionDevice, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(sdcb.builders))
-	nodes := make([]*SessionDevice, len(sdcb.builders))
-	mutators := make([]Mutator, len(sdcb.builders))
-	for i := range sdcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*SessionDevice, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := sdcb.builders[i]
+			builder := c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SessionDeviceMutation)
@@ -268,11 +268,11 @@ func (sdcb *SessionDeviceCreateBulk) Save(ctx context.Context) ([]*SessionDevice
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, sdcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, sdcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -292,7 +292,7 @@ func (sdcb *SessionDeviceCreateBulk) Save(ctx context.Context) ([]*SessionDevice
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, sdcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -300,8 +300,8 @@ func (sdcb *SessionDeviceCreateBulk) Save(ctx context.Context) ([]*SessionDevice
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (sdcb *SessionDeviceCreateBulk) SaveX(ctx context.Context) []*SessionDevice {
-	v, err := sdcb.Save(ctx)
+func (c *SessionDeviceCreateBulk) SaveX(ctx context.Context) []*SessionDevice {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -309,14 +309,14 @@ func (sdcb *SessionDeviceCreateBulk) SaveX(ctx context.Context) []*SessionDevice
 }
 
 // Exec executes the query.
-func (sdcb *SessionDeviceCreateBulk) Exec(ctx context.Context) error {
-	_, err := sdcb.Save(ctx)
+func (c *SessionDeviceCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (sdcb *SessionDeviceCreateBulk) ExecX(ctx context.Context) {
-	if err := sdcb.Exec(ctx); err != nil {
+func (c *SessionDeviceCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

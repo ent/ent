@@ -24,56 +24,56 @@ type SessionDelete struct {
 }
 
 // Where appends a list predicates to the SessionDelete builder.
-func (sd *SessionDelete) Where(ps ...predicate.Session) *SessionDelete {
-	sd.mutation.Where(ps...)
-	return sd
+func (d *SessionDelete) Where(ps ...predicate.Session) *SessionDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (sd *SessionDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, sd.sqlExec, sd.mutation, sd.hooks)
+func (d *SessionDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (sd *SessionDelete) ExecX(ctx context.Context) int {
-	n, err := sd.Exec(ctx)
+func (d *SessionDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (sd *SessionDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *SessionDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(session.Table, sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID))
-	if ps := sd.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, sd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	sd.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // SessionDeleteOne is the builder for deleting a single Session entity.
 type SessionDeleteOne struct {
-	sd *SessionDelete
+	d *SessionDelete
 }
 
 // Where appends a list predicates to the SessionDelete builder.
-func (sdo *SessionDeleteOne) Where(ps ...predicate.Session) *SessionDeleteOne {
-	sdo.sd.mutation.Where(ps...)
-	return sdo
+func (d *SessionDeleteOne) Where(ps ...predicate.Session) *SessionDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (sdo *SessionDeleteOne) Exec(ctx context.Context) error {
-	n, err := sdo.sd.Exec(ctx)
+func (d *SessionDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (sdo *SessionDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (sdo *SessionDeleteOne) ExecX(ctx context.Context) {
-	if err := sdo.Exec(ctx); err != nil {
+func (d *SessionDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

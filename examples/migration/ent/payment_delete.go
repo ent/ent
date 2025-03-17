@@ -24,56 +24,56 @@ type PaymentDelete struct {
 }
 
 // Where appends a list predicates to the PaymentDelete builder.
-func (pd *PaymentDelete) Where(ps ...predicate.Payment) *PaymentDelete {
-	pd.mutation.Where(ps...)
-	return pd
+func (d *PaymentDelete) Where(ps ...predicate.Payment) *PaymentDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (pd *PaymentDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, pd.sqlExec, pd.mutation, pd.hooks)
+func (d *PaymentDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pd *PaymentDelete) ExecX(ctx context.Context) int {
-	n, err := pd.Exec(ctx)
+func (d *PaymentDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (pd *PaymentDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *PaymentDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(payment.Table, sqlgraph.NewFieldSpec(payment.FieldID, field.TypeInt))
-	if ps := pd.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, pd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	pd.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // PaymentDeleteOne is the builder for deleting a single Payment entity.
 type PaymentDeleteOne struct {
-	pd *PaymentDelete
+	d *PaymentDelete
 }
 
 // Where appends a list predicates to the PaymentDelete builder.
-func (pdo *PaymentDeleteOne) Where(ps ...predicate.Payment) *PaymentDeleteOne {
-	pdo.pd.mutation.Where(ps...)
-	return pdo
+func (d *PaymentDeleteOne) Where(ps ...predicate.Payment) *PaymentDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (pdo *PaymentDeleteOne) Exec(ctx context.Context) error {
-	n, err := pdo.pd.Exec(ctx)
+func (d *PaymentDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (pdo *PaymentDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pdo *PaymentDeleteOne) ExecX(ctx context.Context) {
-	if err := pdo.Exec(ctx); err != nil {
+func (d *PaymentDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

@@ -26,81 +26,81 @@ type PetCreate struct {
 }
 
 // SetName sets the "name" field.
-func (pc *PetCreate) SetName(s string) *PetCreate {
-	pc.mutation.SetName(s)
-	return pc
+func (m *PetCreate) SetName(v string) *PetCreate {
+	m.mutation.SetName(v)
+	return m
 }
 
 // SetAge sets the "age" field.
-func (pc *PetCreate) SetAge(f float64) *PetCreate {
-	pc.mutation.SetAge(f)
-	return pc
+func (m *PetCreate) SetAge(v float64) *PetCreate {
+	m.mutation.SetAge(v)
+	return m
 }
 
 // SetWeight sets the "weight" field.
-func (pc *PetCreate) SetWeight(f float64) *PetCreate {
-	pc.mutation.SetWeight(f)
-	return pc
+func (m *PetCreate) SetWeight(v float64) *PetCreate {
+	m.mutation.SetWeight(v)
+	return m
 }
 
 // SetBestFriendID sets the "best_friend_id" field.
-func (pc *PetCreate) SetBestFriendID(u uuid.UUID) *PetCreate {
-	pc.mutation.SetBestFriendID(u)
-	return pc
+func (m *PetCreate) SetBestFriendID(v uuid.UUID) *PetCreate {
+	m.mutation.SetBestFriendID(v)
+	return m
 }
 
 // SetOwnerID sets the "owner_id" field.
-func (pc *PetCreate) SetOwnerID(i int) *PetCreate {
-	pc.mutation.SetOwnerID(i)
-	return pc
+func (m *PetCreate) SetOwnerID(v int) *PetCreate {
+	m.mutation.SetOwnerID(v)
+	return m
 }
 
 // SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (pc *PetCreate) SetNillableOwnerID(i *int) *PetCreate {
-	if i != nil {
-		pc.SetOwnerID(*i)
+func (m *PetCreate) SetNillableOwnerID(v *int) *PetCreate {
+	if v != nil {
+		m.SetOwnerID(*v)
 	}
-	return pc
+	return m
 }
 
 // SetID sets the "id" field.
-func (pc *PetCreate) SetID(u uuid.UUID) *PetCreate {
-	pc.mutation.SetID(u)
-	return pc
+func (m *PetCreate) SetID(v uuid.UUID) *PetCreate {
+	m.mutation.SetID(v)
+	return m
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (pc *PetCreate) SetNillableID(u *uuid.UUID) *PetCreate {
-	if u != nil {
-		pc.SetID(*u)
+func (m *PetCreate) SetNillableID(v *uuid.UUID) *PetCreate {
+	if v != nil {
+		m.SetID(*v)
 	}
-	return pc
+	return m
 }
 
 // SetBestFriend sets the "best_friend" edge to the Pet entity.
-func (pc *PetCreate) SetBestFriend(p *Pet) *PetCreate {
-	return pc.SetBestFriendID(p.ID)
+func (m *PetCreate) SetBestFriend(v *Pet) *PetCreate {
+	return m.SetBestFriendID(v.ID)
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (pc *PetCreate) SetOwner(u *User) *PetCreate {
-	return pc.SetOwnerID(u.ID)
+func (m *PetCreate) SetOwner(v *User) *PetCreate {
+	return m.SetOwnerID(v.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.
-func (pc *PetCreate) Mutation() *PetMutation {
-	return pc.mutation
+func (m *PetCreate) Mutation() *PetMutation {
+	return m.mutation
 }
 
 // Save creates the Pet in the database.
-func (pc *PetCreate) Save(ctx context.Context) (*Pet, error) {
-	pc.defaults()
-	return withHooks(ctx, pc.sqlSave, pc.mutation, pc.hooks)
+func (c *PetCreate) Save(ctx context.Context) (*Pet, error) {
+	c.defaults()
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (pc *PetCreate) SaveX(ctx context.Context) *Pet {
-	v, err := pc.Save(ctx)
+func (c *PetCreate) SaveX(ctx context.Context) *Pet {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -108,62 +108,62 @@ func (pc *PetCreate) SaveX(ctx context.Context) *Pet {
 }
 
 // Exec executes the query.
-func (pc *PetCreate) Exec(ctx context.Context) error {
-	_, err := pc.Save(ctx)
+func (c *PetCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pc *PetCreate) ExecX(ctx context.Context) {
-	if err := pc.Exec(ctx); err != nil {
+func (c *PetCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (pc *PetCreate) defaults() {
-	if _, ok := pc.mutation.OwnerID(); !ok {
+func (c *PetCreate) defaults() {
+	if _, ok := c.mutation.OwnerID(); !ok {
 		v := pet.DefaultOwnerID
-		pc.mutation.SetOwnerID(v)
+		c.mutation.SetOwnerID(v)
 	}
-	if _, ok := pc.mutation.ID(); !ok {
+	if _, ok := c.mutation.ID(); !ok {
 		v := pet.DefaultID()
-		pc.mutation.SetID(v)
+		c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (pc *PetCreate) check() error {
-	if _, ok := pc.mutation.Name(); !ok {
+func (c *PetCreate) check() error {
+	if _, ok := c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Pet.name"`)}
 	}
-	if _, ok := pc.mutation.Age(); !ok {
+	if _, ok := c.mutation.Age(); !ok {
 		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "Pet.age"`)}
 	}
-	if _, ok := pc.mutation.Weight(); !ok {
+	if _, ok := c.mutation.Weight(); !ok {
 		return &ValidationError{Name: "weight", err: errors.New(`ent: missing required field "Pet.weight"`)}
 	}
-	if _, ok := pc.mutation.BestFriendID(); !ok {
+	if _, ok := c.mutation.BestFriendID(); !ok {
 		return &ValidationError{Name: "best_friend_id", err: errors.New(`ent: missing required field "Pet.best_friend_id"`)}
 	}
-	if _, ok := pc.mutation.OwnerID(); !ok {
+	if _, ok := c.mutation.OwnerID(); !ok {
 		return &ValidationError{Name: "owner_id", err: errors.New(`ent: missing required field "Pet.owner_id"`)}
 	}
-	if len(pc.mutation.BestFriendIDs()) == 0 {
+	if len(c.mutation.BestFriendIDs()) == 0 {
 		return &ValidationError{Name: "best_friend", err: errors.New(`ent: missing required edge "Pet.best_friend"`)}
 	}
-	if len(pc.mutation.OwnerIDs()) == 0 {
+	if len(c.mutation.OwnerIDs()) == 0 {
 		return &ValidationError{Name: "owner", err: errors.New(`ent: missing required edge "Pet.owner"`)}
 	}
 	return nil
 }
 
-func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
-	if err := pc.check(); err != nil {
+func (c *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := pc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -176,33 +176,33 @@ func (pc *PetCreate) sqlSave(ctx context.Context) (*Pet, error) {
 			return nil, err
 		}
 	}
-	pc.mutation.id = &_node.ID
-	pc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
+func (c *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Pet{config: pc.config}
+		_node = &Pet{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(pet.Table, sqlgraph.NewFieldSpec(pet.FieldID, field.TypeUUID))
 	)
-	if id, ok := pc.mutation.ID(); ok {
+	if id, ok := c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := pc.mutation.Name(); ok {
+	if value, ok := c.mutation.Name(); ok {
 		_spec.SetField(pet.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := pc.mutation.Age(); ok {
+	if value, ok := c.mutation.Age(); ok {
 		_spec.SetField(pet.FieldAge, field.TypeFloat64, value)
 		_node.Age = value
 	}
-	if value, ok := pc.mutation.Weight(); ok {
+	if value, ok := c.mutation.Weight(); ok {
 		_spec.SetField(pet.FieldWeight, field.TypeFloat64, value)
 		_node.Weight = value
 	}
-	if nodes := pc.mutation.BestFriendIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.BestFriendIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -219,7 +219,7 @@ func (pc *PetCreate) createSpec() (*Pet, *sqlgraph.CreateSpec) {
 		_node.BestFriendID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := pc.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -247,16 +247,16 @@ type PetCreateBulk struct {
 }
 
 // Save creates the Pet entities in the database.
-func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
-	if pcb.err != nil {
-		return nil, pcb.err
+func (c *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(pcb.builders))
-	nodes := make([]*Pet, len(pcb.builders))
-	mutators := make([]Mutator, len(pcb.builders))
-	for i := range pcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Pet, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := pcb.builders[i]
+			builder := c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PetMutation)
@@ -270,11 +270,11 @@ func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, pcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, pcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -294,7 +294,7 @@ func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, pcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -302,8 +302,8 @@ func (pcb *PetCreateBulk) Save(ctx context.Context) ([]*Pet, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (pcb *PetCreateBulk) SaveX(ctx context.Context) []*Pet {
-	v, err := pcb.Save(ctx)
+func (c *PetCreateBulk) SaveX(ctx context.Context) []*Pet {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -311,14 +311,14 @@ func (pcb *PetCreateBulk) SaveX(ctx context.Context) []*Pet {
 }
 
 // Exec executes the query.
-func (pcb *PetCreateBulk) Exec(ctx context.Context) error {
-	_, err := pcb.Save(ctx)
+func (c *PetCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pcb *PetCreateBulk) ExecX(ctx context.Context) {
-	if err := pcb.Exec(ctx); err != nil {
+func (c *PetCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

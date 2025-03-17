@@ -28,40 +28,40 @@ type UserAuditLogQuery struct {
 }
 
 // Where adds a new predicate for the UserAuditLogQuery builder.
-func (ualq *UserAuditLogQuery) Where(ps ...predicate.UserAuditLog) *UserAuditLogQuery {
-	ualq.predicates = append(ualq.predicates, ps...)
-	return ualq
+func (q *UserAuditLogQuery) Where(ps ...predicate.UserAuditLog) *UserAuditLogQuery {
+	q.predicates = append(q.predicates, ps...)
+	return q
 }
 
 // Limit the number of records to be returned by this query.
-func (ualq *UserAuditLogQuery) Limit(limit int) *UserAuditLogQuery {
-	ualq.ctx.Limit = &limit
-	return ualq
+func (q *UserAuditLogQuery) Limit(limit int) *UserAuditLogQuery {
+	q.ctx.Limit = &limit
+	return q
 }
 
 // Offset to start from.
-func (ualq *UserAuditLogQuery) Offset(offset int) *UserAuditLogQuery {
-	ualq.ctx.Offset = &offset
-	return ualq
+func (q *UserAuditLogQuery) Offset(offset int) *UserAuditLogQuery {
+	q.ctx.Offset = &offset
+	return q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (ualq *UserAuditLogQuery) Unique(unique bool) *UserAuditLogQuery {
-	ualq.ctx.Unique = &unique
-	return ualq
+func (q *UserAuditLogQuery) Unique(unique bool) *UserAuditLogQuery {
+	q.ctx.Unique = &unique
+	return q
 }
 
 // Order specifies how the records should be ordered.
-func (ualq *UserAuditLogQuery) Order(o ...userauditlog.OrderOption) *UserAuditLogQuery {
-	ualq.order = append(ualq.order, o...)
-	return ualq
+func (q *UserAuditLogQuery) Order(o ...userauditlog.OrderOption) *UserAuditLogQuery {
+	q.order = append(q.order, o...)
+	return q
 }
 
 // First returns the first UserAuditLog entity from the query.
 // Returns a *NotFoundError when no UserAuditLog was found.
-func (ualq *UserAuditLogQuery) First(ctx context.Context) (*UserAuditLog, error) {
-	nodes, err := ualq.Limit(1).All(setContextOp(ctx, ualq.ctx, ent.OpQueryFirst))
+func (q *UserAuditLogQuery) First(ctx context.Context) (*UserAuditLog, error) {
+	nodes, err := q.Limit(1).All(setContextOp(ctx, q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -72,8 +72,8 @@ func (ualq *UserAuditLogQuery) First(ctx context.Context) (*UserAuditLog, error)
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (ualq *UserAuditLogQuery) FirstX(ctx context.Context) *UserAuditLog {
-	node, err := ualq.First(ctx)
+func (q *UserAuditLogQuery) FirstX(ctx context.Context) *UserAuditLog {
+	node, err := q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -82,9 +82,9 @@ func (ualq *UserAuditLogQuery) FirstX(ctx context.Context) *UserAuditLog {
 
 // FirstID returns the first UserAuditLog ID from the query.
 // Returns a *NotFoundError when no UserAuditLog ID was found.
-func (ualq *UserAuditLogQuery) FirstID(ctx context.Context) (id int, err error) {
+func (q *UserAuditLogQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = ualq.Limit(1).IDs(setContextOp(ctx, ualq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = q.Limit(1).IDs(setContextOp(ctx, q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -95,8 +95,8 @@ func (ualq *UserAuditLogQuery) FirstID(ctx context.Context) (id int, err error) 
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (ualq *UserAuditLogQuery) FirstIDX(ctx context.Context) int {
-	id, err := ualq.FirstID(ctx)
+func (q *UserAuditLogQuery) FirstIDX(ctx context.Context) int {
+	id, err := q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -106,8 +106,8 @@ func (ualq *UserAuditLogQuery) FirstIDX(ctx context.Context) int {
 // Only returns a single UserAuditLog entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one UserAuditLog entity is found.
 // Returns a *NotFoundError when no UserAuditLog entities are found.
-func (ualq *UserAuditLogQuery) Only(ctx context.Context) (*UserAuditLog, error) {
-	nodes, err := ualq.Limit(2).All(setContextOp(ctx, ualq.ctx, ent.OpQueryOnly))
+func (q *UserAuditLogQuery) Only(ctx context.Context) (*UserAuditLog, error) {
+	nodes, err := q.Limit(2).All(setContextOp(ctx, q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -122,8 +122,8 @@ func (ualq *UserAuditLogQuery) Only(ctx context.Context) (*UserAuditLog, error) 
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (ualq *UserAuditLogQuery) OnlyX(ctx context.Context) *UserAuditLog {
-	node, err := ualq.Only(ctx)
+func (q *UserAuditLogQuery) OnlyX(ctx context.Context) *UserAuditLog {
+	node, err := q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -133,9 +133,9 @@ func (ualq *UserAuditLogQuery) OnlyX(ctx context.Context) *UserAuditLog {
 // OnlyID is like Only, but returns the only UserAuditLog ID in the query.
 // Returns a *NotSingularError when more than one UserAuditLog ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (ualq *UserAuditLogQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (q *UserAuditLogQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = ualq.Limit(2).IDs(setContextOp(ctx, ualq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = q.Limit(2).IDs(setContextOp(ctx, q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -150,8 +150,8 @@ func (ualq *UserAuditLogQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (ualq *UserAuditLogQuery) OnlyIDX(ctx context.Context) int {
-	id, err := ualq.OnlyID(ctx)
+func (q *UserAuditLogQuery) OnlyIDX(ctx context.Context) int {
+	id, err := q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -159,18 +159,18 @@ func (ualq *UserAuditLogQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of UserAuditLogs.
-func (ualq *UserAuditLogQuery) All(ctx context.Context) ([]*UserAuditLog, error) {
-	ctx = setContextOp(ctx, ualq.ctx, ent.OpQueryAll)
-	if err := ualq.prepareQuery(ctx); err != nil {
+func (q *UserAuditLogQuery) All(ctx context.Context) ([]*UserAuditLog, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryAll)
+	if err := q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*UserAuditLog, *UserAuditLogQuery]()
-	return withInterceptors[[]*UserAuditLog](ctx, ualq, qr, ualq.inters)
+	return withInterceptors[[]*UserAuditLog](ctx, q, qr, q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (ualq *UserAuditLogQuery) AllX(ctx context.Context) []*UserAuditLog {
-	nodes, err := ualq.All(ctx)
+func (q *UserAuditLogQuery) AllX(ctx context.Context) []*UserAuditLog {
+	nodes, err := q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -178,20 +178,20 @@ func (ualq *UserAuditLogQuery) AllX(ctx context.Context) []*UserAuditLog {
 }
 
 // IDs executes the query and returns a list of UserAuditLog IDs.
-func (ualq *UserAuditLogQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if ualq.ctx.Unique == nil && ualq.path != nil {
-		ualq.Unique(true)
+func (q *UserAuditLogQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if q.ctx.Unique == nil && q.path != nil {
+		q.Unique(true)
 	}
-	ctx = setContextOp(ctx, ualq.ctx, ent.OpQueryIDs)
-	if err = ualq.Select(userauditlog.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryIDs)
+	if err = q.Select(userauditlog.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (ualq *UserAuditLogQuery) IDsX(ctx context.Context) []int {
-	ids, err := ualq.IDs(ctx)
+func (q *UserAuditLogQuery) IDsX(ctx context.Context) []int {
+	ids, err := q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -199,17 +199,17 @@ func (ualq *UserAuditLogQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (ualq *UserAuditLogQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, ualq.ctx, ent.OpQueryCount)
-	if err := ualq.prepareQuery(ctx); err != nil {
+func (q *UserAuditLogQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryCount)
+	if err := q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, ualq, querierCount[*UserAuditLogQuery](), ualq.inters)
+	return withInterceptors[int](ctx, q, querierCount[*UserAuditLogQuery](), q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (ualq *UserAuditLogQuery) CountX(ctx context.Context) int {
-	count, err := ualq.Count(ctx)
+func (q *UserAuditLogQuery) CountX(ctx context.Context) int {
+	count, err := q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -217,9 +217,9 @@ func (ualq *UserAuditLogQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (ualq *UserAuditLogQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, ualq.ctx, ent.OpQueryExist)
-	switch _, err := ualq.FirstID(ctx); {
+func (q *UserAuditLogQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, q.ctx, ent.OpQueryExist)
+	switch _, err := q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -230,8 +230,8 @@ func (ualq *UserAuditLogQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (ualq *UserAuditLogQuery) ExistX(ctx context.Context) bool {
-	exist, err := ualq.Exist(ctx)
+func (q *UserAuditLogQuery) ExistX(ctx context.Context) bool {
+	exist, err := q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -240,19 +240,19 @@ func (ualq *UserAuditLogQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the UserAuditLogQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (ualq *UserAuditLogQuery) Clone() *UserAuditLogQuery {
-	if ualq == nil {
+func (q *UserAuditLogQuery) Clone() *UserAuditLogQuery {
+	if q == nil {
 		return nil
 	}
 	return &UserAuditLogQuery{
-		config:     ualq.config,
-		ctx:        ualq.ctx.Clone(),
-		order:      append([]userauditlog.OrderOption{}, ualq.order...),
-		inters:     append([]Interceptor{}, ualq.inters...),
-		predicates: append([]predicate.UserAuditLog{}, ualq.predicates...),
+		config:     q.config,
+		ctx:        q.ctx.Clone(),
+		order:      append([]userauditlog.OrderOption{}, q.order...),
+		inters:     append([]Interceptor{}, q.inters...),
+		predicates: append([]predicate.UserAuditLog{}, q.predicates...),
 		// clone intermediate query.
-		sql:  ualq.sql.Clone(),
-		path: ualq.path,
+		sql:  q.sql.Clone(),
+		path: q.path,
 	}
 }
 
@@ -270,10 +270,10 @@ func (ualq *UserAuditLogQuery) Clone() *UserAuditLogQuery {
 //		GroupBy(userauditlog.FieldOperationType).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (ualq *UserAuditLogQuery) GroupBy(field string, fields ...string) *UserAuditLogGroupBy {
-	ualq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &UserAuditLogGroupBy{build: ualq}
-	grbuild.flds = &ualq.ctx.Fields
+func (q *UserAuditLogQuery) GroupBy(field string, fields ...string) *UserAuditLogGroupBy {
+	q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &UserAuditLogGroupBy{build: q}
+	grbuild.flds = &q.ctx.Fields
 	grbuild.label = userauditlog.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -291,62 +291,62 @@ func (ualq *UserAuditLogQuery) GroupBy(field string, fields ...string) *UserAudi
 //	client.UserAuditLog.Query().
 //		Select(userauditlog.FieldOperationType).
 //		Scan(ctx, &v)
-func (ualq *UserAuditLogQuery) Select(fields ...string) *UserAuditLogSelect {
-	ualq.ctx.Fields = append(ualq.ctx.Fields, fields...)
-	sbuild := &UserAuditLogSelect{UserAuditLogQuery: ualq}
+func (q *UserAuditLogQuery) Select(fields ...string) *UserAuditLogSelect {
+	q.ctx.Fields = append(q.ctx.Fields, fields...)
+	sbuild := &UserAuditLogSelect{UserAuditLogQuery: q}
 	sbuild.label = userauditlog.Label
-	sbuild.flds, sbuild.scan = &ualq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a UserAuditLogSelect configured with the given aggregations.
-func (ualq *UserAuditLogQuery) Aggregate(fns ...AggregateFunc) *UserAuditLogSelect {
-	return ualq.Select().Aggregate(fns...)
+func (q *UserAuditLogQuery) Aggregate(fns ...AggregateFunc) *UserAuditLogSelect {
+	return q.Select().Aggregate(fns...)
 }
 
-func (ualq *UserAuditLogQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range ualq.inters {
+func (q *UserAuditLogQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, ualq); err != nil {
+			if err := trv.Traverse(ctx, q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range ualq.ctx.Fields {
+	for _, f := range q.ctx.Fields {
 		if !userauditlog.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if ualq.path != nil {
-		prev, err := ualq.path(ctx)
+	if q.path != nil {
+		prev, err := q.path(ctx)
 		if err != nil {
 			return err
 		}
-		ualq.sql = prev
+		q.sql = prev
 	}
 	return nil
 }
 
-func (ualq *UserAuditLogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*UserAuditLog, error) {
+func (q *UserAuditLogQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*UserAuditLog, error) {
 	var (
 		nodes = []*UserAuditLog{}
-		_spec = ualq.querySpec()
+		_spec = q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*UserAuditLog).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &UserAuditLog{config: ualq.config}
+		node := &UserAuditLog{config: q.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, ualq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -355,24 +355,24 @@ func (ualq *UserAuditLogQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	return nodes, nil
 }
 
-func (ualq *UserAuditLogQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := ualq.querySpec()
-	_spec.Node.Columns = ualq.ctx.Fields
-	if len(ualq.ctx.Fields) > 0 {
-		_spec.Unique = ualq.ctx.Unique != nil && *ualq.ctx.Unique
+func (q *UserAuditLogQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := q.querySpec()
+	_spec.Node.Columns = q.ctx.Fields
+	if len(q.ctx.Fields) > 0 {
+		_spec.Unique = q.ctx.Unique != nil && *q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, ualq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, q.driver, _spec)
 }
 
-func (ualq *UserAuditLogQuery) querySpec() *sqlgraph.QuerySpec {
+func (q *UserAuditLogQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(userauditlog.Table, userauditlog.Columns, sqlgraph.NewFieldSpec(userauditlog.FieldID, field.TypeInt))
-	_spec.From = ualq.sql
-	if unique := ualq.ctx.Unique; unique != nil {
+	_spec.From = q.sql
+	if unique := q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if ualq.path != nil {
+	} else if q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := ualq.ctx.Fields; len(fields) > 0 {
+	if fields := q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, userauditlog.FieldID)
 		for i := range fields {
@@ -381,20 +381,20 @@ func (ualq *UserAuditLogQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := ualq.predicates; len(ps) > 0 {
+	if ps := q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := ualq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := ualq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := ualq.order; len(ps) > 0 {
+	if ps := q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -404,33 +404,33 @@ func (ualq *UserAuditLogQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (ualq *UserAuditLogQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(ualq.driver.Dialect())
+func (q *UserAuditLogQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(q.driver.Dialect())
 	t1 := builder.Table(userauditlog.Table)
-	columns := ualq.ctx.Fields
+	columns := q.ctx.Fields
 	if len(columns) == 0 {
 		columns = userauditlog.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if ualq.sql != nil {
-		selector = ualq.sql
+	if q.sql != nil {
+		selector = q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if ualq.ctx.Unique != nil && *ualq.ctx.Unique {
+	if q.ctx.Unique != nil && *q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range ualq.predicates {
+	for _, p := range q.predicates {
 		p(selector)
 	}
-	for _, p := range ualq.order {
+	for _, p := range q.order {
 		p(selector)
 	}
-	if offset := ualq.ctx.Offset; offset != nil {
+	if offset := q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := ualq.ctx.Limit; limit != nil {
+	if limit := q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -457,27 +457,27 @@ func (ualgb *UserAuditLogGroupBy) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*UserAuditLogQuery, *UserAuditLogGroupBy](ctx, ualgb.build, ualgb, ualgb.build.inters, v)
 }
 
-func (ualgb *UserAuditLogGroupBy) sqlScan(ctx context.Context, root *UserAuditLogQuery, v any) error {
+func (q *UserAuditLogGroupBy) sqlScan(ctx context.Context, root *UserAuditLogQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(ualgb.fns))
-	for _, fn := range ualgb.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*ualgb.flds)+len(ualgb.fns))
-		for _, f := range *ualgb.flds {
+		columns := make([]string, 0, len(*q.flds)+len(q.fns))
+		for _, f := range *q.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*ualgb.flds...)...)
+	selector.GroupBy(selector.Columns(*q.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ualgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -505,13 +505,13 @@ func (uals *UserAuditLogSelect) Scan(ctx context.Context, v any) error {
 	return scanWithInterceptors[*UserAuditLogQuery, *UserAuditLogSelect](ctx, uals.UserAuditLogQuery, uals, uals.inters, v)
 }
 
-func (uals *UserAuditLogSelect) sqlScan(ctx context.Context, root *UserAuditLogQuery, v any) error {
+func (q *UserAuditLogSelect) sqlScan(ctx context.Context, root *UserAuditLogQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(uals.fns))
-	for _, fn := range uals.fns {
+	aggregation := make([]string, 0, len(q.fns))
+	for _, fn := range q.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*uals.selector.flds); {
+	switch n := len(*q.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -519,7 +519,7 @@ func (uals *UserAuditLogSelect) sqlScan(ctx context.Context, root *UserAuditLogQ
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := uals.driver.Query(ctx, query, args, rows); err != nil {
+	if err := q.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

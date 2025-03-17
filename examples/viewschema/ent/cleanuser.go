@@ -41,9 +41,9 @@ func (*CleanUser) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the CleanUser fields.
-func (cu *CleanUser) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *CleanUser) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -51,22 +51,22 @@ func (cu *CleanUser) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value.Valid {
-				cu.ID = int(value.Int64)
+				m.ID = int(value.Int64)
 			}
 		case cleanuser.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				cu.Name = value.String
+				m.Name = value.String
 			}
 		case cleanuser.FieldPublicInfo:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field public_info", values[i])
 			} else if value.Valid {
-				cu.PublicInfo = value.String
+				m.PublicInfo = value.String
 			}
 		default:
-			cu.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -74,33 +74,33 @@ func (cu *CleanUser) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the CleanUser.
 // This includes values selected through modifiers, order, etc.
-func (cu *CleanUser) Value(name string) (ent.Value, error) {
-	return cu.selectValues.Get(name)
+func (m *CleanUser) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // Unwrap unwraps the CleanUser entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (cu *CleanUser) Unwrap() *CleanUser {
-	_tx, ok := cu.config.driver.(*txDriver)
+func (m *CleanUser) Unwrap() *CleanUser {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: CleanUser is not a transactional entity")
 	}
-	cu.config.driver = _tx.drv
-	return cu
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (cu *CleanUser) String() string {
+func (m *CleanUser) String() string {
 	var builder strings.Builder
 	builder.WriteString("CleanUser(")
 	builder.WriteString("id=")
-	builder.WriteString(fmt.Sprintf("%v", cu.ID))
+	builder.WriteString(fmt.Sprintf("%v", m.ID))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(cu.Name)
+	builder.WriteString(m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("public_info=")
-	builder.WriteString(cu.PublicInfo)
+	builder.WriteString(m.PublicInfo)
 	builder.WriteByte(')')
 	return builder.String()
 }

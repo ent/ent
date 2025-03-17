@@ -256,8 +256,8 @@ func (c *NodeClient) Update() *NodeUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *NodeClient) UpdateOne(n *Node) *NodeUpdateOne {
-	mutation := newNodeMutation(c.config, OpUpdateOne, withNode(n))
+func (c *NodeClient) UpdateOne(m *Node) *NodeUpdateOne {
+	mutation := newNodeMutation(c.config, OpUpdateOne, withNode(m))
 	return &NodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -274,8 +274,8 @@ func (c *NodeClient) Delete() *NodeDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *NodeClient) DeleteOne(n *Node) *NodeDeleteOne {
-	return c.DeleteOneID(n.ID)
+func (c *NodeClient) DeleteOne(m *Node) *NodeDeleteOne {
+	return c.DeleteOneID(m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -310,32 +310,32 @@ func (c *NodeClient) GetX(ctx context.Context, id int) *Node {
 }
 
 // QueryParent queries the parent edge of a Node.
-func (c *NodeClient) QueryParent(n *Node) *NodeQuery {
+func (c *NodeClient) QueryParent(m *Node) *NodeQuery {
 	query := (&NodeClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := n.ID
+		id := m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(node.Table, node.FieldID, id),
 			sqlgraph.To(node.Table, node.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, node.ParentTable, node.ParentColumn),
 		)
-		fromV = sqlgraph.Neighbors(n.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // QueryChildren queries the children edge of a Node.
-func (c *NodeClient) QueryChildren(n *Node) *NodeQuery {
+func (c *NodeClient) QueryChildren(m *Node) *NodeQuery {
 	query := (&NodeClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := n.ID
+		id := m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(node.Table, node.FieldID, id),
 			sqlgraph.To(node.Table, node.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, node.ChildrenTable, node.ChildrenColumn),
 		)
-		fromV = sqlgraph.Neighbors(n.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query

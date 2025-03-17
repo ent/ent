@@ -26,59 +26,59 @@ type UserUpdate struct {
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	uu.mutation.Where(ps...)
-	return uu
+func (u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetVersion sets the "version" field.
-func (uu *UserUpdate) SetVersion(i int64) *UserUpdate {
-	uu.mutation.ResetVersion()
-	uu.mutation.SetVersion(i)
-	return uu
+func (m *UserUpdate) SetVersion(v int64) *UserUpdate {
+	m.mutation.ResetVersion()
+	m.mutation.SetVersion(v)
+	return m
 }
 
 // SetNillableVersion sets the "version" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableVersion(i *int64) *UserUpdate {
-	if i != nil {
-		uu.SetVersion(*i)
+func (m *UserUpdate) SetNillableVersion(v *int64) *UserUpdate {
+	if v != nil {
+		m.SetVersion(*v)
 	}
-	return uu
+	return m
 }
 
-// AddVersion adds i to the "version" field.
-func (uu *UserUpdate) AddVersion(i int64) *UserUpdate {
-	uu.mutation.AddVersion(i)
-	return uu
+// AddVersion adds value to the "version" field.
+func (m *UserUpdate) AddVersion(v int64) *UserUpdate {
+	m.mutation.AddVersion(v)
+	return m
 }
 
 // SetStatus sets the "status" field.
-func (uu *UserUpdate) SetStatus(u user.Status) *UserUpdate {
-	uu.mutation.SetStatus(u)
-	return uu
+func (m *UserUpdate) SetStatus(v user.Status) *UserUpdate {
+	m.mutation.SetStatus(v)
+	return m
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableStatus(u *user.Status) *UserUpdate {
-	if u != nil {
-		uu.SetStatus(*u)
+func (m *UserUpdate) SetNillableStatus(v *user.Status) *UserUpdate {
+	if v != nil {
+		m.SetStatus(*v)
 	}
-	return uu
+	return m
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uu *UserUpdate) Mutation() *UserMutation {
-	return uu.mutation
+func (m *UserUpdate) Mutation() *UserMutation {
+	return m.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, uu.sqlSave, uu.mutation, uu.hooks)
+func (u *UserUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uu *UserUpdate) SaveX(ctx context.Context) int {
-	affected, err := uu.Save(ctx)
+func (u *UserUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -86,21 +86,21 @@ func (uu *UserUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (uu *UserUpdate) Exec(ctx context.Context) error {
-	_, err := uu.Save(ctx)
+func (u *UserUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uu *UserUpdate) ExecX(ctx context.Context) {
-	if err := uu.Exec(ctx); err != nil {
+func (u *UserUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uu *UserUpdate) check() error {
-	if v, ok := uu.mutation.Status(); ok {
+func (u *UserUpdate) check() error {
+	if v, ok := u.mutation.Status(); ok {
 		if err := user.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "User.status": %w`, err)}
 		}
@@ -108,28 +108,28 @@ func (uu *UserUpdate) check() error {
 	return nil
 }
 
-func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := uu.check(); err != nil {
-		return n, err
+func (u *UserUpdate) sqlSave(ctx context.Context) (_n int, err error) {
+	if err := u.check(); err != nil {
+		return _n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
-	if ps := uu.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uu.mutation.Version(); ok {
+	if value, ok := u.mutation.Version(); ok {
 		_spec.SetField(user.FieldVersion, field.TypeInt64, value)
 	}
-	if value, ok := uu.mutation.AddedVersion(); ok {
+	if value, ok := u.mutation.AddedVersion(); ok {
 		_spec.AddField(user.FieldVersion, field.TypeInt64, value)
 	}
-	if value, ok := uu.mutation.Status(); ok {
+	if value, ok := u.mutation.Status(); ok {
 		_spec.SetField(user.FieldStatus, field.TypeEnum, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -137,8 +137,8 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	uu.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -150,66 +150,66 @@ type UserUpdateOne struct {
 }
 
 // SetVersion sets the "version" field.
-func (uuo *UserUpdateOne) SetVersion(i int64) *UserUpdateOne {
-	uuo.mutation.ResetVersion()
-	uuo.mutation.SetVersion(i)
-	return uuo
+func (m *UserUpdateOne) SetVersion(v int64) *UserUpdateOne {
+	m.mutation.ResetVersion()
+	m.mutation.SetVersion(v)
+	return m
 }
 
 // SetNillableVersion sets the "version" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableVersion(i *int64) *UserUpdateOne {
-	if i != nil {
-		uuo.SetVersion(*i)
+func (m *UserUpdateOne) SetNillableVersion(v *int64) *UserUpdateOne {
+	if v != nil {
+		m.SetVersion(*v)
 	}
-	return uuo
+	return m
 }
 
-// AddVersion adds i to the "version" field.
-func (uuo *UserUpdateOne) AddVersion(i int64) *UserUpdateOne {
-	uuo.mutation.AddVersion(i)
-	return uuo
+// AddVersion adds value to the "version" field.
+func (m *UserUpdateOne) AddVersion(v int64) *UserUpdateOne {
+	m.mutation.AddVersion(v)
+	return m
 }
 
 // SetStatus sets the "status" field.
-func (uuo *UserUpdateOne) SetStatus(u user.Status) *UserUpdateOne {
-	uuo.mutation.SetStatus(u)
-	return uuo
+func (m *UserUpdateOne) SetStatus(v user.Status) *UserUpdateOne {
+	m.mutation.SetStatus(v)
+	return m
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableStatus(u *user.Status) *UserUpdateOne {
-	if u != nil {
-		uuo.SetStatus(*u)
+func (m *UserUpdateOne) SetNillableStatus(v *user.Status) *UserUpdateOne {
+	if v != nil {
+		m.SetStatus(*v)
 	}
-	return uuo
+	return m
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uuo *UserUpdateOne) Mutation() *UserMutation {
-	return uuo.mutation
+func (m *UserUpdateOne) Mutation() *UserMutation {
+	return m.mutation
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uuo *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
-	uuo.mutation.Where(ps...)
-	return uuo
+func (u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
-	uuo.fields = append([]string{field}, fields...)
-	return uuo
+func (u *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated User entity.
-func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	return withHooks(ctx, uuo.sqlSave, uuo.mutation, uuo.hooks)
+func (u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
-	node, err := uuo.Save(ctx)
+func (u *UserUpdateOne) SaveX(ctx context.Context) *User {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -217,21 +217,21 @@ func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
 }
 
 // Exec executes the query on the entity.
-func (uuo *UserUpdateOne) Exec(ctx context.Context) error {
-	_, err := uuo.Save(ctx)
+func (u *UserUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
-	if err := uuo.Exec(ctx); err != nil {
+func (u *UserUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uuo *UserUpdateOne) check() error {
-	if v, ok := uuo.mutation.Status(); ok {
+func (u *UserUpdateOne) check() error {
+	if v, ok := u.mutation.Status(); ok {
 		if err := user.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "User.status": %w`, err)}
 		}
@@ -239,17 +239,17 @@ func (uuo *UserUpdateOne) check() error {
 	return nil
 }
 
-func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
-	if err := uuo.check(); err != nil {
-		return _node, err
+func (u *UserUpdateOne) sqlSave(ctx context.Context) (_n *User, err error) {
+	if err := u.check(); err != nil {
+		return _n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
-	id, ok := uuo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := uuo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, user.FieldID)
 		for _, f := range fields {
@@ -261,26 +261,26 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			}
 		}
 	}
-	if ps := uuo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uuo.mutation.Version(); ok {
+	if value, ok := u.mutation.Version(); ok {
 		_spec.SetField(user.FieldVersion, field.TypeInt64, value)
 	}
-	if value, ok := uuo.mutation.AddedVersion(); ok {
+	if value, ok := u.mutation.AddedVersion(); ok {
 		_spec.AddField(user.FieldVersion, field.TypeInt64, value)
 	}
-	if value, ok := uuo.mutation.Status(); ok {
+	if value, ok := u.mutation.Status(); ok {
 		_spec.SetField(user.FieldStatus, field.TypeEnum, value)
 	}
-	_node = &User{config: uuo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, uuo.driver, _spec); err != nil {
+	_n = &User{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -288,6 +288,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		return nil, err
 	}
-	uuo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

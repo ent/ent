@@ -24,56 +24,56 @@ type CityDelete struct {
 }
 
 // Where appends a list predicates to the CityDelete builder.
-func (cd *CityDelete) Where(ps ...predicate.City) *CityDelete {
-	cd.mutation.Where(ps...)
-	return cd
+func (d *CityDelete) Where(ps ...predicate.City) *CityDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (cd *CityDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, cd.sqlExec, cd.mutation, cd.hooks)
+func (d *CityDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cd *CityDelete) ExecX(ctx context.Context) int {
-	n, err := cd.Exec(ctx)
+func (d *CityDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (cd *CityDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *CityDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(city.Table, sqlgraph.NewFieldSpec(city.FieldID, field.TypeInt))
-	if ps := cd.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, cd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	cd.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // CityDeleteOne is the builder for deleting a single City entity.
 type CityDeleteOne struct {
-	cd *CityDelete
+	d *CityDelete
 }
 
 // Where appends a list predicates to the CityDelete builder.
-func (cdo *CityDeleteOne) Where(ps ...predicate.City) *CityDeleteOne {
-	cdo.cd.mutation.Where(ps...)
-	return cdo
+func (d *CityDeleteOne) Where(ps ...predicate.City) *CityDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (cdo *CityDeleteOne) Exec(ctx context.Context) error {
-	n, err := cdo.cd.Exec(ctx)
+func (d *CityDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (cdo *CityDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cdo *CityDeleteOne) ExecX(ctx context.Context) {
-	if err := cdo.Exec(ctx); err != nil {
+func (d *CityDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

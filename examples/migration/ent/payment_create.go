@@ -26,59 +26,59 @@ type PaymentCreate struct {
 }
 
 // SetCardID sets the "card_id" field.
-func (pc *PaymentCreate) SetCardID(i int) *PaymentCreate {
-	pc.mutation.SetCardID(i)
-	return pc
+func (m *PaymentCreate) SetCardID(v int) *PaymentCreate {
+	m.mutation.SetCardID(v)
+	return m
 }
 
 // SetAmount sets the "amount" field.
-func (pc *PaymentCreate) SetAmount(f float64) *PaymentCreate {
-	pc.mutation.SetAmount(f)
-	return pc
+func (m *PaymentCreate) SetAmount(v float64) *PaymentCreate {
+	m.mutation.SetAmount(v)
+	return m
 }
 
 // SetCurrency sets the "currency" field.
-func (pc *PaymentCreate) SetCurrency(pa payment.Currency) *PaymentCreate {
-	pc.mutation.SetCurrency(pa)
-	return pc
+func (m *PaymentCreate) SetCurrency(v payment.Currency) *PaymentCreate {
+	m.mutation.SetCurrency(v)
+	return m
 }
 
 // SetTime sets the "time" field.
-func (pc *PaymentCreate) SetTime(t time.Time) *PaymentCreate {
-	pc.mutation.SetTime(t)
-	return pc
+func (m *PaymentCreate) SetTime(v time.Time) *PaymentCreate {
+	m.mutation.SetTime(v)
+	return m
 }
 
 // SetDescription sets the "description" field.
-func (pc *PaymentCreate) SetDescription(s string) *PaymentCreate {
-	pc.mutation.SetDescription(s)
-	return pc
+func (m *PaymentCreate) SetDescription(v string) *PaymentCreate {
+	m.mutation.SetDescription(v)
+	return m
 }
 
 // SetStatus sets the "status" field.
-func (pc *PaymentCreate) SetStatus(pa payment.Status) *PaymentCreate {
-	pc.mutation.SetStatus(pa)
-	return pc
+func (m *PaymentCreate) SetStatus(v payment.Status) *PaymentCreate {
+	m.mutation.SetStatus(v)
+	return m
 }
 
 // SetCard sets the "card" edge to the Card entity.
-func (pc *PaymentCreate) SetCard(c *Card) *PaymentCreate {
-	return pc.SetCardID(c.ID)
+func (m *PaymentCreate) SetCard(v *Card) *PaymentCreate {
+	return m.SetCardID(v.ID)
 }
 
 // Mutation returns the PaymentMutation object of the builder.
-func (pc *PaymentCreate) Mutation() *PaymentMutation {
-	return pc.mutation
+func (m *PaymentCreate) Mutation() *PaymentMutation {
+	return m.mutation
 }
 
 // Save creates the Payment in the database.
-func (pc *PaymentCreate) Save(ctx context.Context) (*Payment, error) {
-	return withHooks(ctx, pc.sqlSave, pc.mutation, pc.hooks)
+func (c *PaymentCreate) Save(ctx context.Context) (*Payment, error) {
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (pc *PaymentCreate) SaveX(ctx context.Context) *Payment {
-	v, err := pc.Save(ctx)
+func (c *PaymentCreate) SaveX(ctx context.Context) *Payment {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -86,65 +86,65 @@ func (pc *PaymentCreate) SaveX(ctx context.Context) *Payment {
 }
 
 // Exec executes the query.
-func (pc *PaymentCreate) Exec(ctx context.Context) error {
-	_, err := pc.Save(ctx)
+func (c *PaymentCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pc *PaymentCreate) ExecX(ctx context.Context) {
-	if err := pc.Exec(ctx); err != nil {
+func (c *PaymentCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (pc *PaymentCreate) check() error {
-	if _, ok := pc.mutation.CardID(); !ok {
+func (c *PaymentCreate) check() error {
+	if _, ok := c.mutation.CardID(); !ok {
 		return &ValidationError{Name: "card_id", err: errors.New(`ent: missing required field "Payment.card_id"`)}
 	}
-	if _, ok := pc.mutation.Amount(); !ok {
+	if _, ok := c.mutation.Amount(); !ok {
 		return &ValidationError{Name: "amount", err: errors.New(`ent: missing required field "Payment.amount"`)}
 	}
-	if v, ok := pc.mutation.Amount(); ok {
+	if v, ok := c.mutation.Amount(); ok {
 		if err := payment.AmountValidator(v); err != nil {
 			return &ValidationError{Name: "amount", err: fmt.Errorf(`ent: validator failed for field "Payment.amount": %w`, err)}
 		}
 	}
-	if _, ok := pc.mutation.Currency(); !ok {
+	if _, ok := c.mutation.Currency(); !ok {
 		return &ValidationError{Name: "currency", err: errors.New(`ent: missing required field "Payment.currency"`)}
 	}
-	if v, ok := pc.mutation.Currency(); ok {
+	if v, ok := c.mutation.Currency(); ok {
 		if err := payment.CurrencyValidator(v); err != nil {
 			return &ValidationError{Name: "currency", err: fmt.Errorf(`ent: validator failed for field "Payment.currency": %w`, err)}
 		}
 	}
-	if _, ok := pc.mutation.Time(); !ok {
+	if _, ok := c.mutation.Time(); !ok {
 		return &ValidationError{Name: "time", err: errors.New(`ent: missing required field "Payment.time"`)}
 	}
-	if _, ok := pc.mutation.Description(); !ok {
+	if _, ok := c.mutation.Description(); !ok {
 		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "Payment.description"`)}
 	}
-	if _, ok := pc.mutation.Status(); !ok {
+	if _, ok := c.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Payment.status"`)}
 	}
-	if v, ok := pc.mutation.Status(); ok {
+	if v, ok := c.mutation.Status(); ok {
 		if err := payment.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Payment.status": %w`, err)}
 		}
 	}
-	if len(pc.mutation.CardIDs()) == 0 {
+	if len(c.mutation.CardIDs()) == 0 {
 		return &ValidationError{Name: "card", err: errors.New(`ent: missing required edge "Payment.card"`)}
 	}
 	return nil
 }
 
-func (pc *PaymentCreate) sqlSave(ctx context.Context) (*Payment, error) {
-	if err := pc.check(); err != nil {
+func (c *PaymentCreate) sqlSave(ctx context.Context) (*Payment, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := pc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, pc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -152,37 +152,37 @@ func (pc *PaymentCreate) sqlSave(ctx context.Context) (*Payment, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	pc.mutation.id = &_node.ID
-	pc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (pc *PaymentCreate) createSpec() (*Payment, *sqlgraph.CreateSpec) {
+func (c *PaymentCreate) createSpec() (*Payment, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Payment{config: pc.config}
+		_node = &Payment{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(payment.Table, sqlgraph.NewFieldSpec(payment.FieldID, field.TypeInt))
 	)
-	if value, ok := pc.mutation.Amount(); ok {
+	if value, ok := c.mutation.Amount(); ok {
 		_spec.SetField(payment.FieldAmount, field.TypeFloat64, value)
 		_node.Amount = value
 	}
-	if value, ok := pc.mutation.Currency(); ok {
+	if value, ok := c.mutation.Currency(); ok {
 		_spec.SetField(payment.FieldCurrency, field.TypeEnum, value)
 		_node.Currency = value
 	}
-	if value, ok := pc.mutation.Time(); ok {
+	if value, ok := c.mutation.Time(); ok {
 		_spec.SetField(payment.FieldTime, field.TypeTime, value)
 		_node.Time = value
 	}
-	if value, ok := pc.mutation.Description(); ok {
+	if value, ok := c.mutation.Description(); ok {
 		_spec.SetField(payment.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
-	if value, ok := pc.mutation.Status(); ok {
+	if value, ok := c.mutation.Status(); ok {
 		_spec.SetField(payment.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
 	}
-	if nodes := pc.mutation.CardIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.CardIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -210,16 +210,16 @@ type PaymentCreateBulk struct {
 }
 
 // Save creates the Payment entities in the database.
-func (pcb *PaymentCreateBulk) Save(ctx context.Context) ([]*Payment, error) {
-	if pcb.err != nil {
-		return nil, pcb.err
+func (c *PaymentCreateBulk) Save(ctx context.Context) ([]*Payment, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(pcb.builders))
-	nodes := make([]*Payment, len(pcb.builders))
-	mutators := make([]Mutator, len(pcb.builders))
-	for i := range pcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Payment, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := pcb.builders[i]
+			builder := c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PaymentMutation)
 				if !ok {
@@ -232,11 +232,11 @@ func (pcb *PaymentCreateBulk) Save(ctx context.Context) ([]*Payment, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, pcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, pcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -260,7 +260,7 @@ func (pcb *PaymentCreateBulk) Save(ctx context.Context) ([]*Payment, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, pcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -268,8 +268,8 @@ func (pcb *PaymentCreateBulk) Save(ctx context.Context) ([]*Payment, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (pcb *PaymentCreateBulk) SaveX(ctx context.Context) []*Payment {
-	v, err := pcb.Save(ctx)
+func (c *PaymentCreateBulk) SaveX(ctx context.Context) []*Payment {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -277,14 +277,14 @@ func (pcb *PaymentCreateBulk) SaveX(ctx context.Context) []*Payment {
 }
 
 // Exec executes the query.
-func (pcb *PaymentCreateBulk) Exec(ctx context.Context) error {
-	_, err := pcb.Save(ctx)
+func (c *PaymentCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pcb *PaymentCreateBulk) ExecX(ctx context.Context) {
-	if err := pcb.Exec(ctx); err != nil {
+func (c *PaymentCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

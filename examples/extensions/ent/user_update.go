@@ -22,30 +22,30 @@ type UserUpdate struct {
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	uu.mutation.Where(ps...)
-	return uu
+func (u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetLocation sets the "location" field.
-func (uu *UserUpdate) SetLocation(b []byte) *UserUpdate {
-	uu.mutation.SetLocation(b)
-	return uu
+func (m *UserUpdate) SetLocation(v []byte) *UserUpdate {
+	m.mutation.SetLocation(v)
+	return m
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uu *UserUpdate) Mutation() *UserMutation {
-	return uu.mutation
+func (m *UserUpdate) Mutation() *UserMutation {
+	return m.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, uu.sqlSave, uu.mutation, uu.hooks)
+func (u *UserUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uu *UserUpdate) SaveX(ctx context.Context) int {
-	affected, err := uu.Save(ctx)
+func (u *UserUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -53,31 +53,31 @@ func (uu *UserUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (uu *UserUpdate) Exec(ctx context.Context) error {
-	_, err := uu.Save(ctx)
+func (u *UserUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uu *UserUpdate) ExecX(ctx context.Context) {
-	if err := uu.Exec(ctx); err != nil {
+func (u *UserUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (u *UserUpdate) sqlSave(ctx context.Context) (_n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
-	if ps := uu.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uu.mutation.Location(); ok {
+	if value, ok := u.mutation.Location(); ok {
 		_spec.SetField(user.FieldLocation, field.TypeBytes, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -85,8 +85,8 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	uu.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -98,37 +98,37 @@ type UserUpdateOne struct {
 }
 
 // SetLocation sets the "location" field.
-func (uuo *UserUpdateOne) SetLocation(b []byte) *UserUpdateOne {
-	uuo.mutation.SetLocation(b)
-	return uuo
+func (m *UserUpdateOne) SetLocation(v []byte) *UserUpdateOne {
+	m.mutation.SetLocation(v)
+	return m
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uuo *UserUpdateOne) Mutation() *UserMutation {
-	return uuo.mutation
+func (m *UserUpdateOne) Mutation() *UserMutation {
+	return m.mutation
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uuo *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
-	uuo.mutation.Where(ps...)
-	return uuo
+func (u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
-	uuo.fields = append([]string{field}, fields...)
-	return uuo
+func (u *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated User entity.
-func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	return withHooks(ctx, uuo.sqlSave, uuo.mutation, uuo.hooks)
+func (u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
-	node, err := uuo.Save(ctx)
+func (u *UserUpdateOne) SaveX(ctx context.Context) *User {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -136,26 +136,26 @@ func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
 }
 
 // Exec executes the query on the entity.
-func (uuo *UserUpdateOne) Exec(ctx context.Context) error {
-	_, err := uuo.Save(ctx)
+func (u *UserUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
-	if err := uuo.Exec(ctx); err != nil {
+func (u *UserUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
+func (u *UserUpdateOne) sqlSave(ctx context.Context) (_n *User, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
-	id, ok := uuo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := uuo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, user.FieldID)
 		for _, f := range fields {
@@ -167,20 +167,20 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			}
 		}
 	}
-	if ps := uuo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uuo.mutation.Location(); ok {
+	if value, ok := u.mutation.Location(); ok {
 		_spec.SetField(user.FieldLocation, field.TypeBytes, value)
 	}
-	_node = &User{config: uuo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, uuo.driver, _spec); err != nil {
+	_n = &User{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -188,6 +188,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		return nil, err
 	}
-	uuo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

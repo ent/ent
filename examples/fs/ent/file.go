@@ -83,9 +83,9 @@ func (*File) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the File fields.
-func (f *File) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *File) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -94,27 +94,27 @@ func (f *File) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			f.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case file.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				f.Name = value.String
+				m.Name = value.String
 			}
 		case file.FieldDeleted:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field deleted", values[i])
 			} else if value.Valid {
-				f.Deleted = value.Bool
+				m.Deleted = value.Bool
 			}
 		case file.FieldParentID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
 			} else if value.Valid {
-				f.ParentID = int(value.Int64)
+				m.ParentID = int(value.Int64)
 			}
 		default:
-			f.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -122,51 +122,51 @@ func (f *File) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the File.
 // This includes values selected through modifiers, order, etc.
-func (f *File) Value(name string) (ent.Value, error) {
-	return f.selectValues.Get(name)
+func (m *File) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryParent queries the "parent" edge of the File entity.
-func (f *File) QueryParent() *FileQuery {
-	return NewFileClient(f.config).QueryParent(f)
+func (m *File) QueryParent() *FileQuery {
+	return NewFileClient(m.config).QueryParent(m)
 }
 
 // QueryChildren queries the "children" edge of the File entity.
-func (f *File) QueryChildren() *FileQuery {
-	return NewFileClient(f.config).QueryChildren(f)
+func (m *File) QueryChildren() *FileQuery {
+	return NewFileClient(m.config).QueryChildren(m)
 }
 
 // Update returns a builder for updating this File.
 // Note that you need to call File.Unwrap() before calling this method if this File
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (f *File) Update() *FileUpdateOne {
-	return NewFileClient(f.config).UpdateOne(f)
+func (m *File) Update() *FileUpdateOne {
+	return NewFileClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the File entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (f *File) Unwrap() *File {
-	_tx, ok := f.config.driver.(*txDriver)
+func (m *File) Unwrap() *File {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: File is not a transactional entity")
 	}
-	f.config.driver = _tx.drv
-	return f
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (f *File) String() string {
+func (m *File) String() string {
 	var builder strings.Builder
 	builder.WriteString("File(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", f.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("name=")
-	builder.WriteString(f.Name)
+	builder.WriteString(m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("deleted=")
-	builder.WriteString(fmt.Sprintf("%v", f.Deleted))
+	builder.WriteString(fmt.Sprintf("%v", m.Deleted))
 	builder.WriteString(", ")
 	builder.WriteString("parent_id=")
-	builder.WriteString(fmt.Sprintf("%v", f.ParentID))
+	builder.WriteString(fmt.Sprintf("%v", m.ParentID))
 	builder.WriteByte(')')
 	return builder.String()
 }

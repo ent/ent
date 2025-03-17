@@ -75,9 +75,9 @@ func (*Car) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Car fields.
-func (c *Car) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Car) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -86,28 +86,28 @@ func (c *Car) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			c.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case car.FieldModel:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field model", values[i])
 			} else if value.Valid {
-				c.Model = value.String
+				m.Model = value.String
 			}
 		case car.FieldRegisteredAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field registered_at", values[i])
 			} else if value.Valid {
-				c.RegisteredAt = value.Time
+				m.RegisteredAt = value.Time
 			}
 		case car.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field user_cars", value)
 			} else if value.Valid {
-				c.user_cars = new(int)
-				*c.user_cars = int(value.Int64)
+				m.user_cars = new(int)
+				*m.user_cars = int(value.Int64)
 			}
 		default:
-			c.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -115,43 +115,43 @@ func (c *Car) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Car.
 // This includes values selected through modifiers, order, etc.
-func (c *Car) Value(name string) (ent.Value, error) {
-	return c.selectValues.Get(name)
+func (m *Car) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryOwner queries the "owner" edge of the Car entity.
-func (c *Car) QueryOwner() *UserQuery {
-	return NewCarClient(c.config).QueryOwner(c)
+func (m *Car) QueryOwner() *UserQuery {
+	return NewCarClient(m.config).QueryOwner(m)
 }
 
 // Update returns a builder for updating this Car.
 // Note that you need to call Car.Unwrap() before calling this method if this Car
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (c *Car) Update() *CarUpdateOne {
-	return NewCarClient(c.config).UpdateOne(c)
+func (m *Car) Update() *CarUpdateOne {
+	return NewCarClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Car entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (c *Car) Unwrap() *Car {
-	_tx, ok := c.config.driver.(*txDriver)
+func (m *Car) Unwrap() *Car {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Car is not a transactional entity")
 	}
-	c.config.driver = _tx.drv
-	return c
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (c *Car) String() string {
+func (m *Car) String() string {
 	var builder strings.Builder
 	builder.WriteString("Car(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("model=")
-	builder.WriteString(c.Model)
+	builder.WriteString(m.Model)
 	builder.WriteString(", ")
 	builder.WriteString("registered_at=")
-	builder.WriteString(c.RegisteredAt.Format(time.ANSIC))
+	builder.WriteString(m.RegisteredAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

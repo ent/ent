@@ -25,39 +25,39 @@ type CityCreate struct {
 }
 
 // SetName sets the "name" field.
-func (cc *CityCreate) SetName(s string) *CityCreate {
-	cc.mutation.SetName(s)
-	return cc
+func (m *CityCreate) SetName(v string) *CityCreate {
+	m.mutation.SetName(v)
+	return m
 }
 
 // AddStreetIDs adds the "streets" edge to the Street entity by IDs.
-func (cc *CityCreate) AddStreetIDs(ids ...int) *CityCreate {
-	cc.mutation.AddStreetIDs(ids...)
-	return cc
+func (m *CityCreate) AddStreetIDs(ids ...int) *CityCreate {
+	m.mutation.AddStreetIDs(ids...)
+	return m
 }
 
 // AddStreets adds the "streets" edges to the Street entity.
-func (cc *CityCreate) AddStreets(s ...*Street) *CityCreate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (m *CityCreate) AddStreets(v ...*Street) *CityCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return cc.AddStreetIDs(ids...)
+	return m.AddStreetIDs(ids...)
 }
 
 // Mutation returns the CityMutation object of the builder.
-func (cc *CityCreate) Mutation() *CityMutation {
-	return cc.mutation
+func (m *CityCreate) Mutation() *CityMutation {
+	return m.mutation
 }
 
 // Save creates the City in the database.
-func (cc *CityCreate) Save(ctx context.Context) (*City, error) {
-	return withHooks(ctx, cc.sqlSave, cc.mutation, cc.hooks)
+func (c *CityCreate) Save(ctx context.Context) (*City, error) {
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (cc *CityCreate) SaveX(ctx context.Context) *City {
-	v, err := cc.Save(ctx)
+func (c *CityCreate) SaveX(ctx context.Context) *City {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -65,32 +65,32 @@ func (cc *CityCreate) SaveX(ctx context.Context) *City {
 }
 
 // Exec executes the query.
-func (cc *CityCreate) Exec(ctx context.Context) error {
-	_, err := cc.Save(ctx)
+func (c *CityCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cc *CityCreate) ExecX(ctx context.Context) {
-	if err := cc.Exec(ctx); err != nil {
+func (c *CityCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cc *CityCreate) check() error {
-	if _, ok := cc.mutation.Name(); !ok {
+func (c *CityCreate) check() error {
+	if _, ok := c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "City.name"`)}
 	}
 	return nil
 }
 
-func (cc *CityCreate) sqlSave(ctx context.Context) (*City, error) {
-	if err := cc.check(); err != nil {
+func (c *CityCreate) sqlSave(ctx context.Context) (*City, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := cc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -98,21 +98,21 @@ func (cc *CityCreate) sqlSave(ctx context.Context) (*City, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	cc.mutation.id = &_node.ID
-	cc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (cc *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
+func (c *CityCreate) createSpec() (*City, *sqlgraph.CreateSpec) {
 	var (
-		_node = &City{config: cc.config}
+		_node = &City{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(city.Table, sqlgraph.NewFieldSpec(city.FieldID, field.TypeInt))
 	)
-	if value, ok := cc.mutation.Name(); ok {
+	if value, ok := c.mutation.Name(); ok {
 		_spec.SetField(city.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if nodes := cc.mutation.StreetsIDs(); len(nodes) > 0 {
+	if nodes := c.mutation.StreetsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -139,16 +139,16 @@ type CityCreateBulk struct {
 }
 
 // Save creates the City entities in the database.
-func (ccb *CityCreateBulk) Save(ctx context.Context) ([]*City, error) {
-	if ccb.err != nil {
-		return nil, ccb.err
+func (c *CityCreateBulk) Save(ctx context.Context) ([]*City, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
-	nodes := make([]*City, len(ccb.builders))
-	mutators := make([]Mutator, len(ccb.builders))
-	for i := range ccb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*City, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := ccb.builders[i]
+			builder := c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CityMutation)
 				if !ok {
@@ -161,11 +161,11 @@ func (ccb *CityCreateBulk) Save(ctx context.Context) ([]*City, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, ccb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ccb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -189,7 +189,7 @@ func (ccb *CityCreateBulk) Save(ctx context.Context) ([]*City, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, ccb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -197,8 +197,8 @@ func (ccb *CityCreateBulk) Save(ctx context.Context) ([]*City, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ccb *CityCreateBulk) SaveX(ctx context.Context) []*City {
-	v, err := ccb.Save(ctx)
+func (c *CityCreateBulk) SaveX(ctx context.Context) []*City {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -206,14 +206,14 @@ func (ccb *CityCreateBulk) SaveX(ctx context.Context) []*City {
 }
 
 // Exec executes the query.
-func (ccb *CityCreateBulk) Exec(ctx context.Context) error {
-	_, err := ccb.Save(ctx)
+func (c *CityCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ccb *CityCreateBulk) ExecX(ctx context.Context) {
-	if err := ccb.Exec(ctx); err != nil {
+func (c *CityCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

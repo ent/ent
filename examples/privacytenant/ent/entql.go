@@ -124,13 +124,13 @@ type predicateAdder interface {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (gq *GroupQuery) addPredicate(pred func(s *sql.Selector)) {
-	gq.predicates = append(gq.predicates, pred)
+func (q *GroupQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the GroupQuery builder.
-func (gq *GroupQuery) Filter() *GroupFilter {
-	return &GroupFilter{config: gq.config, predicateAdder: gq}
+func (q *GroupQuery) Filter() *GroupFilter {
+	return &GroupFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -202,13 +202,13 @@ func (f *GroupFilter) WhereHasUsersWith(preds ...predicate.User) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (tq *TenantQuery) addPredicate(pred func(s *sql.Selector)) {
-	tq.predicates = append(tq.predicates, pred)
+func (q *TenantQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the TenantQuery builder.
-func (tq *TenantQuery) Filter() *TenantFilter {
-	return &TenantFilter{config: tq.config, predicateAdder: tq}
+func (q *TenantQuery) Filter() *TenantFilter {
+	return &TenantFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -247,13 +247,13 @@ func (f *TenantFilter) WhereName(p entql.StringP) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (uq *UserQuery) addPredicate(pred func(s *sql.Selector)) {
-	uq.predicates = append(uq.predicates, pred)
+func (q *UserQuery) addPredicate(pred func(s *sql.Selector)) {
+	q.predicates = append(q.predicates, pred)
 }
 
 // Filter returns a Filter implementation to apply filters on the UserQuery builder.
-func (uq *UserQuery) Filter() *UserFilter {
-	return &UserFilter{config: uq.config, predicateAdder: uq}
+func (q *UserQuery) Filter() *UserFilter {
+	return &UserFilter{config: q.config, predicateAdder: q}
 }
 
 // addPredicate implements the predicateAdder interface.

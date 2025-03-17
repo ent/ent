@@ -27,84 +27,84 @@ type PetUpdate struct {
 }
 
 // Where appends a list predicates to the PetUpdate builder.
-func (pu *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
-	pu.mutation.Where(ps...)
-	return pu
+func (u *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetAge sets the "age" field.
-func (pu *PetUpdate) SetAge(i int) *PetUpdate {
-	pu.mutation.ResetAge()
-	pu.mutation.SetAge(i)
-	return pu
+func (m *PetUpdate) SetAge(v int) *PetUpdate {
+	m.mutation.ResetAge()
+	m.mutation.SetAge(v)
+	return m
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (pu *PetUpdate) SetNillableAge(i *int) *PetUpdate {
-	if i != nil {
-		pu.SetAge(*i)
+func (m *PetUpdate) SetNillableAge(v *int) *PetUpdate {
+	if v != nil {
+		m.SetAge(*v)
 	}
-	return pu
+	return m
 }
 
-// AddAge adds i to the "age" field.
-func (pu *PetUpdate) AddAge(i int) *PetUpdate {
-	pu.mutation.AddAge(i)
-	return pu
+// AddAge adds value to the "age" field.
+func (m *PetUpdate) AddAge(v int) *PetUpdate {
+	m.mutation.AddAge(v)
+	return m
 }
 
 // SetName sets the "name" field.
-func (pu *PetUpdate) SetName(s string) *PetUpdate {
-	pu.mutation.SetName(s)
-	return pu
+func (m *PetUpdate) SetName(v string) *PetUpdate {
+	m.mutation.SetName(v)
+	return m
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (pu *PetUpdate) SetNillableName(s *string) *PetUpdate {
-	if s != nil {
-		pu.SetName(*s)
+func (m *PetUpdate) SetNillableName(v *string) *PetUpdate {
+	if v != nil {
+		m.SetName(*v)
 	}
-	return pu
+	return m
 }
 
 // SetOwnerID sets the "owner_id" field.
-func (pu *PetUpdate) SetOwnerID(i int) *PetUpdate {
-	pu.mutation.SetOwnerID(i)
-	return pu
+func (m *PetUpdate) SetOwnerID(v int) *PetUpdate {
+	m.mutation.SetOwnerID(v)
+	return m
 }
 
 // SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (pu *PetUpdate) SetNillableOwnerID(i *int) *PetUpdate {
-	if i != nil {
-		pu.SetOwnerID(*i)
+func (m *PetUpdate) SetNillableOwnerID(v *int) *PetUpdate {
+	if v != nil {
+		m.SetOwnerID(*v)
 	}
-	return pu
+	return m
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (pu *PetUpdate) SetOwner(u *User) *PetUpdate {
-	return pu.SetOwnerID(u.ID)
+func (m *PetUpdate) SetOwner(v *User) *PetUpdate {
+	return m.SetOwnerID(v.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.
-func (pu *PetUpdate) Mutation() *PetMutation {
-	return pu.mutation
+func (m *PetUpdate) Mutation() *PetMutation {
+	return m.mutation
 }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (pu *PetUpdate) ClearOwner() *PetUpdate {
-	pu.mutation.ClearOwner()
-	return pu
+func (u *PetUpdate) ClearOwner() *PetUpdate {
+	u.mutation.ClearOwner()
+	return u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (pu *PetUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, pu.sqlSave, pu.mutation, pu.hooks)
+func (u *PetUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (pu *PetUpdate) SaveX(ctx context.Context) int {
-	affected, err := pu.Save(ctx)
+func (u *PetUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -112,48 +112,48 @@ func (pu *PetUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (pu *PetUpdate) Exec(ctx context.Context) error {
-	_, err := pu.Save(ctx)
+func (u *PetUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pu *PetUpdate) ExecX(ctx context.Context) {
-	if err := pu.Exec(ctx); err != nil {
+func (u *PetUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (pu *PetUpdate) check() error {
-	if pu.mutation.OwnerCleared() && len(pu.mutation.OwnerIDs()) > 0 {
+func (u *PetUpdate) check() error {
+	if u.mutation.OwnerCleared() && len(u.mutation.OwnerIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Pet.owner"`)
 	}
 	return nil
 }
 
-func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := pu.check(); err != nil {
-		return n, err
+func (u *PetUpdate) sqlSave(ctx context.Context) (_n int, err error) {
+	if err := u.check(); err != nil {
+		return _n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(pet.Table, pet.Columns, sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt))
-	if ps := pu.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := pu.mutation.Age(); ok {
+	if value, ok := u.mutation.Age(); ok {
 		_spec.SetField(pet.FieldAge, field.TypeInt, value)
 	}
-	if value, ok := pu.mutation.AddedAge(); ok {
+	if value, ok := u.mutation.AddedAge(); ok {
 		_spec.AddField(pet.FieldAge, field.TypeInt, value)
 	}
-	if value, ok := pu.mutation.Name(); ok {
+	if value, ok := u.mutation.Name(); ok {
 		_spec.SetField(pet.FieldName, field.TypeString, value)
 	}
-	if pu.mutation.OwnerCleared() {
+	if u.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -166,7 +166,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pu.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -182,7 +182,7 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{pet.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -190,8 +190,8 @@ func (pu *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	pu.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // PetUpdateOne is the builder for updating a single Pet entity.
@@ -203,91 +203,91 @@ type PetUpdateOne struct {
 }
 
 // SetAge sets the "age" field.
-func (puo *PetUpdateOne) SetAge(i int) *PetUpdateOne {
-	puo.mutation.ResetAge()
-	puo.mutation.SetAge(i)
-	return puo
+func (m *PetUpdateOne) SetAge(v int) *PetUpdateOne {
+	m.mutation.ResetAge()
+	m.mutation.SetAge(v)
+	return m
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (puo *PetUpdateOne) SetNillableAge(i *int) *PetUpdateOne {
-	if i != nil {
-		puo.SetAge(*i)
+func (m *PetUpdateOne) SetNillableAge(v *int) *PetUpdateOne {
+	if v != nil {
+		m.SetAge(*v)
 	}
-	return puo
+	return m
 }
 
-// AddAge adds i to the "age" field.
-func (puo *PetUpdateOne) AddAge(i int) *PetUpdateOne {
-	puo.mutation.AddAge(i)
-	return puo
+// AddAge adds value to the "age" field.
+func (m *PetUpdateOne) AddAge(v int) *PetUpdateOne {
+	m.mutation.AddAge(v)
+	return m
 }
 
 // SetName sets the "name" field.
-func (puo *PetUpdateOne) SetName(s string) *PetUpdateOne {
-	puo.mutation.SetName(s)
-	return puo
+func (m *PetUpdateOne) SetName(v string) *PetUpdateOne {
+	m.mutation.SetName(v)
+	return m
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (puo *PetUpdateOne) SetNillableName(s *string) *PetUpdateOne {
-	if s != nil {
-		puo.SetName(*s)
+func (m *PetUpdateOne) SetNillableName(v *string) *PetUpdateOne {
+	if v != nil {
+		m.SetName(*v)
 	}
-	return puo
+	return m
 }
 
 // SetOwnerID sets the "owner_id" field.
-func (puo *PetUpdateOne) SetOwnerID(i int) *PetUpdateOne {
-	puo.mutation.SetOwnerID(i)
-	return puo
+func (m *PetUpdateOne) SetOwnerID(v int) *PetUpdateOne {
+	m.mutation.SetOwnerID(v)
+	return m
 }
 
 // SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (puo *PetUpdateOne) SetNillableOwnerID(i *int) *PetUpdateOne {
-	if i != nil {
-		puo.SetOwnerID(*i)
+func (m *PetUpdateOne) SetNillableOwnerID(v *int) *PetUpdateOne {
+	if v != nil {
+		m.SetOwnerID(*v)
 	}
-	return puo
+	return m
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (puo *PetUpdateOne) SetOwner(u *User) *PetUpdateOne {
-	return puo.SetOwnerID(u.ID)
+func (m *PetUpdateOne) SetOwner(v *User) *PetUpdateOne {
+	return m.SetOwnerID(v.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.
-func (puo *PetUpdateOne) Mutation() *PetMutation {
-	return puo.mutation
+func (m *PetUpdateOne) Mutation() *PetMutation {
+	return m.mutation
 }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (puo *PetUpdateOne) ClearOwner() *PetUpdateOne {
-	puo.mutation.ClearOwner()
-	return puo
+func (u *PetUpdateOne) ClearOwner() *PetUpdateOne {
+	u.mutation.ClearOwner()
+	return u
 }
 
 // Where appends a list predicates to the PetUpdate builder.
-func (puo *PetUpdateOne) Where(ps ...predicate.Pet) *PetUpdateOne {
-	puo.mutation.Where(ps...)
-	return puo
+func (u *PetUpdateOne) Where(ps ...predicate.Pet) *PetUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (puo *PetUpdateOne) Select(field string, fields ...string) *PetUpdateOne {
-	puo.fields = append([]string{field}, fields...)
-	return puo
+func (u *PetUpdateOne) Select(field string, fields ...string) *PetUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated Pet entity.
-func (puo *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
-	return withHooks(ctx, puo.sqlSave, puo.mutation, puo.hooks)
+func (u *PetUpdateOne) Save(ctx context.Context) (*Pet, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (puo *PetUpdateOne) SaveX(ctx context.Context) *Pet {
-	node, err := puo.Save(ctx)
+func (u *PetUpdateOne) SaveX(ctx context.Context) *Pet {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -295,37 +295,37 @@ func (puo *PetUpdateOne) SaveX(ctx context.Context) *Pet {
 }
 
 // Exec executes the query on the entity.
-func (puo *PetUpdateOne) Exec(ctx context.Context) error {
-	_, err := puo.Save(ctx)
+func (u *PetUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (puo *PetUpdateOne) ExecX(ctx context.Context) {
-	if err := puo.Exec(ctx); err != nil {
+func (u *PetUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (puo *PetUpdateOne) check() error {
-	if puo.mutation.OwnerCleared() && len(puo.mutation.OwnerIDs()) > 0 {
+func (u *PetUpdateOne) check() error {
+	if u.mutation.OwnerCleared() && len(u.mutation.OwnerIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Pet.owner"`)
 	}
 	return nil
 }
 
-func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
-	if err := puo.check(); err != nil {
-		return _node, err
+func (u *PetUpdateOne) sqlSave(ctx context.Context) (_n *Pet, err error) {
+	if err := u.check(); err != nil {
+		return _n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(pet.Table, pet.Columns, sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt))
-	id, ok := puo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Pet.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := puo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, pet.FieldID)
 		for _, f := range fields {
@@ -337,23 +337,23 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 			}
 		}
 	}
-	if ps := puo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := puo.mutation.Age(); ok {
+	if value, ok := u.mutation.Age(); ok {
 		_spec.SetField(pet.FieldAge, field.TypeInt, value)
 	}
-	if value, ok := puo.mutation.AddedAge(); ok {
+	if value, ok := u.mutation.AddedAge(); ok {
 		_spec.AddField(pet.FieldAge, field.TypeInt, value)
 	}
-	if value, ok := puo.mutation.Name(); ok {
+	if value, ok := u.mutation.Name(); ok {
 		_spec.SetField(pet.FieldName, field.TypeString, value)
 	}
-	if puo.mutation.OwnerCleared() {
+	if u.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -366,7 +366,7 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := puo.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -382,10 +382,10 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Pet{config: puo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, puo.driver, _spec); err != nil {
+	_n = &Pet{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{pet.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -393,6 +393,6 @@ func (puo *PetUpdateOne) sqlSave(ctx context.Context) (_node *Pet, err error) {
 		}
 		return nil, err
 	}
-	puo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

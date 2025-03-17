@@ -79,9 +79,9 @@ func (*Node) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Node fields.
-func (n *Node) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Node) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -90,21 +90,21 @@ func (n *Node) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			n.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case node.FieldValue:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field value", values[i])
 			} else if value.Valid {
-				n.Value = int(value.Int64)
+				m.Value = int(value.Int64)
 			}
 		case node.FieldPrevID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field prev_id", values[i])
 			} else if value.Valid {
-				n.PrevID = int(value.Int64)
+				m.PrevID = int(value.Int64)
 			}
 		default:
-			n.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -112,48 +112,48 @@ func (n *Node) assignValues(columns []string, values []any) error {
 
 // GetValue returns the ent.Value that was dynamically selected and assigned to the Node.
 // This includes values selected through modifiers, order, etc.
-func (n *Node) GetValue(name string) (ent.Value, error) {
-	return n.selectValues.Get(name)
+func (m *Node) GetValue(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryPrev queries the "prev" edge of the Node entity.
-func (n *Node) QueryPrev() *NodeQuery {
-	return NewNodeClient(n.config).QueryPrev(n)
+func (m *Node) QueryPrev() *NodeQuery {
+	return NewNodeClient(m.config).QueryPrev(m)
 }
 
 // QueryNext queries the "next" edge of the Node entity.
-func (n *Node) QueryNext() *NodeQuery {
-	return NewNodeClient(n.config).QueryNext(n)
+func (m *Node) QueryNext() *NodeQuery {
+	return NewNodeClient(m.config).QueryNext(m)
 }
 
 // Update returns a builder for updating this Node.
 // Note that you need to call Node.Unwrap() before calling this method if this Node
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (n *Node) Update() *NodeUpdateOne {
-	return NewNodeClient(n.config).UpdateOne(n)
+func (m *Node) Update() *NodeUpdateOne {
+	return NewNodeClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Node entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (n *Node) Unwrap() *Node {
-	_tx, ok := n.config.driver.(*txDriver)
+func (m *Node) Unwrap() *Node {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Node is not a transactional entity")
 	}
-	n.config.driver = _tx.drv
-	return n
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (n *Node) String() string {
+func (m *Node) String() string {
 	var builder strings.Builder
 	builder.WriteString("Node(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", n.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("value=")
-	builder.WriteString(fmt.Sprintf("%v", n.Value))
+	builder.WriteString(fmt.Sprintf("%v", m.Value))
 	builder.WriteString(", ")
 	builder.WriteString("prev_id=")
-	builder.WriteString(fmt.Sprintf("%v", n.PrevID))
+	builder.WriteString(fmt.Sprintf("%v", m.PrevID))
 	builder.WriteByte(')')
 	return builder.String()
 }

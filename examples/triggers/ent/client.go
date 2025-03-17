@@ -261,8 +261,8 @@ func (c *UserClient) Update() *UserUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
-	mutation := newUserMutation(c.config, OpUpdateOne, withUser(u))
+func (c *UserClient) UpdateOne(m *User) *UserUpdateOne {
+	mutation := newUserMutation(c.config, OpUpdateOne, withUser(m))
 	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -279,8 +279,8 @@ func (c *UserClient) Delete() *UserDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
-	return c.DeleteOneID(u.ID)
+func (c *UserClient) DeleteOne(m *User) *UserDeleteOne {
+	return c.DeleteOneID(m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -394,8 +394,8 @@ func (c *UserAuditLogClient) Update() *UserAuditLogUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *UserAuditLogClient) UpdateOne(ual *UserAuditLog) *UserAuditLogUpdateOne {
-	mutation := newUserAuditLogMutation(c.config, OpUpdateOne, withUserAuditLog(ual))
+func (c *UserAuditLogClient) UpdateOne(m *UserAuditLog) *UserAuditLogUpdateOne {
+	mutation := newUserAuditLogMutation(c.config, OpUpdateOne, withUserAuditLog(m))
 	return &UserAuditLogUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -412,8 +412,8 @@ func (c *UserAuditLogClient) Delete() *UserAuditLogDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *UserAuditLogClient) DeleteOne(ual *UserAuditLog) *UserAuditLogDeleteOne {
-	return c.DeleteOneID(ual.ID)
+func (c *UserAuditLogClient) DeleteOne(m *UserAuditLog) *UserAuditLogDeleteOne {
+	return c.DeleteOneID(m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.

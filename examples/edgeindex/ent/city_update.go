@@ -27,74 +27,74 @@ type CityUpdate struct {
 }
 
 // Where appends a list predicates to the CityUpdate builder.
-func (cu *CityUpdate) Where(ps ...predicate.City) *CityUpdate {
-	cu.mutation.Where(ps...)
-	return cu
+func (u *CityUpdate) Where(ps ...predicate.City) *CityUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetName sets the "name" field.
-func (cu *CityUpdate) SetName(s string) *CityUpdate {
-	cu.mutation.SetName(s)
-	return cu
+func (m *CityUpdate) SetName(v string) *CityUpdate {
+	m.mutation.SetName(v)
+	return m
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (cu *CityUpdate) SetNillableName(s *string) *CityUpdate {
-	if s != nil {
-		cu.SetName(*s)
+func (m *CityUpdate) SetNillableName(v *string) *CityUpdate {
+	if v != nil {
+		m.SetName(*v)
 	}
-	return cu
+	return m
 }
 
 // AddStreetIDs adds the "streets" edge to the Street entity by IDs.
-func (cu *CityUpdate) AddStreetIDs(ids ...int) *CityUpdate {
-	cu.mutation.AddStreetIDs(ids...)
-	return cu
+func (m *CityUpdate) AddStreetIDs(ids ...int) *CityUpdate {
+	m.mutation.AddStreetIDs(ids...)
+	return m
 }
 
 // AddStreets adds the "streets" edges to the Street entity.
-func (cu *CityUpdate) AddStreets(s ...*Street) *CityUpdate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (m *CityUpdate) AddStreets(v ...*Street) *CityUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return cu.AddStreetIDs(ids...)
+	return m.AddStreetIDs(ids...)
 }
 
 // Mutation returns the CityMutation object of the builder.
-func (cu *CityUpdate) Mutation() *CityMutation {
-	return cu.mutation
+func (m *CityUpdate) Mutation() *CityMutation {
+	return m.mutation
 }
 
 // ClearStreets clears all "streets" edges to the Street entity.
-func (cu *CityUpdate) ClearStreets() *CityUpdate {
-	cu.mutation.ClearStreets()
-	return cu
+func (u *CityUpdate) ClearStreets() *CityUpdate {
+	u.mutation.ClearStreets()
+	return u
 }
 
 // RemoveStreetIDs removes the "streets" edge to Street entities by IDs.
-func (cu *CityUpdate) RemoveStreetIDs(ids ...int) *CityUpdate {
-	cu.mutation.RemoveStreetIDs(ids...)
-	return cu
+func (u *CityUpdate) RemoveStreetIDs(ids ...int) *CityUpdate {
+	u.mutation.RemoveStreetIDs(ids...)
+	return u
 }
 
 // RemoveStreets removes "streets" edges to Street entities.
-func (cu *CityUpdate) RemoveStreets(s ...*Street) *CityUpdate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (u *CityUpdate) RemoveStreets(v ...*Street) *CityUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return cu.RemoveStreetIDs(ids...)
+	return u.RemoveStreetIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (cu *CityUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, cu.sqlSave, cu.mutation, cu.hooks)
+func (u *CityUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cu *CityUpdate) SaveX(ctx context.Context) int {
-	affected, err := cu.Save(ctx)
+func (u *CityUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -102,31 +102,31 @@ func (cu *CityUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (cu *CityUpdate) Exec(ctx context.Context) error {
-	_, err := cu.Save(ctx)
+func (u *CityUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cu *CityUpdate) ExecX(ctx context.Context) {
-	if err := cu.Exec(ctx); err != nil {
+func (u *CityUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (u *CityUpdate) sqlSave(ctx context.Context) (_n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(city.Table, city.Columns, sqlgraph.NewFieldSpec(city.FieldID, field.TypeInt))
-	if ps := cu.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := cu.mutation.Name(); ok {
+	if value, ok := u.mutation.Name(); ok {
 		_spec.SetField(city.FieldName, field.TypeString, value)
 	}
-	if cu.mutation.StreetsCleared() {
+	if u.mutation.StreetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -139,7 +139,7 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.RemovedStreetsIDs(); len(nodes) > 0 && !cu.mutation.StreetsCleared() {
+	if nodes := u.mutation.RemovedStreetsIDs(); len(nodes) > 0 && !u.mutation.StreetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -155,7 +155,7 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.StreetsIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.StreetsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -171,7 +171,7 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{city.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -179,8 +179,8 @@ func (cu *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	cu.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // CityUpdateOne is the builder for updating a single City entity.
@@ -192,81 +192,81 @@ type CityUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (cuo *CityUpdateOne) SetName(s string) *CityUpdateOne {
-	cuo.mutation.SetName(s)
-	return cuo
+func (m *CityUpdateOne) SetName(v string) *CityUpdateOne {
+	m.mutation.SetName(v)
+	return m
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (cuo *CityUpdateOne) SetNillableName(s *string) *CityUpdateOne {
-	if s != nil {
-		cuo.SetName(*s)
+func (m *CityUpdateOne) SetNillableName(v *string) *CityUpdateOne {
+	if v != nil {
+		m.SetName(*v)
 	}
-	return cuo
+	return m
 }
 
 // AddStreetIDs adds the "streets" edge to the Street entity by IDs.
-func (cuo *CityUpdateOne) AddStreetIDs(ids ...int) *CityUpdateOne {
-	cuo.mutation.AddStreetIDs(ids...)
-	return cuo
+func (m *CityUpdateOne) AddStreetIDs(ids ...int) *CityUpdateOne {
+	m.mutation.AddStreetIDs(ids...)
+	return m
 }
 
 // AddStreets adds the "streets" edges to the Street entity.
-func (cuo *CityUpdateOne) AddStreets(s ...*Street) *CityUpdateOne {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (m *CityUpdateOne) AddStreets(v ...*Street) *CityUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return cuo.AddStreetIDs(ids...)
+	return m.AddStreetIDs(ids...)
 }
 
 // Mutation returns the CityMutation object of the builder.
-func (cuo *CityUpdateOne) Mutation() *CityMutation {
-	return cuo.mutation
+func (m *CityUpdateOne) Mutation() *CityMutation {
+	return m.mutation
 }
 
 // ClearStreets clears all "streets" edges to the Street entity.
-func (cuo *CityUpdateOne) ClearStreets() *CityUpdateOne {
-	cuo.mutation.ClearStreets()
-	return cuo
+func (u *CityUpdateOne) ClearStreets() *CityUpdateOne {
+	u.mutation.ClearStreets()
+	return u
 }
 
 // RemoveStreetIDs removes the "streets" edge to Street entities by IDs.
-func (cuo *CityUpdateOne) RemoveStreetIDs(ids ...int) *CityUpdateOne {
-	cuo.mutation.RemoveStreetIDs(ids...)
-	return cuo
+func (u *CityUpdateOne) RemoveStreetIDs(ids ...int) *CityUpdateOne {
+	u.mutation.RemoveStreetIDs(ids...)
+	return u
 }
 
 // RemoveStreets removes "streets" edges to Street entities.
-func (cuo *CityUpdateOne) RemoveStreets(s ...*Street) *CityUpdateOne {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (u *CityUpdateOne) RemoveStreets(v ...*Street) *CityUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return cuo.RemoveStreetIDs(ids...)
+	return u.RemoveStreetIDs(ids...)
 }
 
 // Where appends a list predicates to the CityUpdate builder.
-func (cuo *CityUpdateOne) Where(ps ...predicate.City) *CityUpdateOne {
-	cuo.mutation.Where(ps...)
-	return cuo
+func (u *CityUpdateOne) Where(ps ...predicate.City) *CityUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (cuo *CityUpdateOne) Select(field string, fields ...string) *CityUpdateOne {
-	cuo.fields = append([]string{field}, fields...)
-	return cuo
+func (u *CityUpdateOne) Select(field string, fields ...string) *CityUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated City entity.
-func (cuo *CityUpdateOne) Save(ctx context.Context) (*City, error) {
-	return withHooks(ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
+func (u *CityUpdateOne) Save(ctx context.Context) (*City, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cuo *CityUpdateOne) SaveX(ctx context.Context) *City {
-	node, err := cuo.Save(ctx)
+func (u *CityUpdateOne) SaveX(ctx context.Context) *City {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -274,26 +274,26 @@ func (cuo *CityUpdateOne) SaveX(ctx context.Context) *City {
 }
 
 // Exec executes the query on the entity.
-func (cuo *CityUpdateOne) Exec(ctx context.Context) error {
-	_, err := cuo.Save(ctx)
+func (u *CityUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cuo *CityUpdateOne) ExecX(ctx context.Context) {
-	if err := cuo.Exec(ctx); err != nil {
+func (u *CityUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (_node *City, err error) {
+func (u *CityUpdateOne) sqlSave(ctx context.Context) (_n *City, err error) {
 	_spec := sqlgraph.NewUpdateSpec(city.Table, city.Columns, sqlgraph.NewFieldSpec(city.FieldID, field.TypeInt))
-	id, ok := cuo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "City.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := cuo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, city.FieldID)
 		for _, f := range fields {
@@ -305,17 +305,17 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (_node *City, err error) 
 			}
 		}
 	}
-	if ps := cuo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := cuo.mutation.Name(); ok {
+	if value, ok := u.mutation.Name(); ok {
 		_spec.SetField(city.FieldName, field.TypeString, value)
 	}
-	if cuo.mutation.StreetsCleared() {
+	if u.mutation.StreetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -328,7 +328,7 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (_node *City, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.RemovedStreetsIDs(); len(nodes) > 0 && !cuo.mutation.StreetsCleared() {
+	if nodes := u.mutation.RemovedStreetsIDs(); len(nodes) > 0 && !u.mutation.StreetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -344,7 +344,7 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (_node *City, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.StreetsIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.StreetsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -360,10 +360,10 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (_node *City, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &City{config: cuo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
+	_n = &City{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{city.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -371,6 +371,6 @@ func (cuo *CityUpdateOne) sqlSave(ctx context.Context) (_node *City, err error) 
 		}
 		return nil, err
 	}
-	cuo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

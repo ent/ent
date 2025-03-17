@@ -70,9 +70,9 @@ func (*Street) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Street fields.
-func (s *Street) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *Street) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -81,22 +81,22 @@ func (s *Street) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			s.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case street.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				s.Name = value.String
+				m.Name = value.String
 			}
 		case street.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field city_streets", value)
 			} else if value.Valid {
-				s.city_streets = new(int)
-				*s.city_streets = int(value.Int64)
+				m.city_streets = new(int)
+				*m.city_streets = int(value.Int64)
 			}
 		default:
-			s.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -104,40 +104,40 @@ func (s *Street) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Street.
 // This includes values selected through modifiers, order, etc.
-func (s *Street) Value(name string) (ent.Value, error) {
-	return s.selectValues.Get(name)
+func (m *Street) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryCity queries the "city" edge of the Street entity.
-func (s *Street) QueryCity() *CityQuery {
-	return NewStreetClient(s.config).QueryCity(s)
+func (m *Street) QueryCity() *CityQuery {
+	return NewStreetClient(m.config).QueryCity(m)
 }
 
 // Update returns a builder for updating this Street.
 // Note that you need to call Street.Unwrap() before calling this method if this Street
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (s *Street) Update() *StreetUpdateOne {
-	return NewStreetClient(s.config).UpdateOne(s)
+func (m *Street) Update() *StreetUpdateOne {
+	return NewStreetClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Street entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (s *Street) Unwrap() *Street {
-	_tx, ok := s.config.driver.(*txDriver)
+func (m *Street) Unwrap() *Street {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Street is not a transactional entity")
 	}
-	s.config.driver = _tx.drv
-	return s
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (s *Street) String() string {
+func (m *Street) String() string {
 	var builder strings.Builder
 	builder.WriteString("Street(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", s.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("name=")
-	builder.WriteString(s.Name)
+	builder.WriteString(m.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }

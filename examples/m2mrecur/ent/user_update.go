@@ -26,131 +26,131 @@ type UserUpdate struct {
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	uu.mutation.Where(ps...)
-	return uu
+func (u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetAge sets the "age" field.
-func (uu *UserUpdate) SetAge(i int) *UserUpdate {
-	uu.mutation.ResetAge()
-	uu.mutation.SetAge(i)
-	return uu
+func (m *UserUpdate) SetAge(v int) *UserUpdate {
+	m.mutation.ResetAge()
+	m.mutation.SetAge(v)
+	return m
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableAge(i *int) *UserUpdate {
-	if i != nil {
-		uu.SetAge(*i)
+func (m *UserUpdate) SetNillableAge(v *int) *UserUpdate {
+	if v != nil {
+		m.SetAge(*v)
 	}
-	return uu
+	return m
 }
 
-// AddAge adds i to the "age" field.
-func (uu *UserUpdate) AddAge(i int) *UserUpdate {
-	uu.mutation.AddAge(i)
-	return uu
+// AddAge adds value to the "age" field.
+func (m *UserUpdate) AddAge(v int) *UserUpdate {
+	m.mutation.AddAge(v)
+	return m
 }
 
 // SetName sets the "name" field.
-func (uu *UserUpdate) SetName(s string) *UserUpdate {
-	uu.mutation.SetName(s)
-	return uu
+func (m *UserUpdate) SetName(v string) *UserUpdate {
+	m.mutation.SetName(v)
+	return m
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableName(s *string) *UserUpdate {
-	if s != nil {
-		uu.SetName(*s)
+func (m *UserUpdate) SetNillableName(v *string) *UserUpdate {
+	if v != nil {
+		m.SetName(*v)
 	}
-	return uu
+	return m
 }
 
 // AddFollowerIDs adds the "followers" edge to the User entity by IDs.
-func (uu *UserUpdate) AddFollowerIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddFollowerIDs(ids...)
-	return uu
+func (m *UserUpdate) AddFollowerIDs(ids ...int) *UserUpdate {
+	m.mutation.AddFollowerIDs(ids...)
+	return m
 }
 
 // AddFollowers adds the "followers" edges to the User entity.
-func (uu *UserUpdate) AddFollowers(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (m *UserUpdate) AddFollowers(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uu.AddFollowerIDs(ids...)
+	return m.AddFollowerIDs(ids...)
 }
 
 // AddFollowingIDs adds the "following" edge to the User entity by IDs.
-func (uu *UserUpdate) AddFollowingIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddFollowingIDs(ids...)
-	return uu
+func (m *UserUpdate) AddFollowingIDs(ids ...int) *UserUpdate {
+	m.mutation.AddFollowingIDs(ids...)
+	return m
 }
 
 // AddFollowing adds the "following" edges to the User entity.
-func (uu *UserUpdate) AddFollowing(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (m *UserUpdate) AddFollowing(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uu.AddFollowingIDs(ids...)
+	return m.AddFollowingIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uu *UserUpdate) Mutation() *UserMutation {
-	return uu.mutation
+func (m *UserUpdate) Mutation() *UserMutation {
+	return m.mutation
 }
 
 // ClearFollowers clears all "followers" edges to the User entity.
-func (uu *UserUpdate) ClearFollowers() *UserUpdate {
-	uu.mutation.ClearFollowers()
-	return uu
+func (u *UserUpdate) ClearFollowers() *UserUpdate {
+	u.mutation.ClearFollowers()
+	return u
 }
 
 // RemoveFollowerIDs removes the "followers" edge to User entities by IDs.
-func (uu *UserUpdate) RemoveFollowerIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveFollowerIDs(ids...)
-	return uu
+func (u *UserUpdate) RemoveFollowerIDs(ids ...int) *UserUpdate {
+	u.mutation.RemoveFollowerIDs(ids...)
+	return u
 }
 
 // RemoveFollowers removes "followers" edges to User entities.
-func (uu *UserUpdate) RemoveFollowers(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (u *UserUpdate) RemoveFollowers(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uu.RemoveFollowerIDs(ids...)
+	return u.RemoveFollowerIDs(ids...)
 }
 
 // ClearFollowing clears all "following" edges to the User entity.
-func (uu *UserUpdate) ClearFollowing() *UserUpdate {
-	uu.mutation.ClearFollowing()
-	return uu
+func (u *UserUpdate) ClearFollowing() *UserUpdate {
+	u.mutation.ClearFollowing()
+	return u
 }
 
 // RemoveFollowingIDs removes the "following" edge to User entities by IDs.
-func (uu *UserUpdate) RemoveFollowingIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveFollowingIDs(ids...)
-	return uu
+func (u *UserUpdate) RemoveFollowingIDs(ids ...int) *UserUpdate {
+	u.mutation.RemoveFollowingIDs(ids...)
+	return u
 }
 
 // RemoveFollowing removes "following" edges to User entities.
-func (uu *UserUpdate) RemoveFollowing(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (u *UserUpdate) RemoveFollowing(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uu.RemoveFollowingIDs(ids...)
+	return u.RemoveFollowingIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, uu.sqlSave, uu.mutation, uu.hooks)
+func (u *UserUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uu *UserUpdate) SaveX(ctx context.Context) int {
-	affected, err := uu.Save(ctx)
+func (u *UserUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -158,37 +158,37 @@ func (uu *UserUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (uu *UserUpdate) Exec(ctx context.Context) error {
-	_, err := uu.Save(ctx)
+func (u *UserUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uu *UserUpdate) ExecX(ctx context.Context) {
-	if err := uu.Exec(ctx); err != nil {
+func (u *UserUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (u *UserUpdate) sqlSave(ctx context.Context) (_n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
-	if ps := uu.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uu.mutation.Age(); ok {
+	if value, ok := u.mutation.Age(); ok {
 		_spec.SetField(user.FieldAge, field.TypeInt, value)
 	}
-	if value, ok := uu.mutation.AddedAge(); ok {
+	if value, ok := u.mutation.AddedAge(); ok {
 		_spec.AddField(user.FieldAge, field.TypeInt, value)
 	}
-	if value, ok := uu.mutation.Name(); ok {
+	if value, ok := u.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
 	}
-	if uu.mutation.FollowersCleared() {
+	if u.mutation.FollowersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -201,7 +201,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedFollowersIDs(); len(nodes) > 0 && !uu.mutation.FollowersCleared() {
+	if nodes := u.mutation.RemovedFollowersIDs(); len(nodes) > 0 && !u.mutation.FollowersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -217,7 +217,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.FollowersIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.FollowersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -233,7 +233,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.FollowingCleared() {
+	if u.mutation.FollowingCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -246,7 +246,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedFollowingIDs(); len(nodes) > 0 && !uu.mutation.FollowingCleared() {
+	if nodes := u.mutation.RemovedFollowingIDs(); len(nodes) > 0 && !u.mutation.FollowingCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -262,7 +262,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.FollowingIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.FollowingIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -278,7 +278,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -286,8 +286,8 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	uu.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -299,138 +299,138 @@ type UserUpdateOne struct {
 }
 
 // SetAge sets the "age" field.
-func (uuo *UserUpdateOne) SetAge(i int) *UserUpdateOne {
-	uuo.mutation.ResetAge()
-	uuo.mutation.SetAge(i)
-	return uuo
+func (m *UserUpdateOne) SetAge(v int) *UserUpdateOne {
+	m.mutation.ResetAge()
+	m.mutation.SetAge(v)
+	return m
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableAge(i *int) *UserUpdateOne {
-	if i != nil {
-		uuo.SetAge(*i)
+func (m *UserUpdateOne) SetNillableAge(v *int) *UserUpdateOne {
+	if v != nil {
+		m.SetAge(*v)
 	}
-	return uuo
+	return m
 }
 
-// AddAge adds i to the "age" field.
-func (uuo *UserUpdateOne) AddAge(i int) *UserUpdateOne {
-	uuo.mutation.AddAge(i)
-	return uuo
+// AddAge adds value to the "age" field.
+func (m *UserUpdateOne) AddAge(v int) *UserUpdateOne {
+	m.mutation.AddAge(v)
+	return m
 }
 
 // SetName sets the "name" field.
-func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
-	uuo.mutation.SetName(s)
-	return uuo
+func (m *UserUpdateOne) SetName(v string) *UserUpdateOne {
+	m.mutation.SetName(v)
+	return m
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
-	if s != nil {
-		uuo.SetName(*s)
+func (m *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
+	if v != nil {
+		m.SetName(*v)
 	}
-	return uuo
+	return m
 }
 
 // AddFollowerIDs adds the "followers" edge to the User entity by IDs.
-func (uuo *UserUpdateOne) AddFollowerIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddFollowerIDs(ids...)
-	return uuo
+func (m *UserUpdateOne) AddFollowerIDs(ids ...int) *UserUpdateOne {
+	m.mutation.AddFollowerIDs(ids...)
+	return m
 }
 
 // AddFollowers adds the "followers" edges to the User entity.
-func (uuo *UserUpdateOne) AddFollowers(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (m *UserUpdateOne) AddFollowers(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uuo.AddFollowerIDs(ids...)
+	return m.AddFollowerIDs(ids...)
 }
 
 // AddFollowingIDs adds the "following" edge to the User entity by IDs.
-func (uuo *UserUpdateOne) AddFollowingIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddFollowingIDs(ids...)
-	return uuo
+func (m *UserUpdateOne) AddFollowingIDs(ids ...int) *UserUpdateOne {
+	m.mutation.AddFollowingIDs(ids...)
+	return m
 }
 
 // AddFollowing adds the "following" edges to the User entity.
-func (uuo *UserUpdateOne) AddFollowing(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (m *UserUpdateOne) AddFollowing(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uuo.AddFollowingIDs(ids...)
+	return m.AddFollowingIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uuo *UserUpdateOne) Mutation() *UserMutation {
-	return uuo.mutation
+func (m *UserUpdateOne) Mutation() *UserMutation {
+	return m.mutation
 }
 
 // ClearFollowers clears all "followers" edges to the User entity.
-func (uuo *UserUpdateOne) ClearFollowers() *UserUpdateOne {
-	uuo.mutation.ClearFollowers()
-	return uuo
+func (u *UserUpdateOne) ClearFollowers() *UserUpdateOne {
+	u.mutation.ClearFollowers()
+	return u
 }
 
 // RemoveFollowerIDs removes the "followers" edge to User entities by IDs.
-func (uuo *UserUpdateOne) RemoveFollowerIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveFollowerIDs(ids...)
-	return uuo
+func (u *UserUpdateOne) RemoveFollowerIDs(ids ...int) *UserUpdateOne {
+	u.mutation.RemoveFollowerIDs(ids...)
+	return u
 }
 
 // RemoveFollowers removes "followers" edges to User entities.
-func (uuo *UserUpdateOne) RemoveFollowers(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (u *UserUpdateOne) RemoveFollowers(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uuo.RemoveFollowerIDs(ids...)
+	return u.RemoveFollowerIDs(ids...)
 }
 
 // ClearFollowing clears all "following" edges to the User entity.
-func (uuo *UserUpdateOne) ClearFollowing() *UserUpdateOne {
-	uuo.mutation.ClearFollowing()
-	return uuo
+func (u *UserUpdateOne) ClearFollowing() *UserUpdateOne {
+	u.mutation.ClearFollowing()
+	return u
 }
 
 // RemoveFollowingIDs removes the "following" edge to User entities by IDs.
-func (uuo *UserUpdateOne) RemoveFollowingIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveFollowingIDs(ids...)
-	return uuo
+func (u *UserUpdateOne) RemoveFollowingIDs(ids ...int) *UserUpdateOne {
+	u.mutation.RemoveFollowingIDs(ids...)
+	return u
 }
 
 // RemoveFollowing removes "following" edges to User entities.
-func (uuo *UserUpdateOne) RemoveFollowing(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (u *UserUpdateOne) RemoveFollowing(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return uuo.RemoveFollowingIDs(ids...)
+	return u.RemoveFollowingIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uuo *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
-	uuo.mutation.Where(ps...)
-	return uuo
+func (u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
-	uuo.fields = append([]string{field}, fields...)
-	return uuo
+func (u *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated User entity.
-func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	return withHooks(ctx, uuo.sqlSave, uuo.mutation, uuo.hooks)
+func (u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
-	node, err := uuo.Save(ctx)
+func (u *UserUpdateOne) SaveX(ctx context.Context) *User {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -438,26 +438,26 @@ func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
 }
 
 // Exec executes the query on the entity.
-func (uuo *UserUpdateOne) Exec(ctx context.Context) error {
-	_, err := uuo.Save(ctx)
+func (u *UserUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
-	if err := uuo.Exec(ctx); err != nil {
+func (u *UserUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
+func (u *UserUpdateOne) sqlSave(ctx context.Context) (_n *User, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
-	id, ok := uuo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := uuo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, user.FieldID)
 		for _, f := range fields {
@@ -469,23 +469,23 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			}
 		}
 	}
-	if ps := uuo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uuo.mutation.Age(); ok {
+	if value, ok := u.mutation.Age(); ok {
 		_spec.SetField(user.FieldAge, field.TypeInt, value)
 	}
-	if value, ok := uuo.mutation.AddedAge(); ok {
+	if value, ok := u.mutation.AddedAge(); ok {
 		_spec.AddField(user.FieldAge, field.TypeInt, value)
 	}
-	if value, ok := uuo.mutation.Name(); ok {
+	if value, ok := u.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
 	}
-	if uuo.mutation.FollowersCleared() {
+	if u.mutation.FollowersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -498,7 +498,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedFollowersIDs(); len(nodes) > 0 && !uuo.mutation.FollowersCleared() {
+	if nodes := u.mutation.RemovedFollowersIDs(); len(nodes) > 0 && !u.mutation.FollowersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -514,7 +514,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.FollowersIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.FollowersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -530,7 +530,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.FollowingCleared() {
+	if u.mutation.FollowingCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -543,7 +543,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedFollowingIDs(); len(nodes) > 0 && !uuo.mutation.FollowingCleared() {
+	if nodes := u.mutation.RemovedFollowingIDs(); len(nodes) > 0 && !u.mutation.FollowingCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -559,7 +559,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.FollowingIDs(); len(nodes) > 0 {
+	if nodes := u.mutation.FollowingIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -575,10 +575,10 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &User{config: uuo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, uuo.driver, _spec); err != nil {
+	_n = &User{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -586,6 +586,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		return nil, err
 	}
-	uuo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }

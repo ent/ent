@@ -20,24 +20,24 @@ type TenantCreate struct {
 }
 
 // SetName sets the "name" field.
-func (tc *TenantCreate) SetName(s string) *TenantCreate {
-	tc.mutation.SetName(s)
-	return tc
+func (m *TenantCreate) SetName(v string) *TenantCreate {
+	m.mutation.SetName(v)
+	return m
 }
 
 // Mutation returns the TenantMutation object of the builder.
-func (tc *TenantCreate) Mutation() *TenantMutation {
-	return tc.mutation
+func (m *TenantCreate) Mutation() *TenantMutation {
+	return m.mutation
 }
 
 // Save creates the Tenant in the database.
-func (tc *TenantCreate) Save(ctx context.Context) (*Tenant, error) {
-	return withHooks(ctx, tc.sqlSave, tc.mutation, tc.hooks)
+func (c *TenantCreate) Save(ctx context.Context) (*Tenant, error) {
+	return withHooks(ctx, c.sqlSave, c.mutation, c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (tc *TenantCreate) SaveX(ctx context.Context) *Tenant {
-	v, err := tc.Save(ctx)
+func (c *TenantCreate) SaveX(ctx context.Context) *Tenant {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -45,32 +45,32 @@ func (tc *TenantCreate) SaveX(ctx context.Context) *Tenant {
 }
 
 // Exec executes the query.
-func (tc *TenantCreate) Exec(ctx context.Context) error {
-	_, err := tc.Save(ctx)
+func (c *TenantCreate) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tc *TenantCreate) ExecX(ctx context.Context) {
-	if err := tc.Exec(ctx); err != nil {
+func (c *TenantCreate) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (tc *TenantCreate) check() error {
-	if _, ok := tc.mutation.Name(); !ok {
+func (c *TenantCreate) check() error {
+	if _, ok := c.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Tenant.name"`)}
 	}
 	return nil
 }
 
-func (tc *TenantCreate) sqlSave(ctx context.Context) (*Tenant, error) {
-	if err := tc.check(); err != nil {
+func (c *TenantCreate) sqlSave(ctx context.Context) (*Tenant, error) {
+	if err := c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := tc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, tc.driver, _spec); err != nil {
+	_node, _spec := c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -78,17 +78,17 @@ func (tc *TenantCreate) sqlSave(ctx context.Context) (*Tenant, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	tc.mutation.id = &_node.ID
-	tc.mutation.done = true
+	c.mutation.id = &_node.ID
+	c.mutation.done = true
 	return _node, nil
 }
 
-func (tc *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
+func (c *TenantCreate) createSpec() (*Tenant, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Tenant{config: tc.config}
+		_node = &Tenant{config: c.config}
 		_spec = sqlgraph.NewCreateSpec(tenant.Table, sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt))
 	)
-	if value, ok := tc.mutation.Name(); ok {
+	if value, ok := c.mutation.Name(); ok {
 		_spec.SetField(tenant.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
@@ -103,16 +103,16 @@ type TenantCreateBulk struct {
 }
 
 // Save creates the Tenant entities in the database.
-func (tcb *TenantCreateBulk) Save(ctx context.Context) ([]*Tenant, error) {
-	if tcb.err != nil {
-		return nil, tcb.err
+func (c *TenantCreateBulk) Save(ctx context.Context) ([]*Tenant, error) {
+	if c.err != nil {
+		return nil, c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(tcb.builders))
-	nodes := make([]*Tenant, len(tcb.builders))
-	mutators := make([]Mutator, len(tcb.builders))
-	for i := range tcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(c.builders))
+	nodes := make([]*Tenant, len(c.builders))
+	mutators := make([]Mutator, len(c.builders))
+	for i := range c.builders {
 		func(i int, root context.Context) {
-			builder := tcb.builders[i]
+			builder := c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TenantMutation)
 				if !ok {
@@ -125,11 +125,11 @@ func (tcb *TenantCreateBulk) Save(ctx context.Context) ([]*Tenant, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, tcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, tcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -153,7 +153,7 @@ func (tcb *TenantCreateBulk) Save(ctx context.Context) ([]*Tenant, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, tcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -161,8 +161,8 @@ func (tcb *TenantCreateBulk) Save(ctx context.Context) ([]*Tenant, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (tcb *TenantCreateBulk) SaveX(ctx context.Context) []*Tenant {
-	v, err := tcb.Save(ctx)
+func (c *TenantCreateBulk) SaveX(ctx context.Context) []*Tenant {
+	v, err := c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -170,14 +170,14 @@ func (tcb *TenantCreateBulk) SaveX(ctx context.Context) []*Tenant {
 }
 
 // Exec executes the query.
-func (tcb *TenantCreateBulk) Exec(ctx context.Context) error {
-	_, err := tcb.Save(ctx)
+func (c *TenantCreateBulk) Exec(ctx context.Context) error {
+	_, err := c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tcb *TenantCreateBulk) ExecX(ctx context.Context) {
-	if err := tcb.Exec(ctx); err != nil {
+func (c *TenantCreateBulk) ExecX(ctx context.Context) {
+	if err := c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

@@ -64,9 +64,9 @@ func (*City) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the City fields.
-func (c *City) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *City) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -75,15 +75,15 @@ func (c *City) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			c.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case city.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				c.Name = value.String
+				m.Name = value.String
 			}
 		default:
-			c.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -91,40 +91,40 @@ func (c *City) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the City.
 // This includes values selected through modifiers, order, etc.
-func (c *City) Value(name string) (ent.Value, error) {
-	return c.selectValues.Get(name)
+func (m *City) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryStreets queries the "streets" edge of the City entity.
-func (c *City) QueryStreets() *StreetQuery {
-	return NewCityClient(c.config).QueryStreets(c)
+func (m *City) QueryStreets() *StreetQuery {
+	return NewCityClient(m.config).QueryStreets(m)
 }
 
 // Update returns a builder for updating this City.
 // Note that you need to call City.Unwrap() before calling this method if this City
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (c *City) Update() *CityUpdateOne {
-	return NewCityClient(c.config).UpdateOne(c)
+func (m *City) Update() *CityUpdateOne {
+	return NewCityClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the City entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (c *City) Unwrap() *City {
-	_tx, ok := c.config.driver.(*txDriver)
+func (m *City) Unwrap() *City {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: City is not a transactional entity")
 	}
-	c.config.driver = _tx.drv
-	return c
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (c *City) String() string {
+func (m *City) String() string {
 	var builder strings.Builder
 	builder.WriteString("City(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("name=")
-	builder.WriteString(c.Name)
+	builder.WriteString(m.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }

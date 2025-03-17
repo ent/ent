@@ -45,9 +45,9 @@ func (*UserAuditLog) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the UserAuditLog fields.
-func (ual *UserAuditLog) assignValues(columns []string, values []any) error {
-	if m, n := len(values), len(columns); m < n {
-		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
+func (m *UserAuditLog) assignValues(columns []string, values []any) error {
+	if v, c := len(values), len(columns); v < c {
+		return fmt.Errorf("mismatch number of scan values: %d != %d", v, c)
 	}
 	for i := range columns {
 		switch columns[i] {
@@ -56,33 +56,33 @@ func (ual *UserAuditLog) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			ual.ID = int(value.Int64)
+			m.ID = int(value.Int64)
 		case userauditlog.FieldOperationType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field operation_type", values[i])
 			} else if value.Valid {
-				ual.OperationType = value.String
+				m.OperationType = value.String
 			}
 		case userauditlog.FieldOperationTime:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field operation_time", values[i])
 			} else if value.Valid {
-				ual.OperationTime = value.String
+				m.OperationTime = value.String
 			}
 		case userauditlog.FieldOldValue:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field old_value", values[i])
 			} else if value.Valid {
-				ual.OldValue = value.String
+				m.OldValue = value.String
 			}
 		case userauditlog.FieldNewValue:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field new_value", values[i])
 			} else if value.Valid {
-				ual.NewValue = value.String
+				m.NewValue = value.String
 			}
 		default:
-			ual.selectValues.Set(columns[i], values[i])
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -90,44 +90,44 @@ func (ual *UserAuditLog) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the UserAuditLog.
 // This includes values selected through modifiers, order, etc.
-func (ual *UserAuditLog) Value(name string) (ent.Value, error) {
-	return ual.selectValues.Get(name)
+func (m *UserAuditLog) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this UserAuditLog.
 // Note that you need to call UserAuditLog.Unwrap() before calling this method if this UserAuditLog
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (ual *UserAuditLog) Update() *UserAuditLogUpdateOne {
-	return NewUserAuditLogClient(ual.config).UpdateOne(ual)
+func (m *UserAuditLog) Update() *UserAuditLogUpdateOne {
+	return NewUserAuditLogClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the UserAuditLog entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (ual *UserAuditLog) Unwrap() *UserAuditLog {
-	_tx, ok := ual.config.driver.(*txDriver)
+func (m *UserAuditLog) Unwrap() *UserAuditLog {
+	_tx, ok := m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: UserAuditLog is not a transactional entity")
 	}
-	ual.config.driver = _tx.drv
-	return ual
+	m.config.driver = _tx.drv
+	return m
 }
 
 // String implements the fmt.Stringer.
-func (ual *UserAuditLog) String() string {
+func (m *UserAuditLog) String() string {
 	var builder strings.Builder
 	builder.WriteString("UserAuditLog(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", ual.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
 	builder.WriteString("operation_type=")
-	builder.WriteString(ual.OperationType)
+	builder.WriteString(m.OperationType)
 	builder.WriteString(", ")
 	builder.WriteString("operation_time=")
-	builder.WriteString(ual.OperationTime)
+	builder.WriteString(m.OperationTime)
 	builder.WriteString(", ")
 	builder.WriteString("old_value=")
-	builder.WriteString(ual.OldValue)
+	builder.WriteString(m.OldValue)
 	builder.WriteString(", ")
 	builder.WriteString("new_value=")
-	builder.WriteString(ual.NewValue)
+	builder.WriteString(m.NewValue)
 	builder.WriteByte(')')
 	return builder.String()
 }

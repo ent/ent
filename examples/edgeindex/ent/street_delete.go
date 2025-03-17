@@ -24,56 +24,56 @@ type StreetDelete struct {
 }
 
 // Where appends a list predicates to the StreetDelete builder.
-func (sd *StreetDelete) Where(ps ...predicate.Street) *StreetDelete {
-	sd.mutation.Where(ps...)
-	return sd
+func (d *StreetDelete) Where(ps ...predicate.Street) *StreetDelete {
+	d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (sd *StreetDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, sd.sqlExec, sd.mutation, sd.hooks)
+func (d *StreetDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, d.sqlExec, d.mutation, d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (sd *StreetDelete) ExecX(ctx context.Context) int {
-	n, err := sd.Exec(ctx)
+func (d *StreetDelete) ExecX(ctx context.Context) int {
+	n, err := d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (sd *StreetDelete) sqlExec(ctx context.Context) (int, error) {
+func (d *StreetDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(street.Table, sqlgraph.NewFieldSpec(street.FieldID, field.TypeInt))
-	if ps := sd.mutation.predicates; len(ps) > 0 {
+	if ps := d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, sd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	sd.mutation.done = true
+	d.mutation.done = true
 	return affected, err
 }
 
 // StreetDeleteOne is the builder for deleting a single Street entity.
 type StreetDeleteOne struct {
-	sd *StreetDelete
+	d *StreetDelete
 }
 
 // Where appends a list predicates to the StreetDelete builder.
-func (sdo *StreetDeleteOne) Where(ps ...predicate.Street) *StreetDeleteOne {
-	sdo.sd.mutation.Where(ps...)
-	return sdo
+func (d *StreetDeleteOne) Where(ps ...predicate.Street) *StreetDeleteOne {
+	d.d.mutation.Where(ps...)
+	return d
 }
 
 // Exec executes the deletion query.
-func (sdo *StreetDeleteOne) Exec(ctx context.Context) error {
-	n, err := sdo.sd.Exec(ctx)
+func (d *StreetDeleteOne) Exec(ctx context.Context) error {
+	n, err := d.d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (sdo *StreetDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (sdo *StreetDeleteOne) ExecX(ctx context.Context) {
-	if err := sdo.Exec(ctx); err != nil {
+func (d *StreetDeleteOne) ExecX(ctx context.Context) {
+	if err := d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

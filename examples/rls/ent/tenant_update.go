@@ -22,38 +22,38 @@ type TenantUpdate struct {
 }
 
 // Where appends a list predicates to the TenantUpdate builder.
-func (tu *TenantUpdate) Where(ps ...predicate.Tenant) *TenantUpdate {
-	tu.mutation.Where(ps...)
-	return tu
+func (u *TenantUpdate) Where(ps ...predicate.Tenant) *TenantUpdate {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // SetName sets the "name" field.
-func (tu *TenantUpdate) SetName(s string) *TenantUpdate {
-	tu.mutation.SetName(s)
-	return tu
+func (m *TenantUpdate) SetName(v string) *TenantUpdate {
+	m.mutation.SetName(v)
+	return m
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (tu *TenantUpdate) SetNillableName(s *string) *TenantUpdate {
-	if s != nil {
-		tu.SetName(*s)
+func (m *TenantUpdate) SetNillableName(v *string) *TenantUpdate {
+	if v != nil {
+		m.SetName(*v)
 	}
-	return tu
+	return m
 }
 
 // Mutation returns the TenantMutation object of the builder.
-func (tu *TenantUpdate) Mutation() *TenantMutation {
-	return tu.mutation
+func (m *TenantUpdate) Mutation() *TenantMutation {
+	return m.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (tu *TenantUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, tu.sqlSave, tu.mutation, tu.hooks)
+func (u *TenantUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (tu *TenantUpdate) SaveX(ctx context.Context) int {
-	affected, err := tu.Save(ctx)
+func (u *TenantUpdate) SaveX(ctx context.Context) int {
+	affected, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -61,31 +61,31 @@ func (tu *TenantUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (tu *TenantUpdate) Exec(ctx context.Context) error {
-	_, err := tu.Save(ctx)
+func (u *TenantUpdate) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tu *TenantUpdate) ExecX(ctx context.Context) {
-	if err := tu.Exec(ctx); err != nil {
+func (u *TenantUpdate) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (tu *TenantUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (u *TenantUpdate) sqlSave(ctx context.Context) (_n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(tenant.Table, tenant.Columns, sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt))
-	if ps := tu.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := tu.mutation.Name(); ok {
+	if value, ok := u.mutation.Name(); ok {
 		_spec.SetField(tenant.FieldName, field.TypeString, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
+	if _n, err = sqlgraph.UpdateNodes(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{tenant.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -93,8 +93,8 @@ func (tu *TenantUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	tu.mutation.done = true
-	return n, nil
+	u.mutation.done = true
+	return _n, nil
 }
 
 // TenantUpdateOne is the builder for updating a single Tenant entity.
@@ -106,45 +106,45 @@ type TenantUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (tuo *TenantUpdateOne) SetName(s string) *TenantUpdateOne {
-	tuo.mutation.SetName(s)
-	return tuo
+func (m *TenantUpdateOne) SetName(v string) *TenantUpdateOne {
+	m.mutation.SetName(v)
+	return m
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (tuo *TenantUpdateOne) SetNillableName(s *string) *TenantUpdateOne {
-	if s != nil {
-		tuo.SetName(*s)
+func (m *TenantUpdateOne) SetNillableName(v *string) *TenantUpdateOne {
+	if v != nil {
+		m.SetName(*v)
 	}
-	return tuo
+	return m
 }
 
 // Mutation returns the TenantMutation object of the builder.
-func (tuo *TenantUpdateOne) Mutation() *TenantMutation {
-	return tuo.mutation
+func (m *TenantUpdateOne) Mutation() *TenantMutation {
+	return m.mutation
 }
 
 // Where appends a list predicates to the TenantUpdate builder.
-func (tuo *TenantUpdateOne) Where(ps ...predicate.Tenant) *TenantUpdateOne {
-	tuo.mutation.Where(ps...)
-	return tuo
+func (u *TenantUpdateOne) Where(ps ...predicate.Tenant) *TenantUpdateOne {
+	u.mutation.Where(ps...)
+	return u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (tuo *TenantUpdateOne) Select(field string, fields ...string) *TenantUpdateOne {
-	tuo.fields = append([]string{field}, fields...)
-	return tuo
+func (u *TenantUpdateOne) Select(field string, fields ...string) *TenantUpdateOne {
+	u.fields = append([]string{field}, fields...)
+	return u
 }
 
 // Save executes the query and returns the updated Tenant entity.
-func (tuo *TenantUpdateOne) Save(ctx context.Context) (*Tenant, error) {
-	return withHooks(ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
+func (u *TenantUpdateOne) Save(ctx context.Context) (*Tenant, error) {
+	return withHooks(ctx, u.sqlSave, u.mutation, u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (tuo *TenantUpdateOne) SaveX(ctx context.Context) *Tenant {
-	node, err := tuo.Save(ctx)
+func (u *TenantUpdateOne) SaveX(ctx context.Context) *Tenant {
+	node, err := u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -152,26 +152,26 @@ func (tuo *TenantUpdateOne) SaveX(ctx context.Context) *Tenant {
 }
 
 // Exec executes the query on the entity.
-func (tuo *TenantUpdateOne) Exec(ctx context.Context) error {
-	_, err := tuo.Save(ctx)
+func (u *TenantUpdateOne) Exec(ctx context.Context) error {
+	_, err := u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tuo *TenantUpdateOne) ExecX(ctx context.Context) {
-	if err := tuo.Exec(ctx); err != nil {
+func (u *TenantUpdateOne) ExecX(ctx context.Context) {
+	if err := u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (tuo *TenantUpdateOne) sqlSave(ctx context.Context) (_node *Tenant, err error) {
+func (u *TenantUpdateOne) sqlSave(ctx context.Context) (_n *Tenant, err error) {
 	_spec := sqlgraph.NewUpdateSpec(tenant.Table, tenant.Columns, sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt))
-	id, ok := tuo.mutation.ID()
+	id, ok := u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Tenant.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := tuo.fields; len(fields) > 0 {
+	if fields := u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, tenant.FieldID)
 		for _, f := range fields {
@@ -183,20 +183,20 @@ func (tuo *TenantUpdateOne) sqlSave(ctx context.Context) (_node *Tenant, err err
 			}
 		}
 	}
-	if ps := tuo.mutation.predicates; len(ps) > 0 {
+	if ps := u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := tuo.mutation.Name(); ok {
+	if value, ok := u.mutation.Name(); ok {
 		_spec.SetField(tenant.FieldName, field.TypeString, value)
 	}
-	_node = &Tenant{config: tuo.config}
-	_spec.Assign = _node.assignValues
-	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, tuo.driver, _spec); err != nil {
+	_n = &Tenant{config: u.config}
+	_spec.Assign = _n.assignValues
+	_spec.ScanValues = _n.scanValues
+	if err = sqlgraph.UpdateNode(ctx, u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{tenant.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -204,6 +204,6 @@ func (tuo *TenantUpdateOne) sqlSave(ctx context.Context) (_node *Tenant, err err
 		}
 		return nil, err
 	}
-	tuo.mutation.done = true
-	return _node, nil
+	u.mutation.done = true
+	return _n, nil
 }
