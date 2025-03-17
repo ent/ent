@@ -21,7 +21,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/query" }}
 {{ $pkg := $.Scope.Package }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := receiver $builder }}
+{{ $receiver := $.Scope.Receiver }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...queryHook) ([]*{{ $.Name }}, error) {
 	var (
@@ -353,7 +353,7 @@ func ({{ $receiver }} *{{ $builder }}) querySpec() *sqlgraph.QuerySpec {
 
 {{ define "dialect/sql/query/selector" }}
 {{ $builder := pascal $.Scope.Builder }}
-{{ $receiver := receiver $builder }}
+{{ $receiver := $.Scope.Receiver }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Selector {
 	{{- $builderV := "builder" }}{{ if eq $.Package $builderV }}{{ $builderV = "builderC" }}{{ end }}

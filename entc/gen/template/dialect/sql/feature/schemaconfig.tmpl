@@ -100,7 +100,7 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 {{- define "dialect/sql/defedge/spec/schemaconfig" }}
 	{{- $e := $.Scope.Edge }}
 	{{- $builder := pascal $.Scope.Builder }}
-	{{- $receiver := receiver $builder }}
+	{{- $receiver := $.Scope.Receiver }}
 	{{- $ident := "edge" }}{{ with $.Scope.Ident }}{{ $ident = . }}{{ end }}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
 		{{- $schema := $e.Type.Name }}
@@ -126,7 +126,7 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 {{/* A template for injecting the SchemaConfig to the context. Should be executed before other templates. */}}
 {{- define "dialect/sql/spec/ctxschemaconfig" -}}
 	{{- $builder := pascal $.Scope.Builder }}
-	{{- $receiver := receiver $builder }}
+	{{- $receiver := $.Scope.Receiver }}
 	{{- $ident := "_spec.Node" }}{{ with $.Scope.Ident }}{{ $ident = . }}{{ end }}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
 		{{ $ident }}.Schema = {{ $receiver }}.schemaConfig.{{ $.Name }}
@@ -138,7 +138,7 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 
 {{- define "dialect/sql/query/selector/ctxschemaconfig" -}}
 	{{- $builder := pascal $.Scope.Builder }}
-	{{- $receiver := receiver $builder }}
+	{{- $receiver := $.Scope.Receiver }}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
 		t1.Schema({{ $receiver }}.schemaConfig.{{ $.Name }})
 		ctx = internal.NewSchemaConfigContext(ctx, {{ $receiver }}.schemaConfig)

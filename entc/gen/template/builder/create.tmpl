@@ -147,8 +147,8 @@ func ({{ $receiver }} *{{ $builder }}) check() error {
 	{{- end }}
 {{- end }}
 
-{{ $bulk := printf "%sCreateBulk" (pascal $.Name) }}
-{{ $receiver = receiver $bulk }}
+{{ $bulk := $.CreateBulkName }}
+{{ $receiver = $.CreateBulReceiver }}
 
 // {{ $bulk }} is the builder for creating many {{ $.Name }} entities in bulk.
 type {{ $bulk }} struct {
@@ -165,7 +165,7 @@ type {{ $bulk }} struct {
 {{/* If the storage driver supports bulk creation */}}
 {{ $tmpl = printf "dialect/%s/create_bulk" $.Storage }}
 {{ if hasTemplate $tmpl }}
-	{{ with extend $ "Builder" $bulk "Receiver" $receiver }}
+	{{ with extend $ "Receiver" $receiver "Builder" $bulk }}
 		{{ xtemplate $tmpl . }}
 	{{ end }}
 {{ end }}

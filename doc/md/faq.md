@@ -39,7 +39,7 @@ use the following template:
 ```gotemplate
 {{ range $n := $.Nodes }}
     {{ $builder := $n.CreateName }}
-    {{ $receiver := receiver $builder }}
+    {{ $receiver := $n.CreateReceiver }}
 
     func ({{ $receiver }} *{{ $builder }}) Set{{ $n.Name }}(input *{{ $n.Name }}) *{{ $builder }} {
         {{- range $f := $n.Fields }}

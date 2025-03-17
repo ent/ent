@@ -16,7 +16,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ end }}
 
 {{ $builder := $.QueryName }}
-{{ $receiver := receiver $builder }}
+{{ $receiver := $.QueryReceiver }}
 
 // {{ $builder }} is the builder for querying {{ $.Name }} entities.
 type {{ $builder }} struct {
@@ -412,7 +412,7 @@ func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-{{ with extend $ "Builder" $builder "Package" $pkg }}
+{{ with extend $ "Receiver" $receiver "Builder" $builder  "Package" $pkg }}
 	{{ $tmpl := printf "dialect/%s/query" $.Storage }}
 	{{ xtemplate $tmpl . }}
 {{ end }}
@@ -451,7 +451,7 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) Scan(ctx context.Context, v any
 	return scanWithInterceptors[*{{ $builder }}, *{{ $groupBuilder }}](ctx, {{ $groupReceiver }}.build, {{ $groupReceiver }}, {{ $groupReceiver }}.build.inters, v)
 }
 
-{{ with extend $ "Builder" $groupBuilder }}
+{{ with extend $ "Receiver" $groupReceiver "Builder" $groupBuilder }}
 	{{ $tmpl := printf "dialect/%s/group" $.Storage }}
 	{{ xtemplate $tmpl . }}
 {{ end }}
@@ -481,7 +481,7 @@ func ({{ $selectReceiver }} *{{ $selectBuilder }}) Scan(ctx context.Context, v a
 	return scanWithInterceptors[*{{ $builder }}, *{{ $selectBuilder }}](ctx, {{ $selectReceiver }}.{{ $.QueryName }}, {{ $selectReceiver }}, {{ $selectReceiver }}.inters, v)
 }
 
-{{ with extend $ "Builder" $selectBuilder }}
+{{ with extend $ "Receiver" $selectReceiver "Builder" $selectBuilder }}
 	{{ $tmpl := printf "dialect/%s/select" $.Storage }}
 	{{ xtemplate $tmpl . }}
 {{ end }}

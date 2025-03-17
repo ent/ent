@@ -18,7 +18,7 @@ in the LICENSE file in the root directory of this source tree.
 {{/* Template for adding the "executing" the list of modifiers on the sql.Selector. */}}
 {{ define "dialect/sql/query/selector/modify" }}
     {{- if or ($.FeatureEnabled "sql/lock") ($.FeatureEnabled "sql/modifier") }}
-        {{- $receiver := pascal $.Scope.Builder | receiver }}
+        {{- $receiver := $.Scope.Receiver }}
         for _, m := range {{ $receiver }}.modifiers {
             m(selector)
         }
@@ -28,7 +28,7 @@ in the LICENSE file in the root directory of this source tree.
 {{/* Template for passing the modifiers to the sqlgraph.QuerySpec. */}}
 {{ define "dialect/sql/query/spec/modify" }}
     {{- if or ($.FeatureEnabled "sql/lock") ($.FeatureEnabled "sql/modifier") }}
-        {{- $receiver := pascal $.Scope.Builder | receiver }}
+        {{- $receiver := $.Scope.Receiver }}
         if len({{ $receiver }}.modifiers) > 0 {
             _spec.Modifiers = {{ $receiver }}.modifiers
         }
@@ -39,7 +39,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/query/additional/modify" }}
     {{ if $.FeatureEnabled "sql/modifier" }}
         {{ $builder := pascal $.Scope.Builder }}
-        {{ $receiver := receiver $builder }}
+        {{ $receiver := $.Scope.Receiver }}
         {{ $selectBuilder := pascal $.Name | printf "%sSelect" }}
         // Modify adds a query modifier for attaching custom logic to queries.
         func ({{ $receiver }} *{{ $builder }}) Modify(modifiers ...func(s *sql.Selector)) *{{ $selectBuilder }} {
@@ -53,7 +53,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/select/additional/modify" }}
     {{ if $.FeatureEnabled "sql/modifier" }}
         {{ $builder := pascal $.Scope.Builder }}
-        {{ $receiver := receiver $builder }}
+        {{ $receiver := $.Scope.Receiver }}
         // Modify adds a query modifier for attaching custom logic to queries.
         func ({{ $receiver }} *{{ $builder }}) Modify(modifiers ...func(s *sql.Selector)) *{{ $builder }} {
             {{ $receiver }}.modifiers = append({{ $receiver }}.modifiers, modifiers...)
@@ -74,7 +74,7 @@ in the LICENSE file in the root directory of this source tree.
     {{ if $.FeatureEnabled "sql/modifier" }}
         {{ $pkg := $.Scope.Package }}
         {{ $builder := pascal $.Scope.Builder }}
-        {{ $receiver := receiver $builder }}
+        {{ $receiver := $.Scope.Receiver }}
         // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
         func ({{ $receiver }} *{{ $builder }}) Modify(modifiers ...func(u *sql.UpdateBuilder)) *{{ $builder }} {
             {{ $receiver }}.modifiers = append({{ $receiver }}.modifiers, modifiers...)
@@ -86,7 +86,7 @@ in the LICENSE file in the root directory of this source tree.
 {{/* Template for passing the modifiers to the sqlgraph.UpdateSpec. */}}
 {{ define "dialect/sql/update/spec/modify" }}
     {{- if $.FeatureEnabled "sql/modifier" }}
-        {{- $receiver := pascal $.Scope.Builder | receiver }}
+        {{- $receiver := $.Scope.Receiver }}
         _spec.AddModifiers({{ $receiver }}.modifiers...)
     {{- end }}
 {{- end -}}

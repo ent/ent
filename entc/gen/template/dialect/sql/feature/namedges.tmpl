@@ -66,7 +66,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ define "dialect/sql/query/additional/namedges" }}
     {{- if $.FeatureEnabled "namedges" }}
         {{ $builder := $.QueryName }}
-        {{ $receiver := receiver $builder }}
+        {{ $receiver := $.QueryReceiver }}
         {{- range $e := $.Edges }}
             {{- if not $e.Unique }}
                 {{ $ebuilder := $e.Type.QueryName }}
@@ -93,7 +93,7 @@ in the LICENSE file in the root directory of this source tree.
 {{- define "dialect/sql/query/all/nodes/namedges" }}
     {{- if $.FeatureEnabled "namedges" }}
         {{- $builder := pascal $.Scope.Builder }}
-        {{- $receiver := receiver $builder }}
+        {{- $receiver := $.Scope.Receiver }}
         {{- range $e := $.Edges }}
             {{- if not $e.Unique }}
                 for name, query := range {{ $receiver }}.{{ $e.EagerLoadNamedField }} {
