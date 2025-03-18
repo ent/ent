@@ -41,12 +41,11 @@ func ({{ $receiver }} *{{ $builder }}) Exec(ctx context.Context) (int, error) {
 
 // ExecX is like Exec, but panics if an error occurs.
 func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) int {
-	{{- $n := "n" }}{{ if eq $receiver $n }}{{ $n = "_n" }}{{ end }}
-	{{ $n }}, err := {{ $receiver }}.Exec(ctx)
+	n, err := {{ $receiver }}.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
-	return {{ $n }}
+	return n
 }
 
 {{ with extend $ "Receiver" $receiver "Builder" $builder }}
