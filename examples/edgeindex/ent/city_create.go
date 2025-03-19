@@ -25,8 +25,8 @@ type CityCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *CityCreate) SetName(s string) *CityCreate {
-	_c.mutation.SetName(s)
+func (_c *CityCreate) SetName(v string) *CityCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
@@ -37,10 +37,10 @@ func (_c *CityCreate) AddStreetIDs(ids ...int) *CityCreate {
 }
 
 // AddStreets adds the "streets" edges to the Street entity.
-func (_c *CityCreate) AddStreets(s ...*Street) *CityCreate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_c *CityCreate) AddStreets(v ...*Street) *CityCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddStreetIDs(ids...)
 }

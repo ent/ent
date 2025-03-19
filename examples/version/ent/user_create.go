@@ -24,22 +24,22 @@ type UserCreate struct {
 }
 
 // SetVersion sets the "version" field.
-func (_c *UserCreate) SetVersion(i int64) *UserCreate {
-	_c.mutation.SetVersion(i)
+func (_c *UserCreate) SetVersion(v int64) *UserCreate {
+	_c.mutation.SetVersion(v)
 	return _c
 }
 
 // SetNillableVersion sets the "version" field if the given value is not nil.
-func (_c *UserCreate) SetNillableVersion(i *int64) *UserCreate {
-	if i != nil {
-		_c.SetVersion(*i)
+func (_c *UserCreate) SetNillableVersion(v *int64) *UserCreate {
+	if v != nil {
+		_c.SetVersion(*v)
 	}
 	return _c
 }
 
 // SetStatus sets the "status" field.
-func (_c *UserCreate) SetStatus(u user.Status) *UserCreate {
-	_c.mutation.SetStatus(u)
+func (_c *UserCreate) SetStatus(v user.Status) *UserCreate {
+	_c.mutation.SetStatus(v)
 	return _c
 }
 

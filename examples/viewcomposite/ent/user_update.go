@@ -28,43 +28,43 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *UserUpdate) SetName(s string) *UserUpdate {
-	_u.mutation.SetName(s)
+func (_u *UserUpdate) SetName(v string) *UserUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableName(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
 
 // SetPublicInfo sets the "public_info" field.
-func (_u *UserUpdate) SetPublicInfo(s string) *UserUpdate {
-	_u.mutation.SetPublicInfo(s)
+func (_u *UserUpdate) SetPublicInfo(v string) *UserUpdate {
+	_u.mutation.SetPublicInfo(v)
 	return _u
 }
 
 // SetNillablePublicInfo sets the "public_info" field if the given value is not nil.
-func (_u *UserUpdate) SetNillablePublicInfo(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetPublicInfo(*s)
+func (_u *UserUpdate) SetNillablePublicInfo(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetPublicInfo(*v)
 	}
 	return _u
 }
 
 // SetPrivateInfo sets the "private_info" field.
-func (_u *UserUpdate) SetPrivateInfo(s string) *UserUpdate {
-	_u.mutation.SetPrivateInfo(s)
+func (_u *UserUpdate) SetPrivateInfo(v string) *UserUpdate {
+	_u.mutation.SetPrivateInfo(v)
 	return _u
 }
 
 // SetNillablePrivateInfo sets the "private_info" field if the given value is not nil.
-func (_u *UserUpdate) SetNillablePrivateInfo(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetPrivateInfo(*s)
+func (_u *UserUpdate) SetNillablePrivateInfo(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetPrivateInfo(*v)
 	}
 	return _u
 }
@@ -101,7 +101,7 @@ func (_u *UserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -119,7 +119,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := _u.mutation.PrivateInfo(); ok {
 		_spec.SetField(user.FieldPrivateInfo, field.TypeString, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -128,7 +128,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -140,43 +140,43 @@ type UserUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (_u *UserUpdateOne) SetName(s string) *UserUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
 
 // SetPublicInfo sets the "public_info" field.
-func (_u *UserUpdateOne) SetPublicInfo(s string) *UserUpdateOne {
-	_u.mutation.SetPublicInfo(s)
+func (_u *UserUpdateOne) SetPublicInfo(v string) *UserUpdateOne {
+	_u.mutation.SetPublicInfo(v)
 	return _u
 }
 
 // SetNillablePublicInfo sets the "public_info" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillablePublicInfo(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetPublicInfo(*s)
+func (_u *UserUpdateOne) SetNillablePublicInfo(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetPublicInfo(*v)
 	}
 	return _u
 }
 
 // SetPrivateInfo sets the "private_info" field.
-func (_u *UserUpdateOne) SetPrivateInfo(s string) *UserUpdateOne {
-	_u.mutation.SetPrivateInfo(s)
+func (_u *UserUpdateOne) SetPrivateInfo(v string) *UserUpdateOne {
+	_u.mutation.SetPrivateInfo(v)
 	return _u
 }
 
 // SetNillablePrivateInfo sets the "private_info" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillablePrivateInfo(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetPrivateInfo(*s)
+func (_u *UserUpdateOne) SetNillablePrivateInfo(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetPrivateInfo(*v)
 	}
 	return _u
 }

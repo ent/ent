@@ -24,28 +24,28 @@ type NodeCreate struct {
 }
 
 // SetValue sets the "value" field.
-func (_c *NodeCreate) SetValue(i int) *NodeCreate {
-	_c.mutation.SetValue(i)
+func (_c *NodeCreate) SetValue(v int) *NodeCreate {
+	_c.mutation.SetValue(v)
 	return _c
 }
 
 // SetParentID sets the "parent_id" field.
-func (_c *NodeCreate) SetParentID(i int) *NodeCreate {
-	_c.mutation.SetParentID(i)
+func (_c *NodeCreate) SetParentID(v int) *NodeCreate {
+	_c.mutation.SetParentID(v)
 	return _c
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_c *NodeCreate) SetNillableParentID(i *int) *NodeCreate {
-	if i != nil {
-		_c.SetParentID(*i)
+func (_c *NodeCreate) SetNillableParentID(v *int) *NodeCreate {
+	if v != nil {
+		_c.SetParentID(*v)
 	}
 	return _c
 }
 
 // SetParent sets the "parent" edge to the Node entity.
-func (_c *NodeCreate) SetParent(n *Node) *NodeCreate {
-	return _c.SetParentID(n.ID)
+func (_c *NodeCreate) SetParent(v *Node) *NodeCreate {
+	return _c.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the Node entity by IDs.
@@ -55,10 +55,10 @@ func (_c *NodeCreate) AddChildIDs(ids ...int) *NodeCreate {
 }
 
 // AddChildren adds the "children" edges to the Node entity.
-func (_c *NodeCreate) AddChildren(n ...*Node) *NodeCreate {
-	ids := make([]int, len(n))
-	for i := range n {
-		ids[i] = n[i].ID
+func (_c *NodeCreate) AddChildren(v ...*Node) *NodeCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddChildIDs(ids...)
 }

@@ -24,8 +24,8 @@ type TenantCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *TenantCreate) SetName(s string) *TenantCreate {
-	_c.mutation.SetName(s)
+func (_c *TenantCreate) SetName(v string) *TenantCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 

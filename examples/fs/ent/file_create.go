@@ -24,42 +24,42 @@ type FileCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *FileCreate) SetName(s string) *FileCreate {
-	_c.mutation.SetName(s)
+func (_c *FileCreate) SetName(v string) *FileCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetDeleted sets the "deleted" field.
-func (_c *FileCreate) SetDeleted(b bool) *FileCreate {
-	_c.mutation.SetDeleted(b)
+func (_c *FileCreate) SetDeleted(v bool) *FileCreate {
+	_c.mutation.SetDeleted(v)
 	return _c
 }
 
 // SetNillableDeleted sets the "deleted" field if the given value is not nil.
-func (_c *FileCreate) SetNillableDeleted(b *bool) *FileCreate {
-	if b != nil {
-		_c.SetDeleted(*b)
+func (_c *FileCreate) SetNillableDeleted(v *bool) *FileCreate {
+	if v != nil {
+		_c.SetDeleted(*v)
 	}
 	return _c
 }
 
 // SetParentID sets the "parent_id" field.
-func (_c *FileCreate) SetParentID(i int) *FileCreate {
-	_c.mutation.SetParentID(i)
+func (_c *FileCreate) SetParentID(v int) *FileCreate {
+	_c.mutation.SetParentID(v)
 	return _c
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_c *FileCreate) SetNillableParentID(i *int) *FileCreate {
-	if i != nil {
-		_c.SetParentID(*i)
+func (_c *FileCreate) SetNillableParentID(v *int) *FileCreate {
+	if v != nil {
+		_c.SetParentID(*v)
 	}
 	return _c
 }
 
 // SetParent sets the "parent" edge to the File entity.
-func (_c *FileCreate) SetParent(f *File) *FileCreate {
-	return _c.SetParentID(f.ID)
+func (_c *FileCreate) SetParent(v *File) *FileCreate {
+	return _c.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the File entity by IDs.
@@ -69,10 +69,10 @@ func (_c *FileCreate) AddChildIDs(ids ...int) *FileCreate {
 }
 
 // AddChildren adds the "children" edges to the File entity.
-func (_c *FileCreate) AddChildren(f ...*File) *FileCreate {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_c *FileCreate) AddChildren(v ...*File) *FileCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddChildIDs(ids...)
 }

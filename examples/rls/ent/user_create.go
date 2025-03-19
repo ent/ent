@@ -20,14 +20,14 @@ type UserCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *UserCreate) SetName(s string) *UserCreate {
-	_c.mutation.SetName(s)
+func (_c *UserCreate) SetName(v string) *UserCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetTenantID sets the "tenant_id" field.
-func (_c *UserCreate) SetTenantID(i int) *UserCreate {
-	_c.mutation.SetTenantID(i)
+func (_c *UserCreate) SetTenantID(v int) *UserCreate {
+	_c.mutation.SetTenantID(v)
 	return _c
 }
 

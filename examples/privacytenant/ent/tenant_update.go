@@ -32,15 +32,15 @@ func (_u *TenantUpdate) Where(ps ...predicate.Tenant) *TenantUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *TenantUpdate) SetName(s string) *TenantUpdate {
-	_u.mutation.SetName(s)
+func (_u *TenantUpdate) SetName(v string) *TenantUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *TenantUpdate) SetNillableName(s *string) *TenantUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *TenantUpdate) SetNillableName(v *string) *TenantUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -87,9 +87,9 @@ func (_u *TenantUpdate) check() error {
 	return nil
 }
 
-func (_u *TenantUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *TenantUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(tenant.Table, tenant.Columns, sqlgraph.NewFieldSpec(tenant.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -102,7 +102,7 @@ func (_u *TenantUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(tenant.FieldName, field.TypeString, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{tenant.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -111,7 +111,7 @@ func (_u *TenantUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // TenantUpdateOne is the builder for updating a single Tenant entity.
@@ -123,15 +123,15 @@ type TenantUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (_u *TenantUpdateOne) SetName(s string) *TenantUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *TenantUpdateOne) SetName(v string) *TenantUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *TenantUpdateOne) SetNillableName(s *string) *TenantUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *TenantUpdateOne) SetNillableName(v *string) *TenantUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }

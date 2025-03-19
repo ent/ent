@@ -35,43 +35,43 @@ func (_u *SessionUpdate) Where(ps ...predicate.Session) *SessionUpdate {
 }
 
 // SetActive sets the "active" field.
-func (_u *SessionUpdate) SetActive(b bool) *SessionUpdate {
-	_u.mutation.SetActive(b)
+func (_u *SessionUpdate) SetActive(v bool) *SessionUpdate {
+	_u.mutation.SetActive(v)
 	return _u
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableActive(b *bool) *SessionUpdate {
-	if b != nil {
-		_u.SetActive(*b)
+func (_u *SessionUpdate) SetNillableActive(v *bool) *SessionUpdate {
+	if v != nil {
+		_u.SetActive(*v)
 	}
 	return _u
 }
 
 // SetIssuedAt sets the "issued_at" field.
-func (_u *SessionUpdate) SetIssuedAt(t time.Time) *SessionUpdate {
-	_u.mutation.SetIssuedAt(t)
+func (_u *SessionUpdate) SetIssuedAt(v time.Time) *SessionUpdate {
+	_u.mutation.SetIssuedAt(v)
 	return _u
 }
 
 // SetNillableIssuedAt sets the "issued_at" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableIssuedAt(t *time.Time) *SessionUpdate {
-	if t != nil {
-		_u.SetIssuedAt(*t)
+func (_u *SessionUpdate) SetNillableIssuedAt(v *time.Time) *SessionUpdate {
+	if v != nil {
+		_u.SetIssuedAt(*v)
 	}
 	return _u
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (_u *SessionUpdate) SetExpiresAt(t time.Time) *SessionUpdate {
-	_u.mutation.SetExpiresAt(t)
+func (_u *SessionUpdate) SetExpiresAt(v time.Time) *SessionUpdate {
+	_u.mutation.SetExpiresAt(v)
 	return _u
 }
 
 // SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableExpiresAt(t *time.Time) *SessionUpdate {
-	if t != nil {
-		_u.SetExpiresAt(*t)
+func (_u *SessionUpdate) SetNillableExpiresAt(v *time.Time) *SessionUpdate {
+	if v != nil {
+		_u.SetExpiresAt(*v)
 	}
 	return _u
 }
@@ -83,15 +83,15 @@ func (_u *SessionUpdate) ClearExpiresAt() *SessionUpdate {
 }
 
 // SetToken sets the "token" field.
-func (_u *SessionUpdate) SetToken(s string) *SessionUpdate {
-	_u.mutation.SetToken(s)
+func (_u *SessionUpdate) SetToken(v string) *SessionUpdate {
+	_u.mutation.SetToken(v)
 	return _u
 }
 
 // SetNillableToken sets the "token" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableToken(s *string) *SessionUpdate {
-	if s != nil {
-		_u.SetToken(*s)
+func (_u *SessionUpdate) SetNillableToken(v *string) *SessionUpdate {
+	if v != nil {
+		_u.SetToken(*v)
 	}
 	return _u
 }
@@ -103,8 +103,8 @@ func (_u *SessionUpdate) ClearToken() *SessionUpdate {
 }
 
 // SetMethod sets the "method" field.
-func (_u *SessionUpdate) SetMethod(m map[string]interface{}) *SessionUpdate {
-	_u.mutation.SetMethod(m)
+func (_u *SessionUpdate) SetMethod(v map[string]interface{}) *SessionUpdate {
+	_u.mutation.SetMethod(v)
 	return _u
 }
 
@@ -115,15 +115,15 @@ func (_u *SessionUpdate) ClearMethod() *SessionUpdate {
 }
 
 // SetDeviceID sets the "device_id" field.
-func (_u *SessionUpdate) SetDeviceID(u uuid.UUID) *SessionUpdate {
-	_u.mutation.SetDeviceID(u)
+func (_u *SessionUpdate) SetDeviceID(v uuid.UUID) *SessionUpdate {
+	_u.mutation.SetDeviceID(v)
 	return _u
 }
 
 // SetNillableDeviceID sets the "device_id" field if the given value is not nil.
-func (_u *SessionUpdate) SetNillableDeviceID(u *uuid.UUID) *SessionUpdate {
-	if u != nil {
-		_u.SetDeviceID(*u)
+func (_u *SessionUpdate) SetNillableDeviceID(v *uuid.UUID) *SessionUpdate {
+	if v != nil {
+		_u.SetDeviceID(*v)
 	}
 	return _u
 }
@@ -135,8 +135,8 @@ func (_u *SessionUpdate) ClearDeviceID() *SessionUpdate {
 }
 
 // SetDevice sets the "device" edge to the SessionDevice entity.
-func (_u *SessionUpdate) SetDevice(s *SessionDevice) *SessionUpdate {
-	return _u.SetDeviceID(s.ID)
+func (_u *SessionUpdate) SetDevice(v *SessionDevice) *SessionUpdate {
+	return _u.SetDeviceID(v.ID)
 }
 
 // Mutation returns the SessionMutation object of the builder.
@@ -177,7 +177,7 @@ func (_u *SessionUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(session.Table, session.Columns, sqlgraph.NewFieldSpec(session.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -239,7 +239,7 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{session.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -248,7 +248,7 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // SessionUpdateOne is the builder for updating a single Session entity.
@@ -260,43 +260,43 @@ type SessionUpdateOne struct {
 }
 
 // SetActive sets the "active" field.
-func (_u *SessionUpdateOne) SetActive(b bool) *SessionUpdateOne {
-	_u.mutation.SetActive(b)
+func (_u *SessionUpdateOne) SetActive(v bool) *SessionUpdateOne {
+	_u.mutation.SetActive(v)
 	return _u
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableActive(b *bool) *SessionUpdateOne {
-	if b != nil {
-		_u.SetActive(*b)
+func (_u *SessionUpdateOne) SetNillableActive(v *bool) *SessionUpdateOne {
+	if v != nil {
+		_u.SetActive(*v)
 	}
 	return _u
 }
 
 // SetIssuedAt sets the "issued_at" field.
-func (_u *SessionUpdateOne) SetIssuedAt(t time.Time) *SessionUpdateOne {
-	_u.mutation.SetIssuedAt(t)
+func (_u *SessionUpdateOne) SetIssuedAt(v time.Time) *SessionUpdateOne {
+	_u.mutation.SetIssuedAt(v)
 	return _u
 }
 
 // SetNillableIssuedAt sets the "issued_at" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableIssuedAt(t *time.Time) *SessionUpdateOne {
-	if t != nil {
-		_u.SetIssuedAt(*t)
+func (_u *SessionUpdateOne) SetNillableIssuedAt(v *time.Time) *SessionUpdateOne {
+	if v != nil {
+		_u.SetIssuedAt(*v)
 	}
 	return _u
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (_u *SessionUpdateOne) SetExpiresAt(t time.Time) *SessionUpdateOne {
-	_u.mutation.SetExpiresAt(t)
+func (_u *SessionUpdateOne) SetExpiresAt(v time.Time) *SessionUpdateOne {
+	_u.mutation.SetExpiresAt(v)
 	return _u
 }
 
 // SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableExpiresAt(t *time.Time) *SessionUpdateOne {
-	if t != nil {
-		_u.SetExpiresAt(*t)
+func (_u *SessionUpdateOne) SetNillableExpiresAt(v *time.Time) *SessionUpdateOne {
+	if v != nil {
+		_u.SetExpiresAt(*v)
 	}
 	return _u
 }
@@ -308,15 +308,15 @@ func (_u *SessionUpdateOne) ClearExpiresAt() *SessionUpdateOne {
 }
 
 // SetToken sets the "token" field.
-func (_u *SessionUpdateOne) SetToken(s string) *SessionUpdateOne {
-	_u.mutation.SetToken(s)
+func (_u *SessionUpdateOne) SetToken(v string) *SessionUpdateOne {
+	_u.mutation.SetToken(v)
 	return _u
 }
 
 // SetNillableToken sets the "token" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableToken(s *string) *SessionUpdateOne {
-	if s != nil {
-		_u.SetToken(*s)
+func (_u *SessionUpdateOne) SetNillableToken(v *string) *SessionUpdateOne {
+	if v != nil {
+		_u.SetToken(*v)
 	}
 	return _u
 }
@@ -328,8 +328,8 @@ func (_u *SessionUpdateOne) ClearToken() *SessionUpdateOne {
 }
 
 // SetMethod sets the "method" field.
-func (_u *SessionUpdateOne) SetMethod(m map[string]interface{}) *SessionUpdateOne {
-	_u.mutation.SetMethod(m)
+func (_u *SessionUpdateOne) SetMethod(v map[string]interface{}) *SessionUpdateOne {
+	_u.mutation.SetMethod(v)
 	return _u
 }
 
@@ -340,15 +340,15 @@ func (_u *SessionUpdateOne) ClearMethod() *SessionUpdateOne {
 }
 
 // SetDeviceID sets the "device_id" field.
-func (_u *SessionUpdateOne) SetDeviceID(u uuid.UUID) *SessionUpdateOne {
-	_u.mutation.SetDeviceID(u)
+func (_u *SessionUpdateOne) SetDeviceID(v uuid.UUID) *SessionUpdateOne {
+	_u.mutation.SetDeviceID(v)
 	return _u
 }
 
 // SetNillableDeviceID sets the "device_id" field if the given value is not nil.
-func (_u *SessionUpdateOne) SetNillableDeviceID(u *uuid.UUID) *SessionUpdateOne {
-	if u != nil {
-		_u.SetDeviceID(*u)
+func (_u *SessionUpdateOne) SetNillableDeviceID(v *uuid.UUID) *SessionUpdateOne {
+	if v != nil {
+		_u.SetDeviceID(*v)
 	}
 	return _u
 }
@@ -360,8 +360,8 @@ func (_u *SessionUpdateOne) ClearDeviceID() *SessionUpdateOne {
 }
 
 // SetDevice sets the "device" edge to the SessionDevice entity.
-func (_u *SessionUpdateOne) SetDevice(s *SessionDevice) *SessionUpdateOne {
-	return _u.SetDeviceID(s.ID)
+func (_u *SessionUpdateOne) SetDevice(v *SessionDevice) *SessionUpdateOne {
+	return _u.SetDeviceID(v.ID)
 }
 
 // Mutation returns the SessionMutation object of the builder.

@@ -35,71 +35,71 @@ func (_u *SessionDeviceUpdate) Where(ps ...predicate.SessionDevice) *SessionDevi
 }
 
 // SetIPAddress sets the "ip_address" field.
-func (_u *SessionDeviceUpdate) SetIPAddress(s string) *SessionDeviceUpdate {
-	_u.mutation.SetIPAddress(s)
+func (_u *SessionDeviceUpdate) SetIPAddress(v string) *SessionDeviceUpdate {
+	_u.mutation.SetIPAddress(v)
 	return _u
 }
 
 // SetNillableIPAddress sets the "ip_address" field if the given value is not nil.
-func (_u *SessionDeviceUpdate) SetNillableIPAddress(s *string) *SessionDeviceUpdate {
-	if s != nil {
-		_u.SetIPAddress(*s)
+func (_u *SessionDeviceUpdate) SetNillableIPAddress(v *string) *SessionDeviceUpdate {
+	if v != nil {
+		_u.SetIPAddress(*v)
 	}
 	return _u
 }
 
 // SetUserAgent sets the "user_agent" field.
-func (_u *SessionDeviceUpdate) SetUserAgent(s string) *SessionDeviceUpdate {
-	_u.mutation.SetUserAgent(s)
+func (_u *SessionDeviceUpdate) SetUserAgent(v string) *SessionDeviceUpdate {
+	_u.mutation.SetUserAgent(v)
 	return _u
 }
 
 // SetNillableUserAgent sets the "user_agent" field if the given value is not nil.
-func (_u *SessionDeviceUpdate) SetNillableUserAgent(s *string) *SessionDeviceUpdate {
-	if s != nil {
-		_u.SetUserAgent(*s)
+func (_u *SessionDeviceUpdate) SetNillableUserAgent(v *string) *SessionDeviceUpdate {
+	if v != nil {
+		_u.SetUserAgent(*v)
 	}
 	return _u
 }
 
 // SetLocation sets the "location" field.
-func (_u *SessionDeviceUpdate) SetLocation(s string) *SessionDeviceUpdate {
-	_u.mutation.SetLocation(s)
+func (_u *SessionDeviceUpdate) SetLocation(v string) *SessionDeviceUpdate {
+	_u.mutation.SetLocation(v)
 	return _u
 }
 
 // SetNillableLocation sets the "location" field if the given value is not nil.
-func (_u *SessionDeviceUpdate) SetNillableLocation(s *string) *SessionDeviceUpdate {
-	if s != nil {
-		_u.SetLocation(*s)
+func (_u *SessionDeviceUpdate) SetNillableLocation(v *string) *SessionDeviceUpdate {
+	if v != nil {
+		_u.SetLocation(*v)
 	}
 	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_u *SessionDeviceUpdate) SetCreatedAt(t time.Time) *SessionDeviceUpdate {
-	_u.mutation.SetCreatedAt(t)
+func (_u *SessionDeviceUpdate) SetCreatedAt(v time.Time) *SessionDeviceUpdate {
+	_u.mutation.SetCreatedAt(v)
 	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *SessionDeviceUpdate) SetNillableCreatedAt(t *time.Time) *SessionDeviceUpdate {
-	if t != nil {
-		_u.SetCreatedAt(*t)
+func (_u *SessionDeviceUpdate) SetNillableCreatedAt(v *time.Time) *SessionDeviceUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
 	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *SessionDeviceUpdate) SetUpdatedAt(t time.Time) *SessionDeviceUpdate {
-	_u.mutation.SetUpdatedAt(t)
+func (_u *SessionDeviceUpdate) SetUpdatedAt(v time.Time) *SessionDeviceUpdate {
+	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_u *SessionDeviceUpdate) SetNillableUpdatedAt(t *time.Time) *SessionDeviceUpdate {
-	if t != nil {
-		_u.SetUpdatedAt(*t)
+func (_u *SessionDeviceUpdate) SetNillableUpdatedAt(v *time.Time) *SessionDeviceUpdate {
+	if v != nil {
+		_u.SetUpdatedAt(*v)
 	}
 	return _u
 }
@@ -117,10 +117,10 @@ func (_u *SessionDeviceUpdate) AddSessionIDs(ids ...uuid.UUID) *SessionDeviceUpd
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
-func (_u *SessionDeviceUpdate) AddSessions(s ...*Session) *SessionDeviceUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *SessionDeviceUpdate) AddSessions(v ...*Session) *SessionDeviceUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddSessionIDs(ids...)
 }
@@ -143,10 +143,10 @@ func (_u *SessionDeviceUpdate) RemoveSessionIDs(ids ...uuid.UUID) *SessionDevice
 }
 
 // RemoveSessions removes "sessions" edges to Session entities.
-func (_u *SessionDeviceUpdate) RemoveSessions(s ...*Session) *SessionDeviceUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *SessionDeviceUpdate) RemoveSessions(v ...*Session) *SessionDeviceUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveSessionIDs(ids...)
 }
@@ -198,9 +198,9 @@ func (_u *SessionDeviceUpdate) check() error {
 	return nil
 }
 
-func (_u *SessionDeviceUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *SessionDeviceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(sessiondevice.Table, sessiondevice.Columns, sqlgraph.NewFieldSpec(sessiondevice.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -273,7 +273,7 @@ func (_u *SessionDeviceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{sessiondevice.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -282,7 +282,7 @@ func (_u *SessionDeviceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // SessionDeviceUpdateOne is the builder for updating a single SessionDevice entity.
@@ -294,71 +294,71 @@ type SessionDeviceUpdateOne struct {
 }
 
 // SetIPAddress sets the "ip_address" field.
-func (_u *SessionDeviceUpdateOne) SetIPAddress(s string) *SessionDeviceUpdateOne {
-	_u.mutation.SetIPAddress(s)
+func (_u *SessionDeviceUpdateOne) SetIPAddress(v string) *SessionDeviceUpdateOne {
+	_u.mutation.SetIPAddress(v)
 	return _u
 }
 
 // SetNillableIPAddress sets the "ip_address" field if the given value is not nil.
-func (_u *SessionDeviceUpdateOne) SetNillableIPAddress(s *string) *SessionDeviceUpdateOne {
-	if s != nil {
-		_u.SetIPAddress(*s)
+func (_u *SessionDeviceUpdateOne) SetNillableIPAddress(v *string) *SessionDeviceUpdateOne {
+	if v != nil {
+		_u.SetIPAddress(*v)
 	}
 	return _u
 }
 
 // SetUserAgent sets the "user_agent" field.
-func (_u *SessionDeviceUpdateOne) SetUserAgent(s string) *SessionDeviceUpdateOne {
-	_u.mutation.SetUserAgent(s)
+func (_u *SessionDeviceUpdateOne) SetUserAgent(v string) *SessionDeviceUpdateOne {
+	_u.mutation.SetUserAgent(v)
 	return _u
 }
 
 // SetNillableUserAgent sets the "user_agent" field if the given value is not nil.
-func (_u *SessionDeviceUpdateOne) SetNillableUserAgent(s *string) *SessionDeviceUpdateOne {
-	if s != nil {
-		_u.SetUserAgent(*s)
+func (_u *SessionDeviceUpdateOne) SetNillableUserAgent(v *string) *SessionDeviceUpdateOne {
+	if v != nil {
+		_u.SetUserAgent(*v)
 	}
 	return _u
 }
 
 // SetLocation sets the "location" field.
-func (_u *SessionDeviceUpdateOne) SetLocation(s string) *SessionDeviceUpdateOne {
-	_u.mutation.SetLocation(s)
+func (_u *SessionDeviceUpdateOne) SetLocation(v string) *SessionDeviceUpdateOne {
+	_u.mutation.SetLocation(v)
 	return _u
 }
 
 // SetNillableLocation sets the "location" field if the given value is not nil.
-func (_u *SessionDeviceUpdateOne) SetNillableLocation(s *string) *SessionDeviceUpdateOne {
-	if s != nil {
-		_u.SetLocation(*s)
+func (_u *SessionDeviceUpdateOne) SetNillableLocation(v *string) *SessionDeviceUpdateOne {
+	if v != nil {
+		_u.SetLocation(*v)
 	}
 	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_u *SessionDeviceUpdateOne) SetCreatedAt(t time.Time) *SessionDeviceUpdateOne {
-	_u.mutation.SetCreatedAt(t)
+func (_u *SessionDeviceUpdateOne) SetCreatedAt(v time.Time) *SessionDeviceUpdateOne {
+	_u.mutation.SetCreatedAt(v)
 	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *SessionDeviceUpdateOne) SetNillableCreatedAt(t *time.Time) *SessionDeviceUpdateOne {
-	if t != nil {
-		_u.SetCreatedAt(*t)
+func (_u *SessionDeviceUpdateOne) SetNillableCreatedAt(v *time.Time) *SessionDeviceUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
 	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *SessionDeviceUpdateOne) SetUpdatedAt(t time.Time) *SessionDeviceUpdateOne {
-	_u.mutation.SetUpdatedAt(t)
+func (_u *SessionDeviceUpdateOne) SetUpdatedAt(v time.Time) *SessionDeviceUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_u *SessionDeviceUpdateOne) SetNillableUpdatedAt(t *time.Time) *SessionDeviceUpdateOne {
-	if t != nil {
-		_u.SetUpdatedAt(*t)
+func (_u *SessionDeviceUpdateOne) SetNillableUpdatedAt(v *time.Time) *SessionDeviceUpdateOne {
+	if v != nil {
+		_u.SetUpdatedAt(*v)
 	}
 	return _u
 }
@@ -376,10 +376,10 @@ func (_u *SessionDeviceUpdateOne) AddSessionIDs(ids ...uuid.UUID) *SessionDevice
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
-func (_u *SessionDeviceUpdateOne) AddSessions(s ...*Session) *SessionDeviceUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *SessionDeviceUpdateOne) AddSessions(v ...*Session) *SessionDeviceUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddSessionIDs(ids...)
 }
@@ -402,10 +402,10 @@ func (_u *SessionDeviceUpdateOne) RemoveSessionIDs(ids ...uuid.UUID) *SessionDev
 }
 
 // RemoveSessions removes "sessions" edges to Session entities.
-func (_u *SessionDeviceUpdateOne) RemoveSessions(s ...*Session) *SessionDeviceUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *SessionDeviceUpdateOne) RemoveSessions(v ...*Session) *SessionDeviceUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveSessionIDs(ids...)
 }

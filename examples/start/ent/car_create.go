@@ -26,14 +26,14 @@ type CarCreate struct {
 }
 
 // SetModel sets the "model" field.
-func (_c *CarCreate) SetModel(s string) *CarCreate {
-	_c.mutation.SetModel(s)
+func (_c *CarCreate) SetModel(v string) *CarCreate {
+	_c.mutation.SetModel(v)
 	return _c
 }
 
 // SetRegisteredAt sets the "registered_at" field.
-func (_c *CarCreate) SetRegisteredAt(t time.Time) *CarCreate {
-	_c.mutation.SetRegisteredAt(t)
+func (_c *CarCreate) SetRegisteredAt(v time.Time) *CarCreate {
+	_c.mutation.SetRegisteredAt(v)
 	return _c
 }
 
@@ -52,8 +52,8 @@ func (_c *CarCreate) SetNillableOwnerID(id *int) *CarCreate {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_c *CarCreate) SetOwner(u *User) *CarCreate {
-	return _c.SetOwnerID(u.ID)
+func (_c *CarCreate) SetOwner(v *User) *CarCreate {
+	return _c.SetOwnerID(v.ID)
 }
 
 // Mutation returns the CarMutation object of the builder.

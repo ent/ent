@@ -20,8 +20,8 @@ type UserCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *UserCreate) SetName(s string) *UserCreate {
-	_c.mutation.SetName(s)
+func (_c *UserCreate) SetName(v string) *UserCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 

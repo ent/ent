@@ -28,8 +28,8 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 }
 
 // SetLocation sets the "location" field.
-func (_u *UserUpdate) SetLocation(b []byte) *UserUpdate {
-	_u.mutation.SetLocation(b)
+func (_u *UserUpdate) SetLocation(v []byte) *UserUpdate {
+	_u.mutation.SetLocation(v)
 	return _u
 }
 
@@ -65,7 +65,7 @@ func (_u *UserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -77,7 +77,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := _u.mutation.Location(); ok {
 		_spec.SetField(user.FieldLocation, field.TypeBytes, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -86,7 +86,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -98,8 +98,8 @@ type UserUpdateOne struct {
 }
 
 // SetLocation sets the "location" field.
-func (_u *UserUpdateOne) SetLocation(b []byte) *UserUpdateOne {
-	_u.mutation.SetLocation(b)
+func (_u *UserUpdateOne) SetLocation(v []byte) *UserUpdateOne {
+	_u.mutation.SetLocation(v)
 	return _u
 }
 

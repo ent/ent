@@ -33,15 +33,15 @@ func (_u *CityUpdate) Where(ps ...predicate.City) *CityUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *CityUpdate) SetName(s string) *CityUpdate {
-	_u.mutation.SetName(s)
+func (_u *CityUpdate) SetName(v string) *CityUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *CityUpdate) SetNillableName(s *string) *CityUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *CityUpdate) SetNillableName(v *string) *CityUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -53,10 +53,10 @@ func (_u *CityUpdate) AddStreetIDs(ids ...int) *CityUpdate {
 }
 
 // AddStreets adds the "streets" edges to the Street entity.
-func (_u *CityUpdate) AddStreets(s ...*Street) *CityUpdate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *CityUpdate) AddStreets(v ...*Street) *CityUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddStreetIDs(ids...)
 }
@@ -79,10 +79,10 @@ func (_u *CityUpdate) RemoveStreetIDs(ids ...int) *CityUpdate {
 }
 
 // RemoveStreets removes "streets" edges to Street entities.
-func (_u *CityUpdate) RemoveStreets(s ...*Street) *CityUpdate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *CityUpdate) RemoveStreets(v ...*Street) *CityUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveStreetIDs(ids...)
 }
@@ -114,7 +114,7 @@ func (_u *CityUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *CityUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(city.Table, city.Columns, sqlgraph.NewFieldSpec(city.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -171,7 +171,7 @@ func (_u *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{city.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -180,7 +180,7 @@ func (_u *CityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // CityUpdateOne is the builder for updating a single City entity.
@@ -192,15 +192,15 @@ type CityUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (_u *CityUpdateOne) SetName(s string) *CityUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *CityUpdateOne) SetName(v string) *CityUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *CityUpdateOne) SetNillableName(s *string) *CityUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *CityUpdateOne) SetNillableName(v *string) *CityUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -212,10 +212,10 @@ func (_u *CityUpdateOne) AddStreetIDs(ids ...int) *CityUpdateOne {
 }
 
 // AddStreets adds the "streets" edges to the Street entity.
-func (_u *CityUpdateOne) AddStreets(s ...*Street) *CityUpdateOne {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *CityUpdateOne) AddStreets(v ...*Street) *CityUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddStreetIDs(ids...)
 }
@@ -238,10 +238,10 @@ func (_u *CityUpdateOne) RemoveStreetIDs(ids ...int) *CityUpdateOne {
 }
 
 // RemoveStreets removes "streets" edges to Street entities.
-func (_u *CityUpdateOne) RemoveStreets(s ...*Street) *CityUpdateOne {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *CityUpdateOne) RemoveStreets(v ...*Street) *CityUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveStreetIDs(ids...)
 }

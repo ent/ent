@@ -32,43 +32,43 @@ func (_u *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *FileUpdate) SetName(s string) *FileUpdate {
-	_u.mutation.SetName(s)
+func (_u *FileUpdate) SetName(v string) *FileUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *FileUpdate) SetNillableName(s *string) *FileUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *FileUpdate) SetNillableName(v *string) *FileUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
 
 // SetDeleted sets the "deleted" field.
-func (_u *FileUpdate) SetDeleted(b bool) *FileUpdate {
-	_u.mutation.SetDeleted(b)
+func (_u *FileUpdate) SetDeleted(v bool) *FileUpdate {
+	_u.mutation.SetDeleted(v)
 	return _u
 }
 
 // SetNillableDeleted sets the "deleted" field if the given value is not nil.
-func (_u *FileUpdate) SetNillableDeleted(b *bool) *FileUpdate {
-	if b != nil {
-		_u.SetDeleted(*b)
+func (_u *FileUpdate) SetNillableDeleted(v *bool) *FileUpdate {
+	if v != nil {
+		_u.SetDeleted(*v)
 	}
 	return _u
 }
 
 // SetParentID sets the "parent_id" field.
-func (_u *FileUpdate) SetParentID(i int) *FileUpdate {
-	_u.mutation.SetParentID(i)
+func (_u *FileUpdate) SetParentID(v int) *FileUpdate {
+	_u.mutation.SetParentID(v)
 	return _u
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_u *FileUpdate) SetNillableParentID(i *int) *FileUpdate {
-	if i != nil {
-		_u.SetParentID(*i)
+func (_u *FileUpdate) SetNillableParentID(v *int) *FileUpdate {
+	if v != nil {
+		_u.SetParentID(*v)
 	}
 	return _u
 }
@@ -80,8 +80,8 @@ func (_u *FileUpdate) ClearParentID() *FileUpdate {
 }
 
 // SetParent sets the "parent" edge to the File entity.
-func (_u *FileUpdate) SetParent(f *File) *FileUpdate {
-	return _u.SetParentID(f.ID)
+func (_u *FileUpdate) SetParent(v *File) *FileUpdate {
+	return _u.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the File entity by IDs.
@@ -91,10 +91,10 @@ func (_u *FileUpdate) AddChildIDs(ids ...int) *FileUpdate {
 }
 
 // AddChildren adds the "children" edges to the File entity.
-func (_u *FileUpdate) AddChildren(f ...*File) *FileUpdate {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *FileUpdate) AddChildren(v ...*File) *FileUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
@@ -123,10 +123,10 @@ func (_u *FileUpdate) RemoveChildIDs(ids ...int) *FileUpdate {
 }
 
 // RemoveChildren removes "children" edges to File entities.
-func (_u *FileUpdate) RemoveChildren(f ...*File) *FileUpdate {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *FileUpdate) RemoveChildren(v ...*File) *FileUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }
@@ -158,7 +158,7 @@ func (_u *FileUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *FileUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(file.Table, file.Columns, sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -247,7 +247,7 @@ func (_u *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{file.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -256,7 +256,7 @@ func (_u *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // FileUpdateOne is the builder for updating a single File entity.
@@ -268,43 +268,43 @@ type FileUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (_u *FileUpdateOne) SetName(s string) *FileUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *FileUpdateOne) SetName(v string) *FileUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *FileUpdateOne) SetNillableName(s *string) *FileUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *FileUpdateOne) SetNillableName(v *string) *FileUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
 
 // SetDeleted sets the "deleted" field.
-func (_u *FileUpdateOne) SetDeleted(b bool) *FileUpdateOne {
-	_u.mutation.SetDeleted(b)
+func (_u *FileUpdateOne) SetDeleted(v bool) *FileUpdateOne {
+	_u.mutation.SetDeleted(v)
 	return _u
 }
 
 // SetNillableDeleted sets the "deleted" field if the given value is not nil.
-func (_u *FileUpdateOne) SetNillableDeleted(b *bool) *FileUpdateOne {
-	if b != nil {
-		_u.SetDeleted(*b)
+func (_u *FileUpdateOne) SetNillableDeleted(v *bool) *FileUpdateOne {
+	if v != nil {
+		_u.SetDeleted(*v)
 	}
 	return _u
 }
 
 // SetParentID sets the "parent_id" field.
-func (_u *FileUpdateOne) SetParentID(i int) *FileUpdateOne {
-	_u.mutation.SetParentID(i)
+func (_u *FileUpdateOne) SetParentID(v int) *FileUpdateOne {
+	_u.mutation.SetParentID(v)
 	return _u
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_u *FileUpdateOne) SetNillableParentID(i *int) *FileUpdateOne {
-	if i != nil {
-		_u.SetParentID(*i)
+func (_u *FileUpdateOne) SetNillableParentID(v *int) *FileUpdateOne {
+	if v != nil {
+		_u.SetParentID(*v)
 	}
 	return _u
 }
@@ -316,8 +316,8 @@ func (_u *FileUpdateOne) ClearParentID() *FileUpdateOne {
 }
 
 // SetParent sets the "parent" edge to the File entity.
-func (_u *FileUpdateOne) SetParent(f *File) *FileUpdateOne {
-	return _u.SetParentID(f.ID)
+func (_u *FileUpdateOne) SetParent(v *File) *FileUpdateOne {
+	return _u.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the File entity by IDs.
@@ -327,10 +327,10 @@ func (_u *FileUpdateOne) AddChildIDs(ids ...int) *FileUpdateOne {
 }
 
 // AddChildren adds the "children" edges to the File entity.
-func (_u *FileUpdateOne) AddChildren(f ...*File) *FileUpdateOne {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *FileUpdateOne) AddChildren(v ...*File) *FileUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
@@ -359,10 +359,10 @@ func (_u *FileUpdateOne) RemoveChildIDs(ids ...int) *FileUpdateOne {
 }
 
 // RemoveChildren removes "children" edges to File entities.
-func (_u *FileUpdateOne) RemoveChildren(f ...*File) *FileUpdateOne {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *FileUpdateOne) RemoveChildren(v ...*File) *FileUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }

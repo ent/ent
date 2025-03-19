@@ -25,26 +25,26 @@ type PetCreate struct {
 }
 
 // SetAge sets the "age" field.
-func (_c *PetCreate) SetAge(i int) *PetCreate {
-	_c.mutation.SetAge(i)
+func (_c *PetCreate) SetAge(v int) *PetCreate {
+	_c.mutation.SetAge(v)
 	return _c
 }
 
 // SetName sets the "name" field.
-func (_c *PetCreate) SetName(s string) *PetCreate {
-	_c.mutation.SetName(s)
+func (_c *PetCreate) SetName(v string) *PetCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetOwnerID sets the "owner_id" field.
-func (_c *PetCreate) SetOwnerID(i int) *PetCreate {
-	_c.mutation.SetOwnerID(i)
+func (_c *PetCreate) SetOwnerID(v int) *PetCreate {
+	_c.mutation.SetOwnerID(v)
 	return _c
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_c *PetCreate) SetOwner(u *User) *PetCreate {
-	return _c.SetOwnerID(u.ID)
+func (_c *PetCreate) SetOwner(v *User) *PetCreate {
+	return _c.SetOwnerID(v.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.

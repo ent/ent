@@ -20,8 +20,8 @@ type PetCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *PetCreate) SetName(s string) *PetCreate {
-	_c.mutation.SetName(s)
+func (_c *PetCreate) SetName(v string) *PetCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 

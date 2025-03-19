@@ -26,65 +26,65 @@ type PetCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *PetCreate) SetName(s string) *PetCreate {
-	_c.mutation.SetName(s)
+func (_c *PetCreate) SetName(v string) *PetCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetAge sets the "age" field.
-func (_c *PetCreate) SetAge(f float64) *PetCreate {
-	_c.mutation.SetAge(f)
+func (_c *PetCreate) SetAge(v float64) *PetCreate {
+	_c.mutation.SetAge(v)
 	return _c
 }
 
 // SetWeight sets the "weight" field.
-func (_c *PetCreate) SetWeight(f float64) *PetCreate {
-	_c.mutation.SetWeight(f)
+func (_c *PetCreate) SetWeight(v float64) *PetCreate {
+	_c.mutation.SetWeight(v)
 	return _c
 }
 
 // SetBestFriendID sets the "best_friend_id" field.
-func (_c *PetCreate) SetBestFriendID(u uuid.UUID) *PetCreate {
-	_c.mutation.SetBestFriendID(u)
+func (_c *PetCreate) SetBestFriendID(v uuid.UUID) *PetCreate {
+	_c.mutation.SetBestFriendID(v)
 	return _c
 }
 
 // SetOwnerID sets the "owner_id" field.
-func (_c *PetCreate) SetOwnerID(i int) *PetCreate {
-	_c.mutation.SetOwnerID(i)
+func (_c *PetCreate) SetOwnerID(v int) *PetCreate {
+	_c.mutation.SetOwnerID(v)
 	return _c
 }
 
 // SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (_c *PetCreate) SetNillableOwnerID(i *int) *PetCreate {
-	if i != nil {
-		_c.SetOwnerID(*i)
+func (_c *PetCreate) SetNillableOwnerID(v *int) *PetCreate {
+	if v != nil {
+		_c.SetOwnerID(*v)
 	}
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *PetCreate) SetID(u uuid.UUID) *PetCreate {
-	_c.mutation.SetID(u)
+func (_c *PetCreate) SetID(v uuid.UUID) *PetCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *PetCreate) SetNillableID(u *uuid.UUID) *PetCreate {
-	if u != nil {
-		_c.SetID(*u)
+func (_c *PetCreate) SetNillableID(v *uuid.UUID) *PetCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
 	return _c
 }
 
 // SetBestFriend sets the "best_friend" edge to the Pet entity.
-func (_c *PetCreate) SetBestFriend(p *Pet) *PetCreate {
-	return _c.SetBestFriendID(p.ID)
+func (_c *PetCreate) SetBestFriend(v *Pet) *PetCreate {
+	return _c.SetBestFriendID(v.ID)
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_c *PetCreate) SetOwner(u *User) *PetCreate {
-	return _c.SetOwnerID(u.ID)
+func (_c *PetCreate) SetOwner(v *User) *PetCreate {
+	return _c.SetOwnerID(v.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.

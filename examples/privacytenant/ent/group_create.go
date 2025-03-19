@@ -26,28 +26,28 @@ type GroupCreate struct {
 }
 
 // SetTenantID sets the "tenant_id" field.
-func (_c *GroupCreate) SetTenantID(i int) *GroupCreate {
-	_c.mutation.SetTenantID(i)
+func (_c *GroupCreate) SetTenantID(v int) *GroupCreate {
+	_c.mutation.SetTenantID(v)
 	return _c
 }
 
 // SetName sets the "name" field.
-func (_c *GroupCreate) SetName(s string) *GroupCreate {
-	_c.mutation.SetName(s)
+func (_c *GroupCreate) SetName(v string) *GroupCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_c *GroupCreate) SetNillableName(s *string) *GroupCreate {
-	if s != nil {
-		_c.SetName(*s)
+func (_c *GroupCreate) SetNillableName(v *string) *GroupCreate {
+	if v != nil {
+		_c.SetName(*v)
 	}
 	return _c
 }
 
 // SetTenant sets the "tenant" edge to the Tenant entity.
-func (_c *GroupCreate) SetTenant(t *Tenant) *GroupCreate {
-	return _c.SetTenantID(t.ID)
+func (_c *GroupCreate) SetTenant(v *Tenant) *GroupCreate {
+	return _c.SetTenantID(v.ID)
 }
 
 // AddUserIDs adds the "users" edge to the User entity by IDs.
@@ -57,10 +57,10 @@ func (_c *GroupCreate) AddUserIDs(ids ...int) *GroupCreate {
 }
 
 // AddUsers adds the "users" edges to the User entity.
-func (_c *GroupCreate) AddUsers(u ...*User) *GroupCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *GroupCreate) AddUsers(v ...*User) *GroupCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddUserIDs(ids...)
 }

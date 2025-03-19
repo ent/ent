@@ -24,14 +24,14 @@ type UserCreate struct {
 }
 
 // SetAge sets the "age" field.
-func (_c *UserCreate) SetAge(i int) *UserCreate {
-	_c.mutation.SetAge(i)
+func (_c *UserCreate) SetAge(v int) *UserCreate {
+	_c.mutation.SetAge(v)
 	return _c
 }
 
 // SetName sets the "name" field.
-func (_c *UserCreate) SetName(s string) *UserCreate {
-	_c.mutation.SetName(s)
+func (_c *UserCreate) SetName(v string) *UserCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
@@ -50,8 +50,8 @@ func (_c *UserCreate) SetNillableSpouseID(id *int) *UserCreate {
 }
 
 // SetSpouse sets the "spouse" edge to the User entity.
-func (_c *UserCreate) SetSpouse(u *User) *UserCreate {
-	return _c.SetSpouseID(u.ID)
+func (_c *UserCreate) SetSpouse(v *User) *UserCreate {
+	return _c.SetSpouseID(v.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.

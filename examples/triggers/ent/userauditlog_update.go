@@ -28,43 +28,43 @@ func (_u *UserAuditLogUpdate) Where(ps ...predicate.UserAuditLog) *UserAuditLogU
 }
 
 // SetOperationType sets the "operation_type" field.
-func (_u *UserAuditLogUpdate) SetOperationType(s string) *UserAuditLogUpdate {
-	_u.mutation.SetOperationType(s)
+func (_u *UserAuditLogUpdate) SetOperationType(v string) *UserAuditLogUpdate {
+	_u.mutation.SetOperationType(v)
 	return _u
 }
 
 // SetNillableOperationType sets the "operation_type" field if the given value is not nil.
-func (_u *UserAuditLogUpdate) SetNillableOperationType(s *string) *UserAuditLogUpdate {
-	if s != nil {
-		_u.SetOperationType(*s)
+func (_u *UserAuditLogUpdate) SetNillableOperationType(v *string) *UserAuditLogUpdate {
+	if v != nil {
+		_u.SetOperationType(*v)
 	}
 	return _u
 }
 
 // SetOperationTime sets the "operation_time" field.
-func (_u *UserAuditLogUpdate) SetOperationTime(s string) *UserAuditLogUpdate {
-	_u.mutation.SetOperationTime(s)
+func (_u *UserAuditLogUpdate) SetOperationTime(v string) *UserAuditLogUpdate {
+	_u.mutation.SetOperationTime(v)
 	return _u
 }
 
 // SetNillableOperationTime sets the "operation_time" field if the given value is not nil.
-func (_u *UserAuditLogUpdate) SetNillableOperationTime(s *string) *UserAuditLogUpdate {
-	if s != nil {
-		_u.SetOperationTime(*s)
+func (_u *UserAuditLogUpdate) SetNillableOperationTime(v *string) *UserAuditLogUpdate {
+	if v != nil {
+		_u.SetOperationTime(*v)
 	}
 	return _u
 }
 
 // SetOldValue sets the "old_value" field.
-func (_u *UserAuditLogUpdate) SetOldValue(s string) *UserAuditLogUpdate {
-	_u.mutation.SetOldValue(s)
+func (_u *UserAuditLogUpdate) SetOldValue(v string) *UserAuditLogUpdate {
+	_u.mutation.SetOldValue(v)
 	return _u
 }
 
 // SetNillableOldValue sets the "old_value" field if the given value is not nil.
-func (_u *UserAuditLogUpdate) SetNillableOldValue(s *string) *UserAuditLogUpdate {
-	if s != nil {
-		_u.SetOldValue(*s)
+func (_u *UserAuditLogUpdate) SetNillableOldValue(v *string) *UserAuditLogUpdate {
+	if v != nil {
+		_u.SetOldValue(*v)
 	}
 	return _u
 }
@@ -76,15 +76,15 @@ func (_u *UserAuditLogUpdate) ClearOldValue() *UserAuditLogUpdate {
 }
 
 // SetNewValue sets the "new_value" field.
-func (_u *UserAuditLogUpdate) SetNewValue(s string) *UserAuditLogUpdate {
-	_u.mutation.SetNewValue(s)
+func (_u *UserAuditLogUpdate) SetNewValue(v string) *UserAuditLogUpdate {
+	_u.mutation.SetNewValue(v)
 	return _u
 }
 
 // SetNillableNewValue sets the "new_value" field if the given value is not nil.
-func (_u *UserAuditLogUpdate) SetNillableNewValue(s *string) *UserAuditLogUpdate {
-	if s != nil {
-		_u.SetNewValue(*s)
+func (_u *UserAuditLogUpdate) SetNillableNewValue(v *string) *UserAuditLogUpdate {
+	if v != nil {
+		_u.SetNewValue(*v)
 	}
 	return _u
 }
@@ -127,7 +127,7 @@ func (_u *UserAuditLogUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *UserAuditLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *UserAuditLogUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(userauditlog.Table, userauditlog.Columns, sqlgraph.NewFieldSpec(userauditlog.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -154,7 +154,7 @@ func (_u *UserAuditLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if _u.mutation.NewValueCleared() {
 		_spec.ClearField(userauditlog.FieldNewValue, field.TypeString)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{userauditlog.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -163,7 +163,7 @@ func (_u *UserAuditLogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // UserAuditLogUpdateOne is the builder for updating a single UserAuditLog entity.
@@ -175,43 +175,43 @@ type UserAuditLogUpdateOne struct {
 }
 
 // SetOperationType sets the "operation_type" field.
-func (_u *UserAuditLogUpdateOne) SetOperationType(s string) *UserAuditLogUpdateOne {
-	_u.mutation.SetOperationType(s)
+func (_u *UserAuditLogUpdateOne) SetOperationType(v string) *UserAuditLogUpdateOne {
+	_u.mutation.SetOperationType(v)
 	return _u
 }
 
 // SetNillableOperationType sets the "operation_type" field if the given value is not nil.
-func (_u *UserAuditLogUpdateOne) SetNillableOperationType(s *string) *UserAuditLogUpdateOne {
-	if s != nil {
-		_u.SetOperationType(*s)
+func (_u *UserAuditLogUpdateOne) SetNillableOperationType(v *string) *UserAuditLogUpdateOne {
+	if v != nil {
+		_u.SetOperationType(*v)
 	}
 	return _u
 }
 
 // SetOperationTime sets the "operation_time" field.
-func (_u *UserAuditLogUpdateOne) SetOperationTime(s string) *UserAuditLogUpdateOne {
-	_u.mutation.SetOperationTime(s)
+func (_u *UserAuditLogUpdateOne) SetOperationTime(v string) *UserAuditLogUpdateOne {
+	_u.mutation.SetOperationTime(v)
 	return _u
 }
 
 // SetNillableOperationTime sets the "operation_time" field if the given value is not nil.
-func (_u *UserAuditLogUpdateOne) SetNillableOperationTime(s *string) *UserAuditLogUpdateOne {
-	if s != nil {
-		_u.SetOperationTime(*s)
+func (_u *UserAuditLogUpdateOne) SetNillableOperationTime(v *string) *UserAuditLogUpdateOne {
+	if v != nil {
+		_u.SetOperationTime(*v)
 	}
 	return _u
 }
 
 // SetOldValue sets the "old_value" field.
-func (_u *UserAuditLogUpdateOne) SetOldValue(s string) *UserAuditLogUpdateOne {
-	_u.mutation.SetOldValue(s)
+func (_u *UserAuditLogUpdateOne) SetOldValue(v string) *UserAuditLogUpdateOne {
+	_u.mutation.SetOldValue(v)
 	return _u
 }
 
 // SetNillableOldValue sets the "old_value" field if the given value is not nil.
-func (_u *UserAuditLogUpdateOne) SetNillableOldValue(s *string) *UserAuditLogUpdateOne {
-	if s != nil {
-		_u.SetOldValue(*s)
+func (_u *UserAuditLogUpdateOne) SetNillableOldValue(v *string) *UserAuditLogUpdateOne {
+	if v != nil {
+		_u.SetOldValue(*v)
 	}
 	return _u
 }
@@ -223,15 +223,15 @@ func (_u *UserAuditLogUpdateOne) ClearOldValue() *UserAuditLogUpdateOne {
 }
 
 // SetNewValue sets the "new_value" field.
-func (_u *UserAuditLogUpdateOne) SetNewValue(s string) *UserAuditLogUpdateOne {
-	_u.mutation.SetNewValue(s)
+func (_u *UserAuditLogUpdateOne) SetNewValue(v string) *UserAuditLogUpdateOne {
+	_u.mutation.SetNewValue(v)
 	return _u
 }
 
 // SetNillableNewValue sets the "new_value" field if the given value is not nil.
-func (_u *UserAuditLogUpdateOne) SetNillableNewValue(s *string) *UserAuditLogUpdateOne {
-	if s != nil {
-		_u.SetNewValue(*s)
+func (_u *UserAuditLogUpdateOne) SetNillableNewValue(v *string) *UserAuditLogUpdateOne {
+	if v != nil {
+		_u.SetNewValue(*v)
 	}
 	return _u
 }

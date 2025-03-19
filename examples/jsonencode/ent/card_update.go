@@ -32,15 +32,15 @@ func (_u *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 }
 
 // SetNumber sets the "number" field.
-func (_u *CardUpdate) SetNumber(s string) *CardUpdate {
-	_u.mutation.SetNumber(s)
+func (_u *CardUpdate) SetNumber(v string) *CardUpdate {
+	_u.mutation.SetNumber(v)
 	return _u
 }
 
 // SetNillableNumber sets the "number" field if the given value is not nil.
-func (_u *CardUpdate) SetNillableNumber(s *string) *CardUpdate {
-	if s != nil {
-		_u.SetNumber(*s)
+func (_u *CardUpdate) SetNillableNumber(v *string) *CardUpdate {
+	if v != nil {
+		_u.SetNumber(*v)
 	}
 	return _u
 }
@@ -77,7 +77,7 @@ func (_u *CardUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *CardUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(card.Table, card.Columns, sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -89,7 +89,7 @@ func (_u *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := _u.mutation.Number(); ok {
 		_spec.SetField(card.FieldNumber, field.TypeString, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{card.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -98,7 +98,7 @@ func (_u *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // CardUpdateOne is the builder for updating a single Card entity.
@@ -110,15 +110,15 @@ type CardUpdateOne struct {
 }
 
 // SetNumber sets the "number" field.
-func (_u *CardUpdateOne) SetNumber(s string) *CardUpdateOne {
-	_u.mutation.SetNumber(s)
+func (_u *CardUpdateOne) SetNumber(v string) *CardUpdateOne {
+	_u.mutation.SetNumber(v)
 	return _u
 }
 
 // SetNillableNumber sets the "number" field if the given value is not nil.
-func (_u *CardUpdateOne) SetNillableNumber(s *string) *CardUpdateOne {
-	if s != nil {
-		_u.SetNumber(*s)
+func (_u *CardUpdateOne) SetNillableNumber(v *string) *CardUpdateOne {
+	if v != nil {
+		_u.SetNumber(*v)
 	}
 	return _u
 }

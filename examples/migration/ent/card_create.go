@@ -27,62 +27,62 @@ type CardCreate struct {
 }
 
 // SetType sets the "type" field.
-func (_c *CardCreate) SetType(s string) *CardCreate {
-	_c.mutation.SetType(s)
+func (_c *CardCreate) SetType(v string) *CardCreate {
+	_c.mutation.SetType(v)
 	return _c
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (_c *CardCreate) SetNillableType(s *string) *CardCreate {
-	if s != nil {
-		_c.SetType(*s)
+func (_c *CardCreate) SetNillableType(v *string) *CardCreate {
+	if v != nil {
+		_c.SetType(*v)
 	}
 	return _c
 }
 
 // SetNumberHash sets the "number_hash" field.
-func (_c *CardCreate) SetNumberHash(s string) *CardCreate {
-	_c.mutation.SetNumberHash(s)
+func (_c *CardCreate) SetNumberHash(v string) *CardCreate {
+	_c.mutation.SetNumberHash(v)
 	return _c
 }
 
 // SetCvvHash sets the "cvv_hash" field.
-func (_c *CardCreate) SetCvvHash(s string) *CardCreate {
-	_c.mutation.SetCvvHash(s)
+func (_c *CardCreate) SetCvvHash(v string) *CardCreate {
+	_c.mutation.SetCvvHash(v)
 	return _c
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (_c *CardCreate) SetExpiresAt(t time.Time) *CardCreate {
-	_c.mutation.SetExpiresAt(t)
+func (_c *CardCreate) SetExpiresAt(v time.Time) *CardCreate {
+	_c.mutation.SetExpiresAt(v)
 	return _c
 }
 
 // SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
-func (_c *CardCreate) SetNillableExpiresAt(t *time.Time) *CardCreate {
-	if t != nil {
-		_c.SetExpiresAt(*t)
+func (_c *CardCreate) SetNillableExpiresAt(v *time.Time) *CardCreate {
+	if v != nil {
+		_c.SetExpiresAt(*v)
 	}
 	return _c
 }
 
 // SetOwnerID sets the "owner_id" field.
-func (_c *CardCreate) SetOwnerID(i int) *CardCreate {
-	_c.mutation.SetOwnerID(i)
+func (_c *CardCreate) SetOwnerID(v int) *CardCreate {
+	_c.mutation.SetOwnerID(v)
 	return _c
 }
 
 // SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (_c *CardCreate) SetNillableOwnerID(i *int) *CardCreate {
-	if i != nil {
-		_c.SetOwnerID(*i)
+func (_c *CardCreate) SetNillableOwnerID(v *int) *CardCreate {
+	if v != nil {
+		_c.SetOwnerID(*v)
 	}
 	return _c
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_c *CardCreate) SetOwner(u *User) *CardCreate {
-	return _c.SetOwnerID(u.ID)
+func (_c *CardCreate) SetOwner(v *User) *CardCreate {
+	return _c.SetOwnerID(v.ID)
 }
 
 // AddPaymentIDs adds the "payments" edge to the Payment entity by IDs.
@@ -92,10 +92,10 @@ func (_c *CardCreate) AddPaymentIDs(ids ...int) *CardCreate {
 }
 
 // AddPayments adds the "payments" edges to the Payment entity.
-func (_c *CardCreate) AddPayments(p ...*Payment) *CardCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_c *CardCreate) AddPayments(v ...*Payment) *CardCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddPaymentIDs(ids...)
 }

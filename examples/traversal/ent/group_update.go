@@ -33,15 +33,15 @@ func (_u *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *GroupUpdate) SetName(s string) *GroupUpdate {
-	_u.mutation.SetName(s)
+func (_u *GroupUpdate) SetName(v string) *GroupUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *GroupUpdate) SetNillableName(s *string) *GroupUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *GroupUpdate) SetNillableName(v *string) *GroupUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -53,10 +53,10 @@ func (_u *GroupUpdate) AddUserIDs(ids ...int) *GroupUpdate {
 }
 
 // AddUsers adds the "users" edges to the User entity.
-func (_u *GroupUpdate) AddUsers(u ...*User) *GroupUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdate) AddUsers(v ...*User) *GroupUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddUserIDs(ids...)
 }
@@ -76,8 +76,8 @@ func (_u *GroupUpdate) SetNillableAdminID(id *int) *GroupUpdate {
 }
 
 // SetAdmin sets the "admin" edge to the User entity.
-func (_u *GroupUpdate) SetAdmin(u *User) *GroupUpdate {
-	return _u.SetAdminID(u.ID)
+func (_u *GroupUpdate) SetAdmin(v *User) *GroupUpdate {
+	return _u.SetAdminID(v.ID)
 }
 
 // Mutation returns the GroupMutation object of the builder.
@@ -98,10 +98,10 @@ func (_u *GroupUpdate) RemoveUserIDs(ids ...int) *GroupUpdate {
 }
 
 // RemoveUsers removes "users" edges to User entities.
-func (_u *GroupUpdate) RemoveUsers(u ...*User) *GroupUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdate) RemoveUsers(v ...*User) *GroupUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveUserIDs(ids...)
 }
@@ -139,7 +139,7 @@ func (_u *GroupUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *GroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(group.Table, group.Columns, sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -225,7 +225,7 @@ func (_u *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{group.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -234,7 +234,7 @@ func (_u *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // GroupUpdateOne is the builder for updating a single Group entity.
@@ -246,15 +246,15 @@ type GroupUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (_u *GroupUpdateOne) SetName(s string) *GroupUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *GroupUpdateOne) SetName(v string) *GroupUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *GroupUpdateOne) SetNillableName(s *string) *GroupUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *GroupUpdateOne) SetNillableName(v *string) *GroupUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -266,10 +266,10 @@ func (_u *GroupUpdateOne) AddUserIDs(ids ...int) *GroupUpdateOne {
 }
 
 // AddUsers adds the "users" edges to the User entity.
-func (_u *GroupUpdateOne) AddUsers(u ...*User) *GroupUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdateOne) AddUsers(v ...*User) *GroupUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddUserIDs(ids...)
 }
@@ -289,8 +289,8 @@ func (_u *GroupUpdateOne) SetNillableAdminID(id *int) *GroupUpdateOne {
 }
 
 // SetAdmin sets the "admin" edge to the User entity.
-func (_u *GroupUpdateOne) SetAdmin(u *User) *GroupUpdateOne {
-	return _u.SetAdminID(u.ID)
+func (_u *GroupUpdateOne) SetAdmin(v *User) *GroupUpdateOne {
+	return _u.SetAdminID(v.ID)
 }
 
 // Mutation returns the GroupMutation object of the builder.
@@ -311,10 +311,10 @@ func (_u *GroupUpdateOne) RemoveUserIDs(ids ...int) *GroupUpdateOne {
 }
 
 // RemoveUsers removes "users" edges to User entities.
-func (_u *GroupUpdateOne) RemoveUsers(u ...*User) *GroupUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdateOne) RemoveUsers(v ...*User) *GroupUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveUserIDs(ids...)
 }

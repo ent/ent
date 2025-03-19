@@ -25,8 +25,8 @@ type StreetCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *StreetCreate) SetName(s string) *StreetCreate {
-	_c.mutation.SetName(s)
+func (_c *StreetCreate) SetName(v string) *StreetCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
@@ -45,8 +45,8 @@ func (_c *StreetCreate) SetNillableCityID(id *int) *StreetCreate {
 }
 
 // SetCity sets the "city" edge to the City entity.
-func (_c *StreetCreate) SetCity(c *City) *StreetCreate {
-	return _c.SetCityID(c.ID)
+func (_c *StreetCreate) SetCity(v *City) *StreetCreate {
+	return _c.SetCityID(v.ID)
 }
 
 // Mutation returns the StreetMutation object of the builder.

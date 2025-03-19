@@ -20,41 +20,41 @@ type UserAuditLogCreate struct {
 }
 
 // SetOperationType sets the "operation_type" field.
-func (_c *UserAuditLogCreate) SetOperationType(s string) *UserAuditLogCreate {
-	_c.mutation.SetOperationType(s)
+func (_c *UserAuditLogCreate) SetOperationType(v string) *UserAuditLogCreate {
+	_c.mutation.SetOperationType(v)
 	return _c
 }
 
 // SetOperationTime sets the "operation_time" field.
-func (_c *UserAuditLogCreate) SetOperationTime(s string) *UserAuditLogCreate {
-	_c.mutation.SetOperationTime(s)
+func (_c *UserAuditLogCreate) SetOperationTime(v string) *UserAuditLogCreate {
+	_c.mutation.SetOperationTime(v)
 	return _c
 }
 
 // SetOldValue sets the "old_value" field.
-func (_c *UserAuditLogCreate) SetOldValue(s string) *UserAuditLogCreate {
-	_c.mutation.SetOldValue(s)
+func (_c *UserAuditLogCreate) SetOldValue(v string) *UserAuditLogCreate {
+	_c.mutation.SetOldValue(v)
 	return _c
 }
 
 // SetNillableOldValue sets the "old_value" field if the given value is not nil.
-func (_c *UserAuditLogCreate) SetNillableOldValue(s *string) *UserAuditLogCreate {
-	if s != nil {
-		_c.SetOldValue(*s)
+func (_c *UserAuditLogCreate) SetNillableOldValue(v *string) *UserAuditLogCreate {
+	if v != nil {
+		_c.SetOldValue(*v)
 	}
 	return _c
 }
 
 // SetNewValue sets the "new_value" field.
-func (_c *UserAuditLogCreate) SetNewValue(s string) *UserAuditLogCreate {
-	_c.mutation.SetNewValue(s)
+func (_c *UserAuditLogCreate) SetNewValue(v string) *UserAuditLogCreate {
+	_c.mutation.SetNewValue(v)
 	return _c
 }
 
 // SetNillableNewValue sets the "new_value" field if the given value is not nil.
-func (_c *UserAuditLogCreate) SetNillableNewValue(s *string) *UserAuditLogCreate {
-	if s != nil {
-		_c.SetNewValue(*s)
+func (_c *UserAuditLogCreate) SetNillableNewValue(v *string) *UserAuditLogCreate {
+	if v != nil {
+		_c.SetNewValue(*v)
 	}
 	return _c
 }
