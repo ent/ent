@@ -34,15 +34,15 @@ func (_u *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *CardUpdate) SetName(s string) *CardUpdate {
-	_u.mutation.SetName(s)
+func (_u *CardUpdate) SetName(v string) *CardUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *CardUpdate) SetNillableName(s *string) *CardUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *CardUpdate) SetNillableName(v *string) *CardUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -54,43 +54,43 @@ func (_u *CardUpdate) ClearName() *CardUpdate {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_u *CardUpdate) SetCreatedAt(t time.Time) *CardUpdate {
-	_u.mutation.SetCreatedAt(t)
+func (_u *CardUpdate) SetCreatedAt(v time.Time) *CardUpdate {
+	_u.mutation.SetCreatedAt(v)
 	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *CardUpdate) SetNillableCreatedAt(t *time.Time) *CardUpdate {
-	if t != nil {
-		_u.SetCreatedAt(*t)
+func (_u *CardUpdate) SetNillableCreatedAt(v *time.Time) *CardUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
 	return _u
 }
 
 // SetInHook sets the "in_hook" field.
-func (_u *CardUpdate) SetInHook(s string) *CardUpdate {
-	_u.mutation.SetInHook(s)
+func (_u *CardUpdate) SetInHook(v string) *CardUpdate {
+	_u.mutation.SetInHook(v)
 	return _u
 }
 
 // SetNillableInHook sets the "in_hook" field if the given value is not nil.
-func (_u *CardUpdate) SetNillableInHook(s *string) *CardUpdate {
-	if s != nil {
-		_u.SetInHook(*s)
+func (_u *CardUpdate) SetNillableInHook(v *string) *CardUpdate {
+	if v != nil {
+		_u.SetInHook(*v)
 	}
 	return _u
 }
 
 // SetExpiredAt sets the "expired_at" field.
-func (_u *CardUpdate) SetExpiredAt(t time.Time) *CardUpdate {
-	_u.mutation.SetExpiredAt(t)
+func (_u *CardUpdate) SetExpiredAt(v time.Time) *CardUpdate {
+	_u.mutation.SetExpiredAt(v)
 	return _u
 }
 
 // SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
-func (_u *CardUpdate) SetNillableExpiredAt(t *time.Time) *CardUpdate {
-	if t != nil {
-		_u.SetExpiredAt(*t)
+func (_u *CardUpdate) SetNillableExpiredAt(v *time.Time) *CardUpdate {
+	if v != nil {
+		_u.SetExpiredAt(*v)
 	}
 	return _u
 }
@@ -116,8 +116,8 @@ func (_u *CardUpdate) SetNillableOwnerID(id *int) *CardUpdate {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *CardUpdate) SetOwner(u *User) *CardUpdate {
-	return _u.SetOwnerID(u.ID)
+func (_u *CardUpdate) SetOwner(v *User) *CardUpdate {
+	return _u.SetOwnerID(v.ID)
 }
 
 // Mutation returns the CardMutation object of the builder.
@@ -158,7 +158,7 @@ func (_u *CardUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *CardUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(card.Table, card.Columns, sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -214,7 +214,7 @@ func (_u *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{card.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -223,7 +223,7 @@ func (_u *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // CardUpdateOne is the builder for updating a single Card entity.
@@ -235,15 +235,15 @@ type CardUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (_u *CardUpdateOne) SetName(s string) *CardUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *CardUpdateOne) SetName(v string) *CardUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *CardUpdateOne) SetNillableName(s *string) *CardUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *CardUpdateOne) SetNillableName(v *string) *CardUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -255,43 +255,43 @@ func (_u *CardUpdateOne) ClearName() *CardUpdateOne {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_u *CardUpdateOne) SetCreatedAt(t time.Time) *CardUpdateOne {
-	_u.mutation.SetCreatedAt(t)
+func (_u *CardUpdateOne) SetCreatedAt(v time.Time) *CardUpdateOne {
+	_u.mutation.SetCreatedAt(v)
 	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *CardUpdateOne) SetNillableCreatedAt(t *time.Time) *CardUpdateOne {
-	if t != nil {
-		_u.SetCreatedAt(*t)
+func (_u *CardUpdateOne) SetNillableCreatedAt(v *time.Time) *CardUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
 	return _u
 }
 
 // SetInHook sets the "in_hook" field.
-func (_u *CardUpdateOne) SetInHook(s string) *CardUpdateOne {
-	_u.mutation.SetInHook(s)
+func (_u *CardUpdateOne) SetInHook(v string) *CardUpdateOne {
+	_u.mutation.SetInHook(v)
 	return _u
 }
 
 // SetNillableInHook sets the "in_hook" field if the given value is not nil.
-func (_u *CardUpdateOne) SetNillableInHook(s *string) *CardUpdateOne {
-	if s != nil {
-		_u.SetInHook(*s)
+func (_u *CardUpdateOne) SetNillableInHook(v *string) *CardUpdateOne {
+	if v != nil {
+		_u.SetInHook(*v)
 	}
 	return _u
 }
 
 // SetExpiredAt sets the "expired_at" field.
-func (_u *CardUpdateOne) SetExpiredAt(t time.Time) *CardUpdateOne {
-	_u.mutation.SetExpiredAt(t)
+func (_u *CardUpdateOne) SetExpiredAt(v time.Time) *CardUpdateOne {
+	_u.mutation.SetExpiredAt(v)
 	return _u
 }
 
 // SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
-func (_u *CardUpdateOne) SetNillableExpiredAt(t *time.Time) *CardUpdateOne {
-	if t != nil {
-		_u.SetExpiredAt(*t)
+func (_u *CardUpdateOne) SetNillableExpiredAt(v *time.Time) *CardUpdateOne {
+	if v != nil {
+		_u.SetExpiredAt(*v)
 	}
 	return _u
 }
@@ -317,8 +317,8 @@ func (_u *CardUpdateOne) SetNillableOwnerID(id *int) *CardUpdateOne {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *CardUpdateOne) SetOwner(u *User) *CardUpdateOne {
-	return _u.SetOwnerID(u.ID)
+func (_u *CardUpdateOne) SetOwner(v *User) *CardUpdateOne {
+	return _u.SetOwnerID(v.ID)
 }
 
 // Mutation returns the CardMutation object of the builder.

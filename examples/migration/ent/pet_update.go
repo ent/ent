@@ -34,97 +34,97 @@ func (_u *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *PetUpdate) SetName(s string) *PetUpdate {
-	_u.mutation.SetName(s)
+func (_u *PetUpdate) SetName(v string) *PetUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *PetUpdate) SetNillableName(s *string) *PetUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *PetUpdate) SetNillableName(v *string) *PetUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
 
 // SetAge sets the "age" field.
-func (_u *PetUpdate) SetAge(f float64) *PetUpdate {
+func (_u *PetUpdate) SetAge(v float64) *PetUpdate {
 	_u.mutation.ResetAge()
-	_u.mutation.SetAge(f)
+	_u.mutation.SetAge(v)
 	return _u
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *PetUpdate) SetNillableAge(f *float64) *PetUpdate {
-	if f != nil {
-		_u.SetAge(*f)
+func (_u *PetUpdate) SetNillableAge(v *float64) *PetUpdate {
+	if v != nil {
+		_u.SetAge(*v)
 	}
 	return _u
 }
 
-// AddAge adds f to the "age" field.
-func (_u *PetUpdate) AddAge(f float64) *PetUpdate {
-	_u.mutation.AddAge(f)
+// AddAge adds value to the "age" field.
+func (_u *PetUpdate) AddAge(v float64) *PetUpdate {
+	_u.mutation.AddAge(v)
 	return _u
 }
 
 // SetWeight sets the "weight" field.
-func (_u *PetUpdate) SetWeight(f float64) *PetUpdate {
+func (_u *PetUpdate) SetWeight(v float64) *PetUpdate {
 	_u.mutation.ResetWeight()
-	_u.mutation.SetWeight(f)
+	_u.mutation.SetWeight(v)
 	return _u
 }
 
 // SetNillableWeight sets the "weight" field if the given value is not nil.
-func (_u *PetUpdate) SetNillableWeight(f *float64) *PetUpdate {
-	if f != nil {
-		_u.SetWeight(*f)
+func (_u *PetUpdate) SetNillableWeight(v *float64) *PetUpdate {
+	if v != nil {
+		_u.SetWeight(*v)
 	}
 	return _u
 }
 
-// AddWeight adds f to the "weight" field.
-func (_u *PetUpdate) AddWeight(f float64) *PetUpdate {
-	_u.mutation.AddWeight(f)
+// AddWeight adds value to the "weight" field.
+func (_u *PetUpdate) AddWeight(v float64) *PetUpdate {
+	_u.mutation.AddWeight(v)
 	return _u
 }
 
 // SetBestFriendID sets the "best_friend_id" field.
-func (_u *PetUpdate) SetBestFriendID(u uuid.UUID) *PetUpdate {
-	_u.mutation.SetBestFriendID(u)
+func (_u *PetUpdate) SetBestFriendID(v uuid.UUID) *PetUpdate {
+	_u.mutation.SetBestFriendID(v)
 	return _u
 }
 
 // SetNillableBestFriendID sets the "best_friend_id" field if the given value is not nil.
-func (_u *PetUpdate) SetNillableBestFriendID(u *uuid.UUID) *PetUpdate {
-	if u != nil {
-		_u.SetBestFriendID(*u)
+func (_u *PetUpdate) SetNillableBestFriendID(v *uuid.UUID) *PetUpdate {
+	if v != nil {
+		_u.SetBestFriendID(*v)
 	}
 	return _u
 }
 
 // SetOwnerID sets the "owner_id" field.
-func (_u *PetUpdate) SetOwnerID(i int) *PetUpdate {
-	_u.mutation.SetOwnerID(i)
+func (_u *PetUpdate) SetOwnerID(v int) *PetUpdate {
+	_u.mutation.SetOwnerID(v)
 	return _u
 }
 
 // SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (_u *PetUpdate) SetNillableOwnerID(i *int) *PetUpdate {
-	if i != nil {
-		_u.SetOwnerID(*i)
+func (_u *PetUpdate) SetNillableOwnerID(v *int) *PetUpdate {
+	if v != nil {
+		_u.SetOwnerID(*v)
 	}
 	return _u
 }
 
 // SetBestFriend sets the "best_friend" edge to the Pet entity.
-func (_u *PetUpdate) SetBestFriend(p *Pet) *PetUpdate {
-	return _u.SetBestFriendID(p.ID)
+func (_u *PetUpdate) SetBestFriend(v *Pet) *PetUpdate {
+	return _u.SetBestFriendID(v.ID)
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *PetUpdate) SetOwner(u *User) *PetUpdate {
-	return _u.SetOwnerID(u.ID)
+func (_u *PetUpdate) SetOwner(v *User) *PetUpdate {
+	return _u.SetOwnerID(v.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.
@@ -182,9 +182,9 @@ func (_u *PetUpdate) check() error {
 	return nil
 }
 
-func (_u *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *PetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(pet.Table, pet.Columns, sqlgraph.NewFieldSpec(pet.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -267,7 +267,7 @@ func (_u *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{pet.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -276,7 +276,7 @@ func (_u *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // PetUpdateOne is the builder for updating a single Pet entity.
@@ -288,97 +288,97 @@ type PetUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (_u *PetUpdateOne) SetName(s string) *PetUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *PetUpdateOne) SetName(v string) *PetUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableName(s *string) *PetUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *PetUpdateOne) SetNillableName(v *string) *PetUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
 
 // SetAge sets the "age" field.
-func (_u *PetUpdateOne) SetAge(f float64) *PetUpdateOne {
+func (_u *PetUpdateOne) SetAge(v float64) *PetUpdateOne {
 	_u.mutation.ResetAge()
-	_u.mutation.SetAge(f)
+	_u.mutation.SetAge(v)
 	return _u
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableAge(f *float64) *PetUpdateOne {
-	if f != nil {
-		_u.SetAge(*f)
+func (_u *PetUpdateOne) SetNillableAge(v *float64) *PetUpdateOne {
+	if v != nil {
+		_u.SetAge(*v)
 	}
 	return _u
 }
 
-// AddAge adds f to the "age" field.
-func (_u *PetUpdateOne) AddAge(f float64) *PetUpdateOne {
-	_u.mutation.AddAge(f)
+// AddAge adds value to the "age" field.
+func (_u *PetUpdateOne) AddAge(v float64) *PetUpdateOne {
+	_u.mutation.AddAge(v)
 	return _u
 }
 
 // SetWeight sets the "weight" field.
-func (_u *PetUpdateOne) SetWeight(f float64) *PetUpdateOne {
+func (_u *PetUpdateOne) SetWeight(v float64) *PetUpdateOne {
 	_u.mutation.ResetWeight()
-	_u.mutation.SetWeight(f)
+	_u.mutation.SetWeight(v)
 	return _u
 }
 
 // SetNillableWeight sets the "weight" field if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableWeight(f *float64) *PetUpdateOne {
-	if f != nil {
-		_u.SetWeight(*f)
+func (_u *PetUpdateOne) SetNillableWeight(v *float64) *PetUpdateOne {
+	if v != nil {
+		_u.SetWeight(*v)
 	}
 	return _u
 }
 
-// AddWeight adds f to the "weight" field.
-func (_u *PetUpdateOne) AddWeight(f float64) *PetUpdateOne {
-	_u.mutation.AddWeight(f)
+// AddWeight adds value to the "weight" field.
+func (_u *PetUpdateOne) AddWeight(v float64) *PetUpdateOne {
+	_u.mutation.AddWeight(v)
 	return _u
 }
 
 // SetBestFriendID sets the "best_friend_id" field.
-func (_u *PetUpdateOne) SetBestFriendID(u uuid.UUID) *PetUpdateOne {
-	_u.mutation.SetBestFriendID(u)
+func (_u *PetUpdateOne) SetBestFriendID(v uuid.UUID) *PetUpdateOne {
+	_u.mutation.SetBestFriendID(v)
 	return _u
 }
 
 // SetNillableBestFriendID sets the "best_friend_id" field if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableBestFriendID(u *uuid.UUID) *PetUpdateOne {
-	if u != nil {
-		_u.SetBestFriendID(*u)
+func (_u *PetUpdateOne) SetNillableBestFriendID(v *uuid.UUID) *PetUpdateOne {
+	if v != nil {
+		_u.SetBestFriendID(*v)
 	}
 	return _u
 }
 
 // SetOwnerID sets the "owner_id" field.
-func (_u *PetUpdateOne) SetOwnerID(i int) *PetUpdateOne {
-	_u.mutation.SetOwnerID(i)
+func (_u *PetUpdateOne) SetOwnerID(v int) *PetUpdateOne {
+	_u.mutation.SetOwnerID(v)
 	return _u
 }
 
 // SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableOwnerID(i *int) *PetUpdateOne {
-	if i != nil {
-		_u.SetOwnerID(*i)
+func (_u *PetUpdateOne) SetNillableOwnerID(v *int) *PetUpdateOne {
+	if v != nil {
+		_u.SetOwnerID(*v)
 	}
 	return _u
 }
 
 // SetBestFriend sets the "best_friend" edge to the Pet entity.
-func (_u *PetUpdateOne) SetBestFriend(p *Pet) *PetUpdateOne {
-	return _u.SetBestFriendID(p.ID)
+func (_u *PetUpdateOne) SetBestFriend(v *Pet) *PetUpdateOne {
+	return _u.SetBestFriendID(v.ID)
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *PetUpdateOne) SetOwner(u *User) *PetUpdateOne {
-	return _u.SetOwnerID(u.ID)
+func (_u *PetUpdateOne) SetOwner(v *User) *PetUpdateOne {
+	return _u.SetOwnerID(v.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.

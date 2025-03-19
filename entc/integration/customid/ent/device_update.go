@@ -48,8 +48,8 @@ func (_u *DeviceUpdate) SetNillableActiveSessionID(id *schema.ID) *DeviceUpdate 
 }
 
 // SetActiveSession sets the "active_session" edge to the Session entity.
-func (_u *DeviceUpdate) SetActiveSession(s *Session) *DeviceUpdate {
-	return _u.SetActiveSessionID(s.ID)
+func (_u *DeviceUpdate) SetActiveSession(v *Session) *DeviceUpdate {
+	return _u.SetActiveSessionID(v.ID)
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
@@ -59,10 +59,10 @@ func (_u *DeviceUpdate) AddSessionIDs(ids ...schema.ID) *DeviceUpdate {
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
-func (_u *DeviceUpdate) AddSessions(s ...*Session) *DeviceUpdate {
-	ids := make([]schema.ID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *DeviceUpdate) AddSessions(v ...*Session) *DeviceUpdate {
+	ids := make([]schema.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddSessionIDs(ids...)
 }
@@ -91,10 +91,10 @@ func (_u *DeviceUpdate) RemoveSessionIDs(ids ...schema.ID) *DeviceUpdate {
 }
 
 // RemoveSessions removes "sessions" edges to Session entities.
-func (_u *DeviceUpdate) RemoveSessions(s ...*Session) *DeviceUpdate {
-	ids := make([]schema.ID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *DeviceUpdate) RemoveSessions(v ...*Session) *DeviceUpdate {
+	ids := make([]schema.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveSessionIDs(ids...)
 }
@@ -126,7 +126,7 @@ func (_u *DeviceUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *DeviceUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *DeviceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(device.Table, device.Columns, sqlgraph.NewFieldSpec(device.FieldID, field.TypeBytes))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -209,7 +209,7 @@ func (_u *DeviceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{device.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -218,7 +218,7 @@ func (_u *DeviceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // DeviceUpdateOne is the builder for updating a single Device entity.
@@ -244,8 +244,8 @@ func (_u *DeviceUpdateOne) SetNillableActiveSessionID(id *schema.ID) *DeviceUpda
 }
 
 // SetActiveSession sets the "active_session" edge to the Session entity.
-func (_u *DeviceUpdateOne) SetActiveSession(s *Session) *DeviceUpdateOne {
-	return _u.SetActiveSessionID(s.ID)
+func (_u *DeviceUpdateOne) SetActiveSession(v *Session) *DeviceUpdateOne {
+	return _u.SetActiveSessionID(v.ID)
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
@@ -255,10 +255,10 @@ func (_u *DeviceUpdateOne) AddSessionIDs(ids ...schema.ID) *DeviceUpdateOne {
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
-func (_u *DeviceUpdateOne) AddSessions(s ...*Session) *DeviceUpdateOne {
-	ids := make([]schema.ID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *DeviceUpdateOne) AddSessions(v ...*Session) *DeviceUpdateOne {
+	ids := make([]schema.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddSessionIDs(ids...)
 }
@@ -287,10 +287,10 @@ func (_u *DeviceUpdateOne) RemoveSessionIDs(ids ...schema.ID) *DeviceUpdateOne {
 }
 
 // RemoveSessions removes "sessions" edges to Session entities.
-func (_u *DeviceUpdateOne) RemoveSessions(s ...*Session) *DeviceUpdateOne {
-	ids := make([]schema.ID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *DeviceUpdateOne) RemoveSessions(v ...*Session) *DeviceUpdateOne {
+	ids := make([]schema.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveSessionIDs(ids...)
 }

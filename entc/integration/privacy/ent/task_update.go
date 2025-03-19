@@ -35,29 +35,29 @@ func (_u *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
 }
 
 // SetTitle sets the "title" field.
-func (_u *TaskUpdate) SetTitle(s string) *TaskUpdate {
-	_u.mutation.SetTitle(s)
+func (_u *TaskUpdate) SetTitle(v string) *TaskUpdate {
+	_u.mutation.SetTitle(v)
 	return _u
 }
 
 // SetNillableTitle sets the "title" field if the given value is not nil.
-func (_u *TaskUpdate) SetNillableTitle(s *string) *TaskUpdate {
-	if s != nil {
-		_u.SetTitle(*s)
+func (_u *TaskUpdate) SetNillableTitle(v *string) *TaskUpdate {
+	if v != nil {
+		_u.SetTitle(*v)
 	}
 	return _u
 }
 
 // SetDescription sets the "description" field.
-func (_u *TaskUpdate) SetDescription(s string) *TaskUpdate {
-	_u.mutation.SetDescription(s)
+func (_u *TaskUpdate) SetDescription(v string) *TaskUpdate {
+	_u.mutation.SetDescription(v)
 	return _u
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (_u *TaskUpdate) SetNillableDescription(s *string) *TaskUpdate {
-	if s != nil {
-		_u.SetDescription(*s)
+func (_u *TaskUpdate) SetNillableDescription(v *string) *TaskUpdate {
+	if v != nil {
+		_u.SetDescription(*v)
 	}
 	return _u
 }
@@ -69,29 +69,29 @@ func (_u *TaskUpdate) ClearDescription() *TaskUpdate {
 }
 
 // SetStatus sets the "status" field.
-func (_u *TaskUpdate) SetStatus(t task.Status) *TaskUpdate {
-	_u.mutation.SetStatus(t)
+func (_u *TaskUpdate) SetStatus(v task.Status) *TaskUpdate {
+	_u.mutation.SetStatus(v)
 	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *TaskUpdate) SetNillableStatus(t *task.Status) *TaskUpdate {
-	if t != nil {
-		_u.SetStatus(*t)
+func (_u *TaskUpdate) SetNillableStatus(v *task.Status) *TaskUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
 	return _u
 }
 
 // SetUUID sets the "uuid" field.
-func (_u *TaskUpdate) SetUUID(u uuid.UUID) *TaskUpdate {
-	_u.mutation.SetUUID(u)
+func (_u *TaskUpdate) SetUUID(v uuid.UUID) *TaskUpdate {
+	_u.mutation.SetUUID(v)
 	return _u
 }
 
 // SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (_u *TaskUpdate) SetNillableUUID(u *uuid.UUID) *TaskUpdate {
-	if u != nil {
-		_u.SetUUID(*u)
+func (_u *TaskUpdate) SetNillableUUID(v *uuid.UUID) *TaskUpdate {
+	if v != nil {
+		_u.SetUUID(*v)
 	}
 	return _u
 }
@@ -109,10 +109,10 @@ func (_u *TaskUpdate) AddTeamIDs(ids ...int) *TaskUpdate {
 }
 
 // AddTeams adds the "teams" edges to the Team entity.
-func (_u *TaskUpdate) AddTeams(t ...*Team) *TaskUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *TaskUpdate) AddTeams(v ...*Team) *TaskUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddTeamIDs(ids...)
 }
@@ -132,8 +132,8 @@ func (_u *TaskUpdate) SetNillableOwnerID(id *int) *TaskUpdate {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *TaskUpdate) SetOwner(u *User) *TaskUpdate {
-	return _u.SetOwnerID(u.ID)
+func (_u *TaskUpdate) SetOwner(v *User) *TaskUpdate {
+	return _u.SetOwnerID(v.ID)
 }
 
 // Mutation returns the TaskMutation object of the builder.
@@ -154,10 +154,10 @@ func (_u *TaskUpdate) RemoveTeamIDs(ids ...int) *TaskUpdate {
 }
 
 // RemoveTeams removes "teams" edges to Team entities.
-func (_u *TaskUpdate) RemoveTeams(t ...*Team) *TaskUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *TaskUpdate) RemoveTeams(v ...*Team) *TaskUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveTeamIDs(ids...)
 }
@@ -210,9 +210,9 @@ func (_u *TaskUpdate) check() error {
 	return nil
 }
 
-func (_u *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *TaskUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(task.Table, task.Columns, sqlgraph.NewFieldSpec(task.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -314,7 +314,7 @@ func (_u *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{task.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -323,7 +323,7 @@ func (_u *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // TaskUpdateOne is the builder for updating a single Task entity.
@@ -335,29 +335,29 @@ type TaskUpdateOne struct {
 }
 
 // SetTitle sets the "title" field.
-func (_u *TaskUpdateOne) SetTitle(s string) *TaskUpdateOne {
-	_u.mutation.SetTitle(s)
+func (_u *TaskUpdateOne) SetTitle(v string) *TaskUpdateOne {
+	_u.mutation.SetTitle(v)
 	return _u
 }
 
 // SetNillableTitle sets the "title" field if the given value is not nil.
-func (_u *TaskUpdateOne) SetNillableTitle(s *string) *TaskUpdateOne {
-	if s != nil {
-		_u.SetTitle(*s)
+func (_u *TaskUpdateOne) SetNillableTitle(v *string) *TaskUpdateOne {
+	if v != nil {
+		_u.SetTitle(*v)
 	}
 	return _u
 }
 
 // SetDescription sets the "description" field.
-func (_u *TaskUpdateOne) SetDescription(s string) *TaskUpdateOne {
-	_u.mutation.SetDescription(s)
+func (_u *TaskUpdateOne) SetDescription(v string) *TaskUpdateOne {
+	_u.mutation.SetDescription(v)
 	return _u
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (_u *TaskUpdateOne) SetNillableDescription(s *string) *TaskUpdateOne {
-	if s != nil {
-		_u.SetDescription(*s)
+func (_u *TaskUpdateOne) SetNillableDescription(v *string) *TaskUpdateOne {
+	if v != nil {
+		_u.SetDescription(*v)
 	}
 	return _u
 }
@@ -369,29 +369,29 @@ func (_u *TaskUpdateOne) ClearDescription() *TaskUpdateOne {
 }
 
 // SetStatus sets the "status" field.
-func (_u *TaskUpdateOne) SetStatus(t task.Status) *TaskUpdateOne {
-	_u.mutation.SetStatus(t)
+func (_u *TaskUpdateOne) SetStatus(v task.Status) *TaskUpdateOne {
+	_u.mutation.SetStatus(v)
 	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *TaskUpdateOne) SetNillableStatus(t *task.Status) *TaskUpdateOne {
-	if t != nil {
-		_u.SetStatus(*t)
+func (_u *TaskUpdateOne) SetNillableStatus(v *task.Status) *TaskUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
 	return _u
 }
 
 // SetUUID sets the "uuid" field.
-func (_u *TaskUpdateOne) SetUUID(u uuid.UUID) *TaskUpdateOne {
-	_u.mutation.SetUUID(u)
+func (_u *TaskUpdateOne) SetUUID(v uuid.UUID) *TaskUpdateOne {
+	_u.mutation.SetUUID(v)
 	return _u
 }
 
 // SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (_u *TaskUpdateOne) SetNillableUUID(u *uuid.UUID) *TaskUpdateOne {
-	if u != nil {
-		_u.SetUUID(*u)
+func (_u *TaskUpdateOne) SetNillableUUID(v *uuid.UUID) *TaskUpdateOne {
+	if v != nil {
+		_u.SetUUID(*v)
 	}
 	return _u
 }
@@ -409,10 +409,10 @@ func (_u *TaskUpdateOne) AddTeamIDs(ids ...int) *TaskUpdateOne {
 }
 
 // AddTeams adds the "teams" edges to the Team entity.
-func (_u *TaskUpdateOne) AddTeams(t ...*Team) *TaskUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *TaskUpdateOne) AddTeams(v ...*Team) *TaskUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddTeamIDs(ids...)
 }
@@ -432,8 +432,8 @@ func (_u *TaskUpdateOne) SetNillableOwnerID(id *int) *TaskUpdateOne {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *TaskUpdateOne) SetOwner(u *User) *TaskUpdateOne {
-	return _u.SetOwnerID(u.ID)
+func (_u *TaskUpdateOne) SetOwner(v *User) *TaskUpdateOne {
+	return _u.SetOwnerID(v.ID)
 }
 
 // Mutation returns the TaskMutation object of the builder.
@@ -454,10 +454,10 @@ func (_u *TaskUpdateOne) RemoveTeamIDs(ids ...int) *TaskUpdateOne {
 }
 
 // RemoveTeams removes "teams" edges to Team entities.
-func (_u *TaskUpdateOne) RemoveTeams(t ...*Team) *TaskUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *TaskUpdateOne) RemoveTeams(v ...*Team) *TaskUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveTeamIDs(ids...)
 }

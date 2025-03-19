@@ -23,29 +23,29 @@ type UserCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *UserCreate) SetName(s string) *UserCreate {
-	_c.mutation.SetName(s)
+func (_c *UserCreate) SetName(v string) *UserCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_c *UserCreate) SetNillableName(s *string) *UserCreate {
-	if s != nil {
-		_c.SetName(*s)
+func (_c *UserCreate) SetNillableName(v *string) *UserCreate {
+	if v != nil {
+		_c.SetName(*v)
 	}
 	return _c
 }
 
 // SetAge sets the "age" field.
-func (_c *UserCreate) SetAge(i int) *UserCreate {
-	_c.mutation.SetAge(i)
+func (_c *UserCreate) SetAge(v int) *UserCreate {
+	_c.mutation.SetAge(v)
 	return _c
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (_c *UserCreate) SetNillableAge(i *int) *UserCreate {
-	if i != nil {
-		_c.SetAge(*i)
+func (_c *UserCreate) SetNillableAge(v *int) *UserCreate {
+	if v != nil {
+		_c.SetAge(*v)
 	}
 	return _c
 }

@@ -22,15 +22,14 @@ in the LICENSE file in the root directory of this source tree.
 {{- end }}
 
 {{ range $f := $fields }}
-	{{ $p := receiver $f.Type.String }}{{ if eq $p $receiver }} {{ $p = "value" }} {{ end }}
 	{{ $func := print "Set" $f.StructField }}
 	// {{ $func }} sets the "{{ $f.Name }}" field.
-	func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
+	func ({{ $receiver }} *{{ $builder }}) {{ $func }}(v {{ $f.Type }}) *{{ $builder }} {
 		{{- /* setting numeric type override previous calls to Add. */}}
 		{{- if and $updater $f.SupportsMutationAdd }}
 			{{ $receiver }}.mutation.{{ $f.MutationReset }}()
 		{{- end }}
-		{{ $receiver }}.mutation.{{ $f.MutationSet }}({{ $p }})
+		{{ $receiver }}.mutation.{{ $f.MutationSet }}(v)
 		return {{ $receiver }}
 	}
 
@@ -41,26 +40,26 @@ in the LICENSE file in the root directory of this source tree.
 	{{ $skipNillable := false }}{{ range $fields }}{{ if and (ne .Name $f.Name) (eq .MutationSet $nillableFunc) }}{{ $skipNillable = true }}{{ break }}{{ end }}{{ end }}
 	{{ if and (not $f.Type.Nillable) (not $skipNillable) (or $nillableC $nillableU) }}
 		// {{ $nillableFunc }} sets the "{{ $f.Name }}" field if the given value is not nil.
-		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}({{ $p }} *{{ $f.Type }}) *{{ $builder }} {
-			if {{ $p }} != nil {
-				{{ $receiver }}.{{ $func }}(*{{ $p }})
+		func ({{ $receiver }} *{{ $builder }}) {{ $nillableFunc }}(v *{{ $f.Type }}) *{{ $builder }} {
+			if v != nil {
+				{{ $receiver }}.{{ $func }}(*v)
 			}
 			return {{ $receiver }}
 		}
 	{{ end }}
 
 	{{ if and $updater $f.SupportsMutationAdd }}
-		// {{ $f.MutationAdd }} adds {{ $p }} to the "{{ $f.Name }}" field.
-		func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAdd }}({{ $p }} {{ $f.SignedType }}) *{{ $builder }} {
-			{{ $receiver }}.mutation.{{ $f.MutationAdd }}({{ $p }})
+		// {{ $f.MutationAdd }} adds value to the "{{ $f.Name }}" field.
+		func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAdd }}(v {{ $f.SignedType }}) *{{ $builder }} {
+			{{ $receiver }}.mutation.{{ $f.MutationAdd }}(v)
 			return {{ $receiver }}
 		}
 	{{ end }}
 
 	{{ if and $updater $f.SupportsMutationAppend }}
-		// {{ $f.MutationAppend }} appends {{ $p }} to the "{{ $f.Name }}" field.
-		func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAppend }}({{ $p }} {{ $f.Type }}) *{{ $builder }} {
-			{{ $receiver }}.mutation.{{ $f.MutationAppend }}({{ $p }})
+		// {{ $f.MutationAppend }} appends value to the "{{ $f.Name }}" field.
+		func ({{ $receiver }} *{{ $builder }}) {{ $f.MutationAppend }}(v {{ $f.Type }}) *{{ $builder }} {
+			{{ $receiver }}.mutation.{{ $f.MutationAppend }}(v)
 			return {{ $receiver }}
 		}
 	{{ end }}
@@ -100,18 +99,15 @@ in the LICENSE file in the root directory of this source tree.
 			return {{ $receiver }}
 		}
 	{{ end }}
-	{{ $p := lower (printf "%.1s" $e.Type.Name) }}
-	{{ if eq $p $receiver }} {{ $p = "v" }} {{ end }}
 	{{ $func := print (pascal $op) $e.StructField }}
 	// {{ $func }} {{ $op }}s the "{{ $e.Name }}" edge{{if not $e.Unique}}s{{ end }} to the {{ $e.Type.Name }} entity.
-	func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} {{ if not $e.Unique }}...{{ end }}*{{ $e.Type.Name}}) *{{ $builder }} {
+	func ({{ $receiver }} *{{ $builder }}) {{ $func }}(v {{ if not $e.Unique }}...{{ end }}*{{ $e.Type.Name}}) *{{ $builder }} {
 		{{ if $e.Unique -}}
-			return {{ $receiver }}.{{ $idsFunc }}({{ $p }}.ID)
+			return {{ $receiver }}.{{ $idsFunc }}(v.ID)
 		{{- else -}}
-			ids := make([]{{ $e.Type.ID.Type }}, len({{ $p }}))
-			{{ $i := "i" }}{{ if eq $i $p }}{{ $i = "j" }}{{ end -}}
-			for {{ $i }} := range {{ $p }} {
-				ids[{{ $i }}] = {{ $p }}[{{ $i }}].ID
+			ids := make([]{{ $e.Type.ID.Type }}, len(v))
+			for i := range v {
+				ids[i] = v[i].ID
 			}
 			return {{ $receiver }}.{{ $idsFunc }}(ids...)
 		{{- end }}

@@ -36,42 +36,42 @@ func (_u *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 }
 
 // SetUpdateTime sets the "update_time" field.
-func (_u *CardUpdate) SetUpdateTime(t time.Time) *CardUpdate {
-	_u.mutation.SetUpdateTime(t)
+func (_u *CardUpdate) SetUpdateTime(v time.Time) *CardUpdate {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
 // SetBalance sets the "balance" field.
-func (_u *CardUpdate) SetBalance(f float64) *CardUpdate {
+func (_u *CardUpdate) SetBalance(v float64) *CardUpdate {
 	_u.mutation.ResetBalance()
-	_u.mutation.SetBalance(f)
+	_u.mutation.SetBalance(v)
 	return _u
 }
 
 // SetNillableBalance sets the "balance" field if the given value is not nil.
-func (_u *CardUpdate) SetNillableBalance(f *float64) *CardUpdate {
-	if f != nil {
-		_u.SetBalance(*f)
+func (_u *CardUpdate) SetNillableBalance(v *float64) *CardUpdate {
+	if v != nil {
+		_u.SetBalance(*v)
 	}
 	return _u
 }
 
-// AddBalance adds f to the "balance" field.
-func (_u *CardUpdate) AddBalance(f float64) *CardUpdate {
-	_u.mutation.AddBalance(f)
+// AddBalance adds value to the "balance" field.
+func (_u *CardUpdate) AddBalance(v float64) *CardUpdate {
+	_u.mutation.AddBalance(v)
 	return _u
 }
 
 // SetName sets the "name" field.
-func (_u *CardUpdate) SetName(s string) *CardUpdate {
-	_u.mutation.SetName(s)
+func (_u *CardUpdate) SetName(v string) *CardUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *CardUpdate) SetNillableName(s *string) *CardUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *CardUpdate) SetNillableName(v *string) *CardUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -97,8 +97,8 @@ func (_u *CardUpdate) SetNillableOwnerID(id *int) *CardUpdate {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *CardUpdate) SetOwner(u *User) *CardUpdate {
-	return _u.SetOwnerID(u.ID)
+func (_u *CardUpdate) SetOwner(v *User) *CardUpdate {
+	return _u.SetOwnerID(v.ID)
 }
 
 // AddSpecIDs adds the "spec" edge to the Spec entity by IDs.
@@ -108,10 +108,10 @@ func (_u *CardUpdate) AddSpecIDs(ids ...int) *CardUpdate {
 }
 
 // AddSpec adds the "spec" edges to the Spec entity.
-func (_u *CardUpdate) AddSpec(s ...*Spec) *CardUpdate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *CardUpdate) AddSpec(v ...*Spec) *CardUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddSpecIDs(ids...)
 }
@@ -140,10 +140,10 @@ func (_u *CardUpdate) RemoveSpecIDs(ids ...int) *CardUpdate {
 }
 
 // RemoveSpec removes "spec" edges to Spec entities.
-func (_u *CardUpdate) RemoveSpec(s ...*Spec) *CardUpdate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *CardUpdate) RemoveSpec(v ...*Spec) *CardUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveSpecIDs(ids...)
 }
@@ -200,9 +200,9 @@ func (_u *CardUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CardUpdat
 	return _u
 }
 
-func (_u *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *CardUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(card.Table, card.Columns, sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -302,7 +302,7 @@ func (_u *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_spec.AddModifiers(_u.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{card.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -311,7 +311,7 @@ func (_u *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // CardUpdateOne is the builder for updating a single Card entity.
@@ -324,42 +324,42 @@ type CardUpdateOne struct {
 }
 
 // SetUpdateTime sets the "update_time" field.
-func (_u *CardUpdateOne) SetUpdateTime(t time.Time) *CardUpdateOne {
-	_u.mutation.SetUpdateTime(t)
+func (_u *CardUpdateOne) SetUpdateTime(v time.Time) *CardUpdateOne {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
 // SetBalance sets the "balance" field.
-func (_u *CardUpdateOne) SetBalance(f float64) *CardUpdateOne {
+func (_u *CardUpdateOne) SetBalance(v float64) *CardUpdateOne {
 	_u.mutation.ResetBalance()
-	_u.mutation.SetBalance(f)
+	_u.mutation.SetBalance(v)
 	return _u
 }
 
 // SetNillableBalance sets the "balance" field if the given value is not nil.
-func (_u *CardUpdateOne) SetNillableBalance(f *float64) *CardUpdateOne {
-	if f != nil {
-		_u.SetBalance(*f)
+func (_u *CardUpdateOne) SetNillableBalance(v *float64) *CardUpdateOne {
+	if v != nil {
+		_u.SetBalance(*v)
 	}
 	return _u
 }
 
-// AddBalance adds f to the "balance" field.
-func (_u *CardUpdateOne) AddBalance(f float64) *CardUpdateOne {
-	_u.mutation.AddBalance(f)
+// AddBalance adds value to the "balance" field.
+func (_u *CardUpdateOne) AddBalance(v float64) *CardUpdateOne {
+	_u.mutation.AddBalance(v)
 	return _u
 }
 
 // SetName sets the "name" field.
-func (_u *CardUpdateOne) SetName(s string) *CardUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *CardUpdateOne) SetName(v string) *CardUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *CardUpdateOne) SetNillableName(s *string) *CardUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *CardUpdateOne) SetNillableName(v *string) *CardUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -385,8 +385,8 @@ func (_u *CardUpdateOne) SetNillableOwnerID(id *int) *CardUpdateOne {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *CardUpdateOne) SetOwner(u *User) *CardUpdateOne {
-	return _u.SetOwnerID(u.ID)
+func (_u *CardUpdateOne) SetOwner(v *User) *CardUpdateOne {
+	return _u.SetOwnerID(v.ID)
 }
 
 // AddSpecIDs adds the "spec" edge to the Spec entity by IDs.
@@ -396,10 +396,10 @@ func (_u *CardUpdateOne) AddSpecIDs(ids ...int) *CardUpdateOne {
 }
 
 // AddSpec adds the "spec" edges to the Spec entity.
-func (_u *CardUpdateOne) AddSpec(s ...*Spec) *CardUpdateOne {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *CardUpdateOne) AddSpec(v ...*Spec) *CardUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddSpecIDs(ids...)
 }
@@ -428,10 +428,10 @@ func (_u *CardUpdateOne) RemoveSpecIDs(ids ...int) *CardUpdateOne {
 }
 
 // RemoveSpec removes "spec" edges to Spec entities.
-func (_u *CardUpdateOne) RemoveSpec(s ...*Spec) *CardUpdateOne {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *CardUpdateOne) RemoveSpec(v ...*Spec) *CardUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveSpecIDs(ids...)
 }

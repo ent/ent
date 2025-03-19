@@ -40,10 +40,10 @@ func (_u *UserUpdate) AddGroupIDs(ids ...int) *UserUpdate {
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (_u *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *UserUpdate) AddGroups(v ...*Group) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddGroupIDs(ids...)
 }
@@ -63,8 +63,8 @@ func (_u *UserUpdate) SetNillableParentID(id *int) *UserUpdate {
 }
 
 // SetParent sets the "parent" edge to the User entity.
-func (_u *UserUpdate) SetParent(u *User) *UserUpdate {
-	return _u.SetParentID(u.ID)
+func (_u *UserUpdate) SetParent(v *User) *UserUpdate {
+	return _u.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
@@ -74,10 +74,10 @@ func (_u *UserUpdate) AddChildIDs(ids ...int) *UserUpdate {
 }
 
 // AddChildren adds the "children" edges to the User entity.
-func (_u *UserUpdate) AddChildren(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) AddChildren(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
@@ -89,10 +89,10 @@ func (_u *UserUpdate) AddPetIDs(ids ...string) *UserUpdate {
 }
 
 // AddPets adds the "pets" edges to the Pet entity.
-func (_u *UserUpdate) AddPets(p ...*Pet) *UserUpdate {
-	ids := make([]string, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *UserUpdate) AddPets(v ...*Pet) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddPetIDs(ids...)
 }
@@ -115,10 +115,10 @@ func (_u *UserUpdate) RemoveGroupIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveGroups removes "groups" edges to Group entities.
-func (_u *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *UserUpdate) RemoveGroups(v ...*Group) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveGroupIDs(ids...)
 }
@@ -142,10 +142,10 @@ func (_u *UserUpdate) RemoveChildIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveChildren removes "children" edges to User entities.
-func (_u *UserUpdate) RemoveChildren(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) RemoveChildren(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }
@@ -163,10 +163,10 @@ func (_u *UserUpdate) RemovePetIDs(ids ...string) *UserUpdate {
 }
 
 // RemovePets removes "pets" edges to Pet entities.
-func (_u *UserUpdate) RemovePets(p ...*Pet) *UserUpdate {
-	ids := make([]string, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *UserUpdate) RemovePets(v ...*Pet) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemovePetIDs(ids...)
 }
@@ -198,7 +198,7 @@ func (_u *UserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -371,7 +371,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -380,7 +380,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -398,10 +398,10 @@ func (_u *UserUpdateOne) AddGroupIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (_u *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *UserUpdateOne) AddGroups(v ...*Group) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddGroupIDs(ids...)
 }
@@ -421,8 +421,8 @@ func (_u *UserUpdateOne) SetNillableParentID(id *int) *UserUpdateOne {
 }
 
 // SetParent sets the "parent" edge to the User entity.
-func (_u *UserUpdateOne) SetParent(u *User) *UserUpdateOne {
-	return _u.SetParentID(u.ID)
+func (_u *UserUpdateOne) SetParent(v *User) *UserUpdateOne {
+	return _u.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
@@ -432,10 +432,10 @@ func (_u *UserUpdateOne) AddChildIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddChildren adds the "children" edges to the User entity.
-func (_u *UserUpdateOne) AddChildren(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) AddChildren(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
@@ -447,10 +447,10 @@ func (_u *UserUpdateOne) AddPetIDs(ids ...string) *UserUpdateOne {
 }
 
 // AddPets adds the "pets" edges to the Pet entity.
-func (_u *UserUpdateOne) AddPets(p ...*Pet) *UserUpdateOne {
-	ids := make([]string, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *UserUpdateOne) AddPets(v ...*Pet) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddPetIDs(ids...)
 }
@@ -473,10 +473,10 @@ func (_u *UserUpdateOne) RemoveGroupIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveGroups removes "groups" edges to Group entities.
-func (_u *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *UserUpdateOne) RemoveGroups(v ...*Group) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveGroupIDs(ids...)
 }
@@ -500,10 +500,10 @@ func (_u *UserUpdateOne) RemoveChildIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveChildren removes "children" edges to User entities.
-func (_u *UserUpdateOne) RemoveChildren(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) RemoveChildren(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }
@@ -521,10 +521,10 @@ func (_u *UserUpdateOne) RemovePetIDs(ids ...string) *UserUpdateOne {
 }
 
 // RemovePets removes "pets" edges to Pet entities.
-func (_u *UserUpdateOne) RemovePets(p ...*Pet) *UserUpdateOne {
-	ids := make([]string, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *UserUpdateOne) RemovePets(v ...*Pet) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemovePetIDs(ids...)
 }

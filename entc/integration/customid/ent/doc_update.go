@@ -33,15 +33,15 @@ func (_u *DocUpdate) Where(ps ...predicate.Doc) *DocUpdate {
 }
 
 // SetText sets the "text" field.
-func (_u *DocUpdate) SetText(s string) *DocUpdate {
-	_u.mutation.SetText(s)
+func (_u *DocUpdate) SetText(v string) *DocUpdate {
+	_u.mutation.SetText(v)
 	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_u *DocUpdate) SetNillableText(s *string) *DocUpdate {
-	if s != nil {
-		_u.SetText(*s)
+func (_u *DocUpdate) SetNillableText(v *string) *DocUpdate {
+	if v != nil {
+		_u.SetText(*v)
 	}
 	return _u
 }
@@ -67,8 +67,8 @@ func (_u *DocUpdate) SetNillableParentID(id *schema.DocID) *DocUpdate {
 }
 
 // SetParent sets the "parent" edge to the Doc entity.
-func (_u *DocUpdate) SetParent(d *Doc) *DocUpdate {
-	return _u.SetParentID(d.ID)
+func (_u *DocUpdate) SetParent(v *Doc) *DocUpdate {
+	return _u.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the Doc entity by IDs.
@@ -78,10 +78,10 @@ func (_u *DocUpdate) AddChildIDs(ids ...schema.DocID) *DocUpdate {
 }
 
 // AddChildren adds the "children" edges to the Doc entity.
-func (_u *DocUpdate) AddChildren(d ...*Doc) *DocUpdate {
-	ids := make([]schema.DocID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
+func (_u *DocUpdate) AddChildren(v ...*Doc) *DocUpdate {
+	ids := make([]schema.DocID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
@@ -93,10 +93,10 @@ func (_u *DocUpdate) AddRelatedIDs(ids ...schema.DocID) *DocUpdate {
 }
 
 // AddRelated adds the "related" edges to the Doc entity.
-func (_u *DocUpdate) AddRelated(d ...*Doc) *DocUpdate {
-	ids := make([]schema.DocID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
+func (_u *DocUpdate) AddRelated(v ...*Doc) *DocUpdate {
+	ids := make([]schema.DocID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddRelatedIDs(ids...)
 }
@@ -125,10 +125,10 @@ func (_u *DocUpdate) RemoveChildIDs(ids ...schema.DocID) *DocUpdate {
 }
 
 // RemoveChildren removes "children" edges to Doc entities.
-func (_u *DocUpdate) RemoveChildren(d ...*Doc) *DocUpdate {
-	ids := make([]schema.DocID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
+func (_u *DocUpdate) RemoveChildren(v ...*Doc) *DocUpdate {
+	ids := make([]schema.DocID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }
@@ -146,10 +146,10 @@ func (_u *DocUpdate) RemoveRelatedIDs(ids ...schema.DocID) *DocUpdate {
 }
 
 // RemoveRelated removes "related" edges to Doc entities.
-func (_u *DocUpdate) RemoveRelated(d ...*Doc) *DocUpdate {
-	ids := make([]schema.DocID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
+func (_u *DocUpdate) RemoveRelated(v ...*Doc) *DocUpdate {
+	ids := make([]schema.DocID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveRelatedIDs(ids...)
 }
@@ -181,7 +181,7 @@ func (_u *DocUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *DocUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(doc.Table, doc.Columns, sqlgraph.NewFieldSpec(doc.FieldID, field.TypeString))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -315,7 +315,7 @@ func (_u *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{doc.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -324,7 +324,7 @@ func (_u *DocUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // DocUpdateOne is the builder for updating a single Doc entity.
@@ -336,15 +336,15 @@ type DocUpdateOne struct {
 }
 
 // SetText sets the "text" field.
-func (_u *DocUpdateOne) SetText(s string) *DocUpdateOne {
-	_u.mutation.SetText(s)
+func (_u *DocUpdateOne) SetText(v string) *DocUpdateOne {
+	_u.mutation.SetText(v)
 	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_u *DocUpdateOne) SetNillableText(s *string) *DocUpdateOne {
-	if s != nil {
-		_u.SetText(*s)
+func (_u *DocUpdateOne) SetNillableText(v *string) *DocUpdateOne {
+	if v != nil {
+		_u.SetText(*v)
 	}
 	return _u
 }
@@ -370,8 +370,8 @@ func (_u *DocUpdateOne) SetNillableParentID(id *schema.DocID) *DocUpdateOne {
 }
 
 // SetParent sets the "parent" edge to the Doc entity.
-func (_u *DocUpdateOne) SetParent(d *Doc) *DocUpdateOne {
-	return _u.SetParentID(d.ID)
+func (_u *DocUpdateOne) SetParent(v *Doc) *DocUpdateOne {
+	return _u.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the Doc entity by IDs.
@@ -381,10 +381,10 @@ func (_u *DocUpdateOne) AddChildIDs(ids ...schema.DocID) *DocUpdateOne {
 }
 
 // AddChildren adds the "children" edges to the Doc entity.
-func (_u *DocUpdateOne) AddChildren(d ...*Doc) *DocUpdateOne {
-	ids := make([]schema.DocID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
+func (_u *DocUpdateOne) AddChildren(v ...*Doc) *DocUpdateOne {
+	ids := make([]schema.DocID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
@@ -396,10 +396,10 @@ func (_u *DocUpdateOne) AddRelatedIDs(ids ...schema.DocID) *DocUpdateOne {
 }
 
 // AddRelated adds the "related" edges to the Doc entity.
-func (_u *DocUpdateOne) AddRelated(d ...*Doc) *DocUpdateOne {
-	ids := make([]schema.DocID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
+func (_u *DocUpdateOne) AddRelated(v ...*Doc) *DocUpdateOne {
+	ids := make([]schema.DocID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddRelatedIDs(ids...)
 }
@@ -428,10 +428,10 @@ func (_u *DocUpdateOne) RemoveChildIDs(ids ...schema.DocID) *DocUpdateOne {
 }
 
 // RemoveChildren removes "children" edges to Doc entities.
-func (_u *DocUpdateOne) RemoveChildren(d ...*Doc) *DocUpdateOne {
-	ids := make([]schema.DocID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
+func (_u *DocUpdateOne) RemoveChildren(v ...*Doc) *DocUpdateOne {
+	ids := make([]schema.DocID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }
@@ -449,10 +449,10 @@ func (_u *DocUpdateOne) RemoveRelatedIDs(ids ...schema.DocID) *DocUpdateOne {
 }
 
 // RemoveRelated removes "related" edges to Doc entities.
-func (_u *DocUpdateOne) RemoveRelated(d ...*Doc) *DocUpdateOne {
-	ids := make([]schema.DocID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
+func (_u *DocUpdateOne) RemoveRelated(v ...*Doc) *DocUpdateOne {
+	ids := make([]schema.DocID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveRelatedIDs(ids...)
 }

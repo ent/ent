@@ -33,15 +33,15 @@ func (_u *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *CarUpdate) SetName(s string) *CarUpdate {
-	_u.mutation.SetName(s)
+func (_u *CarUpdate) SetName(v string) *CarUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *CarUpdate) SetNillableName(s *string) *CarUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *CarUpdate) SetNillableName(v *string) *CarUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -59,8 +59,8 @@ func (_u *CarUpdate) SetOwnerID(id int) *CarUpdate {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *CarUpdate) SetOwner(u *User) *CarUpdate {
-	return _u.SetOwnerID(u.ID)
+func (_u *CarUpdate) SetOwner(v *User) *CarUpdate {
+	return _u.SetOwnerID(v.ID)
 }
 
 // Mutation returns the CarMutation object of the builder.
@@ -109,9 +109,9 @@ func (_u *CarUpdate) check() error {
 	return nil
 }
 
-func (_u *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *CarUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(car.Table, car.Columns, sqlgraph.NewFieldSpec(car.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -156,7 +156,7 @@ func (_u *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{car.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -165,7 +165,7 @@ func (_u *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // CarUpdateOne is the builder for updating a single Car entity.
@@ -177,15 +177,15 @@ type CarUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (_u *CarUpdateOne) SetName(s string) *CarUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *CarUpdateOne) SetName(v string) *CarUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *CarUpdateOne) SetNillableName(s *string) *CarUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *CarUpdateOne) SetNillableName(v *string) *CarUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -203,8 +203,8 @@ func (_u *CarUpdateOne) SetOwnerID(id int) *CarUpdateOne {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *CarUpdateOne) SetOwner(u *User) *CarUpdateOne {
-	return _u.SetOwnerID(u.ID)
+func (_u *CarUpdateOne) SetOwner(v *User) *CarUpdateOne {
+	return _u.SetOwnerID(v.ID)
 }
 
 // Mutation returns the CarMutation object of the builder.

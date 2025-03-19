@@ -35,57 +35,57 @@ func (_u *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 }
 
 // SetType sets the "type" field.
-func (_u *CardUpdate) SetType(s string) *CardUpdate {
-	_u.mutation.SetType(s)
+func (_u *CardUpdate) SetType(v string) *CardUpdate {
+	_u.mutation.SetType(v)
 	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (_u *CardUpdate) SetNillableType(s *string) *CardUpdate {
-	if s != nil {
-		_u.SetType(*s)
+func (_u *CardUpdate) SetNillableType(v *string) *CardUpdate {
+	if v != nil {
+		_u.SetType(*v)
 	}
 	return _u
 }
 
 // SetNumberHash sets the "number_hash" field.
-func (_u *CardUpdate) SetNumberHash(s string) *CardUpdate {
-	_u.mutation.SetNumberHash(s)
+func (_u *CardUpdate) SetNumberHash(v string) *CardUpdate {
+	_u.mutation.SetNumberHash(v)
 	return _u
 }
 
 // SetNillableNumberHash sets the "number_hash" field if the given value is not nil.
-func (_u *CardUpdate) SetNillableNumberHash(s *string) *CardUpdate {
-	if s != nil {
-		_u.SetNumberHash(*s)
+func (_u *CardUpdate) SetNillableNumberHash(v *string) *CardUpdate {
+	if v != nil {
+		_u.SetNumberHash(*v)
 	}
 	return _u
 }
 
 // SetCvvHash sets the "cvv_hash" field.
-func (_u *CardUpdate) SetCvvHash(s string) *CardUpdate {
-	_u.mutation.SetCvvHash(s)
+func (_u *CardUpdate) SetCvvHash(v string) *CardUpdate {
+	_u.mutation.SetCvvHash(v)
 	return _u
 }
 
 // SetNillableCvvHash sets the "cvv_hash" field if the given value is not nil.
-func (_u *CardUpdate) SetNillableCvvHash(s *string) *CardUpdate {
-	if s != nil {
-		_u.SetCvvHash(*s)
+func (_u *CardUpdate) SetNillableCvvHash(v *string) *CardUpdate {
+	if v != nil {
+		_u.SetCvvHash(*v)
 	}
 	return _u
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (_u *CardUpdate) SetExpiresAt(t time.Time) *CardUpdate {
-	_u.mutation.SetExpiresAt(t)
+func (_u *CardUpdate) SetExpiresAt(v time.Time) *CardUpdate {
+	_u.mutation.SetExpiresAt(v)
 	return _u
 }
 
 // SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
-func (_u *CardUpdate) SetNillableExpiresAt(t *time.Time) *CardUpdate {
-	if t != nil {
-		_u.SetExpiresAt(*t)
+func (_u *CardUpdate) SetNillableExpiresAt(v *time.Time) *CardUpdate {
+	if v != nil {
+		_u.SetExpiresAt(*v)
 	}
 	return _u
 }
@@ -97,22 +97,22 @@ func (_u *CardUpdate) ClearExpiresAt() *CardUpdate {
 }
 
 // SetOwnerID sets the "owner_id" field.
-func (_u *CardUpdate) SetOwnerID(i int) *CardUpdate {
-	_u.mutation.SetOwnerID(i)
+func (_u *CardUpdate) SetOwnerID(v int) *CardUpdate {
+	_u.mutation.SetOwnerID(v)
 	return _u
 }
 
 // SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (_u *CardUpdate) SetNillableOwnerID(i *int) *CardUpdate {
-	if i != nil {
-		_u.SetOwnerID(*i)
+func (_u *CardUpdate) SetNillableOwnerID(v *int) *CardUpdate {
+	if v != nil {
+		_u.SetOwnerID(*v)
 	}
 	return _u
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *CardUpdate) SetOwner(u *User) *CardUpdate {
-	return _u.SetOwnerID(u.ID)
+func (_u *CardUpdate) SetOwner(v *User) *CardUpdate {
+	return _u.SetOwnerID(v.ID)
 }
 
 // AddPaymentIDs adds the "payments" edge to the Payment entity by IDs.
@@ -122,10 +122,10 @@ func (_u *CardUpdate) AddPaymentIDs(ids ...int) *CardUpdate {
 }
 
 // AddPayments adds the "payments" edges to the Payment entity.
-func (_u *CardUpdate) AddPayments(p ...*Payment) *CardUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *CardUpdate) AddPayments(v ...*Payment) *CardUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddPaymentIDs(ids...)
 }
@@ -154,10 +154,10 @@ func (_u *CardUpdate) RemovePaymentIDs(ids ...int) *CardUpdate {
 }
 
 // RemovePayments removes "payments" edges to Payment entities.
-func (_u *CardUpdate) RemovePayments(p ...*Payment) *CardUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *CardUpdate) RemovePayments(v ...*Payment) *CardUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemovePaymentIDs(ids...)
 }
@@ -197,9 +197,9 @@ func (_u *CardUpdate) check() error {
 	return nil
 }
 
-func (_u *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *CardUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(card.Table, card.Columns, sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -298,7 +298,7 @@ func (_u *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{card.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -307,7 +307,7 @@ func (_u *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // CardUpdateOne is the builder for updating a single Card entity.
@@ -319,57 +319,57 @@ type CardUpdateOne struct {
 }
 
 // SetType sets the "type" field.
-func (_u *CardUpdateOne) SetType(s string) *CardUpdateOne {
-	_u.mutation.SetType(s)
+func (_u *CardUpdateOne) SetType(v string) *CardUpdateOne {
+	_u.mutation.SetType(v)
 	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (_u *CardUpdateOne) SetNillableType(s *string) *CardUpdateOne {
-	if s != nil {
-		_u.SetType(*s)
+func (_u *CardUpdateOne) SetNillableType(v *string) *CardUpdateOne {
+	if v != nil {
+		_u.SetType(*v)
 	}
 	return _u
 }
 
 // SetNumberHash sets the "number_hash" field.
-func (_u *CardUpdateOne) SetNumberHash(s string) *CardUpdateOne {
-	_u.mutation.SetNumberHash(s)
+func (_u *CardUpdateOne) SetNumberHash(v string) *CardUpdateOne {
+	_u.mutation.SetNumberHash(v)
 	return _u
 }
 
 // SetNillableNumberHash sets the "number_hash" field if the given value is not nil.
-func (_u *CardUpdateOne) SetNillableNumberHash(s *string) *CardUpdateOne {
-	if s != nil {
-		_u.SetNumberHash(*s)
+func (_u *CardUpdateOne) SetNillableNumberHash(v *string) *CardUpdateOne {
+	if v != nil {
+		_u.SetNumberHash(*v)
 	}
 	return _u
 }
 
 // SetCvvHash sets the "cvv_hash" field.
-func (_u *CardUpdateOne) SetCvvHash(s string) *CardUpdateOne {
-	_u.mutation.SetCvvHash(s)
+func (_u *CardUpdateOne) SetCvvHash(v string) *CardUpdateOne {
+	_u.mutation.SetCvvHash(v)
 	return _u
 }
 
 // SetNillableCvvHash sets the "cvv_hash" field if the given value is not nil.
-func (_u *CardUpdateOne) SetNillableCvvHash(s *string) *CardUpdateOne {
-	if s != nil {
-		_u.SetCvvHash(*s)
+func (_u *CardUpdateOne) SetNillableCvvHash(v *string) *CardUpdateOne {
+	if v != nil {
+		_u.SetCvvHash(*v)
 	}
 	return _u
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (_u *CardUpdateOne) SetExpiresAt(t time.Time) *CardUpdateOne {
-	_u.mutation.SetExpiresAt(t)
+func (_u *CardUpdateOne) SetExpiresAt(v time.Time) *CardUpdateOne {
+	_u.mutation.SetExpiresAt(v)
 	return _u
 }
 
 // SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
-func (_u *CardUpdateOne) SetNillableExpiresAt(t *time.Time) *CardUpdateOne {
-	if t != nil {
-		_u.SetExpiresAt(*t)
+func (_u *CardUpdateOne) SetNillableExpiresAt(v *time.Time) *CardUpdateOne {
+	if v != nil {
+		_u.SetExpiresAt(*v)
 	}
 	return _u
 }
@@ -381,22 +381,22 @@ func (_u *CardUpdateOne) ClearExpiresAt() *CardUpdateOne {
 }
 
 // SetOwnerID sets the "owner_id" field.
-func (_u *CardUpdateOne) SetOwnerID(i int) *CardUpdateOne {
-	_u.mutation.SetOwnerID(i)
+func (_u *CardUpdateOne) SetOwnerID(v int) *CardUpdateOne {
+	_u.mutation.SetOwnerID(v)
 	return _u
 }
 
 // SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (_u *CardUpdateOne) SetNillableOwnerID(i *int) *CardUpdateOne {
-	if i != nil {
-		_u.SetOwnerID(*i)
+func (_u *CardUpdateOne) SetNillableOwnerID(v *int) *CardUpdateOne {
+	if v != nil {
+		_u.SetOwnerID(*v)
 	}
 	return _u
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *CardUpdateOne) SetOwner(u *User) *CardUpdateOne {
-	return _u.SetOwnerID(u.ID)
+func (_u *CardUpdateOne) SetOwner(v *User) *CardUpdateOne {
+	return _u.SetOwnerID(v.ID)
 }
 
 // AddPaymentIDs adds the "payments" edge to the Payment entity by IDs.
@@ -406,10 +406,10 @@ func (_u *CardUpdateOne) AddPaymentIDs(ids ...int) *CardUpdateOne {
 }
 
 // AddPayments adds the "payments" edges to the Payment entity.
-func (_u *CardUpdateOne) AddPayments(p ...*Payment) *CardUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *CardUpdateOne) AddPayments(v ...*Payment) *CardUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddPaymentIDs(ids...)
 }
@@ -438,10 +438,10 @@ func (_u *CardUpdateOne) RemovePaymentIDs(ids ...int) *CardUpdateOne {
 }
 
 // RemovePayments removes "payments" edges to Payment entities.
-func (_u *CardUpdateOne) RemovePayments(p ...*Payment) *CardUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *CardUpdateOne) RemovePayments(v ...*Payment) *CardUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemovePaymentIDs(ids...)
 }

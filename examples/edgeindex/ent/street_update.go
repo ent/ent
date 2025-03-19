@@ -33,15 +33,15 @@ func (_u *StreetUpdate) Where(ps ...predicate.Street) *StreetUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *StreetUpdate) SetName(s string) *StreetUpdate {
-	_u.mutation.SetName(s)
+func (_u *StreetUpdate) SetName(v string) *StreetUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *StreetUpdate) SetNillableName(s *string) *StreetUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *StreetUpdate) SetNillableName(v *string) *StreetUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -61,8 +61,8 @@ func (_u *StreetUpdate) SetNillableCityID(id *int) *StreetUpdate {
 }
 
 // SetCity sets the "city" edge to the City entity.
-func (_u *StreetUpdate) SetCity(c *City) *StreetUpdate {
-	return _u.SetCityID(c.ID)
+func (_u *StreetUpdate) SetCity(v *City) *StreetUpdate {
+	return _u.SetCityID(v.ID)
 }
 
 // Mutation returns the StreetMutation object of the builder.
@@ -103,7 +103,7 @@ func (_u *StreetUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *StreetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(street.Table, street.Columns, sqlgraph.NewFieldSpec(street.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -144,7 +144,7 @@ func (_u *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{street.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -153,7 +153,7 @@ func (_u *StreetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // StreetUpdateOne is the builder for updating a single Street entity.
@@ -165,15 +165,15 @@ type StreetUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (_u *StreetUpdateOne) SetName(s string) *StreetUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *StreetUpdateOne) SetName(v string) *StreetUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *StreetUpdateOne) SetNillableName(s *string) *StreetUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *StreetUpdateOne) SetNillableName(v *string) *StreetUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -193,8 +193,8 @@ func (_u *StreetUpdateOne) SetNillableCityID(id *int) *StreetUpdateOne {
 }
 
 // SetCity sets the "city" edge to the City entity.
-func (_u *StreetUpdateOne) SetCity(c *City) *StreetUpdateOne {
-	return _u.SetCityID(c.ID)
+func (_u *StreetUpdateOne) SetCity(v *City) *StreetUpdateOne {
+	return _u.SetCityID(v.ID)
 }
 
 // Mutation returns the StreetMutation object of the builder.

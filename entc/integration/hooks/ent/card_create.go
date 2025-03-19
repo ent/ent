@@ -26,63 +26,63 @@ type CardCreate struct {
 }
 
 // SetNumber sets the "number" field.
-func (_c *CardCreate) SetNumber(s string) *CardCreate {
-	_c.mutation.SetNumber(s)
+func (_c *CardCreate) SetNumber(v string) *CardCreate {
+	_c.mutation.SetNumber(v)
 	return _c
 }
 
 // SetNillableNumber sets the "number" field if the given value is not nil.
-func (_c *CardCreate) SetNillableNumber(s *string) *CardCreate {
-	if s != nil {
-		_c.SetNumber(*s)
+func (_c *CardCreate) SetNillableNumber(v *string) *CardCreate {
+	if v != nil {
+		_c.SetNumber(*v)
 	}
 	return _c
 }
 
 // SetName sets the "name" field.
-func (_c *CardCreate) SetName(s string) *CardCreate {
-	_c.mutation.SetName(s)
+func (_c *CardCreate) SetName(v string) *CardCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_c *CardCreate) SetNillableName(s *string) *CardCreate {
-	if s != nil {
-		_c.SetName(*s)
+func (_c *CardCreate) SetNillableName(v *string) *CardCreate {
+	if v != nil {
+		_c.SetName(*v)
 	}
 	return _c
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *CardCreate) SetCreatedAt(t time.Time) *CardCreate {
-	_c.mutation.SetCreatedAt(t)
+func (_c *CardCreate) SetCreatedAt(v time.Time) *CardCreate {
+	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *CardCreate) SetNillableCreatedAt(t *time.Time) *CardCreate {
-	if t != nil {
-		_c.SetCreatedAt(*t)
+func (_c *CardCreate) SetNillableCreatedAt(v *time.Time) *CardCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
 	return _c
 }
 
 // SetInHook sets the "in_hook" field.
-func (_c *CardCreate) SetInHook(s string) *CardCreate {
-	_c.mutation.SetInHook(s)
+func (_c *CardCreate) SetInHook(v string) *CardCreate {
+	_c.mutation.SetInHook(v)
 	return _c
 }
 
 // SetExpiredAt sets the "expired_at" field.
-func (_c *CardCreate) SetExpiredAt(t time.Time) *CardCreate {
-	_c.mutation.SetExpiredAt(t)
+func (_c *CardCreate) SetExpiredAt(v time.Time) *CardCreate {
+	_c.mutation.SetExpiredAt(v)
 	return _c
 }
 
 // SetNillableExpiredAt sets the "expired_at" field if the given value is not nil.
-func (_c *CardCreate) SetNillableExpiredAt(t *time.Time) *CardCreate {
-	if t != nil {
-		_c.SetExpiredAt(*t)
+func (_c *CardCreate) SetNillableExpiredAt(v *time.Time) *CardCreate {
+	if v != nil {
+		_c.SetExpiredAt(*v)
 	}
 	return _c
 }
@@ -102,8 +102,8 @@ func (_c *CardCreate) SetNillableOwnerID(id *int) *CardCreate {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_c *CardCreate) SetOwner(u *User) *CardCreate {
-	return _c.SetOwnerID(u.ID)
+func (_c *CardCreate) SetOwner(v *User) *CardCreate {
+	return _c.SetOwnerID(v.ID)
 }
 
 // Mutation returns the CardMutation object of the builder.

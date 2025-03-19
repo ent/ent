@@ -31,8 +31,8 @@ type TagCreate struct {
 }
 
 // SetValue sets the "value" field.
-func (_c *TagCreate) SetValue(s string) *TagCreate {
-	_c.mutation.SetValue(s)
+func (_c *TagCreate) SetValue(v string) *TagCreate {
+	_c.mutation.SetValue(v)
 	return _c
 }
 
@@ -43,10 +43,10 @@ func (_c *TagCreate) AddTweetIDs(ids ...int) *TagCreate {
 }
 
 // AddTweets adds the "tweets" edges to the Tweet entity.
-func (_c *TagCreate) AddTweets(t ...*Tweet) *TagCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_c *TagCreate) AddTweets(v ...*Tweet) *TagCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddTweetIDs(ids...)
 }
@@ -58,10 +58,10 @@ func (_c *TagCreate) AddGroupIDs(ids ...int) *TagCreate {
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (_c *TagCreate) AddGroups(g ...*Group) *TagCreate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_c *TagCreate) AddGroups(v ...*Group) *TagCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddGroupIDs(ids...)
 }
@@ -73,10 +73,10 @@ func (_c *TagCreate) AddTweetTagIDs(ids ...uuid.UUID) *TagCreate {
 }
 
 // AddTweetTags adds the "tweet_tags" edges to the TweetTag entity.
-func (_c *TagCreate) AddTweetTags(t ...*TweetTag) *TagCreate {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_c *TagCreate) AddTweetTags(v ...*TweetTag) *TagCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddTweetTagIDs(ids...)
 }
@@ -88,10 +88,10 @@ func (_c *TagCreate) AddGroupTagIDs(ids ...int) *TagCreate {
 }
 
 // AddGroupTags adds the "group_tags" edges to the GroupTag entity.
-func (_c *TagCreate) AddGroupTags(g ...*GroupTag) *TagCreate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_c *TagCreate) AddGroupTags(v ...*GroupTag) *TagCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddGroupTagIDs(ids...)
 }

@@ -34,58 +34,58 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 }
 
 // SetVersion sets the "version" field.
-func (_u *UserUpdate) SetVersion(i int) *UserUpdate {
+func (_u *UserUpdate) SetVersion(v int) *UserUpdate {
 	_u.mutation.ResetVersion()
-	_u.mutation.SetVersion(i)
+	_u.mutation.SetVersion(v)
 	return _u
 }
 
 // SetNillableVersion sets the "version" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableVersion(i *int) *UserUpdate {
-	if i != nil {
-		_u.SetVersion(*i)
+func (_u *UserUpdate) SetNillableVersion(v *int) *UserUpdate {
+	if v != nil {
+		_u.SetVersion(*v)
 	}
 	return _u
 }
 
-// AddVersion adds i to the "version" field.
-func (_u *UserUpdate) AddVersion(i int) *UserUpdate {
-	_u.mutation.AddVersion(i)
+// AddVersion adds value to the "version" field.
+func (_u *UserUpdate) AddVersion(v int) *UserUpdate {
+	_u.mutation.AddVersion(v)
 	return _u
 }
 
 // SetName sets the "name" field.
-func (_u *UserUpdate) SetName(s string) *UserUpdate {
-	_u.mutation.SetName(s)
+func (_u *UserUpdate) SetName(v string) *UserUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableName(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
 
 // SetWorth sets the "worth" field.
-func (_u *UserUpdate) SetWorth(u uint) *UserUpdate {
+func (_u *UserUpdate) SetWorth(v uint) *UserUpdate {
 	_u.mutation.ResetWorth()
-	_u.mutation.SetWorth(u)
+	_u.mutation.SetWorth(v)
 	return _u
 }
 
 // SetNillableWorth sets the "worth" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableWorth(u *uint) *UserUpdate {
-	if u != nil {
-		_u.SetWorth(*u)
+func (_u *UserUpdate) SetNillableWorth(v *uint) *UserUpdate {
+	if v != nil {
+		_u.SetWorth(*v)
 	}
 	return _u
 }
 
-// AddWorth adds u to the "worth" field.
-func (_u *UserUpdate) AddWorth(u int) *UserUpdate {
-	_u.mutation.AddWorth(u)
+// AddWorth adds value to the "worth" field.
+func (_u *UserUpdate) AddWorth(v int) *UserUpdate {
+	_u.mutation.AddWorth(v)
 	return _u
 }
 
@@ -96,15 +96,15 @@ func (_u *UserUpdate) ClearWorth() *UserUpdate {
 }
 
 // SetPassword sets the "password" field.
-func (_u *UserUpdate) SetPassword(s string) *UserUpdate {
-	_u.mutation.SetPassword(s)
+func (_u *UserUpdate) SetPassword(v string) *UserUpdate {
+	_u.mutation.SetPassword(v)
 	return _u
 }
 
 // SetNillablePassword sets the "password" field if the given value is not nil.
-func (_u *UserUpdate) SetNillablePassword(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetPassword(*s)
+func (_u *UserUpdate) SetNillablePassword(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetPassword(*v)
 	}
 	return _u
 }
@@ -116,15 +116,15 @@ func (_u *UserUpdate) ClearPassword() *UserUpdate {
 }
 
 // SetActive sets the "active" field.
-func (_u *UserUpdate) SetActive(b bool) *UserUpdate {
-	_u.mutation.SetActive(b)
+func (_u *UserUpdate) SetActive(v bool) *UserUpdate {
+	_u.mutation.SetActive(v)
 	return _u
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableActive(b *bool) *UserUpdate {
-	if b != nil {
-		_u.SetActive(*b)
+func (_u *UserUpdate) SetNillableActive(v *bool) *UserUpdate {
+	if v != nil {
+		_u.SetActive(*v)
 	}
 	return _u
 }
@@ -136,10 +136,10 @@ func (_u *UserUpdate) AddCardIDs(ids ...int) *UserUpdate {
 }
 
 // AddCards adds the "cards" edges to the Card entity.
-func (_u *UserUpdate) AddCards(c ...*Card) *UserUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *UserUpdate) AddCards(v ...*Card) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddCardIDs(ids...)
 }
@@ -151,10 +151,10 @@ func (_u *UserUpdate) AddPetIDs(ids ...int) *UserUpdate {
 }
 
 // AddPets adds the "pets" edges to the Pet entity.
-func (_u *UserUpdate) AddPets(p ...*Pet) *UserUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *UserUpdate) AddPets(v ...*Pet) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddPetIDs(ids...)
 }
@@ -166,10 +166,10 @@ func (_u *UserUpdate) AddFriendIDs(ids ...int) *UserUpdate {
 }
 
 // AddFriends adds the "friends" edges to the User entity.
-func (_u *UserUpdate) AddFriends(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) AddFriends(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFriendIDs(ids...)
 }
@@ -189,8 +189,8 @@ func (_u *UserUpdate) SetNillableBestFriendID(id *int) *UserUpdate {
 }
 
 // SetBestFriend sets the "best_friend" edge to the User entity.
-func (_u *UserUpdate) SetBestFriend(u *User) *UserUpdate {
-	return _u.SetBestFriendID(u.ID)
+func (_u *UserUpdate) SetBestFriend(v *User) *UserUpdate {
+	return _u.SetBestFriendID(v.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -211,10 +211,10 @@ func (_u *UserUpdate) RemoveCardIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveCards removes "cards" edges to Card entities.
-func (_u *UserUpdate) RemoveCards(c ...*Card) *UserUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *UserUpdate) RemoveCards(v ...*Card) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveCardIDs(ids...)
 }
@@ -232,10 +232,10 @@ func (_u *UserUpdate) RemovePetIDs(ids ...int) *UserUpdate {
 }
 
 // RemovePets removes "pets" edges to Pet entities.
-func (_u *UserUpdate) RemovePets(p ...*Pet) *UserUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *UserUpdate) RemovePets(v ...*Pet) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemovePetIDs(ids...)
 }
@@ -253,10 +253,10 @@ func (_u *UserUpdate) RemoveFriendIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveFriends removes "friends" edges to User entities.
-func (_u *UserUpdate) RemoveFriends(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) RemoveFriends(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFriendIDs(ids...)
 }
@@ -294,7 +294,7 @@ func (_u *UserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -494,7 +494,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -503,7 +503,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -515,58 +515,58 @@ type UserUpdateOne struct {
 }
 
 // SetVersion sets the "version" field.
-func (_u *UserUpdateOne) SetVersion(i int) *UserUpdateOne {
+func (_u *UserUpdateOne) SetVersion(v int) *UserUpdateOne {
 	_u.mutation.ResetVersion()
-	_u.mutation.SetVersion(i)
+	_u.mutation.SetVersion(v)
 	return _u
 }
 
 // SetNillableVersion sets the "version" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableVersion(i *int) *UserUpdateOne {
-	if i != nil {
-		_u.SetVersion(*i)
+func (_u *UserUpdateOne) SetNillableVersion(v *int) *UserUpdateOne {
+	if v != nil {
+		_u.SetVersion(*v)
 	}
 	return _u
 }
 
-// AddVersion adds i to the "version" field.
-func (_u *UserUpdateOne) AddVersion(i int) *UserUpdateOne {
-	_u.mutation.AddVersion(i)
+// AddVersion adds value to the "version" field.
+func (_u *UserUpdateOne) AddVersion(v int) *UserUpdateOne {
+	_u.mutation.AddVersion(v)
 	return _u
 }
 
 // SetName sets the "name" field.
-func (_u *UserUpdateOne) SetName(s string) *UserUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
 
 // SetWorth sets the "worth" field.
-func (_u *UserUpdateOne) SetWorth(u uint) *UserUpdateOne {
+func (_u *UserUpdateOne) SetWorth(v uint) *UserUpdateOne {
 	_u.mutation.ResetWorth()
-	_u.mutation.SetWorth(u)
+	_u.mutation.SetWorth(v)
 	return _u
 }
 
 // SetNillableWorth sets the "worth" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableWorth(u *uint) *UserUpdateOne {
-	if u != nil {
-		_u.SetWorth(*u)
+func (_u *UserUpdateOne) SetNillableWorth(v *uint) *UserUpdateOne {
+	if v != nil {
+		_u.SetWorth(*v)
 	}
 	return _u
 }
 
-// AddWorth adds u to the "worth" field.
-func (_u *UserUpdateOne) AddWorth(u int) *UserUpdateOne {
-	_u.mutation.AddWorth(u)
+// AddWorth adds value to the "worth" field.
+func (_u *UserUpdateOne) AddWorth(v int) *UserUpdateOne {
+	_u.mutation.AddWorth(v)
 	return _u
 }
 
@@ -577,15 +577,15 @@ func (_u *UserUpdateOne) ClearWorth() *UserUpdateOne {
 }
 
 // SetPassword sets the "password" field.
-func (_u *UserUpdateOne) SetPassword(s string) *UserUpdateOne {
-	_u.mutation.SetPassword(s)
+func (_u *UserUpdateOne) SetPassword(v string) *UserUpdateOne {
+	_u.mutation.SetPassword(v)
 	return _u
 }
 
 // SetNillablePassword sets the "password" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillablePassword(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetPassword(*s)
+func (_u *UserUpdateOne) SetNillablePassword(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetPassword(*v)
 	}
 	return _u
 }
@@ -597,15 +597,15 @@ func (_u *UserUpdateOne) ClearPassword() *UserUpdateOne {
 }
 
 // SetActive sets the "active" field.
-func (_u *UserUpdateOne) SetActive(b bool) *UserUpdateOne {
-	_u.mutation.SetActive(b)
+func (_u *UserUpdateOne) SetActive(v bool) *UserUpdateOne {
+	_u.mutation.SetActive(v)
 	return _u
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableActive(b *bool) *UserUpdateOne {
-	if b != nil {
-		_u.SetActive(*b)
+func (_u *UserUpdateOne) SetNillableActive(v *bool) *UserUpdateOne {
+	if v != nil {
+		_u.SetActive(*v)
 	}
 	return _u
 }
@@ -617,10 +617,10 @@ func (_u *UserUpdateOne) AddCardIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddCards adds the "cards" edges to the Card entity.
-func (_u *UserUpdateOne) AddCards(c ...*Card) *UserUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *UserUpdateOne) AddCards(v ...*Card) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddCardIDs(ids...)
 }
@@ -632,10 +632,10 @@ func (_u *UserUpdateOne) AddPetIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddPets adds the "pets" edges to the Pet entity.
-func (_u *UserUpdateOne) AddPets(p ...*Pet) *UserUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *UserUpdateOne) AddPets(v ...*Pet) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddPetIDs(ids...)
 }
@@ -647,10 +647,10 @@ func (_u *UserUpdateOne) AddFriendIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddFriends adds the "friends" edges to the User entity.
-func (_u *UserUpdateOne) AddFriends(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) AddFriends(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFriendIDs(ids...)
 }
@@ -670,8 +670,8 @@ func (_u *UserUpdateOne) SetNillableBestFriendID(id *int) *UserUpdateOne {
 }
 
 // SetBestFriend sets the "best_friend" edge to the User entity.
-func (_u *UserUpdateOne) SetBestFriend(u *User) *UserUpdateOne {
-	return _u.SetBestFriendID(u.ID)
+func (_u *UserUpdateOne) SetBestFriend(v *User) *UserUpdateOne {
+	return _u.SetBestFriendID(v.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -692,10 +692,10 @@ func (_u *UserUpdateOne) RemoveCardIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveCards removes "cards" edges to Card entities.
-func (_u *UserUpdateOne) RemoveCards(c ...*Card) *UserUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *UserUpdateOne) RemoveCards(v ...*Card) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveCardIDs(ids...)
 }
@@ -713,10 +713,10 @@ func (_u *UserUpdateOne) RemovePetIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemovePets removes "pets" edges to Pet entities.
-func (_u *UserUpdateOne) RemovePets(p ...*Pet) *UserUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *UserUpdateOne) RemovePets(v ...*Pet) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemovePetIDs(ids...)
 }
@@ -734,10 +734,10 @@ func (_u *UserUpdateOne) RemoveFriendIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveFriends removes "friends" edges to User entities.
-func (_u *UserUpdateOne) RemoveFriends(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) RemoveFriends(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFriendIDs(ids...)
 }

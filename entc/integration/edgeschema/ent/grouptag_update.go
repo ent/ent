@@ -34,41 +34,41 @@ func (_u *GroupTagUpdate) Where(ps ...predicate.GroupTag) *GroupTagUpdate {
 }
 
 // SetTagID sets the "tag_id" field.
-func (_u *GroupTagUpdate) SetTagID(i int) *GroupTagUpdate {
-	_u.mutation.SetTagID(i)
+func (_u *GroupTagUpdate) SetTagID(v int) *GroupTagUpdate {
+	_u.mutation.SetTagID(v)
 	return _u
 }
 
 // SetNillableTagID sets the "tag_id" field if the given value is not nil.
-func (_u *GroupTagUpdate) SetNillableTagID(i *int) *GroupTagUpdate {
-	if i != nil {
-		_u.SetTagID(*i)
+func (_u *GroupTagUpdate) SetNillableTagID(v *int) *GroupTagUpdate {
+	if v != nil {
+		_u.SetTagID(*v)
 	}
 	return _u
 }
 
 // SetGroupID sets the "group_id" field.
-func (_u *GroupTagUpdate) SetGroupID(i int) *GroupTagUpdate {
-	_u.mutation.SetGroupID(i)
+func (_u *GroupTagUpdate) SetGroupID(v int) *GroupTagUpdate {
+	_u.mutation.SetGroupID(v)
 	return _u
 }
 
 // SetNillableGroupID sets the "group_id" field if the given value is not nil.
-func (_u *GroupTagUpdate) SetNillableGroupID(i *int) *GroupTagUpdate {
-	if i != nil {
-		_u.SetGroupID(*i)
+func (_u *GroupTagUpdate) SetNillableGroupID(v *int) *GroupTagUpdate {
+	if v != nil {
+		_u.SetGroupID(*v)
 	}
 	return _u
 }
 
 // SetTag sets the "tag" edge to the Tag entity.
-func (_u *GroupTagUpdate) SetTag(t *Tag) *GroupTagUpdate {
-	return _u.SetTagID(t.ID)
+func (_u *GroupTagUpdate) SetTag(v *Tag) *GroupTagUpdate {
+	return _u.SetTagID(v.ID)
 }
 
 // SetGroup sets the "group" edge to the Group entity.
-func (_u *GroupTagUpdate) SetGroup(g *Group) *GroupTagUpdate {
-	return _u.SetGroupID(g.ID)
+func (_u *GroupTagUpdate) SetGroup(v *Group) *GroupTagUpdate {
+	return _u.SetGroupID(v.ID)
 }
 
 // Mutation returns the GroupTagMutation object of the builder.
@@ -126,9 +126,9 @@ func (_u *GroupTagUpdate) check() error {
 	return nil
 }
 
-func (_u *GroupTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *GroupTagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(grouptag.Table, grouptag.Columns, sqlgraph.NewFieldSpec(grouptag.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -196,7 +196,7 @@ func (_u *GroupTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{grouptag.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -205,7 +205,7 @@ func (_u *GroupTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // GroupTagUpdateOne is the builder for updating a single GroupTag entity.
@@ -217,41 +217,41 @@ type GroupTagUpdateOne struct {
 }
 
 // SetTagID sets the "tag_id" field.
-func (_u *GroupTagUpdateOne) SetTagID(i int) *GroupTagUpdateOne {
-	_u.mutation.SetTagID(i)
+func (_u *GroupTagUpdateOne) SetTagID(v int) *GroupTagUpdateOne {
+	_u.mutation.SetTagID(v)
 	return _u
 }
 
 // SetNillableTagID sets the "tag_id" field if the given value is not nil.
-func (_u *GroupTagUpdateOne) SetNillableTagID(i *int) *GroupTagUpdateOne {
-	if i != nil {
-		_u.SetTagID(*i)
+func (_u *GroupTagUpdateOne) SetNillableTagID(v *int) *GroupTagUpdateOne {
+	if v != nil {
+		_u.SetTagID(*v)
 	}
 	return _u
 }
 
 // SetGroupID sets the "group_id" field.
-func (_u *GroupTagUpdateOne) SetGroupID(i int) *GroupTagUpdateOne {
-	_u.mutation.SetGroupID(i)
+func (_u *GroupTagUpdateOne) SetGroupID(v int) *GroupTagUpdateOne {
+	_u.mutation.SetGroupID(v)
 	return _u
 }
 
 // SetNillableGroupID sets the "group_id" field if the given value is not nil.
-func (_u *GroupTagUpdateOne) SetNillableGroupID(i *int) *GroupTagUpdateOne {
-	if i != nil {
-		_u.SetGroupID(*i)
+func (_u *GroupTagUpdateOne) SetNillableGroupID(v *int) *GroupTagUpdateOne {
+	if v != nil {
+		_u.SetGroupID(*v)
 	}
 	return _u
 }
 
 // SetTag sets the "tag" edge to the Tag entity.
-func (_u *GroupTagUpdateOne) SetTag(t *Tag) *GroupTagUpdateOne {
-	return _u.SetTagID(t.ID)
+func (_u *GroupTagUpdateOne) SetTag(v *Tag) *GroupTagUpdateOne {
+	return _u.SetTagID(v.ID)
 }
 
 // SetGroup sets the "group" edge to the Group entity.
-func (_u *GroupTagUpdateOne) SetGroup(g *Group) *GroupTagUpdateOne {
-	return _u.SetGroupID(g.ID)
+func (_u *GroupTagUpdateOne) SetGroup(v *Group) *GroupTagUpdateOne {
+	return _u.SetGroupID(v.ID)
 }
 
 // Mutation returns the GroupTagMutation object of the builder.

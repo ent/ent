@@ -29,77 +29,77 @@ type PetCreate struct {
 }
 
 // SetAge sets the "age" field.
-func (_c *PetCreate) SetAge(f float64) *PetCreate {
-	_c.mutation.SetAge(f)
+func (_c *PetCreate) SetAge(v float64) *PetCreate {
+	_c.mutation.SetAge(v)
 	return _c
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (_c *PetCreate) SetNillableAge(f *float64) *PetCreate {
-	if f != nil {
-		_c.SetAge(*f)
+func (_c *PetCreate) SetNillableAge(v *float64) *PetCreate {
+	if v != nil {
+		_c.SetAge(*v)
 	}
 	return _c
 }
 
 // SetName sets the "name" field.
-func (_c *PetCreate) SetName(s string) *PetCreate {
-	_c.mutation.SetName(s)
+func (_c *PetCreate) SetName(v string) *PetCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetUUID sets the "uuid" field.
-func (_c *PetCreate) SetUUID(u uuid.UUID) *PetCreate {
-	_c.mutation.SetUUID(u)
+func (_c *PetCreate) SetUUID(v uuid.UUID) *PetCreate {
+	_c.mutation.SetUUID(v)
 	return _c
 }
 
 // SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (_c *PetCreate) SetNillableUUID(u *uuid.UUID) *PetCreate {
-	if u != nil {
-		_c.SetUUID(*u)
+func (_c *PetCreate) SetNillableUUID(v *uuid.UUID) *PetCreate {
+	if v != nil {
+		_c.SetUUID(*v)
 	}
 	return _c
 }
 
 // SetNickname sets the "nickname" field.
-func (_c *PetCreate) SetNickname(s string) *PetCreate {
-	_c.mutation.SetNickname(s)
+func (_c *PetCreate) SetNickname(v string) *PetCreate {
+	_c.mutation.SetNickname(v)
 	return _c
 }
 
 // SetNillableNickname sets the "nickname" field if the given value is not nil.
-func (_c *PetCreate) SetNillableNickname(s *string) *PetCreate {
-	if s != nil {
-		_c.SetNickname(*s)
+func (_c *PetCreate) SetNillableNickname(v *string) *PetCreate {
+	if v != nil {
+		_c.SetNickname(*v)
 	}
 	return _c
 }
 
 // SetTrained sets the "trained" field.
-func (_c *PetCreate) SetTrained(b bool) *PetCreate {
-	_c.mutation.SetTrained(b)
+func (_c *PetCreate) SetTrained(v bool) *PetCreate {
+	_c.mutation.SetTrained(v)
 	return _c
 }
 
 // SetNillableTrained sets the "trained" field if the given value is not nil.
-func (_c *PetCreate) SetNillableTrained(b *bool) *PetCreate {
-	if b != nil {
-		_c.SetTrained(*b)
+func (_c *PetCreate) SetNillableTrained(v *bool) *PetCreate {
+	if v != nil {
+		_c.SetTrained(*v)
 	}
 	return _c
 }
 
 // SetOptionalTime sets the "optional_time" field.
-func (_c *PetCreate) SetOptionalTime(t time.Time) *PetCreate {
-	_c.mutation.SetOptionalTime(t)
+func (_c *PetCreate) SetOptionalTime(v time.Time) *PetCreate {
+	_c.mutation.SetOptionalTime(v)
 	return _c
 }
 
 // SetNillableOptionalTime sets the "optional_time" field if the given value is not nil.
-func (_c *PetCreate) SetNillableOptionalTime(t *time.Time) *PetCreate {
-	if t != nil {
-		_c.SetOptionalTime(*t)
+func (_c *PetCreate) SetNillableOptionalTime(v *time.Time) *PetCreate {
+	if v != nil {
+		_c.SetOptionalTime(*v)
 	}
 	return _c
 }
@@ -119,8 +119,8 @@ func (_c *PetCreate) SetNillableTeamID(id *string) *PetCreate {
 }
 
 // SetTeam sets the "team" edge to the User entity.
-func (_c *PetCreate) SetTeam(u *User) *PetCreate {
-	return _c.SetTeamID(u.ID)
+func (_c *PetCreate) SetTeam(v *User) *PetCreate {
+	return _c.SetTeamID(v.ID)
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
@@ -138,8 +138,8 @@ func (_c *PetCreate) SetNillableOwnerID(id *string) *PetCreate {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_c *PetCreate) SetOwner(u *User) *PetCreate {
-	return _c.SetOwnerID(u.ID)
+func (_c *PetCreate) SetOwner(v *User) *PetCreate {
+	return _c.SetOwnerID(v.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.

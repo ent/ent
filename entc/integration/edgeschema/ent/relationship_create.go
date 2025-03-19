@@ -28,58 +28,58 @@ type RelationshipCreate struct {
 }
 
 // SetWeight sets the "weight" field.
-func (_c *RelationshipCreate) SetWeight(i int) *RelationshipCreate {
-	_c.mutation.SetWeight(i)
+func (_c *RelationshipCreate) SetWeight(v int) *RelationshipCreate {
+	_c.mutation.SetWeight(v)
 	return _c
 }
 
 // SetNillableWeight sets the "weight" field if the given value is not nil.
-func (_c *RelationshipCreate) SetNillableWeight(i *int) *RelationshipCreate {
-	if i != nil {
-		_c.SetWeight(*i)
+func (_c *RelationshipCreate) SetNillableWeight(v *int) *RelationshipCreate {
+	if v != nil {
+		_c.SetWeight(*v)
 	}
 	return _c
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *RelationshipCreate) SetUserID(i int) *RelationshipCreate {
-	_c.mutation.SetUserID(i)
+func (_c *RelationshipCreate) SetUserID(v int) *RelationshipCreate {
+	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetRelativeID sets the "relative_id" field.
-func (_c *RelationshipCreate) SetRelativeID(i int) *RelationshipCreate {
-	_c.mutation.SetRelativeID(i)
+func (_c *RelationshipCreate) SetRelativeID(v int) *RelationshipCreate {
+	_c.mutation.SetRelativeID(v)
 	return _c
 }
 
 // SetInfoID sets the "info_id" field.
-func (_c *RelationshipCreate) SetInfoID(i int) *RelationshipCreate {
-	_c.mutation.SetInfoID(i)
+func (_c *RelationshipCreate) SetInfoID(v int) *RelationshipCreate {
+	_c.mutation.SetInfoID(v)
 	return _c
 }
 
 // SetNillableInfoID sets the "info_id" field if the given value is not nil.
-func (_c *RelationshipCreate) SetNillableInfoID(i *int) *RelationshipCreate {
-	if i != nil {
-		_c.SetInfoID(*i)
+func (_c *RelationshipCreate) SetNillableInfoID(v *int) *RelationshipCreate {
+	if v != nil {
+		_c.SetInfoID(*v)
 	}
 	return _c
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_c *RelationshipCreate) SetUser(u *User) *RelationshipCreate {
-	return _c.SetUserID(u.ID)
+func (_c *RelationshipCreate) SetUser(v *User) *RelationshipCreate {
+	return _c.SetUserID(v.ID)
 }
 
 // SetRelative sets the "relative" edge to the User entity.
-func (_c *RelationshipCreate) SetRelative(u *User) *RelationshipCreate {
-	return _c.SetRelativeID(u.ID)
+func (_c *RelationshipCreate) SetRelative(v *User) *RelationshipCreate {
+	return _c.SetRelativeID(v.ID)
 }
 
 // SetInfo sets the "info" edge to the RelationshipInfo entity.
-func (_c *RelationshipCreate) SetInfo(r *RelationshipInfo) *RelationshipCreate {
-	return _c.SetInfoID(r.ID)
+func (_c *RelationshipCreate) SetInfo(v *RelationshipInfo) *RelationshipCreate {
+	return _c.SetInfoID(v.ID)
 }
 
 // Mutation returns the RelationshipMutation object of the builder.

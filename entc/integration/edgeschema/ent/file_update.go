@@ -33,15 +33,15 @@ func (_u *FileUpdate) Where(ps ...predicate.File) *FileUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *FileUpdate) SetName(s string) *FileUpdate {
-	_u.mutation.SetName(s)
+func (_u *FileUpdate) SetName(v string) *FileUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *FileUpdate) SetNillableName(s *string) *FileUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *FileUpdate) SetNillableName(v *string) *FileUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -53,10 +53,10 @@ func (_u *FileUpdate) AddProcessIDs(ids ...int) *FileUpdate {
 }
 
 // AddProcesses adds the "processes" edges to the Process entity.
-func (_u *FileUpdate) AddProcesses(p ...*Process) *FileUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *FileUpdate) AddProcesses(v ...*Process) *FileUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddProcessIDs(ids...)
 }
@@ -79,10 +79,10 @@ func (_u *FileUpdate) RemoveProcessIDs(ids ...int) *FileUpdate {
 }
 
 // RemoveProcesses removes "processes" edges to Process entities.
-func (_u *FileUpdate) RemoveProcesses(p ...*Process) *FileUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *FileUpdate) RemoveProcesses(v ...*Process) *FileUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveProcessIDs(ids...)
 }
@@ -114,7 +114,7 @@ func (_u *FileUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *FileUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(file.Table, file.Columns, sqlgraph.NewFieldSpec(file.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -171,7 +171,7 @@ func (_u *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{file.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -180,7 +180,7 @@ func (_u *FileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // FileUpdateOne is the builder for updating a single File entity.
@@ -192,15 +192,15 @@ type FileUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (_u *FileUpdateOne) SetName(s string) *FileUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *FileUpdateOne) SetName(v string) *FileUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *FileUpdateOne) SetNillableName(s *string) *FileUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *FileUpdateOne) SetNillableName(v *string) *FileUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -212,10 +212,10 @@ func (_u *FileUpdateOne) AddProcessIDs(ids ...int) *FileUpdateOne {
 }
 
 // AddProcesses adds the "processes" edges to the Process entity.
-func (_u *FileUpdateOne) AddProcesses(p ...*Process) *FileUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *FileUpdateOne) AddProcesses(v ...*Process) *FileUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddProcessIDs(ids...)
 }
@@ -238,10 +238,10 @@ func (_u *FileUpdateOne) RemoveProcessIDs(ids ...int) *FileUpdateOne {
 }
 
 // RemoveProcesses removes "processes" edges to Process entities.
-func (_u *FileUpdateOne) RemoveProcesses(p ...*Process) *FileUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *FileUpdateOne) RemoveProcesses(v ...*Process) *FileUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveProcessIDs(ids...)
 }

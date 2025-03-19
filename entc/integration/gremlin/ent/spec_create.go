@@ -29,10 +29,10 @@ func (_c *SpecCreate) AddCardIDs(ids ...string) *SpecCreate {
 }
 
 // AddCard adds the "card" edges to the Card entity.
-func (_c *SpecCreate) AddCard(c ...*Card) *SpecCreate {
-	ids := make([]string, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_c *SpecCreate) AddCard(v ...*Card) *SpecCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddCardIDs(ids...)
 }

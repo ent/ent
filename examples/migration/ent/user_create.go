@@ -25,26 +25,26 @@ type UserCreate struct {
 }
 
 // SetAge sets the "age" field.
-func (_c *UserCreate) SetAge(f float64) *UserCreate {
-	_c.mutation.SetAge(f)
+func (_c *UserCreate) SetAge(v float64) *UserCreate {
+	_c.mutation.SetAge(v)
 	return _c
 }
 
 // SetFirstName sets the "first_name" field.
-func (_c *UserCreate) SetFirstName(s string) *UserCreate {
-	_c.mutation.SetFirstName(s)
+func (_c *UserCreate) SetFirstName(v string) *UserCreate {
+	_c.mutation.SetFirstName(v)
 	return _c
 }
 
 // SetLastName sets the "last_name" field.
-func (_c *UserCreate) SetLastName(s string) *UserCreate {
-	_c.mutation.SetLastName(s)
+func (_c *UserCreate) SetLastName(v string) *UserCreate {
+	_c.mutation.SetLastName(v)
 	return _c
 }
 
 // SetTags sets the "tags" field.
-func (_c *UserCreate) SetTags(s []string) *UserCreate {
-	_c.mutation.SetTags(s)
+func (_c *UserCreate) SetTags(v []string) *UserCreate {
+	_c.mutation.SetTags(v)
 	return _c
 }
 
@@ -55,10 +55,10 @@ func (_c *UserCreate) AddCardIDs(ids ...int) *UserCreate {
 }
 
 // AddCards adds the "cards" edges to the Card entity.
-func (_c *UserCreate) AddCards(c ...*Card) *UserCreate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_c *UserCreate) AddCards(v ...*Card) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddCardIDs(ids...)
 }

@@ -27,153 +27,153 @@ type UserCreate struct {
 }
 
 // SetOptionalInt sets the "optional_int" field.
-func (_c *UserCreate) SetOptionalInt(i int) *UserCreate {
-	_c.mutation.SetOptionalInt(i)
+func (_c *UserCreate) SetOptionalInt(v int) *UserCreate {
+	_c.mutation.SetOptionalInt(v)
 	return _c
 }
 
 // SetNillableOptionalInt sets the "optional_int" field if the given value is not nil.
-func (_c *UserCreate) SetNillableOptionalInt(i *int) *UserCreate {
-	if i != nil {
-		_c.SetOptionalInt(*i)
+func (_c *UserCreate) SetNillableOptionalInt(v *int) *UserCreate {
+	if v != nil {
+		_c.SetOptionalInt(*v)
 	}
 	return _c
 }
 
 // SetAge sets the "age" field.
-func (_c *UserCreate) SetAge(i int) *UserCreate {
-	_c.mutation.SetAge(i)
+func (_c *UserCreate) SetAge(v int) *UserCreate {
+	_c.mutation.SetAge(v)
 	return _c
 }
 
 // SetName sets the "name" field.
-func (_c *UserCreate) SetName(s string) *UserCreate {
-	_c.mutation.SetName(s)
+func (_c *UserCreate) SetName(v string) *UserCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetLast sets the "last" field.
-func (_c *UserCreate) SetLast(s string) *UserCreate {
-	_c.mutation.SetLast(s)
+func (_c *UserCreate) SetLast(v string) *UserCreate {
+	_c.mutation.SetLast(v)
 	return _c
 }
 
 // SetNillableLast sets the "last" field if the given value is not nil.
-func (_c *UserCreate) SetNillableLast(s *string) *UserCreate {
-	if s != nil {
-		_c.SetLast(*s)
+func (_c *UserCreate) SetNillableLast(v *string) *UserCreate {
+	if v != nil {
+		_c.SetLast(*v)
 	}
 	return _c
 }
 
 // SetNickname sets the "nickname" field.
-func (_c *UserCreate) SetNickname(s string) *UserCreate {
-	_c.mutation.SetNickname(s)
+func (_c *UserCreate) SetNickname(v string) *UserCreate {
+	_c.mutation.SetNickname(v)
 	return _c
 }
 
 // SetNillableNickname sets the "nickname" field if the given value is not nil.
-func (_c *UserCreate) SetNillableNickname(s *string) *UserCreate {
-	if s != nil {
-		_c.SetNickname(*s)
+func (_c *UserCreate) SetNillableNickname(v *string) *UserCreate {
+	if v != nil {
+		_c.SetNickname(*v)
 	}
 	return _c
 }
 
 // SetAddress sets the "address" field.
-func (_c *UserCreate) SetAddress(s string) *UserCreate {
-	_c.mutation.SetAddress(s)
+func (_c *UserCreate) SetAddress(v string) *UserCreate {
+	_c.mutation.SetAddress(v)
 	return _c
 }
 
 // SetNillableAddress sets the "address" field if the given value is not nil.
-func (_c *UserCreate) SetNillableAddress(s *string) *UserCreate {
-	if s != nil {
-		_c.SetAddress(*s)
+func (_c *UserCreate) SetNillableAddress(v *string) *UserCreate {
+	if v != nil {
+		_c.SetAddress(*v)
 	}
 	return _c
 }
 
 // SetPhone sets the "phone" field.
-func (_c *UserCreate) SetPhone(s string) *UserCreate {
-	_c.mutation.SetPhone(s)
+func (_c *UserCreate) SetPhone(v string) *UserCreate {
+	_c.mutation.SetPhone(v)
 	return _c
 }
 
 // SetNillablePhone sets the "phone" field if the given value is not nil.
-func (_c *UserCreate) SetNillablePhone(s *string) *UserCreate {
-	if s != nil {
-		_c.SetPhone(*s)
+func (_c *UserCreate) SetNillablePhone(v *string) *UserCreate {
+	if v != nil {
+		_c.SetPhone(*v)
 	}
 	return _c
 }
 
 // SetPassword sets the "password" field.
-func (_c *UserCreate) SetPassword(s string) *UserCreate {
-	_c.mutation.SetPassword(s)
+func (_c *UserCreate) SetPassword(v string) *UserCreate {
+	_c.mutation.SetPassword(v)
 	return _c
 }
 
 // SetNillablePassword sets the "password" field if the given value is not nil.
-func (_c *UserCreate) SetNillablePassword(s *string) *UserCreate {
-	if s != nil {
-		_c.SetPassword(*s)
+func (_c *UserCreate) SetNillablePassword(v *string) *UserCreate {
+	if v != nil {
+		_c.SetPassword(*v)
 	}
 	return _c
 }
 
 // SetRole sets the "role" field.
-func (_c *UserCreate) SetRole(u user.Role) *UserCreate {
-	_c.mutation.SetRole(u)
+func (_c *UserCreate) SetRole(v user.Role) *UserCreate {
+	_c.mutation.SetRole(v)
 	return _c
 }
 
 // SetNillableRole sets the "role" field if the given value is not nil.
-func (_c *UserCreate) SetNillableRole(u *user.Role) *UserCreate {
-	if u != nil {
-		_c.SetRole(*u)
+func (_c *UserCreate) SetNillableRole(v *user.Role) *UserCreate {
+	if v != nil {
+		_c.SetRole(*v)
 	}
 	return _c
 }
 
 // SetEmployment sets the "employment" field.
-func (_c *UserCreate) SetEmployment(u user.Employment) *UserCreate {
-	_c.mutation.SetEmployment(u)
+func (_c *UserCreate) SetEmployment(v user.Employment) *UserCreate {
+	_c.mutation.SetEmployment(v)
 	return _c
 }
 
 // SetNillableEmployment sets the "employment" field if the given value is not nil.
-func (_c *UserCreate) SetNillableEmployment(u *user.Employment) *UserCreate {
-	if u != nil {
-		_c.SetEmployment(*u)
+func (_c *UserCreate) SetNillableEmployment(v *user.Employment) *UserCreate {
+	if v != nil {
+		_c.SetEmployment(*v)
 	}
 	return _c
 }
 
 // SetSSOCert sets the "SSOCert" field.
-func (_c *UserCreate) SetSSOCert(s string) *UserCreate {
-	_c.mutation.SetSSOCert(s)
+func (_c *UserCreate) SetSSOCert(v string) *UserCreate {
+	_c.mutation.SetSSOCert(v)
 	return _c
 }
 
 // SetNillableSSOCert sets the "SSOCert" field if the given value is not nil.
-func (_c *UserCreate) SetNillableSSOCert(s *string) *UserCreate {
-	if s != nil {
-		_c.SetSSOCert(*s)
+func (_c *UserCreate) SetNillableSSOCert(v *string) *UserCreate {
+	if v != nil {
+		_c.SetSSOCert(*v)
 	}
 	return _c
 }
 
 // SetFilesCount sets the "files_count" field.
-func (_c *UserCreate) SetFilesCount(i int) *UserCreate {
-	_c.mutation.SetFilesCount(i)
+func (_c *UserCreate) SetFilesCount(v int) *UserCreate {
+	_c.mutation.SetFilesCount(v)
 	return _c
 }
 
 // SetNillableFilesCount sets the "files_count" field if the given value is not nil.
-func (_c *UserCreate) SetNillableFilesCount(i *int) *UserCreate {
-	if i != nil {
-		_c.SetFilesCount(*i)
+func (_c *UserCreate) SetNillableFilesCount(v *int) *UserCreate {
+	if v != nil {
+		_c.SetFilesCount(*v)
 	}
 	return _c
 }
@@ -193,8 +193,8 @@ func (_c *UserCreate) SetNillableCardID(id *string) *UserCreate {
 }
 
 // SetCard sets the "card" edge to the Card entity.
-func (_c *UserCreate) SetCard(c *Card) *UserCreate {
-	return _c.SetCardID(c.ID)
+func (_c *UserCreate) SetCard(v *Card) *UserCreate {
+	return _c.SetCardID(v.ID)
 }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
@@ -204,10 +204,10 @@ func (_c *UserCreate) AddPetIDs(ids ...string) *UserCreate {
 }
 
 // AddPets adds the "pets" edges to the Pet entity.
-func (_c *UserCreate) AddPets(p ...*Pet) *UserCreate {
-	ids := make([]string, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_c *UserCreate) AddPets(v ...*Pet) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddPetIDs(ids...)
 }
@@ -219,10 +219,10 @@ func (_c *UserCreate) AddFileIDs(ids ...string) *UserCreate {
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (_c *UserCreate) AddFiles(f ...*File) *UserCreate {
-	ids := make([]string, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_c *UserCreate) AddFiles(v ...*File) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddFileIDs(ids...)
 }
@@ -234,10 +234,10 @@ func (_c *UserCreate) AddGroupIDs(ids ...string) *UserCreate {
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (_c *UserCreate) AddGroups(g ...*Group) *UserCreate {
-	ids := make([]string, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_c *UserCreate) AddGroups(v ...*Group) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddGroupIDs(ids...)
 }
@@ -249,10 +249,10 @@ func (_c *UserCreate) AddFriendIDs(ids ...string) *UserCreate {
 }
 
 // AddFriends adds the "friends" edges to the User entity.
-func (_c *UserCreate) AddFriends(u ...*User) *UserCreate {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *UserCreate) AddFriends(v ...*User) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddFriendIDs(ids...)
 }
@@ -264,10 +264,10 @@ func (_c *UserCreate) AddFollowerIDs(ids ...string) *UserCreate {
 }
 
 // AddFollowers adds the "followers" edges to the User entity.
-func (_c *UserCreate) AddFollowers(u ...*User) *UserCreate {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *UserCreate) AddFollowers(v ...*User) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddFollowerIDs(ids...)
 }
@@ -279,10 +279,10 @@ func (_c *UserCreate) AddFollowingIDs(ids ...string) *UserCreate {
 }
 
 // AddFollowing adds the "following" edges to the User entity.
-func (_c *UserCreate) AddFollowing(u ...*User) *UserCreate {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *UserCreate) AddFollowing(v ...*User) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddFollowingIDs(ids...)
 }
@@ -302,8 +302,8 @@ func (_c *UserCreate) SetNillableTeamID(id *string) *UserCreate {
 }
 
 // SetTeam sets the "team" edge to the Pet entity.
-func (_c *UserCreate) SetTeam(p *Pet) *UserCreate {
-	return _c.SetTeamID(p.ID)
+func (_c *UserCreate) SetTeam(v *Pet) *UserCreate {
+	return _c.SetTeamID(v.ID)
 }
 
 // SetSpouseID sets the "spouse" edge to the User entity by ID.
@@ -321,8 +321,8 @@ func (_c *UserCreate) SetNillableSpouseID(id *string) *UserCreate {
 }
 
 // SetSpouse sets the "spouse" edge to the User entity.
-func (_c *UserCreate) SetSpouse(u *User) *UserCreate {
-	return _c.SetSpouseID(u.ID)
+func (_c *UserCreate) SetSpouse(v *User) *UserCreate {
+	return _c.SetSpouseID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
@@ -332,10 +332,10 @@ func (_c *UserCreate) AddChildIDs(ids ...string) *UserCreate {
 }
 
 // AddChildren adds the "children" edges to the User entity.
-func (_c *UserCreate) AddChildren(u ...*User) *UserCreate {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *UserCreate) AddChildren(v ...*User) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddChildIDs(ids...)
 }
@@ -355,8 +355,8 @@ func (_c *UserCreate) SetNillableParentID(id *string) *UserCreate {
 }
 
 // SetParent sets the "parent" edge to the User entity.
-func (_c *UserCreate) SetParent(u *User) *UserCreate {
-	return _c.SetParentID(u.ID)
+func (_c *UserCreate) SetParent(v *User) *UserCreate {
+	return _c.SetParentID(v.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.

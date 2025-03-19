@@ -21,8 +21,8 @@ type UserCreate struct {
 }
 
 // SetAddress sets the "address" field.
-func (_c *UserCreate) SetAddress(s *schema.Address) *UserCreate {
-	_c.mutation.SetAddress(s)
+func (_c *UserCreate) SetAddress(v *schema.Address) *UserCreate {
+	_c.mutation.SetAddress(v)
 	return _c
 }
 

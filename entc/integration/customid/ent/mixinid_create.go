@@ -28,27 +28,27 @@ type MixinIDCreate struct {
 }
 
 // SetSomeField sets the "some_field" field.
-func (_c *MixinIDCreate) SetSomeField(s string) *MixinIDCreate {
-	_c.mutation.SetSomeField(s)
+func (_c *MixinIDCreate) SetSomeField(v string) *MixinIDCreate {
+	_c.mutation.SetSomeField(v)
 	return _c
 }
 
 // SetMixinField sets the "mixin_field" field.
-func (_c *MixinIDCreate) SetMixinField(s string) *MixinIDCreate {
-	_c.mutation.SetMixinField(s)
+func (_c *MixinIDCreate) SetMixinField(v string) *MixinIDCreate {
+	_c.mutation.SetMixinField(v)
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *MixinIDCreate) SetID(u uuid.UUID) *MixinIDCreate {
-	_c.mutation.SetID(u)
+func (_c *MixinIDCreate) SetID(v uuid.UUID) *MixinIDCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *MixinIDCreate) SetNillableID(u *uuid.UUID) *MixinIDCreate {
-	if u != nil {
-		_c.SetID(*u)
+func (_c *MixinIDCreate) SetNillableID(v *uuid.UUID) *MixinIDCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
 	return _c
 }

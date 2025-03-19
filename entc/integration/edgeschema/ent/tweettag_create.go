@@ -31,53 +31,53 @@ type TweetTagCreate struct {
 }
 
 // SetAddedAt sets the "added_at" field.
-func (_c *TweetTagCreate) SetAddedAt(t time.Time) *TweetTagCreate {
-	_c.mutation.SetAddedAt(t)
+func (_c *TweetTagCreate) SetAddedAt(v time.Time) *TweetTagCreate {
+	_c.mutation.SetAddedAt(v)
 	return _c
 }
 
 // SetNillableAddedAt sets the "added_at" field if the given value is not nil.
-func (_c *TweetTagCreate) SetNillableAddedAt(t *time.Time) *TweetTagCreate {
-	if t != nil {
-		_c.SetAddedAt(*t)
+func (_c *TweetTagCreate) SetNillableAddedAt(v *time.Time) *TweetTagCreate {
+	if v != nil {
+		_c.SetAddedAt(*v)
 	}
 	return _c
 }
 
 // SetTagID sets the "tag_id" field.
-func (_c *TweetTagCreate) SetTagID(i int) *TweetTagCreate {
-	_c.mutation.SetTagID(i)
+func (_c *TweetTagCreate) SetTagID(v int) *TweetTagCreate {
+	_c.mutation.SetTagID(v)
 	return _c
 }
 
 // SetTweetID sets the "tweet_id" field.
-func (_c *TweetTagCreate) SetTweetID(i int) *TweetTagCreate {
-	_c.mutation.SetTweetID(i)
+func (_c *TweetTagCreate) SetTweetID(v int) *TweetTagCreate {
+	_c.mutation.SetTweetID(v)
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *TweetTagCreate) SetID(u uuid.UUID) *TweetTagCreate {
-	_c.mutation.SetID(u)
+func (_c *TweetTagCreate) SetID(v uuid.UUID) *TweetTagCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *TweetTagCreate) SetNillableID(u *uuid.UUID) *TweetTagCreate {
-	if u != nil {
-		_c.SetID(*u)
+func (_c *TweetTagCreate) SetNillableID(v *uuid.UUID) *TweetTagCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
 	return _c
 }
 
 // SetTag sets the "tag" edge to the Tag entity.
-func (_c *TweetTagCreate) SetTag(t *Tag) *TweetTagCreate {
-	return _c.SetTagID(t.ID)
+func (_c *TweetTagCreate) SetTag(v *Tag) *TweetTagCreate {
+	return _c.SetTagID(v.ID)
 }
 
 // SetTweet sets the "tweet" edge to the Tweet entity.
-func (_c *TweetTagCreate) SetTweet(t *Tweet) *TweetTagCreate {
-	return _c.SetTweetID(t.ID)
+func (_c *TweetTagCreate) SetTweet(v *Tweet) *TweetTagCreate {
+	return _c.SetTweetID(v.ID)
 }
 
 // Mutation returns the TweetTagMutation object of the builder.

@@ -32,36 +32,36 @@ func (_u *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate {
 }
 
 // SetValue sets the "value" field.
-func (_u *NodeUpdate) SetValue(i int) *NodeUpdate {
+func (_u *NodeUpdate) SetValue(v int) *NodeUpdate {
 	_u.mutation.ResetValue()
-	_u.mutation.SetValue(i)
+	_u.mutation.SetValue(v)
 	return _u
 }
 
 // SetNillableValue sets the "value" field if the given value is not nil.
-func (_u *NodeUpdate) SetNillableValue(i *int) *NodeUpdate {
-	if i != nil {
-		_u.SetValue(*i)
+func (_u *NodeUpdate) SetNillableValue(v *int) *NodeUpdate {
+	if v != nil {
+		_u.SetValue(*v)
 	}
 	return _u
 }
 
-// AddValue adds i to the "value" field.
-func (_u *NodeUpdate) AddValue(i int) *NodeUpdate {
-	_u.mutation.AddValue(i)
+// AddValue adds value to the "value" field.
+func (_u *NodeUpdate) AddValue(v int) *NodeUpdate {
+	_u.mutation.AddValue(v)
 	return _u
 }
 
 // SetParentID sets the "parent_id" field.
-func (_u *NodeUpdate) SetParentID(i int) *NodeUpdate {
-	_u.mutation.SetParentID(i)
+func (_u *NodeUpdate) SetParentID(v int) *NodeUpdate {
+	_u.mutation.SetParentID(v)
 	return _u
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_u *NodeUpdate) SetNillableParentID(i *int) *NodeUpdate {
-	if i != nil {
-		_u.SetParentID(*i)
+func (_u *NodeUpdate) SetNillableParentID(v *int) *NodeUpdate {
+	if v != nil {
+		_u.SetParentID(*v)
 	}
 	return _u
 }
@@ -73,8 +73,8 @@ func (_u *NodeUpdate) ClearParentID() *NodeUpdate {
 }
 
 // SetParent sets the "parent" edge to the Node entity.
-func (_u *NodeUpdate) SetParent(n *Node) *NodeUpdate {
-	return _u.SetParentID(n.ID)
+func (_u *NodeUpdate) SetParent(v *Node) *NodeUpdate {
+	return _u.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the Node entity by IDs.
@@ -84,10 +84,10 @@ func (_u *NodeUpdate) AddChildIDs(ids ...int) *NodeUpdate {
 }
 
 // AddChildren adds the "children" edges to the Node entity.
-func (_u *NodeUpdate) AddChildren(n ...*Node) *NodeUpdate {
-	ids := make([]int, len(n))
-	for i := range n {
-		ids[i] = n[i].ID
+func (_u *NodeUpdate) AddChildren(v ...*Node) *NodeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
@@ -116,10 +116,10 @@ func (_u *NodeUpdate) RemoveChildIDs(ids ...int) *NodeUpdate {
 }
 
 // RemoveChildren removes "children" edges to Node entities.
-func (_u *NodeUpdate) RemoveChildren(n ...*Node) *NodeUpdate {
-	ids := make([]int, len(n))
-	for i := range n {
-		ids[i] = n[i].ID
+func (_u *NodeUpdate) RemoveChildren(v ...*Node) *NodeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }
@@ -151,7 +151,7 @@ func (_u *NodeUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *NodeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(node.Table, node.Columns, sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -240,7 +240,7 @@ func (_u *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{node.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -249,7 +249,7 @@ func (_u *NodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // NodeUpdateOne is the builder for updating a single Node entity.
@@ -261,36 +261,36 @@ type NodeUpdateOne struct {
 }
 
 // SetValue sets the "value" field.
-func (_u *NodeUpdateOne) SetValue(i int) *NodeUpdateOne {
+func (_u *NodeUpdateOne) SetValue(v int) *NodeUpdateOne {
 	_u.mutation.ResetValue()
-	_u.mutation.SetValue(i)
+	_u.mutation.SetValue(v)
 	return _u
 }
 
 // SetNillableValue sets the "value" field if the given value is not nil.
-func (_u *NodeUpdateOne) SetNillableValue(i *int) *NodeUpdateOne {
-	if i != nil {
-		_u.SetValue(*i)
+func (_u *NodeUpdateOne) SetNillableValue(v *int) *NodeUpdateOne {
+	if v != nil {
+		_u.SetValue(*v)
 	}
 	return _u
 }
 
-// AddValue adds i to the "value" field.
-func (_u *NodeUpdateOne) AddValue(i int) *NodeUpdateOne {
-	_u.mutation.AddValue(i)
+// AddValue adds value to the "value" field.
+func (_u *NodeUpdateOne) AddValue(v int) *NodeUpdateOne {
+	_u.mutation.AddValue(v)
 	return _u
 }
 
 // SetParentID sets the "parent_id" field.
-func (_u *NodeUpdateOne) SetParentID(i int) *NodeUpdateOne {
-	_u.mutation.SetParentID(i)
+func (_u *NodeUpdateOne) SetParentID(v int) *NodeUpdateOne {
+	_u.mutation.SetParentID(v)
 	return _u
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_u *NodeUpdateOne) SetNillableParentID(i *int) *NodeUpdateOne {
-	if i != nil {
-		_u.SetParentID(*i)
+func (_u *NodeUpdateOne) SetNillableParentID(v *int) *NodeUpdateOne {
+	if v != nil {
+		_u.SetParentID(*v)
 	}
 	return _u
 }
@@ -302,8 +302,8 @@ func (_u *NodeUpdateOne) ClearParentID() *NodeUpdateOne {
 }
 
 // SetParent sets the "parent" edge to the Node entity.
-func (_u *NodeUpdateOne) SetParent(n *Node) *NodeUpdateOne {
-	return _u.SetParentID(n.ID)
+func (_u *NodeUpdateOne) SetParent(v *Node) *NodeUpdateOne {
+	return _u.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the Node entity by IDs.
@@ -313,10 +313,10 @@ func (_u *NodeUpdateOne) AddChildIDs(ids ...int) *NodeUpdateOne {
 }
 
 // AddChildren adds the "children" edges to the Node entity.
-func (_u *NodeUpdateOne) AddChildren(n ...*Node) *NodeUpdateOne {
-	ids := make([]int, len(n))
-	for i := range n {
-		ids[i] = n[i].ID
+func (_u *NodeUpdateOne) AddChildren(v ...*Node) *NodeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
@@ -345,10 +345,10 @@ func (_u *NodeUpdateOne) RemoveChildIDs(ids ...int) *NodeUpdateOne {
 }
 
 // RemoveChildren removes "children" edges to Node entities.
-func (_u *NodeUpdateOne) RemoveChildren(n ...*Node) *NodeUpdateOne {
-	ids := make([]int, len(n))
-	for i := range n {
-		ids[i] = n[i].ID
+func (_u *NodeUpdateOne) RemoveChildren(v ...*Node) *NodeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }

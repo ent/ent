@@ -24,8 +24,8 @@ type UserCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *UserCreate) SetName(s string) *UserCreate {
-	_c.mutation.SetName(s)
+func (_c *UserCreate) SetName(v string) *UserCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
@@ -44,8 +44,8 @@ func (_c *UserCreate) SetNillableSpouseID(id *uint64) *UserCreate {
 }
 
 // SetSpouse sets the "spouse" edge to the User entity.
-func (_c *UserCreate) SetSpouse(u *User) *UserCreate {
-	return _c.SetSpouseID(u.ID)
+func (_c *UserCreate) SetSpouse(v *User) *UserCreate {
+	return _c.SetSpouseID(v.ID)
 }
 
 // AddFollowerIDs adds the "followers" edge to the User entity by IDs.
@@ -55,10 +55,10 @@ func (_c *UserCreate) AddFollowerIDs(ids ...uint64) *UserCreate {
 }
 
 // AddFollowers adds the "followers" edges to the User entity.
-func (_c *UserCreate) AddFollowers(u ...*User) *UserCreate {
-	ids := make([]uint64, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *UserCreate) AddFollowers(v ...*User) *UserCreate {
+	ids := make([]uint64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddFollowerIDs(ids...)
 }
@@ -70,10 +70,10 @@ func (_c *UserCreate) AddFollowingIDs(ids ...uint64) *UserCreate {
 }
 
 // AddFollowing adds the "following" edges to the User entity.
-func (_c *UserCreate) AddFollowing(u ...*User) *UserCreate {
-	ids := make([]uint64, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *UserCreate) AddFollowing(v ...*User) *UserCreate {
+	ids := make([]uint64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddFollowingIDs(ids...)
 }

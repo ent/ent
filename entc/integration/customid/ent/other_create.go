@@ -28,15 +28,15 @@ type OtherCreate struct {
 }
 
 // SetID sets the "id" field.
-func (_c *OtherCreate) SetID(s sid.ID) *OtherCreate {
-	_c.mutation.SetID(s)
+func (_c *OtherCreate) SetID(v sid.ID) *OtherCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *OtherCreate) SetNillableID(s *sid.ID) *OtherCreate {
-	if s != nil {
-		_c.SetID(*s)
+func (_c *OtherCreate) SetNillableID(v *sid.ID) *OtherCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
 	return _c
 }

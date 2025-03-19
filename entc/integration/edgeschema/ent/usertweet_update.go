@@ -35,55 +35,55 @@ func (_u *UserTweetUpdate) Where(ps ...predicate.UserTweet) *UserTweetUpdate {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_u *UserTweetUpdate) SetCreatedAt(t time.Time) *UserTweetUpdate {
-	_u.mutation.SetCreatedAt(t)
+func (_u *UserTweetUpdate) SetCreatedAt(v time.Time) *UserTweetUpdate {
+	_u.mutation.SetCreatedAt(v)
 	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *UserTweetUpdate) SetNillableCreatedAt(t *time.Time) *UserTweetUpdate {
-	if t != nil {
-		_u.SetCreatedAt(*t)
+func (_u *UserTweetUpdate) SetNillableCreatedAt(v *time.Time) *UserTweetUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
 	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *UserTweetUpdate) SetUserID(i int) *UserTweetUpdate {
-	_u.mutation.SetUserID(i)
+func (_u *UserTweetUpdate) SetUserID(v int) *UserTweetUpdate {
+	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *UserTweetUpdate) SetNillableUserID(i *int) *UserTweetUpdate {
-	if i != nil {
-		_u.SetUserID(*i)
+func (_u *UserTweetUpdate) SetNillableUserID(v *int) *UserTweetUpdate {
+	if v != nil {
+		_u.SetUserID(*v)
 	}
 	return _u
 }
 
 // SetTweetID sets the "tweet_id" field.
-func (_u *UserTweetUpdate) SetTweetID(i int) *UserTweetUpdate {
-	_u.mutation.SetTweetID(i)
+func (_u *UserTweetUpdate) SetTweetID(v int) *UserTweetUpdate {
+	_u.mutation.SetTweetID(v)
 	return _u
 }
 
 // SetNillableTweetID sets the "tweet_id" field if the given value is not nil.
-func (_u *UserTweetUpdate) SetNillableTweetID(i *int) *UserTweetUpdate {
-	if i != nil {
-		_u.SetTweetID(*i)
+func (_u *UserTweetUpdate) SetNillableTweetID(v *int) *UserTweetUpdate {
+	if v != nil {
+		_u.SetTweetID(*v)
 	}
 	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *UserTweetUpdate) SetUser(u *User) *UserTweetUpdate {
-	return _u.SetUserID(u.ID)
+func (_u *UserTweetUpdate) SetUser(v *User) *UserTweetUpdate {
+	return _u.SetUserID(v.ID)
 }
 
 // SetTweet sets the "tweet" edge to the Tweet entity.
-func (_u *UserTweetUpdate) SetTweet(t *Tweet) *UserTweetUpdate {
-	return _u.SetTweetID(t.ID)
+func (_u *UserTweetUpdate) SetTweet(v *Tweet) *UserTweetUpdate {
+	return _u.SetTweetID(v.ID)
 }
 
 // Mutation returns the UserTweetMutation object of the builder.
@@ -141,9 +141,9 @@ func (_u *UserTweetUpdate) check() error {
 	return nil
 }
 
-func (_u *UserTweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *UserTweetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(usertweet.Table, usertweet.Columns, sqlgraph.NewFieldSpec(usertweet.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -214,7 +214,7 @@ func (_u *UserTweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{usertweet.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -223,7 +223,7 @@ func (_u *UserTweetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // UserTweetUpdateOne is the builder for updating a single UserTweet entity.
@@ -235,55 +235,55 @@ type UserTweetUpdateOne struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_u *UserTweetUpdateOne) SetCreatedAt(t time.Time) *UserTweetUpdateOne {
-	_u.mutation.SetCreatedAt(t)
+func (_u *UserTweetUpdateOne) SetCreatedAt(v time.Time) *UserTweetUpdateOne {
+	_u.mutation.SetCreatedAt(v)
 	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *UserTweetUpdateOne) SetNillableCreatedAt(t *time.Time) *UserTweetUpdateOne {
-	if t != nil {
-		_u.SetCreatedAt(*t)
+func (_u *UserTweetUpdateOne) SetNillableCreatedAt(v *time.Time) *UserTweetUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
 	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *UserTweetUpdateOne) SetUserID(i int) *UserTweetUpdateOne {
-	_u.mutation.SetUserID(i)
+func (_u *UserTweetUpdateOne) SetUserID(v int) *UserTweetUpdateOne {
+	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *UserTweetUpdateOne) SetNillableUserID(i *int) *UserTweetUpdateOne {
-	if i != nil {
-		_u.SetUserID(*i)
+func (_u *UserTweetUpdateOne) SetNillableUserID(v *int) *UserTweetUpdateOne {
+	if v != nil {
+		_u.SetUserID(*v)
 	}
 	return _u
 }
 
 // SetTweetID sets the "tweet_id" field.
-func (_u *UserTweetUpdateOne) SetTweetID(i int) *UserTweetUpdateOne {
-	_u.mutation.SetTweetID(i)
+func (_u *UserTweetUpdateOne) SetTweetID(v int) *UserTweetUpdateOne {
+	_u.mutation.SetTweetID(v)
 	return _u
 }
 
 // SetNillableTweetID sets the "tweet_id" field if the given value is not nil.
-func (_u *UserTweetUpdateOne) SetNillableTweetID(i *int) *UserTweetUpdateOne {
-	if i != nil {
-		_u.SetTweetID(*i)
+func (_u *UserTweetUpdateOne) SetNillableTweetID(v *int) *UserTweetUpdateOne {
+	if v != nil {
+		_u.SetTweetID(*v)
 	}
 	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *UserTweetUpdateOne) SetUser(u *User) *UserTweetUpdateOne {
-	return _u.SetUserID(u.ID)
+func (_u *UserTweetUpdateOne) SetUser(v *User) *UserTweetUpdateOne {
+	return _u.SetUserID(v.ID)
 }
 
 // SetTweet sets the "tweet" edge to the Tweet entity.
-func (_u *UserTweetUpdateOne) SetTweet(t *Tweet) *UserTweetUpdateOne {
-	return _u.SetTweetID(t.ID)
+func (_u *UserTweetUpdateOne) SetTweet(v *Tweet) *UserTweetUpdateOne {
+	return _u.SetTweetID(v.ID)
 }
 
 // Mutation returns the UserTweetMutation object of the builder.

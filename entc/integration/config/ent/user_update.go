@@ -32,15 +32,15 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *UserUpdate) SetName(s string) *UserUpdate {
-	_u.mutation.SetName(s)
+func (_u *UserUpdate) SetName(v string) *UserUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableName(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -52,15 +52,15 @@ func (_u *UserUpdate) ClearName() *UserUpdate {
 }
 
 // SetLabel sets the "label" field.
-func (_u *UserUpdate) SetLabel(s string) *UserUpdate {
-	_u.mutation.SetLabel(s)
+func (_u *UserUpdate) SetLabel(v string) *UserUpdate {
+	_u.mutation.SetLabel(v)
 	return _u
 }
 
 // SetNillableLabel sets the "label" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableLabel(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetLabel(*s)
+func (_u *UserUpdate) SetNillableLabel(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetLabel(*v)
 	}
 	return _u
 }
@@ -103,7 +103,7 @@ func (_u *UserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -124,7 +124,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if _u.mutation.LabelCleared() {
 		_spec.ClearField(user.FieldLabel, field.TypeString)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -133,7 +133,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -145,15 +145,15 @@ type UserUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (_u *UserUpdateOne) SetName(s string) *UserUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -165,15 +165,15 @@ func (_u *UserUpdateOne) ClearName() *UserUpdateOne {
 }
 
 // SetLabel sets the "label" field.
-func (_u *UserUpdateOne) SetLabel(s string) *UserUpdateOne {
-	_u.mutation.SetLabel(s)
+func (_u *UserUpdateOne) SetLabel(v string) *UserUpdateOne {
+	_u.mutation.SetLabel(v)
 	return _u
 }
 
 // SetNillableLabel sets the "label" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableLabel(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetLabel(*s)
+func (_u *UserUpdateOne) SetNillableLabel(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetLabel(*v)
 	}
 	return _u
 }

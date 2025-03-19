@@ -25,14 +25,14 @@ type UserCreate struct {
 }
 
 // SetAge sets the "age" field.
-func (_c *UserCreate) SetAge(i int) *UserCreate {
-	_c.mutation.SetAge(i)
+func (_c *UserCreate) SetAge(v int) *UserCreate {
+	_c.mutation.SetAge(v)
 	return _c
 }
 
 // SetName sets the "name" field.
-func (_c *UserCreate) SetName(s string) *UserCreate {
-	_c.mutation.SetName(s)
+func (_c *UserCreate) SetName(v string) *UserCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
@@ -51,8 +51,8 @@ func (_c *UserCreate) SetNillableCardID(id *int) *UserCreate {
 }
 
 // SetCard sets the "card" edge to the Card entity.
-func (_c *UserCreate) SetCard(c *Card) *UserCreate {
-	return _c.SetCardID(c.ID)
+func (_c *UserCreate) SetCard(v *Card) *UserCreate {
+	return _c.SetCardID(v.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.

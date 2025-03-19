@@ -33,15 +33,15 @@ func (_u *CarUpdate) Where(ps ...predicate.Car) *CarUpdate {
 }
 
 // SetNumber sets the "number" field.
-func (_u *CarUpdate) SetNumber(s string) *CarUpdate {
-	_u.mutation.SetNumber(s)
+func (_u *CarUpdate) SetNumber(v string) *CarUpdate {
+	_u.mutation.SetNumber(v)
 	return _u
 }
 
 // SetNillableNumber sets the "number" field if the given value is not nil.
-func (_u *CarUpdate) SetNillableNumber(s *string) *CarUpdate {
-	if s != nil {
-		_u.SetNumber(*s)
+func (_u *CarUpdate) SetNillableNumber(v *string) *CarUpdate {
+	if v != nil {
+		_u.SetNumber(*v)
 	}
 	return _u
 }
@@ -59,10 +59,10 @@ func (_u *CarUpdate) AddRentalIDs(ids ...int) *CarUpdate {
 }
 
 // AddRentals adds the "rentals" edges to the Rental entity.
-func (_u *CarUpdate) AddRentals(r ...*Rental) *CarUpdate {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *CarUpdate) AddRentals(v ...*Rental) *CarUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddRentalIDs(ids...)
 }
@@ -85,10 +85,10 @@ func (_u *CarUpdate) RemoveRentalIDs(ids ...int) *CarUpdate {
 }
 
 // RemoveRentals removes "rentals" edges to Rental entities.
-func (_u *CarUpdate) RemoveRentals(r ...*Rental) *CarUpdate {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *CarUpdate) RemoveRentals(v ...*Rental) *CarUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveRentalIDs(ids...)
 }
@@ -120,7 +120,7 @@ func (_u *CarUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *CarUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(car.Table, car.Columns, sqlgraph.NewFieldSpec(car.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -180,7 +180,7 @@ func (_u *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{car.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -189,7 +189,7 @@ func (_u *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // CarUpdateOne is the builder for updating a single Car entity.
@@ -201,15 +201,15 @@ type CarUpdateOne struct {
 }
 
 // SetNumber sets the "number" field.
-func (_u *CarUpdateOne) SetNumber(s string) *CarUpdateOne {
-	_u.mutation.SetNumber(s)
+func (_u *CarUpdateOne) SetNumber(v string) *CarUpdateOne {
+	_u.mutation.SetNumber(v)
 	return _u
 }
 
 // SetNillableNumber sets the "number" field if the given value is not nil.
-func (_u *CarUpdateOne) SetNillableNumber(s *string) *CarUpdateOne {
-	if s != nil {
-		_u.SetNumber(*s)
+func (_u *CarUpdateOne) SetNillableNumber(v *string) *CarUpdateOne {
+	if v != nil {
+		_u.SetNumber(*v)
 	}
 	return _u
 }
@@ -227,10 +227,10 @@ func (_u *CarUpdateOne) AddRentalIDs(ids ...int) *CarUpdateOne {
 }
 
 // AddRentals adds the "rentals" edges to the Rental entity.
-func (_u *CarUpdateOne) AddRentals(r ...*Rental) *CarUpdateOne {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *CarUpdateOne) AddRentals(v ...*Rental) *CarUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddRentalIDs(ids...)
 }
@@ -253,10 +253,10 @@ func (_u *CarUpdateOne) RemoveRentalIDs(ids ...int) *CarUpdateOne {
 }
 
 // RemoveRentals removes "rentals" edges to Rental entities.
-func (_u *CarUpdateOne) RemoveRentals(r ...*Rental) *CarUpdateOne {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *CarUpdateOne) RemoveRentals(v ...*Rental) *CarUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveRentalIDs(ids...)
 }

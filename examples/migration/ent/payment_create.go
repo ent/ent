@@ -26,44 +26,44 @@ type PaymentCreate struct {
 }
 
 // SetCardID sets the "card_id" field.
-func (_c *PaymentCreate) SetCardID(i int) *PaymentCreate {
-	_c.mutation.SetCardID(i)
+func (_c *PaymentCreate) SetCardID(v int) *PaymentCreate {
+	_c.mutation.SetCardID(v)
 	return _c
 }
 
 // SetAmount sets the "amount" field.
-func (_c *PaymentCreate) SetAmount(f float64) *PaymentCreate {
-	_c.mutation.SetAmount(f)
+func (_c *PaymentCreate) SetAmount(v float64) *PaymentCreate {
+	_c.mutation.SetAmount(v)
 	return _c
 }
 
 // SetCurrency sets the "currency" field.
-func (_c *PaymentCreate) SetCurrency(pa payment.Currency) *PaymentCreate {
-	_c.mutation.SetCurrency(pa)
+func (_c *PaymentCreate) SetCurrency(v payment.Currency) *PaymentCreate {
+	_c.mutation.SetCurrency(v)
 	return _c
 }
 
 // SetTime sets the "time" field.
-func (_c *PaymentCreate) SetTime(t time.Time) *PaymentCreate {
-	_c.mutation.SetTime(t)
+func (_c *PaymentCreate) SetTime(v time.Time) *PaymentCreate {
+	_c.mutation.SetTime(v)
 	return _c
 }
 
 // SetDescription sets the "description" field.
-func (_c *PaymentCreate) SetDescription(s string) *PaymentCreate {
-	_c.mutation.SetDescription(s)
+func (_c *PaymentCreate) SetDescription(v string) *PaymentCreate {
+	_c.mutation.SetDescription(v)
 	return _c
 }
 
 // SetStatus sets the "status" field.
-func (_c *PaymentCreate) SetStatus(pa payment.Status) *PaymentCreate {
-	_c.mutation.SetStatus(pa)
+func (_c *PaymentCreate) SetStatus(v payment.Status) *PaymentCreate {
+	_c.mutation.SetStatus(v)
 	return _c
 }
 
 // SetCard sets the "card" edge to the Card entity.
-func (_c *PaymentCreate) SetCard(c *Card) *PaymentCreate {
-	return _c.SetCardID(c.ID)
+func (_c *PaymentCreate) SetCard(v *Card) *PaymentCreate {
+	return _c.SetCardID(v.ID)
 }
 
 // Mutation returns the PaymentMutation object of the builder.

@@ -26,21 +26,21 @@ type UserCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *UserCreate) SetName(s string) *UserCreate {
-	_c.mutation.SetName(s)
+func (_c *UserCreate) SetName(v string) *UserCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetAge sets the "age" field.
-func (_c *UserCreate) SetAge(u uint) *UserCreate {
-	_c.mutation.SetAge(u)
+func (_c *UserCreate) SetAge(v uint) *UserCreate {
+	_c.mutation.SetAge(v)
 	return _c
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (_c *UserCreate) SetNillableAge(u *uint) *UserCreate {
-	if u != nil {
-		_c.SetAge(*u)
+func (_c *UserCreate) SetNillableAge(v *uint) *UserCreate {
+	if v != nil {
+		_c.SetAge(*v)
 	}
 	return _c
 }
@@ -52,10 +52,10 @@ func (_c *UserCreate) AddTeamIDs(ids ...int) *UserCreate {
 }
 
 // AddTeams adds the "teams" edges to the Team entity.
-func (_c *UserCreate) AddTeams(t ...*Team) *UserCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_c *UserCreate) AddTeams(v ...*Team) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddTeamIDs(ids...)
 }
@@ -67,10 +67,10 @@ func (_c *UserCreate) AddTaskIDs(ids ...int) *UserCreate {
 }
 
 // AddTasks adds the "tasks" edges to the Task entity.
-func (_c *UserCreate) AddTasks(t ...*Task) *UserCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_c *UserCreate) AddTasks(v ...*Task) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddTaskIDs(ids...)
 }

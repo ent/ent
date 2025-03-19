@@ -24,36 +24,36 @@ type CardCreate struct {
 }
 
 // SetNumber sets the "number" field.
-func (_c *CardCreate) SetNumber(s string) *CardCreate {
-	_c.mutation.SetNumber(s)
+func (_c *CardCreate) SetNumber(v string) *CardCreate {
+	_c.mutation.SetNumber(v)
 	return _c
 }
 
 // SetNillableNumber sets the "number" field if the given value is not nil.
-func (_c *CardCreate) SetNillableNumber(s *string) *CardCreate {
-	if s != nil {
-		_c.SetNumber(*s)
+func (_c *CardCreate) SetNillableNumber(v *string) *CardCreate {
+	if v != nil {
+		_c.SetNumber(*v)
 	}
 	return _c
 }
 
 // SetOwnerID sets the "owner_id" field.
-func (_c *CardCreate) SetOwnerID(i int) *CardCreate {
-	_c.mutation.SetOwnerID(i)
+func (_c *CardCreate) SetOwnerID(v int) *CardCreate {
+	_c.mutation.SetOwnerID(v)
 	return _c
 }
 
 // SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (_c *CardCreate) SetNillableOwnerID(i *int) *CardCreate {
-	if i != nil {
-		_c.SetOwnerID(*i)
+func (_c *CardCreate) SetNillableOwnerID(v *int) *CardCreate {
+	if v != nil {
+		_c.SetOwnerID(*v)
 	}
 	return _c
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_c *CardCreate) SetOwner(u *User) *CardCreate {
-	return _c.SetOwnerID(u.ID)
+func (_c *CardCreate) SetOwner(v *User) *CardCreate {
+	return _c.SetOwnerID(v.ID)
 }
 
 // Mutation returns the CardMutation object of the builder.

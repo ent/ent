@@ -25,8 +25,8 @@ type GroupCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *GroupCreate) SetName(s string) *GroupCreate {
-	_c.mutation.SetName(s)
+func (_c *GroupCreate) SetName(v string) *GroupCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
@@ -37,10 +37,10 @@ func (_c *GroupCreate) AddUserIDs(ids ...int) *GroupCreate {
 }
 
 // AddUsers adds the "users" edges to the User entity.
-func (_c *GroupCreate) AddUsers(u ...*User) *GroupCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *GroupCreate) AddUsers(v ...*User) *GroupCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddUserIDs(ids...)
 }
@@ -60,8 +60,8 @@ func (_c *GroupCreate) SetNillableAdminID(id *int) *GroupCreate {
 }
 
 // SetAdmin sets the "admin" edge to the User entity.
-func (_c *GroupCreate) SetAdmin(u *User) *GroupCreate {
-	return _c.SetAdminID(u.ID)
+func (_c *GroupCreate) SetAdmin(v *User) *GroupCreate {
+	return _c.SetAdminID(v.ID)
 }
 
 // Mutation returns the GroupMutation object of the builder.

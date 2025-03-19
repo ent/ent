@@ -20,8 +20,8 @@ type UserCreate struct {
 }
 
 // SetPostalCode sets the "postal_code" field.
-func (_c *UserCreate) SetPostalCode(s string) *UserCreate {
-	_c.mutation.SetPostalCode(s)
+func (_c *UserCreate) SetPostalCode(v string) *UserCreate {
+	_c.mutation.SetPostalCode(v)
 	return _c
 }
 

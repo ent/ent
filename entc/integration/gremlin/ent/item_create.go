@@ -26,29 +26,29 @@ type ItemCreate struct {
 }
 
 // SetText sets the "text" field.
-func (_c *ItemCreate) SetText(s string) *ItemCreate {
-	_c.mutation.SetText(s)
+func (_c *ItemCreate) SetText(v string) *ItemCreate {
+	_c.mutation.SetText(v)
 	return _c
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_c *ItemCreate) SetNillableText(s *string) *ItemCreate {
-	if s != nil {
-		_c.SetText(*s)
+func (_c *ItemCreate) SetNillableText(v *string) *ItemCreate {
+	if v != nil {
+		_c.SetText(*v)
 	}
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *ItemCreate) SetID(s string) *ItemCreate {
-	_c.mutation.SetID(s)
+func (_c *ItemCreate) SetID(v string) *ItemCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *ItemCreate) SetNillableID(s *string) *ItemCreate {
-	if s != nil {
-		_c.SetID(*s)
+func (_c *ItemCreate) SetNillableID(v *string) *ItemCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
 	return _c
 }

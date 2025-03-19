@@ -32,15 +32,15 @@ func (_u *RelationshipInfoUpdate) Where(ps ...predicate.RelationshipInfo) *Relat
 }
 
 // SetText sets the "text" field.
-func (_u *RelationshipInfoUpdate) SetText(s string) *RelationshipInfoUpdate {
-	_u.mutation.SetText(s)
+func (_u *RelationshipInfoUpdate) SetText(v string) *RelationshipInfoUpdate {
+	_u.mutation.SetText(v)
 	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_u *RelationshipInfoUpdate) SetNillableText(s *string) *RelationshipInfoUpdate {
-	if s != nil {
-		_u.SetText(*s)
+func (_u *RelationshipInfoUpdate) SetNillableText(v *string) *RelationshipInfoUpdate {
+	if v != nil {
+		_u.SetText(*v)
 	}
 	return _u
 }
@@ -77,7 +77,7 @@ func (_u *RelationshipInfoUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *RelationshipInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *RelationshipInfoUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(relationshipinfo.Table, relationshipinfo.Columns, sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -89,7 +89,7 @@ func (_u *RelationshipInfoUpdate) sqlSave(ctx context.Context) (n int, err error
 	if value, ok := _u.mutation.Text(); ok {
 		_spec.SetField(relationshipinfo.FieldText, field.TypeString, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{relationshipinfo.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -98,7 +98,7 @@ func (_u *RelationshipInfoUpdate) sqlSave(ctx context.Context) (n int, err error
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // RelationshipInfoUpdateOne is the builder for updating a single RelationshipInfo entity.
@@ -110,15 +110,15 @@ type RelationshipInfoUpdateOne struct {
 }
 
 // SetText sets the "text" field.
-func (_u *RelationshipInfoUpdateOne) SetText(s string) *RelationshipInfoUpdateOne {
-	_u.mutation.SetText(s)
+func (_u *RelationshipInfoUpdateOne) SetText(v string) *RelationshipInfoUpdateOne {
+	_u.mutation.SetText(v)
 	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_u *RelationshipInfoUpdateOne) SetNillableText(s *string) *RelationshipInfoUpdateOne {
-	if s != nil {
-		_u.SetText(*s)
+func (_u *RelationshipInfoUpdateOne) SetNillableText(v *string) *RelationshipInfoUpdateOne {
+	if v != nil {
+		_u.SetText(*v)
 	}
 	return _u
 }

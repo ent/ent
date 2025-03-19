@@ -27,90 +27,90 @@ type SessionCreate struct {
 }
 
 // SetActive sets the "active" field.
-func (_c *SessionCreate) SetActive(b bool) *SessionCreate {
-	_c.mutation.SetActive(b)
+func (_c *SessionCreate) SetActive(v bool) *SessionCreate {
+	_c.mutation.SetActive(v)
 	return _c
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
-func (_c *SessionCreate) SetNillableActive(b *bool) *SessionCreate {
-	if b != nil {
-		_c.SetActive(*b)
+func (_c *SessionCreate) SetNillableActive(v *bool) *SessionCreate {
+	if v != nil {
+		_c.SetActive(*v)
 	}
 	return _c
 }
 
 // SetIssuedAt sets the "issued_at" field.
-func (_c *SessionCreate) SetIssuedAt(t time.Time) *SessionCreate {
-	_c.mutation.SetIssuedAt(t)
+func (_c *SessionCreate) SetIssuedAt(v time.Time) *SessionCreate {
+	_c.mutation.SetIssuedAt(v)
 	return _c
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (_c *SessionCreate) SetExpiresAt(t time.Time) *SessionCreate {
-	_c.mutation.SetExpiresAt(t)
+func (_c *SessionCreate) SetExpiresAt(v time.Time) *SessionCreate {
+	_c.mutation.SetExpiresAt(v)
 	return _c
 }
 
 // SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
-func (_c *SessionCreate) SetNillableExpiresAt(t *time.Time) *SessionCreate {
-	if t != nil {
-		_c.SetExpiresAt(*t)
+func (_c *SessionCreate) SetNillableExpiresAt(v *time.Time) *SessionCreate {
+	if v != nil {
+		_c.SetExpiresAt(*v)
 	}
 	return _c
 }
 
 // SetToken sets the "token" field.
-func (_c *SessionCreate) SetToken(s string) *SessionCreate {
-	_c.mutation.SetToken(s)
+func (_c *SessionCreate) SetToken(v string) *SessionCreate {
+	_c.mutation.SetToken(v)
 	return _c
 }
 
 // SetNillableToken sets the "token" field if the given value is not nil.
-func (_c *SessionCreate) SetNillableToken(s *string) *SessionCreate {
-	if s != nil {
-		_c.SetToken(*s)
+func (_c *SessionCreate) SetNillableToken(v *string) *SessionCreate {
+	if v != nil {
+		_c.SetToken(*v)
 	}
 	return _c
 }
 
 // SetMethod sets the "method" field.
-func (_c *SessionCreate) SetMethod(m map[string]interface{}) *SessionCreate {
-	_c.mutation.SetMethod(m)
+func (_c *SessionCreate) SetMethod(v map[string]interface{}) *SessionCreate {
+	_c.mutation.SetMethod(v)
 	return _c
 }
 
 // SetDeviceID sets the "device_id" field.
-func (_c *SessionCreate) SetDeviceID(u uuid.UUID) *SessionCreate {
-	_c.mutation.SetDeviceID(u)
+func (_c *SessionCreate) SetDeviceID(v uuid.UUID) *SessionCreate {
+	_c.mutation.SetDeviceID(v)
 	return _c
 }
 
 // SetNillableDeviceID sets the "device_id" field if the given value is not nil.
-func (_c *SessionCreate) SetNillableDeviceID(u *uuid.UUID) *SessionCreate {
-	if u != nil {
-		_c.SetDeviceID(*u)
+func (_c *SessionCreate) SetNillableDeviceID(v *uuid.UUID) *SessionCreate {
+	if v != nil {
+		_c.SetDeviceID(*v)
 	}
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *SessionCreate) SetID(u uuid.UUID) *SessionCreate {
-	_c.mutation.SetID(u)
+func (_c *SessionCreate) SetID(v uuid.UUID) *SessionCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *SessionCreate) SetNillableID(u *uuid.UUID) *SessionCreate {
-	if u != nil {
-		_c.SetID(*u)
+func (_c *SessionCreate) SetNillableID(v *uuid.UUID) *SessionCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
 	return _c
 }
 
 // SetDevice sets the "device" edge to the SessionDevice entity.
-func (_c *SessionCreate) SetDevice(s *SessionDevice) *SessionCreate {
-	return _c.SetDeviceID(s.ID)
+func (_c *SessionCreate) SetDevice(v *SessionDevice) *SessionCreate {
+	return _c.SetDeviceID(v.ID)
 }
 
 // Mutation returns the SessionMutation object of the builder.

@@ -29,21 +29,21 @@ type AccountCreate struct {
 }
 
 // SetEmail sets the "email" field.
-func (_c *AccountCreate) SetEmail(s string) *AccountCreate {
-	_c.mutation.SetEmail(s)
+func (_c *AccountCreate) SetEmail(v string) *AccountCreate {
+	_c.mutation.SetEmail(v)
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *AccountCreate) SetID(s sid.ID) *AccountCreate {
-	_c.mutation.SetID(s)
+func (_c *AccountCreate) SetID(v sid.ID) *AccountCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *AccountCreate) SetNillableID(s *sid.ID) *AccountCreate {
-	if s != nil {
-		_c.SetID(*s)
+func (_c *AccountCreate) SetNillableID(v *sid.ID) *AccountCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
 	return _c
 }
@@ -55,10 +55,10 @@ func (_c *AccountCreate) AddTokenIDs(ids ...sid.ID) *AccountCreate {
 }
 
 // AddToken adds the "token" edges to the Token entity.
-func (_c *AccountCreate) AddToken(t ...*Token) *AccountCreate {
-	ids := make([]sid.ID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_c *AccountCreate) AddToken(v ...*Token) *AccountCreate {
+	ids := make([]sid.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddTokenIDs(ids...)
 }

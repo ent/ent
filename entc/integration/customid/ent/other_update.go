@@ -63,7 +63,7 @@ func (_u *OtherUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *OtherUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *OtherUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(other.Table, other.Columns, sqlgraph.NewFieldSpec(other.FieldID, field.TypeOther))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -72,7 +72,7 @@ func (_u *OtherUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{other.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -81,7 +81,7 @@ func (_u *OtherUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // OtherUpdateOne is the builder for updating a single Other entity.

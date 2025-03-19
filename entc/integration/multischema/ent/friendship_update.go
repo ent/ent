@@ -35,36 +35,36 @@ func (_u *FriendshipUpdate) Where(ps ...predicate.Friendship) *FriendshipUpdate 
 }
 
 // SetWeight sets the "weight" field.
-func (_u *FriendshipUpdate) SetWeight(i int) *FriendshipUpdate {
+func (_u *FriendshipUpdate) SetWeight(v int) *FriendshipUpdate {
 	_u.mutation.ResetWeight()
-	_u.mutation.SetWeight(i)
+	_u.mutation.SetWeight(v)
 	return _u
 }
 
 // SetNillableWeight sets the "weight" field if the given value is not nil.
-func (_u *FriendshipUpdate) SetNillableWeight(i *int) *FriendshipUpdate {
-	if i != nil {
-		_u.SetWeight(*i)
+func (_u *FriendshipUpdate) SetNillableWeight(v *int) *FriendshipUpdate {
+	if v != nil {
+		_u.SetWeight(*v)
 	}
 	return _u
 }
 
-// AddWeight adds i to the "weight" field.
-func (_u *FriendshipUpdate) AddWeight(i int) *FriendshipUpdate {
-	_u.mutation.AddWeight(i)
+// AddWeight adds value to the "weight" field.
+func (_u *FriendshipUpdate) AddWeight(v int) *FriendshipUpdate {
+	_u.mutation.AddWeight(v)
 	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_u *FriendshipUpdate) SetCreatedAt(t time.Time) *FriendshipUpdate {
-	_u.mutation.SetCreatedAt(t)
+func (_u *FriendshipUpdate) SetCreatedAt(v time.Time) *FriendshipUpdate {
+	_u.mutation.SetCreatedAt(v)
 	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *FriendshipUpdate) SetNillableCreatedAt(t *time.Time) *FriendshipUpdate {
-	if t != nil {
-		_u.SetCreatedAt(*t)
+func (_u *FriendshipUpdate) SetNillableCreatedAt(v *time.Time) *FriendshipUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
 	return _u
 }
@@ -118,9 +118,9 @@ func (_u *FriendshipUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Fri
 	return _u
 }
 
-func (_u *FriendshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *FriendshipUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(friendship.Table, friendship.Columns, sqlgraph.NewFieldSpec(friendship.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -142,7 +142,7 @@ func (_u *FriendshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec.Node.Schema = _u.schemaConfig.Friendship
 	ctx = internal.NewSchemaConfigContext(ctx, _u.schemaConfig)
 	_spec.AddModifiers(_u.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{friendship.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -151,7 +151,7 @@ func (_u *FriendshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // FriendshipUpdateOne is the builder for updating a single Friendship entity.
@@ -164,36 +164,36 @@ type FriendshipUpdateOne struct {
 }
 
 // SetWeight sets the "weight" field.
-func (_u *FriendshipUpdateOne) SetWeight(i int) *FriendshipUpdateOne {
+func (_u *FriendshipUpdateOne) SetWeight(v int) *FriendshipUpdateOne {
 	_u.mutation.ResetWeight()
-	_u.mutation.SetWeight(i)
+	_u.mutation.SetWeight(v)
 	return _u
 }
 
 // SetNillableWeight sets the "weight" field if the given value is not nil.
-func (_u *FriendshipUpdateOne) SetNillableWeight(i *int) *FriendshipUpdateOne {
-	if i != nil {
-		_u.SetWeight(*i)
+func (_u *FriendshipUpdateOne) SetNillableWeight(v *int) *FriendshipUpdateOne {
+	if v != nil {
+		_u.SetWeight(*v)
 	}
 	return _u
 }
 
-// AddWeight adds i to the "weight" field.
-func (_u *FriendshipUpdateOne) AddWeight(i int) *FriendshipUpdateOne {
-	_u.mutation.AddWeight(i)
+// AddWeight adds value to the "weight" field.
+func (_u *FriendshipUpdateOne) AddWeight(v int) *FriendshipUpdateOne {
+	_u.mutation.AddWeight(v)
 	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_u *FriendshipUpdateOne) SetCreatedAt(t time.Time) *FriendshipUpdateOne {
-	_u.mutation.SetCreatedAt(t)
+func (_u *FriendshipUpdateOne) SetCreatedAt(v time.Time) *FriendshipUpdateOne {
+	_u.mutation.SetCreatedAt(v)
 	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *FriendshipUpdateOne) SetNillableCreatedAt(t *time.Time) *FriendshipUpdateOne {
-	if t != nil {
-		_u.SetCreatedAt(*t)
+func (_u *FriendshipUpdateOne) SetNillableCreatedAt(v *time.Time) *FriendshipUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
 	return _u
 }

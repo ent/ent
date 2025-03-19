@@ -27,42 +27,42 @@ type CarCreate struct {
 }
 
 // SetBeforeID sets the "before_id" field.
-func (_c *CarCreate) SetBeforeID(f float64) *CarCreate {
-	_c.mutation.SetBeforeID(f)
+func (_c *CarCreate) SetBeforeID(v float64) *CarCreate {
+	_c.mutation.SetBeforeID(v)
 	return _c
 }
 
 // SetNillableBeforeID sets the "before_id" field if the given value is not nil.
-func (_c *CarCreate) SetNillableBeforeID(f *float64) *CarCreate {
-	if f != nil {
-		_c.SetBeforeID(*f)
+func (_c *CarCreate) SetNillableBeforeID(v *float64) *CarCreate {
+	if v != nil {
+		_c.SetBeforeID(*v)
 	}
 	return _c
 }
 
 // SetAfterID sets the "after_id" field.
-func (_c *CarCreate) SetAfterID(f float64) *CarCreate {
-	_c.mutation.SetAfterID(f)
+func (_c *CarCreate) SetAfterID(v float64) *CarCreate {
+	_c.mutation.SetAfterID(v)
 	return _c
 }
 
 // SetNillableAfterID sets the "after_id" field if the given value is not nil.
-func (_c *CarCreate) SetNillableAfterID(f *float64) *CarCreate {
-	if f != nil {
-		_c.SetAfterID(*f)
+func (_c *CarCreate) SetNillableAfterID(v *float64) *CarCreate {
+	if v != nil {
+		_c.SetAfterID(*v)
 	}
 	return _c
 }
 
 // SetModel sets the "model" field.
-func (_c *CarCreate) SetModel(s string) *CarCreate {
-	_c.mutation.SetModel(s)
+func (_c *CarCreate) SetModel(v string) *CarCreate {
+	_c.mutation.SetModel(v)
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *CarCreate) SetID(i int) *CarCreate {
-	_c.mutation.SetID(i)
+func (_c *CarCreate) SetID(v int) *CarCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
@@ -81,8 +81,8 @@ func (_c *CarCreate) SetNillableOwnerID(id *string) *CarCreate {
 }
 
 // SetOwner sets the "owner" edge to the Pet entity.
-func (_c *CarCreate) SetOwner(p *Pet) *CarCreate {
-	return _c.SetOwnerID(p.ID)
+func (_c *CarCreate) SetOwner(v *Pet) *CarCreate {
+	return _c.SetOwnerID(v.ID)
 }
 
 // Mutation returns the CarMutation object of the builder.

@@ -37,15 +37,15 @@ func (_u *TagUpdate) Where(ps ...predicate.Tag) *TagUpdate {
 }
 
 // SetValue sets the "value" field.
-func (_u *TagUpdate) SetValue(s string) *TagUpdate {
-	_u.mutation.SetValue(s)
+func (_u *TagUpdate) SetValue(v string) *TagUpdate {
+	_u.mutation.SetValue(v)
 	return _u
 }
 
 // SetNillableValue sets the "value" field if the given value is not nil.
-func (_u *TagUpdate) SetNillableValue(s *string) *TagUpdate {
-	if s != nil {
-		_u.SetValue(*s)
+func (_u *TagUpdate) SetNillableValue(v *string) *TagUpdate {
+	if v != nil {
+		_u.SetValue(*v)
 	}
 	return _u
 }
@@ -57,10 +57,10 @@ func (_u *TagUpdate) AddTweetIDs(ids ...int) *TagUpdate {
 }
 
 // AddTweets adds the "tweets" edges to the Tweet entity.
-func (_u *TagUpdate) AddTweets(t ...*Tweet) *TagUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *TagUpdate) AddTweets(v ...*Tweet) *TagUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddTweetIDs(ids...)
 }
@@ -72,10 +72,10 @@ func (_u *TagUpdate) AddGroupIDs(ids ...int) *TagUpdate {
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (_u *TagUpdate) AddGroups(g ...*Group) *TagUpdate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *TagUpdate) AddGroups(v ...*Group) *TagUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddGroupIDs(ids...)
 }
@@ -87,10 +87,10 @@ func (_u *TagUpdate) AddTweetTagIDs(ids ...uuid.UUID) *TagUpdate {
 }
 
 // AddTweetTags adds the "tweet_tags" edges to the TweetTag entity.
-func (_u *TagUpdate) AddTweetTags(t ...*TweetTag) *TagUpdate {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *TagUpdate) AddTweetTags(v ...*TweetTag) *TagUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddTweetTagIDs(ids...)
 }
@@ -102,10 +102,10 @@ func (_u *TagUpdate) AddGroupTagIDs(ids ...int) *TagUpdate {
 }
 
 // AddGroupTags adds the "group_tags" edges to the GroupTag entity.
-func (_u *TagUpdate) AddGroupTags(g ...*GroupTag) *TagUpdate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *TagUpdate) AddGroupTags(v ...*GroupTag) *TagUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddGroupTagIDs(ids...)
 }
@@ -128,10 +128,10 @@ func (_u *TagUpdate) RemoveTweetIDs(ids ...int) *TagUpdate {
 }
 
 // RemoveTweets removes "tweets" edges to Tweet entities.
-func (_u *TagUpdate) RemoveTweets(t ...*Tweet) *TagUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *TagUpdate) RemoveTweets(v ...*Tweet) *TagUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveTweetIDs(ids...)
 }
@@ -149,10 +149,10 @@ func (_u *TagUpdate) RemoveGroupIDs(ids ...int) *TagUpdate {
 }
 
 // RemoveGroups removes "groups" edges to Group entities.
-func (_u *TagUpdate) RemoveGroups(g ...*Group) *TagUpdate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *TagUpdate) RemoveGroups(v ...*Group) *TagUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveGroupIDs(ids...)
 }
@@ -170,10 +170,10 @@ func (_u *TagUpdate) RemoveTweetTagIDs(ids ...uuid.UUID) *TagUpdate {
 }
 
 // RemoveTweetTags removes "tweet_tags" edges to TweetTag entities.
-func (_u *TagUpdate) RemoveTweetTags(t ...*TweetTag) *TagUpdate {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *TagUpdate) RemoveTweetTags(v ...*TweetTag) *TagUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveTweetTagIDs(ids...)
 }
@@ -191,10 +191,10 @@ func (_u *TagUpdate) RemoveGroupTagIDs(ids ...int) *TagUpdate {
 }
 
 // RemoveGroupTags removes "group_tags" edges to GroupTag entities.
-func (_u *TagUpdate) RemoveGroupTags(g ...*GroupTag) *TagUpdate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *TagUpdate) RemoveGroupTags(v ...*GroupTag) *TagUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveGroupTagIDs(ids...)
 }
@@ -226,7 +226,7 @@ func (_u *TagUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *TagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(tag.Table, tag.Columns, sqlgraph.NewFieldSpec(tag.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -439,7 +439,7 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{tag.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -448,7 +448,7 @@ func (_u *TagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // TagUpdateOne is the builder for updating a single Tag entity.
@@ -460,15 +460,15 @@ type TagUpdateOne struct {
 }
 
 // SetValue sets the "value" field.
-func (_u *TagUpdateOne) SetValue(s string) *TagUpdateOne {
-	_u.mutation.SetValue(s)
+func (_u *TagUpdateOne) SetValue(v string) *TagUpdateOne {
+	_u.mutation.SetValue(v)
 	return _u
 }
 
 // SetNillableValue sets the "value" field if the given value is not nil.
-func (_u *TagUpdateOne) SetNillableValue(s *string) *TagUpdateOne {
-	if s != nil {
-		_u.SetValue(*s)
+func (_u *TagUpdateOne) SetNillableValue(v *string) *TagUpdateOne {
+	if v != nil {
+		_u.SetValue(*v)
 	}
 	return _u
 }
@@ -480,10 +480,10 @@ func (_u *TagUpdateOne) AddTweetIDs(ids ...int) *TagUpdateOne {
 }
 
 // AddTweets adds the "tweets" edges to the Tweet entity.
-func (_u *TagUpdateOne) AddTweets(t ...*Tweet) *TagUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *TagUpdateOne) AddTweets(v ...*Tweet) *TagUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddTweetIDs(ids...)
 }
@@ -495,10 +495,10 @@ func (_u *TagUpdateOne) AddGroupIDs(ids ...int) *TagUpdateOne {
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (_u *TagUpdateOne) AddGroups(g ...*Group) *TagUpdateOne {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *TagUpdateOne) AddGroups(v ...*Group) *TagUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddGroupIDs(ids...)
 }
@@ -510,10 +510,10 @@ func (_u *TagUpdateOne) AddTweetTagIDs(ids ...uuid.UUID) *TagUpdateOne {
 }
 
 // AddTweetTags adds the "tweet_tags" edges to the TweetTag entity.
-func (_u *TagUpdateOne) AddTweetTags(t ...*TweetTag) *TagUpdateOne {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *TagUpdateOne) AddTweetTags(v ...*TweetTag) *TagUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddTweetTagIDs(ids...)
 }
@@ -525,10 +525,10 @@ func (_u *TagUpdateOne) AddGroupTagIDs(ids ...int) *TagUpdateOne {
 }
 
 // AddGroupTags adds the "group_tags" edges to the GroupTag entity.
-func (_u *TagUpdateOne) AddGroupTags(g ...*GroupTag) *TagUpdateOne {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *TagUpdateOne) AddGroupTags(v ...*GroupTag) *TagUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddGroupTagIDs(ids...)
 }
@@ -551,10 +551,10 @@ func (_u *TagUpdateOne) RemoveTweetIDs(ids ...int) *TagUpdateOne {
 }
 
 // RemoveTweets removes "tweets" edges to Tweet entities.
-func (_u *TagUpdateOne) RemoveTweets(t ...*Tweet) *TagUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *TagUpdateOne) RemoveTweets(v ...*Tweet) *TagUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveTweetIDs(ids...)
 }
@@ -572,10 +572,10 @@ func (_u *TagUpdateOne) RemoveGroupIDs(ids ...int) *TagUpdateOne {
 }
 
 // RemoveGroups removes "groups" edges to Group entities.
-func (_u *TagUpdateOne) RemoveGroups(g ...*Group) *TagUpdateOne {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *TagUpdateOne) RemoveGroups(v ...*Group) *TagUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveGroupIDs(ids...)
 }
@@ -593,10 +593,10 @@ func (_u *TagUpdateOne) RemoveTweetTagIDs(ids ...uuid.UUID) *TagUpdateOne {
 }
 
 // RemoveTweetTags removes "tweet_tags" edges to TweetTag entities.
-func (_u *TagUpdateOne) RemoveTweetTags(t ...*TweetTag) *TagUpdateOne {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *TagUpdateOne) RemoveTweetTags(v ...*TweetTag) *TagUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveTweetTagIDs(ids...)
 }
@@ -614,10 +614,10 @@ func (_u *TagUpdateOne) RemoveGroupTagIDs(ids ...int) *TagUpdateOne {
 }
 
 // RemoveGroupTags removes "group_tags" edges to GroupTag entities.
-func (_u *TagUpdateOne) RemoveGroupTags(g ...*GroupTag) *TagUpdateOne {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *TagUpdateOne) RemoveGroupTags(v ...*GroupTag) *TagUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveGroupTagIDs(ids...)
 }

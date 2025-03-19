@@ -35,55 +35,55 @@ func (_u *TweetTagUpdate) Where(ps ...predicate.TweetTag) *TweetTagUpdate {
 }
 
 // SetAddedAt sets the "added_at" field.
-func (_u *TweetTagUpdate) SetAddedAt(t time.Time) *TweetTagUpdate {
-	_u.mutation.SetAddedAt(t)
+func (_u *TweetTagUpdate) SetAddedAt(v time.Time) *TweetTagUpdate {
+	_u.mutation.SetAddedAt(v)
 	return _u
 }
 
 // SetNillableAddedAt sets the "added_at" field if the given value is not nil.
-func (_u *TweetTagUpdate) SetNillableAddedAt(t *time.Time) *TweetTagUpdate {
-	if t != nil {
-		_u.SetAddedAt(*t)
+func (_u *TweetTagUpdate) SetNillableAddedAt(v *time.Time) *TweetTagUpdate {
+	if v != nil {
+		_u.SetAddedAt(*v)
 	}
 	return _u
 }
 
 // SetTagID sets the "tag_id" field.
-func (_u *TweetTagUpdate) SetTagID(i int) *TweetTagUpdate {
-	_u.mutation.SetTagID(i)
+func (_u *TweetTagUpdate) SetTagID(v int) *TweetTagUpdate {
+	_u.mutation.SetTagID(v)
 	return _u
 }
 
 // SetNillableTagID sets the "tag_id" field if the given value is not nil.
-func (_u *TweetTagUpdate) SetNillableTagID(i *int) *TweetTagUpdate {
-	if i != nil {
-		_u.SetTagID(*i)
+func (_u *TweetTagUpdate) SetNillableTagID(v *int) *TweetTagUpdate {
+	if v != nil {
+		_u.SetTagID(*v)
 	}
 	return _u
 }
 
 // SetTweetID sets the "tweet_id" field.
-func (_u *TweetTagUpdate) SetTweetID(i int) *TweetTagUpdate {
-	_u.mutation.SetTweetID(i)
+func (_u *TweetTagUpdate) SetTweetID(v int) *TweetTagUpdate {
+	_u.mutation.SetTweetID(v)
 	return _u
 }
 
 // SetNillableTweetID sets the "tweet_id" field if the given value is not nil.
-func (_u *TweetTagUpdate) SetNillableTweetID(i *int) *TweetTagUpdate {
-	if i != nil {
-		_u.SetTweetID(*i)
+func (_u *TweetTagUpdate) SetNillableTweetID(v *int) *TweetTagUpdate {
+	if v != nil {
+		_u.SetTweetID(*v)
 	}
 	return _u
 }
 
 // SetTag sets the "tag" edge to the Tag entity.
-func (_u *TweetTagUpdate) SetTag(t *Tag) *TweetTagUpdate {
-	return _u.SetTagID(t.ID)
+func (_u *TweetTagUpdate) SetTag(v *Tag) *TweetTagUpdate {
+	return _u.SetTagID(v.ID)
 }
 
 // SetTweet sets the "tweet" edge to the Tweet entity.
-func (_u *TweetTagUpdate) SetTweet(t *Tweet) *TweetTagUpdate {
-	return _u.SetTweetID(t.ID)
+func (_u *TweetTagUpdate) SetTweet(v *Tweet) *TweetTagUpdate {
+	return _u.SetTweetID(v.ID)
 }
 
 // Mutation returns the TweetTagMutation object of the builder.
@@ -141,9 +141,9 @@ func (_u *TweetTagUpdate) check() error {
 	return nil
 }
 
-func (_u *TweetTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *TweetTagUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(tweettag.Table, tweettag.Columns, sqlgraph.NewFieldSpec(tweettag.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -214,7 +214,7 @@ func (_u *TweetTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{tweettag.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -223,7 +223,7 @@ func (_u *TweetTagUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // TweetTagUpdateOne is the builder for updating a single TweetTag entity.
@@ -235,55 +235,55 @@ type TweetTagUpdateOne struct {
 }
 
 // SetAddedAt sets the "added_at" field.
-func (_u *TweetTagUpdateOne) SetAddedAt(t time.Time) *TweetTagUpdateOne {
-	_u.mutation.SetAddedAt(t)
+func (_u *TweetTagUpdateOne) SetAddedAt(v time.Time) *TweetTagUpdateOne {
+	_u.mutation.SetAddedAt(v)
 	return _u
 }
 
 // SetNillableAddedAt sets the "added_at" field if the given value is not nil.
-func (_u *TweetTagUpdateOne) SetNillableAddedAt(t *time.Time) *TweetTagUpdateOne {
-	if t != nil {
-		_u.SetAddedAt(*t)
+func (_u *TweetTagUpdateOne) SetNillableAddedAt(v *time.Time) *TweetTagUpdateOne {
+	if v != nil {
+		_u.SetAddedAt(*v)
 	}
 	return _u
 }
 
 // SetTagID sets the "tag_id" field.
-func (_u *TweetTagUpdateOne) SetTagID(i int) *TweetTagUpdateOne {
-	_u.mutation.SetTagID(i)
+func (_u *TweetTagUpdateOne) SetTagID(v int) *TweetTagUpdateOne {
+	_u.mutation.SetTagID(v)
 	return _u
 }
 
 // SetNillableTagID sets the "tag_id" field if the given value is not nil.
-func (_u *TweetTagUpdateOne) SetNillableTagID(i *int) *TweetTagUpdateOne {
-	if i != nil {
-		_u.SetTagID(*i)
+func (_u *TweetTagUpdateOne) SetNillableTagID(v *int) *TweetTagUpdateOne {
+	if v != nil {
+		_u.SetTagID(*v)
 	}
 	return _u
 }
 
 // SetTweetID sets the "tweet_id" field.
-func (_u *TweetTagUpdateOne) SetTweetID(i int) *TweetTagUpdateOne {
-	_u.mutation.SetTweetID(i)
+func (_u *TweetTagUpdateOne) SetTweetID(v int) *TweetTagUpdateOne {
+	_u.mutation.SetTweetID(v)
 	return _u
 }
 
 // SetNillableTweetID sets the "tweet_id" field if the given value is not nil.
-func (_u *TweetTagUpdateOne) SetNillableTweetID(i *int) *TweetTagUpdateOne {
-	if i != nil {
-		_u.SetTweetID(*i)
+func (_u *TweetTagUpdateOne) SetNillableTweetID(v *int) *TweetTagUpdateOne {
+	if v != nil {
+		_u.SetTweetID(*v)
 	}
 	return _u
 }
 
 // SetTag sets the "tag" edge to the Tag entity.
-func (_u *TweetTagUpdateOne) SetTag(t *Tag) *TweetTagUpdateOne {
-	return _u.SetTagID(t.ID)
+func (_u *TweetTagUpdateOne) SetTag(v *Tag) *TweetTagUpdateOne {
+	return _u.SetTagID(v.ID)
 }
 
 // SetTweet sets the "tweet" edge to the Tweet entity.
-func (_u *TweetTagUpdateOne) SetTweet(t *Tweet) *TweetTagUpdateOne {
-	return _u.SetTweetID(t.ID)
+func (_u *TweetTagUpdateOne) SetTweet(v *Tweet) *TweetTagUpdateOne {
+	return _u.SetTweetID(v.ID)
 }
 
 // Mutation returns the TweetTagMutation object of the builder.

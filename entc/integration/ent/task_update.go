@@ -34,29 +34,29 @@ func (_u *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
 }
 
 // SetPriority sets the "priority" field.
-func (_u *TaskUpdate) SetPriority(t task.Priority) *TaskUpdate {
+func (_u *TaskUpdate) SetPriority(v task.Priority) *TaskUpdate {
 	_u.mutation.ResetPriority()
-	_u.mutation.SetPriority(t)
+	_u.mutation.SetPriority(v)
 	return _u
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
-func (_u *TaskUpdate) SetNillablePriority(t *task.Priority) *TaskUpdate {
-	if t != nil {
-		_u.SetPriority(*t)
+func (_u *TaskUpdate) SetNillablePriority(v *task.Priority) *TaskUpdate {
+	if v != nil {
+		_u.SetPriority(*v)
 	}
 	return _u
 }
 
-// AddPriority adds t to the "priority" field.
-func (_u *TaskUpdate) AddPriority(t task.Priority) *TaskUpdate {
-	_u.mutation.AddPriority(t)
+// AddPriority adds value to the "priority" field.
+func (_u *TaskUpdate) AddPriority(v task.Priority) *TaskUpdate {
+	_u.mutation.AddPriority(v)
 	return _u
 }
 
 // SetPriorities sets the "priorities" field.
-func (_u *TaskUpdate) SetPriorities(m map[string]task.Priority) *TaskUpdate {
-	_u.mutation.SetPriorities(m)
+func (_u *TaskUpdate) SetPriorities(v map[string]task.Priority) *TaskUpdate {
+	_u.mutation.SetPriorities(v)
 	return _u
 }
 
@@ -67,15 +67,15 @@ func (_u *TaskUpdate) ClearPriorities() *TaskUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *TaskUpdate) SetName(s string) *TaskUpdate {
-	_u.mutation.SetName(s)
+func (_u *TaskUpdate) SetName(v string) *TaskUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *TaskUpdate) SetNillableName(s *string) *TaskUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *TaskUpdate) SetNillableName(v *string) *TaskUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -87,15 +87,15 @@ func (_u *TaskUpdate) ClearName() *TaskUpdate {
 }
 
 // SetOwner sets the "owner" field.
-func (_u *TaskUpdate) SetOwner(s string) *TaskUpdate {
-	_u.mutation.SetOwner(s)
+func (_u *TaskUpdate) SetOwner(v string) *TaskUpdate {
+	_u.mutation.SetOwner(v)
 	return _u
 }
 
 // SetNillableOwner sets the "owner" field if the given value is not nil.
-func (_u *TaskUpdate) SetNillableOwner(s *string) *TaskUpdate {
-	if s != nil {
-		_u.SetOwner(*s)
+func (_u *TaskUpdate) SetNillableOwner(v *string) *TaskUpdate {
+	if v != nil {
+		_u.SetOwner(*v)
 	}
 	return _u
 }
@@ -107,23 +107,23 @@ func (_u *TaskUpdate) ClearOwner() *TaskUpdate {
 }
 
 // SetOrder sets the "order" field.
-func (_u *TaskUpdate) SetOrder(i int) *TaskUpdate {
+func (_u *TaskUpdate) SetOrder(v int) *TaskUpdate {
 	_u.mutation.ResetOrder()
-	_u.mutation.SetOrder(i)
+	_u.mutation.SetOrder(v)
 	return _u
 }
 
 // SetNillableOrder sets the "order" field if the given value is not nil.
-func (_u *TaskUpdate) SetNillableOrder(i *int) *TaskUpdate {
-	if i != nil {
-		_u.SetOrder(*i)
+func (_u *TaskUpdate) SetNillableOrder(v *int) *TaskUpdate {
+	if v != nil {
+		_u.SetOrder(*v)
 	}
 	return _u
 }
 
-// AddOrder adds i to the "order" field.
-func (_u *TaskUpdate) AddOrder(i int) *TaskUpdate {
-	_u.mutation.AddOrder(i)
+// AddOrder adds value to the "order" field.
+func (_u *TaskUpdate) AddOrder(v int) *TaskUpdate {
+	_u.mutation.AddOrder(v)
 	return _u
 }
 
@@ -134,23 +134,23 @@ func (_u *TaskUpdate) ClearOrder() *TaskUpdate {
 }
 
 // SetOrderOption sets the "order_option" field.
-func (_u *TaskUpdate) SetOrderOption(i int) *TaskUpdate {
+func (_u *TaskUpdate) SetOrderOption(v int) *TaskUpdate {
 	_u.mutation.ResetOrderOption()
-	_u.mutation.SetOrderOption(i)
+	_u.mutation.SetOrderOption(v)
 	return _u
 }
 
 // SetNillableOrderOption sets the "order_option" field if the given value is not nil.
-func (_u *TaskUpdate) SetNillableOrderOption(i *int) *TaskUpdate {
-	if i != nil {
-		_u.SetOrderOption(*i)
+func (_u *TaskUpdate) SetNillableOrderOption(v *int) *TaskUpdate {
+	if v != nil {
+		_u.SetOrderOption(*v)
 	}
 	return _u
 }
 
-// AddOrderOption adds i to the "order_option" field.
-func (_u *TaskUpdate) AddOrderOption(i int) *TaskUpdate {
-	_u.mutation.AddOrderOption(i)
+// AddOrderOption adds value to the "order_option" field.
+func (_u *TaskUpdate) AddOrderOption(v int) *TaskUpdate {
+	_u.mutation.AddOrderOption(v)
 	return _u
 }
 
@@ -161,15 +161,15 @@ func (_u *TaskUpdate) ClearOrderOption() *TaskUpdate {
 }
 
 // SetOp sets the "op" field.
-func (_u *TaskUpdate) SetOp(s string) *TaskUpdate {
-	_u.mutation.SetOpField(s)
+func (_u *TaskUpdate) SetOp(v string) *TaskUpdate {
+	_u.mutation.SetOpField(v)
 	return _u
 }
 
 // SetNillableOp sets the "op" field if the given value is not nil.
-func (_u *TaskUpdate) SetNillableOp(s *string) *TaskUpdate {
-	if s != nil {
-		_u.SetOp(*s)
+func (_u *TaskUpdate) SetNillableOp(v *string) *TaskUpdate {
+	if v != nil {
+		_u.SetOp(*v)
 	}
 	return _u
 }
@@ -227,9 +227,9 @@ func (_u *TaskUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *TaskUpdat
 	return _u
 }
 
-func (_u *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *TaskUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(enttask.Table, enttask.Columns, sqlgraph.NewFieldSpec(enttask.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -285,7 +285,7 @@ func (_u *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(enttask.FieldOp, field.TypeString, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{enttask.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -294,7 +294,7 @@ func (_u *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // TaskUpdateOne is the builder for updating a single Task entity.
@@ -307,29 +307,29 @@ type TaskUpdateOne struct {
 }
 
 // SetPriority sets the "priority" field.
-func (_u *TaskUpdateOne) SetPriority(t task.Priority) *TaskUpdateOne {
+func (_u *TaskUpdateOne) SetPriority(v task.Priority) *TaskUpdateOne {
 	_u.mutation.ResetPriority()
-	_u.mutation.SetPriority(t)
+	_u.mutation.SetPriority(v)
 	return _u
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
-func (_u *TaskUpdateOne) SetNillablePriority(t *task.Priority) *TaskUpdateOne {
-	if t != nil {
-		_u.SetPriority(*t)
+func (_u *TaskUpdateOne) SetNillablePriority(v *task.Priority) *TaskUpdateOne {
+	if v != nil {
+		_u.SetPriority(*v)
 	}
 	return _u
 }
 
-// AddPriority adds t to the "priority" field.
-func (_u *TaskUpdateOne) AddPriority(t task.Priority) *TaskUpdateOne {
-	_u.mutation.AddPriority(t)
+// AddPriority adds value to the "priority" field.
+func (_u *TaskUpdateOne) AddPriority(v task.Priority) *TaskUpdateOne {
+	_u.mutation.AddPriority(v)
 	return _u
 }
 
 // SetPriorities sets the "priorities" field.
-func (_u *TaskUpdateOne) SetPriorities(m map[string]task.Priority) *TaskUpdateOne {
-	_u.mutation.SetPriorities(m)
+func (_u *TaskUpdateOne) SetPriorities(v map[string]task.Priority) *TaskUpdateOne {
+	_u.mutation.SetPriorities(v)
 	return _u
 }
 
@@ -340,15 +340,15 @@ func (_u *TaskUpdateOne) ClearPriorities() *TaskUpdateOne {
 }
 
 // SetName sets the "name" field.
-func (_u *TaskUpdateOne) SetName(s string) *TaskUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *TaskUpdateOne) SetName(v string) *TaskUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *TaskUpdateOne) SetNillableName(s *string) *TaskUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *TaskUpdateOne) SetNillableName(v *string) *TaskUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -360,15 +360,15 @@ func (_u *TaskUpdateOne) ClearName() *TaskUpdateOne {
 }
 
 // SetOwner sets the "owner" field.
-func (_u *TaskUpdateOne) SetOwner(s string) *TaskUpdateOne {
-	_u.mutation.SetOwner(s)
+func (_u *TaskUpdateOne) SetOwner(v string) *TaskUpdateOne {
+	_u.mutation.SetOwner(v)
 	return _u
 }
 
 // SetNillableOwner sets the "owner" field if the given value is not nil.
-func (_u *TaskUpdateOne) SetNillableOwner(s *string) *TaskUpdateOne {
-	if s != nil {
-		_u.SetOwner(*s)
+func (_u *TaskUpdateOne) SetNillableOwner(v *string) *TaskUpdateOne {
+	if v != nil {
+		_u.SetOwner(*v)
 	}
 	return _u
 }
@@ -380,23 +380,23 @@ func (_u *TaskUpdateOne) ClearOwner() *TaskUpdateOne {
 }
 
 // SetOrder sets the "order" field.
-func (_u *TaskUpdateOne) SetOrder(i int) *TaskUpdateOne {
+func (_u *TaskUpdateOne) SetOrder(v int) *TaskUpdateOne {
 	_u.mutation.ResetOrder()
-	_u.mutation.SetOrder(i)
+	_u.mutation.SetOrder(v)
 	return _u
 }
 
 // SetNillableOrder sets the "order" field if the given value is not nil.
-func (_u *TaskUpdateOne) SetNillableOrder(i *int) *TaskUpdateOne {
-	if i != nil {
-		_u.SetOrder(*i)
+func (_u *TaskUpdateOne) SetNillableOrder(v *int) *TaskUpdateOne {
+	if v != nil {
+		_u.SetOrder(*v)
 	}
 	return _u
 }
 
-// AddOrder adds i to the "order" field.
-func (_u *TaskUpdateOne) AddOrder(i int) *TaskUpdateOne {
-	_u.mutation.AddOrder(i)
+// AddOrder adds value to the "order" field.
+func (_u *TaskUpdateOne) AddOrder(v int) *TaskUpdateOne {
+	_u.mutation.AddOrder(v)
 	return _u
 }
 
@@ -407,23 +407,23 @@ func (_u *TaskUpdateOne) ClearOrder() *TaskUpdateOne {
 }
 
 // SetOrderOption sets the "order_option" field.
-func (_u *TaskUpdateOne) SetOrderOption(i int) *TaskUpdateOne {
+func (_u *TaskUpdateOne) SetOrderOption(v int) *TaskUpdateOne {
 	_u.mutation.ResetOrderOption()
-	_u.mutation.SetOrderOption(i)
+	_u.mutation.SetOrderOption(v)
 	return _u
 }
 
 // SetNillableOrderOption sets the "order_option" field if the given value is not nil.
-func (_u *TaskUpdateOne) SetNillableOrderOption(i *int) *TaskUpdateOne {
-	if i != nil {
-		_u.SetOrderOption(*i)
+func (_u *TaskUpdateOne) SetNillableOrderOption(v *int) *TaskUpdateOne {
+	if v != nil {
+		_u.SetOrderOption(*v)
 	}
 	return _u
 }
 
-// AddOrderOption adds i to the "order_option" field.
-func (_u *TaskUpdateOne) AddOrderOption(i int) *TaskUpdateOne {
-	_u.mutation.AddOrderOption(i)
+// AddOrderOption adds value to the "order_option" field.
+func (_u *TaskUpdateOne) AddOrderOption(v int) *TaskUpdateOne {
+	_u.mutation.AddOrderOption(v)
 	return _u
 }
 
@@ -434,15 +434,15 @@ func (_u *TaskUpdateOne) ClearOrderOption() *TaskUpdateOne {
 }
 
 // SetOp sets the "op" field.
-func (_u *TaskUpdateOne) SetOp(s string) *TaskUpdateOne {
-	_u.mutation.SetOpField(s)
+func (_u *TaskUpdateOne) SetOp(v string) *TaskUpdateOne {
+	_u.mutation.SetOpField(v)
 	return _u
 }
 
 // SetNillableOp sets the "op" field if the given value is not nil.
-func (_u *TaskUpdateOne) SetNillableOp(s *string) *TaskUpdateOne {
-	if s != nil {
-		_u.SetOp(*s)
+func (_u *TaskUpdateOne) SetNillableOp(v *string) *TaskUpdateOne {
+	if v != nil {
+		_u.SetOp(*v)
 	}
 	return _u
 }

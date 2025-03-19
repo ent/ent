@@ -47,8 +47,8 @@ func (_u *CarUpdate) SetNillableOwnerID(id *int) *CarUpdate {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *CarUpdate) SetOwner(u *User) *CarUpdate {
-	return _u.SetOwnerID(u.ID)
+func (_u *CarUpdate) SetOwner(v *User) *CarUpdate {
+	return _u.SetOwnerID(v.ID)
 }
 
 // Mutation returns the CarMutation object of the builder.
@@ -89,7 +89,7 @@ func (_u *CarUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *CarUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(car.Table, car.Columns, sqlgraph.NewFieldSpec(car.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -127,7 +127,7 @@ func (_u *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{car.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -136,7 +136,7 @@ func (_u *CarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // CarUpdateOne is the builder for updating a single Car entity.
@@ -162,8 +162,8 @@ func (_u *CarUpdateOne) SetNillableOwnerID(id *int) *CarUpdateOne {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *CarUpdateOne) SetOwner(u *User) *CarUpdateOne {
-	return _u.SetOwnerID(u.ID)
+func (_u *CarUpdateOne) SetOwner(v *User) *CarUpdateOne {
+	return _u.SetOwnerID(v.ID)
 }
 
 // Mutation returns the CarMutation object of the builder.

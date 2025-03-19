@@ -34,15 +34,15 @@ func (_u *ItemUpdate) Where(ps ...predicate.Item) *ItemUpdate {
 }
 
 // SetText sets the "text" field.
-func (_u *ItemUpdate) SetText(s string) *ItemUpdate {
-	_u.mutation.SetText(s)
+func (_u *ItemUpdate) SetText(v string) *ItemUpdate {
+	_u.mutation.SetText(v)
 	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_u *ItemUpdate) SetNillableText(s *string) *ItemUpdate {
-	if s != nil {
-		_u.SetText(*s)
+func (_u *ItemUpdate) SetNillableText(v *string) *ItemUpdate {
+	if v != nil {
+		_u.SetText(*v)
 	}
 	return _u
 }
@@ -165,15 +165,15 @@ type ItemUpdateOne struct {
 }
 
 // SetText sets the "text" field.
-func (_u *ItemUpdateOne) SetText(s string) *ItemUpdateOne {
-	_u.mutation.SetText(s)
+func (_u *ItemUpdateOne) SetText(v string) *ItemUpdateOne {
+	_u.mutation.SetText(v)
 	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_u *ItemUpdateOne) SetNillableText(s *string) *ItemUpdateOne {
-	if s != nil {
-		_u.SetText(*s)
+func (_u *ItemUpdateOne) SetNillableText(v *string) *ItemUpdateOne {
+	if v != nil {
+		_u.SetText(*v)
 	}
 	return _u
 }

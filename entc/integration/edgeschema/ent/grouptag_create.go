@@ -28,25 +28,25 @@ type GroupTagCreate struct {
 }
 
 // SetTagID sets the "tag_id" field.
-func (_c *GroupTagCreate) SetTagID(i int) *GroupTagCreate {
-	_c.mutation.SetTagID(i)
+func (_c *GroupTagCreate) SetTagID(v int) *GroupTagCreate {
+	_c.mutation.SetTagID(v)
 	return _c
 }
 
 // SetGroupID sets the "group_id" field.
-func (_c *GroupTagCreate) SetGroupID(i int) *GroupTagCreate {
-	_c.mutation.SetGroupID(i)
+func (_c *GroupTagCreate) SetGroupID(v int) *GroupTagCreate {
+	_c.mutation.SetGroupID(v)
 	return _c
 }
 
 // SetTag sets the "tag" edge to the Tag entity.
-func (_c *GroupTagCreate) SetTag(t *Tag) *GroupTagCreate {
-	return _c.SetTagID(t.ID)
+func (_c *GroupTagCreate) SetTag(v *Tag) *GroupTagCreate {
+	return _c.SetTagID(v.ID)
 }
 
 // SetGroup sets the "group" edge to the Group entity.
-func (_c *GroupTagCreate) SetGroup(g *Group) *GroupTagCreate {
-	return _c.SetGroupID(g.ID)
+func (_c *GroupTagCreate) SetGroup(v *Group) *GroupTagCreate {
+	return _c.SetGroupID(v.ID)
 }
 
 // Mutation returns the GroupTagMutation object of the builder.

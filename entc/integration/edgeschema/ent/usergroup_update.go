@@ -35,55 +35,55 @@ func (_u *UserGroupUpdate) Where(ps ...predicate.UserGroup) *UserGroupUpdate {
 }
 
 // SetJoinedAt sets the "joined_at" field.
-func (_u *UserGroupUpdate) SetJoinedAt(t time.Time) *UserGroupUpdate {
-	_u.mutation.SetJoinedAt(t)
+func (_u *UserGroupUpdate) SetJoinedAt(v time.Time) *UserGroupUpdate {
+	_u.mutation.SetJoinedAt(v)
 	return _u
 }
 
 // SetNillableJoinedAt sets the "joined_at" field if the given value is not nil.
-func (_u *UserGroupUpdate) SetNillableJoinedAt(t *time.Time) *UserGroupUpdate {
-	if t != nil {
-		_u.SetJoinedAt(*t)
+func (_u *UserGroupUpdate) SetNillableJoinedAt(v *time.Time) *UserGroupUpdate {
+	if v != nil {
+		_u.SetJoinedAt(*v)
 	}
 	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *UserGroupUpdate) SetUserID(i int) *UserGroupUpdate {
-	_u.mutation.SetUserID(i)
+func (_u *UserGroupUpdate) SetUserID(v int) *UserGroupUpdate {
+	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *UserGroupUpdate) SetNillableUserID(i *int) *UserGroupUpdate {
-	if i != nil {
-		_u.SetUserID(*i)
+func (_u *UserGroupUpdate) SetNillableUserID(v *int) *UserGroupUpdate {
+	if v != nil {
+		_u.SetUserID(*v)
 	}
 	return _u
 }
 
 // SetGroupID sets the "group_id" field.
-func (_u *UserGroupUpdate) SetGroupID(i int) *UserGroupUpdate {
-	_u.mutation.SetGroupID(i)
+func (_u *UserGroupUpdate) SetGroupID(v int) *UserGroupUpdate {
+	_u.mutation.SetGroupID(v)
 	return _u
 }
 
 // SetNillableGroupID sets the "group_id" field if the given value is not nil.
-func (_u *UserGroupUpdate) SetNillableGroupID(i *int) *UserGroupUpdate {
-	if i != nil {
-		_u.SetGroupID(*i)
+func (_u *UserGroupUpdate) SetNillableGroupID(v *int) *UserGroupUpdate {
+	if v != nil {
+		_u.SetGroupID(*v)
 	}
 	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *UserGroupUpdate) SetUser(u *User) *UserGroupUpdate {
-	return _u.SetUserID(u.ID)
+func (_u *UserGroupUpdate) SetUser(v *User) *UserGroupUpdate {
+	return _u.SetUserID(v.ID)
 }
 
 // SetGroup sets the "group" edge to the Group entity.
-func (_u *UserGroupUpdate) SetGroup(g *Group) *UserGroupUpdate {
-	return _u.SetGroupID(g.ID)
+func (_u *UserGroupUpdate) SetGroup(v *Group) *UserGroupUpdate {
+	return _u.SetGroupID(v.ID)
 }
 
 // Mutation returns the UserGroupMutation object of the builder.
@@ -141,9 +141,9 @@ func (_u *UserGroupUpdate) check() error {
 	return nil
 }
 
-func (_u *UserGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *UserGroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(usergroup.Table, usergroup.Columns, sqlgraph.NewFieldSpec(usergroup.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -214,7 +214,7 @@ func (_u *UserGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{usergroup.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -223,7 +223,7 @@ func (_u *UserGroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // UserGroupUpdateOne is the builder for updating a single UserGroup entity.
@@ -235,55 +235,55 @@ type UserGroupUpdateOne struct {
 }
 
 // SetJoinedAt sets the "joined_at" field.
-func (_u *UserGroupUpdateOne) SetJoinedAt(t time.Time) *UserGroupUpdateOne {
-	_u.mutation.SetJoinedAt(t)
+func (_u *UserGroupUpdateOne) SetJoinedAt(v time.Time) *UserGroupUpdateOne {
+	_u.mutation.SetJoinedAt(v)
 	return _u
 }
 
 // SetNillableJoinedAt sets the "joined_at" field if the given value is not nil.
-func (_u *UserGroupUpdateOne) SetNillableJoinedAt(t *time.Time) *UserGroupUpdateOne {
-	if t != nil {
-		_u.SetJoinedAt(*t)
+func (_u *UserGroupUpdateOne) SetNillableJoinedAt(v *time.Time) *UserGroupUpdateOne {
+	if v != nil {
+		_u.SetJoinedAt(*v)
 	}
 	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *UserGroupUpdateOne) SetUserID(i int) *UserGroupUpdateOne {
-	_u.mutation.SetUserID(i)
+func (_u *UserGroupUpdateOne) SetUserID(v int) *UserGroupUpdateOne {
+	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *UserGroupUpdateOne) SetNillableUserID(i *int) *UserGroupUpdateOne {
-	if i != nil {
-		_u.SetUserID(*i)
+func (_u *UserGroupUpdateOne) SetNillableUserID(v *int) *UserGroupUpdateOne {
+	if v != nil {
+		_u.SetUserID(*v)
 	}
 	return _u
 }
 
 // SetGroupID sets the "group_id" field.
-func (_u *UserGroupUpdateOne) SetGroupID(i int) *UserGroupUpdateOne {
-	_u.mutation.SetGroupID(i)
+func (_u *UserGroupUpdateOne) SetGroupID(v int) *UserGroupUpdateOne {
+	_u.mutation.SetGroupID(v)
 	return _u
 }
 
 // SetNillableGroupID sets the "group_id" field if the given value is not nil.
-func (_u *UserGroupUpdateOne) SetNillableGroupID(i *int) *UserGroupUpdateOne {
-	if i != nil {
-		_u.SetGroupID(*i)
+func (_u *UserGroupUpdateOne) SetNillableGroupID(v *int) *UserGroupUpdateOne {
+	if v != nil {
+		_u.SetGroupID(*v)
 	}
 	return _u
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *UserGroupUpdateOne) SetUser(u *User) *UserGroupUpdateOne {
-	return _u.SetUserID(u.ID)
+func (_u *UserGroupUpdateOne) SetUser(v *User) *UserGroupUpdateOne {
+	return _u.SetUserID(v.ID)
 }
 
 // SetGroup sets the "group" edge to the Group entity.
-func (_u *UserGroupUpdateOne) SetGroup(g *Group) *UserGroupUpdateOne {
-	return _u.SetGroupID(g.ID)
+func (_u *UserGroupUpdateOne) SetGroup(v *Group) *UserGroupUpdateOne {
+	return _u.SetGroupID(v.ID)
 }
 
 // Mutation returns the UserGroupMutation object of the builder.

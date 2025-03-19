@@ -34,65 +34,65 @@ func (_u *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
 }
 
 // SetUniqueInt sets the "unique_int" field.
-func (_u *CommentUpdate) SetUniqueInt(i int) *CommentUpdate {
+func (_u *CommentUpdate) SetUniqueInt(v int) *CommentUpdate {
 	_u.mutation.ResetUniqueInt()
-	_u.mutation.SetUniqueInt(i)
+	_u.mutation.SetUniqueInt(v)
 	return _u
 }
 
 // SetNillableUniqueInt sets the "unique_int" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillableUniqueInt(i *int) *CommentUpdate {
-	if i != nil {
-		_u.SetUniqueInt(*i)
+func (_u *CommentUpdate) SetNillableUniqueInt(v *int) *CommentUpdate {
+	if v != nil {
+		_u.SetUniqueInt(*v)
 	}
 	return _u
 }
 
-// AddUniqueInt adds i to the "unique_int" field.
-func (_u *CommentUpdate) AddUniqueInt(i int) *CommentUpdate {
-	_u.mutation.AddUniqueInt(i)
+// AddUniqueInt adds value to the "unique_int" field.
+func (_u *CommentUpdate) AddUniqueInt(v int) *CommentUpdate {
+	_u.mutation.AddUniqueInt(v)
 	return _u
 }
 
 // SetUniqueFloat sets the "unique_float" field.
-func (_u *CommentUpdate) SetUniqueFloat(f float64) *CommentUpdate {
+func (_u *CommentUpdate) SetUniqueFloat(v float64) *CommentUpdate {
 	_u.mutation.ResetUniqueFloat()
-	_u.mutation.SetUniqueFloat(f)
+	_u.mutation.SetUniqueFloat(v)
 	return _u
 }
 
 // SetNillableUniqueFloat sets the "unique_float" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillableUniqueFloat(f *float64) *CommentUpdate {
-	if f != nil {
-		_u.SetUniqueFloat(*f)
+func (_u *CommentUpdate) SetNillableUniqueFloat(v *float64) *CommentUpdate {
+	if v != nil {
+		_u.SetUniqueFloat(*v)
 	}
 	return _u
 }
 
-// AddUniqueFloat adds f to the "unique_float" field.
-func (_u *CommentUpdate) AddUniqueFloat(f float64) *CommentUpdate {
-	_u.mutation.AddUniqueFloat(f)
+// AddUniqueFloat adds value to the "unique_float" field.
+func (_u *CommentUpdate) AddUniqueFloat(v float64) *CommentUpdate {
+	_u.mutation.AddUniqueFloat(v)
 	return _u
 }
 
 // SetNillableInt sets the "nillable_int" field.
-func (_u *CommentUpdate) SetNillableInt(i int) *CommentUpdate {
+func (_u *CommentUpdate) SetNillableInt(v int) *CommentUpdate {
 	_u.mutation.ResetNillableInt()
-	_u.mutation.SetNillableInt(i)
+	_u.mutation.SetNillableInt(v)
 	return _u
 }
 
 // SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillableNillableInt(i *int) *CommentUpdate {
-	if i != nil {
-		_u.SetNillableInt(*i)
+func (_u *CommentUpdate) SetNillableNillableInt(v *int) *CommentUpdate {
+	if v != nil {
+		_u.SetNillableInt(*v)
 	}
 	return _u
 }
 
-// AddNillableInt adds i to the "nillable_int" field.
-func (_u *CommentUpdate) AddNillableInt(i int) *CommentUpdate {
-	_u.mutation.AddNillableInt(i)
+// AddNillableInt adds value to the "nillable_int" field.
+func (_u *CommentUpdate) AddNillableInt(v int) *CommentUpdate {
+	_u.mutation.AddNillableInt(v)
 	return _u
 }
 
@@ -103,15 +103,15 @@ func (_u *CommentUpdate) ClearNillableInt() *CommentUpdate {
 }
 
 // SetTable sets the "table" field.
-func (_u *CommentUpdate) SetTable(s string) *CommentUpdate {
-	_u.mutation.SetTable(s)
+func (_u *CommentUpdate) SetTable(v string) *CommentUpdate {
+	_u.mutation.SetTable(v)
 	return _u
 }
 
 // SetNillableTable sets the "table" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillableTable(s *string) *CommentUpdate {
-	if s != nil {
-		_u.SetTable(*s)
+func (_u *CommentUpdate) SetNillableTable(v *string) *CommentUpdate {
+	if v != nil {
+		_u.SetTable(*v)
 	}
 	return _u
 }
@@ -123,15 +123,15 @@ func (_u *CommentUpdate) ClearTable() *CommentUpdate {
 }
 
 // SetDir sets the "dir" field.
-func (_u *CommentUpdate) SetDir(s schemadir.Dir) *CommentUpdate {
-	_u.mutation.SetDir(s)
+func (_u *CommentUpdate) SetDir(v schemadir.Dir) *CommentUpdate {
+	_u.mutation.SetDir(v)
 	return _u
 }
 
 // SetNillableDir sets the "dir" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillableDir(s *schemadir.Dir) *CommentUpdate {
-	if s != nil {
-		_u.SetDir(*s)
+func (_u *CommentUpdate) SetNillableDir(v *schemadir.Dir) *CommentUpdate {
+	if v != nil {
+		_u.SetDir(*v)
 	}
 	return _u
 }
@@ -143,15 +143,15 @@ func (_u *CommentUpdate) ClearDir() *CommentUpdate {
 }
 
 // SetClient sets the "client" field.
-func (_u *CommentUpdate) SetClient(s string) *CommentUpdate {
-	_u.mutation.SetClient(s)
+func (_u *CommentUpdate) SetClient(v string) *CommentUpdate {
+	_u.mutation.SetClient(v)
 	return _u
 }
 
 // SetNillableClient sets the "client" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillableClient(s *string) *CommentUpdate {
-	if s != nil {
-		_u.SetClient(*s)
+func (_u *CommentUpdate) SetNillableClient(v *string) *CommentUpdate {
+	if v != nil {
+		_u.SetClient(*v)
 	}
 	return _u
 }
@@ -200,7 +200,7 @@ func (_u *CommentUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Commen
 	return _u
 }
 
-func (_u *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *CommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(comment.Table, comment.Columns, sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -249,7 +249,7 @@ func (_u *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.ClearField(comment.FieldClient, field.TypeString)
 	}
 	_spec.AddModifiers(_u.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{comment.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -258,7 +258,7 @@ func (_u *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // CommentUpdateOne is the builder for updating a single Comment entity.
@@ -271,65 +271,65 @@ type CommentUpdateOne struct {
 }
 
 // SetUniqueInt sets the "unique_int" field.
-func (_u *CommentUpdateOne) SetUniqueInt(i int) *CommentUpdateOne {
+func (_u *CommentUpdateOne) SetUniqueInt(v int) *CommentUpdateOne {
 	_u.mutation.ResetUniqueInt()
-	_u.mutation.SetUniqueInt(i)
+	_u.mutation.SetUniqueInt(v)
 	return _u
 }
 
 // SetNillableUniqueInt sets the "unique_int" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillableUniqueInt(i *int) *CommentUpdateOne {
-	if i != nil {
-		_u.SetUniqueInt(*i)
+func (_u *CommentUpdateOne) SetNillableUniqueInt(v *int) *CommentUpdateOne {
+	if v != nil {
+		_u.SetUniqueInt(*v)
 	}
 	return _u
 }
 
-// AddUniqueInt adds i to the "unique_int" field.
-func (_u *CommentUpdateOne) AddUniqueInt(i int) *CommentUpdateOne {
-	_u.mutation.AddUniqueInt(i)
+// AddUniqueInt adds value to the "unique_int" field.
+func (_u *CommentUpdateOne) AddUniqueInt(v int) *CommentUpdateOne {
+	_u.mutation.AddUniqueInt(v)
 	return _u
 }
 
 // SetUniqueFloat sets the "unique_float" field.
-func (_u *CommentUpdateOne) SetUniqueFloat(f float64) *CommentUpdateOne {
+func (_u *CommentUpdateOne) SetUniqueFloat(v float64) *CommentUpdateOne {
 	_u.mutation.ResetUniqueFloat()
-	_u.mutation.SetUniqueFloat(f)
+	_u.mutation.SetUniqueFloat(v)
 	return _u
 }
 
 // SetNillableUniqueFloat sets the "unique_float" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillableUniqueFloat(f *float64) *CommentUpdateOne {
-	if f != nil {
-		_u.SetUniqueFloat(*f)
+func (_u *CommentUpdateOne) SetNillableUniqueFloat(v *float64) *CommentUpdateOne {
+	if v != nil {
+		_u.SetUniqueFloat(*v)
 	}
 	return _u
 }
 
-// AddUniqueFloat adds f to the "unique_float" field.
-func (_u *CommentUpdateOne) AddUniqueFloat(f float64) *CommentUpdateOne {
-	_u.mutation.AddUniqueFloat(f)
+// AddUniqueFloat adds value to the "unique_float" field.
+func (_u *CommentUpdateOne) AddUniqueFloat(v float64) *CommentUpdateOne {
+	_u.mutation.AddUniqueFloat(v)
 	return _u
 }
 
 // SetNillableInt sets the "nillable_int" field.
-func (_u *CommentUpdateOne) SetNillableInt(i int) *CommentUpdateOne {
+func (_u *CommentUpdateOne) SetNillableInt(v int) *CommentUpdateOne {
 	_u.mutation.ResetNillableInt()
-	_u.mutation.SetNillableInt(i)
+	_u.mutation.SetNillableInt(v)
 	return _u
 }
 
 // SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillableNillableInt(i *int) *CommentUpdateOne {
-	if i != nil {
-		_u.SetNillableInt(*i)
+func (_u *CommentUpdateOne) SetNillableNillableInt(v *int) *CommentUpdateOne {
+	if v != nil {
+		_u.SetNillableInt(*v)
 	}
 	return _u
 }
 
-// AddNillableInt adds i to the "nillable_int" field.
-func (_u *CommentUpdateOne) AddNillableInt(i int) *CommentUpdateOne {
-	_u.mutation.AddNillableInt(i)
+// AddNillableInt adds value to the "nillable_int" field.
+func (_u *CommentUpdateOne) AddNillableInt(v int) *CommentUpdateOne {
+	_u.mutation.AddNillableInt(v)
 	return _u
 }
 
@@ -340,15 +340,15 @@ func (_u *CommentUpdateOne) ClearNillableInt() *CommentUpdateOne {
 }
 
 // SetTable sets the "table" field.
-func (_u *CommentUpdateOne) SetTable(s string) *CommentUpdateOne {
-	_u.mutation.SetTable(s)
+func (_u *CommentUpdateOne) SetTable(v string) *CommentUpdateOne {
+	_u.mutation.SetTable(v)
 	return _u
 }
 
 // SetNillableTable sets the "table" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillableTable(s *string) *CommentUpdateOne {
-	if s != nil {
-		_u.SetTable(*s)
+func (_u *CommentUpdateOne) SetNillableTable(v *string) *CommentUpdateOne {
+	if v != nil {
+		_u.SetTable(*v)
 	}
 	return _u
 }
@@ -360,15 +360,15 @@ func (_u *CommentUpdateOne) ClearTable() *CommentUpdateOne {
 }
 
 // SetDir sets the "dir" field.
-func (_u *CommentUpdateOne) SetDir(s schemadir.Dir) *CommentUpdateOne {
-	_u.mutation.SetDir(s)
+func (_u *CommentUpdateOne) SetDir(v schemadir.Dir) *CommentUpdateOne {
+	_u.mutation.SetDir(v)
 	return _u
 }
 
 // SetNillableDir sets the "dir" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillableDir(s *schemadir.Dir) *CommentUpdateOne {
-	if s != nil {
-		_u.SetDir(*s)
+func (_u *CommentUpdateOne) SetNillableDir(v *schemadir.Dir) *CommentUpdateOne {
+	if v != nil {
+		_u.SetDir(*v)
 	}
 	return _u
 }
@@ -380,15 +380,15 @@ func (_u *CommentUpdateOne) ClearDir() *CommentUpdateOne {
 }
 
 // SetClient sets the "client" field.
-func (_u *CommentUpdateOne) SetClient(s string) *CommentUpdateOne {
-	_u.mutation.SetClient(s)
+func (_u *CommentUpdateOne) SetClient(v string) *CommentUpdateOne {
+	_u.mutation.SetClient(v)
 	return _u
 }
 
 // SetNillableClient sets the "client" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillableClient(s *string) *CommentUpdateOne {
-	if s != nil {
-		_u.SetClient(*s)
+func (_u *CommentUpdateOne) SetNillableClient(v *string) *CommentUpdateOne {
+	if v != nil {
+		_u.SetClient(*v)
 	}
 	return _u
 }

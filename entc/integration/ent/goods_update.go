@@ -70,7 +70,7 @@ func (_u *GoodsUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *GoodsUpd
 	return _u
 }
 
-func (_u *GoodsUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *GoodsUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(goods.Table, goods.Columns, sqlgraph.NewFieldSpec(goods.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -80,7 +80,7 @@ func (_u *GoodsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	_spec.AddModifiers(_u.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{goods.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -89,7 +89,7 @@ func (_u *GoodsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // GoodsUpdateOne is the builder for updating a single Goods entity.

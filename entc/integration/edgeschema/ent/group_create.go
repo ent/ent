@@ -30,15 +30,15 @@ type GroupCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *GroupCreate) SetName(s string) *GroupCreate {
-	_c.mutation.SetName(s)
+func (_c *GroupCreate) SetName(v string) *GroupCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_c *GroupCreate) SetNillableName(s *string) *GroupCreate {
-	if s != nil {
-		_c.SetName(*s)
+func (_c *GroupCreate) SetNillableName(v *string) *GroupCreate {
+	if v != nil {
+		_c.SetName(*v)
 	}
 	return _c
 }
@@ -50,10 +50,10 @@ func (_c *GroupCreate) AddUserIDs(ids ...int) *GroupCreate {
 }
 
 // AddUsers adds the "users" edges to the User entity.
-func (_c *GroupCreate) AddUsers(u ...*User) *GroupCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *GroupCreate) AddUsers(v ...*User) *GroupCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddUserIDs(ids...)
 }
@@ -65,10 +65,10 @@ func (_c *GroupCreate) AddTagIDs(ids ...int) *GroupCreate {
 }
 
 // AddTags adds the "tags" edges to the Tag entity.
-func (_c *GroupCreate) AddTags(t ...*Tag) *GroupCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_c *GroupCreate) AddTags(v ...*Tag) *GroupCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddTagIDs(ids...)
 }
@@ -80,10 +80,10 @@ func (_c *GroupCreate) AddJoinedUserIDs(ids ...int) *GroupCreate {
 }
 
 // AddJoinedUsers adds the "joined_users" edges to the UserGroup entity.
-func (_c *GroupCreate) AddJoinedUsers(u ...*UserGroup) *GroupCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *GroupCreate) AddJoinedUsers(v ...*UserGroup) *GroupCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddJoinedUserIDs(ids...)
 }
@@ -95,10 +95,10 @@ func (_c *GroupCreate) AddGroupTagIDs(ids ...int) *GroupCreate {
 }
 
 // AddGroupTags adds the "group_tags" edges to the GroupTag entity.
-func (_c *GroupCreate) AddGroupTags(g ...*GroupTag) *GroupCreate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_c *GroupCreate) AddGroupTags(v ...*GroupTag) *GroupCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddGroupTagIDs(ids...)
 }

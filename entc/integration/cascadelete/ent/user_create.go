@@ -25,15 +25,15 @@ type UserCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *UserCreate) SetName(s string) *UserCreate {
-	_c.mutation.SetName(s)
+func (_c *UserCreate) SetName(v string) *UserCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_c *UserCreate) SetNillableName(s *string) *UserCreate {
-	if s != nil {
-		_c.SetName(*s)
+func (_c *UserCreate) SetNillableName(v *string) *UserCreate {
+	if v != nil {
+		_c.SetName(*v)
 	}
 	return _c
 }
@@ -45,10 +45,10 @@ func (_c *UserCreate) AddPostIDs(ids ...int) *UserCreate {
 }
 
 // AddPosts adds the "posts" edges to the Post entity.
-func (_c *UserCreate) AddPosts(p ...*Post) *UserCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_c *UserCreate) AddPosts(v ...*Post) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddPostIDs(ids...)
 }

@@ -33,37 +33,37 @@ func (_u *BlobUpdate) Where(ps ...predicate.Blob) *BlobUpdate {
 }
 
 // SetUUID sets the "uuid" field.
-func (_u *BlobUpdate) SetUUID(u uuid.UUID) *BlobUpdate {
-	_u.mutation.SetUUID(u)
+func (_u *BlobUpdate) SetUUID(v uuid.UUID) *BlobUpdate {
+	_u.mutation.SetUUID(v)
 	return _u
 }
 
 // SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (_u *BlobUpdate) SetNillableUUID(u *uuid.UUID) *BlobUpdate {
-	if u != nil {
-		_u.SetUUID(*u)
+func (_u *BlobUpdate) SetNillableUUID(v *uuid.UUID) *BlobUpdate {
+	if v != nil {
+		_u.SetUUID(*v)
 	}
 	return _u
 }
 
 // SetCount sets the "count" field.
-func (_u *BlobUpdate) SetCount(i int) *BlobUpdate {
+func (_u *BlobUpdate) SetCount(v int) *BlobUpdate {
 	_u.mutation.ResetCount()
-	_u.mutation.SetCount(i)
+	_u.mutation.SetCount(v)
 	return _u
 }
 
 // SetNillableCount sets the "count" field if the given value is not nil.
-func (_u *BlobUpdate) SetNillableCount(i *int) *BlobUpdate {
-	if i != nil {
-		_u.SetCount(*i)
+func (_u *BlobUpdate) SetNillableCount(v *int) *BlobUpdate {
+	if v != nil {
+		_u.SetCount(*v)
 	}
 	return _u
 }
 
-// AddCount adds i to the "count" field.
-func (_u *BlobUpdate) AddCount(i int) *BlobUpdate {
-	_u.mutation.AddCount(i)
+// AddCount adds value to the "count" field.
+func (_u *BlobUpdate) AddCount(v int) *BlobUpdate {
+	_u.mutation.AddCount(v)
 	return _u
 }
 
@@ -82,8 +82,8 @@ func (_u *BlobUpdate) SetNillableParentID(id *uuid.UUID) *BlobUpdate {
 }
 
 // SetParent sets the "parent" edge to the Blob entity.
-func (_u *BlobUpdate) SetParent(b *Blob) *BlobUpdate {
-	return _u.SetParentID(b.ID)
+func (_u *BlobUpdate) SetParent(v *Blob) *BlobUpdate {
+	return _u.SetParentID(v.ID)
 }
 
 // AddLinkIDs adds the "links" edge to the Blob entity by IDs.
@@ -93,10 +93,10 @@ func (_u *BlobUpdate) AddLinkIDs(ids ...uuid.UUID) *BlobUpdate {
 }
 
 // AddLinks adds the "links" edges to the Blob entity.
-func (_u *BlobUpdate) AddLinks(b ...*Blob) *BlobUpdate {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *BlobUpdate) AddLinks(v ...*Blob) *BlobUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddLinkIDs(ids...)
 }
@@ -125,10 +125,10 @@ func (_u *BlobUpdate) RemoveLinkIDs(ids ...uuid.UUID) *BlobUpdate {
 }
 
 // RemoveLinks removes "links" edges to Blob entities.
-func (_u *BlobUpdate) RemoveLinks(b ...*Blob) *BlobUpdate {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *BlobUpdate) RemoveLinks(v ...*Blob) *BlobUpdate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveLinkIDs(ids...)
 }
@@ -160,7 +160,7 @@ func (_u *BlobUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *BlobUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(blob.Table, blob.Columns, sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -264,7 +264,7 @@ func (_u *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{blob.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -273,7 +273,7 @@ func (_u *BlobUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // BlobUpdateOne is the builder for updating a single Blob entity.
@@ -285,37 +285,37 @@ type BlobUpdateOne struct {
 }
 
 // SetUUID sets the "uuid" field.
-func (_u *BlobUpdateOne) SetUUID(u uuid.UUID) *BlobUpdateOne {
-	_u.mutation.SetUUID(u)
+func (_u *BlobUpdateOne) SetUUID(v uuid.UUID) *BlobUpdateOne {
+	_u.mutation.SetUUID(v)
 	return _u
 }
 
 // SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (_u *BlobUpdateOne) SetNillableUUID(u *uuid.UUID) *BlobUpdateOne {
-	if u != nil {
-		_u.SetUUID(*u)
+func (_u *BlobUpdateOne) SetNillableUUID(v *uuid.UUID) *BlobUpdateOne {
+	if v != nil {
+		_u.SetUUID(*v)
 	}
 	return _u
 }
 
 // SetCount sets the "count" field.
-func (_u *BlobUpdateOne) SetCount(i int) *BlobUpdateOne {
+func (_u *BlobUpdateOne) SetCount(v int) *BlobUpdateOne {
 	_u.mutation.ResetCount()
-	_u.mutation.SetCount(i)
+	_u.mutation.SetCount(v)
 	return _u
 }
 
 // SetNillableCount sets the "count" field if the given value is not nil.
-func (_u *BlobUpdateOne) SetNillableCount(i *int) *BlobUpdateOne {
-	if i != nil {
-		_u.SetCount(*i)
+func (_u *BlobUpdateOne) SetNillableCount(v *int) *BlobUpdateOne {
+	if v != nil {
+		_u.SetCount(*v)
 	}
 	return _u
 }
 
-// AddCount adds i to the "count" field.
-func (_u *BlobUpdateOne) AddCount(i int) *BlobUpdateOne {
-	_u.mutation.AddCount(i)
+// AddCount adds value to the "count" field.
+func (_u *BlobUpdateOne) AddCount(v int) *BlobUpdateOne {
+	_u.mutation.AddCount(v)
 	return _u
 }
 
@@ -334,8 +334,8 @@ func (_u *BlobUpdateOne) SetNillableParentID(id *uuid.UUID) *BlobUpdateOne {
 }
 
 // SetParent sets the "parent" edge to the Blob entity.
-func (_u *BlobUpdateOne) SetParent(b *Blob) *BlobUpdateOne {
-	return _u.SetParentID(b.ID)
+func (_u *BlobUpdateOne) SetParent(v *Blob) *BlobUpdateOne {
+	return _u.SetParentID(v.ID)
 }
 
 // AddLinkIDs adds the "links" edge to the Blob entity by IDs.
@@ -345,10 +345,10 @@ func (_u *BlobUpdateOne) AddLinkIDs(ids ...uuid.UUID) *BlobUpdateOne {
 }
 
 // AddLinks adds the "links" edges to the Blob entity.
-func (_u *BlobUpdateOne) AddLinks(b ...*Blob) *BlobUpdateOne {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *BlobUpdateOne) AddLinks(v ...*Blob) *BlobUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddLinkIDs(ids...)
 }
@@ -377,10 +377,10 @@ func (_u *BlobUpdateOne) RemoveLinkIDs(ids ...uuid.UUID) *BlobUpdateOne {
 }
 
 // RemoveLinks removes "links" edges to Blob entities.
-func (_u *BlobUpdateOne) RemoveLinks(b ...*Blob) *BlobUpdateOne {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_u *BlobUpdateOne) RemoveLinks(v ...*Blob) *BlobUpdateOne {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveLinkIDs(ids...)
 }

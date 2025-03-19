@@ -29,15 +29,15 @@ type SessionCreate struct {
 }
 
 // SetID sets the "id" field.
-func (_c *SessionCreate) SetID(s schema.ID) *SessionCreate {
-	_c.mutation.SetID(s)
+func (_c *SessionCreate) SetID(v schema.ID) *SessionCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *SessionCreate) SetNillableID(s *schema.ID) *SessionCreate {
-	if s != nil {
-		_c.SetID(*s)
+func (_c *SessionCreate) SetNillableID(v *schema.ID) *SessionCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
 	return _c
 }
@@ -57,8 +57,8 @@ func (_c *SessionCreate) SetNillableDeviceID(id *schema.ID) *SessionCreate {
 }
 
 // SetDevice sets the "device" edge to the Device entity.
-func (_c *SessionCreate) SetDevice(d *Device) *SessionCreate {
-	return _c.SetDeviceID(d.ID)
+func (_c *SessionCreate) SetDevice(v *Device) *SessionCreate {
+	return _c.SetDeviceID(v.ID)
 }
 
 // Mutation returns the SessionMutation object of the builder.

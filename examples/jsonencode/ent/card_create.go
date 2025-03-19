@@ -24,8 +24,8 @@ type CardCreate struct {
 }
 
 // SetNumber sets the "number" field.
-func (_c *CardCreate) SetNumber(s string) *CardCreate {
-	_c.mutation.SetNumber(s)
+func (_c *CardCreate) SetNumber(v string) *CardCreate {
+	_c.mutation.SetNumber(v)
 	return _c
 }
 

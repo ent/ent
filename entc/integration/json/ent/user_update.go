@@ -38,8 +38,8 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 }
 
 // SetT sets the "t" field.
-func (_u *UserUpdate) SetT(s *schema.T) *UserUpdate {
-	_u.mutation.SetT(s)
+func (_u *UserUpdate) SetT(v *schema.T) *UserUpdate {
+	_u.mutation.SetT(v)
 	return _u
 }
 
@@ -50,8 +50,8 @@ func (_u *UserUpdate) ClearT() *UserUpdate {
 }
 
 // SetURL sets the "url" field.
-func (_u *UserUpdate) SetURL(u *url.URL) *UserUpdate {
-	_u.mutation.SetURL(u)
+func (_u *UserUpdate) SetURL(v *url.URL) *UserUpdate {
+	_u.mutation.SetURL(v)
 	return _u
 }
 
@@ -62,14 +62,14 @@ func (_u *UserUpdate) ClearURL() *UserUpdate {
 }
 
 // SetURLs sets the "URLs" field.
-func (_u *UserUpdate) SetURLs(u []*url.URL) *UserUpdate {
-	_u.mutation.SetURLs(u)
+func (_u *UserUpdate) SetURLs(v []*url.URL) *UserUpdate {
+	_u.mutation.SetURLs(v)
 	return _u
 }
 
-// AppendURLs appends u to the "URLs" field.
-func (_u *UserUpdate) AppendURLs(u []*url.URL) *UserUpdate {
-	_u.mutation.AppendURLs(u)
+// AppendURLs appends value to the "URLs" field.
+func (_u *UserUpdate) AppendURLs(v []*url.URL) *UserUpdate {
+	_u.mutation.AppendURLs(v)
 	return _u
 }
 
@@ -80,14 +80,14 @@ func (_u *UserUpdate) ClearURLs() *UserUpdate {
 }
 
 // SetRaw sets the "raw" field.
-func (_u *UserUpdate) SetRaw(jm json.RawMessage) *UserUpdate {
-	_u.mutation.SetRaw(jm)
+func (_u *UserUpdate) SetRaw(v json.RawMessage) *UserUpdate {
+	_u.mutation.SetRaw(v)
 	return _u
 }
 
-// AppendRaw appends jm to the "raw" field.
-func (_u *UserUpdate) AppendRaw(jm json.RawMessage) *UserUpdate {
-	_u.mutation.AppendRaw(jm)
+// AppendRaw appends value to the "raw" field.
+func (_u *UserUpdate) AppendRaw(v json.RawMessage) *UserUpdate {
+	_u.mutation.AppendRaw(v)
 	return _u
 }
 
@@ -98,26 +98,26 @@ func (_u *UserUpdate) ClearRaw() *UserUpdate {
 }
 
 // SetDirs sets the "dirs" field.
-func (_u *UserUpdate) SetDirs(h []http.Dir) *UserUpdate {
-	_u.mutation.SetDirs(h)
+func (_u *UserUpdate) SetDirs(v []http.Dir) *UserUpdate {
+	_u.mutation.SetDirs(v)
 	return _u
 }
 
-// AppendDirs appends h to the "dirs" field.
-func (_u *UserUpdate) AppendDirs(h []http.Dir) *UserUpdate {
-	_u.mutation.AppendDirs(h)
+// AppendDirs appends value to the "dirs" field.
+func (_u *UserUpdate) AppendDirs(v []http.Dir) *UserUpdate {
+	_u.mutation.AppendDirs(v)
 	return _u
 }
 
 // SetInts sets the "ints" field.
-func (_u *UserUpdate) SetInts(i []int) *UserUpdate {
-	_u.mutation.SetInts(i)
+func (_u *UserUpdate) SetInts(v []int) *UserUpdate {
+	_u.mutation.SetInts(v)
 	return _u
 }
 
-// AppendInts appends i to the "ints" field.
-func (_u *UserUpdate) AppendInts(i []int) *UserUpdate {
-	_u.mutation.AppendInts(i)
+// AppendInts appends value to the "ints" field.
+func (_u *UserUpdate) AppendInts(v []int) *UserUpdate {
+	_u.mutation.AppendInts(v)
 	return _u
 }
 
@@ -128,14 +128,14 @@ func (_u *UserUpdate) ClearInts() *UserUpdate {
 }
 
 // SetFloats sets the "floats" field.
-func (_u *UserUpdate) SetFloats(f []float64) *UserUpdate {
-	_u.mutation.SetFloats(f)
+func (_u *UserUpdate) SetFloats(v []float64) *UserUpdate {
+	_u.mutation.SetFloats(v)
 	return _u
 }
 
-// AppendFloats appends f to the "floats" field.
-func (_u *UserUpdate) AppendFloats(f []float64) *UserUpdate {
-	_u.mutation.AppendFloats(f)
+// AppendFloats appends value to the "floats" field.
+func (_u *UserUpdate) AppendFloats(v []float64) *UserUpdate {
+	_u.mutation.AppendFloats(v)
 	return _u
 }
 
@@ -146,14 +146,14 @@ func (_u *UserUpdate) ClearFloats() *UserUpdate {
 }
 
 // SetStrings sets the "strings" field.
-func (_u *UserUpdate) SetStrings(s []string) *UserUpdate {
-	_u.mutation.SetStrings(s)
+func (_u *UserUpdate) SetStrings(v []string) *UserUpdate {
+	_u.mutation.SetStrings(v)
 	return _u
 }
 
-// AppendStrings appends s to the "strings" field.
-func (_u *UserUpdate) AppendStrings(s []string) *UserUpdate {
-	_u.mutation.AppendStrings(s)
+// AppendStrings appends value to the "strings" field.
+func (_u *UserUpdate) AppendStrings(v []string) *UserUpdate {
+	_u.mutation.AppendStrings(v)
 	return _u
 }
 
@@ -164,14 +164,14 @@ func (_u *UserUpdate) ClearStrings() *UserUpdate {
 }
 
 // SetIntsValidate sets the "ints_validate" field.
-func (_u *UserUpdate) SetIntsValidate(i []int) *UserUpdate {
-	_u.mutation.SetIntsValidate(i)
+func (_u *UserUpdate) SetIntsValidate(v []int) *UserUpdate {
+	_u.mutation.SetIntsValidate(v)
 	return _u
 }
 
-// AppendIntsValidate appends i to the "ints_validate" field.
-func (_u *UserUpdate) AppendIntsValidate(i []int) *UserUpdate {
-	_u.mutation.AppendIntsValidate(i)
+// AppendIntsValidate appends value to the "ints_validate" field.
+func (_u *UserUpdate) AppendIntsValidate(v []int) *UserUpdate {
+	_u.mutation.AppendIntsValidate(v)
 	return _u
 }
 
@@ -182,14 +182,14 @@ func (_u *UserUpdate) ClearIntsValidate() *UserUpdate {
 }
 
 // SetFloatsValidate sets the "floats_validate" field.
-func (_u *UserUpdate) SetFloatsValidate(f []float64) *UserUpdate {
-	_u.mutation.SetFloatsValidate(f)
+func (_u *UserUpdate) SetFloatsValidate(v []float64) *UserUpdate {
+	_u.mutation.SetFloatsValidate(v)
 	return _u
 }
 
-// AppendFloatsValidate appends f to the "floats_validate" field.
-func (_u *UserUpdate) AppendFloatsValidate(f []float64) *UserUpdate {
-	_u.mutation.AppendFloatsValidate(f)
+// AppendFloatsValidate appends value to the "floats_validate" field.
+func (_u *UserUpdate) AppendFloatsValidate(v []float64) *UserUpdate {
+	_u.mutation.AppendFloatsValidate(v)
 	return _u
 }
 
@@ -200,14 +200,14 @@ func (_u *UserUpdate) ClearFloatsValidate() *UserUpdate {
 }
 
 // SetStringsValidate sets the "strings_validate" field.
-func (_u *UserUpdate) SetStringsValidate(s []string) *UserUpdate {
-	_u.mutation.SetStringsValidate(s)
+func (_u *UserUpdate) SetStringsValidate(v []string) *UserUpdate {
+	_u.mutation.SetStringsValidate(v)
 	return _u
 }
 
-// AppendStringsValidate appends s to the "strings_validate" field.
-func (_u *UserUpdate) AppendStringsValidate(s []string) *UserUpdate {
-	_u.mutation.AppendStringsValidate(s)
+// AppendStringsValidate appends value to the "strings_validate" field.
+func (_u *UserUpdate) AppendStringsValidate(v []string) *UserUpdate {
+	_u.mutation.AppendStringsValidate(v)
 	return _u
 }
 
@@ -218,15 +218,15 @@ func (_u *UserUpdate) ClearStringsValidate() *UserUpdate {
 }
 
 // SetAddr sets the "addr" field.
-func (_u *UserUpdate) SetAddr(s schema.Addr) *UserUpdate {
-	_u.mutation.SetAddr(s)
+func (_u *UserUpdate) SetAddr(v schema.Addr) *UserUpdate {
+	_u.mutation.SetAddr(v)
 	return _u
 }
 
 // SetNillableAddr sets the "addr" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableAddr(s *schema.Addr) *UserUpdate {
-	if s != nil {
-		_u.SetAddr(*s)
+func (_u *UserUpdate) SetNillableAddr(v *schema.Addr) *UserUpdate {
+	if v != nil {
+		_u.SetAddr(*v)
 	}
 	return _u
 }
@@ -238,8 +238,8 @@ func (_u *UserUpdate) ClearAddr() *UserUpdate {
 }
 
 // SetUnknown sets the "unknown" field.
-func (_u *UserUpdate) SetUnknown(a any) *UserUpdate {
-	_u.mutation.SetUnknown(a)
+func (_u *UserUpdate) SetUnknown(v any) *UserUpdate {
+	_u.mutation.SetUnknown(v)
 	return _u
 }
 
@@ -307,9 +307,9 @@ func (_u *UserUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserUpdat
 	return _u
 }
 
-func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -440,7 +440,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.ClearField(user.FieldUnknown, field.TypeJSON)
 	}
 	_spec.AddModifiers(_u.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -449,7 +449,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -462,8 +462,8 @@ type UserUpdateOne struct {
 }
 
 // SetT sets the "t" field.
-func (_u *UserUpdateOne) SetT(s *schema.T) *UserUpdateOne {
-	_u.mutation.SetT(s)
+func (_u *UserUpdateOne) SetT(v *schema.T) *UserUpdateOne {
+	_u.mutation.SetT(v)
 	return _u
 }
 
@@ -474,8 +474,8 @@ func (_u *UserUpdateOne) ClearT() *UserUpdateOne {
 }
 
 // SetURL sets the "url" field.
-func (_u *UserUpdateOne) SetURL(u *url.URL) *UserUpdateOne {
-	_u.mutation.SetURL(u)
+func (_u *UserUpdateOne) SetURL(v *url.URL) *UserUpdateOne {
+	_u.mutation.SetURL(v)
 	return _u
 }
 
@@ -486,14 +486,14 @@ func (_u *UserUpdateOne) ClearURL() *UserUpdateOne {
 }
 
 // SetURLs sets the "URLs" field.
-func (_u *UserUpdateOne) SetURLs(u []*url.URL) *UserUpdateOne {
-	_u.mutation.SetURLs(u)
+func (_u *UserUpdateOne) SetURLs(v []*url.URL) *UserUpdateOne {
+	_u.mutation.SetURLs(v)
 	return _u
 }
 
-// AppendURLs appends u to the "URLs" field.
-func (_u *UserUpdateOne) AppendURLs(u []*url.URL) *UserUpdateOne {
-	_u.mutation.AppendURLs(u)
+// AppendURLs appends value to the "URLs" field.
+func (_u *UserUpdateOne) AppendURLs(v []*url.URL) *UserUpdateOne {
+	_u.mutation.AppendURLs(v)
 	return _u
 }
 
@@ -504,14 +504,14 @@ func (_u *UserUpdateOne) ClearURLs() *UserUpdateOne {
 }
 
 // SetRaw sets the "raw" field.
-func (_u *UserUpdateOne) SetRaw(jm json.RawMessage) *UserUpdateOne {
-	_u.mutation.SetRaw(jm)
+func (_u *UserUpdateOne) SetRaw(v json.RawMessage) *UserUpdateOne {
+	_u.mutation.SetRaw(v)
 	return _u
 }
 
-// AppendRaw appends jm to the "raw" field.
-func (_u *UserUpdateOne) AppendRaw(jm json.RawMessage) *UserUpdateOne {
-	_u.mutation.AppendRaw(jm)
+// AppendRaw appends value to the "raw" field.
+func (_u *UserUpdateOne) AppendRaw(v json.RawMessage) *UserUpdateOne {
+	_u.mutation.AppendRaw(v)
 	return _u
 }
 
@@ -522,26 +522,26 @@ func (_u *UserUpdateOne) ClearRaw() *UserUpdateOne {
 }
 
 // SetDirs sets the "dirs" field.
-func (_u *UserUpdateOne) SetDirs(h []http.Dir) *UserUpdateOne {
-	_u.mutation.SetDirs(h)
+func (_u *UserUpdateOne) SetDirs(v []http.Dir) *UserUpdateOne {
+	_u.mutation.SetDirs(v)
 	return _u
 }
 
-// AppendDirs appends h to the "dirs" field.
-func (_u *UserUpdateOne) AppendDirs(h []http.Dir) *UserUpdateOne {
-	_u.mutation.AppendDirs(h)
+// AppendDirs appends value to the "dirs" field.
+func (_u *UserUpdateOne) AppendDirs(v []http.Dir) *UserUpdateOne {
+	_u.mutation.AppendDirs(v)
 	return _u
 }
 
 // SetInts sets the "ints" field.
-func (_u *UserUpdateOne) SetInts(i []int) *UserUpdateOne {
-	_u.mutation.SetInts(i)
+func (_u *UserUpdateOne) SetInts(v []int) *UserUpdateOne {
+	_u.mutation.SetInts(v)
 	return _u
 }
 
-// AppendInts appends i to the "ints" field.
-func (_u *UserUpdateOne) AppendInts(i []int) *UserUpdateOne {
-	_u.mutation.AppendInts(i)
+// AppendInts appends value to the "ints" field.
+func (_u *UserUpdateOne) AppendInts(v []int) *UserUpdateOne {
+	_u.mutation.AppendInts(v)
 	return _u
 }
 
@@ -552,14 +552,14 @@ func (_u *UserUpdateOne) ClearInts() *UserUpdateOne {
 }
 
 // SetFloats sets the "floats" field.
-func (_u *UserUpdateOne) SetFloats(f []float64) *UserUpdateOne {
-	_u.mutation.SetFloats(f)
+func (_u *UserUpdateOne) SetFloats(v []float64) *UserUpdateOne {
+	_u.mutation.SetFloats(v)
 	return _u
 }
 
-// AppendFloats appends f to the "floats" field.
-func (_u *UserUpdateOne) AppendFloats(f []float64) *UserUpdateOne {
-	_u.mutation.AppendFloats(f)
+// AppendFloats appends value to the "floats" field.
+func (_u *UserUpdateOne) AppendFloats(v []float64) *UserUpdateOne {
+	_u.mutation.AppendFloats(v)
 	return _u
 }
 
@@ -570,14 +570,14 @@ func (_u *UserUpdateOne) ClearFloats() *UserUpdateOne {
 }
 
 // SetStrings sets the "strings" field.
-func (_u *UserUpdateOne) SetStrings(s []string) *UserUpdateOne {
-	_u.mutation.SetStrings(s)
+func (_u *UserUpdateOne) SetStrings(v []string) *UserUpdateOne {
+	_u.mutation.SetStrings(v)
 	return _u
 }
 
-// AppendStrings appends s to the "strings" field.
-func (_u *UserUpdateOne) AppendStrings(s []string) *UserUpdateOne {
-	_u.mutation.AppendStrings(s)
+// AppendStrings appends value to the "strings" field.
+func (_u *UserUpdateOne) AppendStrings(v []string) *UserUpdateOne {
+	_u.mutation.AppendStrings(v)
 	return _u
 }
 
@@ -588,14 +588,14 @@ func (_u *UserUpdateOne) ClearStrings() *UserUpdateOne {
 }
 
 // SetIntsValidate sets the "ints_validate" field.
-func (_u *UserUpdateOne) SetIntsValidate(i []int) *UserUpdateOne {
-	_u.mutation.SetIntsValidate(i)
+func (_u *UserUpdateOne) SetIntsValidate(v []int) *UserUpdateOne {
+	_u.mutation.SetIntsValidate(v)
 	return _u
 }
 
-// AppendIntsValidate appends i to the "ints_validate" field.
-func (_u *UserUpdateOne) AppendIntsValidate(i []int) *UserUpdateOne {
-	_u.mutation.AppendIntsValidate(i)
+// AppendIntsValidate appends value to the "ints_validate" field.
+func (_u *UserUpdateOne) AppendIntsValidate(v []int) *UserUpdateOne {
+	_u.mutation.AppendIntsValidate(v)
 	return _u
 }
 
@@ -606,14 +606,14 @@ func (_u *UserUpdateOne) ClearIntsValidate() *UserUpdateOne {
 }
 
 // SetFloatsValidate sets the "floats_validate" field.
-func (_u *UserUpdateOne) SetFloatsValidate(f []float64) *UserUpdateOne {
-	_u.mutation.SetFloatsValidate(f)
+func (_u *UserUpdateOne) SetFloatsValidate(v []float64) *UserUpdateOne {
+	_u.mutation.SetFloatsValidate(v)
 	return _u
 }
 
-// AppendFloatsValidate appends f to the "floats_validate" field.
-func (_u *UserUpdateOne) AppendFloatsValidate(f []float64) *UserUpdateOne {
-	_u.mutation.AppendFloatsValidate(f)
+// AppendFloatsValidate appends value to the "floats_validate" field.
+func (_u *UserUpdateOne) AppendFloatsValidate(v []float64) *UserUpdateOne {
+	_u.mutation.AppendFloatsValidate(v)
 	return _u
 }
 
@@ -624,14 +624,14 @@ func (_u *UserUpdateOne) ClearFloatsValidate() *UserUpdateOne {
 }
 
 // SetStringsValidate sets the "strings_validate" field.
-func (_u *UserUpdateOne) SetStringsValidate(s []string) *UserUpdateOne {
-	_u.mutation.SetStringsValidate(s)
+func (_u *UserUpdateOne) SetStringsValidate(v []string) *UserUpdateOne {
+	_u.mutation.SetStringsValidate(v)
 	return _u
 }
 
-// AppendStringsValidate appends s to the "strings_validate" field.
-func (_u *UserUpdateOne) AppendStringsValidate(s []string) *UserUpdateOne {
-	_u.mutation.AppendStringsValidate(s)
+// AppendStringsValidate appends value to the "strings_validate" field.
+func (_u *UserUpdateOne) AppendStringsValidate(v []string) *UserUpdateOne {
+	_u.mutation.AppendStringsValidate(v)
 	return _u
 }
 
@@ -642,15 +642,15 @@ func (_u *UserUpdateOne) ClearStringsValidate() *UserUpdateOne {
 }
 
 // SetAddr sets the "addr" field.
-func (_u *UserUpdateOne) SetAddr(s schema.Addr) *UserUpdateOne {
-	_u.mutation.SetAddr(s)
+func (_u *UserUpdateOne) SetAddr(v schema.Addr) *UserUpdateOne {
+	_u.mutation.SetAddr(v)
 	return _u
 }
 
 // SetNillableAddr sets the "addr" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableAddr(s *schema.Addr) *UserUpdateOne {
-	if s != nil {
-		_u.SetAddr(*s)
+func (_u *UserUpdateOne) SetNillableAddr(v *schema.Addr) *UserUpdateOne {
+	if v != nil {
+		_u.SetAddr(*v)
 	}
 	return _u
 }
@@ -662,8 +662,8 @@ func (_u *UserUpdateOne) ClearAddr() *UserUpdateOne {
 }
 
 // SetUnknown sets the "unknown" field.
-func (_u *UserUpdateOne) SetUnknown(a any) *UserUpdateOne {
-	_u.mutation.SetUnknown(a)
+func (_u *UserUpdateOne) SetUnknown(v any) *UserUpdateOne {
+	_u.mutation.SetUnknown(v)
 	return _u
 }
 

@@ -70,7 +70,7 @@ func (_u *PCUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *PCUpdate {
 	return _u
 }
 
-func (_u *PCUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *PCUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(pc.Table, pc.Columns, sqlgraph.NewFieldSpec(pc.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -80,7 +80,7 @@ func (_u *PCUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	_spec.AddModifiers(_u.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{pc.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -89,7 +89,7 @@ func (_u *PCUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // PCUpdateOne is the builder for updating a single PC entity.

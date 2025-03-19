@@ -35,43 +35,43 @@ func (_u *AttachedFileUpdate) Where(ps ...predicate.AttachedFile) *AttachedFileU
 }
 
 // SetAttachTime sets the "attach_time" field.
-func (_u *AttachedFileUpdate) SetAttachTime(t time.Time) *AttachedFileUpdate {
-	_u.mutation.SetAttachTime(t)
+func (_u *AttachedFileUpdate) SetAttachTime(v time.Time) *AttachedFileUpdate {
+	_u.mutation.SetAttachTime(v)
 	return _u
 }
 
 // SetNillableAttachTime sets the "attach_time" field if the given value is not nil.
-func (_u *AttachedFileUpdate) SetNillableAttachTime(t *time.Time) *AttachedFileUpdate {
-	if t != nil {
-		_u.SetAttachTime(*t)
+func (_u *AttachedFileUpdate) SetNillableAttachTime(v *time.Time) *AttachedFileUpdate {
+	if v != nil {
+		_u.SetAttachTime(*v)
 	}
 	return _u
 }
 
 // SetFID sets the "f_id" field.
-func (_u *AttachedFileUpdate) SetFID(i int) *AttachedFileUpdate {
-	_u.mutation.SetFID(i)
+func (_u *AttachedFileUpdate) SetFID(v int) *AttachedFileUpdate {
+	_u.mutation.SetFID(v)
 	return _u
 }
 
 // SetNillableFID sets the "f_id" field if the given value is not nil.
-func (_u *AttachedFileUpdate) SetNillableFID(i *int) *AttachedFileUpdate {
-	if i != nil {
-		_u.SetFID(*i)
+func (_u *AttachedFileUpdate) SetNillableFID(v *int) *AttachedFileUpdate {
+	if v != nil {
+		_u.SetFID(*v)
 	}
 	return _u
 }
 
 // SetProcID sets the "proc_id" field.
-func (_u *AttachedFileUpdate) SetProcID(i int) *AttachedFileUpdate {
-	_u.mutation.SetProcID(i)
+func (_u *AttachedFileUpdate) SetProcID(v int) *AttachedFileUpdate {
+	_u.mutation.SetProcID(v)
 	return _u
 }
 
 // SetNillableProcID sets the "proc_id" field if the given value is not nil.
-func (_u *AttachedFileUpdate) SetNillableProcID(i *int) *AttachedFileUpdate {
-	if i != nil {
-		_u.SetProcID(*i)
+func (_u *AttachedFileUpdate) SetNillableProcID(v *int) *AttachedFileUpdate {
+	if v != nil {
+		_u.SetProcID(*v)
 	}
 	return _u
 }
@@ -83,13 +83,13 @@ func (_u *AttachedFileUpdate) SetFiID(id int) *AttachedFileUpdate {
 }
 
 // SetFi sets the "fi" edge to the File entity.
-func (_u *AttachedFileUpdate) SetFi(f *File) *AttachedFileUpdate {
-	return _u.SetFiID(f.ID)
+func (_u *AttachedFileUpdate) SetFi(v *File) *AttachedFileUpdate {
+	return _u.SetFiID(v.ID)
 }
 
 // SetProc sets the "proc" edge to the Process entity.
-func (_u *AttachedFileUpdate) SetProc(p *Process) *AttachedFileUpdate {
-	return _u.SetProcID(p.ID)
+func (_u *AttachedFileUpdate) SetProc(v *Process) *AttachedFileUpdate {
+	return _u.SetProcID(v.ID)
 }
 
 // Mutation returns the AttachedFileMutation object of the builder.
@@ -147,9 +147,9 @@ func (_u *AttachedFileUpdate) check() error {
 	return nil
 }
 
-func (_u *AttachedFileUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *AttachedFileUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(attachedfile.Table, attachedfile.Columns, sqlgraph.NewFieldSpec(attachedfile.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -220,7 +220,7 @@ func (_u *AttachedFileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{attachedfile.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -229,7 +229,7 @@ func (_u *AttachedFileUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // AttachedFileUpdateOne is the builder for updating a single AttachedFile entity.
@@ -241,43 +241,43 @@ type AttachedFileUpdateOne struct {
 }
 
 // SetAttachTime sets the "attach_time" field.
-func (_u *AttachedFileUpdateOne) SetAttachTime(t time.Time) *AttachedFileUpdateOne {
-	_u.mutation.SetAttachTime(t)
+func (_u *AttachedFileUpdateOne) SetAttachTime(v time.Time) *AttachedFileUpdateOne {
+	_u.mutation.SetAttachTime(v)
 	return _u
 }
 
 // SetNillableAttachTime sets the "attach_time" field if the given value is not nil.
-func (_u *AttachedFileUpdateOne) SetNillableAttachTime(t *time.Time) *AttachedFileUpdateOne {
-	if t != nil {
-		_u.SetAttachTime(*t)
+func (_u *AttachedFileUpdateOne) SetNillableAttachTime(v *time.Time) *AttachedFileUpdateOne {
+	if v != nil {
+		_u.SetAttachTime(*v)
 	}
 	return _u
 }
 
 // SetFID sets the "f_id" field.
-func (_u *AttachedFileUpdateOne) SetFID(i int) *AttachedFileUpdateOne {
-	_u.mutation.SetFID(i)
+func (_u *AttachedFileUpdateOne) SetFID(v int) *AttachedFileUpdateOne {
+	_u.mutation.SetFID(v)
 	return _u
 }
 
 // SetNillableFID sets the "f_id" field if the given value is not nil.
-func (_u *AttachedFileUpdateOne) SetNillableFID(i *int) *AttachedFileUpdateOne {
-	if i != nil {
-		_u.SetFID(*i)
+func (_u *AttachedFileUpdateOne) SetNillableFID(v *int) *AttachedFileUpdateOne {
+	if v != nil {
+		_u.SetFID(*v)
 	}
 	return _u
 }
 
 // SetProcID sets the "proc_id" field.
-func (_u *AttachedFileUpdateOne) SetProcID(i int) *AttachedFileUpdateOne {
-	_u.mutation.SetProcID(i)
+func (_u *AttachedFileUpdateOne) SetProcID(v int) *AttachedFileUpdateOne {
+	_u.mutation.SetProcID(v)
 	return _u
 }
 
 // SetNillableProcID sets the "proc_id" field if the given value is not nil.
-func (_u *AttachedFileUpdateOne) SetNillableProcID(i *int) *AttachedFileUpdateOne {
-	if i != nil {
-		_u.SetProcID(*i)
+func (_u *AttachedFileUpdateOne) SetNillableProcID(v *int) *AttachedFileUpdateOne {
+	if v != nil {
+		_u.SetProcID(*v)
 	}
 	return _u
 }
@@ -289,13 +289,13 @@ func (_u *AttachedFileUpdateOne) SetFiID(id int) *AttachedFileUpdateOne {
 }
 
 // SetFi sets the "fi" edge to the File entity.
-func (_u *AttachedFileUpdateOne) SetFi(f *File) *AttachedFileUpdateOne {
-	return _u.SetFiID(f.ID)
+func (_u *AttachedFileUpdateOne) SetFi(v *File) *AttachedFileUpdateOne {
+	return _u.SetFiID(v.ID)
 }
 
 // SetProc sets the "proc" edge to the Process entity.
-func (_u *AttachedFileUpdateOne) SetProc(p *Process) *AttachedFileUpdateOne {
-	return _u.SetProcID(p.ID)
+func (_u *AttachedFileUpdateOne) SetProc(v *Process) *AttachedFileUpdateOne {
+	return _u.SetProcID(v.ID)
 }
 
 // Mutation returns the AttachedFileMutation object of the builder.

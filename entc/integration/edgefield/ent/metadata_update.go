@@ -33,36 +33,36 @@ func (_u *MetadataUpdate) Where(ps ...predicate.Metadata) *MetadataUpdate {
 }
 
 // SetAge sets the "age" field.
-func (_u *MetadataUpdate) SetAge(i int) *MetadataUpdate {
+func (_u *MetadataUpdate) SetAge(v int) *MetadataUpdate {
 	_u.mutation.ResetAge()
-	_u.mutation.SetAge(i)
+	_u.mutation.SetAge(v)
 	return _u
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *MetadataUpdate) SetNillableAge(i *int) *MetadataUpdate {
-	if i != nil {
-		_u.SetAge(*i)
+func (_u *MetadataUpdate) SetNillableAge(v *int) *MetadataUpdate {
+	if v != nil {
+		_u.SetAge(*v)
 	}
 	return _u
 }
 
-// AddAge adds i to the "age" field.
-func (_u *MetadataUpdate) AddAge(i int) *MetadataUpdate {
-	_u.mutation.AddAge(i)
+// AddAge adds value to the "age" field.
+func (_u *MetadataUpdate) AddAge(v int) *MetadataUpdate {
+	_u.mutation.AddAge(v)
 	return _u
 }
 
 // SetParentID sets the "parent_id" field.
-func (_u *MetadataUpdate) SetParentID(i int) *MetadataUpdate {
-	_u.mutation.SetParentID(i)
+func (_u *MetadataUpdate) SetParentID(v int) *MetadataUpdate {
+	_u.mutation.SetParentID(v)
 	return _u
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_u *MetadataUpdate) SetNillableParentID(i *int) *MetadataUpdate {
-	if i != nil {
-		_u.SetParentID(*i)
+func (_u *MetadataUpdate) SetNillableParentID(v *int) *MetadataUpdate {
+	if v != nil {
+		_u.SetParentID(*v)
 	}
 	return _u
 }
@@ -88,8 +88,8 @@ func (_u *MetadataUpdate) SetNillableUserID(id *int) *MetadataUpdate {
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *MetadataUpdate) SetUser(u *User) *MetadataUpdate {
-	return _u.SetUserID(u.ID)
+func (_u *MetadataUpdate) SetUser(v *User) *MetadataUpdate {
+	return _u.SetUserID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the Metadata entity by IDs.
@@ -99,17 +99,17 @@ func (_u *MetadataUpdate) AddChildIDs(ids ...int) *MetadataUpdate {
 }
 
 // AddChildren adds the "children" edges to the Metadata entity.
-func (_u *MetadataUpdate) AddChildren(m ...*Metadata) *MetadataUpdate {
-	ids := make([]int, len(m))
-	for i := range m {
-		ids[i] = m[i].ID
+func (_u *MetadataUpdate) AddChildren(v ...*Metadata) *MetadataUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
 
 // SetParent sets the "parent" edge to the Metadata entity.
-func (_u *MetadataUpdate) SetParent(m *Metadata) *MetadataUpdate {
-	return _u.SetParentID(m.ID)
+func (_u *MetadataUpdate) SetParent(v *Metadata) *MetadataUpdate {
+	return _u.SetParentID(v.ID)
 }
 
 // Mutation returns the MetadataMutation object of the builder.
@@ -136,10 +136,10 @@ func (_u *MetadataUpdate) RemoveChildIDs(ids ...int) *MetadataUpdate {
 }
 
 // RemoveChildren removes "children" edges to Metadata entities.
-func (_u *MetadataUpdate) RemoveChildren(m ...*Metadata) *MetadataUpdate {
-	ids := make([]int, len(m))
-	for i := range m {
-		ids[i] = m[i].ID
+func (_u *MetadataUpdate) RemoveChildren(v ...*Metadata) *MetadataUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }
@@ -177,7 +177,7 @@ func (_u *MetadataUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *MetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *MetadataUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(metadata.Table, metadata.Columns, sqlgraph.NewFieldSpec(metadata.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -295,7 +295,7 @@ func (_u *MetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{metadata.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -304,7 +304,7 @@ func (_u *MetadataUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // MetadataUpdateOne is the builder for updating a single Metadata entity.
@@ -316,36 +316,36 @@ type MetadataUpdateOne struct {
 }
 
 // SetAge sets the "age" field.
-func (_u *MetadataUpdateOne) SetAge(i int) *MetadataUpdateOne {
+func (_u *MetadataUpdateOne) SetAge(v int) *MetadataUpdateOne {
 	_u.mutation.ResetAge()
-	_u.mutation.SetAge(i)
+	_u.mutation.SetAge(v)
 	return _u
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *MetadataUpdateOne) SetNillableAge(i *int) *MetadataUpdateOne {
-	if i != nil {
-		_u.SetAge(*i)
+func (_u *MetadataUpdateOne) SetNillableAge(v *int) *MetadataUpdateOne {
+	if v != nil {
+		_u.SetAge(*v)
 	}
 	return _u
 }
 
-// AddAge adds i to the "age" field.
-func (_u *MetadataUpdateOne) AddAge(i int) *MetadataUpdateOne {
-	_u.mutation.AddAge(i)
+// AddAge adds value to the "age" field.
+func (_u *MetadataUpdateOne) AddAge(v int) *MetadataUpdateOne {
+	_u.mutation.AddAge(v)
 	return _u
 }
 
 // SetParentID sets the "parent_id" field.
-func (_u *MetadataUpdateOne) SetParentID(i int) *MetadataUpdateOne {
-	_u.mutation.SetParentID(i)
+func (_u *MetadataUpdateOne) SetParentID(v int) *MetadataUpdateOne {
+	_u.mutation.SetParentID(v)
 	return _u
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_u *MetadataUpdateOne) SetNillableParentID(i *int) *MetadataUpdateOne {
-	if i != nil {
-		_u.SetParentID(*i)
+func (_u *MetadataUpdateOne) SetNillableParentID(v *int) *MetadataUpdateOne {
+	if v != nil {
+		_u.SetParentID(*v)
 	}
 	return _u
 }
@@ -371,8 +371,8 @@ func (_u *MetadataUpdateOne) SetNillableUserID(id *int) *MetadataUpdateOne {
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *MetadataUpdateOne) SetUser(u *User) *MetadataUpdateOne {
-	return _u.SetUserID(u.ID)
+func (_u *MetadataUpdateOne) SetUser(v *User) *MetadataUpdateOne {
+	return _u.SetUserID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the Metadata entity by IDs.
@@ -382,17 +382,17 @@ func (_u *MetadataUpdateOne) AddChildIDs(ids ...int) *MetadataUpdateOne {
 }
 
 // AddChildren adds the "children" edges to the Metadata entity.
-func (_u *MetadataUpdateOne) AddChildren(m ...*Metadata) *MetadataUpdateOne {
-	ids := make([]int, len(m))
-	for i := range m {
-		ids[i] = m[i].ID
+func (_u *MetadataUpdateOne) AddChildren(v ...*Metadata) *MetadataUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
 
 // SetParent sets the "parent" edge to the Metadata entity.
-func (_u *MetadataUpdateOne) SetParent(m *Metadata) *MetadataUpdateOne {
-	return _u.SetParentID(m.ID)
+func (_u *MetadataUpdateOne) SetParent(v *Metadata) *MetadataUpdateOne {
+	return _u.SetParentID(v.ID)
 }
 
 // Mutation returns the MetadataMutation object of the builder.
@@ -419,10 +419,10 @@ func (_u *MetadataUpdateOne) RemoveChildIDs(ids ...int) *MetadataUpdateOne {
 }
 
 // RemoveChildren removes "children" edges to Metadata entities.
-func (_u *MetadataUpdateOne) RemoveChildren(m ...*Metadata) *MetadataUpdateOne {
-	ids := make([]int, len(m))
-	for i := range m {
-		ids[i] = m[i].ID
+func (_u *MetadataUpdateOne) RemoveChildren(v ...*Metadata) *MetadataUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }

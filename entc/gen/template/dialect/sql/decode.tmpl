@@ -60,17 +60,16 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []any
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	{{- $idx := "i" }}{{ if eq $idx $receiver }}{{ $idx = "j" }}{{ end }}
-	for {{ $idx }} := range columns {
-		switch columns[{{ $idx }}] {
+	for i := range columns {
+		switch columns[i] {
 		{{- if $.HasOneFieldID }}
 			case {{ $.Package }}.{{ $.ID.Constant }}:
 				{{- if or $.ID.IsString $.ID.IsBytes $.ID.HasGoType }}
-					{{- with extend $ "Idx" $idx "Field" $.ID "Rec" $receiver }}
+					{{- with extend $ "Idx" "i" "Field" $.ID "Rec" $receiver }}
 						{{ template "dialect/sql/decode/field" . }}
 					{{- end }}
 				{{- else }}
-					value, ok := values[{{ $idx }}].(*sql.NullInt64)
+					value, ok := values[i].(*sql.NullInt64)
 					if !ok {
 						return fmt.Errorf("unexpected type %T for field id", value)
 					}
@@ -79,7 +78,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []any
 		{{- end }}
 		{{- range  $f := $.Fields }}
 			case {{ $.Package }}.{{ $f.Constant }}:
-				{{- with extend $ "Idx" $idx "Field" $f "Rec" $receiver }}
+				{{- with extend $ "Idx" "i" "Field" $f "Rec" $receiver }}
 					{{ template "dialect/sql/decode/field" . }}
 				{{- end }}
 		{{- end }}
@@ -87,11 +86,11 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []any
 			{{- $f := $fk.Field }}
 			case {{ if $fk.UserDefined }}{{ $.Package }}.{{ $.ID.Constant }}{{ else }}{{ $.Package }}.ForeignKeys[{{ $i }}]{{ end }}:
 				{{- if or $fk.UserDefined (and $f.UserDefined (or $f.IsString $f.IsBytes $f.HasGoType)) }}
-					{{- with extend $ "Idx" $idx "Field" $f "Rec" $receiver "StructField" $fk.StructField }}
+					{{- with extend $ "Idx" "i" "Field" $f "Rec" $receiver "StructField" $fk.StructField }}
 						{{ template "dialect/sql/decode/field" . }}
 					{{- end }}
 				{{- else }}
-					if value, ok := values[{{ $idx }}].(*sql.NullInt64); !ok {
+					if value, ok := values[i].(*sql.NullInt64); !ok {
 						return fmt.Errorf("unexpected type %T for edge-field {{ $f.Name}}", value)
 					} else if value.Valid {
 						{{ $receiver }}.{{ $fk.StructField }} = new({{ $f.Type }})
@@ -101,7 +100,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []any
 		{{- end }}
 		default:
 			{{- /* In case of no match, allow getting this value by its name. */}}
-			{{ $receiver }}.selectValues.Set(columns[{{ $idx }}], values[{{ $idx }}])
+			{{ $receiver }}.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil

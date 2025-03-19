@@ -34,63 +34,63 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 }
 
 // SetAge sets the "age" field.
-func (_u *UserUpdate) SetAge(f float64) *UserUpdate {
+func (_u *UserUpdate) SetAge(v float64) *UserUpdate {
 	_u.mutation.ResetAge()
-	_u.mutation.SetAge(f)
+	_u.mutation.SetAge(v)
 	return _u
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableAge(f *float64) *UserUpdate {
-	if f != nil {
-		_u.SetAge(*f)
+func (_u *UserUpdate) SetNillableAge(v *float64) *UserUpdate {
+	if v != nil {
+		_u.SetAge(*v)
 	}
 	return _u
 }
 
-// AddAge adds f to the "age" field.
-func (_u *UserUpdate) AddAge(f float64) *UserUpdate {
-	_u.mutation.AddAge(f)
+// AddAge adds value to the "age" field.
+func (_u *UserUpdate) AddAge(v float64) *UserUpdate {
+	_u.mutation.AddAge(v)
 	return _u
 }
 
 // SetFirstName sets the "first_name" field.
-func (_u *UserUpdate) SetFirstName(s string) *UserUpdate {
-	_u.mutation.SetFirstName(s)
+func (_u *UserUpdate) SetFirstName(v string) *UserUpdate {
+	_u.mutation.SetFirstName(v)
 	return _u
 }
 
 // SetNillableFirstName sets the "first_name" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableFirstName(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetFirstName(*s)
+func (_u *UserUpdate) SetNillableFirstName(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetFirstName(*v)
 	}
 	return _u
 }
 
 // SetLastName sets the "last_name" field.
-func (_u *UserUpdate) SetLastName(s string) *UserUpdate {
-	_u.mutation.SetLastName(s)
+func (_u *UserUpdate) SetLastName(v string) *UserUpdate {
+	_u.mutation.SetLastName(v)
 	return _u
 }
 
 // SetNillableLastName sets the "last_name" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableLastName(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetLastName(*s)
+func (_u *UserUpdate) SetNillableLastName(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetLastName(*v)
 	}
 	return _u
 }
 
 // SetTags sets the "tags" field.
-func (_u *UserUpdate) SetTags(s []string) *UserUpdate {
-	_u.mutation.SetTags(s)
+func (_u *UserUpdate) SetTags(v []string) *UserUpdate {
+	_u.mutation.SetTags(v)
 	return _u
 }
 
-// AppendTags appends s to the "tags" field.
-func (_u *UserUpdate) AppendTags(s []string) *UserUpdate {
-	_u.mutation.AppendTags(s)
+// AppendTags appends value to the "tags" field.
+func (_u *UserUpdate) AppendTags(v []string) *UserUpdate {
+	_u.mutation.AppendTags(v)
 	return _u
 }
 
@@ -107,10 +107,10 @@ func (_u *UserUpdate) AddCardIDs(ids ...int) *UserUpdate {
 }
 
 // AddCards adds the "cards" edges to the Card entity.
-func (_u *UserUpdate) AddCards(c ...*Card) *UserUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *UserUpdate) AddCards(v ...*Card) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddCardIDs(ids...)
 }
@@ -133,10 +133,10 @@ func (_u *UserUpdate) RemoveCardIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveCards removes "cards" edges to Card entities.
-func (_u *UserUpdate) RemoveCards(c ...*Card) *UserUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *UserUpdate) RemoveCards(v ...*Card) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveCardIDs(ids...)
 }
@@ -168,7 +168,7 @@ func (_u *UserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -245,7 +245,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -254,7 +254,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -266,63 +266,63 @@ type UserUpdateOne struct {
 }
 
 // SetAge sets the "age" field.
-func (_u *UserUpdateOne) SetAge(f float64) *UserUpdateOne {
+func (_u *UserUpdateOne) SetAge(v float64) *UserUpdateOne {
 	_u.mutation.ResetAge()
-	_u.mutation.SetAge(f)
+	_u.mutation.SetAge(v)
 	return _u
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableAge(f *float64) *UserUpdateOne {
-	if f != nil {
-		_u.SetAge(*f)
+func (_u *UserUpdateOne) SetNillableAge(v *float64) *UserUpdateOne {
+	if v != nil {
+		_u.SetAge(*v)
 	}
 	return _u
 }
 
-// AddAge adds f to the "age" field.
-func (_u *UserUpdateOne) AddAge(f float64) *UserUpdateOne {
-	_u.mutation.AddAge(f)
+// AddAge adds value to the "age" field.
+func (_u *UserUpdateOne) AddAge(v float64) *UserUpdateOne {
+	_u.mutation.AddAge(v)
 	return _u
 }
 
 // SetFirstName sets the "first_name" field.
-func (_u *UserUpdateOne) SetFirstName(s string) *UserUpdateOne {
-	_u.mutation.SetFirstName(s)
+func (_u *UserUpdateOne) SetFirstName(v string) *UserUpdateOne {
+	_u.mutation.SetFirstName(v)
 	return _u
 }
 
 // SetNillableFirstName sets the "first_name" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableFirstName(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetFirstName(*s)
+func (_u *UserUpdateOne) SetNillableFirstName(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetFirstName(*v)
 	}
 	return _u
 }
 
 // SetLastName sets the "last_name" field.
-func (_u *UserUpdateOne) SetLastName(s string) *UserUpdateOne {
-	_u.mutation.SetLastName(s)
+func (_u *UserUpdateOne) SetLastName(v string) *UserUpdateOne {
+	_u.mutation.SetLastName(v)
 	return _u
 }
 
 // SetNillableLastName sets the "last_name" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableLastName(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetLastName(*s)
+func (_u *UserUpdateOne) SetNillableLastName(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetLastName(*v)
 	}
 	return _u
 }
 
 // SetTags sets the "tags" field.
-func (_u *UserUpdateOne) SetTags(s []string) *UserUpdateOne {
-	_u.mutation.SetTags(s)
+func (_u *UserUpdateOne) SetTags(v []string) *UserUpdateOne {
+	_u.mutation.SetTags(v)
 	return _u
 }
 
-// AppendTags appends s to the "tags" field.
-func (_u *UserUpdateOne) AppendTags(s []string) *UserUpdateOne {
-	_u.mutation.AppendTags(s)
+// AppendTags appends value to the "tags" field.
+func (_u *UserUpdateOne) AppendTags(v []string) *UserUpdateOne {
+	_u.mutation.AppendTags(v)
 	return _u
 }
 
@@ -339,10 +339,10 @@ func (_u *UserUpdateOne) AddCardIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddCards adds the "cards" edges to the Card entity.
-func (_u *UserUpdateOne) AddCards(c ...*Card) *UserUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *UserUpdateOne) AddCards(v ...*Card) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddCardIDs(ids...)
 }
@@ -365,10 +365,10 @@ func (_u *UserUpdateOne) RemoveCardIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveCards removes "cards" edges to Card entities.
-func (_u *UserUpdateOne) RemoveCards(c ...*Card) *UserUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *UserUpdateOne) RemoveCards(v ...*Card) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveCardIDs(ids...)
 }

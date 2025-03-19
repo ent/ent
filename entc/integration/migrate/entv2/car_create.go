@@ -25,15 +25,15 @@ type CarCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *CarCreate) SetName(s string) *CarCreate {
-	_c.mutation.SetName(s)
+func (_c *CarCreate) SetName(v string) *CarCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_c *CarCreate) SetNillableName(s *string) *CarCreate {
-	if s != nil {
-		_c.SetName(*s)
+func (_c *CarCreate) SetNillableName(v *string) *CarCreate {
+	if v != nil {
+		_c.SetName(*v)
 	}
 	return _c
 }
@@ -45,8 +45,8 @@ func (_c *CarCreate) SetOwnerID(id int) *CarCreate {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_c *CarCreate) SetOwner(u *User) *CarCreate {
-	return _c.SetOwnerID(u.ID)
+func (_c *CarCreate) SetOwner(v *User) *CarCreate {
+	return _c.SetOwnerID(v.ID)
 }
 
 // Mutation returns the CarMutation object of the builder.

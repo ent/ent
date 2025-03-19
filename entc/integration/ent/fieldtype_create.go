@@ -32,759 +32,759 @@ type FieldTypeCreate struct {
 }
 
 // SetInt sets the "int" field.
-func (_c *FieldTypeCreate) SetInt(i int) *FieldTypeCreate {
-	_c.mutation.SetInt(i)
+func (_c *FieldTypeCreate) SetInt(v int) *FieldTypeCreate {
+	_c.mutation.SetInt(v)
 	return _c
 }
 
 // SetInt8 sets the "int8" field.
-func (_c *FieldTypeCreate) SetInt8(i int8) *FieldTypeCreate {
-	_c.mutation.SetInt8(i)
+func (_c *FieldTypeCreate) SetInt8(v int8) *FieldTypeCreate {
+	_c.mutation.SetInt8(v)
 	return _c
 }
 
 // SetInt16 sets the "int16" field.
-func (_c *FieldTypeCreate) SetInt16(i int16) *FieldTypeCreate {
-	_c.mutation.SetInt16(i)
+func (_c *FieldTypeCreate) SetInt16(v int16) *FieldTypeCreate {
+	_c.mutation.SetInt16(v)
 	return _c
 }
 
 // SetInt32 sets the "int32" field.
-func (_c *FieldTypeCreate) SetInt32(i int32) *FieldTypeCreate {
-	_c.mutation.SetInt32(i)
+func (_c *FieldTypeCreate) SetInt32(v int32) *FieldTypeCreate {
+	_c.mutation.SetInt32(v)
 	return _c
 }
 
 // SetInt64 sets the "int64" field.
-func (_c *FieldTypeCreate) SetInt64(i int64) *FieldTypeCreate {
-	_c.mutation.SetInt64(i)
+func (_c *FieldTypeCreate) SetInt64(v int64) *FieldTypeCreate {
+	_c.mutation.SetInt64(v)
 	return _c
 }
 
 // SetOptionalInt sets the "optional_int" field.
-func (_c *FieldTypeCreate) SetOptionalInt(i int) *FieldTypeCreate {
-	_c.mutation.SetOptionalInt(i)
+func (_c *FieldTypeCreate) SetOptionalInt(v int) *FieldTypeCreate {
+	_c.mutation.SetOptionalInt(v)
 	return _c
 }
 
 // SetNillableOptionalInt sets the "optional_int" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableOptionalInt(i *int) *FieldTypeCreate {
-	if i != nil {
-		_c.SetOptionalInt(*i)
+func (_c *FieldTypeCreate) SetNillableOptionalInt(v *int) *FieldTypeCreate {
+	if v != nil {
+		_c.SetOptionalInt(*v)
 	}
 	return _c
 }
 
 // SetOptionalInt8 sets the "optional_int8" field.
-func (_c *FieldTypeCreate) SetOptionalInt8(i int8) *FieldTypeCreate {
-	_c.mutation.SetOptionalInt8(i)
+func (_c *FieldTypeCreate) SetOptionalInt8(v int8) *FieldTypeCreate {
+	_c.mutation.SetOptionalInt8(v)
 	return _c
 }
 
 // SetNillableOptionalInt8 sets the "optional_int8" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableOptionalInt8(i *int8) *FieldTypeCreate {
-	if i != nil {
-		_c.SetOptionalInt8(*i)
+func (_c *FieldTypeCreate) SetNillableOptionalInt8(v *int8) *FieldTypeCreate {
+	if v != nil {
+		_c.SetOptionalInt8(*v)
 	}
 	return _c
 }
 
 // SetOptionalInt16 sets the "optional_int16" field.
-func (_c *FieldTypeCreate) SetOptionalInt16(i int16) *FieldTypeCreate {
-	_c.mutation.SetOptionalInt16(i)
+func (_c *FieldTypeCreate) SetOptionalInt16(v int16) *FieldTypeCreate {
+	_c.mutation.SetOptionalInt16(v)
 	return _c
 }
 
 // SetNillableOptionalInt16 sets the "optional_int16" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableOptionalInt16(i *int16) *FieldTypeCreate {
-	if i != nil {
-		_c.SetOptionalInt16(*i)
+func (_c *FieldTypeCreate) SetNillableOptionalInt16(v *int16) *FieldTypeCreate {
+	if v != nil {
+		_c.SetOptionalInt16(*v)
 	}
 	return _c
 }
 
 // SetOptionalInt32 sets the "optional_int32" field.
-func (_c *FieldTypeCreate) SetOptionalInt32(i int32) *FieldTypeCreate {
-	_c.mutation.SetOptionalInt32(i)
+func (_c *FieldTypeCreate) SetOptionalInt32(v int32) *FieldTypeCreate {
+	_c.mutation.SetOptionalInt32(v)
 	return _c
 }
 
 // SetNillableOptionalInt32 sets the "optional_int32" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableOptionalInt32(i *int32) *FieldTypeCreate {
-	if i != nil {
-		_c.SetOptionalInt32(*i)
+func (_c *FieldTypeCreate) SetNillableOptionalInt32(v *int32) *FieldTypeCreate {
+	if v != nil {
+		_c.SetOptionalInt32(*v)
 	}
 	return _c
 }
 
 // SetOptionalInt64 sets the "optional_int64" field.
-func (_c *FieldTypeCreate) SetOptionalInt64(i int64) *FieldTypeCreate {
-	_c.mutation.SetOptionalInt64(i)
+func (_c *FieldTypeCreate) SetOptionalInt64(v int64) *FieldTypeCreate {
+	_c.mutation.SetOptionalInt64(v)
 	return _c
 }
 
 // SetNillableOptionalInt64 sets the "optional_int64" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableOptionalInt64(i *int64) *FieldTypeCreate {
-	if i != nil {
-		_c.SetOptionalInt64(*i)
+func (_c *FieldTypeCreate) SetNillableOptionalInt64(v *int64) *FieldTypeCreate {
+	if v != nil {
+		_c.SetOptionalInt64(*v)
 	}
 	return _c
 }
 
 // SetNillableInt sets the "nillable_int" field.
-func (_c *FieldTypeCreate) SetNillableInt(i int) *FieldTypeCreate {
-	_c.mutation.SetNillableInt(i)
+func (_c *FieldTypeCreate) SetNillableInt(v int) *FieldTypeCreate {
+	_c.mutation.SetNillableInt(v)
 	return _c
 }
 
 // SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableNillableInt(i *int) *FieldTypeCreate {
-	if i != nil {
-		_c.SetNillableInt(*i)
+func (_c *FieldTypeCreate) SetNillableNillableInt(v *int) *FieldTypeCreate {
+	if v != nil {
+		_c.SetNillableInt(*v)
 	}
 	return _c
 }
 
 // SetNillableInt8 sets the "nillable_int8" field.
-func (_c *FieldTypeCreate) SetNillableInt8(i int8) *FieldTypeCreate {
-	_c.mutation.SetNillableInt8(i)
+func (_c *FieldTypeCreate) SetNillableInt8(v int8) *FieldTypeCreate {
+	_c.mutation.SetNillableInt8(v)
 	return _c
 }
 
 // SetNillableNillableInt8 sets the "nillable_int8" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableNillableInt8(i *int8) *FieldTypeCreate {
-	if i != nil {
-		_c.SetNillableInt8(*i)
+func (_c *FieldTypeCreate) SetNillableNillableInt8(v *int8) *FieldTypeCreate {
+	if v != nil {
+		_c.SetNillableInt8(*v)
 	}
 	return _c
 }
 
 // SetNillableInt16 sets the "nillable_int16" field.
-func (_c *FieldTypeCreate) SetNillableInt16(i int16) *FieldTypeCreate {
-	_c.mutation.SetNillableInt16(i)
+func (_c *FieldTypeCreate) SetNillableInt16(v int16) *FieldTypeCreate {
+	_c.mutation.SetNillableInt16(v)
 	return _c
 }
 
 // SetNillableNillableInt16 sets the "nillable_int16" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableNillableInt16(i *int16) *FieldTypeCreate {
-	if i != nil {
-		_c.SetNillableInt16(*i)
+func (_c *FieldTypeCreate) SetNillableNillableInt16(v *int16) *FieldTypeCreate {
+	if v != nil {
+		_c.SetNillableInt16(*v)
 	}
 	return _c
 }
 
 // SetNillableInt32 sets the "nillable_int32" field.
-func (_c *FieldTypeCreate) SetNillableInt32(i int32) *FieldTypeCreate {
-	_c.mutation.SetNillableInt32(i)
+func (_c *FieldTypeCreate) SetNillableInt32(v int32) *FieldTypeCreate {
+	_c.mutation.SetNillableInt32(v)
 	return _c
 }
 
 // SetNillableNillableInt32 sets the "nillable_int32" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableNillableInt32(i *int32) *FieldTypeCreate {
-	if i != nil {
-		_c.SetNillableInt32(*i)
+func (_c *FieldTypeCreate) SetNillableNillableInt32(v *int32) *FieldTypeCreate {
+	if v != nil {
+		_c.SetNillableInt32(*v)
 	}
 	return _c
 }
 
 // SetNillableInt64 sets the "nillable_int64" field.
-func (_c *FieldTypeCreate) SetNillableInt64(i int64) *FieldTypeCreate {
-	_c.mutation.SetNillableInt64(i)
+func (_c *FieldTypeCreate) SetNillableInt64(v int64) *FieldTypeCreate {
+	_c.mutation.SetNillableInt64(v)
 	return _c
 }
 
 // SetNillableNillableInt64 sets the "nillable_int64" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableNillableInt64(i *int64) *FieldTypeCreate {
-	if i != nil {
-		_c.SetNillableInt64(*i)
+func (_c *FieldTypeCreate) SetNillableNillableInt64(v *int64) *FieldTypeCreate {
+	if v != nil {
+		_c.SetNillableInt64(*v)
 	}
 	return _c
 }
 
 // SetValidateOptionalInt32 sets the "validate_optional_int32" field.
-func (_c *FieldTypeCreate) SetValidateOptionalInt32(i int32) *FieldTypeCreate {
-	_c.mutation.SetValidateOptionalInt32(i)
+func (_c *FieldTypeCreate) SetValidateOptionalInt32(v int32) *FieldTypeCreate {
+	_c.mutation.SetValidateOptionalInt32(v)
 	return _c
 }
 
 // SetNillableValidateOptionalInt32 sets the "validate_optional_int32" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableValidateOptionalInt32(i *int32) *FieldTypeCreate {
-	if i != nil {
-		_c.SetValidateOptionalInt32(*i)
+func (_c *FieldTypeCreate) SetNillableValidateOptionalInt32(v *int32) *FieldTypeCreate {
+	if v != nil {
+		_c.SetValidateOptionalInt32(*v)
 	}
 	return _c
 }
 
 // SetOptionalUint sets the "optional_uint" field.
-func (_c *FieldTypeCreate) SetOptionalUint(u uint) *FieldTypeCreate {
-	_c.mutation.SetOptionalUint(u)
+func (_c *FieldTypeCreate) SetOptionalUint(v uint) *FieldTypeCreate {
+	_c.mutation.SetOptionalUint(v)
 	return _c
 }
 
 // SetNillableOptionalUint sets the "optional_uint" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableOptionalUint(u *uint) *FieldTypeCreate {
-	if u != nil {
-		_c.SetOptionalUint(*u)
+func (_c *FieldTypeCreate) SetNillableOptionalUint(v *uint) *FieldTypeCreate {
+	if v != nil {
+		_c.SetOptionalUint(*v)
 	}
 	return _c
 }
 
 // SetOptionalUint8 sets the "optional_uint8" field.
-func (_c *FieldTypeCreate) SetOptionalUint8(u uint8) *FieldTypeCreate {
-	_c.mutation.SetOptionalUint8(u)
+func (_c *FieldTypeCreate) SetOptionalUint8(v uint8) *FieldTypeCreate {
+	_c.mutation.SetOptionalUint8(v)
 	return _c
 }
 
 // SetNillableOptionalUint8 sets the "optional_uint8" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableOptionalUint8(u *uint8) *FieldTypeCreate {
-	if u != nil {
-		_c.SetOptionalUint8(*u)
+func (_c *FieldTypeCreate) SetNillableOptionalUint8(v *uint8) *FieldTypeCreate {
+	if v != nil {
+		_c.SetOptionalUint8(*v)
 	}
 	return _c
 }
 
 // SetOptionalUint16 sets the "optional_uint16" field.
-func (_c *FieldTypeCreate) SetOptionalUint16(u uint16) *FieldTypeCreate {
-	_c.mutation.SetOptionalUint16(u)
+func (_c *FieldTypeCreate) SetOptionalUint16(v uint16) *FieldTypeCreate {
+	_c.mutation.SetOptionalUint16(v)
 	return _c
 }
 
 // SetNillableOptionalUint16 sets the "optional_uint16" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableOptionalUint16(u *uint16) *FieldTypeCreate {
-	if u != nil {
-		_c.SetOptionalUint16(*u)
+func (_c *FieldTypeCreate) SetNillableOptionalUint16(v *uint16) *FieldTypeCreate {
+	if v != nil {
+		_c.SetOptionalUint16(*v)
 	}
 	return _c
 }
 
 // SetOptionalUint32 sets the "optional_uint32" field.
-func (_c *FieldTypeCreate) SetOptionalUint32(u uint32) *FieldTypeCreate {
-	_c.mutation.SetOptionalUint32(u)
+func (_c *FieldTypeCreate) SetOptionalUint32(v uint32) *FieldTypeCreate {
+	_c.mutation.SetOptionalUint32(v)
 	return _c
 }
 
 // SetNillableOptionalUint32 sets the "optional_uint32" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableOptionalUint32(u *uint32) *FieldTypeCreate {
-	if u != nil {
-		_c.SetOptionalUint32(*u)
+func (_c *FieldTypeCreate) SetNillableOptionalUint32(v *uint32) *FieldTypeCreate {
+	if v != nil {
+		_c.SetOptionalUint32(*v)
 	}
 	return _c
 }
 
 // SetOptionalUint64 sets the "optional_uint64" field.
-func (_c *FieldTypeCreate) SetOptionalUint64(u uint64) *FieldTypeCreate {
-	_c.mutation.SetOptionalUint64(u)
+func (_c *FieldTypeCreate) SetOptionalUint64(v uint64) *FieldTypeCreate {
+	_c.mutation.SetOptionalUint64(v)
 	return _c
 }
 
 // SetNillableOptionalUint64 sets the "optional_uint64" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableOptionalUint64(u *uint64) *FieldTypeCreate {
-	if u != nil {
-		_c.SetOptionalUint64(*u)
+func (_c *FieldTypeCreate) SetNillableOptionalUint64(v *uint64) *FieldTypeCreate {
+	if v != nil {
+		_c.SetOptionalUint64(*v)
 	}
 	return _c
 }
 
 // SetState sets the "state" field.
-func (_c *FieldTypeCreate) SetState(f fieldtype.State) *FieldTypeCreate {
-	_c.mutation.SetState(f)
+func (_c *FieldTypeCreate) SetState(v fieldtype.State) *FieldTypeCreate {
+	_c.mutation.SetState(v)
 	return _c
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableState(f *fieldtype.State) *FieldTypeCreate {
-	if f != nil {
-		_c.SetState(*f)
+func (_c *FieldTypeCreate) SetNillableState(v *fieldtype.State) *FieldTypeCreate {
+	if v != nil {
+		_c.SetState(*v)
 	}
 	return _c
 }
 
 // SetOptionalFloat sets the "optional_float" field.
-func (_c *FieldTypeCreate) SetOptionalFloat(f float64) *FieldTypeCreate {
-	_c.mutation.SetOptionalFloat(f)
+func (_c *FieldTypeCreate) SetOptionalFloat(v float64) *FieldTypeCreate {
+	_c.mutation.SetOptionalFloat(v)
 	return _c
 }
 
 // SetNillableOptionalFloat sets the "optional_float" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableOptionalFloat(f *float64) *FieldTypeCreate {
-	if f != nil {
-		_c.SetOptionalFloat(*f)
+func (_c *FieldTypeCreate) SetNillableOptionalFloat(v *float64) *FieldTypeCreate {
+	if v != nil {
+		_c.SetOptionalFloat(*v)
 	}
 	return _c
 }
 
 // SetOptionalFloat32 sets the "optional_float32" field.
-func (_c *FieldTypeCreate) SetOptionalFloat32(f float32) *FieldTypeCreate {
-	_c.mutation.SetOptionalFloat32(f)
+func (_c *FieldTypeCreate) SetOptionalFloat32(v float32) *FieldTypeCreate {
+	_c.mutation.SetOptionalFloat32(v)
 	return _c
 }
 
 // SetNillableOptionalFloat32 sets the "optional_float32" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableOptionalFloat32(f *float32) *FieldTypeCreate {
-	if f != nil {
-		_c.SetOptionalFloat32(*f)
+func (_c *FieldTypeCreate) SetNillableOptionalFloat32(v *float32) *FieldTypeCreate {
+	if v != nil {
+		_c.SetOptionalFloat32(*v)
 	}
 	return _c
 }
 
 // SetText sets the "text" field.
-func (_c *FieldTypeCreate) SetText(s string) *FieldTypeCreate {
-	_c.mutation.SetText(s)
+func (_c *FieldTypeCreate) SetText(v string) *FieldTypeCreate {
+	_c.mutation.SetText(v)
 	return _c
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableText(s *string) *FieldTypeCreate {
-	if s != nil {
-		_c.SetText(*s)
+func (_c *FieldTypeCreate) SetNillableText(v *string) *FieldTypeCreate {
+	if v != nil {
+		_c.SetText(*v)
 	}
 	return _c
 }
 
 // SetDatetime sets the "datetime" field.
-func (_c *FieldTypeCreate) SetDatetime(t time.Time) *FieldTypeCreate {
-	_c.mutation.SetDatetime(t)
+func (_c *FieldTypeCreate) SetDatetime(v time.Time) *FieldTypeCreate {
+	_c.mutation.SetDatetime(v)
 	return _c
 }
 
 // SetNillableDatetime sets the "datetime" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableDatetime(t *time.Time) *FieldTypeCreate {
-	if t != nil {
-		_c.SetDatetime(*t)
+func (_c *FieldTypeCreate) SetNillableDatetime(v *time.Time) *FieldTypeCreate {
+	if v != nil {
+		_c.SetDatetime(*v)
 	}
 	return _c
 }
 
 // SetDecimal sets the "decimal" field.
-func (_c *FieldTypeCreate) SetDecimal(f float64) *FieldTypeCreate {
-	_c.mutation.SetDecimal(f)
+func (_c *FieldTypeCreate) SetDecimal(v float64) *FieldTypeCreate {
+	_c.mutation.SetDecimal(v)
 	return _c
 }
 
 // SetNillableDecimal sets the "decimal" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableDecimal(f *float64) *FieldTypeCreate {
-	if f != nil {
-		_c.SetDecimal(*f)
+func (_c *FieldTypeCreate) SetNillableDecimal(v *float64) *FieldTypeCreate {
+	if v != nil {
+		_c.SetDecimal(*v)
 	}
 	return _c
 }
 
 // SetLinkOther sets the "link_other" field.
-func (_c *FieldTypeCreate) SetLinkOther(s *schema.Link) *FieldTypeCreate {
-	_c.mutation.SetLinkOther(s)
+func (_c *FieldTypeCreate) SetLinkOther(v *schema.Link) *FieldTypeCreate {
+	_c.mutation.SetLinkOther(v)
 	return _c
 }
 
 // SetLinkOtherFunc sets the "link_other_func" field.
-func (_c *FieldTypeCreate) SetLinkOtherFunc(s *schema.Link) *FieldTypeCreate {
-	_c.mutation.SetLinkOtherFunc(s)
+func (_c *FieldTypeCreate) SetLinkOtherFunc(v *schema.Link) *FieldTypeCreate {
+	_c.mutation.SetLinkOtherFunc(v)
 	return _c
 }
 
 // SetMAC sets the "mac" field.
-func (_c *FieldTypeCreate) SetMAC(s schema.MAC) *FieldTypeCreate {
-	_c.mutation.SetMAC(s)
+func (_c *FieldTypeCreate) SetMAC(v schema.MAC) *FieldTypeCreate {
+	_c.mutation.SetMAC(v)
 	return _c
 }
 
 // SetNillableMAC sets the "mac" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableMAC(s *schema.MAC) *FieldTypeCreate {
-	if s != nil {
-		_c.SetMAC(*s)
+func (_c *FieldTypeCreate) SetNillableMAC(v *schema.MAC) *FieldTypeCreate {
+	if v != nil {
+		_c.SetMAC(*v)
 	}
 	return _c
 }
 
 // SetStringArray sets the "string_array" field.
-func (_c *FieldTypeCreate) SetStringArray(s schema.Strings) *FieldTypeCreate {
-	_c.mutation.SetStringArray(s)
+func (_c *FieldTypeCreate) SetStringArray(v schema.Strings) *FieldTypeCreate {
+	_c.mutation.SetStringArray(v)
 	return _c
 }
 
 // SetPassword sets the "password" field.
-func (_c *FieldTypeCreate) SetPassword(s string) *FieldTypeCreate {
-	_c.mutation.SetPassword(s)
+func (_c *FieldTypeCreate) SetPassword(v string) *FieldTypeCreate {
+	_c.mutation.SetPassword(v)
 	return _c
 }
 
 // SetNillablePassword sets the "password" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillablePassword(s *string) *FieldTypeCreate {
-	if s != nil {
-		_c.SetPassword(*s)
+func (_c *FieldTypeCreate) SetNillablePassword(v *string) *FieldTypeCreate {
+	if v != nil {
+		_c.SetPassword(*v)
 	}
 	return _c
 }
 
 // SetStringScanner sets the "string_scanner" field.
-func (_c *FieldTypeCreate) SetStringScanner(ss schema.StringScanner) *FieldTypeCreate {
-	_c.mutation.SetStringScanner(ss)
+func (_c *FieldTypeCreate) SetStringScanner(v schema.StringScanner) *FieldTypeCreate {
+	_c.mutation.SetStringScanner(v)
 	return _c
 }
 
 // SetNillableStringScanner sets the "string_scanner" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableStringScanner(ss *schema.StringScanner) *FieldTypeCreate {
-	if ss != nil {
-		_c.SetStringScanner(*ss)
+func (_c *FieldTypeCreate) SetNillableStringScanner(v *schema.StringScanner) *FieldTypeCreate {
+	if v != nil {
+		_c.SetStringScanner(*v)
 	}
 	return _c
 }
 
 // SetDuration sets the "duration" field.
-func (_c *FieldTypeCreate) SetDuration(t time.Duration) *FieldTypeCreate {
-	_c.mutation.SetDuration(t)
+func (_c *FieldTypeCreate) SetDuration(v time.Duration) *FieldTypeCreate {
+	_c.mutation.SetDuration(v)
 	return _c
 }
 
 // SetNillableDuration sets the "duration" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableDuration(t *time.Duration) *FieldTypeCreate {
-	if t != nil {
-		_c.SetDuration(*t)
+func (_c *FieldTypeCreate) SetNillableDuration(v *time.Duration) *FieldTypeCreate {
+	if v != nil {
+		_c.SetDuration(*v)
 	}
 	return _c
 }
 
 // SetDir sets the "dir" field.
-func (_c *FieldTypeCreate) SetDir(h http.Dir) *FieldTypeCreate {
-	_c.mutation.SetDir(h)
+func (_c *FieldTypeCreate) SetDir(v http.Dir) *FieldTypeCreate {
+	_c.mutation.SetDir(v)
 	return _c
 }
 
 // SetNillableDir sets the "dir" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableDir(h *http.Dir) *FieldTypeCreate {
-	if h != nil {
-		_c.SetDir(*h)
+func (_c *FieldTypeCreate) SetNillableDir(v *http.Dir) *FieldTypeCreate {
+	if v != nil {
+		_c.SetDir(*v)
 	}
 	return _c
 }
 
 // SetNdir sets the "ndir" field.
-func (_c *FieldTypeCreate) SetNdir(h http.Dir) *FieldTypeCreate {
-	_c.mutation.SetNdir(h)
+func (_c *FieldTypeCreate) SetNdir(v http.Dir) *FieldTypeCreate {
+	_c.mutation.SetNdir(v)
 	return _c
 }
 
 // SetNillableNdir sets the "ndir" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableNdir(h *http.Dir) *FieldTypeCreate {
-	if h != nil {
-		_c.SetNdir(*h)
+func (_c *FieldTypeCreate) SetNillableNdir(v *http.Dir) *FieldTypeCreate {
+	if v != nil {
+		_c.SetNdir(*v)
 	}
 	return _c
 }
 
 // SetStr sets the "str" field.
-func (_c *FieldTypeCreate) SetStr(ss sql.NullString) *FieldTypeCreate {
-	_c.mutation.SetStr(ss)
+func (_c *FieldTypeCreate) SetStr(v sql.NullString) *FieldTypeCreate {
+	_c.mutation.SetStr(v)
 	return _c
 }
 
 // SetNillableStr sets the "str" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableStr(ss *sql.NullString) *FieldTypeCreate {
-	if ss != nil {
-		_c.SetStr(*ss)
+func (_c *FieldTypeCreate) SetNillableStr(v *sql.NullString) *FieldTypeCreate {
+	if v != nil {
+		_c.SetStr(*v)
 	}
 	return _c
 }
 
 // SetNullStr sets the "null_str" field.
-func (_c *FieldTypeCreate) SetNullStr(ss *sql.NullString) *FieldTypeCreate {
-	_c.mutation.SetNullStr(ss)
+func (_c *FieldTypeCreate) SetNullStr(v *sql.NullString) *FieldTypeCreate {
+	_c.mutation.SetNullStr(v)
 	return _c
 }
 
 // SetLink sets the "link" field.
-func (_c *FieldTypeCreate) SetLink(s schema.Link) *FieldTypeCreate {
-	_c.mutation.SetLink(s)
+func (_c *FieldTypeCreate) SetLink(v schema.Link) *FieldTypeCreate {
+	_c.mutation.SetLink(v)
 	return _c
 }
 
 // SetNillableLink sets the "link" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableLink(s *schema.Link) *FieldTypeCreate {
-	if s != nil {
-		_c.SetLink(*s)
+func (_c *FieldTypeCreate) SetNillableLink(v *schema.Link) *FieldTypeCreate {
+	if v != nil {
+		_c.SetLink(*v)
 	}
 	return _c
 }
 
 // SetNullLink sets the "null_link" field.
-func (_c *FieldTypeCreate) SetNullLink(s *schema.Link) *FieldTypeCreate {
-	_c.mutation.SetNullLink(s)
+func (_c *FieldTypeCreate) SetNullLink(v *schema.Link) *FieldTypeCreate {
+	_c.mutation.SetNullLink(v)
 	return _c
 }
 
 // SetActive sets the "active" field.
-func (_c *FieldTypeCreate) SetActive(s schema.Status) *FieldTypeCreate {
-	_c.mutation.SetActive(s)
+func (_c *FieldTypeCreate) SetActive(v schema.Status) *FieldTypeCreate {
+	_c.mutation.SetActive(v)
 	return _c
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableActive(s *schema.Status) *FieldTypeCreate {
-	if s != nil {
-		_c.SetActive(*s)
+func (_c *FieldTypeCreate) SetNillableActive(v *schema.Status) *FieldTypeCreate {
+	if v != nil {
+		_c.SetActive(*v)
 	}
 	return _c
 }
 
 // SetNullActive sets the "null_active" field.
-func (_c *FieldTypeCreate) SetNullActive(s schema.Status) *FieldTypeCreate {
-	_c.mutation.SetNullActive(s)
+func (_c *FieldTypeCreate) SetNullActive(v schema.Status) *FieldTypeCreate {
+	_c.mutation.SetNullActive(v)
 	return _c
 }
 
 // SetNillableNullActive sets the "null_active" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableNullActive(s *schema.Status) *FieldTypeCreate {
-	if s != nil {
-		_c.SetNullActive(*s)
+func (_c *FieldTypeCreate) SetNillableNullActive(v *schema.Status) *FieldTypeCreate {
+	if v != nil {
+		_c.SetNullActive(*v)
 	}
 	return _c
 }
 
 // SetDeleted sets the "deleted" field.
-func (_c *FieldTypeCreate) SetDeleted(sb *sql.NullBool) *FieldTypeCreate {
-	_c.mutation.SetDeleted(sb)
+func (_c *FieldTypeCreate) SetDeleted(v *sql.NullBool) *FieldTypeCreate {
+	_c.mutation.SetDeleted(v)
 	return _c
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (_c *FieldTypeCreate) SetDeletedAt(st *sql.NullTime) *FieldTypeCreate {
-	_c.mutation.SetDeletedAt(st)
+func (_c *FieldTypeCreate) SetDeletedAt(v *sql.NullTime) *FieldTypeCreate {
+	_c.mutation.SetDeletedAt(v)
 	return _c
 }
 
 // SetRawData sets the "raw_data" field.
-func (_c *FieldTypeCreate) SetRawData(b []byte) *FieldTypeCreate {
-	_c.mutation.SetRawData(b)
+func (_c *FieldTypeCreate) SetRawData(v []byte) *FieldTypeCreate {
+	_c.mutation.SetRawData(v)
 	return _c
 }
 
 // SetSensitive sets the "sensitive" field.
-func (_c *FieldTypeCreate) SetSensitive(b []byte) *FieldTypeCreate {
-	_c.mutation.SetSensitive(b)
+func (_c *FieldTypeCreate) SetSensitive(v []byte) *FieldTypeCreate {
+	_c.mutation.SetSensitive(v)
 	return _c
 }
 
 // SetIP sets the "ip" field.
-func (_c *FieldTypeCreate) SetIP(n net.IP) *FieldTypeCreate {
-	_c.mutation.SetIP(n)
+func (_c *FieldTypeCreate) SetIP(v net.IP) *FieldTypeCreate {
+	_c.mutation.SetIP(v)
 	return _c
 }
 
 // SetNullInt64 sets the "null_int64" field.
-func (_c *FieldTypeCreate) SetNullInt64(si *sql.NullInt64) *FieldTypeCreate {
-	_c.mutation.SetNullInt64(si)
+func (_c *FieldTypeCreate) SetNullInt64(v *sql.NullInt64) *FieldTypeCreate {
+	_c.mutation.SetNullInt64(v)
 	return _c
 }
 
 // SetSchemaInt sets the "schema_int" field.
-func (_c *FieldTypeCreate) SetSchemaInt(s schema.Int) *FieldTypeCreate {
-	_c.mutation.SetSchemaInt(s)
+func (_c *FieldTypeCreate) SetSchemaInt(v schema.Int) *FieldTypeCreate {
+	_c.mutation.SetSchemaInt(v)
 	return _c
 }
 
 // SetNillableSchemaInt sets the "schema_int" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableSchemaInt(s *schema.Int) *FieldTypeCreate {
-	if s != nil {
-		_c.SetSchemaInt(*s)
+func (_c *FieldTypeCreate) SetNillableSchemaInt(v *schema.Int) *FieldTypeCreate {
+	if v != nil {
+		_c.SetSchemaInt(*v)
 	}
 	return _c
 }
 
 // SetSchemaInt8 sets the "schema_int8" field.
-func (_c *FieldTypeCreate) SetSchemaInt8(s schema.Int8) *FieldTypeCreate {
-	_c.mutation.SetSchemaInt8(s)
+func (_c *FieldTypeCreate) SetSchemaInt8(v schema.Int8) *FieldTypeCreate {
+	_c.mutation.SetSchemaInt8(v)
 	return _c
 }
 
 // SetNillableSchemaInt8 sets the "schema_int8" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableSchemaInt8(s *schema.Int8) *FieldTypeCreate {
-	if s != nil {
-		_c.SetSchemaInt8(*s)
+func (_c *FieldTypeCreate) SetNillableSchemaInt8(v *schema.Int8) *FieldTypeCreate {
+	if v != nil {
+		_c.SetSchemaInt8(*v)
 	}
 	return _c
 }
 
 // SetSchemaInt64 sets the "schema_int64" field.
-func (_c *FieldTypeCreate) SetSchemaInt64(s schema.Int64) *FieldTypeCreate {
-	_c.mutation.SetSchemaInt64(s)
+func (_c *FieldTypeCreate) SetSchemaInt64(v schema.Int64) *FieldTypeCreate {
+	_c.mutation.SetSchemaInt64(v)
 	return _c
 }
 
 // SetNillableSchemaInt64 sets the "schema_int64" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableSchemaInt64(s *schema.Int64) *FieldTypeCreate {
-	if s != nil {
-		_c.SetSchemaInt64(*s)
+func (_c *FieldTypeCreate) SetNillableSchemaInt64(v *schema.Int64) *FieldTypeCreate {
+	if v != nil {
+		_c.SetSchemaInt64(*v)
 	}
 	return _c
 }
 
 // SetSchemaFloat sets the "schema_float" field.
-func (_c *FieldTypeCreate) SetSchemaFloat(s schema.Float64) *FieldTypeCreate {
-	_c.mutation.SetSchemaFloat(s)
+func (_c *FieldTypeCreate) SetSchemaFloat(v schema.Float64) *FieldTypeCreate {
+	_c.mutation.SetSchemaFloat(v)
 	return _c
 }
 
 // SetNillableSchemaFloat sets the "schema_float" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableSchemaFloat(s *schema.Float64) *FieldTypeCreate {
-	if s != nil {
-		_c.SetSchemaFloat(*s)
+func (_c *FieldTypeCreate) SetNillableSchemaFloat(v *schema.Float64) *FieldTypeCreate {
+	if v != nil {
+		_c.SetSchemaFloat(*v)
 	}
 	return _c
 }
 
 // SetSchemaFloat32 sets the "schema_float32" field.
-func (_c *FieldTypeCreate) SetSchemaFloat32(s schema.Float32) *FieldTypeCreate {
-	_c.mutation.SetSchemaFloat32(s)
+func (_c *FieldTypeCreate) SetSchemaFloat32(v schema.Float32) *FieldTypeCreate {
+	_c.mutation.SetSchemaFloat32(v)
 	return _c
 }
 
 // SetNillableSchemaFloat32 sets the "schema_float32" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableSchemaFloat32(s *schema.Float32) *FieldTypeCreate {
-	if s != nil {
-		_c.SetSchemaFloat32(*s)
+func (_c *FieldTypeCreate) SetNillableSchemaFloat32(v *schema.Float32) *FieldTypeCreate {
+	if v != nil {
+		_c.SetSchemaFloat32(*v)
 	}
 	return _c
 }
 
 // SetNullFloat sets the "null_float" field.
-func (_c *FieldTypeCreate) SetNullFloat(sf *sql.NullFloat64) *FieldTypeCreate {
-	_c.mutation.SetNullFloat(sf)
+func (_c *FieldTypeCreate) SetNullFloat(v *sql.NullFloat64) *FieldTypeCreate {
+	_c.mutation.SetNullFloat(v)
 	return _c
 }
 
 // SetRole sets the "role" field.
-func (_c *FieldTypeCreate) SetRole(r role.Role) *FieldTypeCreate {
-	_c.mutation.SetRole(r)
+func (_c *FieldTypeCreate) SetRole(v role.Role) *FieldTypeCreate {
+	_c.mutation.SetRole(v)
 	return _c
 }
 
 // SetNillableRole sets the "role" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableRole(r *role.Role) *FieldTypeCreate {
-	if r != nil {
-		_c.SetRole(*r)
+func (_c *FieldTypeCreate) SetNillableRole(v *role.Role) *FieldTypeCreate {
+	if v != nil {
+		_c.SetRole(*v)
 	}
 	return _c
 }
 
 // SetPriority sets the "priority" field.
-func (_c *FieldTypeCreate) SetPriority(r role.Priority) *FieldTypeCreate {
-	_c.mutation.SetPriority(r)
+func (_c *FieldTypeCreate) SetPriority(v role.Priority) *FieldTypeCreate {
+	_c.mutation.SetPriority(v)
 	return _c
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillablePriority(r *role.Priority) *FieldTypeCreate {
-	if r != nil {
-		_c.SetPriority(*r)
+func (_c *FieldTypeCreate) SetNillablePriority(v *role.Priority) *FieldTypeCreate {
+	if v != nil {
+		_c.SetPriority(*v)
 	}
 	return _c
 }
 
 // SetOptionalUUID sets the "optional_uuid" field.
-func (_c *FieldTypeCreate) SetOptionalUUID(u uuid.UUID) *FieldTypeCreate {
-	_c.mutation.SetOptionalUUID(u)
+func (_c *FieldTypeCreate) SetOptionalUUID(v uuid.UUID) *FieldTypeCreate {
+	_c.mutation.SetOptionalUUID(v)
 	return _c
 }
 
 // SetNillableOptionalUUID sets the "optional_uuid" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableOptionalUUID(u *uuid.UUID) *FieldTypeCreate {
-	if u != nil {
-		_c.SetOptionalUUID(*u)
+func (_c *FieldTypeCreate) SetNillableOptionalUUID(v *uuid.UUID) *FieldTypeCreate {
+	if v != nil {
+		_c.SetOptionalUUID(*v)
 	}
 	return _c
 }
 
 // SetNillableUUID sets the "nillable_uuid" field.
-func (_c *FieldTypeCreate) SetNillableUUID(u uuid.UUID) *FieldTypeCreate {
-	_c.mutation.SetNillableUUID(u)
+func (_c *FieldTypeCreate) SetNillableUUID(v uuid.UUID) *FieldTypeCreate {
+	_c.mutation.SetNillableUUID(v)
 	return _c
 }
 
 // SetNillableNillableUUID sets the "nillable_uuid" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableNillableUUID(u *uuid.UUID) *FieldTypeCreate {
-	if u != nil {
-		_c.SetNillableUUID(*u)
+func (_c *FieldTypeCreate) SetNillableNillableUUID(v *uuid.UUID) *FieldTypeCreate {
+	if v != nil {
+		_c.SetNillableUUID(*v)
 	}
 	return _c
 }
 
 // SetStrings sets the "strings" field.
-func (_c *FieldTypeCreate) SetStrings(s []string) *FieldTypeCreate {
-	_c.mutation.SetStrings(s)
+func (_c *FieldTypeCreate) SetStrings(v []string) *FieldTypeCreate {
+	_c.mutation.SetStrings(v)
 	return _c
 }
 
 // SetPair sets the "pair" field.
-func (_c *FieldTypeCreate) SetPair(s schema.Pair) *FieldTypeCreate {
-	_c.mutation.SetPair(s)
+func (_c *FieldTypeCreate) SetPair(v schema.Pair) *FieldTypeCreate {
+	_c.mutation.SetPair(v)
 	return _c
 }
 
 // SetNillablePair sets the "pair" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillablePair(s *schema.Pair) *FieldTypeCreate {
-	if s != nil {
-		_c.SetPair(*s)
+func (_c *FieldTypeCreate) SetNillablePair(v *schema.Pair) *FieldTypeCreate {
+	if v != nil {
+		_c.SetPair(*v)
 	}
 	return _c
 }
 
 // SetNilPair sets the "nil_pair" field.
-func (_c *FieldTypeCreate) SetNilPair(s *schema.Pair) *FieldTypeCreate {
-	_c.mutation.SetNilPair(s)
+func (_c *FieldTypeCreate) SetNilPair(v *schema.Pair) *FieldTypeCreate {
+	_c.mutation.SetNilPair(v)
 	return _c
 }
 
 // SetVstring sets the "vstring" field.
-func (_c *FieldTypeCreate) SetVstring(ss schema.VString) *FieldTypeCreate {
-	_c.mutation.SetVstring(ss)
+func (_c *FieldTypeCreate) SetVstring(v schema.VString) *FieldTypeCreate {
+	_c.mutation.SetVstring(v)
 	return _c
 }
 
 // SetNillableVstring sets the "vstring" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableVstring(ss *schema.VString) *FieldTypeCreate {
-	if ss != nil {
-		_c.SetVstring(*ss)
+func (_c *FieldTypeCreate) SetNillableVstring(v *schema.VString) *FieldTypeCreate {
+	if v != nil {
+		_c.SetVstring(*v)
 	}
 	return _c
 }
 
 // SetTriple sets the "triple" field.
-func (_c *FieldTypeCreate) SetTriple(s schema.Triple) *FieldTypeCreate {
-	_c.mutation.SetTriple(s)
+func (_c *FieldTypeCreate) SetTriple(v schema.Triple) *FieldTypeCreate {
+	_c.mutation.SetTriple(v)
 	return _c
 }
 
 // SetNillableTriple sets the "triple" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableTriple(s *schema.Triple) *FieldTypeCreate {
-	if s != nil {
-		_c.SetTriple(*s)
+func (_c *FieldTypeCreate) SetNillableTriple(v *schema.Triple) *FieldTypeCreate {
+	if v != nil {
+		_c.SetTriple(*v)
 	}
 	return _c
 }
 
 // SetBigInt sets the "big_int" field.
-func (_c *FieldTypeCreate) SetBigInt(si schema.BigInt) *FieldTypeCreate {
-	_c.mutation.SetBigInt(si)
+func (_c *FieldTypeCreate) SetBigInt(v schema.BigInt) *FieldTypeCreate {
+	_c.mutation.SetBigInt(v)
 	return _c
 }
 
 // SetNillableBigInt sets the "big_int" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillableBigInt(si *schema.BigInt) *FieldTypeCreate {
-	if si != nil {
-		_c.SetBigInt(*si)
+func (_c *FieldTypeCreate) SetNillableBigInt(v *schema.BigInt) *FieldTypeCreate {
+	if v != nil {
+		_c.SetBigInt(*v)
 	}
 	return _c
 }
 
 // SetPasswordOther sets the "password_other" field.
-func (_c *FieldTypeCreate) SetPasswordOther(s schema.Password) *FieldTypeCreate {
-	_c.mutation.SetPasswordOther(s)
+func (_c *FieldTypeCreate) SetPasswordOther(v schema.Password) *FieldTypeCreate {
+	_c.mutation.SetPasswordOther(v)
 	return _c
 }
 
 // SetNillablePasswordOther sets the "password_other" field if the given value is not nil.
-func (_c *FieldTypeCreate) SetNillablePasswordOther(s *schema.Password) *FieldTypeCreate {
-	if s != nil {
-		_c.SetPasswordOther(*s)
+func (_c *FieldTypeCreate) SetNillablePasswordOther(v *schema.Password) *FieldTypeCreate {
+	if v != nil {
+		_c.SetPasswordOther(*v)
 	}
 	return _c
 }

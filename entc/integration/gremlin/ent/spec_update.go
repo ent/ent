@@ -38,10 +38,10 @@ func (_u *SpecUpdate) AddCardIDs(ids ...string) *SpecUpdate {
 }
 
 // AddCard adds the "card" edges to the Card entity.
-func (_u *SpecUpdate) AddCard(c ...*Card) *SpecUpdate {
-	ids := make([]string, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SpecUpdate) AddCard(v ...*Card) *SpecUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddCardIDs(ids...)
 }
@@ -64,10 +64,10 @@ func (_u *SpecUpdate) RemoveCardIDs(ids ...string) *SpecUpdate {
 }
 
 // RemoveCard removes "card" edges to Card entities.
-func (_u *SpecUpdate) RemoveCard(c ...*Card) *SpecUpdate {
-	ids := make([]string, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SpecUpdate) RemoveCard(v ...*Card) *SpecUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveCardIDs(ids...)
 }
@@ -150,10 +150,10 @@ func (_u *SpecUpdateOne) AddCardIDs(ids ...string) *SpecUpdateOne {
 }
 
 // AddCard adds the "card" edges to the Card entity.
-func (_u *SpecUpdateOne) AddCard(c ...*Card) *SpecUpdateOne {
-	ids := make([]string, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SpecUpdateOne) AddCard(v ...*Card) *SpecUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddCardIDs(ids...)
 }
@@ -176,10 +176,10 @@ func (_u *SpecUpdateOne) RemoveCardIDs(ids ...string) *SpecUpdateOne {
 }
 
 // RemoveCard removes "card" edges to Card entities.
-func (_u *SpecUpdateOne) RemoveCard(c ...*Card) *SpecUpdateOne {
-	ids := make([]string, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SpecUpdateOne) RemoveCard(v ...*Card) *SpecUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveCardIDs(ids...)
 }

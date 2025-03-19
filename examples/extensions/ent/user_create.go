@@ -20,8 +20,8 @@ type UserCreate struct {
 }
 
 // SetLocation sets the "location" field.
-func (_c *UserCreate) SetLocation(b []byte) *UserCreate {
-	_c.mutation.SetLocation(b)
+func (_c *UserCreate) SetLocation(v []byte) *UserCreate {
+	_c.mutation.SetLocation(v)
 	return _c
 }
 

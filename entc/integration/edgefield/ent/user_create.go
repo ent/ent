@@ -28,36 +28,36 @@ type UserCreate struct {
 }
 
 // SetParentID sets the "parent_id" field.
-func (_c *UserCreate) SetParentID(i int) *UserCreate {
-	_c.mutation.SetParentID(i)
+func (_c *UserCreate) SetParentID(v int) *UserCreate {
+	_c.mutation.SetParentID(v)
 	return _c
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_c *UserCreate) SetNillableParentID(i *int) *UserCreate {
-	if i != nil {
-		_c.SetParentID(*i)
+func (_c *UserCreate) SetNillableParentID(v *int) *UserCreate {
+	if v != nil {
+		_c.SetParentID(*v)
 	}
 	return _c
 }
 
 // SetSpouseID sets the "spouse_id" field.
-func (_c *UserCreate) SetSpouseID(i int) *UserCreate {
-	_c.mutation.SetSpouseID(i)
+func (_c *UserCreate) SetSpouseID(v int) *UserCreate {
+	_c.mutation.SetSpouseID(v)
 	return _c
 }
 
 // SetNillableSpouseID sets the "spouse_id" field if the given value is not nil.
-func (_c *UserCreate) SetNillableSpouseID(i *int) *UserCreate {
-	if i != nil {
-		_c.SetSpouseID(*i)
+func (_c *UserCreate) SetNillableSpouseID(v *int) *UserCreate {
+	if v != nil {
+		_c.SetSpouseID(*v)
 	}
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *UserCreate) SetID(i int) *UserCreate {
-	_c.mutation.SetID(i)
+func (_c *UserCreate) SetID(v int) *UserCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
@@ -68,17 +68,17 @@ func (_c *UserCreate) AddPetIDs(ids ...int) *UserCreate {
 }
 
 // AddPets adds the "pets" edges to the Pet entity.
-func (_c *UserCreate) AddPets(p ...*Pet) *UserCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_c *UserCreate) AddPets(v ...*Pet) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddPetIDs(ids...)
 }
 
 // SetParent sets the "parent" edge to the User entity.
-func (_c *UserCreate) SetParent(u *User) *UserCreate {
-	return _c.SetParentID(u.ID)
+func (_c *UserCreate) SetParent(v *User) *UserCreate {
+	return _c.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
@@ -88,17 +88,17 @@ func (_c *UserCreate) AddChildIDs(ids ...int) *UserCreate {
 }
 
 // AddChildren adds the "children" edges to the User entity.
-func (_c *UserCreate) AddChildren(u ...*User) *UserCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *UserCreate) AddChildren(v ...*User) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddChildIDs(ids...)
 }
 
 // SetSpouse sets the "spouse" edge to the User entity.
-func (_c *UserCreate) SetSpouse(u *User) *UserCreate {
-	return _c.SetSpouseID(u.ID)
+func (_c *UserCreate) SetSpouse(v *User) *UserCreate {
+	return _c.SetSpouseID(v.ID)
 }
 
 // SetCardID sets the "card" edge to the Card entity by ID.
@@ -116,8 +116,8 @@ func (_c *UserCreate) SetNillableCardID(id *int) *UserCreate {
 }
 
 // SetCard sets the "card" edge to the Card entity.
-func (_c *UserCreate) SetCard(c *Card) *UserCreate {
-	return _c.SetCardID(c.ID)
+func (_c *UserCreate) SetCard(v *Card) *UserCreate {
+	return _c.SetCardID(v.ID)
 }
 
 // SetMetadataID sets the "metadata" edge to the Metadata entity by ID.
@@ -135,8 +135,8 @@ func (_c *UserCreate) SetNillableMetadataID(id *int) *UserCreate {
 }
 
 // SetMetadata sets the "metadata" edge to the Metadata entity.
-func (_c *UserCreate) SetMetadata(m *Metadata) *UserCreate {
-	return _c.SetMetadataID(m.ID)
+func (_c *UserCreate) SetMetadata(v *Metadata) *UserCreate {
+	return _c.SetMetadataID(v.ID)
 }
 
 // AddInfoIDs adds the "info" edge to the Info entity by IDs.
@@ -146,10 +146,10 @@ func (_c *UserCreate) AddInfoIDs(ids ...int) *UserCreate {
 }
 
 // AddInfo adds the "info" edges to the Info entity.
-func (_c *UserCreate) AddInfo(i ...*Info) *UserCreate {
-	ids := make([]int, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
+func (_c *UserCreate) AddInfo(v ...*Info) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddInfoIDs(ids...)
 }
@@ -161,10 +161,10 @@ func (_c *UserCreate) AddRentalIDs(ids ...int) *UserCreate {
 }
 
 // AddRentals adds the "rentals" edges to the Rental entity.
-func (_c *UserCreate) AddRentals(r ...*Rental) *UserCreate {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_c *UserCreate) AddRentals(v ...*Rental) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddRentalIDs(ids...)
 }

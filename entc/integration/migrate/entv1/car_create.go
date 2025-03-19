@@ -38,8 +38,8 @@ func (_c *CarCreate) SetNillableOwnerID(id *int) *CarCreate {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_c *CarCreate) SetOwner(u *User) *CarCreate {
-	return _c.SetOwnerID(u.ID)
+func (_c *CarCreate) SetOwner(v *User) *CarCreate {
+	return _c.SetOwnerID(v.ID)
 }
 
 // Mutation returns the CarMutation object of the builder.

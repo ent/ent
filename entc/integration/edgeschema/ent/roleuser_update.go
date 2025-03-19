@@ -35,55 +35,55 @@ func (_u *RoleUserUpdate) Where(ps ...predicate.RoleUser) *RoleUserUpdate {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_u *RoleUserUpdate) SetCreatedAt(t time.Time) *RoleUserUpdate {
-	_u.mutation.SetCreatedAt(t)
+func (_u *RoleUserUpdate) SetCreatedAt(v time.Time) *RoleUserUpdate {
+	_u.mutation.SetCreatedAt(v)
 	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *RoleUserUpdate) SetNillableCreatedAt(t *time.Time) *RoleUserUpdate {
-	if t != nil {
-		_u.SetCreatedAt(*t)
+func (_u *RoleUserUpdate) SetNillableCreatedAt(v *time.Time) *RoleUserUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
 	return _u
 }
 
 // SetRoleID sets the "role_id" field.
-func (_u *RoleUserUpdate) SetRoleID(i int) *RoleUserUpdate {
-	_u.mutation.SetRoleID(i)
+func (_u *RoleUserUpdate) SetRoleID(v int) *RoleUserUpdate {
+	_u.mutation.SetRoleID(v)
 	return _u
 }
 
 // SetNillableRoleID sets the "role_id" field if the given value is not nil.
-func (_u *RoleUserUpdate) SetNillableRoleID(i *int) *RoleUserUpdate {
-	if i != nil {
-		_u.SetRoleID(*i)
+func (_u *RoleUserUpdate) SetNillableRoleID(v *int) *RoleUserUpdate {
+	if v != nil {
+		_u.SetRoleID(*v)
 	}
 	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *RoleUserUpdate) SetUserID(i int) *RoleUserUpdate {
-	_u.mutation.SetUserID(i)
+func (_u *RoleUserUpdate) SetUserID(v int) *RoleUserUpdate {
+	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *RoleUserUpdate) SetNillableUserID(i *int) *RoleUserUpdate {
-	if i != nil {
-		_u.SetUserID(*i)
+func (_u *RoleUserUpdate) SetNillableUserID(v *int) *RoleUserUpdate {
+	if v != nil {
+		_u.SetUserID(*v)
 	}
 	return _u
 }
 
 // SetRole sets the "role" edge to the Role entity.
-func (_u *RoleUserUpdate) SetRole(r *Role) *RoleUserUpdate {
-	return _u.SetRoleID(r.ID)
+func (_u *RoleUserUpdate) SetRole(v *Role) *RoleUserUpdate {
+	return _u.SetRoleID(v.ID)
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *RoleUserUpdate) SetUser(u *User) *RoleUserUpdate {
-	return _u.SetUserID(u.ID)
+func (_u *RoleUserUpdate) SetUser(v *User) *RoleUserUpdate {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the RoleUserMutation object of the builder.
@@ -141,9 +141,9 @@ func (_u *RoleUserUpdate) check() error {
 	return nil
 }
 
-func (_u *RoleUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *RoleUserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(roleuser.Table, roleuser.Columns, sqlgraph.NewFieldSpec(roleuser.FieldUserID, field.TypeInt), sqlgraph.NewFieldSpec(roleuser.FieldRoleID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -214,7 +214,7 @@ func (_u *RoleUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{roleuser.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -223,7 +223,7 @@ func (_u *RoleUserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // RoleUserUpdateOne is the builder for updating a single RoleUser entity.
@@ -235,55 +235,55 @@ type RoleUserUpdateOne struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_u *RoleUserUpdateOne) SetCreatedAt(t time.Time) *RoleUserUpdateOne {
-	_u.mutation.SetCreatedAt(t)
+func (_u *RoleUserUpdateOne) SetCreatedAt(v time.Time) *RoleUserUpdateOne {
+	_u.mutation.SetCreatedAt(v)
 	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *RoleUserUpdateOne) SetNillableCreatedAt(t *time.Time) *RoleUserUpdateOne {
-	if t != nil {
-		_u.SetCreatedAt(*t)
+func (_u *RoleUserUpdateOne) SetNillableCreatedAt(v *time.Time) *RoleUserUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
 	return _u
 }
 
 // SetRoleID sets the "role_id" field.
-func (_u *RoleUserUpdateOne) SetRoleID(i int) *RoleUserUpdateOne {
-	_u.mutation.SetRoleID(i)
+func (_u *RoleUserUpdateOne) SetRoleID(v int) *RoleUserUpdateOne {
+	_u.mutation.SetRoleID(v)
 	return _u
 }
 
 // SetNillableRoleID sets the "role_id" field if the given value is not nil.
-func (_u *RoleUserUpdateOne) SetNillableRoleID(i *int) *RoleUserUpdateOne {
-	if i != nil {
-		_u.SetRoleID(*i)
+func (_u *RoleUserUpdateOne) SetNillableRoleID(v *int) *RoleUserUpdateOne {
+	if v != nil {
+		_u.SetRoleID(*v)
 	}
 	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *RoleUserUpdateOne) SetUserID(i int) *RoleUserUpdateOne {
-	_u.mutation.SetUserID(i)
+func (_u *RoleUserUpdateOne) SetUserID(v int) *RoleUserUpdateOne {
+	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *RoleUserUpdateOne) SetNillableUserID(i *int) *RoleUserUpdateOne {
-	if i != nil {
-		_u.SetUserID(*i)
+func (_u *RoleUserUpdateOne) SetNillableUserID(v *int) *RoleUserUpdateOne {
+	if v != nil {
+		_u.SetUserID(*v)
 	}
 	return _u
 }
 
 // SetRole sets the "role" edge to the Role entity.
-func (_u *RoleUserUpdateOne) SetRole(r *Role) *RoleUserUpdateOne {
-	return _u.SetRoleID(r.ID)
+func (_u *RoleUserUpdateOne) SetRole(v *Role) *RoleUserUpdateOne {
+	return _u.SetRoleID(v.ID)
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *RoleUserUpdateOne) SetUser(u *User) *RoleUserUpdateOne {
-	return _u.SetUserID(u.ID)
+func (_u *RoleUserUpdateOne) SetUser(v *User) *RoleUserUpdateOne {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the RoleUserMutation object of the builder.

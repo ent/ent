@@ -34,64 +34,64 @@ func (_u *RelationshipUpdate) Where(ps ...predicate.Relationship) *RelationshipU
 }
 
 // SetWeight sets the "weight" field.
-func (_u *RelationshipUpdate) SetWeight(i int) *RelationshipUpdate {
+func (_u *RelationshipUpdate) SetWeight(v int) *RelationshipUpdate {
 	_u.mutation.ResetWeight()
-	_u.mutation.SetWeight(i)
+	_u.mutation.SetWeight(v)
 	return _u
 }
 
 // SetNillableWeight sets the "weight" field if the given value is not nil.
-func (_u *RelationshipUpdate) SetNillableWeight(i *int) *RelationshipUpdate {
-	if i != nil {
-		_u.SetWeight(*i)
+func (_u *RelationshipUpdate) SetNillableWeight(v *int) *RelationshipUpdate {
+	if v != nil {
+		_u.SetWeight(*v)
 	}
 	return _u
 }
 
-// AddWeight adds i to the "weight" field.
-func (_u *RelationshipUpdate) AddWeight(i int) *RelationshipUpdate {
-	_u.mutation.AddWeight(i)
+// AddWeight adds value to the "weight" field.
+func (_u *RelationshipUpdate) AddWeight(v int) *RelationshipUpdate {
+	_u.mutation.AddWeight(v)
 	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *RelationshipUpdate) SetUserID(i int) *RelationshipUpdate {
-	_u.mutation.SetUserID(i)
+func (_u *RelationshipUpdate) SetUserID(v int) *RelationshipUpdate {
+	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *RelationshipUpdate) SetNillableUserID(i *int) *RelationshipUpdate {
-	if i != nil {
-		_u.SetUserID(*i)
+func (_u *RelationshipUpdate) SetNillableUserID(v *int) *RelationshipUpdate {
+	if v != nil {
+		_u.SetUserID(*v)
 	}
 	return _u
 }
 
 // SetRelativeID sets the "relative_id" field.
-func (_u *RelationshipUpdate) SetRelativeID(i int) *RelationshipUpdate {
-	_u.mutation.SetRelativeID(i)
+func (_u *RelationshipUpdate) SetRelativeID(v int) *RelationshipUpdate {
+	_u.mutation.SetRelativeID(v)
 	return _u
 }
 
 // SetNillableRelativeID sets the "relative_id" field if the given value is not nil.
-func (_u *RelationshipUpdate) SetNillableRelativeID(i *int) *RelationshipUpdate {
-	if i != nil {
-		_u.SetRelativeID(*i)
+func (_u *RelationshipUpdate) SetNillableRelativeID(v *int) *RelationshipUpdate {
+	if v != nil {
+		_u.SetRelativeID(*v)
 	}
 	return _u
 }
 
 // SetInfoID sets the "info_id" field.
-func (_u *RelationshipUpdate) SetInfoID(i int) *RelationshipUpdate {
-	_u.mutation.SetInfoID(i)
+func (_u *RelationshipUpdate) SetInfoID(v int) *RelationshipUpdate {
+	_u.mutation.SetInfoID(v)
 	return _u
 }
 
 // SetNillableInfoID sets the "info_id" field if the given value is not nil.
-func (_u *RelationshipUpdate) SetNillableInfoID(i *int) *RelationshipUpdate {
-	if i != nil {
-		_u.SetInfoID(*i)
+func (_u *RelationshipUpdate) SetNillableInfoID(v *int) *RelationshipUpdate {
+	if v != nil {
+		_u.SetInfoID(*v)
 	}
 	return _u
 }
@@ -103,18 +103,18 @@ func (_u *RelationshipUpdate) ClearInfoID() *RelationshipUpdate {
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *RelationshipUpdate) SetUser(u *User) *RelationshipUpdate {
-	return _u.SetUserID(u.ID)
+func (_u *RelationshipUpdate) SetUser(v *User) *RelationshipUpdate {
+	return _u.SetUserID(v.ID)
 }
 
 // SetRelative sets the "relative" edge to the User entity.
-func (_u *RelationshipUpdate) SetRelative(u *User) *RelationshipUpdate {
-	return _u.SetRelativeID(u.ID)
+func (_u *RelationshipUpdate) SetRelative(v *User) *RelationshipUpdate {
+	return _u.SetRelativeID(v.ID)
 }
 
 // SetInfo sets the "info" edge to the RelationshipInfo entity.
-func (_u *RelationshipUpdate) SetInfo(r *RelationshipInfo) *RelationshipUpdate {
-	return _u.SetInfoID(r.ID)
+func (_u *RelationshipUpdate) SetInfo(v *RelationshipInfo) *RelationshipUpdate {
+	return _u.SetInfoID(v.ID)
 }
 
 // Mutation returns the RelationshipMutation object of the builder.
@@ -178,9 +178,9 @@ func (_u *RelationshipUpdate) check() error {
 	return nil
 }
 
-func (_u *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *RelationshipUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(relationship.Table, relationship.Columns, sqlgraph.NewFieldSpec(relationship.FieldUserID, field.TypeInt), sqlgraph.NewFieldSpec(relationship.FieldRelativeID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -283,7 +283,7 @@ func (_u *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{relationship.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -292,7 +292,7 @@ func (_u *RelationshipUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // RelationshipUpdateOne is the builder for updating a single Relationship entity.
@@ -304,64 +304,64 @@ type RelationshipUpdateOne struct {
 }
 
 // SetWeight sets the "weight" field.
-func (_u *RelationshipUpdateOne) SetWeight(i int) *RelationshipUpdateOne {
+func (_u *RelationshipUpdateOne) SetWeight(v int) *RelationshipUpdateOne {
 	_u.mutation.ResetWeight()
-	_u.mutation.SetWeight(i)
+	_u.mutation.SetWeight(v)
 	return _u
 }
 
 // SetNillableWeight sets the "weight" field if the given value is not nil.
-func (_u *RelationshipUpdateOne) SetNillableWeight(i *int) *RelationshipUpdateOne {
-	if i != nil {
-		_u.SetWeight(*i)
+func (_u *RelationshipUpdateOne) SetNillableWeight(v *int) *RelationshipUpdateOne {
+	if v != nil {
+		_u.SetWeight(*v)
 	}
 	return _u
 }
 
-// AddWeight adds i to the "weight" field.
-func (_u *RelationshipUpdateOne) AddWeight(i int) *RelationshipUpdateOne {
-	_u.mutation.AddWeight(i)
+// AddWeight adds value to the "weight" field.
+func (_u *RelationshipUpdateOne) AddWeight(v int) *RelationshipUpdateOne {
+	_u.mutation.AddWeight(v)
 	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *RelationshipUpdateOne) SetUserID(i int) *RelationshipUpdateOne {
-	_u.mutation.SetUserID(i)
+func (_u *RelationshipUpdateOne) SetUserID(v int) *RelationshipUpdateOne {
+	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *RelationshipUpdateOne) SetNillableUserID(i *int) *RelationshipUpdateOne {
-	if i != nil {
-		_u.SetUserID(*i)
+func (_u *RelationshipUpdateOne) SetNillableUserID(v *int) *RelationshipUpdateOne {
+	if v != nil {
+		_u.SetUserID(*v)
 	}
 	return _u
 }
 
 // SetRelativeID sets the "relative_id" field.
-func (_u *RelationshipUpdateOne) SetRelativeID(i int) *RelationshipUpdateOne {
-	_u.mutation.SetRelativeID(i)
+func (_u *RelationshipUpdateOne) SetRelativeID(v int) *RelationshipUpdateOne {
+	_u.mutation.SetRelativeID(v)
 	return _u
 }
 
 // SetNillableRelativeID sets the "relative_id" field if the given value is not nil.
-func (_u *RelationshipUpdateOne) SetNillableRelativeID(i *int) *RelationshipUpdateOne {
-	if i != nil {
-		_u.SetRelativeID(*i)
+func (_u *RelationshipUpdateOne) SetNillableRelativeID(v *int) *RelationshipUpdateOne {
+	if v != nil {
+		_u.SetRelativeID(*v)
 	}
 	return _u
 }
 
 // SetInfoID sets the "info_id" field.
-func (_u *RelationshipUpdateOne) SetInfoID(i int) *RelationshipUpdateOne {
-	_u.mutation.SetInfoID(i)
+func (_u *RelationshipUpdateOne) SetInfoID(v int) *RelationshipUpdateOne {
+	_u.mutation.SetInfoID(v)
 	return _u
 }
 
 // SetNillableInfoID sets the "info_id" field if the given value is not nil.
-func (_u *RelationshipUpdateOne) SetNillableInfoID(i *int) *RelationshipUpdateOne {
-	if i != nil {
-		_u.SetInfoID(*i)
+func (_u *RelationshipUpdateOne) SetNillableInfoID(v *int) *RelationshipUpdateOne {
+	if v != nil {
+		_u.SetInfoID(*v)
 	}
 	return _u
 }
@@ -373,18 +373,18 @@ func (_u *RelationshipUpdateOne) ClearInfoID() *RelationshipUpdateOne {
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *RelationshipUpdateOne) SetUser(u *User) *RelationshipUpdateOne {
-	return _u.SetUserID(u.ID)
+func (_u *RelationshipUpdateOne) SetUser(v *User) *RelationshipUpdateOne {
+	return _u.SetUserID(v.ID)
 }
 
 // SetRelative sets the "relative" edge to the User entity.
-func (_u *RelationshipUpdateOne) SetRelative(u *User) *RelationshipUpdateOne {
-	return _u.SetRelativeID(u.ID)
+func (_u *RelationshipUpdateOne) SetRelative(v *User) *RelationshipUpdateOne {
+	return _u.SetRelativeID(v.ID)
 }
 
 // SetInfo sets the "info" edge to the RelationshipInfo entity.
-func (_u *RelationshipUpdateOne) SetInfo(r *RelationshipInfo) *RelationshipUpdateOne {
-	return _u.SetInfoID(r.ID)
+func (_u *RelationshipUpdateOne) SetInfo(v *RelationshipInfo) *RelationshipUpdateOne {
+	return _u.SetInfoID(v.ID)
 }
 
 // Mutation returns the RelationshipMutation object of the builder.

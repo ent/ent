@@ -23,15 +23,15 @@ type CustomTypeCreate struct {
 }
 
 // SetCustom sets the "custom" field.
-func (_c *CustomTypeCreate) SetCustom(s string) *CustomTypeCreate {
-	_c.mutation.SetCustom(s)
+func (_c *CustomTypeCreate) SetCustom(v string) *CustomTypeCreate {
+	_c.mutation.SetCustom(v)
 	return _c
 }
 
 // SetNillableCustom sets the "custom" field if the given value is not nil.
-func (_c *CustomTypeCreate) SetNillableCustom(s *string) *CustomTypeCreate {
-	if s != nil {
-		_c.SetCustom(*s)
+func (_c *CustomTypeCreate) SetNillableCustom(v *string) *CustomTypeCreate {
+	if v != nil {
+		_c.SetCustom(*v)
 	}
 	return _c
 }

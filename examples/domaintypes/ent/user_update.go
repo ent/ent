@@ -28,15 +28,15 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 }
 
 // SetPostalCode sets the "postal_code" field.
-func (_u *UserUpdate) SetPostalCode(s string) *UserUpdate {
-	_u.mutation.SetPostalCode(s)
+func (_u *UserUpdate) SetPostalCode(v string) *UserUpdate {
+	_u.mutation.SetPostalCode(v)
 	return _u
 }
 
 // SetNillablePostalCode sets the "postal_code" field if the given value is not nil.
-func (_u *UserUpdate) SetNillablePostalCode(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetPostalCode(*s)
+func (_u *UserUpdate) SetNillablePostalCode(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetPostalCode(*v)
 	}
 	return _u
 }
@@ -73,7 +73,7 @@ func (_u *UserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -85,7 +85,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := _u.mutation.PostalCode(); ok {
 		_spec.SetField(user.FieldPostalCode, field.TypeString, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -94,7 +94,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -106,15 +106,15 @@ type UserUpdateOne struct {
 }
 
 // SetPostalCode sets the "postal_code" field.
-func (_u *UserUpdateOne) SetPostalCode(s string) *UserUpdateOne {
-	_u.mutation.SetPostalCode(s)
+func (_u *UserUpdateOne) SetPostalCode(v string) *UserUpdateOne {
+	_u.mutation.SetPostalCode(v)
 	return _u
 }
 
 // SetNillablePostalCode sets the "postal_code" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillablePostalCode(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetPostalCode(*s)
+func (_u *UserUpdateOne) SetNillablePostalCode(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetPostalCode(*v)
 	}
 	return _u
 }

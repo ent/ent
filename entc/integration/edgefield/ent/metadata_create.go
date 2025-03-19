@@ -25,36 +25,36 @@ type MetadataCreate struct {
 }
 
 // SetAge sets the "age" field.
-func (_c *MetadataCreate) SetAge(i int) *MetadataCreate {
-	_c.mutation.SetAge(i)
+func (_c *MetadataCreate) SetAge(v int) *MetadataCreate {
+	_c.mutation.SetAge(v)
 	return _c
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (_c *MetadataCreate) SetNillableAge(i *int) *MetadataCreate {
-	if i != nil {
-		_c.SetAge(*i)
+func (_c *MetadataCreate) SetNillableAge(v *int) *MetadataCreate {
+	if v != nil {
+		_c.SetAge(*v)
 	}
 	return _c
 }
 
 // SetParentID sets the "parent_id" field.
-func (_c *MetadataCreate) SetParentID(i int) *MetadataCreate {
-	_c.mutation.SetParentID(i)
+func (_c *MetadataCreate) SetParentID(v int) *MetadataCreate {
+	_c.mutation.SetParentID(v)
 	return _c
 }
 
 // SetNillableParentID sets the "parent_id" field if the given value is not nil.
-func (_c *MetadataCreate) SetNillableParentID(i *int) *MetadataCreate {
-	if i != nil {
-		_c.SetParentID(*i)
+func (_c *MetadataCreate) SetNillableParentID(v *int) *MetadataCreate {
+	if v != nil {
+		_c.SetParentID(*v)
 	}
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *MetadataCreate) SetID(i int) *MetadataCreate {
-	_c.mutation.SetID(i)
+func (_c *MetadataCreate) SetID(v int) *MetadataCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
@@ -73,8 +73,8 @@ func (_c *MetadataCreate) SetNillableUserID(id *int) *MetadataCreate {
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_c *MetadataCreate) SetUser(u *User) *MetadataCreate {
-	return _c.SetUserID(u.ID)
+func (_c *MetadataCreate) SetUser(v *User) *MetadataCreate {
+	return _c.SetUserID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the Metadata entity by IDs.
@@ -84,17 +84,17 @@ func (_c *MetadataCreate) AddChildIDs(ids ...int) *MetadataCreate {
 }
 
 // AddChildren adds the "children" edges to the Metadata entity.
-func (_c *MetadataCreate) AddChildren(m ...*Metadata) *MetadataCreate {
-	ids := make([]int, len(m))
-	for i := range m {
-		ids[i] = m[i].ID
+func (_c *MetadataCreate) AddChildren(v ...*Metadata) *MetadataCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddChildIDs(ids...)
 }
 
 // SetParent sets the "parent" edge to the Metadata entity.
-func (_c *MetadataCreate) SetParent(m *Metadata) *MetadataCreate {
-	return _c.SetParentID(m.ID)
+func (_c *MetadataCreate) SetParent(v *Metadata) *MetadataCreate {
+	return _c.SetParentID(v.ID)
 }
 
 // Mutation returns the MetadataMutation object of the builder.

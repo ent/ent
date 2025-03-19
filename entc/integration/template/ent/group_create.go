@@ -24,8 +24,8 @@ type GroupCreate struct {
 }
 
 // SetMaxUsers sets the "max_users" field.
-func (_c *GroupCreate) SetMaxUsers(i int) *GroupCreate {
-	_c.mutation.SetMaxUsers(i)
+func (_c *GroupCreate) SetMaxUsers(v int) *GroupCreate {
+	_c.mutation.SetMaxUsers(v)
 	return _c
 }
 

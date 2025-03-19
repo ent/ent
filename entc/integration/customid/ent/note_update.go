@@ -33,15 +33,15 @@ func (_u *NoteUpdate) Where(ps ...predicate.Note) *NoteUpdate {
 }
 
 // SetText sets the "text" field.
-func (_u *NoteUpdate) SetText(s string) *NoteUpdate {
-	_u.mutation.SetText(s)
+func (_u *NoteUpdate) SetText(v string) *NoteUpdate {
+	_u.mutation.SetText(v)
 	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_u *NoteUpdate) SetNillableText(s *string) *NoteUpdate {
-	if s != nil {
-		_u.SetText(*s)
+func (_u *NoteUpdate) SetNillableText(v *string) *NoteUpdate {
+	if v != nil {
+		_u.SetText(*v)
 	}
 	return _u
 }
@@ -67,8 +67,8 @@ func (_u *NoteUpdate) SetNillableParentID(id *schema.NoteID) *NoteUpdate {
 }
 
 // SetParent sets the "parent" edge to the Note entity.
-func (_u *NoteUpdate) SetParent(n *Note) *NoteUpdate {
-	return _u.SetParentID(n.ID)
+func (_u *NoteUpdate) SetParent(v *Note) *NoteUpdate {
+	return _u.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the Note entity by IDs.
@@ -78,10 +78,10 @@ func (_u *NoteUpdate) AddChildIDs(ids ...schema.NoteID) *NoteUpdate {
 }
 
 // AddChildren adds the "children" edges to the Note entity.
-func (_u *NoteUpdate) AddChildren(n ...*Note) *NoteUpdate {
-	ids := make([]schema.NoteID, len(n))
-	for i := range n {
-		ids[i] = n[i].ID
+func (_u *NoteUpdate) AddChildren(v ...*Note) *NoteUpdate {
+	ids := make([]schema.NoteID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
@@ -110,10 +110,10 @@ func (_u *NoteUpdate) RemoveChildIDs(ids ...schema.NoteID) *NoteUpdate {
 }
 
 // RemoveChildren removes "children" edges to Note entities.
-func (_u *NoteUpdate) RemoveChildren(n ...*Note) *NoteUpdate {
-	ids := make([]schema.NoteID, len(n))
-	for i := range n {
-		ids[i] = n[i].ID
+func (_u *NoteUpdate) RemoveChildren(v ...*Note) *NoteUpdate {
+	ids := make([]schema.NoteID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }
@@ -145,7 +145,7 @@ func (_u *NoteUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *NoteUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *NoteUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(note.Table, note.Columns, sqlgraph.NewFieldSpec(note.FieldID, field.TypeString))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -234,7 +234,7 @@ func (_u *NoteUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{note.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -243,7 +243,7 @@ func (_u *NoteUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // NoteUpdateOne is the builder for updating a single Note entity.
@@ -255,15 +255,15 @@ type NoteUpdateOne struct {
 }
 
 // SetText sets the "text" field.
-func (_u *NoteUpdateOne) SetText(s string) *NoteUpdateOne {
-	_u.mutation.SetText(s)
+func (_u *NoteUpdateOne) SetText(v string) *NoteUpdateOne {
+	_u.mutation.SetText(v)
 	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_u *NoteUpdateOne) SetNillableText(s *string) *NoteUpdateOne {
-	if s != nil {
-		_u.SetText(*s)
+func (_u *NoteUpdateOne) SetNillableText(v *string) *NoteUpdateOne {
+	if v != nil {
+		_u.SetText(*v)
 	}
 	return _u
 }
@@ -289,8 +289,8 @@ func (_u *NoteUpdateOne) SetNillableParentID(id *schema.NoteID) *NoteUpdateOne {
 }
 
 // SetParent sets the "parent" edge to the Note entity.
-func (_u *NoteUpdateOne) SetParent(n *Note) *NoteUpdateOne {
-	return _u.SetParentID(n.ID)
+func (_u *NoteUpdateOne) SetParent(v *Note) *NoteUpdateOne {
+	return _u.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the Note entity by IDs.
@@ -300,10 +300,10 @@ func (_u *NoteUpdateOne) AddChildIDs(ids ...schema.NoteID) *NoteUpdateOne {
 }
 
 // AddChildren adds the "children" edges to the Note entity.
-func (_u *NoteUpdateOne) AddChildren(n ...*Note) *NoteUpdateOne {
-	ids := make([]schema.NoteID, len(n))
-	for i := range n {
-		ids[i] = n[i].ID
+func (_u *NoteUpdateOne) AddChildren(v ...*Note) *NoteUpdateOne {
+	ids := make([]schema.NoteID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
@@ -332,10 +332,10 @@ func (_u *NoteUpdateOne) RemoveChildIDs(ids ...schema.NoteID) *NoteUpdateOne {
 }
 
 // RemoveChildren removes "children" edges to Note entities.
-func (_u *NoteUpdateOne) RemoveChildren(n ...*Note) *NoteUpdateOne {
-	ids := make([]schema.NoteID, len(n))
-	for i := range n {
-		ids[i] = n[i].ID
+func (_u *NoteUpdateOne) RemoveChildren(v ...*Note) *NoteUpdateOne {
+	ids := make([]schema.NoteID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }

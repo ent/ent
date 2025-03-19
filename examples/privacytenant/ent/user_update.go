@@ -34,28 +34,28 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *UserUpdate) SetName(s string) *UserUpdate {
-	_u.mutation.SetName(s)
+func (_u *UserUpdate) SetName(v string) *UserUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableName(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
 
 // SetFoods sets the "foods" field.
-func (_u *UserUpdate) SetFoods(s []string) *UserUpdate {
-	_u.mutation.SetFoods(s)
+func (_u *UserUpdate) SetFoods(v []string) *UserUpdate {
+	_u.mutation.SetFoods(v)
 	return _u
 }
 
-// AppendFoods appends s to the "foods" field.
-func (_u *UserUpdate) AppendFoods(s []string) *UserUpdate {
-	_u.mutation.AppendFoods(s)
+// AppendFoods appends value to the "foods" field.
+func (_u *UserUpdate) AppendFoods(v []string) *UserUpdate {
+	_u.mutation.AppendFoods(v)
 	return _u
 }
 
@@ -72,10 +72,10 @@ func (_u *UserUpdate) AddGroupIDs(ids ...int) *UserUpdate {
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (_u *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *UserUpdate) AddGroups(v ...*Group) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddGroupIDs(ids...)
 }
@@ -98,10 +98,10 @@ func (_u *UserUpdate) RemoveGroupIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveGroups removes "groups" edges to Group entities.
-func (_u *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *UserUpdate) RemoveGroups(v ...*Group) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveGroupIDs(ids...)
 }
@@ -141,9 +141,9 @@ func (_u *UserUpdate) check() error {
 	return nil
 }
 
-func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -212,7 +212,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -221,7 +221,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -233,28 +233,28 @@ type UserUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (_u *UserUpdateOne) SetName(s string) *UserUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
 
 // SetFoods sets the "foods" field.
-func (_u *UserUpdateOne) SetFoods(s []string) *UserUpdateOne {
-	_u.mutation.SetFoods(s)
+func (_u *UserUpdateOne) SetFoods(v []string) *UserUpdateOne {
+	_u.mutation.SetFoods(v)
 	return _u
 }
 
-// AppendFoods appends s to the "foods" field.
-func (_u *UserUpdateOne) AppendFoods(s []string) *UserUpdateOne {
-	_u.mutation.AppendFoods(s)
+// AppendFoods appends value to the "foods" field.
+func (_u *UserUpdateOne) AppendFoods(v []string) *UserUpdateOne {
+	_u.mutation.AppendFoods(v)
 	return _u
 }
 
@@ -271,10 +271,10 @@ func (_u *UserUpdateOne) AddGroupIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (_u *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *UserUpdateOne) AddGroups(v ...*Group) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddGroupIDs(ids...)
 }
@@ -297,10 +297,10 @@ func (_u *UserUpdateOne) RemoveGroupIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveGroups removes "groups" edges to Group entities.
-func (_u *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *UserUpdateOne) RemoveGroups(v ...*Group) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveGroupIDs(ids...)
 }

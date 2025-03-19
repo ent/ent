@@ -27,53 +27,53 @@ type SessionDeviceCreate struct {
 }
 
 // SetIPAddress sets the "ip_address" field.
-func (_c *SessionDeviceCreate) SetIPAddress(s string) *SessionDeviceCreate {
-	_c.mutation.SetIPAddress(s)
+func (_c *SessionDeviceCreate) SetIPAddress(v string) *SessionDeviceCreate {
+	_c.mutation.SetIPAddress(v)
 	return _c
 }
 
 // SetUserAgent sets the "user_agent" field.
-func (_c *SessionDeviceCreate) SetUserAgent(s string) *SessionDeviceCreate {
-	_c.mutation.SetUserAgent(s)
+func (_c *SessionDeviceCreate) SetUserAgent(v string) *SessionDeviceCreate {
+	_c.mutation.SetUserAgent(v)
 	return _c
 }
 
 // SetLocation sets the "location" field.
-func (_c *SessionDeviceCreate) SetLocation(s string) *SessionDeviceCreate {
-	_c.mutation.SetLocation(s)
+func (_c *SessionDeviceCreate) SetLocation(v string) *SessionDeviceCreate {
+	_c.mutation.SetLocation(v)
 	return _c
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *SessionDeviceCreate) SetCreatedAt(t time.Time) *SessionDeviceCreate {
-	_c.mutation.SetCreatedAt(t)
+func (_c *SessionDeviceCreate) SetCreatedAt(v time.Time) *SessionDeviceCreate {
+	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_c *SessionDeviceCreate) SetUpdatedAt(t time.Time) *SessionDeviceCreate {
-	_c.mutation.SetUpdatedAt(t)
+func (_c *SessionDeviceCreate) SetUpdatedAt(v time.Time) *SessionDeviceCreate {
+	_c.mutation.SetUpdatedAt(v)
 	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *SessionDeviceCreate) SetNillableUpdatedAt(t *time.Time) *SessionDeviceCreate {
-	if t != nil {
-		_c.SetUpdatedAt(*t)
+func (_c *SessionDeviceCreate) SetNillableUpdatedAt(v *time.Time) *SessionDeviceCreate {
+	if v != nil {
+		_c.SetUpdatedAt(*v)
 	}
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *SessionDeviceCreate) SetID(u uuid.UUID) *SessionDeviceCreate {
-	_c.mutation.SetID(u)
+func (_c *SessionDeviceCreate) SetID(v uuid.UUID) *SessionDeviceCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *SessionDeviceCreate) SetNillableID(u *uuid.UUID) *SessionDeviceCreate {
-	if u != nil {
-		_c.SetID(*u)
+func (_c *SessionDeviceCreate) SetNillableID(v *uuid.UUID) *SessionDeviceCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
 	return _c
 }
@@ -85,10 +85,10 @@ func (_c *SessionDeviceCreate) AddSessionIDs(ids ...uuid.UUID) *SessionDeviceCre
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
-func (_c *SessionDeviceCreate) AddSessions(s ...*Session) *SessionDeviceCreate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_c *SessionDeviceCreate) AddSessions(v ...*Session) *SessionDeviceCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddSessionIDs(ids...)
 }

@@ -29,15 +29,15 @@ type PetCreate struct {
 }
 
 // SetID sets the "id" field.
-func (_c *PetCreate) SetID(s string) *PetCreate {
-	_c.mutation.SetID(s)
+func (_c *PetCreate) SetID(v string) *PetCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *PetCreate) SetNillableID(s *string) *PetCreate {
-	if s != nil {
-		_c.SetID(*s)
+func (_c *PetCreate) SetNillableID(v *string) *PetCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
 	return _c
 }
@@ -57,8 +57,8 @@ func (_c *PetCreate) SetNillableOwnerID(id *int) *PetCreate {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_c *PetCreate) SetOwner(u *User) *PetCreate {
-	return _c.SetOwnerID(u.ID)
+func (_c *PetCreate) SetOwner(v *User) *PetCreate {
+	return _c.SetOwnerID(v.ID)
 }
 
 // AddCarIDs adds the "cars" edge to the Car entity by IDs.
@@ -68,10 +68,10 @@ func (_c *PetCreate) AddCarIDs(ids ...int) *PetCreate {
 }
 
 // AddCars adds the "cars" edges to the Car entity.
-func (_c *PetCreate) AddCars(c ...*Car) *PetCreate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_c *PetCreate) AddCars(v ...*Car) *PetCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddCarIDs(ids...)
 }
@@ -83,10 +83,10 @@ func (_c *PetCreate) AddFriendIDs(ids ...string) *PetCreate {
 }
 
 // AddFriends adds the "friends" edges to the Pet entity.
-func (_c *PetCreate) AddFriends(p ...*Pet) *PetCreate {
-	ids := make([]string, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_c *PetCreate) AddFriends(v ...*Pet) *PetCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddFriendIDs(ids...)
 }
@@ -106,8 +106,8 @@ func (_c *PetCreate) SetNillableBestFriendID(id *string) *PetCreate {
 }
 
 // SetBestFriend sets the "best_friend" edge to the Pet entity.
-func (_c *PetCreate) SetBestFriend(p *Pet) *PetCreate {
-	return _c.SetBestFriendID(p.ID)
+func (_c *PetCreate) SetBestFriend(v *Pet) *PetCreate {
+	return _c.SetBestFriendID(v.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.

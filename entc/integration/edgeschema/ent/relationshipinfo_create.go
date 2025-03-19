@@ -26,8 +26,8 @@ type RelationshipInfoCreate struct {
 }
 
 // SetText sets the "text" field.
-func (_c *RelationshipInfoCreate) SetText(s string) *RelationshipInfoCreate {
-	_c.mutation.SetText(s)
+func (_c *RelationshipInfoCreate) SetText(v string) *RelationshipInfoCreate {
+	_c.mutation.SetText(v)
 	return _c
 }
 

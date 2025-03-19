@@ -34,99 +34,99 @@ func (_u *PaymentUpdate) Where(ps ...predicate.Payment) *PaymentUpdate {
 }
 
 // SetCardID sets the "card_id" field.
-func (_u *PaymentUpdate) SetCardID(i int) *PaymentUpdate {
-	_u.mutation.SetCardID(i)
+func (_u *PaymentUpdate) SetCardID(v int) *PaymentUpdate {
+	_u.mutation.SetCardID(v)
 	return _u
 }
 
 // SetNillableCardID sets the "card_id" field if the given value is not nil.
-func (_u *PaymentUpdate) SetNillableCardID(i *int) *PaymentUpdate {
-	if i != nil {
-		_u.SetCardID(*i)
+func (_u *PaymentUpdate) SetNillableCardID(v *int) *PaymentUpdate {
+	if v != nil {
+		_u.SetCardID(*v)
 	}
 	return _u
 }
 
 // SetAmount sets the "amount" field.
-func (_u *PaymentUpdate) SetAmount(f float64) *PaymentUpdate {
+func (_u *PaymentUpdate) SetAmount(v float64) *PaymentUpdate {
 	_u.mutation.ResetAmount()
-	_u.mutation.SetAmount(f)
+	_u.mutation.SetAmount(v)
 	return _u
 }
 
 // SetNillableAmount sets the "amount" field if the given value is not nil.
-func (_u *PaymentUpdate) SetNillableAmount(f *float64) *PaymentUpdate {
-	if f != nil {
-		_u.SetAmount(*f)
+func (_u *PaymentUpdate) SetNillableAmount(v *float64) *PaymentUpdate {
+	if v != nil {
+		_u.SetAmount(*v)
 	}
 	return _u
 }
 
-// AddAmount adds f to the "amount" field.
-func (_u *PaymentUpdate) AddAmount(f float64) *PaymentUpdate {
-	_u.mutation.AddAmount(f)
+// AddAmount adds value to the "amount" field.
+func (_u *PaymentUpdate) AddAmount(v float64) *PaymentUpdate {
+	_u.mutation.AddAmount(v)
 	return _u
 }
 
 // SetCurrency sets the "currency" field.
-func (_u *PaymentUpdate) SetCurrency(pa payment.Currency) *PaymentUpdate {
-	_u.mutation.SetCurrency(pa)
+func (_u *PaymentUpdate) SetCurrency(v payment.Currency) *PaymentUpdate {
+	_u.mutation.SetCurrency(v)
 	return _u
 }
 
 // SetNillableCurrency sets the "currency" field if the given value is not nil.
-func (_u *PaymentUpdate) SetNillableCurrency(pa *payment.Currency) *PaymentUpdate {
-	if pa != nil {
-		_u.SetCurrency(*pa)
+func (_u *PaymentUpdate) SetNillableCurrency(v *payment.Currency) *PaymentUpdate {
+	if v != nil {
+		_u.SetCurrency(*v)
 	}
 	return _u
 }
 
 // SetTime sets the "time" field.
-func (_u *PaymentUpdate) SetTime(t time.Time) *PaymentUpdate {
-	_u.mutation.SetTime(t)
+func (_u *PaymentUpdate) SetTime(v time.Time) *PaymentUpdate {
+	_u.mutation.SetTime(v)
 	return _u
 }
 
 // SetNillableTime sets the "time" field if the given value is not nil.
-func (_u *PaymentUpdate) SetNillableTime(t *time.Time) *PaymentUpdate {
-	if t != nil {
-		_u.SetTime(*t)
+func (_u *PaymentUpdate) SetNillableTime(v *time.Time) *PaymentUpdate {
+	if v != nil {
+		_u.SetTime(*v)
 	}
 	return _u
 }
 
 // SetDescription sets the "description" field.
-func (_u *PaymentUpdate) SetDescription(s string) *PaymentUpdate {
-	_u.mutation.SetDescription(s)
+func (_u *PaymentUpdate) SetDescription(v string) *PaymentUpdate {
+	_u.mutation.SetDescription(v)
 	return _u
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (_u *PaymentUpdate) SetNillableDescription(s *string) *PaymentUpdate {
-	if s != nil {
-		_u.SetDescription(*s)
+func (_u *PaymentUpdate) SetNillableDescription(v *string) *PaymentUpdate {
+	if v != nil {
+		_u.SetDescription(*v)
 	}
 	return _u
 }
 
 // SetStatus sets the "status" field.
-func (_u *PaymentUpdate) SetStatus(pa payment.Status) *PaymentUpdate {
-	_u.mutation.SetStatus(pa)
+func (_u *PaymentUpdate) SetStatus(v payment.Status) *PaymentUpdate {
+	_u.mutation.SetStatus(v)
 	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *PaymentUpdate) SetNillableStatus(pa *payment.Status) *PaymentUpdate {
-	if pa != nil {
-		_u.SetStatus(*pa)
+func (_u *PaymentUpdate) SetNillableStatus(v *payment.Status) *PaymentUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
 	return _u
 }
 
 // SetCard sets the "card" edge to the Card entity.
-func (_u *PaymentUpdate) SetCard(c *Card) *PaymentUpdate {
-	return _u.SetCardID(c.ID)
+func (_u *PaymentUpdate) SetCard(v *Card) *PaymentUpdate {
+	return _u.SetCardID(v.ID)
 }
 
 // Mutation returns the PaymentMutation object of the builder.
@@ -190,9 +190,9 @@ func (_u *PaymentUpdate) check() error {
 	return nil
 }
 
-func (_u *PaymentUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *PaymentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(payment.Table, payment.Columns, sqlgraph.NewFieldSpec(payment.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -249,7 +249,7 @@ func (_u *PaymentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{payment.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -258,7 +258,7 @@ func (_u *PaymentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // PaymentUpdateOne is the builder for updating a single Payment entity.
@@ -270,99 +270,99 @@ type PaymentUpdateOne struct {
 }
 
 // SetCardID sets the "card_id" field.
-func (_u *PaymentUpdateOne) SetCardID(i int) *PaymentUpdateOne {
-	_u.mutation.SetCardID(i)
+func (_u *PaymentUpdateOne) SetCardID(v int) *PaymentUpdateOne {
+	_u.mutation.SetCardID(v)
 	return _u
 }
 
 // SetNillableCardID sets the "card_id" field if the given value is not nil.
-func (_u *PaymentUpdateOne) SetNillableCardID(i *int) *PaymentUpdateOne {
-	if i != nil {
-		_u.SetCardID(*i)
+func (_u *PaymentUpdateOne) SetNillableCardID(v *int) *PaymentUpdateOne {
+	if v != nil {
+		_u.SetCardID(*v)
 	}
 	return _u
 }
 
 // SetAmount sets the "amount" field.
-func (_u *PaymentUpdateOne) SetAmount(f float64) *PaymentUpdateOne {
+func (_u *PaymentUpdateOne) SetAmount(v float64) *PaymentUpdateOne {
 	_u.mutation.ResetAmount()
-	_u.mutation.SetAmount(f)
+	_u.mutation.SetAmount(v)
 	return _u
 }
 
 // SetNillableAmount sets the "amount" field if the given value is not nil.
-func (_u *PaymentUpdateOne) SetNillableAmount(f *float64) *PaymentUpdateOne {
-	if f != nil {
-		_u.SetAmount(*f)
+func (_u *PaymentUpdateOne) SetNillableAmount(v *float64) *PaymentUpdateOne {
+	if v != nil {
+		_u.SetAmount(*v)
 	}
 	return _u
 }
 
-// AddAmount adds f to the "amount" field.
-func (_u *PaymentUpdateOne) AddAmount(f float64) *PaymentUpdateOne {
-	_u.mutation.AddAmount(f)
+// AddAmount adds value to the "amount" field.
+func (_u *PaymentUpdateOne) AddAmount(v float64) *PaymentUpdateOne {
+	_u.mutation.AddAmount(v)
 	return _u
 }
 
 // SetCurrency sets the "currency" field.
-func (_u *PaymentUpdateOne) SetCurrency(pa payment.Currency) *PaymentUpdateOne {
-	_u.mutation.SetCurrency(pa)
+func (_u *PaymentUpdateOne) SetCurrency(v payment.Currency) *PaymentUpdateOne {
+	_u.mutation.SetCurrency(v)
 	return _u
 }
 
 // SetNillableCurrency sets the "currency" field if the given value is not nil.
-func (_u *PaymentUpdateOne) SetNillableCurrency(pa *payment.Currency) *PaymentUpdateOne {
-	if pa != nil {
-		_u.SetCurrency(*pa)
+func (_u *PaymentUpdateOne) SetNillableCurrency(v *payment.Currency) *PaymentUpdateOne {
+	if v != nil {
+		_u.SetCurrency(*v)
 	}
 	return _u
 }
 
 // SetTime sets the "time" field.
-func (_u *PaymentUpdateOne) SetTime(t time.Time) *PaymentUpdateOne {
-	_u.mutation.SetTime(t)
+func (_u *PaymentUpdateOne) SetTime(v time.Time) *PaymentUpdateOne {
+	_u.mutation.SetTime(v)
 	return _u
 }
 
 // SetNillableTime sets the "time" field if the given value is not nil.
-func (_u *PaymentUpdateOne) SetNillableTime(t *time.Time) *PaymentUpdateOne {
-	if t != nil {
-		_u.SetTime(*t)
+func (_u *PaymentUpdateOne) SetNillableTime(v *time.Time) *PaymentUpdateOne {
+	if v != nil {
+		_u.SetTime(*v)
 	}
 	return _u
 }
 
 // SetDescription sets the "description" field.
-func (_u *PaymentUpdateOne) SetDescription(s string) *PaymentUpdateOne {
-	_u.mutation.SetDescription(s)
+func (_u *PaymentUpdateOne) SetDescription(v string) *PaymentUpdateOne {
+	_u.mutation.SetDescription(v)
 	return _u
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (_u *PaymentUpdateOne) SetNillableDescription(s *string) *PaymentUpdateOne {
-	if s != nil {
-		_u.SetDescription(*s)
+func (_u *PaymentUpdateOne) SetNillableDescription(v *string) *PaymentUpdateOne {
+	if v != nil {
+		_u.SetDescription(*v)
 	}
 	return _u
 }
 
 // SetStatus sets the "status" field.
-func (_u *PaymentUpdateOne) SetStatus(pa payment.Status) *PaymentUpdateOne {
-	_u.mutation.SetStatus(pa)
+func (_u *PaymentUpdateOne) SetStatus(v payment.Status) *PaymentUpdateOne {
+	_u.mutation.SetStatus(v)
 	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *PaymentUpdateOne) SetNillableStatus(pa *payment.Status) *PaymentUpdateOne {
-	if pa != nil {
-		_u.SetStatus(*pa)
+func (_u *PaymentUpdateOne) SetNillableStatus(v *payment.Status) *PaymentUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
 	return _u
 }
 
 // SetCard sets the "card" edge to the Card entity.
-func (_u *PaymentUpdateOne) SetCard(c *Card) *PaymentUpdateOne {
-	return _u.SetCardID(c.ID)
+func (_u *PaymentUpdateOne) SetCard(v *Card) *PaymentUpdateOne {
+	return _u.SetCardID(v.ID)
 }
 
 // Mutation returns the PaymentMutation object of the builder.

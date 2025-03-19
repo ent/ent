@@ -30,105 +30,105 @@ type FileCreate struct {
 }
 
 // SetSetID sets the "set_id" field.
-func (_c *FileCreate) SetSetID(i int) *FileCreate {
-	_c.mutation.SetSetID(i)
+func (_c *FileCreate) SetSetID(v int) *FileCreate {
+	_c.mutation.SetSetID(v)
 	return _c
 }
 
 // SetNillableSetID sets the "set_id" field if the given value is not nil.
-func (_c *FileCreate) SetNillableSetID(i *int) *FileCreate {
-	if i != nil {
-		_c.SetSetID(*i)
+func (_c *FileCreate) SetNillableSetID(v *int) *FileCreate {
+	if v != nil {
+		_c.SetSetID(*v)
 	}
 	return _c
 }
 
 // SetSize sets the "size" field.
-func (_c *FileCreate) SetSize(i int) *FileCreate {
-	_c.mutation.SetSize(i)
+func (_c *FileCreate) SetSize(v int) *FileCreate {
+	_c.mutation.SetSize(v)
 	return _c
 }
 
 // SetNillableSize sets the "size" field if the given value is not nil.
-func (_c *FileCreate) SetNillableSize(i *int) *FileCreate {
-	if i != nil {
-		_c.SetSize(*i)
+func (_c *FileCreate) SetNillableSize(v *int) *FileCreate {
+	if v != nil {
+		_c.SetSize(*v)
 	}
 	return _c
 }
 
 // SetName sets the "name" field.
-func (_c *FileCreate) SetName(s string) *FileCreate {
-	_c.mutation.SetName(s)
+func (_c *FileCreate) SetName(v string) *FileCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetUser sets the "user" field.
-func (_c *FileCreate) SetUser(s string) *FileCreate {
-	_c.mutation.SetUser(s)
+func (_c *FileCreate) SetUser(v string) *FileCreate {
+	_c.mutation.SetUser(v)
 	return _c
 }
 
 // SetNillableUser sets the "user" field if the given value is not nil.
-func (_c *FileCreate) SetNillableUser(s *string) *FileCreate {
-	if s != nil {
-		_c.SetUser(*s)
+func (_c *FileCreate) SetNillableUser(v *string) *FileCreate {
+	if v != nil {
+		_c.SetUser(*v)
 	}
 	return _c
 }
 
 // SetGroup sets the "group" field.
-func (_c *FileCreate) SetGroup(s string) *FileCreate {
-	_c.mutation.SetGroup(s)
+func (_c *FileCreate) SetGroup(v string) *FileCreate {
+	_c.mutation.SetGroup(v)
 	return _c
 }
 
 // SetNillableGroup sets the "group" field if the given value is not nil.
-func (_c *FileCreate) SetNillableGroup(s *string) *FileCreate {
-	if s != nil {
-		_c.SetGroup(*s)
+func (_c *FileCreate) SetNillableGroup(v *string) *FileCreate {
+	if v != nil {
+		_c.SetGroup(*v)
 	}
 	return _c
 }
 
 // SetOp sets the "op" field.
-func (_c *FileCreate) SetOp(b bool) *FileCreate {
-	_c.mutation.SetOpField(b)
+func (_c *FileCreate) SetOp(v bool) *FileCreate {
+	_c.mutation.SetOpField(v)
 	return _c
 }
 
 // SetNillableOp sets the "op" field if the given value is not nil.
-func (_c *FileCreate) SetNillableOp(b *bool) *FileCreate {
-	if b != nil {
-		_c.SetOp(*b)
+func (_c *FileCreate) SetNillableOp(v *bool) *FileCreate {
+	if v != nil {
+		_c.SetOp(*v)
 	}
 	return _c
 }
 
 // SetFieldID sets the "field_id" field.
-func (_c *FileCreate) SetFieldID(i int) *FileCreate {
-	_c.mutation.SetFieldID(i)
+func (_c *FileCreate) SetFieldID(v int) *FileCreate {
+	_c.mutation.SetFieldID(v)
 	return _c
 }
 
 // SetNillableFieldID sets the "field_id" field if the given value is not nil.
-func (_c *FileCreate) SetNillableFieldID(i *int) *FileCreate {
-	if i != nil {
-		_c.SetFieldID(*i)
+func (_c *FileCreate) SetNillableFieldID(v *int) *FileCreate {
+	if v != nil {
+		_c.SetFieldID(*v)
 	}
 	return _c
 }
 
 // SetCreateTime sets the "create_time" field.
-func (_c *FileCreate) SetCreateTime(t time.Time) *FileCreate {
-	_c.mutation.SetCreateTime(t)
+func (_c *FileCreate) SetCreateTime(v time.Time) *FileCreate {
+	_c.mutation.SetCreateTime(v)
 	return _c
 }
 
 // SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (_c *FileCreate) SetNillableCreateTime(t *time.Time) *FileCreate {
-	if t != nil {
-		_c.SetCreateTime(*t)
+func (_c *FileCreate) SetNillableCreateTime(v *time.Time) *FileCreate {
+	if v != nil {
+		_c.SetCreateTime(*v)
 	}
 	return _c
 }
@@ -148,8 +148,8 @@ func (_c *FileCreate) SetNillableOwnerID(id *string) *FileCreate {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_c *FileCreate) SetOwner(u *User) *FileCreate {
-	return _c.SetOwnerID(u.ID)
+func (_c *FileCreate) SetOwner(v *User) *FileCreate {
+	return _c.SetOwnerID(v.ID)
 }
 
 // SetTypeID sets the "type" edge to the FileType entity by ID.
@@ -167,8 +167,8 @@ func (_c *FileCreate) SetNillableTypeID(id *string) *FileCreate {
 }
 
 // SetType sets the "type" edge to the FileType entity.
-func (_c *FileCreate) SetType(f *FileType) *FileCreate {
-	return _c.SetTypeID(f.ID)
+func (_c *FileCreate) SetType(v *FileType) *FileCreate {
+	return _c.SetTypeID(v.ID)
 }
 
 // AddFieldIDs adds the "field" edge to the FieldType entity by IDs.
@@ -178,10 +178,10 @@ func (_c *FileCreate) AddFieldIDs(ids ...string) *FileCreate {
 }
 
 // AddField adds the "field" edges to the FieldType entity.
-func (_c *FileCreate) AddField(f ...*FieldType) *FileCreate {
-	ids := make([]string, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_c *FileCreate) AddField(v ...*FieldType) *FileCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddFieldIDs(ids...)
 }

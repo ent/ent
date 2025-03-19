@@ -35,14 +35,14 @@ func (_u *InfoUpdate) Where(ps ...predicate.Info) *InfoUpdate {
 }
 
 // SetContent sets the "content" field.
-func (_u *InfoUpdate) SetContent(jm json.RawMessage) *InfoUpdate {
-	_u.mutation.SetContent(jm)
+func (_u *InfoUpdate) SetContent(v json.RawMessage) *InfoUpdate {
+	_u.mutation.SetContent(v)
 	return _u
 }
 
-// AppendContent appends jm to the "content" field.
-func (_u *InfoUpdate) AppendContent(jm json.RawMessage) *InfoUpdate {
-	_u.mutation.AppendContent(jm)
+// AppendContent appends value to the "content" field.
+func (_u *InfoUpdate) AppendContent(v json.RawMessage) *InfoUpdate {
+	_u.mutation.AppendContent(v)
 	return _u
 }
 
@@ -61,8 +61,8 @@ func (_u *InfoUpdate) SetNillableUserID(id *int) *InfoUpdate {
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *InfoUpdate) SetUser(u *User) *InfoUpdate {
-	return _u.SetUserID(u.ID)
+func (_u *InfoUpdate) SetUser(v *User) *InfoUpdate {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the InfoMutation object of the builder.
@@ -103,7 +103,7 @@ func (_u *InfoUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *InfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *InfoUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(info.Table, info.Columns, sqlgraph.NewFieldSpec(info.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -149,7 +149,7 @@ func (_u *InfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{info.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -158,7 +158,7 @@ func (_u *InfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // InfoUpdateOne is the builder for updating a single Info entity.
@@ -170,14 +170,14 @@ type InfoUpdateOne struct {
 }
 
 // SetContent sets the "content" field.
-func (_u *InfoUpdateOne) SetContent(jm json.RawMessage) *InfoUpdateOne {
-	_u.mutation.SetContent(jm)
+func (_u *InfoUpdateOne) SetContent(v json.RawMessage) *InfoUpdateOne {
+	_u.mutation.SetContent(v)
 	return _u
 }
 
-// AppendContent appends jm to the "content" field.
-func (_u *InfoUpdateOne) AppendContent(jm json.RawMessage) *InfoUpdateOne {
-	_u.mutation.AppendContent(jm)
+// AppendContent appends value to the "content" field.
+func (_u *InfoUpdateOne) AppendContent(v json.RawMessage) *InfoUpdateOne {
+	_u.mutation.AppendContent(v)
 	return _u
 }
 
@@ -196,8 +196,8 @@ func (_u *InfoUpdateOne) SetNillableUserID(id *int) *InfoUpdateOne {
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *InfoUpdateOne) SetUser(u *User) *InfoUpdateOne {
-	return _u.SetUserID(u.ID)
+func (_u *InfoUpdateOne) SetUser(v *User) *InfoUpdateOne {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the InfoMutation object of the builder.

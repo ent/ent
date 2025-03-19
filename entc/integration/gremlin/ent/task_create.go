@@ -27,105 +27,105 @@ type TaskCreate struct {
 }
 
 // SetPriority sets the "priority" field.
-func (_c *TaskCreate) SetPriority(t task.Priority) *TaskCreate {
-	_c.mutation.SetPriority(t)
+func (_c *TaskCreate) SetPriority(v task.Priority) *TaskCreate {
+	_c.mutation.SetPriority(v)
 	return _c
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
-func (_c *TaskCreate) SetNillablePriority(t *task.Priority) *TaskCreate {
-	if t != nil {
-		_c.SetPriority(*t)
+func (_c *TaskCreate) SetNillablePriority(v *task.Priority) *TaskCreate {
+	if v != nil {
+		_c.SetPriority(*v)
 	}
 	return _c
 }
 
 // SetPriorities sets the "priorities" field.
-func (_c *TaskCreate) SetPriorities(m map[string]task.Priority) *TaskCreate {
-	_c.mutation.SetPriorities(m)
+func (_c *TaskCreate) SetPriorities(v map[string]task.Priority) *TaskCreate {
+	_c.mutation.SetPriorities(v)
 	return _c
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *TaskCreate) SetCreatedAt(t time.Time) *TaskCreate {
-	_c.mutation.SetCreatedAt(t)
+func (_c *TaskCreate) SetCreatedAt(v time.Time) *TaskCreate {
+	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *TaskCreate) SetNillableCreatedAt(t *time.Time) *TaskCreate {
-	if t != nil {
-		_c.SetCreatedAt(*t)
+func (_c *TaskCreate) SetNillableCreatedAt(v *time.Time) *TaskCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
 	return _c
 }
 
 // SetName sets the "name" field.
-func (_c *TaskCreate) SetName(s string) *TaskCreate {
-	_c.mutation.SetName(s)
+func (_c *TaskCreate) SetName(v string) *TaskCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_c *TaskCreate) SetNillableName(s *string) *TaskCreate {
-	if s != nil {
-		_c.SetName(*s)
+func (_c *TaskCreate) SetNillableName(v *string) *TaskCreate {
+	if v != nil {
+		_c.SetName(*v)
 	}
 	return _c
 }
 
 // SetOwner sets the "owner" field.
-func (_c *TaskCreate) SetOwner(s string) *TaskCreate {
-	_c.mutation.SetOwner(s)
+func (_c *TaskCreate) SetOwner(v string) *TaskCreate {
+	_c.mutation.SetOwner(v)
 	return _c
 }
 
 // SetNillableOwner sets the "owner" field if the given value is not nil.
-func (_c *TaskCreate) SetNillableOwner(s *string) *TaskCreate {
-	if s != nil {
-		_c.SetOwner(*s)
+func (_c *TaskCreate) SetNillableOwner(v *string) *TaskCreate {
+	if v != nil {
+		_c.SetOwner(*v)
 	}
 	return _c
 }
 
 // SetOrder sets the "order" field.
-func (_c *TaskCreate) SetOrder(i int) *TaskCreate {
-	_c.mutation.SetOrder(i)
+func (_c *TaskCreate) SetOrder(v int) *TaskCreate {
+	_c.mutation.SetOrder(v)
 	return _c
 }
 
 // SetNillableOrder sets the "order" field if the given value is not nil.
-func (_c *TaskCreate) SetNillableOrder(i *int) *TaskCreate {
-	if i != nil {
-		_c.SetOrder(*i)
+func (_c *TaskCreate) SetNillableOrder(v *int) *TaskCreate {
+	if v != nil {
+		_c.SetOrder(*v)
 	}
 	return _c
 }
 
 // SetOrderOption sets the "order_option" field.
-func (_c *TaskCreate) SetOrderOption(i int) *TaskCreate {
-	_c.mutation.SetOrderOption(i)
+func (_c *TaskCreate) SetOrderOption(v int) *TaskCreate {
+	_c.mutation.SetOrderOption(v)
 	return _c
 }
 
 // SetNillableOrderOption sets the "order_option" field if the given value is not nil.
-func (_c *TaskCreate) SetNillableOrderOption(i *int) *TaskCreate {
-	if i != nil {
-		_c.SetOrderOption(*i)
+func (_c *TaskCreate) SetNillableOrderOption(v *int) *TaskCreate {
+	if v != nil {
+		_c.SetOrderOption(*v)
 	}
 	return _c
 }
 
 // SetOp sets the "op" field.
-func (_c *TaskCreate) SetOp(s string) *TaskCreate {
-	_c.mutation.SetOpField(s)
+func (_c *TaskCreate) SetOp(v string) *TaskCreate {
+	_c.mutation.SetOpField(v)
 	return _c
 }
 
 // SetNillableOp sets the "op" field if the given value is not nil.
-func (_c *TaskCreate) SetNillableOp(s *string) *TaskCreate {
-	if s != nil {
-		_c.SetOp(*s)
+func (_c *TaskCreate) SetNillableOp(v *string) *TaskCreate {
+	if v != nil {
+		_c.SetOp(*v)
 	}
 	return _c
 }

@@ -28,29 +28,29 @@ type DocCreate struct {
 }
 
 // SetText sets the "text" field.
-func (_c *DocCreate) SetText(s string) *DocCreate {
-	_c.mutation.SetText(s)
+func (_c *DocCreate) SetText(v string) *DocCreate {
+	_c.mutation.SetText(v)
 	return _c
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_c *DocCreate) SetNillableText(s *string) *DocCreate {
-	if s != nil {
-		_c.SetText(*s)
+func (_c *DocCreate) SetNillableText(v *string) *DocCreate {
+	if v != nil {
+		_c.SetText(*v)
 	}
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *DocCreate) SetID(si schema.DocID) *DocCreate {
-	_c.mutation.SetID(si)
+func (_c *DocCreate) SetID(v schema.DocID) *DocCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *DocCreate) SetNillableID(si *schema.DocID) *DocCreate {
-	if si != nil {
-		_c.SetID(*si)
+func (_c *DocCreate) SetNillableID(v *schema.DocID) *DocCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
 	return _c
 }
@@ -70,8 +70,8 @@ func (_c *DocCreate) SetNillableParentID(id *schema.DocID) *DocCreate {
 }
 
 // SetParent sets the "parent" edge to the Doc entity.
-func (_c *DocCreate) SetParent(d *Doc) *DocCreate {
-	return _c.SetParentID(d.ID)
+func (_c *DocCreate) SetParent(v *Doc) *DocCreate {
+	return _c.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the Doc entity by IDs.
@@ -81,10 +81,10 @@ func (_c *DocCreate) AddChildIDs(ids ...schema.DocID) *DocCreate {
 }
 
 // AddChildren adds the "children" edges to the Doc entity.
-func (_c *DocCreate) AddChildren(d ...*Doc) *DocCreate {
-	ids := make([]schema.DocID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
+func (_c *DocCreate) AddChildren(v ...*Doc) *DocCreate {
+	ids := make([]schema.DocID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddChildIDs(ids...)
 }
@@ -96,10 +96,10 @@ func (_c *DocCreate) AddRelatedIDs(ids ...schema.DocID) *DocCreate {
 }
 
 // AddRelated adds the "related" edges to the Doc entity.
-func (_c *DocCreate) AddRelated(d ...*Doc) *DocCreate {
-	ids := make([]schema.DocID, len(d))
-	for i := range d {
-		ids[i] = d[i].ID
+func (_c *DocCreate) AddRelated(v ...*Doc) *DocCreate {
+	ids := make([]schema.DocID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddRelatedIDs(ids...)
 }

@@ -20,20 +20,20 @@ type UserCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *UserCreate) SetName(s string) *UserCreate {
-	_c.mutation.SetName(s)
+func (_c *UserCreate) SetName(v string) *UserCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetPublicInfo sets the "public_info" field.
-func (_c *UserCreate) SetPublicInfo(s string) *UserCreate {
-	_c.mutation.SetPublicInfo(s)
+func (_c *UserCreate) SetPublicInfo(v string) *UserCreate {
+	_c.mutation.SetPublicInfo(v)
 	return _c
 }
 
 // SetPrivateInfo sets the "private_info" field.
-func (_c *UserCreate) SetPrivateInfo(s string) *UserCreate {
-	_c.mutation.SetPrivateInfo(s)
+func (_c *UserCreate) SetPrivateInfo(v string) *UserCreate {
+	_c.mutation.SetPrivateInfo(v)
 	return _c
 }
 

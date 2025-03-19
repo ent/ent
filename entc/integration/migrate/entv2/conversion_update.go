@@ -32,15 +32,15 @@ func (_u *ConversionUpdate) Where(ps ...predicate.Conversion) *ConversionUpdate 
 }
 
 // SetName sets the "name" field.
-func (_u *ConversionUpdate) SetName(s string) *ConversionUpdate {
-	_u.mutation.SetName(s)
+func (_u *ConversionUpdate) SetName(v string) *ConversionUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *ConversionUpdate) SetNillableName(s *string) *ConversionUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *ConversionUpdate) SetNillableName(v *string) *ConversionUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -52,15 +52,15 @@ func (_u *ConversionUpdate) ClearName() *ConversionUpdate {
 }
 
 // SetInt8ToString sets the "int8_to_string" field.
-func (_u *ConversionUpdate) SetInt8ToString(s string) *ConversionUpdate {
-	_u.mutation.SetInt8ToString(s)
+func (_u *ConversionUpdate) SetInt8ToString(v string) *ConversionUpdate {
+	_u.mutation.SetInt8ToString(v)
 	return _u
 }
 
 // SetNillableInt8ToString sets the "int8_to_string" field if the given value is not nil.
-func (_u *ConversionUpdate) SetNillableInt8ToString(s *string) *ConversionUpdate {
-	if s != nil {
-		_u.SetInt8ToString(*s)
+func (_u *ConversionUpdate) SetNillableInt8ToString(v *string) *ConversionUpdate {
+	if v != nil {
+		_u.SetInt8ToString(*v)
 	}
 	return _u
 }
@@ -72,15 +72,15 @@ func (_u *ConversionUpdate) ClearInt8ToString() *ConversionUpdate {
 }
 
 // SetUint8ToString sets the "uint8_to_string" field.
-func (_u *ConversionUpdate) SetUint8ToString(s string) *ConversionUpdate {
-	_u.mutation.SetUint8ToString(s)
+func (_u *ConversionUpdate) SetUint8ToString(v string) *ConversionUpdate {
+	_u.mutation.SetUint8ToString(v)
 	return _u
 }
 
 // SetNillableUint8ToString sets the "uint8_to_string" field if the given value is not nil.
-func (_u *ConversionUpdate) SetNillableUint8ToString(s *string) *ConversionUpdate {
-	if s != nil {
-		_u.SetUint8ToString(*s)
+func (_u *ConversionUpdate) SetNillableUint8ToString(v *string) *ConversionUpdate {
+	if v != nil {
+		_u.SetUint8ToString(*v)
 	}
 	return _u
 }
@@ -92,15 +92,15 @@ func (_u *ConversionUpdate) ClearUint8ToString() *ConversionUpdate {
 }
 
 // SetInt16ToString sets the "int16_to_string" field.
-func (_u *ConversionUpdate) SetInt16ToString(s string) *ConversionUpdate {
-	_u.mutation.SetInt16ToString(s)
+func (_u *ConversionUpdate) SetInt16ToString(v string) *ConversionUpdate {
+	_u.mutation.SetInt16ToString(v)
 	return _u
 }
 
 // SetNillableInt16ToString sets the "int16_to_string" field if the given value is not nil.
-func (_u *ConversionUpdate) SetNillableInt16ToString(s *string) *ConversionUpdate {
-	if s != nil {
-		_u.SetInt16ToString(*s)
+func (_u *ConversionUpdate) SetNillableInt16ToString(v *string) *ConversionUpdate {
+	if v != nil {
+		_u.SetInt16ToString(*v)
 	}
 	return _u
 }
@@ -112,15 +112,15 @@ func (_u *ConversionUpdate) ClearInt16ToString() *ConversionUpdate {
 }
 
 // SetUint16ToString sets the "uint16_to_string" field.
-func (_u *ConversionUpdate) SetUint16ToString(s string) *ConversionUpdate {
-	_u.mutation.SetUint16ToString(s)
+func (_u *ConversionUpdate) SetUint16ToString(v string) *ConversionUpdate {
+	_u.mutation.SetUint16ToString(v)
 	return _u
 }
 
 // SetNillableUint16ToString sets the "uint16_to_string" field if the given value is not nil.
-func (_u *ConversionUpdate) SetNillableUint16ToString(s *string) *ConversionUpdate {
-	if s != nil {
-		_u.SetUint16ToString(*s)
+func (_u *ConversionUpdate) SetNillableUint16ToString(v *string) *ConversionUpdate {
+	if v != nil {
+		_u.SetUint16ToString(*v)
 	}
 	return _u
 }
@@ -132,15 +132,15 @@ func (_u *ConversionUpdate) ClearUint16ToString() *ConversionUpdate {
 }
 
 // SetInt32ToString sets the "int32_to_string" field.
-func (_u *ConversionUpdate) SetInt32ToString(s string) *ConversionUpdate {
-	_u.mutation.SetInt32ToString(s)
+func (_u *ConversionUpdate) SetInt32ToString(v string) *ConversionUpdate {
+	_u.mutation.SetInt32ToString(v)
 	return _u
 }
 
 // SetNillableInt32ToString sets the "int32_to_string" field if the given value is not nil.
-func (_u *ConversionUpdate) SetNillableInt32ToString(s *string) *ConversionUpdate {
-	if s != nil {
-		_u.SetInt32ToString(*s)
+func (_u *ConversionUpdate) SetNillableInt32ToString(v *string) *ConversionUpdate {
+	if v != nil {
+		_u.SetInt32ToString(*v)
 	}
 	return _u
 }
@@ -152,15 +152,15 @@ func (_u *ConversionUpdate) ClearInt32ToString() *ConversionUpdate {
 }
 
 // SetUint32ToString sets the "uint32_to_string" field.
-func (_u *ConversionUpdate) SetUint32ToString(s string) *ConversionUpdate {
-	_u.mutation.SetUint32ToString(s)
+func (_u *ConversionUpdate) SetUint32ToString(v string) *ConversionUpdate {
+	_u.mutation.SetUint32ToString(v)
 	return _u
 }
 
 // SetNillableUint32ToString sets the "uint32_to_string" field if the given value is not nil.
-func (_u *ConversionUpdate) SetNillableUint32ToString(s *string) *ConversionUpdate {
-	if s != nil {
-		_u.SetUint32ToString(*s)
+func (_u *ConversionUpdate) SetNillableUint32ToString(v *string) *ConversionUpdate {
+	if v != nil {
+		_u.SetUint32ToString(*v)
 	}
 	return _u
 }
@@ -172,15 +172,15 @@ func (_u *ConversionUpdate) ClearUint32ToString() *ConversionUpdate {
 }
 
 // SetInt64ToString sets the "int64_to_string" field.
-func (_u *ConversionUpdate) SetInt64ToString(s string) *ConversionUpdate {
-	_u.mutation.SetInt64ToString(s)
+func (_u *ConversionUpdate) SetInt64ToString(v string) *ConversionUpdate {
+	_u.mutation.SetInt64ToString(v)
 	return _u
 }
 
 // SetNillableInt64ToString sets the "int64_to_string" field if the given value is not nil.
-func (_u *ConversionUpdate) SetNillableInt64ToString(s *string) *ConversionUpdate {
-	if s != nil {
-		_u.SetInt64ToString(*s)
+func (_u *ConversionUpdate) SetNillableInt64ToString(v *string) *ConversionUpdate {
+	if v != nil {
+		_u.SetInt64ToString(*v)
 	}
 	return _u
 }
@@ -192,15 +192,15 @@ func (_u *ConversionUpdate) ClearInt64ToString() *ConversionUpdate {
 }
 
 // SetUint64ToString sets the "uint64_to_string" field.
-func (_u *ConversionUpdate) SetUint64ToString(s string) *ConversionUpdate {
-	_u.mutation.SetUint64ToString(s)
+func (_u *ConversionUpdate) SetUint64ToString(v string) *ConversionUpdate {
+	_u.mutation.SetUint64ToString(v)
 	return _u
 }
 
 // SetNillableUint64ToString sets the "uint64_to_string" field if the given value is not nil.
-func (_u *ConversionUpdate) SetNillableUint64ToString(s *string) *ConversionUpdate {
-	if s != nil {
-		_u.SetUint64ToString(*s)
+func (_u *ConversionUpdate) SetNillableUint64ToString(v *string) *ConversionUpdate {
+	if v != nil {
+		_u.SetUint64ToString(*v)
 	}
 	return _u
 }
@@ -243,7 +243,7 @@ func (_u *ConversionUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *ConversionUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *ConversionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(conversion.Table, conversion.Columns, sqlgraph.NewFieldSpec(conversion.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -306,7 +306,7 @@ func (_u *ConversionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if _u.mutation.Uint64ToStringCleared() {
 		_spec.ClearField(conversion.FieldUint64ToString, field.TypeString)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{conversion.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -315,7 +315,7 @@ func (_u *ConversionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // ConversionUpdateOne is the builder for updating a single Conversion entity.
@@ -327,15 +327,15 @@ type ConversionUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (_u *ConversionUpdateOne) SetName(s string) *ConversionUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *ConversionUpdateOne) SetName(v string) *ConversionUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *ConversionUpdateOne) SetNillableName(s *string) *ConversionUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *ConversionUpdateOne) SetNillableName(v *string) *ConversionUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -347,15 +347,15 @@ func (_u *ConversionUpdateOne) ClearName() *ConversionUpdateOne {
 }
 
 // SetInt8ToString sets the "int8_to_string" field.
-func (_u *ConversionUpdateOne) SetInt8ToString(s string) *ConversionUpdateOne {
-	_u.mutation.SetInt8ToString(s)
+func (_u *ConversionUpdateOne) SetInt8ToString(v string) *ConversionUpdateOne {
+	_u.mutation.SetInt8ToString(v)
 	return _u
 }
 
 // SetNillableInt8ToString sets the "int8_to_string" field if the given value is not nil.
-func (_u *ConversionUpdateOne) SetNillableInt8ToString(s *string) *ConversionUpdateOne {
-	if s != nil {
-		_u.SetInt8ToString(*s)
+func (_u *ConversionUpdateOne) SetNillableInt8ToString(v *string) *ConversionUpdateOne {
+	if v != nil {
+		_u.SetInt8ToString(*v)
 	}
 	return _u
 }
@@ -367,15 +367,15 @@ func (_u *ConversionUpdateOne) ClearInt8ToString() *ConversionUpdateOne {
 }
 
 // SetUint8ToString sets the "uint8_to_string" field.
-func (_u *ConversionUpdateOne) SetUint8ToString(s string) *ConversionUpdateOne {
-	_u.mutation.SetUint8ToString(s)
+func (_u *ConversionUpdateOne) SetUint8ToString(v string) *ConversionUpdateOne {
+	_u.mutation.SetUint8ToString(v)
 	return _u
 }
 
 // SetNillableUint8ToString sets the "uint8_to_string" field if the given value is not nil.
-func (_u *ConversionUpdateOne) SetNillableUint8ToString(s *string) *ConversionUpdateOne {
-	if s != nil {
-		_u.SetUint8ToString(*s)
+func (_u *ConversionUpdateOne) SetNillableUint8ToString(v *string) *ConversionUpdateOne {
+	if v != nil {
+		_u.SetUint8ToString(*v)
 	}
 	return _u
 }
@@ -387,15 +387,15 @@ func (_u *ConversionUpdateOne) ClearUint8ToString() *ConversionUpdateOne {
 }
 
 // SetInt16ToString sets the "int16_to_string" field.
-func (_u *ConversionUpdateOne) SetInt16ToString(s string) *ConversionUpdateOne {
-	_u.mutation.SetInt16ToString(s)
+func (_u *ConversionUpdateOne) SetInt16ToString(v string) *ConversionUpdateOne {
+	_u.mutation.SetInt16ToString(v)
 	return _u
 }
 
 // SetNillableInt16ToString sets the "int16_to_string" field if the given value is not nil.
-func (_u *ConversionUpdateOne) SetNillableInt16ToString(s *string) *ConversionUpdateOne {
-	if s != nil {
-		_u.SetInt16ToString(*s)
+func (_u *ConversionUpdateOne) SetNillableInt16ToString(v *string) *ConversionUpdateOne {
+	if v != nil {
+		_u.SetInt16ToString(*v)
 	}
 	return _u
 }
@@ -407,15 +407,15 @@ func (_u *ConversionUpdateOne) ClearInt16ToString() *ConversionUpdateOne {
 }
 
 // SetUint16ToString sets the "uint16_to_string" field.
-func (_u *ConversionUpdateOne) SetUint16ToString(s string) *ConversionUpdateOne {
-	_u.mutation.SetUint16ToString(s)
+func (_u *ConversionUpdateOne) SetUint16ToString(v string) *ConversionUpdateOne {
+	_u.mutation.SetUint16ToString(v)
 	return _u
 }
 
 // SetNillableUint16ToString sets the "uint16_to_string" field if the given value is not nil.
-func (_u *ConversionUpdateOne) SetNillableUint16ToString(s *string) *ConversionUpdateOne {
-	if s != nil {
-		_u.SetUint16ToString(*s)
+func (_u *ConversionUpdateOne) SetNillableUint16ToString(v *string) *ConversionUpdateOne {
+	if v != nil {
+		_u.SetUint16ToString(*v)
 	}
 	return _u
 }
@@ -427,15 +427,15 @@ func (_u *ConversionUpdateOne) ClearUint16ToString() *ConversionUpdateOne {
 }
 
 // SetInt32ToString sets the "int32_to_string" field.
-func (_u *ConversionUpdateOne) SetInt32ToString(s string) *ConversionUpdateOne {
-	_u.mutation.SetInt32ToString(s)
+func (_u *ConversionUpdateOne) SetInt32ToString(v string) *ConversionUpdateOne {
+	_u.mutation.SetInt32ToString(v)
 	return _u
 }
 
 // SetNillableInt32ToString sets the "int32_to_string" field if the given value is not nil.
-func (_u *ConversionUpdateOne) SetNillableInt32ToString(s *string) *ConversionUpdateOne {
-	if s != nil {
-		_u.SetInt32ToString(*s)
+func (_u *ConversionUpdateOne) SetNillableInt32ToString(v *string) *ConversionUpdateOne {
+	if v != nil {
+		_u.SetInt32ToString(*v)
 	}
 	return _u
 }
@@ -447,15 +447,15 @@ func (_u *ConversionUpdateOne) ClearInt32ToString() *ConversionUpdateOne {
 }
 
 // SetUint32ToString sets the "uint32_to_string" field.
-func (_u *ConversionUpdateOne) SetUint32ToString(s string) *ConversionUpdateOne {
-	_u.mutation.SetUint32ToString(s)
+func (_u *ConversionUpdateOne) SetUint32ToString(v string) *ConversionUpdateOne {
+	_u.mutation.SetUint32ToString(v)
 	return _u
 }
 
 // SetNillableUint32ToString sets the "uint32_to_string" field if the given value is not nil.
-func (_u *ConversionUpdateOne) SetNillableUint32ToString(s *string) *ConversionUpdateOne {
-	if s != nil {
-		_u.SetUint32ToString(*s)
+func (_u *ConversionUpdateOne) SetNillableUint32ToString(v *string) *ConversionUpdateOne {
+	if v != nil {
+		_u.SetUint32ToString(*v)
 	}
 	return _u
 }
@@ -467,15 +467,15 @@ func (_u *ConversionUpdateOne) ClearUint32ToString() *ConversionUpdateOne {
 }
 
 // SetInt64ToString sets the "int64_to_string" field.
-func (_u *ConversionUpdateOne) SetInt64ToString(s string) *ConversionUpdateOne {
-	_u.mutation.SetInt64ToString(s)
+func (_u *ConversionUpdateOne) SetInt64ToString(v string) *ConversionUpdateOne {
+	_u.mutation.SetInt64ToString(v)
 	return _u
 }
 
 // SetNillableInt64ToString sets the "int64_to_string" field if the given value is not nil.
-func (_u *ConversionUpdateOne) SetNillableInt64ToString(s *string) *ConversionUpdateOne {
-	if s != nil {
-		_u.SetInt64ToString(*s)
+func (_u *ConversionUpdateOne) SetNillableInt64ToString(v *string) *ConversionUpdateOne {
+	if v != nil {
+		_u.SetInt64ToString(*v)
 	}
 	return _u
 }
@@ -487,15 +487,15 @@ func (_u *ConversionUpdateOne) ClearInt64ToString() *ConversionUpdateOne {
 }
 
 // SetUint64ToString sets the "uint64_to_string" field.
-func (_u *ConversionUpdateOne) SetUint64ToString(s string) *ConversionUpdateOne {
-	_u.mutation.SetUint64ToString(s)
+func (_u *ConversionUpdateOne) SetUint64ToString(v string) *ConversionUpdateOne {
+	_u.mutation.SetUint64ToString(v)
 	return _u
 }
 
 // SetNillableUint64ToString sets the "uint64_to_string" field if the given value is not nil.
-func (_u *ConversionUpdateOne) SetNillableUint64ToString(s *string) *ConversionUpdateOne {
-	if s != nil {
-		_u.SetUint64ToString(*s)
+func (_u *ConversionUpdateOne) SetNillableUint64ToString(v *string) *ConversionUpdateOne {
+	if v != nil {
+		_u.SetUint64ToString(*v)
 	}
 	return _u
 }

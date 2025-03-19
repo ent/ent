@@ -28,39 +28,39 @@ type RentalCreate struct {
 }
 
 // SetDate sets the "date" field.
-func (_c *RentalCreate) SetDate(t time.Time) *RentalCreate {
-	_c.mutation.SetDate(t)
+func (_c *RentalCreate) SetDate(v time.Time) *RentalCreate {
+	_c.mutation.SetDate(v)
 	return _c
 }
 
 // SetNillableDate sets the "date" field if the given value is not nil.
-func (_c *RentalCreate) SetNillableDate(t *time.Time) *RentalCreate {
-	if t != nil {
-		_c.SetDate(*t)
+func (_c *RentalCreate) SetNillableDate(v *time.Time) *RentalCreate {
+	if v != nil {
+		_c.SetDate(*v)
 	}
 	return _c
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *RentalCreate) SetUserID(i int) *RentalCreate {
-	_c.mutation.SetUserID(i)
+func (_c *RentalCreate) SetUserID(v int) *RentalCreate {
+	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetCarID sets the "car_id" field.
-func (_c *RentalCreate) SetCarID(u uuid.UUID) *RentalCreate {
-	_c.mutation.SetCarID(u)
+func (_c *RentalCreate) SetCarID(v uuid.UUID) *RentalCreate {
+	_c.mutation.SetCarID(v)
 	return _c
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_c *RentalCreate) SetUser(u *User) *RentalCreate {
-	return _c.SetUserID(u.ID)
+func (_c *RentalCreate) SetUser(v *User) *RentalCreate {
+	return _c.SetUserID(v.ID)
 }
 
 // SetCar sets the "car" edge to the Car entity.
-func (_c *RentalCreate) SetCar(c *Car) *RentalCreate {
-	return _c.SetCarID(c.ID)
+func (_c *RentalCreate) SetCar(v *Car) *RentalCreate {
+	return _c.SetCarID(v.ID)
 }
 
 // Mutation returns the RentalMutation object of the builder.

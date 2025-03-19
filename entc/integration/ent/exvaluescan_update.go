@@ -35,20 +35,20 @@ func (_u *ExValueScanUpdate) Where(ps ...predicate.ExValueScan) *ExValueScanUpda
 }
 
 // SetBinary sets the "binary" field.
-func (_u *ExValueScanUpdate) SetBinary(u *url.URL) *ExValueScanUpdate {
-	_u.mutation.SetBinary(u)
+func (_u *ExValueScanUpdate) SetBinary(v *url.URL) *ExValueScanUpdate {
+	_u.mutation.SetBinary(v)
 	return _u
 }
 
 // SetBinaryBytes sets the "binary_bytes" field.
-func (_u *ExValueScanUpdate) SetBinaryBytes(u *url.URL) *ExValueScanUpdate {
-	_u.mutation.SetBinaryBytes(u)
+func (_u *ExValueScanUpdate) SetBinaryBytes(v *url.URL) *ExValueScanUpdate {
+	_u.mutation.SetBinaryBytes(v)
 	return _u
 }
 
 // SetBinaryOptional sets the "binary_optional" field.
-func (_u *ExValueScanUpdate) SetBinaryOptional(u *url.URL) *ExValueScanUpdate {
-	_u.mutation.SetBinaryOptional(u)
+func (_u *ExValueScanUpdate) SetBinaryOptional(v *url.URL) *ExValueScanUpdate {
+	_u.mutation.SetBinaryOptional(v)
 	return _u
 }
 
@@ -59,14 +59,14 @@ func (_u *ExValueScanUpdate) ClearBinaryOptional() *ExValueScanUpdate {
 }
 
 // SetText sets the "text" field.
-func (_u *ExValueScanUpdate) SetText(b *big.Int) *ExValueScanUpdate {
-	_u.mutation.SetText(b)
+func (_u *ExValueScanUpdate) SetText(v *big.Int) *ExValueScanUpdate {
+	_u.mutation.SetText(v)
 	return _u
 }
 
 // SetTextOptional sets the "text_optional" field.
-func (_u *ExValueScanUpdate) SetTextOptional(b *big.Int) *ExValueScanUpdate {
-	_u.mutation.SetTextOptional(b)
+func (_u *ExValueScanUpdate) SetTextOptional(v *big.Int) *ExValueScanUpdate {
+	_u.mutation.SetTextOptional(v)
 	return _u
 }
 
@@ -77,43 +77,43 @@ func (_u *ExValueScanUpdate) ClearTextOptional() *ExValueScanUpdate {
 }
 
 // SetBase64 sets the "base64" field.
-func (_u *ExValueScanUpdate) SetBase64(s string) *ExValueScanUpdate {
-	_u.mutation.SetBase64(s)
+func (_u *ExValueScanUpdate) SetBase64(v string) *ExValueScanUpdate {
+	_u.mutation.SetBase64(v)
 	return _u
 }
 
 // SetNillableBase64 sets the "base64" field if the given value is not nil.
-func (_u *ExValueScanUpdate) SetNillableBase64(s *string) *ExValueScanUpdate {
-	if s != nil {
-		_u.SetBase64(*s)
+func (_u *ExValueScanUpdate) SetNillableBase64(v *string) *ExValueScanUpdate {
+	if v != nil {
+		_u.SetBase64(*v)
 	}
 	return _u
 }
 
 // SetCustom sets the "custom" field.
-func (_u *ExValueScanUpdate) SetCustom(s string) *ExValueScanUpdate {
-	_u.mutation.SetCustom(s)
+func (_u *ExValueScanUpdate) SetCustom(v string) *ExValueScanUpdate {
+	_u.mutation.SetCustom(v)
 	return _u
 }
 
 // SetNillableCustom sets the "custom" field if the given value is not nil.
-func (_u *ExValueScanUpdate) SetNillableCustom(s *string) *ExValueScanUpdate {
-	if s != nil {
-		_u.SetCustom(*s)
+func (_u *ExValueScanUpdate) SetNillableCustom(v *string) *ExValueScanUpdate {
+	if v != nil {
+		_u.SetCustom(*v)
 	}
 	return _u
 }
 
 // SetCustomOptional sets the "custom_optional" field.
-func (_u *ExValueScanUpdate) SetCustomOptional(s string) *ExValueScanUpdate {
-	_u.mutation.SetCustomOptional(s)
+func (_u *ExValueScanUpdate) SetCustomOptional(v string) *ExValueScanUpdate {
+	_u.mutation.SetCustomOptional(v)
 	return _u
 }
 
 // SetNillableCustomOptional sets the "custom_optional" field if the given value is not nil.
-func (_u *ExValueScanUpdate) SetNillableCustomOptional(s *string) *ExValueScanUpdate {
-	if s != nil {
-		_u.SetCustomOptional(*s)
+func (_u *ExValueScanUpdate) SetNillableCustomOptional(v *string) *ExValueScanUpdate {
+	if v != nil {
+		_u.SetCustomOptional(*v)
 	}
 	return _u
 }
@@ -162,7 +162,7 @@ func (_u *ExValueScanUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Ex
 	return _u
 }
 
-func (_u *ExValueScanUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *ExValueScanUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(exvaluescan.Table, exvaluescan.Columns, sqlgraph.NewFieldSpec(exvaluescan.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -237,7 +237,7 @@ func (_u *ExValueScanUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.ClearField(exvaluescan.FieldCustomOptional, field.TypeString)
 	}
 	_spec.AddModifiers(_u.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{exvaluescan.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -246,7 +246,7 @@ func (_u *ExValueScanUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // ExValueScanUpdateOne is the builder for updating a single ExValueScan entity.
@@ -259,20 +259,20 @@ type ExValueScanUpdateOne struct {
 }
 
 // SetBinary sets the "binary" field.
-func (_u *ExValueScanUpdateOne) SetBinary(u *url.URL) *ExValueScanUpdateOne {
-	_u.mutation.SetBinary(u)
+func (_u *ExValueScanUpdateOne) SetBinary(v *url.URL) *ExValueScanUpdateOne {
+	_u.mutation.SetBinary(v)
 	return _u
 }
 
 // SetBinaryBytes sets the "binary_bytes" field.
-func (_u *ExValueScanUpdateOne) SetBinaryBytes(u *url.URL) *ExValueScanUpdateOne {
-	_u.mutation.SetBinaryBytes(u)
+func (_u *ExValueScanUpdateOne) SetBinaryBytes(v *url.URL) *ExValueScanUpdateOne {
+	_u.mutation.SetBinaryBytes(v)
 	return _u
 }
 
 // SetBinaryOptional sets the "binary_optional" field.
-func (_u *ExValueScanUpdateOne) SetBinaryOptional(u *url.URL) *ExValueScanUpdateOne {
-	_u.mutation.SetBinaryOptional(u)
+func (_u *ExValueScanUpdateOne) SetBinaryOptional(v *url.URL) *ExValueScanUpdateOne {
+	_u.mutation.SetBinaryOptional(v)
 	return _u
 }
 
@@ -283,14 +283,14 @@ func (_u *ExValueScanUpdateOne) ClearBinaryOptional() *ExValueScanUpdateOne {
 }
 
 // SetText sets the "text" field.
-func (_u *ExValueScanUpdateOne) SetText(b *big.Int) *ExValueScanUpdateOne {
-	_u.mutation.SetText(b)
+func (_u *ExValueScanUpdateOne) SetText(v *big.Int) *ExValueScanUpdateOne {
+	_u.mutation.SetText(v)
 	return _u
 }
 
 // SetTextOptional sets the "text_optional" field.
-func (_u *ExValueScanUpdateOne) SetTextOptional(b *big.Int) *ExValueScanUpdateOne {
-	_u.mutation.SetTextOptional(b)
+func (_u *ExValueScanUpdateOne) SetTextOptional(v *big.Int) *ExValueScanUpdateOne {
+	_u.mutation.SetTextOptional(v)
 	return _u
 }
 
@@ -301,43 +301,43 @@ func (_u *ExValueScanUpdateOne) ClearTextOptional() *ExValueScanUpdateOne {
 }
 
 // SetBase64 sets the "base64" field.
-func (_u *ExValueScanUpdateOne) SetBase64(s string) *ExValueScanUpdateOne {
-	_u.mutation.SetBase64(s)
+func (_u *ExValueScanUpdateOne) SetBase64(v string) *ExValueScanUpdateOne {
+	_u.mutation.SetBase64(v)
 	return _u
 }
 
 // SetNillableBase64 sets the "base64" field if the given value is not nil.
-func (_u *ExValueScanUpdateOne) SetNillableBase64(s *string) *ExValueScanUpdateOne {
-	if s != nil {
-		_u.SetBase64(*s)
+func (_u *ExValueScanUpdateOne) SetNillableBase64(v *string) *ExValueScanUpdateOne {
+	if v != nil {
+		_u.SetBase64(*v)
 	}
 	return _u
 }
 
 // SetCustom sets the "custom" field.
-func (_u *ExValueScanUpdateOne) SetCustom(s string) *ExValueScanUpdateOne {
-	_u.mutation.SetCustom(s)
+func (_u *ExValueScanUpdateOne) SetCustom(v string) *ExValueScanUpdateOne {
+	_u.mutation.SetCustom(v)
 	return _u
 }
 
 // SetNillableCustom sets the "custom" field if the given value is not nil.
-func (_u *ExValueScanUpdateOne) SetNillableCustom(s *string) *ExValueScanUpdateOne {
-	if s != nil {
-		_u.SetCustom(*s)
+func (_u *ExValueScanUpdateOne) SetNillableCustom(v *string) *ExValueScanUpdateOne {
+	if v != nil {
+		_u.SetCustom(*v)
 	}
 	return _u
 }
 
 // SetCustomOptional sets the "custom_optional" field.
-func (_u *ExValueScanUpdateOne) SetCustomOptional(s string) *ExValueScanUpdateOne {
-	_u.mutation.SetCustomOptional(s)
+func (_u *ExValueScanUpdateOne) SetCustomOptional(v string) *ExValueScanUpdateOne {
+	_u.mutation.SetCustomOptional(v)
 	return _u
 }
 
 // SetNillableCustomOptional sets the "custom_optional" field if the given value is not nil.
-func (_u *ExValueScanUpdateOne) SetNillableCustomOptional(s *string) *ExValueScanUpdateOne {
-	if s != nil {
-		_u.SetCustomOptional(*s)
+func (_u *ExValueScanUpdateOne) SetNillableCustomOptional(v *string) *ExValueScanUpdateOne {
+	if v != nil {
+		_u.SetCustomOptional(*v)
 	}
 	return _u
 }

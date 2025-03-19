@@ -23,36 +23,36 @@ type UserCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *UserCreate) SetName(s string) *UserCreate {
-	_c.mutation.SetName(s)
+func (_c *UserCreate) SetName(v string) *UserCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_c *UserCreate) SetNillableName(s *string) *UserCreate {
-	if s != nil {
-		_c.SetName(*s)
+func (_c *UserCreate) SetNillableName(v *string) *UserCreate {
+	if v != nil {
+		_c.SetName(*v)
 	}
 	return _c
 }
 
 // SetLabel sets the "label" field.
-func (_c *UserCreate) SetLabel(s string) *UserCreate {
-	_c.mutation.SetLabel(s)
+func (_c *UserCreate) SetLabel(v string) *UserCreate {
+	_c.mutation.SetLabel(v)
 	return _c
 }
 
 // SetNillableLabel sets the "label" field if the given value is not nil.
-func (_c *UserCreate) SetNillableLabel(s *string) *UserCreate {
-	if s != nil {
-		_c.SetLabel(*s)
+func (_c *UserCreate) SetNillableLabel(v *string) *UserCreate {
+	if v != nil {
+		_c.SetLabel(*v)
 	}
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *UserCreate) SetID(i int) *UserCreate {
-	_c.mutation.SetID(i)
+func (_c *UserCreate) SetID(v int) *UserCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 

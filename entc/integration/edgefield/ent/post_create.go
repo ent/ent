@@ -25,28 +25,28 @@ type PostCreate struct {
 }
 
 // SetText sets the "text" field.
-func (_c *PostCreate) SetText(s string) *PostCreate {
-	_c.mutation.SetText(s)
+func (_c *PostCreate) SetText(v string) *PostCreate {
+	_c.mutation.SetText(v)
 	return _c
 }
 
 // SetAuthorID sets the "author_id" field.
-func (_c *PostCreate) SetAuthorID(i int) *PostCreate {
-	_c.mutation.SetAuthorID(i)
+func (_c *PostCreate) SetAuthorID(v int) *PostCreate {
+	_c.mutation.SetAuthorID(v)
 	return _c
 }
 
 // SetNillableAuthorID sets the "author_id" field if the given value is not nil.
-func (_c *PostCreate) SetNillableAuthorID(i *int) *PostCreate {
-	if i != nil {
-		_c.SetAuthorID(*i)
+func (_c *PostCreate) SetNillableAuthorID(v *int) *PostCreate {
+	if v != nil {
+		_c.SetAuthorID(*v)
 	}
 	return _c
 }
 
 // SetAuthor sets the "author" edge to the User entity.
-func (_c *PostCreate) SetAuthor(u *User) *PostCreate {
-	return _c.SetAuthorID(u.ID)
+func (_c *PostCreate) SetAuthor(v *User) *PostCreate {
+	return _c.SetAuthorID(v.ID)
 }
 
 // Mutation returns the PostMutation object of the builder.

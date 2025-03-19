@@ -48,8 +48,8 @@ func (_u *SessionUpdate) SetNillableDeviceID(id *schema.ID) *SessionUpdate {
 }
 
 // SetDevice sets the "device" edge to the Device entity.
-func (_u *SessionUpdate) SetDevice(d *Device) *SessionUpdate {
-	return _u.SetDeviceID(d.ID)
+func (_u *SessionUpdate) SetDevice(v *Device) *SessionUpdate {
+	return _u.SetDeviceID(v.ID)
 }
 
 // Mutation returns the SessionMutation object of the builder.
@@ -90,7 +90,7 @@ func (_u *SessionUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *SessionUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(session.Table, session.Columns, sqlgraph.NewFieldSpec(session.FieldID, field.TypeBytes))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -128,7 +128,7 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{session.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -137,7 +137,7 @@ func (_u *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // SessionUpdateOne is the builder for updating a single Session entity.
@@ -163,8 +163,8 @@ func (_u *SessionUpdateOne) SetNillableDeviceID(id *schema.ID) *SessionUpdateOne
 }
 
 // SetDevice sets the "device" edge to the Device entity.
-func (_u *SessionUpdateOne) SetDevice(d *Device) *SessionUpdateOne {
-	return _u.SetDeviceID(d.ID)
+func (_u *SessionUpdateOne) SetDevice(v *Device) *SessionUpdateOne {
+	return _u.SetDeviceID(v.ID)
 }
 
 // Mutation returns the SessionMutation object of the builder.

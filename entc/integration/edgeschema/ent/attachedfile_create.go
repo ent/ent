@@ -29,28 +29,28 @@ type AttachedFileCreate struct {
 }
 
 // SetAttachTime sets the "attach_time" field.
-func (_c *AttachedFileCreate) SetAttachTime(t time.Time) *AttachedFileCreate {
-	_c.mutation.SetAttachTime(t)
+func (_c *AttachedFileCreate) SetAttachTime(v time.Time) *AttachedFileCreate {
+	_c.mutation.SetAttachTime(v)
 	return _c
 }
 
 // SetNillableAttachTime sets the "attach_time" field if the given value is not nil.
-func (_c *AttachedFileCreate) SetNillableAttachTime(t *time.Time) *AttachedFileCreate {
-	if t != nil {
-		_c.SetAttachTime(*t)
+func (_c *AttachedFileCreate) SetNillableAttachTime(v *time.Time) *AttachedFileCreate {
+	if v != nil {
+		_c.SetAttachTime(*v)
 	}
 	return _c
 }
 
 // SetFID sets the "f_id" field.
-func (_c *AttachedFileCreate) SetFID(i int) *AttachedFileCreate {
-	_c.mutation.SetFID(i)
+func (_c *AttachedFileCreate) SetFID(v int) *AttachedFileCreate {
+	_c.mutation.SetFID(v)
 	return _c
 }
 
 // SetProcID sets the "proc_id" field.
-func (_c *AttachedFileCreate) SetProcID(i int) *AttachedFileCreate {
-	_c.mutation.SetProcID(i)
+func (_c *AttachedFileCreate) SetProcID(v int) *AttachedFileCreate {
+	_c.mutation.SetProcID(v)
 	return _c
 }
 
@@ -61,13 +61,13 @@ func (_c *AttachedFileCreate) SetFiID(id int) *AttachedFileCreate {
 }
 
 // SetFi sets the "fi" edge to the File entity.
-func (_c *AttachedFileCreate) SetFi(f *File) *AttachedFileCreate {
-	return _c.SetFiID(f.ID)
+func (_c *AttachedFileCreate) SetFi(v *File) *AttachedFileCreate {
+	return _c.SetFiID(v.ID)
 }
 
 // SetProc sets the "proc" edge to the Process entity.
-func (_c *AttachedFileCreate) SetProc(p *Process) *AttachedFileCreate {
-	return _c.SetProcID(p.ID)
+func (_c *AttachedFileCreate) SetProc(v *Process) *AttachedFileCreate {
+	return _c.SetProcID(v.ID)
 }
 
 // Mutation returns the AttachedFileMutation object of the builder.

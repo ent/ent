@@ -23,127 +23,127 @@ type ConversionCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *ConversionCreate) SetName(s string) *ConversionCreate {
-	_c.mutation.SetName(s)
+func (_c *ConversionCreate) SetName(v string) *ConversionCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_c *ConversionCreate) SetNillableName(s *string) *ConversionCreate {
-	if s != nil {
-		_c.SetName(*s)
+func (_c *ConversionCreate) SetNillableName(v *string) *ConversionCreate {
+	if v != nil {
+		_c.SetName(*v)
 	}
 	return _c
 }
 
 // SetInt8ToString sets the "int8_to_string" field.
-func (_c *ConversionCreate) SetInt8ToString(s string) *ConversionCreate {
-	_c.mutation.SetInt8ToString(s)
+func (_c *ConversionCreate) SetInt8ToString(v string) *ConversionCreate {
+	_c.mutation.SetInt8ToString(v)
 	return _c
 }
 
 // SetNillableInt8ToString sets the "int8_to_string" field if the given value is not nil.
-func (_c *ConversionCreate) SetNillableInt8ToString(s *string) *ConversionCreate {
-	if s != nil {
-		_c.SetInt8ToString(*s)
+func (_c *ConversionCreate) SetNillableInt8ToString(v *string) *ConversionCreate {
+	if v != nil {
+		_c.SetInt8ToString(*v)
 	}
 	return _c
 }
 
 // SetUint8ToString sets the "uint8_to_string" field.
-func (_c *ConversionCreate) SetUint8ToString(s string) *ConversionCreate {
-	_c.mutation.SetUint8ToString(s)
+func (_c *ConversionCreate) SetUint8ToString(v string) *ConversionCreate {
+	_c.mutation.SetUint8ToString(v)
 	return _c
 }
 
 // SetNillableUint8ToString sets the "uint8_to_string" field if the given value is not nil.
-func (_c *ConversionCreate) SetNillableUint8ToString(s *string) *ConversionCreate {
-	if s != nil {
-		_c.SetUint8ToString(*s)
+func (_c *ConversionCreate) SetNillableUint8ToString(v *string) *ConversionCreate {
+	if v != nil {
+		_c.SetUint8ToString(*v)
 	}
 	return _c
 }
 
 // SetInt16ToString sets the "int16_to_string" field.
-func (_c *ConversionCreate) SetInt16ToString(s string) *ConversionCreate {
-	_c.mutation.SetInt16ToString(s)
+func (_c *ConversionCreate) SetInt16ToString(v string) *ConversionCreate {
+	_c.mutation.SetInt16ToString(v)
 	return _c
 }
 
 // SetNillableInt16ToString sets the "int16_to_string" field if the given value is not nil.
-func (_c *ConversionCreate) SetNillableInt16ToString(s *string) *ConversionCreate {
-	if s != nil {
-		_c.SetInt16ToString(*s)
+func (_c *ConversionCreate) SetNillableInt16ToString(v *string) *ConversionCreate {
+	if v != nil {
+		_c.SetInt16ToString(*v)
 	}
 	return _c
 }
 
 // SetUint16ToString sets the "uint16_to_string" field.
-func (_c *ConversionCreate) SetUint16ToString(s string) *ConversionCreate {
-	_c.mutation.SetUint16ToString(s)
+func (_c *ConversionCreate) SetUint16ToString(v string) *ConversionCreate {
+	_c.mutation.SetUint16ToString(v)
 	return _c
 }
 
 // SetNillableUint16ToString sets the "uint16_to_string" field if the given value is not nil.
-func (_c *ConversionCreate) SetNillableUint16ToString(s *string) *ConversionCreate {
-	if s != nil {
-		_c.SetUint16ToString(*s)
+func (_c *ConversionCreate) SetNillableUint16ToString(v *string) *ConversionCreate {
+	if v != nil {
+		_c.SetUint16ToString(*v)
 	}
 	return _c
 }
 
 // SetInt32ToString sets the "int32_to_string" field.
-func (_c *ConversionCreate) SetInt32ToString(s string) *ConversionCreate {
-	_c.mutation.SetInt32ToString(s)
+func (_c *ConversionCreate) SetInt32ToString(v string) *ConversionCreate {
+	_c.mutation.SetInt32ToString(v)
 	return _c
 }
 
 // SetNillableInt32ToString sets the "int32_to_string" field if the given value is not nil.
-func (_c *ConversionCreate) SetNillableInt32ToString(s *string) *ConversionCreate {
-	if s != nil {
-		_c.SetInt32ToString(*s)
+func (_c *ConversionCreate) SetNillableInt32ToString(v *string) *ConversionCreate {
+	if v != nil {
+		_c.SetInt32ToString(*v)
 	}
 	return _c
 }
 
 // SetUint32ToString sets the "uint32_to_string" field.
-func (_c *ConversionCreate) SetUint32ToString(s string) *ConversionCreate {
-	_c.mutation.SetUint32ToString(s)
+func (_c *ConversionCreate) SetUint32ToString(v string) *ConversionCreate {
+	_c.mutation.SetUint32ToString(v)
 	return _c
 }
 
 // SetNillableUint32ToString sets the "uint32_to_string" field if the given value is not nil.
-func (_c *ConversionCreate) SetNillableUint32ToString(s *string) *ConversionCreate {
-	if s != nil {
-		_c.SetUint32ToString(*s)
+func (_c *ConversionCreate) SetNillableUint32ToString(v *string) *ConversionCreate {
+	if v != nil {
+		_c.SetUint32ToString(*v)
 	}
 	return _c
 }
 
 // SetInt64ToString sets the "int64_to_string" field.
-func (_c *ConversionCreate) SetInt64ToString(s string) *ConversionCreate {
-	_c.mutation.SetInt64ToString(s)
+func (_c *ConversionCreate) SetInt64ToString(v string) *ConversionCreate {
+	_c.mutation.SetInt64ToString(v)
 	return _c
 }
 
 // SetNillableInt64ToString sets the "int64_to_string" field if the given value is not nil.
-func (_c *ConversionCreate) SetNillableInt64ToString(s *string) *ConversionCreate {
-	if s != nil {
-		_c.SetInt64ToString(*s)
+func (_c *ConversionCreate) SetNillableInt64ToString(v *string) *ConversionCreate {
+	if v != nil {
+		_c.SetInt64ToString(*v)
 	}
 	return _c
 }
 
 // SetUint64ToString sets the "uint64_to_string" field.
-func (_c *ConversionCreate) SetUint64ToString(s string) *ConversionCreate {
-	_c.mutation.SetUint64ToString(s)
+func (_c *ConversionCreate) SetUint64ToString(v string) *ConversionCreate {
+	_c.mutation.SetUint64ToString(v)
 	return _c
 }
 
 // SetNillableUint64ToString sets the "uint64_to_string" field if the given value is not nil.
-func (_c *ConversionCreate) SetNillableUint64ToString(s *string) *ConversionCreate {
-	if s != nil {
-		_c.SetUint64ToString(*s)
+func (_c *ConversionCreate) SetNillableUint64ToString(v *string) *ConversionCreate {
+	if v != nil {
+		_c.SetUint64ToString(*v)
 	}
 	return _c
 }

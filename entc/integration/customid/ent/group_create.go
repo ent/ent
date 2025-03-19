@@ -27,8 +27,8 @@ type GroupCreate struct {
 }
 
 // SetID sets the "id" field.
-func (_c *GroupCreate) SetID(i int) *GroupCreate {
-	_c.mutation.SetID(i)
+func (_c *GroupCreate) SetID(v int) *GroupCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
@@ -39,10 +39,10 @@ func (_c *GroupCreate) AddUserIDs(ids ...int) *GroupCreate {
 }
 
 // AddUsers adds the "users" edges to the User entity.
-func (_c *GroupCreate) AddUsers(u ...*User) *GroupCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *GroupCreate) AddUsers(v ...*User) *GroupCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddUserIDs(ids...)
 }

@@ -40,10 +40,10 @@ func (_u *SpecUpdate) AddCardIDs(ids ...int) *SpecUpdate {
 }
 
 // AddCard adds the "card" edges to the Card entity.
-func (_u *SpecUpdate) AddCard(c ...*Card) *SpecUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SpecUpdate) AddCard(v ...*Card) *SpecUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddCardIDs(ids...)
 }
@@ -66,10 +66,10 @@ func (_u *SpecUpdate) RemoveCardIDs(ids ...int) *SpecUpdate {
 }
 
 // RemoveCard removes "card" edges to Card entities.
-func (_u *SpecUpdate) RemoveCard(c ...*Card) *SpecUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SpecUpdate) RemoveCard(v ...*Card) *SpecUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveCardIDs(ids...)
 }
@@ -107,7 +107,7 @@ func (_u *SpecUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *SpecUpdat
 	return _u
 }
 
-func (_u *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *SpecUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(spec.Table, spec.Columns, sqlgraph.NewFieldSpec(spec.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -162,7 +162,7 @@ func (_u *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_spec.AddModifiers(_u.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{spec.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -171,7 +171,7 @@ func (_u *SpecUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // SpecUpdateOne is the builder for updating a single Spec entity.
@@ -190,10 +190,10 @@ func (_u *SpecUpdateOne) AddCardIDs(ids ...int) *SpecUpdateOne {
 }
 
 // AddCard adds the "card" edges to the Card entity.
-func (_u *SpecUpdateOne) AddCard(c ...*Card) *SpecUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SpecUpdateOne) AddCard(v ...*Card) *SpecUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddCardIDs(ids...)
 }
@@ -216,10 +216,10 @@ func (_u *SpecUpdateOne) RemoveCardIDs(ids ...int) *SpecUpdateOne {
 }
 
 // RemoveCard removes "card" edges to Card entities.
-func (_u *SpecUpdateOne) RemoveCard(c ...*Card) *SpecUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *SpecUpdateOne) RemoveCard(v ...*Card) *SpecUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveCardIDs(ids...)
 }

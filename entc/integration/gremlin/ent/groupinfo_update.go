@@ -34,37 +34,37 @@ func (_u *GroupInfoUpdate) Where(ps ...predicate.GroupInfo) *GroupInfoUpdate {
 }
 
 // SetDesc sets the "desc" field.
-func (_u *GroupInfoUpdate) SetDesc(s string) *GroupInfoUpdate {
-	_u.mutation.SetDesc(s)
+func (_u *GroupInfoUpdate) SetDesc(v string) *GroupInfoUpdate {
+	_u.mutation.SetDesc(v)
 	return _u
 }
 
 // SetNillableDesc sets the "desc" field if the given value is not nil.
-func (_u *GroupInfoUpdate) SetNillableDesc(s *string) *GroupInfoUpdate {
-	if s != nil {
-		_u.SetDesc(*s)
+func (_u *GroupInfoUpdate) SetNillableDesc(v *string) *GroupInfoUpdate {
+	if v != nil {
+		_u.SetDesc(*v)
 	}
 	return _u
 }
 
 // SetMaxUsers sets the "max_users" field.
-func (_u *GroupInfoUpdate) SetMaxUsers(i int) *GroupInfoUpdate {
+func (_u *GroupInfoUpdate) SetMaxUsers(v int) *GroupInfoUpdate {
 	_u.mutation.ResetMaxUsers()
-	_u.mutation.SetMaxUsers(i)
+	_u.mutation.SetMaxUsers(v)
 	return _u
 }
 
 // SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (_u *GroupInfoUpdate) SetNillableMaxUsers(i *int) *GroupInfoUpdate {
-	if i != nil {
-		_u.SetMaxUsers(*i)
+func (_u *GroupInfoUpdate) SetNillableMaxUsers(v *int) *GroupInfoUpdate {
+	if v != nil {
+		_u.SetMaxUsers(*v)
 	}
 	return _u
 }
 
-// AddMaxUsers adds i to the "max_users" field.
-func (_u *GroupInfoUpdate) AddMaxUsers(i int) *GroupInfoUpdate {
-	_u.mutation.AddMaxUsers(i)
+// AddMaxUsers adds value to the "max_users" field.
+func (_u *GroupInfoUpdate) AddMaxUsers(v int) *GroupInfoUpdate {
+	_u.mutation.AddMaxUsers(v)
 	return _u
 }
 
@@ -75,10 +75,10 @@ func (_u *GroupInfoUpdate) AddGroupIDs(ids ...string) *GroupInfoUpdate {
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (_u *GroupInfoUpdate) AddGroups(g ...*Group) *GroupInfoUpdate {
-	ids := make([]string, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *GroupInfoUpdate) AddGroups(v ...*Group) *GroupInfoUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddGroupIDs(ids...)
 }
@@ -101,10 +101,10 @@ func (_u *GroupInfoUpdate) RemoveGroupIDs(ids ...string) *GroupInfoUpdate {
 }
 
 // RemoveGroups removes "groups" edges to Group entities.
-func (_u *GroupInfoUpdate) RemoveGroups(g ...*Group) *GroupInfoUpdate {
-	ids := make([]string, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *GroupInfoUpdate) RemoveGroups(v ...*Group) *GroupInfoUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveGroupIDs(ids...)
 }
@@ -209,37 +209,37 @@ type GroupInfoUpdateOne struct {
 }
 
 // SetDesc sets the "desc" field.
-func (_u *GroupInfoUpdateOne) SetDesc(s string) *GroupInfoUpdateOne {
-	_u.mutation.SetDesc(s)
+func (_u *GroupInfoUpdateOne) SetDesc(v string) *GroupInfoUpdateOne {
+	_u.mutation.SetDesc(v)
 	return _u
 }
 
 // SetNillableDesc sets the "desc" field if the given value is not nil.
-func (_u *GroupInfoUpdateOne) SetNillableDesc(s *string) *GroupInfoUpdateOne {
-	if s != nil {
-		_u.SetDesc(*s)
+func (_u *GroupInfoUpdateOne) SetNillableDesc(v *string) *GroupInfoUpdateOne {
+	if v != nil {
+		_u.SetDesc(*v)
 	}
 	return _u
 }
 
 // SetMaxUsers sets the "max_users" field.
-func (_u *GroupInfoUpdateOne) SetMaxUsers(i int) *GroupInfoUpdateOne {
+func (_u *GroupInfoUpdateOne) SetMaxUsers(v int) *GroupInfoUpdateOne {
 	_u.mutation.ResetMaxUsers()
-	_u.mutation.SetMaxUsers(i)
+	_u.mutation.SetMaxUsers(v)
 	return _u
 }
 
 // SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (_u *GroupInfoUpdateOne) SetNillableMaxUsers(i *int) *GroupInfoUpdateOne {
-	if i != nil {
-		_u.SetMaxUsers(*i)
+func (_u *GroupInfoUpdateOne) SetNillableMaxUsers(v *int) *GroupInfoUpdateOne {
+	if v != nil {
+		_u.SetMaxUsers(*v)
 	}
 	return _u
 }
 
-// AddMaxUsers adds i to the "max_users" field.
-func (_u *GroupInfoUpdateOne) AddMaxUsers(i int) *GroupInfoUpdateOne {
-	_u.mutation.AddMaxUsers(i)
+// AddMaxUsers adds value to the "max_users" field.
+func (_u *GroupInfoUpdateOne) AddMaxUsers(v int) *GroupInfoUpdateOne {
+	_u.mutation.AddMaxUsers(v)
 	return _u
 }
 
@@ -250,10 +250,10 @@ func (_u *GroupInfoUpdateOne) AddGroupIDs(ids ...string) *GroupInfoUpdateOne {
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (_u *GroupInfoUpdateOne) AddGroups(g ...*Group) *GroupInfoUpdateOne {
-	ids := make([]string, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *GroupInfoUpdateOne) AddGroups(v ...*Group) *GroupInfoUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddGroupIDs(ids...)
 }
@@ -276,10 +276,10 @@ func (_u *GroupInfoUpdateOne) RemoveGroupIDs(ids ...string) *GroupInfoUpdateOne 
 }
 
 // RemoveGroups removes "groups" edges to Group entities.
-func (_u *GroupInfoUpdateOne) RemoveGroups(g ...*Group) *GroupInfoUpdateOne {
-	ids := make([]string, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *GroupInfoUpdateOne) RemoveGroups(v ...*Group) *GroupInfoUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveGroupIDs(ids...)
 }

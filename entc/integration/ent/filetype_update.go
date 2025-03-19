@@ -34,43 +34,43 @@ func (_u *FileTypeUpdate) Where(ps ...predicate.FileType) *FileTypeUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *FileTypeUpdate) SetName(s string) *FileTypeUpdate {
-	_u.mutation.SetName(s)
+func (_u *FileTypeUpdate) SetName(v string) *FileTypeUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *FileTypeUpdate) SetNillableName(s *string) *FileTypeUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *FileTypeUpdate) SetNillableName(v *string) *FileTypeUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
 
 // SetType sets the "type" field.
-func (_u *FileTypeUpdate) SetType(f filetype.Type) *FileTypeUpdate {
-	_u.mutation.SetType(f)
+func (_u *FileTypeUpdate) SetType(v filetype.Type) *FileTypeUpdate {
+	_u.mutation.SetType(v)
 	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (_u *FileTypeUpdate) SetNillableType(f *filetype.Type) *FileTypeUpdate {
-	if f != nil {
-		_u.SetType(*f)
+func (_u *FileTypeUpdate) SetNillableType(v *filetype.Type) *FileTypeUpdate {
+	if v != nil {
+		_u.SetType(*v)
 	}
 	return _u
 }
 
 // SetState sets the "state" field.
-func (_u *FileTypeUpdate) SetState(f filetype.State) *FileTypeUpdate {
-	_u.mutation.SetState(f)
+func (_u *FileTypeUpdate) SetState(v filetype.State) *FileTypeUpdate {
+	_u.mutation.SetState(v)
 	return _u
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
-func (_u *FileTypeUpdate) SetNillableState(f *filetype.State) *FileTypeUpdate {
-	if f != nil {
-		_u.SetState(*f)
+func (_u *FileTypeUpdate) SetNillableState(v *filetype.State) *FileTypeUpdate {
+	if v != nil {
+		_u.SetState(*v)
 	}
 	return _u
 }
@@ -82,10 +82,10 @@ func (_u *FileTypeUpdate) AddFileIDs(ids ...int) *FileTypeUpdate {
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (_u *FileTypeUpdate) AddFiles(f ...*File) *FileTypeUpdate {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *FileTypeUpdate) AddFiles(v ...*File) *FileTypeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFileIDs(ids...)
 }
@@ -108,10 +108,10 @@ func (_u *FileTypeUpdate) RemoveFileIDs(ids ...int) *FileTypeUpdate {
 }
 
 // RemoveFiles removes "files" edges to File entities.
-func (_u *FileTypeUpdate) RemoveFiles(f ...*File) *FileTypeUpdate {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *FileTypeUpdate) RemoveFiles(v ...*File) *FileTypeUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFileIDs(ids...)
 }
@@ -164,9 +164,9 @@ func (_u *FileTypeUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *FileT
 	return _u
 }
 
-func (_u *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *FileTypeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(filetype.Table, filetype.Columns, sqlgraph.NewFieldSpec(filetype.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -231,7 +231,7 @@ func (_u *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_spec.AddModifiers(_u.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{filetype.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -240,7 +240,7 @@ func (_u *FileTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // FileTypeUpdateOne is the builder for updating a single FileType entity.
@@ -253,43 +253,43 @@ type FileTypeUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (_u *FileTypeUpdateOne) SetName(s string) *FileTypeUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *FileTypeUpdateOne) SetName(v string) *FileTypeUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *FileTypeUpdateOne) SetNillableName(s *string) *FileTypeUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *FileTypeUpdateOne) SetNillableName(v *string) *FileTypeUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
 
 // SetType sets the "type" field.
-func (_u *FileTypeUpdateOne) SetType(f filetype.Type) *FileTypeUpdateOne {
-	_u.mutation.SetType(f)
+func (_u *FileTypeUpdateOne) SetType(v filetype.Type) *FileTypeUpdateOne {
+	_u.mutation.SetType(v)
 	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (_u *FileTypeUpdateOne) SetNillableType(f *filetype.Type) *FileTypeUpdateOne {
-	if f != nil {
-		_u.SetType(*f)
+func (_u *FileTypeUpdateOne) SetNillableType(v *filetype.Type) *FileTypeUpdateOne {
+	if v != nil {
+		_u.SetType(*v)
 	}
 	return _u
 }
 
 // SetState sets the "state" field.
-func (_u *FileTypeUpdateOne) SetState(f filetype.State) *FileTypeUpdateOne {
-	_u.mutation.SetState(f)
+func (_u *FileTypeUpdateOne) SetState(v filetype.State) *FileTypeUpdateOne {
+	_u.mutation.SetState(v)
 	return _u
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
-func (_u *FileTypeUpdateOne) SetNillableState(f *filetype.State) *FileTypeUpdateOne {
-	if f != nil {
-		_u.SetState(*f)
+func (_u *FileTypeUpdateOne) SetNillableState(v *filetype.State) *FileTypeUpdateOne {
+	if v != nil {
+		_u.SetState(*v)
 	}
 	return _u
 }
@@ -301,10 +301,10 @@ func (_u *FileTypeUpdateOne) AddFileIDs(ids ...int) *FileTypeUpdateOne {
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (_u *FileTypeUpdateOne) AddFiles(f ...*File) *FileTypeUpdateOne {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *FileTypeUpdateOne) AddFiles(v ...*File) *FileTypeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFileIDs(ids...)
 }
@@ -327,10 +327,10 @@ func (_u *FileTypeUpdateOne) RemoveFileIDs(ids ...int) *FileTypeUpdateOne {
 }
 
 // RemoveFiles removes "files" edges to File entities.
-func (_u *FileTypeUpdateOne) RemoveFiles(f ...*File) *FileTypeUpdateOne {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *FileTypeUpdateOne) RemoveFiles(v ...*File) *FileTypeUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFileIDs(ids...)
 }

@@ -201,9 +201,6 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 		return {{ $receiver }}
 	}
 	{{ if not $e.Unique }}
-		{{ $p := lower (printf "%.1s" $e.Type.Name) }}
-		{{/* if the name of the parameter conflicts with the receiver name */}}
-		{{ if eq $p $receiver }} {{ $p = "v" }} {{ end }}
 		{{ $idsFunc := print "Remove" (singular $e.Name | pascal) "IDs" }}
 		// {{ $idsFunc }} removes the "{{ $e.Name }}" edge to {{ $e.Type.Name }} entities by IDs.
 		func ({{ $receiver }} *{{ $builder }}) {{ $idsFunc }}(ids ...{{ $e.Type.ID.Type }}) *{{ $builder }} {
@@ -212,11 +209,10 @@ func ({{ $receiver }} *{{ $onebuilder }}) ExecX(ctx context.Context) {
 		}
 		{{ $func := print "Remove" $e.StructField }}
 		// {{ $func }} removes "{{ $e.Name }}" edges to {{ $e.Type.Name }} entities.
-		func ({{ $receiver }} *{{ $builder }}) {{ $func }}({{ $p }} ...*{{ $e.Type.Name }}) *{{ $builder }} {
-			ids := make([]{{ $e.Type.ID.Type }}, len({{ $p }}))
-			{{ $i := "i" }}{{ if eq $i $p }}{{ $i = "j" }}{{ end -}}
-			for {{ $i }} := range {{ $p }} {
-				ids[{{ $i }}] = {{ $p }}[{{ $i }}].ID
+		func ({{ $receiver }} *{{ $builder }}) {{ $func }}(v ...*{{ $e.Type.Name }}) *{{ $builder }} {
+			ids := make([]{{ $e.Type.ID.Type }}, len(v))
+			for i := range v {
+				ids[i] = v[i].ID
 			}
 			return {{ $receiver }}.{{ $idsFunc }}(ids...)
 		}

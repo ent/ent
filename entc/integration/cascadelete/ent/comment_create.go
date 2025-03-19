@@ -25,20 +25,20 @@ type CommentCreate struct {
 }
 
 // SetText sets the "text" field.
-func (_c *CommentCreate) SetText(s string) *CommentCreate {
-	_c.mutation.SetText(s)
+func (_c *CommentCreate) SetText(v string) *CommentCreate {
+	_c.mutation.SetText(v)
 	return _c
 }
 
 // SetPostID sets the "post_id" field.
-func (_c *CommentCreate) SetPostID(i int) *CommentCreate {
-	_c.mutation.SetPostID(i)
+func (_c *CommentCreate) SetPostID(v int) *CommentCreate {
+	_c.mutation.SetPostID(v)
 	return _c
 }
 
 // SetPost sets the "post" edge to the Post entity.
-func (_c *CommentCreate) SetPost(p *Post) *CommentCreate {
-	return _c.SetPostID(p.ID)
+func (_c *CommentCreate) SetPost(v *Post) *CommentCreate {
+	return _c.SetPostID(v.ID)
 }
 
 // Mutation returns the CommentMutation object of the builder.
