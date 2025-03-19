@@ -28,105 +28,105 @@ type UserCreate struct {
 }
 
 // SetT sets the "t" field.
-func (uc *UserCreate) SetT(s *schema.T) *UserCreate {
-	uc.mutation.SetT(s)
-	return uc
+func (_c *UserCreate) SetT(s *schema.T) *UserCreate {
+	_c.mutation.SetT(s)
+	return _c
 }
 
 // SetURL sets the "url" field.
-func (uc *UserCreate) SetURL(u *url.URL) *UserCreate {
-	uc.mutation.SetURL(u)
-	return uc
+func (_c *UserCreate) SetURL(u *url.URL) *UserCreate {
+	_c.mutation.SetURL(u)
+	return _c
 }
 
 // SetURLs sets the "URLs" field.
-func (uc *UserCreate) SetURLs(u []*url.URL) *UserCreate {
-	uc.mutation.SetURLs(u)
-	return uc
+func (_c *UserCreate) SetURLs(u []*url.URL) *UserCreate {
+	_c.mutation.SetURLs(u)
+	return _c
 }
 
 // SetRaw sets the "raw" field.
-func (uc *UserCreate) SetRaw(jm json.RawMessage) *UserCreate {
-	uc.mutation.SetRaw(jm)
-	return uc
+func (_c *UserCreate) SetRaw(jm json.RawMessage) *UserCreate {
+	_c.mutation.SetRaw(jm)
+	return _c
 }
 
 // SetDirs sets the "dirs" field.
-func (uc *UserCreate) SetDirs(h []http.Dir) *UserCreate {
-	uc.mutation.SetDirs(h)
-	return uc
+func (_c *UserCreate) SetDirs(h []http.Dir) *UserCreate {
+	_c.mutation.SetDirs(h)
+	return _c
 }
 
 // SetInts sets the "ints" field.
-func (uc *UserCreate) SetInts(i []int) *UserCreate {
-	uc.mutation.SetInts(i)
-	return uc
+func (_c *UserCreate) SetInts(i []int) *UserCreate {
+	_c.mutation.SetInts(i)
+	return _c
 }
 
 // SetFloats sets the "floats" field.
-func (uc *UserCreate) SetFloats(f []float64) *UserCreate {
-	uc.mutation.SetFloats(f)
-	return uc
+func (_c *UserCreate) SetFloats(f []float64) *UserCreate {
+	_c.mutation.SetFloats(f)
+	return _c
 }
 
 // SetStrings sets the "strings" field.
-func (uc *UserCreate) SetStrings(s []string) *UserCreate {
-	uc.mutation.SetStrings(s)
-	return uc
+func (_c *UserCreate) SetStrings(s []string) *UserCreate {
+	_c.mutation.SetStrings(s)
+	return _c
 }
 
 // SetIntsValidate sets the "ints_validate" field.
-func (uc *UserCreate) SetIntsValidate(i []int) *UserCreate {
-	uc.mutation.SetIntsValidate(i)
-	return uc
+func (_c *UserCreate) SetIntsValidate(i []int) *UserCreate {
+	_c.mutation.SetIntsValidate(i)
+	return _c
 }
 
 // SetFloatsValidate sets the "floats_validate" field.
-func (uc *UserCreate) SetFloatsValidate(f []float64) *UserCreate {
-	uc.mutation.SetFloatsValidate(f)
-	return uc
+func (_c *UserCreate) SetFloatsValidate(f []float64) *UserCreate {
+	_c.mutation.SetFloatsValidate(f)
+	return _c
 }
 
 // SetStringsValidate sets the "strings_validate" field.
-func (uc *UserCreate) SetStringsValidate(s []string) *UserCreate {
-	uc.mutation.SetStringsValidate(s)
-	return uc
+func (_c *UserCreate) SetStringsValidate(s []string) *UserCreate {
+	_c.mutation.SetStringsValidate(s)
+	return _c
 }
 
 // SetAddr sets the "addr" field.
-func (uc *UserCreate) SetAddr(s schema.Addr) *UserCreate {
-	uc.mutation.SetAddr(s)
-	return uc
+func (_c *UserCreate) SetAddr(s schema.Addr) *UserCreate {
+	_c.mutation.SetAddr(s)
+	return _c
 }
 
 // SetNillableAddr sets the "addr" field if the given value is not nil.
-func (uc *UserCreate) SetNillableAddr(s *schema.Addr) *UserCreate {
+func (_c *UserCreate) SetNillableAddr(s *schema.Addr) *UserCreate {
 	if s != nil {
-		uc.SetAddr(*s)
+		_c.SetAddr(*s)
 	}
-	return uc
+	return _c
 }
 
 // SetUnknown sets the "unknown" field.
-func (uc *UserCreate) SetUnknown(a any) *UserCreate {
-	uc.mutation.SetUnknown(a)
-	return uc
+func (_c *UserCreate) SetUnknown(a any) *UserCreate {
+	_c.mutation.SetUnknown(a)
+	return _c
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uc *UserCreate) Mutation() *UserMutation {
-	return uc.mutation
+func (_c *UserCreate) Mutation() *UserMutation {
+	return _c.mutation
 }
 
 // Save creates the User in the database.
-func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
-	uc.defaults()
-	return withHooks(ctx, uc.sqlSave, uc.mutation, uc.hooks)
+func (_c *UserCreate) Save(ctx context.Context) (*User, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (uc *UserCreate) SaveX(ctx context.Context) *User {
-	v, err := uc.Save(ctx)
+func (_c *UserCreate) SaveX(ctx context.Context) *User {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -134,46 +134,46 @@ func (uc *UserCreate) SaveX(ctx context.Context) *User {
 }
 
 // Exec executes the query.
-func (uc *UserCreate) Exec(ctx context.Context) error {
-	_, err := uc.Save(ctx)
+func (_c *UserCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uc *UserCreate) ExecX(ctx context.Context) {
-	if err := uc.Exec(ctx); err != nil {
+func (_c *UserCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (uc *UserCreate) defaults() {
-	if _, ok := uc.mutation.Dirs(); !ok {
+func (_c *UserCreate) defaults() {
+	if _, ok := _c.mutation.Dirs(); !ok {
 		v := user.DefaultDirs()
-		uc.mutation.SetDirs(v)
+		_c.mutation.SetDirs(v)
 	}
-	if _, ok := uc.mutation.Ints(); !ok {
+	if _, ok := _c.mutation.Ints(); !ok {
 		v := user.DefaultInts
-		uc.mutation.SetInts(v)
+		_c.mutation.SetInts(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uc *UserCreate) check() error {
-	if _, ok := uc.mutation.Dirs(); !ok {
+func (_c *UserCreate) check() error {
+	if _, ok := _c.mutation.Dirs(); !ok {
 		return &ValidationError{Name: "dirs", err: errors.New(`ent: missing required field "User.dirs"`)}
 	}
-	if v, ok := uc.mutation.IntsValidate(); ok {
+	if v, ok := _c.mutation.IntsValidate(); ok {
 		if err := user.IntsValidateValidator(v); err != nil {
 			return &ValidationError{Name: "ints_validate", err: fmt.Errorf(`ent: validator failed for field "User.ints_validate": %w`, err)}
 		}
 	}
-	if v, ok := uc.mutation.FloatsValidate(); ok {
+	if v, ok := _c.mutation.FloatsValidate(); ok {
 		if err := user.FloatsValidateValidator(v); err != nil {
 			return &ValidationError{Name: "floats_validate", err: fmt.Errorf(`ent: validator failed for field "User.floats_validate": %w`, err)}
 		}
 	}
-	if v, ok := uc.mutation.StringsValidate(); ok {
+	if v, ok := _c.mutation.StringsValidate(); ok {
 		if err := user.StringsValidateValidator(v); err != nil {
 			return &ValidationError{Name: "strings_validate", err: fmt.Errorf(`ent: validator failed for field "User.strings_validate": %w`, err)}
 		}
@@ -181,12 +181,12 @@ func (uc *UserCreate) check() error {
 	return nil
 }
 
-func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
-	if err := uc.check(); err != nil {
+func (_c *UserCreate) sqlSave(ctx context.Context) (*User, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := uc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, uc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -194,65 +194,65 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	uc.mutation.id = &_node.ID
-	uc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
+func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	var (
-		_node = &User{config: uc.config}
+		_node = &User{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(user.Table, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	)
-	if value, ok := uc.mutation.T(); ok {
+	if value, ok := _c.mutation.T(); ok {
 		_spec.SetField(user.FieldT, field.TypeJSON, value)
 		_node.T = value
 	}
-	if value, ok := uc.mutation.URL(); ok {
+	if value, ok := _c.mutation.URL(); ok {
 		_spec.SetField(user.FieldURL, field.TypeJSON, value)
 		_node.URL = value
 	}
-	if value, ok := uc.mutation.URLs(); ok {
+	if value, ok := _c.mutation.URLs(); ok {
 		_spec.SetField(user.FieldURLs, field.TypeJSON, value)
 		_node.URLs = value
 	}
-	if value, ok := uc.mutation.Raw(); ok {
+	if value, ok := _c.mutation.Raw(); ok {
 		_spec.SetField(user.FieldRaw, field.TypeJSON, value)
 		_node.Raw = value
 	}
-	if value, ok := uc.mutation.Dirs(); ok {
+	if value, ok := _c.mutation.Dirs(); ok {
 		_spec.SetField(user.FieldDirs, field.TypeJSON, value)
 		_node.Dirs = value
 	}
-	if value, ok := uc.mutation.Ints(); ok {
+	if value, ok := _c.mutation.Ints(); ok {
 		_spec.SetField(user.FieldInts, field.TypeJSON, value)
 		_node.Ints = value
 	}
-	if value, ok := uc.mutation.Floats(); ok {
+	if value, ok := _c.mutation.Floats(); ok {
 		_spec.SetField(user.FieldFloats, field.TypeJSON, value)
 		_node.Floats = value
 	}
-	if value, ok := uc.mutation.Strings(); ok {
+	if value, ok := _c.mutation.Strings(); ok {
 		_spec.SetField(user.FieldStrings, field.TypeJSON, value)
 		_node.Strings = value
 	}
-	if value, ok := uc.mutation.IntsValidate(); ok {
+	if value, ok := _c.mutation.IntsValidate(); ok {
 		_spec.SetField(user.FieldIntsValidate, field.TypeJSON, value)
 		_node.IntsValidate = value
 	}
-	if value, ok := uc.mutation.FloatsValidate(); ok {
+	if value, ok := _c.mutation.FloatsValidate(); ok {
 		_spec.SetField(user.FieldFloatsValidate, field.TypeJSON, value)
 		_node.FloatsValidate = value
 	}
-	if value, ok := uc.mutation.StringsValidate(); ok {
+	if value, ok := _c.mutation.StringsValidate(); ok {
 		_spec.SetField(user.FieldStringsValidate, field.TypeJSON, value)
 		_node.StringsValidate = value
 	}
-	if value, ok := uc.mutation.Addr(); ok {
+	if value, ok := _c.mutation.Addr(); ok {
 		_spec.SetField(user.FieldAddr, field.TypeJSON, value)
 		_node.Addr = value
 	}
-	if value, ok := uc.mutation.Unknown(); ok {
+	if value, ok := _c.mutation.Unknown(); ok {
 		_spec.SetField(user.FieldUnknown, field.TypeJSON, value)
 		_node.Unknown = value
 	}
@@ -267,16 +267,16 @@ type UserCreateBulk struct {
 }
 
 // Save creates the User entities in the database.
-func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
-	if ucb.err != nil {
-		return nil, ucb.err
+func (_c *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(ucb.builders))
-	nodes := make([]*User, len(ucb.builders))
-	mutators := make([]Mutator, len(ucb.builders))
-	for i := range ucb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*User, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := ucb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*UserMutation)
@@ -290,11 +290,11 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, ucb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ucb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -318,7 +318,7 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, ucb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -326,8 +326,8 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
-	v, err := ucb.Save(ctx)
+func (_c *UserCreateBulk) SaveX(ctx context.Context) []*User {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -335,14 +335,14 @@ func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
 }
 
 // Exec executes the query.
-func (ucb *UserCreateBulk) Exec(ctx context.Context) error {
-	_, err := ucb.Save(ctx)
+func (_c *UserCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ucb *UserCreateBulk) ExecX(ctx context.Context) {
-	if err := ucb.Exec(ctx); err != nil {
+func (_c *UserCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

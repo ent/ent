@@ -41,26 +41,26 @@ func (*Item) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Item fields.
-func (i *Item) assignValues(columns []string, values []any) error {
+func (_m *Item) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
-	for j := range columns {
-		switch columns[j] {
+	for i := range columns {
+		switch columns[i] {
 		case item.FieldID:
-			if value, ok := values[j].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[j])
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value.Valid {
-				i.ID = value.String
+				_m.ID = value.String
 			}
 		case item.FieldText:
-			if value, ok := values[j].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field text", values[j])
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field text", values[i])
 			} else if value.Valid {
-				i.Text = value.String
+				_m.Text = value.String
 			}
 		default:
-			i.selectValues.Set(columns[j], values[j])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -68,35 +68,35 @@ func (i *Item) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Item.
 // This includes values selected through modifiers, order, etc.
-func (i *Item) Value(name string) (ent.Value, error) {
-	return i.selectValues.Get(name)
+func (_m *Item) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Item.
 // Note that you need to call Item.Unwrap() before calling this method if this Item
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (i *Item) Update() *ItemUpdateOne {
-	return NewItemClient(i.config).UpdateOne(i)
+func (_m *Item) Update() *ItemUpdateOne {
+	return NewItemClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Item entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (i *Item) Unwrap() *Item {
-	_tx, ok := i.config.driver.(*txDriver)
+func (_m *Item) Unwrap() *Item {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Item is not a transactional entity")
 	}
-	i.config.driver = _tx.drv
-	return i
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (i *Item) String() string {
+func (_m *Item) String() string {
 	var builder strings.Builder
 	builder.WriteString("Item(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", i.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("text=")
-	builder.WriteString(i.Text)
+	builder.WriteString(_m.Text)
 	builder.WriteByte(')')
 	return builder.String()
 }

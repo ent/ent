@@ -26,84 +26,84 @@ type NodeCreate struct {
 }
 
 // SetValue sets the "value" field.
-func (nc *NodeCreate) SetValue(i int) *NodeCreate {
-	nc.mutation.SetValue(i)
-	return nc
+func (_c *NodeCreate) SetValue(i int) *NodeCreate {
+	_c.mutation.SetValue(i)
+	return _c
 }
 
 // SetNillableValue sets the "value" field if the given value is not nil.
-func (nc *NodeCreate) SetNillableValue(i *int) *NodeCreate {
+func (_c *NodeCreate) SetNillableValue(i *int) *NodeCreate {
 	if i != nil {
-		nc.SetValue(*i)
+		_c.SetValue(*i)
 	}
-	return nc
+	return _c
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (nc *NodeCreate) SetUpdatedAt(t time.Time) *NodeCreate {
-	nc.mutation.SetUpdatedAt(t)
-	return nc
+func (_c *NodeCreate) SetUpdatedAt(t time.Time) *NodeCreate {
+	_c.mutation.SetUpdatedAt(t)
+	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (nc *NodeCreate) SetNillableUpdatedAt(t *time.Time) *NodeCreate {
+func (_c *NodeCreate) SetNillableUpdatedAt(t *time.Time) *NodeCreate {
 	if t != nil {
-		nc.SetUpdatedAt(*t)
+		_c.SetUpdatedAt(*t)
 	}
-	return nc
+	return _c
 }
 
 // SetPrevID sets the "prev" edge to the Node entity by ID.
-func (nc *NodeCreate) SetPrevID(id string) *NodeCreate {
-	nc.mutation.SetPrevID(id)
-	return nc
+func (_c *NodeCreate) SetPrevID(id string) *NodeCreate {
+	_c.mutation.SetPrevID(id)
+	return _c
 }
 
 // SetNillablePrevID sets the "prev" edge to the Node entity by ID if the given value is not nil.
-func (nc *NodeCreate) SetNillablePrevID(id *string) *NodeCreate {
+func (_c *NodeCreate) SetNillablePrevID(id *string) *NodeCreate {
 	if id != nil {
-		nc = nc.SetPrevID(*id)
+		_c = _c.SetPrevID(*id)
 	}
-	return nc
+	return _c
 }
 
 // SetPrev sets the "prev" edge to the Node entity.
-func (nc *NodeCreate) SetPrev(n *Node) *NodeCreate {
-	return nc.SetPrevID(n.ID)
+func (_c *NodeCreate) SetPrev(n *Node) *NodeCreate {
+	return _c.SetPrevID(n.ID)
 }
 
 // SetNextID sets the "next" edge to the Node entity by ID.
-func (nc *NodeCreate) SetNextID(id string) *NodeCreate {
-	nc.mutation.SetNextID(id)
-	return nc
+func (_c *NodeCreate) SetNextID(id string) *NodeCreate {
+	_c.mutation.SetNextID(id)
+	return _c
 }
 
 // SetNillableNextID sets the "next" edge to the Node entity by ID if the given value is not nil.
-func (nc *NodeCreate) SetNillableNextID(id *string) *NodeCreate {
+func (_c *NodeCreate) SetNillableNextID(id *string) *NodeCreate {
 	if id != nil {
-		nc = nc.SetNextID(*id)
+		_c = _c.SetNextID(*id)
 	}
-	return nc
+	return _c
 }
 
 // SetNext sets the "next" edge to the Node entity.
-func (nc *NodeCreate) SetNext(n *Node) *NodeCreate {
-	return nc.SetNextID(n.ID)
+func (_c *NodeCreate) SetNext(n *Node) *NodeCreate {
+	return _c.SetNextID(n.ID)
 }
 
 // Mutation returns the NodeMutation object of the builder.
-func (nc *NodeCreate) Mutation() *NodeMutation {
-	return nc.mutation
+func (_c *NodeCreate) Mutation() *NodeMutation {
+	return _c.mutation
 }
 
 // Save creates the Node in the database.
-func (nc *NodeCreate) Save(ctx context.Context) (*Node, error) {
-	return withHooks(ctx, nc.gremlinSave, nc.mutation, nc.hooks)
+func (_c *NodeCreate) Save(ctx context.Context) (*Node, error) {
+	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (nc *NodeCreate) SaveX(ctx context.Context) *Node {
-	v, err := nc.Save(ctx)
+func (_c *NodeCreate) SaveX(ctx context.Context) *Node {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -111,65 +111,65 @@ func (nc *NodeCreate) SaveX(ctx context.Context) *Node {
 }
 
 // Exec executes the query.
-func (nc *NodeCreate) Exec(ctx context.Context) error {
-	_, err := nc.Save(ctx)
+func (_c *NodeCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (nc *NodeCreate) ExecX(ctx context.Context) {
-	if err := nc.Exec(ctx); err != nil {
+func (_c *NodeCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (nc *NodeCreate) check() error {
+func (_c *NodeCreate) check() error {
 	return nil
 }
 
-func (nc *NodeCreate) gremlinSave(ctx context.Context) (*Node, error) {
-	if err := nc.check(); err != nil {
+func (_c *NodeCreate) gremlinSave(ctx context.Context) (*Node, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := nc.gremlin().Query()
-	if err := nc.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _c.gremlin().Query()
+	if err := _c.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	rnode := &Node{config: nc.config}
+	rnode := &Node{config: _c.config}
 	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	nc.mutation.id = &rnode.ID
-	nc.mutation.done = true
+	_c.mutation.id = &rnode.ID
+	_c.mutation.done = true
 	return rnode, nil
 }
 
-func (nc *NodeCreate) gremlin() *dsl.Traversal {
+func (_c *NodeCreate) gremlin() *dsl.Traversal {
 	type constraint struct {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
 	constraints := make([]*constraint, 0, 2)
 	v := g.AddV(node.Label)
-	if value, ok := nc.mutation.Value(); ok {
+	if value, ok := _c.mutation.Value(); ok {
 		v.Property(dsl.Single, node.FieldValue, value)
 	}
-	if value, ok := nc.mutation.UpdatedAt(); ok {
+	if value, ok := _c.mutation.UpdatedAt(); ok {
 		v.Property(dsl.Single, node.FieldUpdatedAt, value)
 	}
-	for _, id := range nc.mutation.PrevIDs() {
+	for _, id := range _c.mutation.PrevIDs() {
 		v.AddE(node.NextLabel).From(g.V(id)).InV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(node.NextLabel).OutV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(node.Label, node.NextLabel, id)),
 		})
 	}
-	for _, id := range nc.mutation.NextIDs() {
+	for _, id := range _c.mutation.NextIDs() {
 		v.AddE(node.NextLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(node.NextLabel).InV().HasID(id).Count(),

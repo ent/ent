@@ -31,607 +31,607 @@ type UserUpdate struct {
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
-	uu.mutation.Where(ps...)
-	return uu
+func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetOptionalInt sets the "optional_int" field.
-func (uu *UserUpdate) SetOptionalInt(i int) *UserUpdate {
-	uu.mutation.ResetOptionalInt()
-	uu.mutation.SetOptionalInt(i)
-	return uu
+func (_u *UserUpdate) SetOptionalInt(i int) *UserUpdate {
+	_u.mutation.ResetOptionalInt()
+	_u.mutation.SetOptionalInt(i)
+	return _u
 }
 
 // SetNillableOptionalInt sets the "optional_int" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableOptionalInt(i *int) *UserUpdate {
+func (_u *UserUpdate) SetNillableOptionalInt(i *int) *UserUpdate {
 	if i != nil {
-		uu.SetOptionalInt(*i)
+		_u.SetOptionalInt(*i)
 	}
-	return uu
+	return _u
 }
 
 // AddOptionalInt adds i to the "optional_int" field.
-func (uu *UserUpdate) AddOptionalInt(i int) *UserUpdate {
-	uu.mutation.AddOptionalInt(i)
-	return uu
+func (_u *UserUpdate) AddOptionalInt(i int) *UserUpdate {
+	_u.mutation.AddOptionalInt(i)
+	return _u
 }
 
 // ClearOptionalInt clears the value of the "optional_int" field.
-func (uu *UserUpdate) ClearOptionalInt() *UserUpdate {
-	uu.mutation.ClearOptionalInt()
-	return uu
+func (_u *UserUpdate) ClearOptionalInt() *UserUpdate {
+	_u.mutation.ClearOptionalInt()
+	return _u
 }
 
 // SetAge sets the "age" field.
-func (uu *UserUpdate) SetAge(i int) *UserUpdate {
-	uu.mutation.ResetAge()
-	uu.mutation.SetAge(i)
-	return uu
+func (_u *UserUpdate) SetAge(i int) *UserUpdate {
+	_u.mutation.ResetAge()
+	_u.mutation.SetAge(i)
+	return _u
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableAge(i *int) *UserUpdate {
+func (_u *UserUpdate) SetNillableAge(i *int) *UserUpdate {
 	if i != nil {
-		uu.SetAge(*i)
+		_u.SetAge(*i)
 	}
-	return uu
+	return _u
 }
 
 // AddAge adds i to the "age" field.
-func (uu *UserUpdate) AddAge(i int) *UserUpdate {
-	uu.mutation.AddAge(i)
-	return uu
+func (_u *UserUpdate) AddAge(i int) *UserUpdate {
+	_u.mutation.AddAge(i)
+	return _u
 }
 
 // SetName sets the "name" field.
-func (uu *UserUpdate) SetName(s string) *UserUpdate {
-	uu.mutation.SetName(s)
-	return uu
+func (_u *UserUpdate) SetName(s string) *UserUpdate {
+	_u.mutation.SetName(s)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableName(s *string) *UserUpdate {
+func (_u *UserUpdate) SetNillableName(s *string) *UserUpdate {
 	if s != nil {
-		uu.SetName(*s)
+		_u.SetName(*s)
 	}
-	return uu
+	return _u
 }
 
 // SetLast sets the "last" field.
-func (uu *UserUpdate) SetLast(s string) *UserUpdate {
-	uu.mutation.SetLast(s)
-	return uu
+func (_u *UserUpdate) SetLast(s string) *UserUpdate {
+	_u.mutation.SetLast(s)
+	return _u
 }
 
 // SetNillableLast sets the "last" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableLast(s *string) *UserUpdate {
+func (_u *UserUpdate) SetNillableLast(s *string) *UserUpdate {
 	if s != nil {
-		uu.SetLast(*s)
+		_u.SetLast(*s)
 	}
-	return uu
+	return _u
 }
 
 // SetNickname sets the "nickname" field.
-func (uu *UserUpdate) SetNickname(s string) *UserUpdate {
-	uu.mutation.SetNickname(s)
-	return uu
+func (_u *UserUpdate) SetNickname(s string) *UserUpdate {
+	_u.mutation.SetNickname(s)
+	return _u
 }
 
 // SetNillableNickname sets the "nickname" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableNickname(s *string) *UserUpdate {
+func (_u *UserUpdate) SetNillableNickname(s *string) *UserUpdate {
 	if s != nil {
-		uu.SetNickname(*s)
+		_u.SetNickname(*s)
 	}
-	return uu
+	return _u
 }
 
 // ClearNickname clears the value of the "nickname" field.
-func (uu *UserUpdate) ClearNickname() *UserUpdate {
-	uu.mutation.ClearNickname()
-	return uu
+func (_u *UserUpdate) ClearNickname() *UserUpdate {
+	_u.mutation.ClearNickname()
+	return _u
 }
 
 // SetAddress sets the "address" field.
-func (uu *UserUpdate) SetAddress(s string) *UserUpdate {
-	uu.mutation.SetAddress(s)
-	return uu
+func (_u *UserUpdate) SetAddress(s string) *UserUpdate {
+	_u.mutation.SetAddress(s)
+	return _u
 }
 
 // SetNillableAddress sets the "address" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableAddress(s *string) *UserUpdate {
+func (_u *UserUpdate) SetNillableAddress(s *string) *UserUpdate {
 	if s != nil {
-		uu.SetAddress(*s)
+		_u.SetAddress(*s)
 	}
-	return uu
+	return _u
 }
 
 // ClearAddress clears the value of the "address" field.
-func (uu *UserUpdate) ClearAddress() *UserUpdate {
-	uu.mutation.ClearAddress()
-	return uu
+func (_u *UserUpdate) ClearAddress() *UserUpdate {
+	_u.mutation.ClearAddress()
+	return _u
 }
 
 // SetPhone sets the "phone" field.
-func (uu *UserUpdate) SetPhone(s string) *UserUpdate {
-	uu.mutation.SetPhone(s)
-	return uu
+func (_u *UserUpdate) SetPhone(s string) *UserUpdate {
+	_u.mutation.SetPhone(s)
+	return _u
 }
 
 // SetNillablePhone sets the "phone" field if the given value is not nil.
-func (uu *UserUpdate) SetNillablePhone(s *string) *UserUpdate {
+func (_u *UserUpdate) SetNillablePhone(s *string) *UserUpdate {
 	if s != nil {
-		uu.SetPhone(*s)
+		_u.SetPhone(*s)
 	}
-	return uu
+	return _u
 }
 
 // ClearPhone clears the value of the "phone" field.
-func (uu *UserUpdate) ClearPhone() *UserUpdate {
-	uu.mutation.ClearPhone()
-	return uu
+func (_u *UserUpdate) ClearPhone() *UserUpdate {
+	_u.mutation.ClearPhone()
+	return _u
 }
 
 // SetPassword sets the "password" field.
-func (uu *UserUpdate) SetPassword(s string) *UserUpdate {
-	uu.mutation.SetPassword(s)
-	return uu
+func (_u *UserUpdate) SetPassword(s string) *UserUpdate {
+	_u.mutation.SetPassword(s)
+	return _u
 }
 
 // SetNillablePassword sets the "password" field if the given value is not nil.
-func (uu *UserUpdate) SetNillablePassword(s *string) *UserUpdate {
+func (_u *UserUpdate) SetNillablePassword(s *string) *UserUpdate {
 	if s != nil {
-		uu.SetPassword(*s)
+		_u.SetPassword(*s)
 	}
-	return uu
+	return _u
 }
 
 // ClearPassword clears the value of the "password" field.
-func (uu *UserUpdate) ClearPassword() *UserUpdate {
-	uu.mutation.ClearPassword()
-	return uu
+func (_u *UserUpdate) ClearPassword() *UserUpdate {
+	_u.mutation.ClearPassword()
+	return _u
 }
 
 // SetRole sets the "role" field.
-func (uu *UserUpdate) SetRole(u user.Role) *UserUpdate {
-	uu.mutation.SetRole(u)
-	return uu
+func (_u *UserUpdate) SetRole(u user.Role) *UserUpdate {
+	_u.mutation.SetRole(u)
+	return _u
 }
 
 // SetNillableRole sets the "role" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableRole(u *user.Role) *UserUpdate {
+func (_u *UserUpdate) SetNillableRole(u *user.Role) *UserUpdate {
 	if u != nil {
-		uu.SetRole(*u)
+		_u.SetRole(*u)
 	}
-	return uu
+	return _u
 }
 
 // SetEmployment sets the "employment" field.
-func (uu *UserUpdate) SetEmployment(u user.Employment) *UserUpdate {
-	uu.mutation.SetEmployment(u)
-	return uu
+func (_u *UserUpdate) SetEmployment(u user.Employment) *UserUpdate {
+	_u.mutation.SetEmployment(u)
+	return _u
 }
 
 // SetNillableEmployment sets the "employment" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableEmployment(u *user.Employment) *UserUpdate {
+func (_u *UserUpdate) SetNillableEmployment(u *user.Employment) *UserUpdate {
 	if u != nil {
-		uu.SetEmployment(*u)
+		_u.SetEmployment(*u)
 	}
-	return uu
+	return _u
 }
 
 // SetSSOCert sets the "SSOCert" field.
-func (uu *UserUpdate) SetSSOCert(s string) *UserUpdate {
-	uu.mutation.SetSSOCert(s)
-	return uu
+func (_u *UserUpdate) SetSSOCert(s string) *UserUpdate {
+	_u.mutation.SetSSOCert(s)
+	return _u
 }
 
 // SetNillableSSOCert sets the "SSOCert" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableSSOCert(s *string) *UserUpdate {
+func (_u *UserUpdate) SetNillableSSOCert(s *string) *UserUpdate {
 	if s != nil {
-		uu.SetSSOCert(*s)
+		_u.SetSSOCert(*s)
 	}
-	return uu
+	return _u
 }
 
 // ClearSSOCert clears the value of the "SSOCert" field.
-func (uu *UserUpdate) ClearSSOCert() *UserUpdate {
-	uu.mutation.ClearSSOCert()
-	return uu
+func (_u *UserUpdate) ClearSSOCert() *UserUpdate {
+	_u.mutation.ClearSSOCert()
+	return _u
 }
 
 // SetFilesCount sets the "files_count" field.
-func (uu *UserUpdate) SetFilesCount(i int) *UserUpdate {
-	uu.mutation.ResetFilesCount()
-	uu.mutation.SetFilesCount(i)
-	return uu
+func (_u *UserUpdate) SetFilesCount(i int) *UserUpdate {
+	_u.mutation.ResetFilesCount()
+	_u.mutation.SetFilesCount(i)
+	return _u
 }
 
 // SetNillableFilesCount sets the "files_count" field if the given value is not nil.
-func (uu *UserUpdate) SetNillableFilesCount(i *int) *UserUpdate {
+func (_u *UserUpdate) SetNillableFilesCount(i *int) *UserUpdate {
 	if i != nil {
-		uu.SetFilesCount(*i)
+		_u.SetFilesCount(*i)
 	}
-	return uu
+	return _u
 }
 
 // AddFilesCount adds i to the "files_count" field.
-func (uu *UserUpdate) AddFilesCount(i int) *UserUpdate {
-	uu.mutation.AddFilesCount(i)
-	return uu
+func (_u *UserUpdate) AddFilesCount(i int) *UserUpdate {
+	_u.mutation.AddFilesCount(i)
+	return _u
 }
 
 // ClearFilesCount clears the value of the "files_count" field.
-func (uu *UserUpdate) ClearFilesCount() *UserUpdate {
-	uu.mutation.ClearFilesCount()
-	return uu
+func (_u *UserUpdate) ClearFilesCount() *UserUpdate {
+	_u.mutation.ClearFilesCount()
+	return _u
 }
 
 // SetCardID sets the "card" edge to the Card entity by ID.
-func (uu *UserUpdate) SetCardID(id int) *UserUpdate {
-	uu.mutation.SetCardID(id)
-	return uu
+func (_u *UserUpdate) SetCardID(id int) *UserUpdate {
+	_u.mutation.SetCardID(id)
+	return _u
 }
 
 // SetNillableCardID sets the "card" edge to the Card entity by ID if the given value is not nil.
-func (uu *UserUpdate) SetNillableCardID(id *int) *UserUpdate {
+func (_u *UserUpdate) SetNillableCardID(id *int) *UserUpdate {
 	if id != nil {
-		uu = uu.SetCardID(*id)
+		_u = _u.SetCardID(*id)
 	}
-	return uu
+	return _u
 }
 
 // SetCard sets the "card" edge to the Card entity.
-func (uu *UserUpdate) SetCard(c *Card) *UserUpdate {
-	return uu.SetCardID(c.ID)
+func (_u *UserUpdate) SetCard(c *Card) *UserUpdate {
+	return _u.SetCardID(c.ID)
 }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
-func (uu *UserUpdate) AddPetIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddPetIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddPetIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddPetIDs(ids...)
+	return _u
 }
 
 // AddPets adds the "pets" edges to the Pet entity.
-func (uu *UserUpdate) AddPets(p ...*Pet) *UserUpdate {
+func (_u *UserUpdate) AddPets(p ...*Pet) *UserUpdate {
 	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return uu.AddPetIDs(ids...)
+	return _u.AddPetIDs(ids...)
 }
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
-func (uu *UserUpdate) AddFileIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddFileIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddFileIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddFileIDs(ids...)
+	return _u
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (uu *UserUpdate) AddFiles(f ...*File) *UserUpdate {
+func (_u *UserUpdate) AddFiles(f ...*File) *UserUpdate {
 	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return uu.AddFileIDs(ids...)
+	return _u.AddFileIDs(ids...)
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (uu *UserUpdate) AddGroupIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddGroupIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddGroupIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddGroupIDs(ids...)
+	return _u
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (uu *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
+func (_u *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
 	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
-	return uu.AddGroupIDs(ids...)
+	return _u.AddGroupIDs(ids...)
 }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
-func (uu *UserUpdate) AddFriendIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddFriendIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddFriendIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddFriendIDs(ids...)
+	return _u
 }
 
 // AddFriends adds the "friends" edges to the User entity.
-func (uu *UserUpdate) AddFriends(u ...*User) *UserUpdate {
+func (_u *UserUpdate) AddFriends(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uu.AddFriendIDs(ids...)
+	return _u.AddFriendIDs(ids...)
 }
 
 // AddFollowerIDs adds the "followers" edge to the User entity by IDs.
-func (uu *UserUpdate) AddFollowerIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddFollowerIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddFollowerIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddFollowerIDs(ids...)
+	return _u
 }
 
 // AddFollowers adds the "followers" edges to the User entity.
-func (uu *UserUpdate) AddFollowers(u ...*User) *UserUpdate {
+func (_u *UserUpdate) AddFollowers(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uu.AddFollowerIDs(ids...)
+	return _u.AddFollowerIDs(ids...)
 }
 
 // AddFollowingIDs adds the "following" edge to the User entity by IDs.
-func (uu *UserUpdate) AddFollowingIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddFollowingIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddFollowingIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddFollowingIDs(ids...)
+	return _u
 }
 
 // AddFollowing adds the "following" edges to the User entity.
-func (uu *UserUpdate) AddFollowing(u ...*User) *UserUpdate {
+func (_u *UserUpdate) AddFollowing(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uu.AddFollowingIDs(ids...)
+	return _u.AddFollowingIDs(ids...)
 }
 
 // SetTeamID sets the "team" edge to the Pet entity by ID.
-func (uu *UserUpdate) SetTeamID(id int) *UserUpdate {
-	uu.mutation.SetTeamID(id)
-	return uu
+func (_u *UserUpdate) SetTeamID(id int) *UserUpdate {
+	_u.mutation.SetTeamID(id)
+	return _u
 }
 
 // SetNillableTeamID sets the "team" edge to the Pet entity by ID if the given value is not nil.
-func (uu *UserUpdate) SetNillableTeamID(id *int) *UserUpdate {
+func (_u *UserUpdate) SetNillableTeamID(id *int) *UserUpdate {
 	if id != nil {
-		uu = uu.SetTeamID(*id)
+		_u = _u.SetTeamID(*id)
 	}
-	return uu
+	return _u
 }
 
 // SetTeam sets the "team" edge to the Pet entity.
-func (uu *UserUpdate) SetTeam(p *Pet) *UserUpdate {
-	return uu.SetTeamID(p.ID)
+func (_u *UserUpdate) SetTeam(p *Pet) *UserUpdate {
+	return _u.SetTeamID(p.ID)
 }
 
 // SetSpouseID sets the "spouse" edge to the User entity by ID.
-func (uu *UserUpdate) SetSpouseID(id int) *UserUpdate {
-	uu.mutation.SetSpouseID(id)
-	return uu
+func (_u *UserUpdate) SetSpouseID(id int) *UserUpdate {
+	_u.mutation.SetSpouseID(id)
+	return _u
 }
 
 // SetNillableSpouseID sets the "spouse" edge to the User entity by ID if the given value is not nil.
-func (uu *UserUpdate) SetNillableSpouseID(id *int) *UserUpdate {
+func (_u *UserUpdate) SetNillableSpouseID(id *int) *UserUpdate {
 	if id != nil {
-		uu = uu.SetSpouseID(*id)
+		_u = _u.SetSpouseID(*id)
 	}
-	return uu
+	return _u
 }
 
 // SetSpouse sets the "spouse" edge to the User entity.
-func (uu *UserUpdate) SetSpouse(u *User) *UserUpdate {
-	return uu.SetSpouseID(u.ID)
+func (_u *UserUpdate) SetSpouse(u *User) *UserUpdate {
+	return _u.SetSpouseID(u.ID)
 }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
-func (uu *UserUpdate) AddChildIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddChildIDs(ids...)
-	return uu
+func (_u *UserUpdate) AddChildIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddChildIDs(ids...)
+	return _u
 }
 
 // AddChildren adds the "children" edges to the User entity.
-func (uu *UserUpdate) AddChildren(u ...*User) *UserUpdate {
+func (_u *UserUpdate) AddChildren(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uu.AddChildIDs(ids...)
+	return _u.AddChildIDs(ids...)
 }
 
 // SetParentID sets the "parent" edge to the User entity by ID.
-func (uu *UserUpdate) SetParentID(id int) *UserUpdate {
-	uu.mutation.SetParentID(id)
-	return uu
+func (_u *UserUpdate) SetParentID(id int) *UserUpdate {
+	_u.mutation.SetParentID(id)
+	return _u
 }
 
 // SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
-func (uu *UserUpdate) SetNillableParentID(id *int) *UserUpdate {
+func (_u *UserUpdate) SetNillableParentID(id *int) *UserUpdate {
 	if id != nil {
-		uu = uu.SetParentID(*id)
+		_u = _u.SetParentID(*id)
 	}
-	return uu
+	return _u
 }
 
 // SetParent sets the "parent" edge to the User entity.
-func (uu *UserUpdate) SetParent(u *User) *UserUpdate {
-	return uu.SetParentID(u.ID)
+func (_u *UserUpdate) SetParent(u *User) *UserUpdate {
+	return _u.SetParentID(u.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uu *UserUpdate) Mutation() *UserMutation {
-	return uu.mutation
+func (_u *UserUpdate) Mutation() *UserMutation {
+	return _u.mutation
 }
 
 // ClearCard clears the "card" edge to the Card entity.
-func (uu *UserUpdate) ClearCard() *UserUpdate {
-	uu.mutation.ClearCard()
-	return uu
+func (_u *UserUpdate) ClearCard() *UserUpdate {
+	_u.mutation.ClearCard()
+	return _u
 }
 
 // ClearPets clears all "pets" edges to the Pet entity.
-func (uu *UserUpdate) ClearPets() *UserUpdate {
-	uu.mutation.ClearPets()
-	return uu
+func (_u *UserUpdate) ClearPets() *UserUpdate {
+	_u.mutation.ClearPets()
+	return _u
 }
 
 // RemovePetIDs removes the "pets" edge to Pet entities by IDs.
-func (uu *UserUpdate) RemovePetIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemovePetIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemovePetIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemovePetIDs(ids...)
+	return _u
 }
 
 // RemovePets removes "pets" edges to Pet entities.
-func (uu *UserUpdate) RemovePets(p ...*Pet) *UserUpdate {
+func (_u *UserUpdate) RemovePets(p ...*Pet) *UserUpdate {
 	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return uu.RemovePetIDs(ids...)
+	return _u.RemovePetIDs(ids...)
 }
 
 // ClearFiles clears all "files" edges to the File entity.
-func (uu *UserUpdate) ClearFiles() *UserUpdate {
-	uu.mutation.ClearFiles()
-	return uu
+func (_u *UserUpdate) ClearFiles() *UserUpdate {
+	_u.mutation.ClearFiles()
+	return _u
 }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
-func (uu *UserUpdate) RemoveFileIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveFileIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveFileIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveFileIDs(ids...)
+	return _u
 }
 
 // RemoveFiles removes "files" edges to File entities.
-func (uu *UserUpdate) RemoveFiles(f ...*File) *UserUpdate {
+func (_u *UserUpdate) RemoveFiles(f ...*File) *UserUpdate {
 	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return uu.RemoveFileIDs(ids...)
+	return _u.RemoveFileIDs(ids...)
 }
 
 // ClearGroups clears all "groups" edges to the Group entity.
-func (uu *UserUpdate) ClearGroups() *UserUpdate {
-	uu.mutation.ClearGroups()
-	return uu
+func (_u *UserUpdate) ClearGroups() *UserUpdate {
+	_u.mutation.ClearGroups()
+	return _u
 }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
-func (uu *UserUpdate) RemoveGroupIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveGroupIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveGroupIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveGroupIDs(ids...)
+	return _u
 }
 
 // RemoveGroups removes "groups" edges to Group entities.
-func (uu *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
+func (_u *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
 	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
-	return uu.RemoveGroupIDs(ids...)
+	return _u.RemoveGroupIDs(ids...)
 }
 
 // ClearFriends clears all "friends" edges to the User entity.
-func (uu *UserUpdate) ClearFriends() *UserUpdate {
-	uu.mutation.ClearFriends()
-	return uu
+func (_u *UserUpdate) ClearFriends() *UserUpdate {
+	_u.mutation.ClearFriends()
+	return _u
 }
 
 // RemoveFriendIDs removes the "friends" edge to User entities by IDs.
-func (uu *UserUpdate) RemoveFriendIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveFriendIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveFriendIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveFriendIDs(ids...)
+	return _u
 }
 
 // RemoveFriends removes "friends" edges to User entities.
-func (uu *UserUpdate) RemoveFriends(u ...*User) *UserUpdate {
+func (_u *UserUpdate) RemoveFriends(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uu.RemoveFriendIDs(ids...)
+	return _u.RemoveFriendIDs(ids...)
 }
 
 // ClearFollowers clears all "followers" edges to the User entity.
-func (uu *UserUpdate) ClearFollowers() *UserUpdate {
-	uu.mutation.ClearFollowers()
-	return uu
+func (_u *UserUpdate) ClearFollowers() *UserUpdate {
+	_u.mutation.ClearFollowers()
+	return _u
 }
 
 // RemoveFollowerIDs removes the "followers" edge to User entities by IDs.
-func (uu *UserUpdate) RemoveFollowerIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveFollowerIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveFollowerIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveFollowerIDs(ids...)
+	return _u
 }
 
 // RemoveFollowers removes "followers" edges to User entities.
-func (uu *UserUpdate) RemoveFollowers(u ...*User) *UserUpdate {
+func (_u *UserUpdate) RemoveFollowers(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uu.RemoveFollowerIDs(ids...)
+	return _u.RemoveFollowerIDs(ids...)
 }
 
 // ClearFollowing clears all "following" edges to the User entity.
-func (uu *UserUpdate) ClearFollowing() *UserUpdate {
-	uu.mutation.ClearFollowing()
-	return uu
+func (_u *UserUpdate) ClearFollowing() *UserUpdate {
+	_u.mutation.ClearFollowing()
+	return _u
 }
 
 // RemoveFollowingIDs removes the "following" edge to User entities by IDs.
-func (uu *UserUpdate) RemoveFollowingIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveFollowingIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveFollowingIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveFollowingIDs(ids...)
+	return _u
 }
 
 // RemoveFollowing removes "following" edges to User entities.
-func (uu *UserUpdate) RemoveFollowing(u ...*User) *UserUpdate {
+func (_u *UserUpdate) RemoveFollowing(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uu.RemoveFollowingIDs(ids...)
+	return _u.RemoveFollowingIDs(ids...)
 }
 
 // ClearTeam clears the "team" edge to the Pet entity.
-func (uu *UserUpdate) ClearTeam() *UserUpdate {
-	uu.mutation.ClearTeam()
-	return uu
+func (_u *UserUpdate) ClearTeam() *UserUpdate {
+	_u.mutation.ClearTeam()
+	return _u
 }
 
 // ClearSpouse clears the "spouse" edge to the User entity.
-func (uu *UserUpdate) ClearSpouse() *UserUpdate {
-	uu.mutation.ClearSpouse()
-	return uu
+func (_u *UserUpdate) ClearSpouse() *UserUpdate {
+	_u.mutation.ClearSpouse()
+	return _u
 }
 
 // ClearChildren clears all "children" edges to the User entity.
-func (uu *UserUpdate) ClearChildren() *UserUpdate {
-	uu.mutation.ClearChildren()
-	return uu
+func (_u *UserUpdate) ClearChildren() *UserUpdate {
+	_u.mutation.ClearChildren()
+	return _u
 }
 
 // RemoveChildIDs removes the "children" edge to User entities by IDs.
-func (uu *UserUpdate) RemoveChildIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveChildIDs(ids...)
-	return uu
+func (_u *UserUpdate) RemoveChildIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveChildIDs(ids...)
+	return _u
 }
 
 // RemoveChildren removes "children" edges to User entities.
-func (uu *UserUpdate) RemoveChildren(u ...*User) *UserUpdate {
+func (_u *UserUpdate) RemoveChildren(u ...*User) *UserUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uu.RemoveChildIDs(ids...)
+	return _u.RemoveChildIDs(ids...)
 }
 
 // ClearParent clears the "parent" edge to the User entity.
-func (uu *UserUpdate) ClearParent() *UserUpdate {
-	uu.mutation.ClearParent()
-	return uu
+func (_u *UserUpdate) ClearParent() *UserUpdate {
+	_u.mutation.ClearParent()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, uu.sqlSave, uu.mutation, uu.hooks)
+func (_u *UserUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uu *UserUpdate) SaveX(ctx context.Context) int {
-	affected, err := uu.Save(ctx)
+func (_u *UserUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -639,31 +639,31 @@ func (uu *UserUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (uu *UserUpdate) Exec(ctx context.Context) error {
-	_, err := uu.Save(ctx)
+func (_u *UserUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uu *UserUpdate) ExecX(ctx context.Context) {
-	if err := uu.Exec(ctx); err != nil {
+func (_u *UserUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uu *UserUpdate) check() error {
-	if v, ok := uu.mutation.OptionalInt(); ok {
+func (_u *UserUpdate) check() error {
+	if v, ok := _u.mutation.OptionalInt(); ok {
 		if err := user.OptionalIntValidator(v); err != nil {
 			return &ValidationError{Name: "optional_int", err: fmt.Errorf(`ent: validator failed for field "User.optional_int": %w`, err)}
 		}
 	}
-	if v, ok := uu.mutation.Role(); ok {
+	if v, ok := _u.mutation.Role(); ok {
 		if err := user.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
 		}
 	}
-	if v, ok := uu.mutation.Employment(); ok {
+	if v, ok := _u.mutation.Employment(); ok {
 		if err := user.EmploymentValidator(v); err != nil {
 			return &ValidationError{Name: "employment", err: fmt.Errorf(`ent: validator failed for field "User.employment": %w`, err)}
 		}
@@ -672,90 +672,90 @@ func (uu *UserUpdate) check() error {
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (uu *UserUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserUpdate {
-	uu.modifiers = append(uu.modifiers, modifiers...)
-	return uu
+func (_u *UserUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
-func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := uu.check(); err != nil {
+func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := _u.check(); err != nil {
 		return n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
-	if ps := uu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uu.mutation.OptionalInt(); ok {
+	if value, ok := _u.mutation.OptionalInt(); ok {
 		_spec.SetField(user.FieldOptionalInt, field.TypeInt, value)
 	}
-	if value, ok := uu.mutation.AddedOptionalInt(); ok {
+	if value, ok := _u.mutation.AddedOptionalInt(); ok {
 		_spec.AddField(user.FieldOptionalInt, field.TypeInt, value)
 	}
-	if uu.mutation.OptionalIntCleared() {
+	if _u.mutation.OptionalIntCleared() {
 		_spec.ClearField(user.FieldOptionalInt, field.TypeInt)
 	}
-	if value, ok := uu.mutation.Age(); ok {
+	if value, ok := _u.mutation.Age(); ok {
 		_spec.SetField(user.FieldAge, field.TypeInt, value)
 	}
-	if value, ok := uu.mutation.AddedAge(); ok {
+	if value, ok := _u.mutation.AddedAge(); ok {
 		_spec.AddField(user.FieldAge, field.TypeInt, value)
 	}
-	if value, ok := uu.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
 	}
-	if value, ok := uu.mutation.Last(); ok {
+	if value, ok := _u.mutation.Last(); ok {
 		_spec.SetField(user.FieldLast, field.TypeString, value)
 	}
-	if value, ok := uu.mutation.Nickname(); ok {
+	if value, ok := _u.mutation.Nickname(); ok {
 		_spec.SetField(user.FieldNickname, field.TypeString, value)
 	}
-	if uu.mutation.NicknameCleared() {
+	if _u.mutation.NicknameCleared() {
 		_spec.ClearField(user.FieldNickname, field.TypeString)
 	}
-	if value, ok := uu.mutation.Address(); ok {
+	if value, ok := _u.mutation.Address(); ok {
 		_spec.SetField(user.FieldAddress, field.TypeString, value)
 	}
-	if uu.mutation.AddressCleared() {
+	if _u.mutation.AddressCleared() {
 		_spec.ClearField(user.FieldAddress, field.TypeString)
 	}
-	if value, ok := uu.mutation.Phone(); ok {
+	if value, ok := _u.mutation.Phone(); ok {
 		_spec.SetField(user.FieldPhone, field.TypeString, value)
 	}
-	if uu.mutation.PhoneCleared() {
+	if _u.mutation.PhoneCleared() {
 		_spec.ClearField(user.FieldPhone, field.TypeString)
 	}
-	if value, ok := uu.mutation.Password(); ok {
+	if value, ok := _u.mutation.Password(); ok {
 		_spec.SetField(user.FieldPassword, field.TypeString, value)
 	}
-	if uu.mutation.PasswordCleared() {
+	if _u.mutation.PasswordCleared() {
 		_spec.ClearField(user.FieldPassword, field.TypeString)
 	}
-	if value, ok := uu.mutation.Role(); ok {
+	if value, ok := _u.mutation.Role(); ok {
 		_spec.SetField(user.FieldRole, field.TypeEnum, value)
 	}
-	if value, ok := uu.mutation.Employment(); ok {
+	if value, ok := _u.mutation.Employment(); ok {
 		_spec.SetField(user.FieldEmployment, field.TypeEnum, value)
 	}
-	if value, ok := uu.mutation.SSOCert(); ok {
+	if value, ok := _u.mutation.SSOCert(); ok {
 		_spec.SetField(user.FieldSSOCert, field.TypeString, value)
 	}
-	if uu.mutation.SSOCertCleared() {
+	if _u.mutation.SSOCertCleared() {
 		_spec.ClearField(user.FieldSSOCert, field.TypeString)
 	}
-	if value, ok := uu.mutation.FilesCount(); ok {
+	if value, ok := _u.mutation.FilesCount(); ok {
 		_spec.SetField(user.FieldFilesCount, field.TypeInt, value)
 	}
-	if value, ok := uu.mutation.AddedFilesCount(); ok {
+	if value, ok := _u.mutation.AddedFilesCount(); ok {
 		_spec.AddField(user.FieldFilesCount, field.TypeInt, value)
 	}
-	if uu.mutation.FilesCountCleared() {
+	if _u.mutation.FilesCountCleared() {
 		_spec.ClearField(user.FieldFilesCount, field.TypeInt)
 	}
-	if uu.mutation.CardCleared() {
+	if _u.mutation.CardCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -768,7 +768,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.CardIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.CardIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -784,7 +784,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.PetsCleared() {
+	if _u.mutation.PetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -797,23 +797,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedPetsIDs(); len(nodes) > 0 && !uu.mutation.PetsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.PetsTable,
-			Columns: []string{user.PetsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.PetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedPetsIDs(); len(nodes) > 0 && !_u.mutation.PetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -827,9 +811,25 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PetsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PetsTable,
+			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.FilesCleared() {
+	if _u.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -842,7 +842,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedFilesIDs(); len(nodes) > 0 && !uu.mutation.FilesCleared() {
+	if nodes := _u.mutation.RemovedFilesIDs(); len(nodes) > 0 && !_u.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -858,7 +858,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.FilesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.FilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -874,7 +874,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.GroupsCleared() {
+	if _u.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -887,23 +887,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !uu.mutation.GroupsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.GroupsTable,
-			Columns: user.GroupsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.GroupsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !_u.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -917,9 +901,25 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.GroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.GroupsTable,
+			Columns: user.GroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.FriendsCleared() {
+	if _u.mutation.FriendsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -932,7 +932,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedFriendsIDs(); len(nodes) > 0 && !uu.mutation.FriendsCleared() {
+	if nodes := _u.mutation.RemovedFriendsIDs(); len(nodes) > 0 && !_u.mutation.FriendsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -948,7 +948,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.FriendsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.FriendsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -964,7 +964,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.FollowersCleared() {
+	if _u.mutation.FollowersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -977,7 +977,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedFollowersIDs(); len(nodes) > 0 && !uu.mutation.FollowersCleared() {
+	if nodes := _u.mutation.RemovedFollowersIDs(); len(nodes) > 0 && !_u.mutation.FollowersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -993,7 +993,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.FollowersIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.FollowersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -1009,7 +1009,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.FollowingCleared() {
+	if _u.mutation.FollowingCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1022,7 +1022,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedFollowingIDs(); len(nodes) > 0 && !uu.mutation.FollowingCleared() {
+	if nodes := _u.mutation.RemovedFollowingIDs(); len(nodes) > 0 && !_u.mutation.FollowingCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1038,7 +1038,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.FollowingIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.FollowingIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -1054,7 +1054,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.TeamCleared() {
+	if _u.mutation.TeamCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -1067,7 +1067,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.TeamIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.TeamIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -1083,7 +1083,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.SpouseCleared() {
+	if _u.mutation.SpouseCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -1096,7 +1096,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.SpouseIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SpouseIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -1112,7 +1112,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.ChildrenCleared() {
+	if _u.mutation.ChildrenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1125,7 +1125,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !uu.mutation.ChildrenCleared() {
+	if nodes := _u.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !_u.mutation.ChildrenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1141,7 +1141,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.ChildrenIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -1157,7 +1157,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uu.mutation.ParentCleared() {
+	if _u.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -1170,7 +1170,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uu.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -1186,8 +1186,8 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.AddModifiers(uu.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
+	_spec.AddModifiers(_u.modifiers...)
+	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -1195,7 +1195,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	uu.mutation.done = true
+	_u.mutation.done = true
 	return n, nil
 }
 
@@ -1209,614 +1209,614 @@ type UserUpdateOne struct {
 }
 
 // SetOptionalInt sets the "optional_int" field.
-func (uuo *UserUpdateOne) SetOptionalInt(i int) *UserUpdateOne {
-	uuo.mutation.ResetOptionalInt()
-	uuo.mutation.SetOptionalInt(i)
-	return uuo
+func (_u *UserUpdateOne) SetOptionalInt(i int) *UserUpdateOne {
+	_u.mutation.ResetOptionalInt()
+	_u.mutation.SetOptionalInt(i)
+	return _u
 }
 
 // SetNillableOptionalInt sets the "optional_int" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableOptionalInt(i *int) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillableOptionalInt(i *int) *UserUpdateOne {
 	if i != nil {
-		uuo.SetOptionalInt(*i)
+		_u.SetOptionalInt(*i)
 	}
-	return uuo
+	return _u
 }
 
 // AddOptionalInt adds i to the "optional_int" field.
-func (uuo *UserUpdateOne) AddOptionalInt(i int) *UserUpdateOne {
-	uuo.mutation.AddOptionalInt(i)
-	return uuo
+func (_u *UserUpdateOne) AddOptionalInt(i int) *UserUpdateOne {
+	_u.mutation.AddOptionalInt(i)
+	return _u
 }
 
 // ClearOptionalInt clears the value of the "optional_int" field.
-func (uuo *UserUpdateOne) ClearOptionalInt() *UserUpdateOne {
-	uuo.mutation.ClearOptionalInt()
-	return uuo
+func (_u *UserUpdateOne) ClearOptionalInt() *UserUpdateOne {
+	_u.mutation.ClearOptionalInt()
+	return _u
 }
 
 // SetAge sets the "age" field.
-func (uuo *UserUpdateOne) SetAge(i int) *UserUpdateOne {
-	uuo.mutation.ResetAge()
-	uuo.mutation.SetAge(i)
-	return uuo
+func (_u *UserUpdateOne) SetAge(i int) *UserUpdateOne {
+	_u.mutation.ResetAge()
+	_u.mutation.SetAge(i)
+	return _u
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableAge(i *int) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillableAge(i *int) *UserUpdateOne {
 	if i != nil {
-		uuo.SetAge(*i)
+		_u.SetAge(*i)
 	}
-	return uuo
+	return _u
 }
 
 // AddAge adds i to the "age" field.
-func (uuo *UserUpdateOne) AddAge(i int) *UserUpdateOne {
-	uuo.mutation.AddAge(i)
-	return uuo
+func (_u *UserUpdateOne) AddAge(i int) *UserUpdateOne {
+	_u.mutation.AddAge(i)
+	return _u
 }
 
 // SetName sets the "name" field.
-func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
-	uuo.mutation.SetName(s)
-	return uuo
+func (_u *UserUpdateOne) SetName(s string) *UserUpdateOne {
+	_u.mutation.SetName(s)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
 	if s != nil {
-		uuo.SetName(*s)
+		_u.SetName(*s)
 	}
-	return uuo
+	return _u
 }
 
 // SetLast sets the "last" field.
-func (uuo *UserUpdateOne) SetLast(s string) *UserUpdateOne {
-	uuo.mutation.SetLast(s)
-	return uuo
+func (_u *UserUpdateOne) SetLast(s string) *UserUpdateOne {
+	_u.mutation.SetLast(s)
+	return _u
 }
 
 // SetNillableLast sets the "last" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableLast(s *string) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillableLast(s *string) *UserUpdateOne {
 	if s != nil {
-		uuo.SetLast(*s)
+		_u.SetLast(*s)
 	}
-	return uuo
+	return _u
 }
 
 // SetNickname sets the "nickname" field.
-func (uuo *UserUpdateOne) SetNickname(s string) *UserUpdateOne {
-	uuo.mutation.SetNickname(s)
-	return uuo
+func (_u *UserUpdateOne) SetNickname(s string) *UserUpdateOne {
+	_u.mutation.SetNickname(s)
+	return _u
 }
 
 // SetNillableNickname sets the "nickname" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableNickname(s *string) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillableNickname(s *string) *UserUpdateOne {
 	if s != nil {
-		uuo.SetNickname(*s)
+		_u.SetNickname(*s)
 	}
-	return uuo
+	return _u
 }
 
 // ClearNickname clears the value of the "nickname" field.
-func (uuo *UserUpdateOne) ClearNickname() *UserUpdateOne {
-	uuo.mutation.ClearNickname()
-	return uuo
+func (_u *UserUpdateOne) ClearNickname() *UserUpdateOne {
+	_u.mutation.ClearNickname()
+	return _u
 }
 
 // SetAddress sets the "address" field.
-func (uuo *UserUpdateOne) SetAddress(s string) *UserUpdateOne {
-	uuo.mutation.SetAddress(s)
-	return uuo
+func (_u *UserUpdateOne) SetAddress(s string) *UserUpdateOne {
+	_u.mutation.SetAddress(s)
+	return _u
 }
 
 // SetNillableAddress sets the "address" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableAddress(s *string) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillableAddress(s *string) *UserUpdateOne {
 	if s != nil {
-		uuo.SetAddress(*s)
+		_u.SetAddress(*s)
 	}
-	return uuo
+	return _u
 }
 
 // ClearAddress clears the value of the "address" field.
-func (uuo *UserUpdateOne) ClearAddress() *UserUpdateOne {
-	uuo.mutation.ClearAddress()
-	return uuo
+func (_u *UserUpdateOne) ClearAddress() *UserUpdateOne {
+	_u.mutation.ClearAddress()
+	return _u
 }
 
 // SetPhone sets the "phone" field.
-func (uuo *UserUpdateOne) SetPhone(s string) *UserUpdateOne {
-	uuo.mutation.SetPhone(s)
-	return uuo
+func (_u *UserUpdateOne) SetPhone(s string) *UserUpdateOne {
+	_u.mutation.SetPhone(s)
+	return _u
 }
 
 // SetNillablePhone sets the "phone" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillablePhone(s *string) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillablePhone(s *string) *UserUpdateOne {
 	if s != nil {
-		uuo.SetPhone(*s)
+		_u.SetPhone(*s)
 	}
-	return uuo
+	return _u
 }
 
 // ClearPhone clears the value of the "phone" field.
-func (uuo *UserUpdateOne) ClearPhone() *UserUpdateOne {
-	uuo.mutation.ClearPhone()
-	return uuo
+func (_u *UserUpdateOne) ClearPhone() *UserUpdateOne {
+	_u.mutation.ClearPhone()
+	return _u
 }
 
 // SetPassword sets the "password" field.
-func (uuo *UserUpdateOne) SetPassword(s string) *UserUpdateOne {
-	uuo.mutation.SetPassword(s)
-	return uuo
+func (_u *UserUpdateOne) SetPassword(s string) *UserUpdateOne {
+	_u.mutation.SetPassword(s)
+	return _u
 }
 
 // SetNillablePassword sets the "password" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillablePassword(s *string) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillablePassword(s *string) *UserUpdateOne {
 	if s != nil {
-		uuo.SetPassword(*s)
+		_u.SetPassword(*s)
 	}
-	return uuo
+	return _u
 }
 
 // ClearPassword clears the value of the "password" field.
-func (uuo *UserUpdateOne) ClearPassword() *UserUpdateOne {
-	uuo.mutation.ClearPassword()
-	return uuo
+func (_u *UserUpdateOne) ClearPassword() *UserUpdateOne {
+	_u.mutation.ClearPassword()
+	return _u
 }
 
 // SetRole sets the "role" field.
-func (uuo *UserUpdateOne) SetRole(u user.Role) *UserUpdateOne {
-	uuo.mutation.SetRole(u)
-	return uuo
+func (_u *UserUpdateOne) SetRole(u user.Role) *UserUpdateOne {
+	_u.mutation.SetRole(u)
+	return _u
 }
 
 // SetNillableRole sets the "role" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableRole(u *user.Role) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillableRole(u *user.Role) *UserUpdateOne {
 	if u != nil {
-		uuo.SetRole(*u)
+		_u.SetRole(*u)
 	}
-	return uuo
+	return _u
 }
 
 // SetEmployment sets the "employment" field.
-func (uuo *UserUpdateOne) SetEmployment(u user.Employment) *UserUpdateOne {
-	uuo.mutation.SetEmployment(u)
-	return uuo
+func (_u *UserUpdateOne) SetEmployment(u user.Employment) *UserUpdateOne {
+	_u.mutation.SetEmployment(u)
+	return _u
 }
 
 // SetNillableEmployment sets the "employment" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableEmployment(u *user.Employment) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillableEmployment(u *user.Employment) *UserUpdateOne {
 	if u != nil {
-		uuo.SetEmployment(*u)
+		_u.SetEmployment(*u)
 	}
-	return uuo
+	return _u
 }
 
 // SetSSOCert sets the "SSOCert" field.
-func (uuo *UserUpdateOne) SetSSOCert(s string) *UserUpdateOne {
-	uuo.mutation.SetSSOCert(s)
-	return uuo
+func (_u *UserUpdateOne) SetSSOCert(s string) *UserUpdateOne {
+	_u.mutation.SetSSOCert(s)
+	return _u
 }
 
 // SetNillableSSOCert sets the "SSOCert" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableSSOCert(s *string) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillableSSOCert(s *string) *UserUpdateOne {
 	if s != nil {
-		uuo.SetSSOCert(*s)
+		_u.SetSSOCert(*s)
 	}
-	return uuo
+	return _u
 }
 
 // ClearSSOCert clears the value of the "SSOCert" field.
-func (uuo *UserUpdateOne) ClearSSOCert() *UserUpdateOne {
-	uuo.mutation.ClearSSOCert()
-	return uuo
+func (_u *UserUpdateOne) ClearSSOCert() *UserUpdateOne {
+	_u.mutation.ClearSSOCert()
+	return _u
 }
 
 // SetFilesCount sets the "files_count" field.
-func (uuo *UserUpdateOne) SetFilesCount(i int) *UserUpdateOne {
-	uuo.mutation.ResetFilesCount()
-	uuo.mutation.SetFilesCount(i)
-	return uuo
+func (_u *UserUpdateOne) SetFilesCount(i int) *UserUpdateOne {
+	_u.mutation.ResetFilesCount()
+	_u.mutation.SetFilesCount(i)
+	return _u
 }
 
 // SetNillableFilesCount sets the "files_count" field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableFilesCount(i *int) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillableFilesCount(i *int) *UserUpdateOne {
 	if i != nil {
-		uuo.SetFilesCount(*i)
+		_u.SetFilesCount(*i)
 	}
-	return uuo
+	return _u
 }
 
 // AddFilesCount adds i to the "files_count" field.
-func (uuo *UserUpdateOne) AddFilesCount(i int) *UserUpdateOne {
-	uuo.mutation.AddFilesCount(i)
-	return uuo
+func (_u *UserUpdateOne) AddFilesCount(i int) *UserUpdateOne {
+	_u.mutation.AddFilesCount(i)
+	return _u
 }
 
 // ClearFilesCount clears the value of the "files_count" field.
-func (uuo *UserUpdateOne) ClearFilesCount() *UserUpdateOne {
-	uuo.mutation.ClearFilesCount()
-	return uuo
+func (_u *UserUpdateOne) ClearFilesCount() *UserUpdateOne {
+	_u.mutation.ClearFilesCount()
+	return _u
 }
 
 // SetCardID sets the "card" edge to the Card entity by ID.
-func (uuo *UserUpdateOne) SetCardID(id int) *UserUpdateOne {
-	uuo.mutation.SetCardID(id)
-	return uuo
+func (_u *UserUpdateOne) SetCardID(id int) *UserUpdateOne {
+	_u.mutation.SetCardID(id)
+	return _u
 }
 
 // SetNillableCardID sets the "card" edge to the Card entity by ID if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableCardID(id *int) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillableCardID(id *int) *UserUpdateOne {
 	if id != nil {
-		uuo = uuo.SetCardID(*id)
+		_u = _u.SetCardID(*id)
 	}
-	return uuo
+	return _u
 }
 
 // SetCard sets the "card" edge to the Card entity.
-func (uuo *UserUpdateOne) SetCard(c *Card) *UserUpdateOne {
-	return uuo.SetCardID(c.ID)
+func (_u *UserUpdateOne) SetCard(c *Card) *UserUpdateOne {
+	return _u.SetCardID(c.ID)
 }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
-func (uuo *UserUpdateOne) AddPetIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddPetIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddPetIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddPetIDs(ids...)
+	return _u
 }
 
 // AddPets adds the "pets" edges to the Pet entity.
-func (uuo *UserUpdateOne) AddPets(p ...*Pet) *UserUpdateOne {
+func (_u *UserUpdateOne) AddPets(p ...*Pet) *UserUpdateOne {
 	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return uuo.AddPetIDs(ids...)
+	return _u.AddPetIDs(ids...)
 }
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
-func (uuo *UserUpdateOne) AddFileIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddFileIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddFileIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddFileIDs(ids...)
+	return _u
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (uuo *UserUpdateOne) AddFiles(f ...*File) *UserUpdateOne {
+func (_u *UserUpdateOne) AddFiles(f ...*File) *UserUpdateOne {
 	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return uuo.AddFileIDs(ids...)
+	return _u.AddFileIDs(ids...)
 }
 
 // AddGroupIDs adds the "groups" edge to the Group entity by IDs.
-func (uuo *UserUpdateOne) AddGroupIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddGroupIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddGroupIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddGroupIDs(ids...)
+	return _u
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (uuo *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
+func (_u *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
 	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
-	return uuo.AddGroupIDs(ids...)
+	return _u.AddGroupIDs(ids...)
 }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
-func (uuo *UserUpdateOne) AddFriendIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddFriendIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddFriendIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddFriendIDs(ids...)
+	return _u
 }
 
 // AddFriends adds the "friends" edges to the User entity.
-func (uuo *UserUpdateOne) AddFriends(u ...*User) *UserUpdateOne {
+func (_u *UserUpdateOne) AddFriends(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uuo.AddFriendIDs(ids...)
+	return _u.AddFriendIDs(ids...)
 }
 
 // AddFollowerIDs adds the "followers" edge to the User entity by IDs.
-func (uuo *UserUpdateOne) AddFollowerIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddFollowerIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddFollowerIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddFollowerIDs(ids...)
+	return _u
 }
 
 // AddFollowers adds the "followers" edges to the User entity.
-func (uuo *UserUpdateOne) AddFollowers(u ...*User) *UserUpdateOne {
+func (_u *UserUpdateOne) AddFollowers(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uuo.AddFollowerIDs(ids...)
+	return _u.AddFollowerIDs(ids...)
 }
 
 // AddFollowingIDs adds the "following" edge to the User entity by IDs.
-func (uuo *UserUpdateOne) AddFollowingIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddFollowingIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddFollowingIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddFollowingIDs(ids...)
+	return _u
 }
 
 // AddFollowing adds the "following" edges to the User entity.
-func (uuo *UserUpdateOne) AddFollowing(u ...*User) *UserUpdateOne {
+func (_u *UserUpdateOne) AddFollowing(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uuo.AddFollowingIDs(ids...)
+	return _u.AddFollowingIDs(ids...)
 }
 
 // SetTeamID sets the "team" edge to the Pet entity by ID.
-func (uuo *UserUpdateOne) SetTeamID(id int) *UserUpdateOne {
-	uuo.mutation.SetTeamID(id)
-	return uuo
+func (_u *UserUpdateOne) SetTeamID(id int) *UserUpdateOne {
+	_u.mutation.SetTeamID(id)
+	return _u
 }
 
 // SetNillableTeamID sets the "team" edge to the Pet entity by ID if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableTeamID(id *int) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillableTeamID(id *int) *UserUpdateOne {
 	if id != nil {
-		uuo = uuo.SetTeamID(*id)
+		_u = _u.SetTeamID(*id)
 	}
-	return uuo
+	return _u
 }
 
 // SetTeam sets the "team" edge to the Pet entity.
-func (uuo *UserUpdateOne) SetTeam(p *Pet) *UserUpdateOne {
-	return uuo.SetTeamID(p.ID)
+func (_u *UserUpdateOne) SetTeam(p *Pet) *UserUpdateOne {
+	return _u.SetTeamID(p.ID)
 }
 
 // SetSpouseID sets the "spouse" edge to the User entity by ID.
-func (uuo *UserUpdateOne) SetSpouseID(id int) *UserUpdateOne {
-	uuo.mutation.SetSpouseID(id)
-	return uuo
+func (_u *UserUpdateOne) SetSpouseID(id int) *UserUpdateOne {
+	_u.mutation.SetSpouseID(id)
+	return _u
 }
 
 // SetNillableSpouseID sets the "spouse" edge to the User entity by ID if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableSpouseID(id *int) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillableSpouseID(id *int) *UserUpdateOne {
 	if id != nil {
-		uuo = uuo.SetSpouseID(*id)
+		_u = _u.SetSpouseID(*id)
 	}
-	return uuo
+	return _u
 }
 
 // SetSpouse sets the "spouse" edge to the User entity.
-func (uuo *UserUpdateOne) SetSpouse(u *User) *UserUpdateOne {
-	return uuo.SetSpouseID(u.ID)
+func (_u *UserUpdateOne) SetSpouse(u *User) *UserUpdateOne {
+	return _u.SetSpouseID(u.ID)
 }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
-func (uuo *UserUpdateOne) AddChildIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddChildIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) AddChildIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddChildIDs(ids...)
+	return _u
 }
 
 // AddChildren adds the "children" edges to the User entity.
-func (uuo *UserUpdateOne) AddChildren(u ...*User) *UserUpdateOne {
+func (_u *UserUpdateOne) AddChildren(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uuo.AddChildIDs(ids...)
+	return _u.AddChildIDs(ids...)
 }
 
 // SetParentID sets the "parent" edge to the User entity by ID.
-func (uuo *UserUpdateOne) SetParentID(id int) *UserUpdateOne {
-	uuo.mutation.SetParentID(id)
-	return uuo
+func (_u *UserUpdateOne) SetParentID(id int) *UserUpdateOne {
+	_u.mutation.SetParentID(id)
+	return _u
 }
 
 // SetNillableParentID sets the "parent" edge to the User entity by ID if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableParentID(id *int) *UserUpdateOne {
+func (_u *UserUpdateOne) SetNillableParentID(id *int) *UserUpdateOne {
 	if id != nil {
-		uuo = uuo.SetParentID(*id)
+		_u = _u.SetParentID(*id)
 	}
-	return uuo
+	return _u
 }
 
 // SetParent sets the "parent" edge to the User entity.
-func (uuo *UserUpdateOne) SetParent(u *User) *UserUpdateOne {
-	return uuo.SetParentID(u.ID)
+func (_u *UserUpdateOne) SetParent(u *User) *UserUpdateOne {
+	return _u.SetParentID(u.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
-func (uuo *UserUpdateOne) Mutation() *UserMutation {
-	return uuo.mutation
+func (_u *UserUpdateOne) Mutation() *UserMutation {
+	return _u.mutation
 }
 
 // ClearCard clears the "card" edge to the Card entity.
-func (uuo *UserUpdateOne) ClearCard() *UserUpdateOne {
-	uuo.mutation.ClearCard()
-	return uuo
+func (_u *UserUpdateOne) ClearCard() *UserUpdateOne {
+	_u.mutation.ClearCard()
+	return _u
 }
 
 // ClearPets clears all "pets" edges to the Pet entity.
-func (uuo *UserUpdateOne) ClearPets() *UserUpdateOne {
-	uuo.mutation.ClearPets()
-	return uuo
+func (_u *UserUpdateOne) ClearPets() *UserUpdateOne {
+	_u.mutation.ClearPets()
+	return _u
 }
 
 // RemovePetIDs removes the "pets" edge to Pet entities by IDs.
-func (uuo *UserUpdateOne) RemovePetIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemovePetIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemovePetIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemovePetIDs(ids...)
+	return _u
 }
 
 // RemovePets removes "pets" edges to Pet entities.
-func (uuo *UserUpdateOne) RemovePets(p ...*Pet) *UserUpdateOne {
+func (_u *UserUpdateOne) RemovePets(p ...*Pet) *UserUpdateOne {
 	ids := make([]int, len(p))
 	for i := range p {
 		ids[i] = p[i].ID
 	}
-	return uuo.RemovePetIDs(ids...)
+	return _u.RemovePetIDs(ids...)
 }
 
 // ClearFiles clears all "files" edges to the File entity.
-func (uuo *UserUpdateOne) ClearFiles() *UserUpdateOne {
-	uuo.mutation.ClearFiles()
-	return uuo
+func (_u *UserUpdateOne) ClearFiles() *UserUpdateOne {
+	_u.mutation.ClearFiles()
+	return _u
 }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
-func (uuo *UserUpdateOne) RemoveFileIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveFileIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveFileIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveFileIDs(ids...)
+	return _u
 }
 
 // RemoveFiles removes "files" edges to File entities.
-func (uuo *UserUpdateOne) RemoveFiles(f ...*File) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveFiles(f ...*File) *UserUpdateOne {
 	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return uuo.RemoveFileIDs(ids...)
+	return _u.RemoveFileIDs(ids...)
 }
 
 // ClearGroups clears all "groups" edges to the Group entity.
-func (uuo *UserUpdateOne) ClearGroups() *UserUpdateOne {
-	uuo.mutation.ClearGroups()
-	return uuo
+func (_u *UserUpdateOne) ClearGroups() *UserUpdateOne {
+	_u.mutation.ClearGroups()
+	return _u
 }
 
 // RemoveGroupIDs removes the "groups" edge to Group entities by IDs.
-func (uuo *UserUpdateOne) RemoveGroupIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveGroupIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveGroupIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveGroupIDs(ids...)
+	return _u
 }
 
 // RemoveGroups removes "groups" edges to Group entities.
-func (uuo *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
 	ids := make([]int, len(g))
 	for i := range g {
 		ids[i] = g[i].ID
 	}
-	return uuo.RemoveGroupIDs(ids...)
+	return _u.RemoveGroupIDs(ids...)
 }
 
 // ClearFriends clears all "friends" edges to the User entity.
-func (uuo *UserUpdateOne) ClearFriends() *UserUpdateOne {
-	uuo.mutation.ClearFriends()
-	return uuo
+func (_u *UserUpdateOne) ClearFriends() *UserUpdateOne {
+	_u.mutation.ClearFriends()
+	return _u
 }
 
 // RemoveFriendIDs removes the "friends" edge to User entities by IDs.
-func (uuo *UserUpdateOne) RemoveFriendIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveFriendIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveFriendIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveFriendIDs(ids...)
+	return _u
 }
 
 // RemoveFriends removes "friends" edges to User entities.
-func (uuo *UserUpdateOne) RemoveFriends(u ...*User) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveFriends(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uuo.RemoveFriendIDs(ids...)
+	return _u.RemoveFriendIDs(ids...)
 }
 
 // ClearFollowers clears all "followers" edges to the User entity.
-func (uuo *UserUpdateOne) ClearFollowers() *UserUpdateOne {
-	uuo.mutation.ClearFollowers()
-	return uuo
+func (_u *UserUpdateOne) ClearFollowers() *UserUpdateOne {
+	_u.mutation.ClearFollowers()
+	return _u
 }
 
 // RemoveFollowerIDs removes the "followers" edge to User entities by IDs.
-func (uuo *UserUpdateOne) RemoveFollowerIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveFollowerIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveFollowerIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveFollowerIDs(ids...)
+	return _u
 }
 
 // RemoveFollowers removes "followers" edges to User entities.
-func (uuo *UserUpdateOne) RemoveFollowers(u ...*User) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveFollowers(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uuo.RemoveFollowerIDs(ids...)
+	return _u.RemoveFollowerIDs(ids...)
 }
 
 // ClearFollowing clears all "following" edges to the User entity.
-func (uuo *UserUpdateOne) ClearFollowing() *UserUpdateOne {
-	uuo.mutation.ClearFollowing()
-	return uuo
+func (_u *UserUpdateOne) ClearFollowing() *UserUpdateOne {
+	_u.mutation.ClearFollowing()
+	return _u
 }
 
 // RemoveFollowingIDs removes the "following" edge to User entities by IDs.
-func (uuo *UserUpdateOne) RemoveFollowingIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveFollowingIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveFollowingIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveFollowingIDs(ids...)
+	return _u
 }
 
 // RemoveFollowing removes "following" edges to User entities.
-func (uuo *UserUpdateOne) RemoveFollowing(u ...*User) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveFollowing(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uuo.RemoveFollowingIDs(ids...)
+	return _u.RemoveFollowingIDs(ids...)
 }
 
 // ClearTeam clears the "team" edge to the Pet entity.
-func (uuo *UserUpdateOne) ClearTeam() *UserUpdateOne {
-	uuo.mutation.ClearTeam()
-	return uuo
+func (_u *UserUpdateOne) ClearTeam() *UserUpdateOne {
+	_u.mutation.ClearTeam()
+	return _u
 }
 
 // ClearSpouse clears the "spouse" edge to the User entity.
-func (uuo *UserUpdateOne) ClearSpouse() *UserUpdateOne {
-	uuo.mutation.ClearSpouse()
-	return uuo
+func (_u *UserUpdateOne) ClearSpouse() *UserUpdateOne {
+	_u.mutation.ClearSpouse()
+	return _u
 }
 
 // ClearChildren clears all "children" edges to the User entity.
-func (uuo *UserUpdateOne) ClearChildren() *UserUpdateOne {
-	uuo.mutation.ClearChildren()
-	return uuo
+func (_u *UserUpdateOne) ClearChildren() *UserUpdateOne {
+	_u.mutation.ClearChildren()
+	return _u
 }
 
 // RemoveChildIDs removes the "children" edge to User entities by IDs.
-func (uuo *UserUpdateOne) RemoveChildIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveChildIDs(ids...)
-	return uuo
+func (_u *UserUpdateOne) RemoveChildIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveChildIDs(ids...)
+	return _u
 }
 
 // RemoveChildren removes "children" edges to User entities.
-func (uuo *UserUpdateOne) RemoveChildren(u ...*User) *UserUpdateOne {
+func (_u *UserUpdateOne) RemoveChildren(u ...*User) *UserUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return uuo.RemoveChildIDs(ids...)
+	return _u.RemoveChildIDs(ids...)
 }
 
 // ClearParent clears the "parent" edge to the User entity.
-func (uuo *UserUpdateOne) ClearParent() *UserUpdateOne {
-	uuo.mutation.ClearParent()
-	return uuo
+func (_u *UserUpdateOne) ClearParent() *UserUpdateOne {
+	_u.mutation.ClearParent()
+	return _u
 }
 
 // Where appends a list predicates to the UserUpdate builder.
-func (uuo *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
-	uuo.mutation.Where(ps...)
-	return uuo
+func (_u *UserUpdateOne) Where(ps ...predicate.User) *UserUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (uuo *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
-	uuo.fields = append([]string{field}, fields...)
-	return uuo
+func (_u *UserUpdateOne) Select(field string, fields ...string) *UserUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated User entity.
-func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
-	return withHooks(ctx, uuo.sqlSave, uuo.mutation, uuo.hooks)
+func (_u *UserUpdateOne) Save(ctx context.Context) (*User, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
-	node, err := uuo.Save(ctx)
+func (_u *UserUpdateOne) SaveX(ctx context.Context) *User {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -1824,31 +1824,31 @@ func (uuo *UserUpdateOne) SaveX(ctx context.Context) *User {
 }
 
 // Exec executes the query on the entity.
-func (uuo *UserUpdateOne) Exec(ctx context.Context) error {
-	_, err := uuo.Save(ctx)
+func (_u *UserUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
-	if err := uuo.Exec(ctx); err != nil {
+func (_u *UserUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (uuo *UserUpdateOne) check() error {
-	if v, ok := uuo.mutation.OptionalInt(); ok {
+func (_u *UserUpdateOne) check() error {
+	if v, ok := _u.mutation.OptionalInt(); ok {
 		if err := user.OptionalIntValidator(v); err != nil {
 			return &ValidationError{Name: "optional_int", err: fmt.Errorf(`ent: validator failed for field "User.optional_int": %w`, err)}
 		}
 	}
-	if v, ok := uuo.mutation.Role(); ok {
+	if v, ok := _u.mutation.Role(); ok {
 		if err := user.RoleValidator(v); err != nil {
 			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
 		}
 	}
-	if v, ok := uuo.mutation.Employment(); ok {
+	if v, ok := _u.mutation.Employment(); ok {
 		if err := user.EmploymentValidator(v); err != nil {
 			return &ValidationError{Name: "employment", err: fmt.Errorf(`ent: validator failed for field "User.employment": %w`, err)}
 		}
@@ -1857,22 +1857,22 @@ func (uuo *UserUpdateOne) check() error {
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (uuo *UserUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserUpdateOne {
-	uuo.modifiers = append(uuo.modifiers, modifiers...)
-	return uuo
+func (_u *UserUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *UserUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
-func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
-	if err := uuo.check(); err != nil {
+func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
-	id, ok := uuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "User.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := uuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, user.FieldID)
 		for _, f := range fields {
@@ -1884,80 +1884,80 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			}
 		}
 	}
-	if ps := uuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := uuo.mutation.OptionalInt(); ok {
+	if value, ok := _u.mutation.OptionalInt(); ok {
 		_spec.SetField(user.FieldOptionalInt, field.TypeInt, value)
 	}
-	if value, ok := uuo.mutation.AddedOptionalInt(); ok {
+	if value, ok := _u.mutation.AddedOptionalInt(); ok {
 		_spec.AddField(user.FieldOptionalInt, field.TypeInt, value)
 	}
-	if uuo.mutation.OptionalIntCleared() {
+	if _u.mutation.OptionalIntCleared() {
 		_spec.ClearField(user.FieldOptionalInt, field.TypeInt)
 	}
-	if value, ok := uuo.mutation.Age(); ok {
+	if value, ok := _u.mutation.Age(); ok {
 		_spec.SetField(user.FieldAge, field.TypeInt, value)
 	}
-	if value, ok := uuo.mutation.AddedAge(); ok {
+	if value, ok := _u.mutation.AddedAge(); ok {
 		_spec.AddField(user.FieldAge, field.TypeInt, value)
 	}
-	if value, ok := uuo.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(user.FieldName, field.TypeString, value)
 	}
-	if value, ok := uuo.mutation.Last(); ok {
+	if value, ok := _u.mutation.Last(); ok {
 		_spec.SetField(user.FieldLast, field.TypeString, value)
 	}
-	if value, ok := uuo.mutation.Nickname(); ok {
+	if value, ok := _u.mutation.Nickname(); ok {
 		_spec.SetField(user.FieldNickname, field.TypeString, value)
 	}
-	if uuo.mutation.NicknameCleared() {
+	if _u.mutation.NicknameCleared() {
 		_spec.ClearField(user.FieldNickname, field.TypeString)
 	}
-	if value, ok := uuo.mutation.Address(); ok {
+	if value, ok := _u.mutation.Address(); ok {
 		_spec.SetField(user.FieldAddress, field.TypeString, value)
 	}
-	if uuo.mutation.AddressCleared() {
+	if _u.mutation.AddressCleared() {
 		_spec.ClearField(user.FieldAddress, field.TypeString)
 	}
-	if value, ok := uuo.mutation.Phone(); ok {
+	if value, ok := _u.mutation.Phone(); ok {
 		_spec.SetField(user.FieldPhone, field.TypeString, value)
 	}
-	if uuo.mutation.PhoneCleared() {
+	if _u.mutation.PhoneCleared() {
 		_spec.ClearField(user.FieldPhone, field.TypeString)
 	}
-	if value, ok := uuo.mutation.Password(); ok {
+	if value, ok := _u.mutation.Password(); ok {
 		_spec.SetField(user.FieldPassword, field.TypeString, value)
 	}
-	if uuo.mutation.PasswordCleared() {
+	if _u.mutation.PasswordCleared() {
 		_spec.ClearField(user.FieldPassword, field.TypeString)
 	}
-	if value, ok := uuo.mutation.Role(); ok {
+	if value, ok := _u.mutation.Role(); ok {
 		_spec.SetField(user.FieldRole, field.TypeEnum, value)
 	}
-	if value, ok := uuo.mutation.Employment(); ok {
+	if value, ok := _u.mutation.Employment(); ok {
 		_spec.SetField(user.FieldEmployment, field.TypeEnum, value)
 	}
-	if value, ok := uuo.mutation.SSOCert(); ok {
+	if value, ok := _u.mutation.SSOCert(); ok {
 		_spec.SetField(user.FieldSSOCert, field.TypeString, value)
 	}
-	if uuo.mutation.SSOCertCleared() {
+	if _u.mutation.SSOCertCleared() {
 		_spec.ClearField(user.FieldSSOCert, field.TypeString)
 	}
-	if value, ok := uuo.mutation.FilesCount(); ok {
+	if value, ok := _u.mutation.FilesCount(); ok {
 		_spec.SetField(user.FieldFilesCount, field.TypeInt, value)
 	}
-	if value, ok := uuo.mutation.AddedFilesCount(); ok {
+	if value, ok := _u.mutation.AddedFilesCount(); ok {
 		_spec.AddField(user.FieldFilesCount, field.TypeInt, value)
 	}
-	if uuo.mutation.FilesCountCleared() {
+	if _u.mutation.FilesCountCleared() {
 		_spec.ClearField(user.FieldFilesCount, field.TypeInt)
 	}
-	if uuo.mutation.CardCleared() {
+	if _u.mutation.CardCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -1970,7 +1970,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.CardIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.CardIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -1986,7 +1986,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.PetsCleared() {
+	if _u.mutation.PetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -1999,23 +1999,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedPetsIDs(); len(nodes) > 0 && !uuo.mutation.PetsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.PetsTable,
-			Columns: []string{user.PetsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.PetsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedPetsIDs(); len(nodes) > 0 && !_u.mutation.PetsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -2029,9 +2013,25 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.PetsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.PetsTable,
+			Columns: []string{user.PetsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.FilesCleared() {
+	if _u.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -2044,7 +2044,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedFilesIDs(); len(nodes) > 0 && !uuo.mutation.FilesCleared() {
+	if nodes := _u.mutation.RemovedFilesIDs(); len(nodes) > 0 && !_u.mutation.FilesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -2060,7 +2060,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.FilesIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.FilesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -2076,7 +2076,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.GroupsCleared() {
+	if _u.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -2089,23 +2089,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !uuo.mutation.GroupsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.GroupsTable,
-			Columns: user.GroupsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.GroupsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RemovedGroupsIDs(); len(nodes) > 0 && !_u.mutation.GroupsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -2119,9 +2103,25 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.GroupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.GroupsTable,
+			Columns: user.GroupsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.FriendsCleared() {
+	if _u.mutation.FriendsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -2134,7 +2134,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedFriendsIDs(); len(nodes) > 0 && !uuo.mutation.FriendsCleared() {
+	if nodes := _u.mutation.RemovedFriendsIDs(); len(nodes) > 0 && !_u.mutation.FriendsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -2150,7 +2150,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.FriendsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.FriendsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -2166,7 +2166,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.FollowersCleared() {
+	if _u.mutation.FollowersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -2179,7 +2179,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedFollowersIDs(); len(nodes) > 0 && !uuo.mutation.FollowersCleared() {
+	if nodes := _u.mutation.RemovedFollowersIDs(); len(nodes) > 0 && !_u.mutation.FollowersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -2195,7 +2195,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.FollowersIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.FollowersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
@@ -2211,7 +2211,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.FollowingCleared() {
+	if _u.mutation.FollowingCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -2224,7 +2224,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedFollowingIDs(); len(nodes) > 0 && !uuo.mutation.FollowingCleared() {
+	if nodes := _u.mutation.RemovedFollowingIDs(); len(nodes) > 0 && !_u.mutation.FollowingCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -2240,7 +2240,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.FollowingIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.FollowingIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -2256,7 +2256,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.TeamCleared() {
+	if _u.mutation.TeamCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -2269,7 +2269,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.TeamIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.TeamIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -2285,7 +2285,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.SpouseCleared() {
+	if _u.mutation.SpouseCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -2298,7 +2298,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.SpouseIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SpouseIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -2314,7 +2314,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.ChildrenCleared() {
+	if _u.mutation.ChildrenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -2327,7 +2327,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !uuo.mutation.ChildrenCleared() {
+	if nodes := _u.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !_u.mutation.ChildrenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -2343,7 +2343,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.ChildrenIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: true,
@@ -2359,7 +2359,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if uuo.mutation.ParentCleared() {
+	if _u.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -2372,7 +2372,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := uuo.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -2388,11 +2388,11 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.AddModifiers(uuo.modifiers...)
-	_node = &User{config: uuo.config}
+	_spec.AddModifiers(_u.modifiers...)
+	_node = &User{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, uuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -2400,6 +2400,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		}
 		return nil, err
 	}
-	uuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

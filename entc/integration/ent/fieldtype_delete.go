@@ -24,56 +24,56 @@ type FieldTypeDelete struct {
 }
 
 // Where appends a list predicates to the FieldTypeDelete builder.
-func (ftd *FieldTypeDelete) Where(ps ...predicate.FieldType) *FieldTypeDelete {
-	ftd.mutation.Where(ps...)
-	return ftd
+func (_d *FieldTypeDelete) Where(ps ...predicate.FieldType) *FieldTypeDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (ftd *FieldTypeDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, ftd.sqlExec, ftd.mutation, ftd.hooks)
+func (_d *FieldTypeDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ftd *FieldTypeDelete) ExecX(ctx context.Context) int {
-	n, err := ftd.Exec(ctx)
+func (_d *FieldTypeDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (ftd *FieldTypeDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *FieldTypeDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(fieldtype.Table, sqlgraph.NewFieldSpec(fieldtype.FieldID, field.TypeInt))
-	if ps := ftd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, ftd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	ftd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // FieldTypeDeleteOne is the builder for deleting a single FieldType entity.
 type FieldTypeDeleteOne struct {
-	ftd *FieldTypeDelete
+	_d *FieldTypeDelete
 }
 
 // Where appends a list predicates to the FieldTypeDelete builder.
-func (ftdo *FieldTypeDeleteOne) Where(ps ...predicate.FieldType) *FieldTypeDeleteOne {
-	ftdo.ftd.mutation.Where(ps...)
-	return ftdo
+func (_d *FieldTypeDeleteOne) Where(ps ...predicate.FieldType) *FieldTypeDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (ftdo *FieldTypeDeleteOne) Exec(ctx context.Context) error {
-	n, err := ftdo.ftd.Exec(ctx)
+func (_d *FieldTypeDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (ftdo *FieldTypeDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ftdo *FieldTypeDeleteOne) ExecX(ctx context.Context) {
-	if err := ftdo.Exec(ctx); err != nil {
+func (_d *FieldTypeDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

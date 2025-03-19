@@ -38,44 +38,44 @@ type NodeQuery struct {
 }
 
 // Where adds a new predicate for the NodeQuery builder.
-func (nq *NodeQuery) Where(ps ...predicate.Node) *NodeQuery {
-	nq.predicates = append(nq.predicates, ps...)
-	return nq
+func (_q *NodeQuery) Where(ps ...predicate.Node) *NodeQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (nq *NodeQuery) Limit(limit int) *NodeQuery {
-	nq.ctx.Limit = &limit
-	return nq
+func (_q *NodeQuery) Limit(limit int) *NodeQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (nq *NodeQuery) Offset(offset int) *NodeQuery {
-	nq.ctx.Offset = &offset
-	return nq
+func (_q *NodeQuery) Offset(offset int) *NodeQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (nq *NodeQuery) Unique(unique bool) *NodeQuery {
-	nq.ctx.Unique = &unique
-	return nq
+func (_q *NodeQuery) Unique(unique bool) *NodeQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (nq *NodeQuery) Order(o ...node.OrderOption) *NodeQuery {
-	nq.order = append(nq.order, o...)
-	return nq
+func (_q *NodeQuery) Order(o ...node.OrderOption) *NodeQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryPrev chains the current query on the "prev" edge.
-func (nq *NodeQuery) QueryPrev() *NodeQuery {
-	query := (&NodeClient{config: nq.config}).Query()
+func (_q *NodeQuery) QueryPrev() *NodeQuery {
+	query := (&NodeClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := nq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := nq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -84,20 +84,20 @@ func (nq *NodeQuery) QueryPrev() *NodeQuery {
 			sqlgraph.To(node.Table, node.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, true, node.PrevTable, node.PrevColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(nq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryNext chains the current query on the "next" edge.
-func (nq *NodeQuery) QueryNext() *NodeQuery {
-	query := (&NodeClient{config: nq.config}).Query()
+func (_q *NodeQuery) QueryNext() *NodeQuery {
+	query := (&NodeClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := nq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := nq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -106,7 +106,7 @@ func (nq *NodeQuery) QueryNext() *NodeQuery {
 			sqlgraph.To(node.Table, node.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, node.NextTable, node.NextColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(nq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -114,8 +114,8 @@ func (nq *NodeQuery) QueryNext() *NodeQuery {
 
 // First returns the first Node entity from the query.
 // Returns a *NotFoundError when no Node was found.
-func (nq *NodeQuery) First(ctx context.Context) (*Node, error) {
-	nodes, err := nq.Limit(1).All(setContextOp(ctx, nq.ctx, ent.OpQueryFirst))
+func (_q *NodeQuery) First(ctx context.Context) (*Node, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -126,8 +126,8 @@ func (nq *NodeQuery) First(ctx context.Context) (*Node, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (nq *NodeQuery) FirstX(ctx context.Context) *Node {
-	node, err := nq.First(ctx)
+func (_q *NodeQuery) FirstX(ctx context.Context) *Node {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -136,9 +136,9 @@ func (nq *NodeQuery) FirstX(ctx context.Context) *Node {
 
 // FirstID returns the first Node ID from the query.
 // Returns a *NotFoundError when no Node ID was found.
-func (nq *NodeQuery) FirstID(ctx context.Context) (id int, err error) {
+func (_q *NodeQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = nq.Limit(1).IDs(setContextOp(ctx, nq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -149,8 +149,8 @@ func (nq *NodeQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (nq *NodeQuery) FirstIDX(ctx context.Context) int {
-	id, err := nq.FirstID(ctx)
+func (_q *NodeQuery) FirstIDX(ctx context.Context) int {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -160,8 +160,8 @@ func (nq *NodeQuery) FirstIDX(ctx context.Context) int {
 // Only returns a single Node entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Node entity is found.
 // Returns a *NotFoundError when no Node entities are found.
-func (nq *NodeQuery) Only(ctx context.Context) (*Node, error) {
-	nodes, err := nq.Limit(2).All(setContextOp(ctx, nq.ctx, ent.OpQueryOnly))
+func (_q *NodeQuery) Only(ctx context.Context) (*Node, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -176,8 +176,8 @@ func (nq *NodeQuery) Only(ctx context.Context) (*Node, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (nq *NodeQuery) OnlyX(ctx context.Context) *Node {
-	node, err := nq.Only(ctx)
+func (_q *NodeQuery) OnlyX(ctx context.Context) *Node {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -187,9 +187,9 @@ func (nq *NodeQuery) OnlyX(ctx context.Context) *Node {
 // OnlyID is like Only, but returns the only Node ID in the query.
 // Returns a *NotSingularError when more than one Node ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (nq *NodeQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *NodeQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = nq.Limit(2).IDs(setContextOp(ctx, nq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -204,8 +204,8 @@ func (nq *NodeQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (nq *NodeQuery) OnlyIDX(ctx context.Context) int {
-	id, err := nq.OnlyID(ctx)
+func (_q *NodeQuery) OnlyIDX(ctx context.Context) int {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -213,18 +213,18 @@ func (nq *NodeQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Nodes.
-func (nq *NodeQuery) All(ctx context.Context) ([]*Node, error) {
-	ctx = setContextOp(ctx, nq.ctx, ent.OpQueryAll)
-	if err := nq.prepareQuery(ctx); err != nil {
+func (_q *NodeQuery) All(ctx context.Context) ([]*Node, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Node, *NodeQuery]()
-	return withInterceptors[[]*Node](ctx, nq, qr, nq.inters)
+	return withInterceptors[[]*Node](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (nq *NodeQuery) AllX(ctx context.Context) []*Node {
-	nodes, err := nq.All(ctx)
+func (_q *NodeQuery) AllX(ctx context.Context) []*Node {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -232,20 +232,20 @@ func (nq *NodeQuery) AllX(ctx context.Context) []*Node {
 }
 
 // IDs executes the query and returns a list of Node IDs.
-func (nq *NodeQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if nq.ctx.Unique == nil && nq.path != nil {
-		nq.Unique(true)
+func (_q *NodeQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, nq.ctx, ent.OpQueryIDs)
-	if err = nq.Select(node.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(node.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (nq *NodeQuery) IDsX(ctx context.Context) []int {
-	ids, err := nq.IDs(ctx)
+func (_q *NodeQuery) IDsX(ctx context.Context) []int {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -253,17 +253,17 @@ func (nq *NodeQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (nq *NodeQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, nq.ctx, ent.OpQueryCount)
-	if err := nq.prepareQuery(ctx); err != nil {
+func (_q *NodeQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, nq, querierCount[*NodeQuery](), nq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*NodeQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (nq *NodeQuery) CountX(ctx context.Context) int {
-	count, err := nq.Count(ctx)
+func (_q *NodeQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -271,9 +271,9 @@ func (nq *NodeQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (nq *NodeQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, nq.ctx, ent.OpQueryExist)
-	switch _, err := nq.FirstID(ctx); {
+func (_q *NodeQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -284,8 +284,8 @@ func (nq *NodeQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (nq *NodeQuery) ExistX(ctx context.Context) bool {
-	exist, err := nq.Exist(ctx)
+func (_q *NodeQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -294,45 +294,45 @@ func (nq *NodeQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the NodeQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (nq *NodeQuery) Clone() *NodeQuery {
-	if nq == nil {
+func (_q *NodeQuery) Clone() *NodeQuery {
+	if _q == nil {
 		return nil
 	}
 	return &NodeQuery{
-		config:     nq.config,
-		ctx:        nq.ctx.Clone(),
-		order:      append([]node.OrderOption{}, nq.order...),
-		inters:     append([]Interceptor{}, nq.inters...),
-		predicates: append([]predicate.Node{}, nq.predicates...),
-		withPrev:   nq.withPrev.Clone(),
-		withNext:   nq.withNext.Clone(),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]node.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.Node{}, _q.predicates...),
+		withPrev:   _q.withPrev.Clone(),
+		withNext:   _q.withNext.Clone(),
 		// clone intermediate query.
-		sql:       nq.sql.Clone(),
-		path:      nq.path,
-		modifiers: append([]func(*sql.Selector){}, nq.modifiers...),
+		sql:       _q.sql.Clone(),
+		path:      _q.path,
+		modifiers: append([]func(*sql.Selector){}, _q.modifiers...),
 	}
 }
 
 // WithPrev tells the query-builder to eager-load the nodes that are connected to
 // the "prev" edge. The optional arguments are used to configure the query builder of the edge.
-func (nq *NodeQuery) WithPrev(opts ...func(*NodeQuery)) *NodeQuery {
-	query := (&NodeClient{config: nq.config}).Query()
+func (_q *NodeQuery) WithPrev(opts ...func(*NodeQuery)) *NodeQuery {
+	query := (&NodeClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	nq.withPrev = query
-	return nq
+	_q.withPrev = query
+	return _q
 }
 
 // WithNext tells the query-builder to eager-load the nodes that are connected to
 // the "next" edge. The optional arguments are used to configure the query builder of the edge.
-func (nq *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
-	query := (&NodeClient{config: nq.config}).Query()
+func (_q *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
+	query := (&NodeClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	nq.withNext = query
-	return nq
+	_q.withNext = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -349,10 +349,10 @@ func (nq *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
 //		GroupBy(node.FieldValue).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
-	nq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &NodeGroupBy{build: nq}
-	grbuild.flds = &nq.ctx.Fields
+func (_q *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &NodeGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = node.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -370,56 +370,56 @@ func (nq *NodeQuery) GroupBy(field string, fields ...string) *NodeGroupBy {
 //	client.Node.Query().
 //		Select(node.FieldValue).
 //		Scan(ctx, &v)
-func (nq *NodeQuery) Select(fields ...string) *NodeSelect {
-	nq.ctx.Fields = append(nq.ctx.Fields, fields...)
-	sbuild := &NodeSelect{NodeQuery: nq}
+func (_q *NodeQuery) Select(fields ...string) *NodeSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &NodeSelect{NodeQuery: _q}
 	sbuild.label = node.Label
-	sbuild.flds, sbuild.scan = &nq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a NodeSelect configured with the given aggregations.
-func (nq *NodeQuery) Aggregate(fns ...AggregateFunc) *NodeSelect {
-	return nq.Select().Aggregate(fns...)
+func (_q *NodeQuery) Aggregate(fns ...AggregateFunc) *NodeSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (nq *NodeQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range nq.inters {
+func (_q *NodeQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, nq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range nq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !node.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if nq.path != nil {
-		prev, err := nq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		nq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (nq *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, error) {
+func (_q *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, error) {
 	var (
 		nodes       = []*Node{}
-		withFKs     = nq.withFKs
-		_spec       = nq.querySpec()
+		withFKs     = _q.withFKs
+		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
-			nq.withPrev != nil,
-			nq.withNext != nil,
+			_q.withPrev != nil,
+			_q.withNext != nil,
 		}
 	)
-	if nq.withPrev != nil {
+	if _q.withPrev != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -429,25 +429,25 @@ func (nq *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, e
 		return (*Node).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Node{config: nq.config}
+		node := &Node{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
-	if len(nq.modifiers) > 0 {
-		_spec.Modifiers = nq.modifiers
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, nq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := nq.withPrev; query != nil {
-		if err := nq.loadPrev(ctx, query, nodes, nil,
+	if query := _q.withPrev; query != nil {
+		if err := _q.loadPrev(ctx, query, nodes, nil,
 			func(n *Node, e *Node) {
 				n.Edges.Prev = e
 				if !e.Edges.loadedTypes[1] {
@@ -457,8 +457,8 @@ func (nq *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, e
 			return nil, err
 		}
 	}
-	if query := nq.withNext; query != nil {
-		if err := nq.loadNext(ctx, query, nodes, nil,
+	if query := _q.withNext; query != nil {
+		if err := _q.loadNext(ctx, query, nodes, nil,
 			func(n *Node, e *Node) {
 				n.Edges.Next = e
 				if !e.Edges.loadedTypes[0] {
@@ -471,7 +471,7 @@ func (nq *NodeQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Node, e
 	return nodes, nil
 }
 
-func (nq *NodeQuery) loadPrev(ctx context.Context, query *NodeQuery, nodes []*Node, init func(*Node), assign func(*Node, *Node)) error {
+func (_q *NodeQuery) loadPrev(ctx context.Context, query *NodeQuery, nodes []*Node, init func(*Node), assign func(*Node, *Node)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Node)
 	for i := range nodes {
@@ -503,7 +503,7 @@ func (nq *NodeQuery) loadPrev(ctx context.Context, query *NodeQuery, nodes []*No
 	}
 	return nil
 }
-func (nq *NodeQuery) loadNext(ctx context.Context, query *NodeQuery, nodes []*Node, init func(*Node), assign func(*Node, *Node)) error {
+func (_q *NodeQuery) loadNext(ctx context.Context, query *NodeQuery, nodes []*Node, init func(*Node), assign func(*Node, *Node)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Node)
 	for i := range nodes {
@@ -532,27 +532,27 @@ func (nq *NodeQuery) loadNext(ctx context.Context, query *NodeQuery, nodes []*No
 	return nil
 }
 
-func (nq *NodeQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := nq.querySpec()
-	if len(nq.modifiers) > 0 {
-		_spec.Modifiers = nq.modifiers
+func (_q *NodeQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	if len(_q.modifiers) > 0 {
+		_spec.Modifiers = _q.modifiers
 	}
-	_spec.Node.Columns = nq.ctx.Fields
-	if len(nq.ctx.Fields) > 0 {
-		_spec.Unique = nq.ctx.Unique != nil && *nq.ctx.Unique
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, nq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(node.Table, node.Columns, sqlgraph.NewFieldSpec(node.FieldID, field.TypeInt))
-	_spec.From = nq.sql
-	if unique := nq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if nq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := nq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, node.FieldID)
 		for i := range fields {
@@ -561,20 +561,20 @@ func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := nq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := nq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := nq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := nq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -584,36 +584,36 @@ func (nq *NodeQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (nq *NodeQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(nq.driver.Dialect())
+func (_q *NodeQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(node.Table)
-	columns := nq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = node.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if nq.sql != nil {
-		selector = nq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if nq.ctx.Unique != nil && *nq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, m := range nq.modifiers {
+	for _, m := range _q.modifiers {
 		m(selector)
 	}
-	for _, p := range nq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range nq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := nq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := nq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -622,33 +622,33 @@ func (nq *NodeQuery) sqlQuery(ctx context.Context) *sql.Selector {
 // ForUpdate locks the selected rows against concurrent updates, and prevent them from being
 // updated, deleted or "selected ... for update" by other sessions, until the transaction is
 // either committed or rolled-back.
-func (nq *NodeQuery) ForUpdate(opts ...sql.LockOption) *NodeQuery {
-	if nq.driver.Dialect() == dialect.Postgres {
-		nq.Unique(false)
+func (_q *NodeQuery) ForUpdate(opts ...sql.LockOption) *NodeQuery {
+	if _q.driver.Dialect() == dialect.Postgres {
+		_q.Unique(false)
 	}
-	nq.modifiers = append(nq.modifiers, func(s *sql.Selector) {
+	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
 		s.ForUpdate(opts...)
 	})
-	return nq
+	return _q
 }
 
 // ForShare behaves similarly to ForUpdate, except that it acquires a shared mode lock
 // on any rows that are read. Other sessions can read the rows, but cannot modify them
 // until your transaction commits.
-func (nq *NodeQuery) ForShare(opts ...sql.LockOption) *NodeQuery {
-	if nq.driver.Dialect() == dialect.Postgres {
-		nq.Unique(false)
+func (_q *NodeQuery) ForShare(opts ...sql.LockOption) *NodeQuery {
+	if _q.driver.Dialect() == dialect.Postgres {
+		_q.Unique(false)
 	}
-	nq.modifiers = append(nq.modifiers, func(s *sql.Selector) {
+	_q.modifiers = append(_q.modifiers, func(s *sql.Selector) {
 		s.ForShare(opts...)
 	})
-	return nq
+	return _q
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (nq *NodeQuery) Modify(modifiers ...func(s *sql.Selector)) *NodeSelect {
-	nq.modifiers = append(nq.modifiers, modifiers...)
-	return nq.Select()
+func (_q *NodeQuery) Modify(modifiers ...func(s *sql.Selector)) *NodeSelect {
+	_q.modifiers = append(_q.modifiers, modifiers...)
+	return _q.Select()
 }
 
 // NodeGroupBy is the group-by builder for Node entities.

@@ -29,153 +29,153 @@ type TaskUpdate struct {
 }
 
 // Where appends a list predicates to the TaskUpdate builder.
-func (tu *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
-	tu.mutation.Where(ps...)
-	return tu
+func (_u *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetTitle sets the "title" field.
-func (tu *TaskUpdate) SetTitle(s string) *TaskUpdate {
-	tu.mutation.SetTitle(s)
-	return tu
+func (_u *TaskUpdate) SetTitle(s string) *TaskUpdate {
+	_u.mutation.SetTitle(s)
+	return _u
 }
 
 // SetNillableTitle sets the "title" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillableTitle(s *string) *TaskUpdate {
+func (_u *TaskUpdate) SetNillableTitle(s *string) *TaskUpdate {
 	if s != nil {
-		tu.SetTitle(*s)
+		_u.SetTitle(*s)
 	}
-	return tu
+	return _u
 }
 
 // SetDescription sets the "description" field.
-func (tu *TaskUpdate) SetDescription(s string) *TaskUpdate {
-	tu.mutation.SetDescription(s)
-	return tu
+func (_u *TaskUpdate) SetDescription(s string) *TaskUpdate {
+	_u.mutation.SetDescription(s)
+	return _u
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillableDescription(s *string) *TaskUpdate {
+func (_u *TaskUpdate) SetNillableDescription(s *string) *TaskUpdate {
 	if s != nil {
-		tu.SetDescription(*s)
+		_u.SetDescription(*s)
 	}
-	return tu
+	return _u
 }
 
 // ClearDescription clears the value of the "description" field.
-func (tu *TaskUpdate) ClearDescription() *TaskUpdate {
-	tu.mutation.ClearDescription()
-	return tu
+func (_u *TaskUpdate) ClearDescription() *TaskUpdate {
+	_u.mutation.ClearDescription()
+	return _u
 }
 
 // SetStatus sets the "status" field.
-func (tu *TaskUpdate) SetStatus(t task.Status) *TaskUpdate {
-	tu.mutation.SetStatus(t)
-	return tu
+func (_u *TaskUpdate) SetStatus(t task.Status) *TaskUpdate {
+	_u.mutation.SetStatus(t)
+	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillableStatus(t *task.Status) *TaskUpdate {
+func (_u *TaskUpdate) SetNillableStatus(t *task.Status) *TaskUpdate {
 	if t != nil {
-		tu.SetStatus(*t)
+		_u.SetStatus(*t)
 	}
-	return tu
+	return _u
 }
 
 // SetUUID sets the "uuid" field.
-func (tu *TaskUpdate) SetUUID(u uuid.UUID) *TaskUpdate {
-	tu.mutation.SetUUID(u)
-	return tu
+func (_u *TaskUpdate) SetUUID(u uuid.UUID) *TaskUpdate {
+	_u.mutation.SetUUID(u)
+	return _u
 }
 
 // SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillableUUID(u *uuid.UUID) *TaskUpdate {
+func (_u *TaskUpdate) SetNillableUUID(u *uuid.UUID) *TaskUpdate {
 	if u != nil {
-		tu.SetUUID(*u)
+		_u.SetUUID(*u)
 	}
-	return tu
+	return _u
 }
 
 // ClearUUID clears the value of the "uuid" field.
-func (tu *TaskUpdate) ClearUUID() *TaskUpdate {
-	tu.mutation.ClearUUID()
-	return tu
+func (_u *TaskUpdate) ClearUUID() *TaskUpdate {
+	_u.mutation.ClearUUID()
+	return _u
 }
 
 // AddTeamIDs adds the "teams" edge to the Team entity by IDs.
-func (tu *TaskUpdate) AddTeamIDs(ids ...int) *TaskUpdate {
-	tu.mutation.AddTeamIDs(ids...)
-	return tu
+func (_u *TaskUpdate) AddTeamIDs(ids ...int) *TaskUpdate {
+	_u.mutation.AddTeamIDs(ids...)
+	return _u
 }
 
 // AddTeams adds the "teams" edges to the Team entity.
-func (tu *TaskUpdate) AddTeams(t ...*Team) *TaskUpdate {
+func (_u *TaskUpdate) AddTeams(t ...*Team) *TaskUpdate {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return tu.AddTeamIDs(ids...)
+	return _u.AddTeamIDs(ids...)
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
-func (tu *TaskUpdate) SetOwnerID(id int) *TaskUpdate {
-	tu.mutation.SetOwnerID(id)
-	return tu
+func (_u *TaskUpdate) SetOwnerID(id int) *TaskUpdate {
+	_u.mutation.SetOwnerID(id)
+	return _u
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (tu *TaskUpdate) SetNillableOwnerID(id *int) *TaskUpdate {
+func (_u *TaskUpdate) SetNillableOwnerID(id *int) *TaskUpdate {
 	if id != nil {
-		tu = tu.SetOwnerID(*id)
+		_u = _u.SetOwnerID(*id)
 	}
-	return tu
+	return _u
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (tu *TaskUpdate) SetOwner(u *User) *TaskUpdate {
-	return tu.SetOwnerID(u.ID)
+func (_u *TaskUpdate) SetOwner(u *User) *TaskUpdate {
+	return _u.SetOwnerID(u.ID)
 }
 
 // Mutation returns the TaskMutation object of the builder.
-func (tu *TaskUpdate) Mutation() *TaskMutation {
-	return tu.mutation
+func (_u *TaskUpdate) Mutation() *TaskMutation {
+	return _u.mutation
 }
 
 // ClearTeams clears all "teams" edges to the Team entity.
-func (tu *TaskUpdate) ClearTeams() *TaskUpdate {
-	tu.mutation.ClearTeams()
-	return tu
+func (_u *TaskUpdate) ClearTeams() *TaskUpdate {
+	_u.mutation.ClearTeams()
+	return _u
 }
 
 // RemoveTeamIDs removes the "teams" edge to Team entities by IDs.
-func (tu *TaskUpdate) RemoveTeamIDs(ids ...int) *TaskUpdate {
-	tu.mutation.RemoveTeamIDs(ids...)
-	return tu
+func (_u *TaskUpdate) RemoveTeamIDs(ids ...int) *TaskUpdate {
+	_u.mutation.RemoveTeamIDs(ids...)
+	return _u
 }
 
 // RemoveTeams removes "teams" edges to Team entities.
-func (tu *TaskUpdate) RemoveTeams(t ...*Team) *TaskUpdate {
+func (_u *TaskUpdate) RemoveTeams(t ...*Team) *TaskUpdate {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return tu.RemoveTeamIDs(ids...)
+	return _u.RemoveTeamIDs(ids...)
 }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (tu *TaskUpdate) ClearOwner() *TaskUpdate {
-	tu.mutation.ClearOwner()
-	return tu
+func (_u *TaskUpdate) ClearOwner() *TaskUpdate {
+	_u.mutation.ClearOwner()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (tu *TaskUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, tu.sqlSave, tu.mutation, tu.hooks)
+func (_u *TaskUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (tu *TaskUpdate) SaveX(ctx context.Context) int {
-	affected, err := tu.Save(ctx)
+func (_u *TaskUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -183,26 +183,26 @@ func (tu *TaskUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (tu *TaskUpdate) Exec(ctx context.Context) error {
-	_, err := tu.Save(ctx)
+func (_u *TaskUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tu *TaskUpdate) ExecX(ctx context.Context) {
-	if err := tu.Exec(ctx); err != nil {
+func (_u *TaskUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (tu *TaskUpdate) check() error {
-	if v, ok := tu.mutation.Title(); ok {
+func (_u *TaskUpdate) check() error {
+	if v, ok := _u.mutation.Title(); ok {
 		if err := task.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Task.title": %w`, err)}
 		}
 	}
-	if v, ok := tu.mutation.Status(); ok {
+	if v, ok := _u.mutation.Status(); ok {
 		if err := task.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Task.status": %w`, err)}
 		}
@@ -210,37 +210,37 @@ func (tu *TaskUpdate) check() error {
 	return nil
 }
 
-func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := tu.check(); err != nil {
+func (_u *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := _u.check(); err != nil {
 		return n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(task.Table, task.Columns, sqlgraph.NewFieldSpec(task.FieldID, field.TypeInt))
-	if ps := tu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := tu.mutation.Title(); ok {
+	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(task.FieldTitle, field.TypeString, value)
 	}
-	if value, ok := tu.mutation.Description(); ok {
+	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(task.FieldDescription, field.TypeString, value)
 	}
-	if tu.mutation.DescriptionCleared() {
+	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(task.FieldDescription, field.TypeString)
 	}
-	if value, ok := tu.mutation.Status(); ok {
+	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(task.FieldStatus, field.TypeEnum, value)
 	}
-	if value, ok := tu.mutation.UUID(); ok {
+	if value, ok := _u.mutation.UUID(); ok {
 		_spec.SetField(task.FieldUUID, field.TypeUUID, value)
 	}
-	if tu.mutation.UUIDCleared() {
+	if _u.mutation.UUIDCleared() {
 		_spec.ClearField(task.FieldUUID, field.TypeUUID)
 	}
-	if tu.mutation.TeamsCleared() {
+	if _u.mutation.TeamsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -253,7 +253,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.RemovedTeamsIDs(); len(nodes) > 0 && !tu.mutation.TeamsCleared() {
+	if nodes := _u.mutation.RemovedTeamsIDs(); len(nodes) > 0 && !_u.mutation.TeamsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -269,7 +269,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.TeamsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.TeamsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -285,7 +285,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tu.mutation.OwnerCleared() {
+	if _u.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -298,7 +298,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -314,7 +314,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{task.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -322,7 +322,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	tu.mutation.done = true
+	_u.mutation.done = true
 	return n, nil
 }
 
@@ -335,160 +335,160 @@ type TaskUpdateOne struct {
 }
 
 // SetTitle sets the "title" field.
-func (tuo *TaskUpdateOne) SetTitle(s string) *TaskUpdateOne {
-	tuo.mutation.SetTitle(s)
-	return tuo
+func (_u *TaskUpdateOne) SetTitle(s string) *TaskUpdateOne {
+	_u.mutation.SetTitle(s)
+	return _u
 }
 
 // SetNillableTitle sets the "title" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillableTitle(s *string) *TaskUpdateOne {
+func (_u *TaskUpdateOne) SetNillableTitle(s *string) *TaskUpdateOne {
 	if s != nil {
-		tuo.SetTitle(*s)
+		_u.SetTitle(*s)
 	}
-	return tuo
+	return _u
 }
 
 // SetDescription sets the "description" field.
-func (tuo *TaskUpdateOne) SetDescription(s string) *TaskUpdateOne {
-	tuo.mutation.SetDescription(s)
-	return tuo
+func (_u *TaskUpdateOne) SetDescription(s string) *TaskUpdateOne {
+	_u.mutation.SetDescription(s)
+	return _u
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillableDescription(s *string) *TaskUpdateOne {
+func (_u *TaskUpdateOne) SetNillableDescription(s *string) *TaskUpdateOne {
 	if s != nil {
-		tuo.SetDescription(*s)
+		_u.SetDescription(*s)
 	}
-	return tuo
+	return _u
 }
 
 // ClearDescription clears the value of the "description" field.
-func (tuo *TaskUpdateOne) ClearDescription() *TaskUpdateOne {
-	tuo.mutation.ClearDescription()
-	return tuo
+func (_u *TaskUpdateOne) ClearDescription() *TaskUpdateOne {
+	_u.mutation.ClearDescription()
+	return _u
 }
 
 // SetStatus sets the "status" field.
-func (tuo *TaskUpdateOne) SetStatus(t task.Status) *TaskUpdateOne {
-	tuo.mutation.SetStatus(t)
-	return tuo
+func (_u *TaskUpdateOne) SetStatus(t task.Status) *TaskUpdateOne {
+	_u.mutation.SetStatus(t)
+	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillableStatus(t *task.Status) *TaskUpdateOne {
+func (_u *TaskUpdateOne) SetNillableStatus(t *task.Status) *TaskUpdateOne {
 	if t != nil {
-		tuo.SetStatus(*t)
+		_u.SetStatus(*t)
 	}
-	return tuo
+	return _u
 }
 
 // SetUUID sets the "uuid" field.
-func (tuo *TaskUpdateOne) SetUUID(u uuid.UUID) *TaskUpdateOne {
-	tuo.mutation.SetUUID(u)
-	return tuo
+func (_u *TaskUpdateOne) SetUUID(u uuid.UUID) *TaskUpdateOne {
+	_u.mutation.SetUUID(u)
+	return _u
 }
 
 // SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillableUUID(u *uuid.UUID) *TaskUpdateOne {
+func (_u *TaskUpdateOne) SetNillableUUID(u *uuid.UUID) *TaskUpdateOne {
 	if u != nil {
-		tuo.SetUUID(*u)
+		_u.SetUUID(*u)
 	}
-	return tuo
+	return _u
 }
 
 // ClearUUID clears the value of the "uuid" field.
-func (tuo *TaskUpdateOne) ClearUUID() *TaskUpdateOne {
-	tuo.mutation.ClearUUID()
-	return tuo
+func (_u *TaskUpdateOne) ClearUUID() *TaskUpdateOne {
+	_u.mutation.ClearUUID()
+	return _u
 }
 
 // AddTeamIDs adds the "teams" edge to the Team entity by IDs.
-func (tuo *TaskUpdateOne) AddTeamIDs(ids ...int) *TaskUpdateOne {
-	tuo.mutation.AddTeamIDs(ids...)
-	return tuo
+func (_u *TaskUpdateOne) AddTeamIDs(ids ...int) *TaskUpdateOne {
+	_u.mutation.AddTeamIDs(ids...)
+	return _u
 }
 
 // AddTeams adds the "teams" edges to the Team entity.
-func (tuo *TaskUpdateOne) AddTeams(t ...*Team) *TaskUpdateOne {
+func (_u *TaskUpdateOne) AddTeams(t ...*Team) *TaskUpdateOne {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return tuo.AddTeamIDs(ids...)
+	return _u.AddTeamIDs(ids...)
 }
 
 // SetOwnerID sets the "owner" edge to the User entity by ID.
-func (tuo *TaskUpdateOne) SetOwnerID(id int) *TaskUpdateOne {
-	tuo.mutation.SetOwnerID(id)
-	return tuo
+func (_u *TaskUpdateOne) SetOwnerID(id int) *TaskUpdateOne {
+	_u.mutation.SetOwnerID(id)
+	return _u
 }
 
 // SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillableOwnerID(id *int) *TaskUpdateOne {
+func (_u *TaskUpdateOne) SetNillableOwnerID(id *int) *TaskUpdateOne {
 	if id != nil {
-		tuo = tuo.SetOwnerID(*id)
+		_u = _u.SetOwnerID(*id)
 	}
-	return tuo
+	return _u
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (tuo *TaskUpdateOne) SetOwner(u *User) *TaskUpdateOne {
-	return tuo.SetOwnerID(u.ID)
+func (_u *TaskUpdateOne) SetOwner(u *User) *TaskUpdateOne {
+	return _u.SetOwnerID(u.ID)
 }
 
 // Mutation returns the TaskMutation object of the builder.
-func (tuo *TaskUpdateOne) Mutation() *TaskMutation {
-	return tuo.mutation
+func (_u *TaskUpdateOne) Mutation() *TaskMutation {
+	return _u.mutation
 }
 
 // ClearTeams clears all "teams" edges to the Team entity.
-func (tuo *TaskUpdateOne) ClearTeams() *TaskUpdateOne {
-	tuo.mutation.ClearTeams()
-	return tuo
+func (_u *TaskUpdateOne) ClearTeams() *TaskUpdateOne {
+	_u.mutation.ClearTeams()
+	return _u
 }
 
 // RemoveTeamIDs removes the "teams" edge to Team entities by IDs.
-func (tuo *TaskUpdateOne) RemoveTeamIDs(ids ...int) *TaskUpdateOne {
-	tuo.mutation.RemoveTeamIDs(ids...)
-	return tuo
+func (_u *TaskUpdateOne) RemoveTeamIDs(ids ...int) *TaskUpdateOne {
+	_u.mutation.RemoveTeamIDs(ids...)
+	return _u
 }
 
 // RemoveTeams removes "teams" edges to Team entities.
-func (tuo *TaskUpdateOne) RemoveTeams(t ...*Team) *TaskUpdateOne {
+func (_u *TaskUpdateOne) RemoveTeams(t ...*Team) *TaskUpdateOne {
 	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
-	return tuo.RemoveTeamIDs(ids...)
+	return _u.RemoveTeamIDs(ids...)
 }
 
 // ClearOwner clears the "owner" edge to the User entity.
-func (tuo *TaskUpdateOne) ClearOwner() *TaskUpdateOne {
-	tuo.mutation.ClearOwner()
-	return tuo
+func (_u *TaskUpdateOne) ClearOwner() *TaskUpdateOne {
+	_u.mutation.ClearOwner()
+	return _u
 }
 
 // Where appends a list predicates to the TaskUpdate builder.
-func (tuo *TaskUpdateOne) Where(ps ...predicate.Task) *TaskUpdateOne {
-	tuo.mutation.Where(ps...)
-	return tuo
+func (_u *TaskUpdateOne) Where(ps ...predicate.Task) *TaskUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (tuo *TaskUpdateOne) Select(field string, fields ...string) *TaskUpdateOne {
-	tuo.fields = append([]string{field}, fields...)
-	return tuo
+func (_u *TaskUpdateOne) Select(field string, fields ...string) *TaskUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Task entity.
-func (tuo *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
-	return withHooks(ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
+func (_u *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (tuo *TaskUpdateOne) SaveX(ctx context.Context) *Task {
-	node, err := tuo.Save(ctx)
+func (_u *TaskUpdateOne) SaveX(ctx context.Context) *Task {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -496,26 +496,26 @@ func (tuo *TaskUpdateOne) SaveX(ctx context.Context) *Task {
 }
 
 // Exec executes the query on the entity.
-func (tuo *TaskUpdateOne) Exec(ctx context.Context) error {
-	_, err := tuo.Save(ctx)
+func (_u *TaskUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tuo *TaskUpdateOne) ExecX(ctx context.Context) {
-	if err := tuo.Exec(ctx); err != nil {
+func (_u *TaskUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (tuo *TaskUpdateOne) check() error {
-	if v, ok := tuo.mutation.Title(); ok {
+func (_u *TaskUpdateOne) check() error {
+	if v, ok := _u.mutation.Title(); ok {
 		if err := task.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Task.title": %w`, err)}
 		}
 	}
-	if v, ok := tuo.mutation.Status(); ok {
+	if v, ok := _u.mutation.Status(); ok {
 		if err := task.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Task.status": %w`, err)}
 		}
@@ -523,17 +523,17 @@ func (tuo *TaskUpdateOne) check() error {
 	return nil
 }
 
-func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) {
-	if err := tuo.check(); err != nil {
+func (_u *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(task.Table, task.Columns, sqlgraph.NewFieldSpec(task.FieldID, field.TypeInt))
-	id, ok := tuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Task.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := tuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, task.FieldID)
 		for _, f := range fields {
@@ -545,32 +545,32 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 			}
 		}
 	}
-	if ps := tuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := tuo.mutation.Title(); ok {
+	if value, ok := _u.mutation.Title(); ok {
 		_spec.SetField(task.FieldTitle, field.TypeString, value)
 	}
-	if value, ok := tuo.mutation.Description(); ok {
+	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(task.FieldDescription, field.TypeString, value)
 	}
-	if tuo.mutation.DescriptionCleared() {
+	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(task.FieldDescription, field.TypeString)
 	}
-	if value, ok := tuo.mutation.Status(); ok {
+	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(task.FieldStatus, field.TypeEnum, value)
 	}
-	if value, ok := tuo.mutation.UUID(); ok {
+	if value, ok := _u.mutation.UUID(); ok {
 		_spec.SetField(task.FieldUUID, field.TypeUUID, value)
 	}
-	if tuo.mutation.UUIDCleared() {
+	if _u.mutation.UUIDCleared() {
 		_spec.ClearField(task.FieldUUID, field.TypeUUID)
 	}
-	if tuo.mutation.TeamsCleared() {
+	if _u.mutation.TeamsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -583,7 +583,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.RemovedTeamsIDs(); len(nodes) > 0 && !tuo.mutation.TeamsCleared() {
+	if nodes := _u.mutation.RemovedTeamsIDs(); len(nodes) > 0 && !_u.mutation.TeamsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -599,7 +599,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.TeamsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.TeamsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -615,7 +615,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tuo.mutation.OwnerCleared() {
+	if _u.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -628,7 +628,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -644,10 +644,10 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Task{config: tuo.config}
+	_node = &Task{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, tuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{task.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -655,6 +655,6 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 		}
 		return nil, err
 	}
-	tuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

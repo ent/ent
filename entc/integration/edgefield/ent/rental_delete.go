@@ -24,56 +24,56 @@ type RentalDelete struct {
 }
 
 // Where appends a list predicates to the RentalDelete builder.
-func (rd *RentalDelete) Where(ps ...predicate.Rental) *RentalDelete {
-	rd.mutation.Where(ps...)
-	return rd
+func (_d *RentalDelete) Where(ps ...predicate.Rental) *RentalDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (rd *RentalDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, rd.sqlExec, rd.mutation, rd.hooks)
+func (_d *RentalDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rd *RentalDelete) ExecX(ctx context.Context) int {
-	n, err := rd.Exec(ctx)
+func (_d *RentalDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (rd *RentalDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *RentalDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(rental.Table, sqlgraph.NewFieldSpec(rental.FieldID, field.TypeInt))
-	if ps := rd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, rd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	rd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // RentalDeleteOne is the builder for deleting a single Rental entity.
 type RentalDeleteOne struct {
-	rd *RentalDelete
+	_d *RentalDelete
 }
 
 // Where appends a list predicates to the RentalDelete builder.
-func (rdo *RentalDeleteOne) Where(ps ...predicate.Rental) *RentalDeleteOne {
-	rdo.rd.mutation.Where(ps...)
-	return rdo
+func (_d *RentalDeleteOne) Where(ps ...predicate.Rental) *RentalDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (rdo *RentalDeleteOne) Exec(ctx context.Context) error {
-	n, err := rdo.rd.Exec(ctx)
+func (_d *RentalDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (rdo *RentalDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rdo *RentalDeleteOne) ExecX(ctx context.Context) {
-	if err := rdo.Exec(ctx); err != nil {
+func (_d *RentalDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

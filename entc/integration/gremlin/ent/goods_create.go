@@ -23,18 +23,18 @@ type GoodsCreate struct {
 }
 
 // Mutation returns the GoodsMutation object of the builder.
-func (gc *GoodsCreate) Mutation() *GoodsMutation {
-	return gc.mutation
+func (_c *GoodsCreate) Mutation() *GoodsMutation {
+	return _c.mutation
 }
 
 // Save creates the Goods in the database.
-func (gc *GoodsCreate) Save(ctx context.Context) (*Goods, error) {
-	return withHooks(ctx, gc.gremlinSave, gc.mutation, gc.hooks)
+func (_c *GoodsCreate) Save(ctx context.Context) (*Goods, error) {
+	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (gc *GoodsCreate) SaveX(ctx context.Context) *Goods {
-	v, err := gc.Save(ctx)
+func (_c *GoodsCreate) SaveX(ctx context.Context) *Goods {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -42,45 +42,45 @@ func (gc *GoodsCreate) SaveX(ctx context.Context) *Goods {
 }
 
 // Exec executes the query.
-func (gc *GoodsCreate) Exec(ctx context.Context) error {
-	_, err := gc.Save(ctx)
+func (_c *GoodsCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gc *GoodsCreate) ExecX(ctx context.Context) {
-	if err := gc.Exec(ctx); err != nil {
+func (_c *GoodsCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (gc *GoodsCreate) check() error {
+func (_c *GoodsCreate) check() error {
 	return nil
 }
 
-func (gc *GoodsCreate) gremlinSave(ctx context.Context) (*Goods, error) {
-	if err := gc.check(); err != nil {
+func (_c *GoodsCreate) gremlinSave(ctx context.Context) (*Goods, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := gc.gremlin().Query()
-	if err := gc.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _c.gremlin().Query()
+	if err := _c.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	rnode := &Goods{config: gc.config}
+	rnode := &Goods{config: _c.config}
 	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	gc.mutation.id = &rnode.ID
-	gc.mutation.done = true
+	_c.mutation.id = &rnode.ID
+	_c.mutation.done = true
 	return rnode, nil
 }
 
-func (gc *GoodsCreate) gremlin() *dsl.Traversal {
+func (_c *GoodsCreate) gremlin() *dsl.Traversal {
 	v := g.AddV(goods.Label)
 	return v.ValueMap(true)
 }

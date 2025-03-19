@@ -29,61 +29,61 @@ type AttachedFileCreate struct {
 }
 
 // SetAttachTime sets the "attach_time" field.
-func (afc *AttachedFileCreate) SetAttachTime(t time.Time) *AttachedFileCreate {
-	afc.mutation.SetAttachTime(t)
-	return afc
+func (_c *AttachedFileCreate) SetAttachTime(t time.Time) *AttachedFileCreate {
+	_c.mutation.SetAttachTime(t)
+	return _c
 }
 
 // SetNillableAttachTime sets the "attach_time" field if the given value is not nil.
-func (afc *AttachedFileCreate) SetNillableAttachTime(t *time.Time) *AttachedFileCreate {
+func (_c *AttachedFileCreate) SetNillableAttachTime(t *time.Time) *AttachedFileCreate {
 	if t != nil {
-		afc.SetAttachTime(*t)
+		_c.SetAttachTime(*t)
 	}
-	return afc
+	return _c
 }
 
 // SetFID sets the "f_id" field.
-func (afc *AttachedFileCreate) SetFID(i int) *AttachedFileCreate {
-	afc.mutation.SetFID(i)
-	return afc
+func (_c *AttachedFileCreate) SetFID(i int) *AttachedFileCreate {
+	_c.mutation.SetFID(i)
+	return _c
 }
 
 // SetProcID sets the "proc_id" field.
-func (afc *AttachedFileCreate) SetProcID(i int) *AttachedFileCreate {
-	afc.mutation.SetProcID(i)
-	return afc
+func (_c *AttachedFileCreate) SetProcID(i int) *AttachedFileCreate {
+	_c.mutation.SetProcID(i)
+	return _c
 }
 
 // SetFiID sets the "fi" edge to the File entity by ID.
-func (afc *AttachedFileCreate) SetFiID(id int) *AttachedFileCreate {
-	afc.mutation.SetFiID(id)
-	return afc
+func (_c *AttachedFileCreate) SetFiID(id int) *AttachedFileCreate {
+	_c.mutation.SetFiID(id)
+	return _c
 }
 
 // SetFi sets the "fi" edge to the File entity.
-func (afc *AttachedFileCreate) SetFi(f *File) *AttachedFileCreate {
-	return afc.SetFiID(f.ID)
+func (_c *AttachedFileCreate) SetFi(f *File) *AttachedFileCreate {
+	return _c.SetFiID(f.ID)
 }
 
 // SetProc sets the "proc" edge to the Process entity.
-func (afc *AttachedFileCreate) SetProc(p *Process) *AttachedFileCreate {
-	return afc.SetProcID(p.ID)
+func (_c *AttachedFileCreate) SetProc(p *Process) *AttachedFileCreate {
+	return _c.SetProcID(p.ID)
 }
 
 // Mutation returns the AttachedFileMutation object of the builder.
-func (afc *AttachedFileCreate) Mutation() *AttachedFileMutation {
-	return afc.mutation
+func (_c *AttachedFileCreate) Mutation() *AttachedFileMutation {
+	return _c.mutation
 }
 
 // Save creates the AttachedFile in the database.
-func (afc *AttachedFileCreate) Save(ctx context.Context) (*AttachedFile, error) {
-	afc.defaults()
-	return withHooks(ctx, afc.sqlSave, afc.mutation, afc.hooks)
+func (_c *AttachedFileCreate) Save(ctx context.Context) (*AttachedFile, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (afc *AttachedFileCreate) SaveX(ctx context.Context) *AttachedFile {
-	v, err := afc.Save(ctx)
+func (_c *AttachedFileCreate) SaveX(ctx context.Context) *AttachedFile {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -91,52 +91,52 @@ func (afc *AttachedFileCreate) SaveX(ctx context.Context) *AttachedFile {
 }
 
 // Exec executes the query.
-func (afc *AttachedFileCreate) Exec(ctx context.Context) error {
-	_, err := afc.Save(ctx)
+func (_c *AttachedFileCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (afc *AttachedFileCreate) ExecX(ctx context.Context) {
-	if err := afc.Exec(ctx); err != nil {
+func (_c *AttachedFileCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (afc *AttachedFileCreate) defaults() {
-	if _, ok := afc.mutation.AttachTime(); !ok {
+func (_c *AttachedFileCreate) defaults() {
+	if _, ok := _c.mutation.AttachTime(); !ok {
 		v := attachedfile.DefaultAttachTime()
-		afc.mutation.SetAttachTime(v)
+		_c.mutation.SetAttachTime(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (afc *AttachedFileCreate) check() error {
-	if _, ok := afc.mutation.AttachTime(); !ok {
+func (_c *AttachedFileCreate) check() error {
+	if _, ok := _c.mutation.AttachTime(); !ok {
 		return &ValidationError{Name: "attach_time", err: errors.New(`ent: missing required field "AttachedFile.attach_time"`)}
 	}
-	if _, ok := afc.mutation.FID(); !ok {
+	if _, ok := _c.mutation.FID(); !ok {
 		return &ValidationError{Name: "f_id", err: errors.New(`ent: missing required field "AttachedFile.f_id"`)}
 	}
-	if _, ok := afc.mutation.ProcID(); !ok {
+	if _, ok := _c.mutation.ProcID(); !ok {
 		return &ValidationError{Name: "proc_id", err: errors.New(`ent: missing required field "AttachedFile.proc_id"`)}
 	}
-	if len(afc.mutation.FiIDs()) == 0 {
+	if len(_c.mutation.FiIDs()) == 0 {
 		return &ValidationError{Name: "fi", err: errors.New(`ent: missing required edge "AttachedFile.fi"`)}
 	}
-	if len(afc.mutation.ProcIDs()) == 0 {
+	if len(_c.mutation.ProcIDs()) == 0 {
 		return &ValidationError{Name: "proc", err: errors.New(`ent: missing required edge "AttachedFile.proc"`)}
 	}
 	return nil
 }
 
-func (afc *AttachedFileCreate) sqlSave(ctx context.Context) (*AttachedFile, error) {
-	if err := afc.check(); err != nil {
+func (_c *AttachedFileCreate) sqlSave(ctx context.Context) (*AttachedFile, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := afc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, afc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -144,22 +144,22 @@ func (afc *AttachedFileCreate) sqlSave(ctx context.Context) (*AttachedFile, erro
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	afc.mutation.id = &_node.ID
-	afc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (afc *AttachedFileCreate) createSpec() (*AttachedFile, *sqlgraph.CreateSpec) {
+func (_c *AttachedFileCreate) createSpec() (*AttachedFile, *sqlgraph.CreateSpec) {
 	var (
-		_node = &AttachedFile{config: afc.config}
+		_node = &AttachedFile{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(attachedfile.Table, sqlgraph.NewFieldSpec(attachedfile.FieldID, field.TypeInt))
 	)
-	_spec.OnConflict = afc.conflict
-	if value, ok := afc.mutation.AttachTime(); ok {
+	_spec.OnConflict = _c.conflict
+	if value, ok := _c.mutation.AttachTime(); ok {
 		_spec.SetField(attachedfile.FieldAttachTime, field.TypeTime, value)
 		_node.AttachTime = value
 	}
-	if nodes := afc.mutation.FiIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.FiIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -176,7 +176,7 @@ func (afc *AttachedFileCreate) createSpec() (*AttachedFile, *sqlgraph.CreateSpec
 		_node.FID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := afc.mutation.ProcIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ProcIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -212,10 +212,10 @@ func (afc *AttachedFileCreate) createSpec() (*AttachedFile, *sqlgraph.CreateSpec
 //			SetAttachTime(v+v).
 //		}).
 //		Exec(ctx)
-func (afc *AttachedFileCreate) OnConflict(opts ...sql.ConflictOption) *AttachedFileUpsertOne {
-	afc.conflict = opts
+func (_c *AttachedFileCreate) OnConflict(opts ...sql.ConflictOption) *AttachedFileUpsertOne {
+	_c.conflict = opts
 	return &AttachedFileUpsertOne{
-		create: afc,
+		create: _c,
 	}
 }
 
@@ -225,10 +225,10 @@ func (afc *AttachedFileCreate) OnConflict(opts ...sql.ConflictOption) *AttachedF
 //	client.AttachedFile.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (afc *AttachedFileCreate) OnConflictColumns(columns ...string) *AttachedFileUpsertOne {
-	afc.conflict = append(afc.conflict, sql.ConflictColumns(columns...))
+func (_c *AttachedFileCreate) OnConflictColumns(columns ...string) *AttachedFileUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &AttachedFileUpsertOne{
-		create: afc,
+		create: _c,
 	}
 }
 
@@ -405,16 +405,16 @@ type AttachedFileCreateBulk struct {
 }
 
 // Save creates the AttachedFile entities in the database.
-func (afcb *AttachedFileCreateBulk) Save(ctx context.Context) ([]*AttachedFile, error) {
-	if afcb.err != nil {
-		return nil, afcb.err
+func (_c *AttachedFileCreateBulk) Save(ctx context.Context) ([]*AttachedFile, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(afcb.builders))
-	nodes := make([]*AttachedFile, len(afcb.builders))
-	mutators := make([]Mutator, len(afcb.builders))
-	for i := range afcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*AttachedFile, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := afcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*AttachedFileMutation)
@@ -428,12 +428,12 @@ func (afcb *AttachedFileCreateBulk) Save(ctx context.Context) ([]*AttachedFile, 
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, afcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = afcb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, afcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -457,7 +457,7 @@ func (afcb *AttachedFileCreateBulk) Save(ctx context.Context) ([]*AttachedFile, 
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, afcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -465,8 +465,8 @@ func (afcb *AttachedFileCreateBulk) Save(ctx context.Context) ([]*AttachedFile, 
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (afcb *AttachedFileCreateBulk) SaveX(ctx context.Context) []*AttachedFile {
-	v, err := afcb.Save(ctx)
+func (_c *AttachedFileCreateBulk) SaveX(ctx context.Context) []*AttachedFile {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -474,14 +474,14 @@ func (afcb *AttachedFileCreateBulk) SaveX(ctx context.Context) []*AttachedFile {
 }
 
 // Exec executes the query.
-func (afcb *AttachedFileCreateBulk) Exec(ctx context.Context) error {
-	_, err := afcb.Save(ctx)
+func (_c *AttachedFileCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (afcb *AttachedFileCreateBulk) ExecX(ctx context.Context) {
-	if err := afcb.Exec(ctx); err != nil {
+func (_c *AttachedFileCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -501,10 +501,10 @@ func (afcb *AttachedFileCreateBulk) ExecX(ctx context.Context) {
 //			SetAttachTime(v+v).
 //		}).
 //		Exec(ctx)
-func (afcb *AttachedFileCreateBulk) OnConflict(opts ...sql.ConflictOption) *AttachedFileUpsertBulk {
-	afcb.conflict = opts
+func (_c *AttachedFileCreateBulk) OnConflict(opts ...sql.ConflictOption) *AttachedFileUpsertBulk {
+	_c.conflict = opts
 	return &AttachedFileUpsertBulk{
-		create: afcb,
+		create: _c,
 	}
 }
 
@@ -514,10 +514,10 @@ func (afcb *AttachedFileCreateBulk) OnConflict(opts ...sql.ConflictOption) *Atta
 //	client.AttachedFile.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (afcb *AttachedFileCreateBulk) OnConflictColumns(columns ...string) *AttachedFileUpsertBulk {
-	afcb.conflict = append(afcb.conflict, sql.ConflictColumns(columns...))
+func (_c *AttachedFileCreateBulk) OnConflictColumns(columns ...string) *AttachedFileUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &AttachedFileUpsertBulk{
-		create: afcb,
+		create: _c,
 	}
 }
 

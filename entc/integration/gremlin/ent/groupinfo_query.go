@@ -35,44 +35,44 @@ type GroupInfoQuery struct {
 }
 
 // Where adds a new predicate for the GroupInfoQuery builder.
-func (giq *GroupInfoQuery) Where(ps ...predicate.GroupInfo) *GroupInfoQuery {
-	giq.predicates = append(giq.predicates, ps...)
-	return giq
+func (_q *GroupInfoQuery) Where(ps ...predicate.GroupInfo) *GroupInfoQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (giq *GroupInfoQuery) Limit(limit int) *GroupInfoQuery {
-	giq.ctx.Limit = &limit
-	return giq
+func (_q *GroupInfoQuery) Limit(limit int) *GroupInfoQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (giq *GroupInfoQuery) Offset(offset int) *GroupInfoQuery {
-	giq.ctx.Offset = &offset
-	return giq
+func (_q *GroupInfoQuery) Offset(offset int) *GroupInfoQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (giq *GroupInfoQuery) Unique(unique bool) *GroupInfoQuery {
-	giq.ctx.Unique = &unique
-	return giq
+func (_q *GroupInfoQuery) Unique(unique bool) *GroupInfoQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (giq *GroupInfoQuery) Order(o ...groupinfo.OrderOption) *GroupInfoQuery {
-	giq.order = append(giq.order, o...)
-	return giq
+func (_q *GroupInfoQuery) Order(o ...groupinfo.OrderOption) *GroupInfoQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryGroups chains the current query on the "groups" edge.
-func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
-	query := (&GroupClient{config: giq.config}).Query()
+func (_q *GroupInfoQuery) QueryGroups() *GroupQuery {
+	query := (&GroupClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
-		if err := giq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := giq.gremlinQuery(ctx)
+		gremlin := _q.gremlinQuery(ctx)
 		fromU = gremlin.InE(group.InfoLabel).OutV()
 		return fromU, nil
 	}
@@ -81,8 +81,8 @@ func (giq *GroupInfoQuery) QueryGroups() *GroupQuery {
 
 // First returns the first GroupInfo entity from the query.
 // Returns a *NotFoundError when no GroupInfo was found.
-func (giq *GroupInfoQuery) First(ctx context.Context) (*GroupInfo, error) {
-	nodes, err := giq.Limit(1).All(setContextOp(ctx, giq.ctx, ent.OpQueryFirst))
+func (_q *GroupInfoQuery) First(ctx context.Context) (*GroupInfo, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -93,8 +93,8 @@ func (giq *GroupInfoQuery) First(ctx context.Context) (*GroupInfo, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (giq *GroupInfoQuery) FirstX(ctx context.Context) *GroupInfo {
-	node, err := giq.First(ctx)
+func (_q *GroupInfoQuery) FirstX(ctx context.Context) *GroupInfo {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -103,9 +103,9 @@ func (giq *GroupInfoQuery) FirstX(ctx context.Context) *GroupInfo {
 
 // FirstID returns the first GroupInfo ID from the query.
 // Returns a *NotFoundError when no GroupInfo ID was found.
-func (giq *GroupInfoQuery) FirstID(ctx context.Context) (id string, err error) {
+func (_q *GroupInfoQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = giq.Limit(1).IDs(setContextOp(ctx, giq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -116,8 +116,8 @@ func (giq *GroupInfoQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (giq *GroupInfoQuery) FirstIDX(ctx context.Context) string {
-	id, err := giq.FirstID(ctx)
+func (_q *GroupInfoQuery) FirstIDX(ctx context.Context) string {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -127,8 +127,8 @@ func (giq *GroupInfoQuery) FirstIDX(ctx context.Context) string {
 // Only returns a single GroupInfo entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one GroupInfo entity is found.
 // Returns a *NotFoundError when no GroupInfo entities are found.
-func (giq *GroupInfoQuery) Only(ctx context.Context) (*GroupInfo, error) {
-	nodes, err := giq.Limit(2).All(setContextOp(ctx, giq.ctx, ent.OpQueryOnly))
+func (_q *GroupInfoQuery) Only(ctx context.Context) (*GroupInfo, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -143,8 +143,8 @@ func (giq *GroupInfoQuery) Only(ctx context.Context) (*GroupInfo, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (giq *GroupInfoQuery) OnlyX(ctx context.Context) *GroupInfo {
-	node, err := giq.Only(ctx)
+func (_q *GroupInfoQuery) OnlyX(ctx context.Context) *GroupInfo {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -154,9 +154,9 @@ func (giq *GroupInfoQuery) OnlyX(ctx context.Context) *GroupInfo {
 // OnlyID is like Only, but returns the only GroupInfo ID in the query.
 // Returns a *NotSingularError when more than one GroupInfo ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (giq *GroupInfoQuery) OnlyID(ctx context.Context) (id string, err error) {
+func (_q *GroupInfoQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = giq.Limit(2).IDs(setContextOp(ctx, giq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -171,8 +171,8 @@ func (giq *GroupInfoQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (giq *GroupInfoQuery) OnlyIDX(ctx context.Context) string {
-	id, err := giq.OnlyID(ctx)
+func (_q *GroupInfoQuery) OnlyIDX(ctx context.Context) string {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -180,18 +180,18 @@ func (giq *GroupInfoQuery) OnlyIDX(ctx context.Context) string {
 }
 
 // All executes the query and returns a list of GroupInfos.
-func (giq *GroupInfoQuery) All(ctx context.Context) ([]*GroupInfo, error) {
-	ctx = setContextOp(ctx, giq.ctx, ent.OpQueryAll)
-	if err := giq.prepareQuery(ctx); err != nil {
+func (_q *GroupInfoQuery) All(ctx context.Context) ([]*GroupInfo, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*GroupInfo, *GroupInfoQuery]()
-	return withInterceptors[[]*GroupInfo](ctx, giq, qr, giq.inters)
+	return withInterceptors[[]*GroupInfo](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (giq *GroupInfoQuery) AllX(ctx context.Context) []*GroupInfo {
-	nodes, err := giq.All(ctx)
+func (_q *GroupInfoQuery) AllX(ctx context.Context) []*GroupInfo {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -199,20 +199,20 @@ func (giq *GroupInfoQuery) AllX(ctx context.Context) []*GroupInfo {
 }
 
 // IDs executes the query and returns a list of GroupInfo IDs.
-func (giq *GroupInfoQuery) IDs(ctx context.Context) (ids []string, err error) {
-	if giq.ctx.Unique == nil && giq.path != nil {
-		giq.Unique(true)
+func (_q *GroupInfoQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, giq.ctx, ent.OpQueryIDs)
-	if err = giq.Select(groupinfo.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(groupinfo.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (giq *GroupInfoQuery) IDsX(ctx context.Context) []string {
-	ids, err := giq.IDs(ctx)
+func (_q *GroupInfoQuery) IDsX(ctx context.Context) []string {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -220,17 +220,17 @@ func (giq *GroupInfoQuery) IDsX(ctx context.Context) []string {
 }
 
 // Count returns the count of the given query.
-func (giq *GroupInfoQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, giq.ctx, ent.OpQueryCount)
-	if err := giq.prepareQuery(ctx); err != nil {
+func (_q *GroupInfoQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, giq, querierCount[*GroupInfoQuery](), giq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*GroupInfoQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (giq *GroupInfoQuery) CountX(ctx context.Context) int {
-	count, err := giq.Count(ctx)
+func (_q *GroupInfoQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -238,9 +238,9 @@ func (giq *GroupInfoQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (giq *GroupInfoQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, giq.ctx, ent.OpQueryExist)
-	switch _, err := giq.FirstID(ctx); {
+func (_q *GroupInfoQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -251,8 +251,8 @@ func (giq *GroupInfoQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (giq *GroupInfoQuery) ExistX(ctx context.Context) bool {
-	exist, err := giq.Exist(ctx)
+func (_q *GroupInfoQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -261,32 +261,32 @@ func (giq *GroupInfoQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the GroupInfoQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (giq *GroupInfoQuery) Clone() *GroupInfoQuery {
-	if giq == nil {
+func (_q *GroupInfoQuery) Clone() *GroupInfoQuery {
+	if _q == nil {
 		return nil
 	}
 	return &GroupInfoQuery{
-		config:     giq.config,
-		ctx:        giq.ctx.Clone(),
-		order:      append([]groupinfo.OrderOption{}, giq.order...),
-		inters:     append([]Interceptor{}, giq.inters...),
-		predicates: append([]predicate.GroupInfo{}, giq.predicates...),
-		withGroups: giq.withGroups.Clone(),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]groupinfo.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.GroupInfo{}, _q.predicates...),
+		withGroups: _q.withGroups.Clone(),
 		// clone intermediate query.
-		gremlin: giq.gremlin.Clone(),
-		path:    giq.path,
+		gremlin: _q.gremlin.Clone(),
+		path:    _q.path,
 	}
 }
 
 // WithGroups tells the query-builder to eager-load the nodes that are connected to
 // the "groups" edge. The optional arguments are used to configure the query builder of the edge.
-func (giq *GroupInfoQuery) WithGroups(opts ...func(*GroupQuery)) *GroupInfoQuery {
-	query := (&GroupClient{config: giq.config}).Query()
+func (_q *GroupInfoQuery) WithGroups(opts ...func(*GroupQuery)) *GroupInfoQuery {
+	query := (&GroupClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	giq.withGroups = query
-	return giq
+	_q.withGroups = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -303,10 +303,10 @@ func (giq *GroupInfoQuery) WithGroups(opts ...func(*GroupQuery)) *GroupInfoQuery
 //		GroupBy(groupinfo.FieldDesc).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGroupBy {
-	giq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &GroupInfoGroupBy{build: giq}
-	grbuild.flds = &giq.ctx.Fields
+func (_q *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &GroupInfoGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = groupinfo.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -324,46 +324,46 @@ func (giq *GroupInfoQuery) GroupBy(field string, fields ...string) *GroupInfoGro
 //	client.GroupInfo.Query().
 //		Select(groupinfo.FieldDesc).
 //		Scan(ctx, &v)
-func (giq *GroupInfoQuery) Select(fields ...string) *GroupInfoSelect {
-	giq.ctx.Fields = append(giq.ctx.Fields, fields...)
-	sbuild := &GroupInfoSelect{GroupInfoQuery: giq}
+func (_q *GroupInfoQuery) Select(fields ...string) *GroupInfoSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &GroupInfoSelect{GroupInfoQuery: _q}
 	sbuild.label = groupinfo.Label
-	sbuild.flds, sbuild.scan = &giq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a GroupInfoSelect configured with the given aggregations.
-func (giq *GroupInfoQuery) Aggregate(fns ...AggregateFunc) *GroupInfoSelect {
-	return giq.Select().Aggregate(fns...)
+func (_q *GroupInfoQuery) Aggregate(fns ...AggregateFunc) *GroupInfoSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (giq *GroupInfoQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range giq.inters {
+func (_q *GroupInfoQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, giq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	if giq.path != nil {
-		prev, err := giq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		giq.gremlin = prev
+		_q.gremlin = prev
 	}
 	return nil
 }
 
-func (giq *GroupInfoQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*GroupInfo, error) {
+func (_q *GroupInfoQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*GroupInfo, error) {
 	res := &gremlin.Response{}
-	traversal := giq.gremlinQuery(ctx)
-	if len(giq.ctx.Fields) > 0 {
-		fields := make([]any, len(giq.ctx.Fields))
-		for i, f := range giq.ctx.Fields {
+	traversal := _q.gremlinQuery(ctx)
+	if len(_q.ctx.Fields) > 0 {
+		fields := make([]any, len(_q.ctx.Fields))
+		for i, f := range _q.ctx.Fields {
 			fields[i] = f
 		}
 		traversal.ValueMap(fields...)
@@ -371,43 +371,43 @@ func (giq *GroupInfoQuery) gremlinAll(ctx context.Context, hooks ...queryHook) (
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := giq.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
-	var gis GroupInfos
-	if err := gis.FromResponse(res); err != nil {
+	var _ms GroupInfos
+	if err := _ms.FromResponse(res); err != nil {
 		return nil, err
 	}
-	for i := range gis {
-		gis[i].config = giq.config
+	for i := range _ms {
+		_ms[i].config = _q.config
 	}
-	return gis, nil
+	return _ms, nil
 }
 
-func (giq *GroupInfoQuery) gremlinCount(ctx context.Context) (int, error) {
+func (_q *GroupInfoQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := giq.gremlinQuery(ctx).Count().Query()
-	if err := giq.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _q.gremlinQuery(ctx).Count().Query()
+	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
 }
 
-func (giq *GroupInfoQuery) gremlinQuery(context.Context) *dsl.Traversal {
+func (_q *GroupInfoQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(groupinfo.Label)
-	if giq.gremlin != nil {
-		v = giq.gremlin.Clone()
+	if _q.gremlin != nil {
+		v = _q.gremlin.Clone()
 	}
-	for _, p := range giq.predicates {
+	for _, p := range _q.predicates {
 		p(v)
 	}
-	if len(giq.order) > 0 {
+	if len(_q.order) > 0 {
 		v.Order()
-		for _, p := range giq.order {
+		for _, p := range _q.order {
 			p(v)
 		}
 	}
-	switch limit, offset := giq.ctx.Limit, giq.ctx.Offset; {
+	switch limit, offset := _q.ctx.Limit, _q.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset+*limit)
 	case offset != nil:
@@ -415,7 +415,7 @@ func (giq *GroupInfoQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := giq.ctx.Unique; unique == nil || *unique {
+	if unique := _q.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v

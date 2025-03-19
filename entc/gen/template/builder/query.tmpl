@@ -412,7 +412,7 @@ func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-{{ with extend $ "Receiver" $receiver "Builder" $builder  "Package" $pkg }}
+{{ with extend $ "Receiver" $receiver "Builder" $builder "Package" $pkg }}
 	{{ $tmpl := printf "dialect/%s/query" $.Storage }}
 	{{ xtemplate $tmpl . }}
 {{ end }}

@@ -25,38 +25,38 @@ type GroupDelete struct {
 }
 
 // Where appends a list predicates to the GroupDelete builder.
-func (gd *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
-	gd.mutation.Where(ps...)
-	return gd
+func (_d *GroupDelete) Where(ps ...predicate.Group) *GroupDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (gd *GroupDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, gd.gremlinExec, gd.mutation, gd.hooks)
+func (_d *GroupDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.gremlinExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gd *GroupDelete) ExecX(ctx context.Context) int {
-	n, err := gd.Exec(ctx)
+func (_d *GroupDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (gd *GroupDelete) gremlinExec(ctx context.Context) (int, error) {
+func (_d *GroupDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := gd.gremlin().Query()
-	if err := gd.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _d.gremlin().Query()
+	if err := _d.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
-	gd.mutation.done = true
+	_d.mutation.done = true
 	return res.ReadInt()
 }
 
-func (gd *GroupDelete) gremlin() *dsl.Traversal {
+func (_d *GroupDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(group.Label)
-	for _, p := range gd.mutation.predicates {
+	for _, p := range _d.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()
@@ -64,18 +64,18 @@ func (gd *GroupDelete) gremlin() *dsl.Traversal {
 
 // GroupDeleteOne is the builder for deleting a single Group entity.
 type GroupDeleteOne struct {
-	gd *GroupDelete
+	_d *GroupDelete
 }
 
 // Where appends a list predicates to the GroupDelete builder.
-func (gdo *GroupDeleteOne) Where(ps ...predicate.Group) *GroupDeleteOne {
-	gdo.gd.mutation.Where(ps...)
-	return gdo
+func (_d *GroupDeleteOne) Where(ps ...predicate.Group) *GroupDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (gdo *GroupDeleteOne) Exec(ctx context.Context) error {
-	n, err := gdo.gd.Exec(ctx)
+func (_d *GroupDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -87,8 +87,8 @@ func (gdo *GroupDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gdo *GroupDeleteOne) ExecX(ctx context.Context) {
-	if err := gdo.Exec(ctx); err != nil {
+func (_d *GroupDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

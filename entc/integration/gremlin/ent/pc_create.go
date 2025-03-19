@@ -23,18 +23,18 @@ type PCCreate struct {
 }
 
 // Mutation returns the PCMutation object of the builder.
-func (_pc *PCCreate) Mutation() *PCMutation {
-	return _pc.mutation
+func (_c *PCCreate) Mutation() *PCMutation {
+	return _c.mutation
 }
 
 // Save creates the PC in the database.
-func (_pc *PCCreate) Save(ctx context.Context) (*PC, error) {
-	return withHooks(ctx, _pc.gremlinSave, _pc.mutation, _pc.hooks)
+func (_c *PCCreate) Save(ctx context.Context) (*PC, error) {
+	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_pc *PCCreate) SaveX(ctx context.Context) *PC {
-	v, err := _pc.Save(ctx)
+func (_c *PCCreate) SaveX(ctx context.Context) *PC {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -42,45 +42,45 @@ func (_pc *PCCreate) SaveX(ctx context.Context) *PC {
 }
 
 // Exec executes the query.
-func (_pc *PCCreate) Exec(ctx context.Context) error {
-	_, err := _pc.Save(ctx)
+func (_c *PCCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_pc *PCCreate) ExecX(ctx context.Context) {
-	if err := _pc.Exec(ctx); err != nil {
+func (_c *PCCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_pc *PCCreate) check() error {
+func (_c *PCCreate) check() error {
 	return nil
 }
 
-func (_pc *PCCreate) gremlinSave(ctx context.Context) (*PC, error) {
-	if err := _pc.check(); err != nil {
+func (_c *PCCreate) gremlinSave(ctx context.Context) (*PC, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := _pc.gremlin().Query()
-	if err := _pc.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _c.gremlin().Query()
+	if err := _c.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	rnode := &PC{config: _pc.config}
+	rnode := &PC{config: _c.config}
 	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	_pc.mutation.id = &rnode.ID
-	_pc.mutation.done = true
+	_c.mutation.id = &rnode.ID
+	_c.mutation.done = true
 	return rnode, nil
 }
 
-func (_pc *PCCreate) gremlin() *dsl.Traversal {
+func (_c *PCCreate) gremlin() *dsl.Traversal {
 	v := g.AddV(pc.Label)
 	return v.ValueMap(true)
 }

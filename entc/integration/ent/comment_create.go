@@ -27,86 +27,86 @@ type CommentCreate struct {
 }
 
 // SetUniqueInt sets the "unique_int" field.
-func (cc *CommentCreate) SetUniqueInt(i int) *CommentCreate {
-	cc.mutation.SetUniqueInt(i)
-	return cc
+func (_c *CommentCreate) SetUniqueInt(i int) *CommentCreate {
+	_c.mutation.SetUniqueInt(i)
+	return _c
 }
 
 // SetUniqueFloat sets the "unique_float" field.
-func (cc *CommentCreate) SetUniqueFloat(f float64) *CommentCreate {
-	cc.mutation.SetUniqueFloat(f)
-	return cc
+func (_c *CommentCreate) SetUniqueFloat(f float64) *CommentCreate {
+	_c.mutation.SetUniqueFloat(f)
+	return _c
 }
 
 // SetNillableInt sets the "nillable_int" field.
-func (cc *CommentCreate) SetNillableInt(i int) *CommentCreate {
-	cc.mutation.SetNillableInt(i)
-	return cc
+func (_c *CommentCreate) SetNillableInt(i int) *CommentCreate {
+	_c.mutation.SetNillableInt(i)
+	return _c
 }
 
 // SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
-func (cc *CommentCreate) SetNillableNillableInt(i *int) *CommentCreate {
+func (_c *CommentCreate) SetNillableNillableInt(i *int) *CommentCreate {
 	if i != nil {
-		cc.SetNillableInt(*i)
+		_c.SetNillableInt(*i)
 	}
-	return cc
+	return _c
 }
 
 // SetTable sets the "table" field.
-func (cc *CommentCreate) SetTable(s string) *CommentCreate {
-	cc.mutation.SetTable(s)
-	return cc
+func (_c *CommentCreate) SetTable(s string) *CommentCreate {
+	_c.mutation.SetTable(s)
+	return _c
 }
 
 // SetNillableTable sets the "table" field if the given value is not nil.
-func (cc *CommentCreate) SetNillableTable(s *string) *CommentCreate {
+func (_c *CommentCreate) SetNillableTable(s *string) *CommentCreate {
 	if s != nil {
-		cc.SetTable(*s)
+		_c.SetTable(*s)
 	}
-	return cc
+	return _c
 }
 
 // SetDir sets the "dir" field.
-func (cc *CommentCreate) SetDir(s schemadir.Dir) *CommentCreate {
-	cc.mutation.SetDir(s)
-	return cc
+func (_c *CommentCreate) SetDir(s schemadir.Dir) *CommentCreate {
+	_c.mutation.SetDir(s)
+	return _c
 }
 
 // SetNillableDir sets the "dir" field if the given value is not nil.
-func (cc *CommentCreate) SetNillableDir(s *schemadir.Dir) *CommentCreate {
+func (_c *CommentCreate) SetNillableDir(s *schemadir.Dir) *CommentCreate {
 	if s != nil {
-		cc.SetDir(*s)
+		_c.SetDir(*s)
 	}
-	return cc
+	return _c
 }
 
 // SetClient sets the "client" field.
-func (cc *CommentCreate) SetClient(s string) *CommentCreate {
-	cc.mutation.SetClient(s)
-	return cc
+func (_c *CommentCreate) SetClient(s string) *CommentCreate {
+	_c.mutation.SetClient(s)
+	return _c
 }
 
 // SetNillableClient sets the "client" field if the given value is not nil.
-func (cc *CommentCreate) SetNillableClient(s *string) *CommentCreate {
+func (_c *CommentCreate) SetNillableClient(s *string) *CommentCreate {
 	if s != nil {
-		cc.SetClient(*s)
+		_c.SetClient(*s)
 	}
-	return cc
+	return _c
 }
 
 // Mutation returns the CommentMutation object of the builder.
-func (cc *CommentCreate) Mutation() *CommentMutation {
-	return cc.mutation
+func (_c *CommentCreate) Mutation() *CommentMutation {
+	return _c.mutation
 }
 
 // Save creates the Comment in the database.
-func (cc *CommentCreate) Save(ctx context.Context) (*Comment, error) {
-	return withHooks(ctx, cc.sqlSave, cc.mutation, cc.hooks)
+func (_c *CommentCreate) Save(ctx context.Context) (*Comment, error) {
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (cc *CommentCreate) SaveX(ctx context.Context) *Comment {
-	v, err := cc.Save(ctx)
+func (_c *CommentCreate) SaveX(ctx context.Context) *Comment {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -114,35 +114,35 @@ func (cc *CommentCreate) SaveX(ctx context.Context) *Comment {
 }
 
 // Exec executes the query.
-func (cc *CommentCreate) Exec(ctx context.Context) error {
-	_, err := cc.Save(ctx)
+func (_c *CommentCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cc *CommentCreate) ExecX(ctx context.Context) {
-	if err := cc.Exec(ctx); err != nil {
+func (_c *CommentCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cc *CommentCreate) check() error {
-	if _, ok := cc.mutation.UniqueInt(); !ok {
+func (_c *CommentCreate) check() error {
+	if _, ok := _c.mutation.UniqueInt(); !ok {
 		return &ValidationError{Name: "unique_int", err: errors.New(`ent: missing required field "Comment.unique_int"`)}
 	}
-	if _, ok := cc.mutation.UniqueFloat(); !ok {
+	if _, ok := _c.mutation.UniqueFloat(); !ok {
 		return &ValidationError{Name: "unique_float", err: errors.New(`ent: missing required field "Comment.unique_float"`)}
 	}
 	return nil
 }
 
-func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
-	if err := cc.check(); err != nil {
+func (_c *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := cc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -150,38 +150,38 @@ func (cc *CommentCreate) sqlSave(ctx context.Context) (*Comment, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	cc.mutation.id = &_node.ID
-	cc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
+func (_c *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Comment{config: cc.config}
+		_node = &Comment{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(comment.Table, sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt))
 	)
-	_spec.OnConflict = cc.conflict
-	if value, ok := cc.mutation.UniqueInt(); ok {
+	_spec.OnConflict = _c.conflict
+	if value, ok := _c.mutation.UniqueInt(); ok {
 		_spec.SetField(comment.FieldUniqueInt, field.TypeInt, value)
 		_node.UniqueInt = value
 	}
-	if value, ok := cc.mutation.UniqueFloat(); ok {
+	if value, ok := _c.mutation.UniqueFloat(); ok {
 		_spec.SetField(comment.FieldUniqueFloat, field.TypeFloat64, value)
 		_node.UniqueFloat = value
 	}
-	if value, ok := cc.mutation.NillableInt(); ok {
+	if value, ok := _c.mutation.NillableInt(); ok {
 		_spec.SetField(comment.FieldNillableInt, field.TypeInt, value)
 		_node.NillableInt = &value
 	}
-	if value, ok := cc.mutation.Table(); ok {
+	if value, ok := _c.mutation.Table(); ok {
 		_spec.SetField(comment.FieldTable, field.TypeString, value)
 		_node.Table = value
 	}
-	if value, ok := cc.mutation.Dir(); ok {
+	if value, ok := _c.mutation.Dir(); ok {
 		_spec.SetField(comment.FieldDir, field.TypeJSON, value)
 		_node.Dir = value
 	}
-	if value, ok := cc.mutation.GetClient(); ok {
+	if value, ok := _c.mutation.GetClient(); ok {
 		_spec.SetField(comment.FieldClient, field.TypeString, value)
 		_node.Client = value
 	}
@@ -204,10 +204,10 @@ func (cc *CommentCreate) createSpec() (*Comment, *sqlgraph.CreateSpec) {
 //			SetUniqueInt(v+v).
 //		}).
 //		Exec(ctx)
-func (cc *CommentCreate) OnConflict(opts ...sql.ConflictOption) *CommentUpsertOne {
-	cc.conflict = opts
+func (_c *CommentCreate) OnConflict(opts ...sql.ConflictOption) *CommentUpsertOne {
+	_c.conflict = opts
 	return &CommentUpsertOne{
-		create: cc,
+		create: _c,
 	}
 }
 
@@ -217,10 +217,10 @@ func (cc *CommentCreate) OnConflict(opts ...sql.ConflictOption) *CommentUpsertOn
 //	client.Comment.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (cc *CommentCreate) OnConflictColumns(columns ...string) *CommentUpsertOne {
-	cc.conflict = append(cc.conflict, sql.ConflictColumns(columns...))
+func (_c *CommentCreate) OnConflictColumns(columns ...string) *CommentUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &CommentUpsertOne{
-		create: cc,
+		create: _c,
 	}
 }
 
@@ -566,16 +566,16 @@ type CommentCreateBulk struct {
 }
 
 // Save creates the Comment entities in the database.
-func (ccb *CommentCreateBulk) Save(ctx context.Context) ([]*Comment, error) {
-	if ccb.err != nil {
-		return nil, ccb.err
+func (_c *CommentCreateBulk) Save(ctx context.Context) ([]*Comment, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
-	nodes := make([]*Comment, len(ccb.builders))
-	mutators := make([]Mutator, len(ccb.builders))
-	for i := range ccb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Comment, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := ccb.builders[i]
+			builder := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CommentMutation)
 				if !ok {
@@ -588,12 +588,12 @@ func (ccb *CommentCreateBulk) Save(ctx context.Context) ([]*Comment, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, ccb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = ccb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ccb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -617,7 +617,7 @@ func (ccb *CommentCreateBulk) Save(ctx context.Context) ([]*Comment, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, ccb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -625,8 +625,8 @@ func (ccb *CommentCreateBulk) Save(ctx context.Context) ([]*Comment, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ccb *CommentCreateBulk) SaveX(ctx context.Context) []*Comment {
-	v, err := ccb.Save(ctx)
+func (_c *CommentCreateBulk) SaveX(ctx context.Context) []*Comment {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -634,14 +634,14 @@ func (ccb *CommentCreateBulk) SaveX(ctx context.Context) []*Comment {
 }
 
 // Exec executes the query.
-func (ccb *CommentCreateBulk) Exec(ctx context.Context) error {
-	_, err := ccb.Save(ctx)
+func (_c *CommentCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ccb *CommentCreateBulk) ExecX(ctx context.Context) {
-	if err := ccb.Exec(ctx); err != nil {
+func (_c *CommentCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -661,10 +661,10 @@ func (ccb *CommentCreateBulk) ExecX(ctx context.Context) {
 //			SetUniqueInt(v+v).
 //		}).
 //		Exec(ctx)
-func (ccb *CommentCreateBulk) OnConflict(opts ...sql.ConflictOption) *CommentUpsertBulk {
-	ccb.conflict = opts
+func (_c *CommentCreateBulk) OnConflict(opts ...sql.ConflictOption) *CommentUpsertBulk {
+	_c.conflict = opts
 	return &CommentUpsertBulk{
-		create: ccb,
+		create: _c,
 	}
 }
 
@@ -674,10 +674,10 @@ func (ccb *CommentCreateBulk) OnConflict(opts ...sql.ConflictOption) *CommentUps
 //	client.Comment.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (ccb *CommentCreateBulk) OnConflictColumns(columns ...string) *CommentUpsertBulk {
-	ccb.conflict = append(ccb.conflict, sql.ConflictColumns(columns...))
+func (_c *CommentCreateBulk) OnConflictColumns(columns ...string) *CommentUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &CommentUpsertBulk{
-		create: ccb,
+		create: _c,
 	}
 }
 

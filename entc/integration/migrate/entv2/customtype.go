@@ -50,7 +50,7 @@ func (*CustomType) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the CustomType fields.
-func (ct *CustomType) assignValues(columns []string, values []any) error {
+func (_m *CustomType) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -61,27 +61,27 @@ func (ct *CustomType) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			ct.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case customtype.FieldCustom:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field custom", values[i])
 			} else if value.Valid {
-				ct.Custom = value.String
+				_m.Custom = value.String
 			}
 		case customtype.FieldTz0:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field tz0", values[i])
 			} else if value.Valid {
-				ct.Tz0 = value.Time
+				_m.Tz0 = value.Time
 			}
 		case customtype.FieldTz3:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field tz3", values[i])
 			} else if value.Valid {
-				ct.Tz3 = value.Time
+				_m.Tz3 = value.Time
 			}
 		default:
-			ct.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -89,41 +89,41 @@ func (ct *CustomType) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the CustomType.
 // This includes values selected through modifiers, order, etc.
-func (ct *CustomType) Value(name string) (ent.Value, error) {
-	return ct.selectValues.Get(name)
+func (_m *CustomType) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this CustomType.
 // Note that you need to call CustomType.Unwrap() before calling this method if this CustomType
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (ct *CustomType) Update() *CustomTypeUpdateOne {
-	return NewCustomTypeClient(ct.config).UpdateOne(ct)
+func (_m *CustomType) Update() *CustomTypeUpdateOne {
+	return NewCustomTypeClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the CustomType entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (ct *CustomType) Unwrap() *CustomType {
-	_tx, ok := ct.config.driver.(*txDriver)
+func (_m *CustomType) Unwrap() *CustomType {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("entv2: CustomType is not a transactional entity")
 	}
-	ct.config.driver = _tx.drv
-	return ct
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (ct *CustomType) String() string {
+func (_m *CustomType) String() string {
 	var builder strings.Builder
 	builder.WriteString("CustomType(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", ct.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("custom=")
-	builder.WriteString(ct.Custom)
+	builder.WriteString(_m.Custom)
 	builder.WriteString(", ")
 	builder.WriteString("tz0=")
-	builder.WriteString(ct.Tz0.Format(time.ANSIC))
+	builder.WriteString(_m.Tz0.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("tz3=")
-	builder.WriteString(ct.Tz3.Format(time.ANSIC))
+	builder.WriteString(_m.Tz3.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

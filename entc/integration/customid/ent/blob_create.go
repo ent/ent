@@ -28,95 +28,95 @@ type BlobCreate struct {
 }
 
 // SetUUID sets the "uuid" field.
-func (bc *BlobCreate) SetUUID(u uuid.UUID) *BlobCreate {
-	bc.mutation.SetUUID(u)
-	return bc
+func (_c *BlobCreate) SetUUID(u uuid.UUID) *BlobCreate {
+	_c.mutation.SetUUID(u)
+	return _c
 }
 
 // SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (bc *BlobCreate) SetNillableUUID(u *uuid.UUID) *BlobCreate {
+func (_c *BlobCreate) SetNillableUUID(u *uuid.UUID) *BlobCreate {
 	if u != nil {
-		bc.SetUUID(*u)
+		_c.SetUUID(*u)
 	}
-	return bc
+	return _c
 }
 
 // SetCount sets the "count" field.
-func (bc *BlobCreate) SetCount(i int) *BlobCreate {
-	bc.mutation.SetCount(i)
-	return bc
+func (_c *BlobCreate) SetCount(i int) *BlobCreate {
+	_c.mutation.SetCount(i)
+	return _c
 }
 
 // SetNillableCount sets the "count" field if the given value is not nil.
-func (bc *BlobCreate) SetNillableCount(i *int) *BlobCreate {
+func (_c *BlobCreate) SetNillableCount(i *int) *BlobCreate {
 	if i != nil {
-		bc.SetCount(*i)
+		_c.SetCount(*i)
 	}
-	return bc
+	return _c
 }
 
 // SetID sets the "id" field.
-func (bc *BlobCreate) SetID(u uuid.UUID) *BlobCreate {
-	bc.mutation.SetID(u)
-	return bc
+func (_c *BlobCreate) SetID(u uuid.UUID) *BlobCreate {
+	_c.mutation.SetID(u)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (bc *BlobCreate) SetNillableID(u *uuid.UUID) *BlobCreate {
+func (_c *BlobCreate) SetNillableID(u *uuid.UUID) *BlobCreate {
 	if u != nil {
-		bc.SetID(*u)
+		_c.SetID(*u)
 	}
-	return bc
+	return _c
 }
 
 // SetParentID sets the "parent" edge to the Blob entity by ID.
-func (bc *BlobCreate) SetParentID(id uuid.UUID) *BlobCreate {
-	bc.mutation.SetParentID(id)
-	return bc
+func (_c *BlobCreate) SetParentID(id uuid.UUID) *BlobCreate {
+	_c.mutation.SetParentID(id)
+	return _c
 }
 
 // SetNillableParentID sets the "parent" edge to the Blob entity by ID if the given value is not nil.
-func (bc *BlobCreate) SetNillableParentID(id *uuid.UUID) *BlobCreate {
+func (_c *BlobCreate) SetNillableParentID(id *uuid.UUID) *BlobCreate {
 	if id != nil {
-		bc = bc.SetParentID(*id)
+		_c = _c.SetParentID(*id)
 	}
-	return bc
+	return _c
 }
 
 // SetParent sets the "parent" edge to the Blob entity.
-func (bc *BlobCreate) SetParent(b *Blob) *BlobCreate {
-	return bc.SetParentID(b.ID)
+func (_c *BlobCreate) SetParent(b *Blob) *BlobCreate {
+	return _c.SetParentID(b.ID)
 }
 
 // AddLinkIDs adds the "links" edge to the Blob entity by IDs.
-func (bc *BlobCreate) AddLinkIDs(ids ...uuid.UUID) *BlobCreate {
-	bc.mutation.AddLinkIDs(ids...)
-	return bc
+func (_c *BlobCreate) AddLinkIDs(ids ...uuid.UUID) *BlobCreate {
+	_c.mutation.AddLinkIDs(ids...)
+	return _c
 }
 
 // AddLinks adds the "links" edges to the Blob entity.
-func (bc *BlobCreate) AddLinks(b ...*Blob) *BlobCreate {
+func (_c *BlobCreate) AddLinks(b ...*Blob) *BlobCreate {
 	ids := make([]uuid.UUID, len(b))
 	for i := range b {
 		ids[i] = b[i].ID
 	}
-	return bc.AddLinkIDs(ids...)
+	return _c.AddLinkIDs(ids...)
 }
 
 // Mutation returns the BlobMutation object of the builder.
-func (bc *BlobCreate) Mutation() *BlobMutation {
-	return bc.mutation
+func (_c *BlobCreate) Mutation() *BlobMutation {
+	return _c.mutation
 }
 
 // Save creates the Blob in the database.
-func (bc *BlobCreate) Save(ctx context.Context) (*Blob, error) {
-	bc.defaults()
-	return withHooks(ctx, bc.sqlSave, bc.mutation, bc.hooks)
+func (_c *BlobCreate) Save(ctx context.Context) (*Blob, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (bc *BlobCreate) SaveX(ctx context.Context) *Blob {
-	v, err := bc.Save(ctx)
+func (_c *BlobCreate) SaveX(ctx context.Context) *Blob {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -124,51 +124,51 @@ func (bc *BlobCreate) SaveX(ctx context.Context) *Blob {
 }
 
 // Exec executes the query.
-func (bc *BlobCreate) Exec(ctx context.Context) error {
-	_, err := bc.Save(ctx)
+func (_c *BlobCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bc *BlobCreate) ExecX(ctx context.Context) {
-	if err := bc.Exec(ctx); err != nil {
+func (_c *BlobCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (bc *BlobCreate) defaults() {
-	if _, ok := bc.mutation.UUID(); !ok {
+func (_c *BlobCreate) defaults() {
+	if _, ok := _c.mutation.UUID(); !ok {
 		v := blob.DefaultUUID()
-		bc.mutation.SetUUID(v)
+		_c.mutation.SetUUID(v)
 	}
-	if _, ok := bc.mutation.Count(); !ok {
+	if _, ok := _c.mutation.Count(); !ok {
 		v := blob.DefaultCount
-		bc.mutation.SetCount(v)
+		_c.mutation.SetCount(v)
 	}
-	if _, ok := bc.mutation.ID(); !ok {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := blob.DefaultID()
-		bc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (bc *BlobCreate) check() error {
-	if _, ok := bc.mutation.UUID(); !ok {
+func (_c *BlobCreate) check() error {
+	if _, ok := _c.mutation.UUID(); !ok {
 		return &ValidationError{Name: "uuid", err: errors.New(`ent: missing required field "Blob.uuid"`)}
 	}
-	if _, ok := bc.mutation.Count(); !ok {
+	if _, ok := _c.mutation.Count(); !ok {
 		return &ValidationError{Name: "count", err: errors.New(`ent: missing required field "Blob.count"`)}
 	}
 	return nil
 }
 
-func (bc *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
-	if err := bc.check(); err != nil {
+func (_c *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := bc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -181,30 +181,30 @@ func (bc *BlobCreate) sqlSave(ctx context.Context) (*Blob, error) {
 			return nil, err
 		}
 	}
-	bc.mutation.id = &_node.ID
-	bc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
+func (_c *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Blob{config: bc.config}
+		_node = &Blob{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(blob.Table, sqlgraph.NewFieldSpec(blob.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = bc.conflict
-	if id, ok := bc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := bc.mutation.UUID(); ok {
+	if value, ok := _c.mutation.UUID(); ok {
 		_spec.SetField(blob.FieldUUID, field.TypeUUID, value)
 		_node.UUID = value
 	}
-	if value, ok := bc.mutation.Count(); ok {
+	if value, ok := _c.mutation.Count(); ok {
 		_spec.SetField(blob.FieldCount, field.TypeInt, value)
 		_node.Count = value
 	}
-	if nodes := bc.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
 			Inverse: false,
@@ -221,7 +221,7 @@ func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 		_node.blob_parent = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := bc.mutation.LinksIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.LinksIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
@@ -235,7 +235,7 @@ func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		createE := &BlobLinkCreate{config: bc.config, mutation: newBlobLinkMutation(bc.config, OpCreate)}
+		createE := &BlobLinkCreate{config: _c.config, mutation: newBlobLinkMutation(_c.config, OpCreate)}
 		createE.defaults()
 		_, specE := createE.createSpec()
 		edge.Target.Fields = specE.Fields
@@ -260,10 +260,10 @@ func (bc *BlobCreate) createSpec() (*Blob, *sqlgraph.CreateSpec) {
 //			SetUUID(v+v).
 //		}).
 //		Exec(ctx)
-func (bc *BlobCreate) OnConflict(opts ...sql.ConflictOption) *BlobUpsertOne {
-	bc.conflict = opts
+func (_c *BlobCreate) OnConflict(opts ...sql.ConflictOption) *BlobUpsertOne {
+	_c.conflict = opts
 	return &BlobUpsertOne{
-		create: bc,
+		create: _c,
 	}
 }
 
@@ -273,10 +273,10 @@ func (bc *BlobCreate) OnConflict(opts ...sql.ConflictOption) *BlobUpsertOne {
 //	client.Blob.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (bc *BlobCreate) OnConflictColumns(columns ...string) *BlobUpsertOne {
-	bc.conflict = append(bc.conflict, sql.ConflictColumns(columns...))
+func (_c *BlobCreate) OnConflictColumns(columns ...string) *BlobUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &BlobUpsertOne{
-		create: bc,
+		create: _c,
 	}
 }
 
@@ -453,16 +453,16 @@ type BlobCreateBulk struct {
 }
 
 // Save creates the Blob entities in the database.
-func (bcb *BlobCreateBulk) Save(ctx context.Context) ([]*Blob, error) {
-	if bcb.err != nil {
-		return nil, bcb.err
+func (_c *BlobCreateBulk) Save(ctx context.Context) ([]*Blob, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(bcb.builders))
-	nodes := make([]*Blob, len(bcb.builders))
-	mutators := make([]Mutator, len(bcb.builders))
-	for i := range bcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Blob, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := bcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*BlobMutation)
@@ -476,12 +476,12 @@ func (bcb *BlobCreateBulk) Save(ctx context.Context) ([]*Blob, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, bcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = bcb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, bcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -501,7 +501,7 @@ func (bcb *BlobCreateBulk) Save(ctx context.Context) ([]*Blob, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, bcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -509,8 +509,8 @@ func (bcb *BlobCreateBulk) Save(ctx context.Context) ([]*Blob, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (bcb *BlobCreateBulk) SaveX(ctx context.Context) []*Blob {
-	v, err := bcb.Save(ctx)
+func (_c *BlobCreateBulk) SaveX(ctx context.Context) []*Blob {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -518,14 +518,14 @@ func (bcb *BlobCreateBulk) SaveX(ctx context.Context) []*Blob {
 }
 
 // Exec executes the query.
-func (bcb *BlobCreateBulk) Exec(ctx context.Context) error {
-	_, err := bcb.Save(ctx)
+func (_c *BlobCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bcb *BlobCreateBulk) ExecX(ctx context.Context) {
-	if err := bcb.Exec(ctx); err != nil {
+func (_c *BlobCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -545,10 +545,10 @@ func (bcb *BlobCreateBulk) ExecX(ctx context.Context) {
 //			SetUUID(v+v).
 //		}).
 //		Exec(ctx)
-func (bcb *BlobCreateBulk) OnConflict(opts ...sql.ConflictOption) *BlobUpsertBulk {
-	bcb.conflict = opts
+func (_c *BlobCreateBulk) OnConflict(opts ...sql.ConflictOption) *BlobUpsertBulk {
+	_c.conflict = opts
 	return &BlobUpsertBulk{
-		create: bcb,
+		create: _c,
 	}
 }
 
@@ -558,10 +558,10 @@ func (bcb *BlobCreateBulk) OnConflict(opts ...sql.ConflictOption) *BlobUpsertBul
 //	client.Blob.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (bcb *BlobCreateBulk) OnConflictColumns(columns ...string) *BlobUpsertBulk {
-	bcb.conflict = append(bcb.conflict, sql.ConflictColumns(columns...))
+func (_c *BlobCreateBulk) OnConflictColumns(columns ...string) *BlobUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &BlobUpsertBulk{
-		create: bcb,
+		create: _c,
 	}
 }
 

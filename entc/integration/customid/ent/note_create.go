@@ -28,81 +28,81 @@ type NoteCreate struct {
 }
 
 // SetText sets the "text" field.
-func (nc *NoteCreate) SetText(s string) *NoteCreate {
-	nc.mutation.SetText(s)
-	return nc
+func (_c *NoteCreate) SetText(s string) *NoteCreate {
+	_c.mutation.SetText(s)
+	return _c
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (nc *NoteCreate) SetNillableText(s *string) *NoteCreate {
+func (_c *NoteCreate) SetNillableText(s *string) *NoteCreate {
 	if s != nil {
-		nc.SetText(*s)
+		_c.SetText(*s)
 	}
-	return nc
+	return _c
 }
 
 // SetID sets the "id" field.
-func (nc *NoteCreate) SetID(si schema.NoteID) *NoteCreate {
-	nc.mutation.SetID(si)
-	return nc
+func (_c *NoteCreate) SetID(si schema.NoteID) *NoteCreate {
+	_c.mutation.SetID(si)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (nc *NoteCreate) SetNillableID(si *schema.NoteID) *NoteCreate {
+func (_c *NoteCreate) SetNillableID(si *schema.NoteID) *NoteCreate {
 	if si != nil {
-		nc.SetID(*si)
+		_c.SetID(*si)
 	}
-	return nc
+	return _c
 }
 
 // SetParentID sets the "parent" edge to the Note entity by ID.
-func (nc *NoteCreate) SetParentID(id schema.NoteID) *NoteCreate {
-	nc.mutation.SetParentID(id)
-	return nc
+func (_c *NoteCreate) SetParentID(id schema.NoteID) *NoteCreate {
+	_c.mutation.SetParentID(id)
+	return _c
 }
 
 // SetNillableParentID sets the "parent" edge to the Note entity by ID if the given value is not nil.
-func (nc *NoteCreate) SetNillableParentID(id *schema.NoteID) *NoteCreate {
+func (_c *NoteCreate) SetNillableParentID(id *schema.NoteID) *NoteCreate {
 	if id != nil {
-		nc = nc.SetParentID(*id)
+		_c = _c.SetParentID(*id)
 	}
-	return nc
+	return _c
 }
 
 // SetParent sets the "parent" edge to the Note entity.
-func (nc *NoteCreate) SetParent(n *Note) *NoteCreate {
-	return nc.SetParentID(n.ID)
+func (_c *NoteCreate) SetParent(n *Note) *NoteCreate {
+	return _c.SetParentID(n.ID)
 }
 
 // AddChildIDs adds the "children" edge to the Note entity by IDs.
-func (nc *NoteCreate) AddChildIDs(ids ...schema.NoteID) *NoteCreate {
-	nc.mutation.AddChildIDs(ids...)
-	return nc
+func (_c *NoteCreate) AddChildIDs(ids ...schema.NoteID) *NoteCreate {
+	_c.mutation.AddChildIDs(ids...)
+	return _c
 }
 
 // AddChildren adds the "children" edges to the Note entity.
-func (nc *NoteCreate) AddChildren(n ...*Note) *NoteCreate {
+func (_c *NoteCreate) AddChildren(n ...*Note) *NoteCreate {
 	ids := make([]schema.NoteID, len(n))
 	for i := range n {
 		ids[i] = n[i].ID
 	}
-	return nc.AddChildIDs(ids...)
+	return _c.AddChildIDs(ids...)
 }
 
 // Mutation returns the NoteMutation object of the builder.
-func (nc *NoteCreate) Mutation() *NoteMutation {
-	return nc.mutation
+func (_c *NoteCreate) Mutation() *NoteMutation {
+	return _c.mutation
 }
 
 // Save creates the Note in the database.
-func (nc *NoteCreate) Save(ctx context.Context) (*Note, error) {
-	nc.defaults()
-	return withHooks(ctx, nc.sqlSave, nc.mutation, nc.hooks)
+func (_c *NoteCreate) Save(ctx context.Context) (*Note, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (nc *NoteCreate) SaveX(ctx context.Context) *Note {
-	v, err := nc.Save(ctx)
+func (_c *NoteCreate) SaveX(ctx context.Context) *Note {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -110,29 +110,29 @@ func (nc *NoteCreate) SaveX(ctx context.Context) *Note {
 }
 
 // Exec executes the query.
-func (nc *NoteCreate) Exec(ctx context.Context) error {
-	_, err := nc.Save(ctx)
+func (_c *NoteCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (nc *NoteCreate) ExecX(ctx context.Context) {
-	if err := nc.Exec(ctx); err != nil {
+func (_c *NoteCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (nc *NoteCreate) defaults() {
-	if _, ok := nc.mutation.ID(); !ok {
+func (_c *NoteCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := note.DefaultID()
-		nc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (nc *NoteCreate) check() error {
-	if v, ok := nc.mutation.ID(); ok {
+func (_c *NoteCreate) check() error {
+	if v, ok := _c.mutation.ID(); ok {
 		if err := note.IDValidator(string(v)); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Note.id": %w`, err)}
 		}
@@ -140,12 +140,12 @@ func (nc *NoteCreate) check() error {
 	return nil
 }
 
-func (nc *NoteCreate) sqlSave(ctx context.Context) (*Note, error) {
-	if err := nc.check(); err != nil {
+func (_c *NoteCreate) sqlSave(ctx context.Context) (*Note, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := nc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, nc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -158,26 +158,26 @@ func (nc *NoteCreate) sqlSave(ctx context.Context) (*Note, error) {
 			return nil, fmt.Errorf("unexpected Note.ID type: %T", _spec.ID.Value)
 		}
 	}
-	nc.mutation.id = &_node.ID
-	nc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (nc *NoteCreate) createSpec() (*Note, *sqlgraph.CreateSpec) {
+func (_c *NoteCreate) createSpec() (*Note, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Note{config: nc.config}
+		_node = &Note{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(note.Table, sqlgraph.NewFieldSpec(note.FieldID, field.TypeString))
 	)
-	_spec.OnConflict = nc.conflict
-	if id, ok := nc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := nc.mutation.Text(); ok {
+	if value, ok := _c.mutation.Text(); ok {
 		_spec.SetField(note.FieldText, field.TypeString, value)
 		_node.Text = value
 	}
-	if nodes := nc.mutation.ParentIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -194,7 +194,7 @@ func (nc *NoteCreate) createSpec() (*Note, *sqlgraph.CreateSpec) {
 		_node.note_children = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := nc.mutation.ChildrenIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.ChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -229,10 +229,10 @@ func (nc *NoteCreate) createSpec() (*Note, *sqlgraph.CreateSpec) {
 //			SetText(v+v).
 //		}).
 //		Exec(ctx)
-func (nc *NoteCreate) OnConflict(opts ...sql.ConflictOption) *NoteUpsertOne {
-	nc.conflict = opts
+func (_c *NoteCreate) OnConflict(opts ...sql.ConflictOption) *NoteUpsertOne {
+	_c.conflict = opts
 	return &NoteUpsertOne{
-		create: nc,
+		create: _c,
 	}
 }
 
@@ -242,10 +242,10 @@ func (nc *NoteCreate) OnConflict(opts ...sql.ConflictOption) *NoteUpsertOne {
 //	client.Note.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (nc *NoteCreate) OnConflictColumns(columns ...string) *NoteUpsertOne {
-	nc.conflict = append(nc.conflict, sql.ConflictColumns(columns...))
+func (_c *NoteCreate) OnConflictColumns(columns ...string) *NoteUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &NoteUpsertOne{
-		create: nc,
+		create: _c,
 	}
 }
 
@@ -396,16 +396,16 @@ type NoteCreateBulk struct {
 }
 
 // Save creates the Note entities in the database.
-func (ncb *NoteCreateBulk) Save(ctx context.Context) ([]*Note, error) {
-	if ncb.err != nil {
-		return nil, ncb.err
+func (_c *NoteCreateBulk) Save(ctx context.Context) ([]*Note, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(ncb.builders))
-	nodes := make([]*Note, len(ncb.builders))
-	mutators := make([]Mutator, len(ncb.builders))
-	for i := range ncb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Note, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := ncb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*NoteMutation)
@@ -419,12 +419,12 @@ func (ncb *NoteCreateBulk) Save(ctx context.Context) ([]*Note, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, ncb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = ncb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ncb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -444,7 +444,7 @@ func (ncb *NoteCreateBulk) Save(ctx context.Context) ([]*Note, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, ncb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -452,8 +452,8 @@ func (ncb *NoteCreateBulk) Save(ctx context.Context) ([]*Note, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ncb *NoteCreateBulk) SaveX(ctx context.Context) []*Note {
-	v, err := ncb.Save(ctx)
+func (_c *NoteCreateBulk) SaveX(ctx context.Context) []*Note {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -461,14 +461,14 @@ func (ncb *NoteCreateBulk) SaveX(ctx context.Context) []*Note {
 }
 
 // Exec executes the query.
-func (ncb *NoteCreateBulk) Exec(ctx context.Context) error {
-	_, err := ncb.Save(ctx)
+func (_c *NoteCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ncb *NoteCreateBulk) ExecX(ctx context.Context) {
-	if err := ncb.Exec(ctx); err != nil {
+func (_c *NoteCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -488,10 +488,10 @@ func (ncb *NoteCreateBulk) ExecX(ctx context.Context) {
 //			SetText(v+v).
 //		}).
 //		Exec(ctx)
-func (ncb *NoteCreateBulk) OnConflict(opts ...sql.ConflictOption) *NoteUpsertBulk {
-	ncb.conflict = opts
+func (_c *NoteCreateBulk) OnConflict(opts ...sql.ConflictOption) *NoteUpsertBulk {
+	_c.conflict = opts
 	return &NoteUpsertBulk{
-		create: ncb,
+		create: _c,
 	}
 }
 
@@ -501,10 +501,10 @@ func (ncb *NoteCreateBulk) OnConflict(opts ...sql.ConflictOption) *NoteUpsertBul
 //	client.Note.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (ncb *NoteCreateBulk) OnConflictColumns(columns ...string) *NoteUpsertBulk {
-	ncb.conflict = append(ncb.conflict, sql.ConflictColumns(columns...))
+func (_c *NoteCreateBulk) OnConflictColumns(columns ...string) *NoteUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &NoteUpsertBulk{
-		create: ncb,
+		create: _c,
 	}
 }
 

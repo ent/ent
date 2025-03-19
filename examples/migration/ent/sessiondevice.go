@@ -76,7 +76,7 @@ func (*SessionDevice) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the SessionDevice fields.
-func (sd *SessionDevice) assignValues(columns []string, values []any) error {
+func (_m *SessionDevice) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -86,40 +86,40 @@ func (sd *SessionDevice) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				sd.ID = *value
+				_m.ID = *value
 			}
 		case sessiondevice.FieldIPAddress:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field ip_address", values[i])
 			} else if value.Valid {
-				sd.IPAddress = value.String
+				_m.IPAddress = value.String
 			}
 		case sessiondevice.FieldUserAgent:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field user_agent", values[i])
 			} else if value.Valid {
-				sd.UserAgent = value.String
+				_m.UserAgent = value.String
 			}
 		case sessiondevice.FieldLocation:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field location", values[i])
 			} else if value.Valid {
-				sd.Location = value.String
+				_m.Location = value.String
 			}
 		case sessiondevice.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				sd.CreatedAt = value.Time
+				_m.CreatedAt = value.Time
 			}
 		case sessiondevice.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				sd.UpdatedAt = value.Time
+				_m.UpdatedAt = value.Time
 			}
 		default:
-			sd.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -127,52 +127,52 @@ func (sd *SessionDevice) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the SessionDevice.
 // This includes values selected through modifiers, order, etc.
-func (sd *SessionDevice) Value(name string) (ent.Value, error) {
-	return sd.selectValues.Get(name)
+func (_m *SessionDevice) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QuerySessions queries the "sessions" edge of the SessionDevice entity.
-func (sd *SessionDevice) QuerySessions() *SessionQuery {
-	return NewSessionDeviceClient(sd.config).QuerySessions(sd)
+func (_m *SessionDevice) QuerySessions() *SessionQuery {
+	return NewSessionDeviceClient(_m.config).QuerySessions(_m)
 }
 
 // Update returns a builder for updating this SessionDevice.
 // Note that you need to call SessionDevice.Unwrap() before calling this method if this SessionDevice
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (sd *SessionDevice) Update() *SessionDeviceUpdateOne {
-	return NewSessionDeviceClient(sd.config).UpdateOne(sd)
+func (_m *SessionDevice) Update() *SessionDeviceUpdateOne {
+	return NewSessionDeviceClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the SessionDevice entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (sd *SessionDevice) Unwrap() *SessionDevice {
-	_tx, ok := sd.config.driver.(*txDriver)
+func (_m *SessionDevice) Unwrap() *SessionDevice {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: SessionDevice is not a transactional entity")
 	}
-	sd.config.driver = _tx.drv
-	return sd
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (sd *SessionDevice) String() string {
+func (_m *SessionDevice) String() string {
 	var builder strings.Builder
 	builder.WriteString("SessionDevice(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", sd.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("ip_address=")
-	builder.WriteString(sd.IPAddress)
+	builder.WriteString(_m.IPAddress)
 	builder.WriteString(", ")
 	builder.WriteString("user_agent=")
-	builder.WriteString(sd.UserAgent)
+	builder.WriteString(_m.UserAgent)
 	builder.WriteString(", ")
 	builder.WriteString("location=")
-	builder.WriteString(sd.Location)
+	builder.WriteString(_m.Location)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
-	builder.WriteString(sd.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(sd.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

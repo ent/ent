@@ -33,40 +33,40 @@ type PCQuery struct {
 }
 
 // Where adds a new predicate for the PCQuery builder.
-func (pq *PCQuery) Where(ps ...predicate.PC) *PCQuery {
-	pq.predicates = append(pq.predicates, ps...)
-	return pq
+func (_q *PCQuery) Where(ps ...predicate.PC) *PCQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (pq *PCQuery) Limit(limit int) *PCQuery {
-	pq.ctx.Limit = &limit
-	return pq
+func (_q *PCQuery) Limit(limit int) *PCQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (pq *PCQuery) Offset(offset int) *PCQuery {
-	pq.ctx.Offset = &offset
-	return pq
+func (_q *PCQuery) Offset(offset int) *PCQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (pq *PCQuery) Unique(unique bool) *PCQuery {
-	pq.ctx.Unique = &unique
-	return pq
+func (_q *PCQuery) Unique(unique bool) *PCQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (pq *PCQuery) Order(o ...pc.OrderOption) *PCQuery {
-	pq.order = append(pq.order, o...)
-	return pq
+func (_q *PCQuery) Order(o ...pc.OrderOption) *PCQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // First returns the first PC entity from the query.
 // Returns a *NotFoundError when no PC was found.
-func (pq *PCQuery) First(ctx context.Context) (*PC, error) {
-	nodes, err := pq.Limit(1).All(setContextOp(ctx, pq.ctx, ent.OpQueryFirst))
+func (_q *PCQuery) First(ctx context.Context) (*PC, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -77,8 +77,8 @@ func (pq *PCQuery) First(ctx context.Context) (*PC, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (pq *PCQuery) FirstX(ctx context.Context) *PC {
-	node, err := pq.First(ctx)
+func (_q *PCQuery) FirstX(ctx context.Context) *PC {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -87,9 +87,9 @@ func (pq *PCQuery) FirstX(ctx context.Context) *PC {
 
 // FirstID returns the first PC ID from the query.
 // Returns a *NotFoundError when no PC ID was found.
-func (pq *PCQuery) FirstID(ctx context.Context) (id string, err error) {
+func (_q *PCQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = pq.Limit(1).IDs(setContextOp(ctx, pq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -100,8 +100,8 @@ func (pq *PCQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (pq *PCQuery) FirstIDX(ctx context.Context) string {
-	id, err := pq.FirstID(ctx)
+func (_q *PCQuery) FirstIDX(ctx context.Context) string {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -111,8 +111,8 @@ func (pq *PCQuery) FirstIDX(ctx context.Context) string {
 // Only returns a single PC entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one PC entity is found.
 // Returns a *NotFoundError when no PC entities are found.
-func (pq *PCQuery) Only(ctx context.Context) (*PC, error) {
-	nodes, err := pq.Limit(2).All(setContextOp(ctx, pq.ctx, ent.OpQueryOnly))
+func (_q *PCQuery) Only(ctx context.Context) (*PC, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -127,8 +127,8 @@ func (pq *PCQuery) Only(ctx context.Context) (*PC, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (pq *PCQuery) OnlyX(ctx context.Context) *PC {
-	node, err := pq.Only(ctx)
+func (_q *PCQuery) OnlyX(ctx context.Context) *PC {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -138,9 +138,9 @@ func (pq *PCQuery) OnlyX(ctx context.Context) *PC {
 // OnlyID is like Only, but returns the only PC ID in the query.
 // Returns a *NotSingularError when more than one PC ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (pq *PCQuery) OnlyID(ctx context.Context) (id string, err error) {
+func (_q *PCQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = pq.Limit(2).IDs(setContextOp(ctx, pq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -155,8 +155,8 @@ func (pq *PCQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (pq *PCQuery) OnlyIDX(ctx context.Context) string {
-	id, err := pq.OnlyID(ctx)
+func (_q *PCQuery) OnlyIDX(ctx context.Context) string {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -164,18 +164,18 @@ func (pq *PCQuery) OnlyIDX(ctx context.Context) string {
 }
 
 // All executes the query and returns a list of PCs.
-func (pq *PCQuery) All(ctx context.Context) ([]*PC, error) {
-	ctx = setContextOp(ctx, pq.ctx, ent.OpQueryAll)
-	if err := pq.prepareQuery(ctx); err != nil {
+func (_q *PCQuery) All(ctx context.Context) ([]*PC, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*PC, *PCQuery]()
-	return withInterceptors[[]*PC](ctx, pq, qr, pq.inters)
+	return withInterceptors[[]*PC](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (pq *PCQuery) AllX(ctx context.Context) []*PC {
-	nodes, err := pq.All(ctx)
+func (_q *PCQuery) AllX(ctx context.Context) []*PC {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -183,20 +183,20 @@ func (pq *PCQuery) AllX(ctx context.Context) []*PC {
 }
 
 // IDs executes the query and returns a list of PC IDs.
-func (pq *PCQuery) IDs(ctx context.Context) (ids []string, err error) {
-	if pq.ctx.Unique == nil && pq.path != nil {
-		pq.Unique(true)
+func (_q *PCQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, pq.ctx, ent.OpQueryIDs)
-	if err = pq.Select(pc.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(pc.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (pq *PCQuery) IDsX(ctx context.Context) []string {
-	ids, err := pq.IDs(ctx)
+func (_q *PCQuery) IDsX(ctx context.Context) []string {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -204,17 +204,17 @@ func (pq *PCQuery) IDsX(ctx context.Context) []string {
 }
 
 // Count returns the count of the given query.
-func (pq *PCQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, pq.ctx, ent.OpQueryCount)
-	if err := pq.prepareQuery(ctx); err != nil {
+func (_q *PCQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, pq, querierCount[*PCQuery](), pq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*PCQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (pq *PCQuery) CountX(ctx context.Context) int {
-	count, err := pq.Count(ctx)
+func (_q *PCQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -222,9 +222,9 @@ func (pq *PCQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (pq *PCQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, pq.ctx, ent.OpQueryExist)
-	switch _, err := pq.FirstID(ctx); {
+func (_q *PCQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -235,8 +235,8 @@ func (pq *PCQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (pq *PCQuery) ExistX(ctx context.Context) bool {
-	exist, err := pq.Exist(ctx)
+func (_q *PCQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -245,28 +245,28 @@ func (pq *PCQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the PCQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (pq *PCQuery) Clone() *PCQuery {
-	if pq == nil {
+func (_q *PCQuery) Clone() *PCQuery {
+	if _q == nil {
 		return nil
 	}
 	return &PCQuery{
-		config:     pq.config,
-		ctx:        pq.ctx.Clone(),
-		order:      append([]pc.OrderOption{}, pq.order...),
-		inters:     append([]Interceptor{}, pq.inters...),
-		predicates: append([]predicate.PC{}, pq.predicates...),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]pc.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.PC{}, _q.predicates...),
 		// clone intermediate query.
-		gremlin: pq.gremlin.Clone(),
-		path:    pq.path,
+		gremlin: _q.gremlin.Clone(),
+		path:    _q.path,
 	}
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
-func (pq *PCQuery) GroupBy(field string, fields ...string) *PCGroupBy {
-	pq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &PCGroupBy{build: pq}
-	grbuild.flds = &pq.ctx.Fields
+func (_q *PCQuery) GroupBy(field string, fields ...string) *PCGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &PCGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = pc.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -274,46 +274,46 @@ func (pq *PCQuery) GroupBy(field string, fields ...string) *PCGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (pq *PCQuery) Select(fields ...string) *PCSelect {
-	pq.ctx.Fields = append(pq.ctx.Fields, fields...)
-	sbuild := &PCSelect{PCQuery: pq}
+func (_q *PCQuery) Select(fields ...string) *PCSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &PCSelect{PCQuery: _q}
 	sbuild.label = pc.Label
-	sbuild.flds, sbuild.scan = &pq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a PCSelect configured with the given aggregations.
-func (pq *PCQuery) Aggregate(fns ...AggregateFunc) *PCSelect {
-	return pq.Select().Aggregate(fns...)
+func (_q *PCQuery) Aggregate(fns ...AggregateFunc) *PCSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (pq *PCQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range pq.inters {
+func (_q *PCQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, pq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	if pq.path != nil {
-		prev, err := pq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		pq.gremlin = prev
+		_q.gremlin = prev
 	}
 	return nil
 }
 
-func (pq *PCQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*PC, error) {
+func (_q *PCQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*PC, error) {
 	res := &gremlin.Response{}
-	traversal := pq.gremlinQuery(ctx)
-	if len(pq.ctx.Fields) > 0 {
-		fields := make([]any, len(pq.ctx.Fields))
-		for i, f := range pq.ctx.Fields {
+	traversal := _q.gremlinQuery(ctx)
+	if len(_q.ctx.Fields) > 0 {
+		fields := make([]any, len(_q.ctx.Fields))
+		for i, f := range _q.ctx.Fields {
 			fields[i] = f
 		}
 		traversal.ValueMap(fields...)
@@ -321,43 +321,43 @@ func (pq *PCQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*PC, e
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := pq.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
-	var _pcs PCs
-	if err := _pcs.FromResponse(res); err != nil {
+	var _ms PCs
+	if err := _ms.FromResponse(res); err != nil {
 		return nil, err
 	}
-	for i := range _pcs {
-		_pcs[i].config = pq.config
+	for i := range _ms {
+		_ms[i].config = _q.config
 	}
-	return _pcs, nil
+	return _ms, nil
 }
 
-func (pq *PCQuery) gremlinCount(ctx context.Context) (int, error) {
+func (_q *PCQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := pq.gremlinQuery(ctx).Count().Query()
-	if err := pq.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _q.gremlinQuery(ctx).Count().Query()
+	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
 }
 
-func (pq *PCQuery) gremlinQuery(context.Context) *dsl.Traversal {
+func (_q *PCQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(pc.Label)
-	if pq.gremlin != nil {
-		v = pq.gremlin.Clone()
+	if _q.gremlin != nil {
+		v = _q.gremlin.Clone()
 	}
-	for _, p := range pq.predicates {
+	for _, p := range _q.predicates {
 		p(v)
 	}
-	if len(pq.order) > 0 {
+	if len(_q.order) > 0 {
 		v.Order()
-		for _, p := range pq.order {
+		for _, p := range _q.order {
 			p(v)
 		}
 	}
-	switch limit, offset := pq.ctx.Limit, pq.ctx.Offset; {
+	switch limit, offset := _q.ctx.Limit, _q.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset+*limit)
 	case offset != nil:
@@ -365,7 +365,7 @@ func (pq *PCQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := pq.ctx.Unique; unique == nil || *unique {
+	if unique := _q.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v

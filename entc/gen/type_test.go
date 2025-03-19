@@ -21,7 +21,7 @@ func TestType(t *testing.T) {
 	require.Equal("T1", typ.Name)
 	require.Equal("t1", typ.Label())
 	require.Equal("t1", typ.Package())
-	require.Equal("t", typ.Receiver())
+	require.Equal("_m", typ.Receiver())
 
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
 		Fields: []*load.Field{
@@ -118,29 +118,6 @@ func TestType_Table(t *testing.T) {
 	for _, tt := range tests {
 		typ := &Type{Name: tt.name}
 		require.Equal(t, tt.label, typ.Table())
-	}
-}
-
-func TestType_Receiver(t *testing.T) {
-	tests := []struct {
-		name     string
-		receiver string
-	}{
-		{"User", "u"},
-		{"Group", "gr"},
-		{"UserData", "ud"},
-		{"UserInfo", "ui"},
-		{"User_Info", "ui"},
-		{"PHBUser", "pu"},
-		{"PHBOrg", "po"},
-		{"DomainSpecificLang", "dospla"},
-		{"[]byte", "b"},
-		{"[16]byte", "b"},
-		{"UserPKey", "up"},
-	}
-	for _, tt := range tests {
-		typ := &Type{Name: tt.name, Config: &Config{Package: "entc/gen"}}
-		require.Equal(t, tt.receiver, typ.Receiver())
 	}
 }
 

@@ -27,81 +27,81 @@ type BlogUpdate struct {
 }
 
 // Where appends a list predicates to the BlogUpdate builder.
-func (bu *BlogUpdate) Where(ps ...predicate.Blog) *BlogUpdate {
-	bu.mutation.Where(ps...)
-	return bu
+func (_u *BlogUpdate) Where(ps ...predicate.Blog) *BlogUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetOid sets the "oid" field.
-func (bu *BlogUpdate) SetOid(i int) *BlogUpdate {
-	bu.mutation.ResetOid()
-	bu.mutation.SetOid(i)
-	return bu
+func (_u *BlogUpdate) SetOid(i int) *BlogUpdate {
+	_u.mutation.ResetOid()
+	_u.mutation.SetOid(i)
+	return _u
 }
 
 // SetNillableOid sets the "oid" field if the given value is not nil.
-func (bu *BlogUpdate) SetNillableOid(i *int) *BlogUpdate {
+func (_u *BlogUpdate) SetNillableOid(i *int) *BlogUpdate {
 	if i != nil {
-		bu.SetOid(*i)
+		_u.SetOid(*i)
 	}
-	return bu
+	return _u
 }
 
 // AddOid adds i to the "oid" field.
-func (bu *BlogUpdate) AddOid(i int) *BlogUpdate {
-	bu.mutation.AddOid(i)
-	return bu
+func (_u *BlogUpdate) AddOid(i int) *BlogUpdate {
+	_u.mutation.AddOid(i)
+	return _u
 }
 
 // AddAdminIDs adds the "admins" edge to the User entity by IDs.
-func (bu *BlogUpdate) AddAdminIDs(ids ...int) *BlogUpdate {
-	bu.mutation.AddAdminIDs(ids...)
-	return bu
+func (_u *BlogUpdate) AddAdminIDs(ids ...int) *BlogUpdate {
+	_u.mutation.AddAdminIDs(ids...)
+	return _u
 }
 
 // AddAdmins adds the "admins" edges to the User entity.
-func (bu *BlogUpdate) AddAdmins(u ...*User) *BlogUpdate {
+func (_u *BlogUpdate) AddAdmins(u ...*User) *BlogUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return bu.AddAdminIDs(ids...)
+	return _u.AddAdminIDs(ids...)
 }
 
 // Mutation returns the BlogMutation object of the builder.
-func (bu *BlogUpdate) Mutation() *BlogMutation {
-	return bu.mutation
+func (_u *BlogUpdate) Mutation() *BlogMutation {
+	return _u.mutation
 }
 
 // ClearAdmins clears all "admins" edges to the User entity.
-func (bu *BlogUpdate) ClearAdmins() *BlogUpdate {
-	bu.mutation.ClearAdmins()
-	return bu
+func (_u *BlogUpdate) ClearAdmins() *BlogUpdate {
+	_u.mutation.ClearAdmins()
+	return _u
 }
 
 // RemoveAdminIDs removes the "admins" edge to User entities by IDs.
-func (bu *BlogUpdate) RemoveAdminIDs(ids ...int) *BlogUpdate {
-	bu.mutation.RemoveAdminIDs(ids...)
-	return bu
+func (_u *BlogUpdate) RemoveAdminIDs(ids ...int) *BlogUpdate {
+	_u.mutation.RemoveAdminIDs(ids...)
+	return _u
 }
 
 // RemoveAdmins removes "admins" edges to User entities.
-func (bu *BlogUpdate) RemoveAdmins(u ...*User) *BlogUpdate {
+func (_u *BlogUpdate) RemoveAdmins(u ...*User) *BlogUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return bu.RemoveAdminIDs(ids...)
+	return _u.RemoveAdminIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (bu *BlogUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, bu.sqlSave, bu.mutation, bu.hooks)
+func (_u *BlogUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (bu *BlogUpdate) SaveX(ctx context.Context) int {
-	affected, err := bu.Save(ctx)
+func (_u *BlogUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -109,34 +109,34 @@ func (bu *BlogUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (bu *BlogUpdate) Exec(ctx context.Context) error {
-	_, err := bu.Save(ctx)
+func (_u *BlogUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bu *BlogUpdate) ExecX(ctx context.Context) {
-	if err := bu.Exec(ctx); err != nil {
+func (_u *BlogUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (bu *BlogUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *BlogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(blog.Table, blog.Columns, sqlgraph.NewFieldSpec(blog.FieldID, field.TypeInt))
-	if ps := bu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := bu.mutation.Oid(); ok {
+	if value, ok := _u.mutation.Oid(); ok {
 		_spec.SetField(blog.FieldOid, field.TypeInt, value)
 	}
-	if value, ok := bu.mutation.AddedOid(); ok {
+	if value, ok := _u.mutation.AddedOid(); ok {
 		_spec.AddField(blog.FieldOid, field.TypeInt, value)
 	}
-	if bu.mutation.AdminsCleared() {
+	if _u.mutation.AdminsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -149,7 +149,7 @@ func (bu *BlogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bu.mutation.RemovedAdminsIDs(); len(nodes) > 0 && !bu.mutation.AdminsCleared() {
+	if nodes := _u.mutation.RemovedAdminsIDs(); len(nodes) > 0 && !_u.mutation.AdminsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -165,7 +165,7 @@ func (bu *BlogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := bu.mutation.AdminsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.AdminsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -181,7 +181,7 @@ func (bu *BlogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, bu.driver, _spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{blog.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -189,7 +189,7 @@ func (bu *BlogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	bu.mutation.done = true
+	_u.mutation.done = true
 	return n, nil
 }
 
@@ -202,88 +202,88 @@ type BlogUpdateOne struct {
 }
 
 // SetOid sets the "oid" field.
-func (buo *BlogUpdateOne) SetOid(i int) *BlogUpdateOne {
-	buo.mutation.ResetOid()
-	buo.mutation.SetOid(i)
-	return buo
+func (_u *BlogUpdateOne) SetOid(i int) *BlogUpdateOne {
+	_u.mutation.ResetOid()
+	_u.mutation.SetOid(i)
+	return _u
 }
 
 // SetNillableOid sets the "oid" field if the given value is not nil.
-func (buo *BlogUpdateOne) SetNillableOid(i *int) *BlogUpdateOne {
+func (_u *BlogUpdateOne) SetNillableOid(i *int) *BlogUpdateOne {
 	if i != nil {
-		buo.SetOid(*i)
+		_u.SetOid(*i)
 	}
-	return buo
+	return _u
 }
 
 // AddOid adds i to the "oid" field.
-func (buo *BlogUpdateOne) AddOid(i int) *BlogUpdateOne {
-	buo.mutation.AddOid(i)
-	return buo
+func (_u *BlogUpdateOne) AddOid(i int) *BlogUpdateOne {
+	_u.mutation.AddOid(i)
+	return _u
 }
 
 // AddAdminIDs adds the "admins" edge to the User entity by IDs.
-func (buo *BlogUpdateOne) AddAdminIDs(ids ...int) *BlogUpdateOne {
-	buo.mutation.AddAdminIDs(ids...)
-	return buo
+func (_u *BlogUpdateOne) AddAdminIDs(ids ...int) *BlogUpdateOne {
+	_u.mutation.AddAdminIDs(ids...)
+	return _u
 }
 
 // AddAdmins adds the "admins" edges to the User entity.
-func (buo *BlogUpdateOne) AddAdmins(u ...*User) *BlogUpdateOne {
+func (_u *BlogUpdateOne) AddAdmins(u ...*User) *BlogUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return buo.AddAdminIDs(ids...)
+	return _u.AddAdminIDs(ids...)
 }
 
 // Mutation returns the BlogMutation object of the builder.
-func (buo *BlogUpdateOne) Mutation() *BlogMutation {
-	return buo.mutation
+func (_u *BlogUpdateOne) Mutation() *BlogMutation {
+	return _u.mutation
 }
 
 // ClearAdmins clears all "admins" edges to the User entity.
-func (buo *BlogUpdateOne) ClearAdmins() *BlogUpdateOne {
-	buo.mutation.ClearAdmins()
-	return buo
+func (_u *BlogUpdateOne) ClearAdmins() *BlogUpdateOne {
+	_u.mutation.ClearAdmins()
+	return _u
 }
 
 // RemoveAdminIDs removes the "admins" edge to User entities by IDs.
-func (buo *BlogUpdateOne) RemoveAdminIDs(ids ...int) *BlogUpdateOne {
-	buo.mutation.RemoveAdminIDs(ids...)
-	return buo
+func (_u *BlogUpdateOne) RemoveAdminIDs(ids ...int) *BlogUpdateOne {
+	_u.mutation.RemoveAdminIDs(ids...)
+	return _u
 }
 
 // RemoveAdmins removes "admins" edges to User entities.
-func (buo *BlogUpdateOne) RemoveAdmins(u ...*User) *BlogUpdateOne {
+func (_u *BlogUpdateOne) RemoveAdmins(u ...*User) *BlogUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return buo.RemoveAdminIDs(ids...)
+	return _u.RemoveAdminIDs(ids...)
 }
 
 // Where appends a list predicates to the BlogUpdate builder.
-func (buo *BlogUpdateOne) Where(ps ...predicate.Blog) *BlogUpdateOne {
-	buo.mutation.Where(ps...)
-	return buo
+func (_u *BlogUpdateOne) Where(ps ...predicate.Blog) *BlogUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (buo *BlogUpdateOne) Select(field string, fields ...string) *BlogUpdateOne {
-	buo.fields = append([]string{field}, fields...)
-	return buo
+func (_u *BlogUpdateOne) Select(field string, fields ...string) *BlogUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Blog entity.
-func (buo *BlogUpdateOne) Save(ctx context.Context) (*Blog, error) {
-	return withHooks(ctx, buo.sqlSave, buo.mutation, buo.hooks)
+func (_u *BlogUpdateOne) Save(ctx context.Context) (*Blog, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (buo *BlogUpdateOne) SaveX(ctx context.Context) *Blog {
-	node, err := buo.Save(ctx)
+func (_u *BlogUpdateOne) SaveX(ctx context.Context) *Blog {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -291,26 +291,26 @@ func (buo *BlogUpdateOne) SaveX(ctx context.Context) *Blog {
 }
 
 // Exec executes the query on the entity.
-func (buo *BlogUpdateOne) Exec(ctx context.Context) error {
-	_, err := buo.Save(ctx)
+func (_u *BlogUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (buo *BlogUpdateOne) ExecX(ctx context.Context) {
-	if err := buo.Exec(ctx); err != nil {
+func (_u *BlogUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (buo *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) {
+func (_u *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) {
 	_spec := sqlgraph.NewUpdateSpec(blog.Table, blog.Columns, sqlgraph.NewFieldSpec(blog.FieldID, field.TypeInt))
-	id, ok := buo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`entv2: missing "Blog.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := buo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, blog.FieldID)
 		for _, f := range fields {
@@ -322,20 +322,20 @@ func (buo *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) 
 			}
 		}
 	}
-	if ps := buo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := buo.mutation.Oid(); ok {
+	if value, ok := _u.mutation.Oid(); ok {
 		_spec.SetField(blog.FieldOid, field.TypeInt, value)
 	}
-	if value, ok := buo.mutation.AddedOid(); ok {
+	if value, ok := _u.mutation.AddedOid(); ok {
 		_spec.AddField(blog.FieldOid, field.TypeInt, value)
 	}
-	if buo.mutation.AdminsCleared() {
+	if _u.mutation.AdminsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -348,7 +348,7 @@ func (buo *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := buo.mutation.RemovedAdminsIDs(); len(nodes) > 0 && !buo.mutation.AdminsCleared() {
+	if nodes := _u.mutation.RemovedAdminsIDs(); len(nodes) > 0 && !_u.mutation.AdminsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -364,7 +364,7 @@ func (buo *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := buo.mutation.AdminsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.AdminsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -380,10 +380,10 @@ func (buo *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Blog{config: buo.config}
+	_node = &Blog{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, buo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{blog.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -391,6 +391,6 @@ func (buo *BlogUpdateOne) sqlSave(ctx context.Context) (_node *Blog, err error) 
 		}
 		return nil, err
 	}
-	buo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

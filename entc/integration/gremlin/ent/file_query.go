@@ -38,44 +38,44 @@ type FileQuery struct {
 }
 
 // Where adds a new predicate for the FileQuery builder.
-func (fq *FileQuery) Where(ps ...predicate.File) *FileQuery {
-	fq.predicates = append(fq.predicates, ps...)
-	return fq
+func (_q *FileQuery) Where(ps ...predicate.File) *FileQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (fq *FileQuery) Limit(limit int) *FileQuery {
-	fq.ctx.Limit = &limit
-	return fq
+func (_q *FileQuery) Limit(limit int) *FileQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (fq *FileQuery) Offset(offset int) *FileQuery {
-	fq.ctx.Offset = &offset
-	return fq
+func (_q *FileQuery) Offset(offset int) *FileQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (fq *FileQuery) Unique(unique bool) *FileQuery {
-	fq.ctx.Unique = &unique
-	return fq
+func (_q *FileQuery) Unique(unique bool) *FileQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (fq *FileQuery) Order(o ...file.OrderOption) *FileQuery {
-	fq.order = append(fq.order, o...)
-	return fq
+func (_q *FileQuery) Order(o ...file.OrderOption) *FileQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryOwner chains the current query on the "owner" edge.
-func (fq *FileQuery) QueryOwner() *UserQuery {
-	query := (&UserClient{config: fq.config}).Query()
+func (_q *FileQuery) QueryOwner() *UserQuery {
+	query := (&UserClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
-		if err := fq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := fq.gremlinQuery(ctx)
+		gremlin := _q.gremlinQuery(ctx)
 		fromU = gremlin.InE(user.FilesLabel).OutV()
 		return fromU, nil
 	}
@@ -83,13 +83,13 @@ func (fq *FileQuery) QueryOwner() *UserQuery {
 }
 
 // QueryType chains the current query on the "type" edge.
-func (fq *FileQuery) QueryType() *FileTypeQuery {
-	query := (&FileTypeClient{config: fq.config}).Query()
+func (_q *FileQuery) QueryType() *FileTypeQuery {
+	query := (&FileTypeClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
-		if err := fq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := fq.gremlinQuery(ctx)
+		gremlin := _q.gremlinQuery(ctx)
 		fromU = gremlin.InE(filetype.FilesLabel).OutV()
 		return fromU, nil
 	}
@@ -97,13 +97,13 @@ func (fq *FileQuery) QueryType() *FileTypeQuery {
 }
 
 // QueryField chains the current query on the "field" edge.
-func (fq *FileQuery) QueryField() *FieldTypeQuery {
-	query := (&FieldTypeClient{config: fq.config}).Query()
+func (_q *FileQuery) QueryField() *FieldTypeQuery {
+	query := (&FieldTypeClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
-		if err := fq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := fq.gremlinQuery(ctx)
+		gremlin := _q.gremlinQuery(ctx)
 		fromU = gremlin.OutE(file.FieldLabel).InV()
 		return fromU, nil
 	}
@@ -112,8 +112,8 @@ func (fq *FileQuery) QueryField() *FieldTypeQuery {
 
 // First returns the first File entity from the query.
 // Returns a *NotFoundError when no File was found.
-func (fq *FileQuery) First(ctx context.Context) (*File, error) {
-	nodes, err := fq.Limit(1).All(setContextOp(ctx, fq.ctx, ent.OpQueryFirst))
+func (_q *FileQuery) First(ctx context.Context) (*File, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -124,8 +124,8 @@ func (fq *FileQuery) First(ctx context.Context) (*File, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (fq *FileQuery) FirstX(ctx context.Context) *File {
-	node, err := fq.First(ctx)
+func (_q *FileQuery) FirstX(ctx context.Context) *File {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -134,9 +134,9 @@ func (fq *FileQuery) FirstX(ctx context.Context) *File {
 
 // FirstID returns the first File ID from the query.
 // Returns a *NotFoundError when no File ID was found.
-func (fq *FileQuery) FirstID(ctx context.Context) (id string, err error) {
+func (_q *FileQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = fq.Limit(1).IDs(setContextOp(ctx, fq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -147,8 +147,8 @@ func (fq *FileQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (fq *FileQuery) FirstIDX(ctx context.Context) string {
-	id, err := fq.FirstID(ctx)
+func (_q *FileQuery) FirstIDX(ctx context.Context) string {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -158,8 +158,8 @@ func (fq *FileQuery) FirstIDX(ctx context.Context) string {
 // Only returns a single File entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one File entity is found.
 // Returns a *NotFoundError when no File entities are found.
-func (fq *FileQuery) Only(ctx context.Context) (*File, error) {
-	nodes, err := fq.Limit(2).All(setContextOp(ctx, fq.ctx, ent.OpQueryOnly))
+func (_q *FileQuery) Only(ctx context.Context) (*File, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -174,8 +174,8 @@ func (fq *FileQuery) Only(ctx context.Context) (*File, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (fq *FileQuery) OnlyX(ctx context.Context) *File {
-	node, err := fq.Only(ctx)
+func (_q *FileQuery) OnlyX(ctx context.Context) *File {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -185,9 +185,9 @@ func (fq *FileQuery) OnlyX(ctx context.Context) *File {
 // OnlyID is like Only, but returns the only File ID in the query.
 // Returns a *NotSingularError when more than one File ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (fq *FileQuery) OnlyID(ctx context.Context) (id string, err error) {
+func (_q *FileQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = fq.Limit(2).IDs(setContextOp(ctx, fq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -202,8 +202,8 @@ func (fq *FileQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (fq *FileQuery) OnlyIDX(ctx context.Context) string {
-	id, err := fq.OnlyID(ctx)
+func (_q *FileQuery) OnlyIDX(ctx context.Context) string {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -211,18 +211,18 @@ func (fq *FileQuery) OnlyIDX(ctx context.Context) string {
 }
 
 // All executes the query and returns a list of Files.
-func (fq *FileQuery) All(ctx context.Context) ([]*File, error) {
-	ctx = setContextOp(ctx, fq.ctx, ent.OpQueryAll)
-	if err := fq.prepareQuery(ctx); err != nil {
+func (_q *FileQuery) All(ctx context.Context) ([]*File, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*File, *FileQuery]()
-	return withInterceptors[[]*File](ctx, fq, qr, fq.inters)
+	return withInterceptors[[]*File](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (fq *FileQuery) AllX(ctx context.Context) []*File {
-	nodes, err := fq.All(ctx)
+func (_q *FileQuery) AllX(ctx context.Context) []*File {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -230,20 +230,20 @@ func (fq *FileQuery) AllX(ctx context.Context) []*File {
 }
 
 // IDs executes the query and returns a list of File IDs.
-func (fq *FileQuery) IDs(ctx context.Context) (ids []string, err error) {
-	if fq.ctx.Unique == nil && fq.path != nil {
-		fq.Unique(true)
+func (_q *FileQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, fq.ctx, ent.OpQueryIDs)
-	if err = fq.Select(file.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(file.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (fq *FileQuery) IDsX(ctx context.Context) []string {
-	ids, err := fq.IDs(ctx)
+func (_q *FileQuery) IDsX(ctx context.Context) []string {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -251,17 +251,17 @@ func (fq *FileQuery) IDsX(ctx context.Context) []string {
 }
 
 // Count returns the count of the given query.
-func (fq *FileQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, fq.ctx, ent.OpQueryCount)
-	if err := fq.prepareQuery(ctx); err != nil {
+func (_q *FileQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, fq, querierCount[*FileQuery](), fq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*FileQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (fq *FileQuery) CountX(ctx context.Context) int {
-	count, err := fq.Count(ctx)
+func (_q *FileQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -269,9 +269,9 @@ func (fq *FileQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (fq *FileQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, fq.ctx, ent.OpQueryExist)
-	switch _, err := fq.FirstID(ctx); {
+func (_q *FileQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -282,8 +282,8 @@ func (fq *FileQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (fq *FileQuery) ExistX(ctx context.Context) bool {
-	exist, err := fq.Exist(ctx)
+func (_q *FileQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -292,56 +292,56 @@ func (fq *FileQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the FileQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (fq *FileQuery) Clone() *FileQuery {
-	if fq == nil {
+func (_q *FileQuery) Clone() *FileQuery {
+	if _q == nil {
 		return nil
 	}
 	return &FileQuery{
-		config:     fq.config,
-		ctx:        fq.ctx.Clone(),
-		order:      append([]file.OrderOption{}, fq.order...),
-		inters:     append([]Interceptor{}, fq.inters...),
-		predicates: append([]predicate.File{}, fq.predicates...),
-		withOwner:  fq.withOwner.Clone(),
-		withType:   fq.withType.Clone(),
-		withField:  fq.withField.Clone(),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]file.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.File{}, _q.predicates...),
+		withOwner:  _q.withOwner.Clone(),
+		withType:   _q.withType.Clone(),
+		withField:  _q.withField.Clone(),
 		// clone intermediate query.
-		gremlin: fq.gremlin.Clone(),
-		path:    fq.path,
+		gremlin: _q.gremlin.Clone(),
+		path:    _q.path,
 	}
 }
 
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
-func (fq *FileQuery) WithOwner(opts ...func(*UserQuery)) *FileQuery {
-	query := (&UserClient{config: fq.config}).Query()
+func (_q *FileQuery) WithOwner(opts ...func(*UserQuery)) *FileQuery {
+	query := (&UserClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	fq.withOwner = query
-	return fq
+	_q.withOwner = query
+	return _q
 }
 
 // WithType tells the query-builder to eager-load the nodes that are connected to
 // the "type" edge. The optional arguments are used to configure the query builder of the edge.
-func (fq *FileQuery) WithType(opts ...func(*FileTypeQuery)) *FileQuery {
-	query := (&FileTypeClient{config: fq.config}).Query()
+func (_q *FileQuery) WithType(opts ...func(*FileTypeQuery)) *FileQuery {
+	query := (&FileTypeClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	fq.withType = query
-	return fq
+	_q.withType = query
+	return _q
 }
 
 // WithField tells the query-builder to eager-load the nodes that are connected to
 // the "field" edge. The optional arguments are used to configure the query builder of the edge.
-func (fq *FileQuery) WithField(opts ...func(*FieldTypeQuery)) *FileQuery {
-	query := (&FieldTypeClient{config: fq.config}).Query()
+func (_q *FileQuery) WithField(opts ...func(*FieldTypeQuery)) *FileQuery {
+	query := (&FieldTypeClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	fq.withField = query
-	return fq
+	_q.withField = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -358,10 +358,10 @@ func (fq *FileQuery) WithField(opts ...func(*FieldTypeQuery)) *FileQuery {
 //		GroupBy(file.FieldSetID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
-	fq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &FileGroupBy{build: fq}
-	grbuild.flds = &fq.ctx.Fields
+func (_q *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &FileGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = file.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -379,46 +379,46 @@ func (fq *FileQuery) GroupBy(field string, fields ...string) *FileGroupBy {
 //	client.File.Query().
 //		Select(file.FieldSetID).
 //		Scan(ctx, &v)
-func (fq *FileQuery) Select(fields ...string) *FileSelect {
-	fq.ctx.Fields = append(fq.ctx.Fields, fields...)
-	sbuild := &FileSelect{FileQuery: fq}
+func (_q *FileQuery) Select(fields ...string) *FileSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &FileSelect{FileQuery: _q}
 	sbuild.label = file.Label
-	sbuild.flds, sbuild.scan = &fq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a FileSelect configured with the given aggregations.
-func (fq *FileQuery) Aggregate(fns ...AggregateFunc) *FileSelect {
-	return fq.Select().Aggregate(fns...)
+func (_q *FileQuery) Aggregate(fns ...AggregateFunc) *FileSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (fq *FileQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range fq.inters {
+func (_q *FileQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, fq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	if fq.path != nil {
-		prev, err := fq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		fq.gremlin = prev
+		_q.gremlin = prev
 	}
 	return nil
 }
 
-func (fq *FileQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*File, error) {
+func (_q *FileQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*File, error) {
 	res := &gremlin.Response{}
-	traversal := fq.gremlinQuery(ctx)
-	if len(fq.ctx.Fields) > 0 {
-		fields := make([]any, len(fq.ctx.Fields))
-		for i, f := range fq.ctx.Fields {
+	traversal := _q.gremlinQuery(ctx)
+	if len(_q.ctx.Fields) > 0 {
+		fields := make([]any, len(_q.ctx.Fields))
+		for i, f := range _q.ctx.Fields {
 			fields[i] = f
 		}
 		traversal.ValueMap(fields...)
@@ -426,43 +426,43 @@ func (fq *FileQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*Fil
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := fq.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
-	var fs Files
-	if err := fs.FromResponse(res); err != nil {
+	var _ms Files
+	if err := _ms.FromResponse(res); err != nil {
 		return nil, err
 	}
-	for i := range fs {
-		fs[i].config = fq.config
+	for i := range _ms {
+		_ms[i].config = _q.config
 	}
-	return fs, nil
+	return _ms, nil
 }
 
-func (fq *FileQuery) gremlinCount(ctx context.Context) (int, error) {
+func (_q *FileQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := fq.gremlinQuery(ctx).Count().Query()
-	if err := fq.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _q.gremlinQuery(ctx).Count().Query()
+	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
 }
 
-func (fq *FileQuery) gremlinQuery(context.Context) *dsl.Traversal {
+func (_q *FileQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(file.Label)
-	if fq.gremlin != nil {
-		v = fq.gremlin.Clone()
+	if _q.gremlin != nil {
+		v = _q.gremlin.Clone()
 	}
-	for _, p := range fq.predicates {
+	for _, p := range _q.predicates {
 		p(v)
 	}
-	if len(fq.order) > 0 {
+	if len(_q.order) > 0 {
 		v.Order()
-		for _, p := range fq.order {
+		for _, p := range _q.order {
 			p(v)
 		}
 	}
-	switch limit, offset := fq.ctx.Limit, fq.ctx.Offset; {
+	switch limit, offset := _q.ctx.Limit, _q.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset+*limit)
 	case offset != nil:
@@ -470,7 +470,7 @@ func (fq *FileQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := fq.ctx.Unique; unique == nil || *unique {
+	if unique := _q.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v

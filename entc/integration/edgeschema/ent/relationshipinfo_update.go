@@ -26,38 +26,38 @@ type RelationshipInfoUpdate struct {
 }
 
 // Where appends a list predicates to the RelationshipInfoUpdate builder.
-func (riu *RelationshipInfoUpdate) Where(ps ...predicate.RelationshipInfo) *RelationshipInfoUpdate {
-	riu.mutation.Where(ps...)
-	return riu
+func (_u *RelationshipInfoUpdate) Where(ps ...predicate.RelationshipInfo) *RelationshipInfoUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetText sets the "text" field.
-func (riu *RelationshipInfoUpdate) SetText(s string) *RelationshipInfoUpdate {
-	riu.mutation.SetText(s)
-	return riu
+func (_u *RelationshipInfoUpdate) SetText(s string) *RelationshipInfoUpdate {
+	_u.mutation.SetText(s)
+	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (riu *RelationshipInfoUpdate) SetNillableText(s *string) *RelationshipInfoUpdate {
+func (_u *RelationshipInfoUpdate) SetNillableText(s *string) *RelationshipInfoUpdate {
 	if s != nil {
-		riu.SetText(*s)
+		_u.SetText(*s)
 	}
-	return riu
+	return _u
 }
 
 // Mutation returns the RelationshipInfoMutation object of the builder.
-func (riu *RelationshipInfoUpdate) Mutation() *RelationshipInfoMutation {
-	return riu.mutation
+func (_u *RelationshipInfoUpdate) Mutation() *RelationshipInfoMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (riu *RelationshipInfoUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, riu.sqlSave, riu.mutation, riu.hooks)
+func (_u *RelationshipInfoUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (riu *RelationshipInfoUpdate) SaveX(ctx context.Context) int {
-	affected, err := riu.Save(ctx)
+func (_u *RelationshipInfoUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -65,31 +65,31 @@ func (riu *RelationshipInfoUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (riu *RelationshipInfoUpdate) Exec(ctx context.Context) error {
-	_, err := riu.Save(ctx)
+func (_u *RelationshipInfoUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (riu *RelationshipInfoUpdate) ExecX(ctx context.Context) {
-	if err := riu.Exec(ctx); err != nil {
+func (_u *RelationshipInfoUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (riu *RelationshipInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *RelationshipInfoUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(relationshipinfo.Table, relationshipinfo.Columns, sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt))
-	if ps := riu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := riu.mutation.Text(); ok {
+	if value, ok := _u.mutation.Text(); ok {
 		_spec.SetField(relationshipinfo.FieldText, field.TypeString, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, riu.driver, _spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{relationshipinfo.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -97,7 +97,7 @@ func (riu *RelationshipInfoUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		return 0, err
 	}
-	riu.mutation.done = true
+	_u.mutation.done = true
 	return n, nil
 }
 
@@ -110,45 +110,45 @@ type RelationshipInfoUpdateOne struct {
 }
 
 // SetText sets the "text" field.
-func (riuo *RelationshipInfoUpdateOne) SetText(s string) *RelationshipInfoUpdateOne {
-	riuo.mutation.SetText(s)
-	return riuo
+func (_u *RelationshipInfoUpdateOne) SetText(s string) *RelationshipInfoUpdateOne {
+	_u.mutation.SetText(s)
+	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (riuo *RelationshipInfoUpdateOne) SetNillableText(s *string) *RelationshipInfoUpdateOne {
+func (_u *RelationshipInfoUpdateOne) SetNillableText(s *string) *RelationshipInfoUpdateOne {
 	if s != nil {
-		riuo.SetText(*s)
+		_u.SetText(*s)
 	}
-	return riuo
+	return _u
 }
 
 // Mutation returns the RelationshipInfoMutation object of the builder.
-func (riuo *RelationshipInfoUpdateOne) Mutation() *RelationshipInfoMutation {
-	return riuo.mutation
+func (_u *RelationshipInfoUpdateOne) Mutation() *RelationshipInfoMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the RelationshipInfoUpdate builder.
-func (riuo *RelationshipInfoUpdateOne) Where(ps ...predicate.RelationshipInfo) *RelationshipInfoUpdateOne {
-	riuo.mutation.Where(ps...)
-	return riuo
+func (_u *RelationshipInfoUpdateOne) Where(ps ...predicate.RelationshipInfo) *RelationshipInfoUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (riuo *RelationshipInfoUpdateOne) Select(field string, fields ...string) *RelationshipInfoUpdateOne {
-	riuo.fields = append([]string{field}, fields...)
-	return riuo
+func (_u *RelationshipInfoUpdateOne) Select(field string, fields ...string) *RelationshipInfoUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated RelationshipInfo entity.
-func (riuo *RelationshipInfoUpdateOne) Save(ctx context.Context) (*RelationshipInfo, error) {
-	return withHooks(ctx, riuo.sqlSave, riuo.mutation, riuo.hooks)
+func (_u *RelationshipInfoUpdateOne) Save(ctx context.Context) (*RelationshipInfo, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (riuo *RelationshipInfoUpdateOne) SaveX(ctx context.Context) *RelationshipInfo {
-	node, err := riuo.Save(ctx)
+func (_u *RelationshipInfoUpdateOne) SaveX(ctx context.Context) *RelationshipInfo {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -156,26 +156,26 @@ func (riuo *RelationshipInfoUpdateOne) SaveX(ctx context.Context) *RelationshipI
 }
 
 // Exec executes the query on the entity.
-func (riuo *RelationshipInfoUpdateOne) Exec(ctx context.Context) error {
-	_, err := riuo.Save(ctx)
+func (_u *RelationshipInfoUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (riuo *RelationshipInfoUpdateOne) ExecX(ctx context.Context) {
-	if err := riuo.Exec(ctx); err != nil {
+func (_u *RelationshipInfoUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (riuo *RelationshipInfoUpdateOne) sqlSave(ctx context.Context) (_node *RelationshipInfo, err error) {
+func (_u *RelationshipInfoUpdateOne) sqlSave(ctx context.Context) (_node *RelationshipInfo, err error) {
 	_spec := sqlgraph.NewUpdateSpec(relationshipinfo.Table, relationshipinfo.Columns, sqlgraph.NewFieldSpec(relationshipinfo.FieldID, field.TypeInt))
-	id, ok := riuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "RelationshipInfo.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := riuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, relationshipinfo.FieldID)
 		for _, f := range fields {
@@ -187,20 +187,20 @@ func (riuo *RelationshipInfoUpdateOne) sqlSave(ctx context.Context) (_node *Rela
 			}
 		}
 	}
-	if ps := riuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := riuo.mutation.Text(); ok {
+	if value, ok := _u.mutation.Text(); ok {
 		_spec.SetField(relationshipinfo.FieldText, field.TypeString, value)
 	}
-	_node = &RelationshipInfo{config: riuo.config}
+	_node = &RelationshipInfo{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, riuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{relationshipinfo.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -208,6 +208,6 @@ func (riuo *RelationshipInfoUpdateOne) sqlSave(ctx context.Context) (_node *Rela
 		}
 		return nil, err
 	}
-	riuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

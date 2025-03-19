@@ -39,7 +39,7 @@ func (*CleanUser) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the CleanUser fields.
-func (cu *CleanUser) assignValues(columns []string, values []any) error {
+func (_m *CleanUser) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -49,10 +49,10 @@ func (cu *CleanUser) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				cu.Name = value.String
+				_m.Name = value.String
 			}
 		default:
-			cu.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -60,27 +60,27 @@ func (cu *CleanUser) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the CleanUser.
 // This includes values selected through modifiers, order, etc.
-func (cu *CleanUser) Value(name string) (ent.Value, error) {
-	return cu.selectValues.Get(name)
+func (_m *CleanUser) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // Unwrap unwraps the CleanUser entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (cu *CleanUser) Unwrap() *CleanUser {
-	_tx, ok := cu.config.driver.(*txDriver)
+func (_m *CleanUser) Unwrap() *CleanUser {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: CleanUser is not a transactional entity")
 	}
-	cu.config.driver = _tx.drv
-	return cu
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (cu *CleanUser) String() string {
+func (_m *CleanUser) String() string {
 	var builder strings.Builder
 	builder.WriteString("CleanUser(")
 	builder.WriteString("name=")
-	builder.WriteString(cu.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }

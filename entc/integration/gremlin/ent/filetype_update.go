@@ -28,102 +28,102 @@ type FileTypeUpdate struct {
 }
 
 // Where appends a list predicates to the FileTypeUpdate builder.
-func (ftu *FileTypeUpdate) Where(ps ...predicate.FileType) *FileTypeUpdate {
-	ftu.mutation.Where(ps...)
-	return ftu
+func (_u *FileTypeUpdate) Where(ps ...predicate.FileType) *FileTypeUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetName sets the "name" field.
-func (ftu *FileTypeUpdate) SetName(s string) *FileTypeUpdate {
-	ftu.mutation.SetName(s)
-	return ftu
+func (_u *FileTypeUpdate) SetName(s string) *FileTypeUpdate {
+	_u.mutation.SetName(s)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (ftu *FileTypeUpdate) SetNillableName(s *string) *FileTypeUpdate {
+func (_u *FileTypeUpdate) SetNillableName(s *string) *FileTypeUpdate {
 	if s != nil {
-		ftu.SetName(*s)
+		_u.SetName(*s)
 	}
-	return ftu
+	return _u
 }
 
 // SetType sets the "type" field.
-func (ftu *FileTypeUpdate) SetType(f filetype.Type) *FileTypeUpdate {
-	ftu.mutation.SetType(f)
-	return ftu
+func (_u *FileTypeUpdate) SetType(f filetype.Type) *FileTypeUpdate {
+	_u.mutation.SetType(f)
+	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (ftu *FileTypeUpdate) SetNillableType(f *filetype.Type) *FileTypeUpdate {
+func (_u *FileTypeUpdate) SetNillableType(f *filetype.Type) *FileTypeUpdate {
 	if f != nil {
-		ftu.SetType(*f)
+		_u.SetType(*f)
 	}
-	return ftu
+	return _u
 }
 
 // SetState sets the "state" field.
-func (ftu *FileTypeUpdate) SetState(f filetype.State) *FileTypeUpdate {
-	ftu.mutation.SetState(f)
-	return ftu
+func (_u *FileTypeUpdate) SetState(f filetype.State) *FileTypeUpdate {
+	_u.mutation.SetState(f)
+	return _u
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
-func (ftu *FileTypeUpdate) SetNillableState(f *filetype.State) *FileTypeUpdate {
+func (_u *FileTypeUpdate) SetNillableState(f *filetype.State) *FileTypeUpdate {
 	if f != nil {
-		ftu.SetState(*f)
+		_u.SetState(*f)
 	}
-	return ftu
+	return _u
 }
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
-func (ftu *FileTypeUpdate) AddFileIDs(ids ...string) *FileTypeUpdate {
-	ftu.mutation.AddFileIDs(ids...)
-	return ftu
+func (_u *FileTypeUpdate) AddFileIDs(ids ...string) *FileTypeUpdate {
+	_u.mutation.AddFileIDs(ids...)
+	return _u
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (ftu *FileTypeUpdate) AddFiles(f ...*File) *FileTypeUpdate {
+func (_u *FileTypeUpdate) AddFiles(f ...*File) *FileTypeUpdate {
 	ids := make([]string, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return ftu.AddFileIDs(ids...)
+	return _u.AddFileIDs(ids...)
 }
 
 // Mutation returns the FileTypeMutation object of the builder.
-func (ftu *FileTypeUpdate) Mutation() *FileTypeMutation {
-	return ftu.mutation
+func (_u *FileTypeUpdate) Mutation() *FileTypeMutation {
+	return _u.mutation
 }
 
 // ClearFiles clears all "files" edges to the File entity.
-func (ftu *FileTypeUpdate) ClearFiles() *FileTypeUpdate {
-	ftu.mutation.ClearFiles()
-	return ftu
+func (_u *FileTypeUpdate) ClearFiles() *FileTypeUpdate {
+	_u.mutation.ClearFiles()
+	return _u
 }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
-func (ftu *FileTypeUpdate) RemoveFileIDs(ids ...string) *FileTypeUpdate {
-	ftu.mutation.RemoveFileIDs(ids...)
-	return ftu
+func (_u *FileTypeUpdate) RemoveFileIDs(ids ...string) *FileTypeUpdate {
+	_u.mutation.RemoveFileIDs(ids...)
+	return _u
 }
 
 // RemoveFiles removes "files" edges to File entities.
-func (ftu *FileTypeUpdate) RemoveFiles(f ...*File) *FileTypeUpdate {
+func (_u *FileTypeUpdate) RemoveFiles(f ...*File) *FileTypeUpdate {
 	ids := make([]string, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return ftu.RemoveFileIDs(ids...)
+	return _u.RemoveFileIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (ftu *FileTypeUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, ftu.gremlinSave, ftu.mutation, ftu.hooks)
+func (_u *FileTypeUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ftu *FileTypeUpdate) SaveX(ctx context.Context) int {
-	affected, err := ftu.Save(ctx)
+func (_u *FileTypeUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -131,26 +131,26 @@ func (ftu *FileTypeUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (ftu *FileTypeUpdate) Exec(ctx context.Context) error {
-	_, err := ftu.Save(ctx)
+func (_u *FileTypeUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ftu *FileTypeUpdate) ExecX(ctx context.Context) {
-	if err := ftu.Exec(ctx); err != nil {
+func (_u *FileTypeUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ftu *FileTypeUpdate) check() error {
-	if v, ok := ftu.mutation.GetType(); ok {
+func (_u *FileTypeUpdate) check() error {
+	if v, ok := _u.mutation.GetType(); ok {
 		if err := filetype.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "FileType.type": %w`, err)}
 		}
 	}
-	if v, ok := ftu.mutation.State(); ok {
+	if v, ok := _u.mutation.State(); ok {
 		if err := filetype.StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "FileType.state": %w`, err)}
 		}
@@ -158,30 +158,30 @@ func (ftu *FileTypeUpdate) check() error {
 	return nil
 }
 
-func (ftu *FileTypeUpdate) gremlinSave(ctx context.Context) (int, error) {
-	if err := ftu.check(); err != nil {
+func (_u *FileTypeUpdate) gremlinSave(ctx context.Context) (int, error) {
+	if err := _u.check(); err != nil {
 		return 0, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := ftu.gremlin().Query()
-	if err := ftu.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _u.gremlin().Query()
+	if err := _u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return 0, err
 	}
-	ftu.mutation.done = true
+	_u.mutation.done = true
 	return res.ReadInt()
 }
 
-func (ftu *FileTypeUpdate) gremlin() *dsl.Traversal {
+func (_u *FileTypeUpdate) gremlin() *dsl.Traversal {
 	type constraint struct {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
 	constraints := make([]*constraint, 0, 2)
 	v := g.V().HasLabel(filetype.Label)
-	for _, p := range ftu.mutation.predicates {
+	for _, p := range _u.mutation.predicates {
 		p(v)
 	}
 	var (
@@ -190,24 +190,24 @@ func (ftu *FileTypeUpdate) gremlin() *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value, ok := ftu.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		constraints = append(constraints, &constraint{
 			pred: g.V().Has(filetype.Label, filetype.FieldName, value).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(filetype.Label, filetype.FieldName, value)),
 		})
 		v.Property(dsl.Single, filetype.FieldName, value)
 	}
-	if value, ok := ftu.mutation.GetType(); ok {
+	if value, ok := _u.mutation.GetType(); ok {
 		v.Property(dsl.Single, filetype.FieldType, value)
 	}
-	if value, ok := ftu.mutation.State(); ok {
+	if value, ok := _u.mutation.State(); ok {
 		v.Property(dsl.Single, filetype.FieldState, value)
 	}
-	for _, id := range ftu.mutation.RemovedFilesIDs() {
+	for _, id := range _u.mutation.RemovedFilesIDs() {
 		tr := rv.Clone().OutE(filetype.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for _, id := range ftu.mutation.FilesIDs() {
+	for _, id := range _u.mutation.FilesIDs() {
 		v.AddE(filetype.FilesLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(filetype.FilesLabel).InV().HasID(id).Count(),
@@ -238,109 +238,109 @@ type FileTypeUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (ftuo *FileTypeUpdateOne) SetName(s string) *FileTypeUpdateOne {
-	ftuo.mutation.SetName(s)
-	return ftuo
+func (_u *FileTypeUpdateOne) SetName(s string) *FileTypeUpdateOne {
+	_u.mutation.SetName(s)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (ftuo *FileTypeUpdateOne) SetNillableName(s *string) *FileTypeUpdateOne {
+func (_u *FileTypeUpdateOne) SetNillableName(s *string) *FileTypeUpdateOne {
 	if s != nil {
-		ftuo.SetName(*s)
+		_u.SetName(*s)
 	}
-	return ftuo
+	return _u
 }
 
 // SetType sets the "type" field.
-func (ftuo *FileTypeUpdateOne) SetType(f filetype.Type) *FileTypeUpdateOne {
-	ftuo.mutation.SetType(f)
-	return ftuo
+func (_u *FileTypeUpdateOne) SetType(f filetype.Type) *FileTypeUpdateOne {
+	_u.mutation.SetType(f)
+	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (ftuo *FileTypeUpdateOne) SetNillableType(f *filetype.Type) *FileTypeUpdateOne {
+func (_u *FileTypeUpdateOne) SetNillableType(f *filetype.Type) *FileTypeUpdateOne {
 	if f != nil {
-		ftuo.SetType(*f)
+		_u.SetType(*f)
 	}
-	return ftuo
+	return _u
 }
 
 // SetState sets the "state" field.
-func (ftuo *FileTypeUpdateOne) SetState(f filetype.State) *FileTypeUpdateOne {
-	ftuo.mutation.SetState(f)
-	return ftuo
+func (_u *FileTypeUpdateOne) SetState(f filetype.State) *FileTypeUpdateOne {
+	_u.mutation.SetState(f)
+	return _u
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
-func (ftuo *FileTypeUpdateOne) SetNillableState(f *filetype.State) *FileTypeUpdateOne {
+func (_u *FileTypeUpdateOne) SetNillableState(f *filetype.State) *FileTypeUpdateOne {
 	if f != nil {
-		ftuo.SetState(*f)
+		_u.SetState(*f)
 	}
-	return ftuo
+	return _u
 }
 
 // AddFileIDs adds the "files" edge to the File entity by IDs.
-func (ftuo *FileTypeUpdateOne) AddFileIDs(ids ...string) *FileTypeUpdateOne {
-	ftuo.mutation.AddFileIDs(ids...)
-	return ftuo
+func (_u *FileTypeUpdateOne) AddFileIDs(ids ...string) *FileTypeUpdateOne {
+	_u.mutation.AddFileIDs(ids...)
+	return _u
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (ftuo *FileTypeUpdateOne) AddFiles(f ...*File) *FileTypeUpdateOne {
+func (_u *FileTypeUpdateOne) AddFiles(f ...*File) *FileTypeUpdateOne {
 	ids := make([]string, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return ftuo.AddFileIDs(ids...)
+	return _u.AddFileIDs(ids...)
 }
 
 // Mutation returns the FileTypeMutation object of the builder.
-func (ftuo *FileTypeUpdateOne) Mutation() *FileTypeMutation {
-	return ftuo.mutation
+func (_u *FileTypeUpdateOne) Mutation() *FileTypeMutation {
+	return _u.mutation
 }
 
 // ClearFiles clears all "files" edges to the File entity.
-func (ftuo *FileTypeUpdateOne) ClearFiles() *FileTypeUpdateOne {
-	ftuo.mutation.ClearFiles()
-	return ftuo
+func (_u *FileTypeUpdateOne) ClearFiles() *FileTypeUpdateOne {
+	_u.mutation.ClearFiles()
+	return _u
 }
 
 // RemoveFileIDs removes the "files" edge to File entities by IDs.
-func (ftuo *FileTypeUpdateOne) RemoveFileIDs(ids ...string) *FileTypeUpdateOne {
-	ftuo.mutation.RemoveFileIDs(ids...)
-	return ftuo
+func (_u *FileTypeUpdateOne) RemoveFileIDs(ids ...string) *FileTypeUpdateOne {
+	_u.mutation.RemoveFileIDs(ids...)
+	return _u
 }
 
 // RemoveFiles removes "files" edges to File entities.
-func (ftuo *FileTypeUpdateOne) RemoveFiles(f ...*File) *FileTypeUpdateOne {
+func (_u *FileTypeUpdateOne) RemoveFiles(f ...*File) *FileTypeUpdateOne {
 	ids := make([]string, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return ftuo.RemoveFileIDs(ids...)
+	return _u.RemoveFileIDs(ids...)
 }
 
 // Where appends a list predicates to the FileTypeUpdate builder.
-func (ftuo *FileTypeUpdateOne) Where(ps ...predicate.FileType) *FileTypeUpdateOne {
-	ftuo.mutation.Where(ps...)
-	return ftuo
+func (_u *FileTypeUpdateOne) Where(ps ...predicate.FileType) *FileTypeUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (ftuo *FileTypeUpdateOne) Select(field string, fields ...string) *FileTypeUpdateOne {
-	ftuo.fields = append([]string{field}, fields...)
-	return ftuo
+func (_u *FileTypeUpdateOne) Select(field string, fields ...string) *FileTypeUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated FileType entity.
-func (ftuo *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
-	return withHooks(ctx, ftuo.gremlinSave, ftuo.mutation, ftuo.hooks)
+func (_u *FileTypeUpdateOne) Save(ctx context.Context) (*FileType, error) {
+	return withHooks(ctx, _u.gremlinSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ftuo *FileTypeUpdateOne) SaveX(ctx context.Context) *FileType {
-	node, err := ftuo.Save(ctx)
+func (_u *FileTypeUpdateOne) SaveX(ctx context.Context) *FileType {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -348,26 +348,26 @@ func (ftuo *FileTypeUpdateOne) SaveX(ctx context.Context) *FileType {
 }
 
 // Exec executes the query on the entity.
-func (ftuo *FileTypeUpdateOne) Exec(ctx context.Context) error {
-	_, err := ftuo.Save(ctx)
+func (_u *FileTypeUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ftuo *FileTypeUpdateOne) ExecX(ctx context.Context) {
-	if err := ftuo.Exec(ctx); err != nil {
+func (_u *FileTypeUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ftuo *FileTypeUpdateOne) check() error {
-	if v, ok := ftuo.mutation.GetType(); ok {
+func (_u *FileTypeUpdateOne) check() error {
+	if v, ok := _u.mutation.GetType(); ok {
 		if err := filetype.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "FileType.type": %w`, err)}
 		}
 	}
-	if v, ok := ftuo.mutation.State(); ok {
+	if v, ok := _u.mutation.State(); ok {
 		if err := filetype.StateValidator(v); err != nil {
 			return &ValidationError{Name: "state", err: fmt.Errorf(`ent: validator failed for field "FileType.state": %w`, err)}
 		}
@@ -375,31 +375,31 @@ func (ftuo *FileTypeUpdateOne) check() error {
 	return nil
 }
 
-func (ftuo *FileTypeUpdateOne) gremlinSave(ctx context.Context) (*FileType, error) {
-	if err := ftuo.check(); err != nil {
+func (_u *FileTypeUpdateOne) gremlinSave(ctx context.Context) (*FileType, error) {
+	if err := _u.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	id, ok := ftuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "FileType.id" for update`)}
 	}
-	query, bindings := ftuo.gremlin(id).Query()
-	if err := ftuo.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _u.gremlin(id).Query()
+	if err := _u.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	ftuo.mutation.done = true
-	ft := &FileType{config: ftuo.config}
-	if err := ft.FromResponse(res); err != nil {
+	_u.mutation.done = true
+	_m := &FileType{config: _u.config}
+	if err := _m.FromResponse(res); err != nil {
 		return nil, err
 	}
-	return ft, nil
+	return _m, nil
 }
 
-func (ftuo *FileTypeUpdateOne) gremlin(id string) *dsl.Traversal {
+func (_u *FileTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 	type constraint struct {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
@@ -412,34 +412,34 @@ func (ftuo *FileTypeUpdateOne) gremlin(id string) *dsl.Traversal {
 
 		trs []*dsl.Traversal
 	)
-	if value, ok := ftuo.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		constraints = append(constraints, &constraint{
 			pred: g.V().Has(filetype.Label, filetype.FieldName, value).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(filetype.Label, filetype.FieldName, value)),
 		})
 		v.Property(dsl.Single, filetype.FieldName, value)
 	}
-	if value, ok := ftuo.mutation.GetType(); ok {
+	if value, ok := _u.mutation.GetType(); ok {
 		v.Property(dsl.Single, filetype.FieldType, value)
 	}
-	if value, ok := ftuo.mutation.State(); ok {
+	if value, ok := _u.mutation.State(); ok {
 		v.Property(dsl.Single, filetype.FieldState, value)
 	}
-	for _, id := range ftuo.mutation.RemovedFilesIDs() {
+	for _, id := range _u.mutation.RemovedFilesIDs() {
 		tr := rv.Clone().OutE(filetype.FilesLabel).Where(__.OtherV().HasID(id)).Drop().Iterate()
 		trs = append(trs, tr)
 	}
-	for _, id := range ftuo.mutation.FilesIDs() {
+	for _, id := range _u.mutation.FilesIDs() {
 		v.AddE(filetype.FilesLabel).To(g.V(id)).OutV()
 		constraints = append(constraints, &constraint{
 			pred: g.E().HasLabel(filetype.FilesLabel).InV().HasID(id).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueEdge(filetype.Label, filetype.FilesLabel, id)),
 		})
 	}
-	if len(ftuo.fields) > 0 {
-		fields := make([]any, 0, len(ftuo.fields)+1)
+	if len(_u.fields) > 0 {
+		fields := make([]any, 0, len(_u.fields)+1)
 		fields = append(fields, true)
-		for _, f := range ftuo.fields {
+		for _, f := range _u.fields {
 			fields = append(fields, f)
 		}
 		v.ValueMap(fields...)

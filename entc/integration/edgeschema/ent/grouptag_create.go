@@ -28,40 +28,40 @@ type GroupTagCreate struct {
 }
 
 // SetTagID sets the "tag_id" field.
-func (gtc *GroupTagCreate) SetTagID(i int) *GroupTagCreate {
-	gtc.mutation.SetTagID(i)
-	return gtc
+func (_c *GroupTagCreate) SetTagID(i int) *GroupTagCreate {
+	_c.mutation.SetTagID(i)
+	return _c
 }
 
 // SetGroupID sets the "group_id" field.
-func (gtc *GroupTagCreate) SetGroupID(i int) *GroupTagCreate {
-	gtc.mutation.SetGroupID(i)
-	return gtc
+func (_c *GroupTagCreate) SetGroupID(i int) *GroupTagCreate {
+	_c.mutation.SetGroupID(i)
+	return _c
 }
 
 // SetTag sets the "tag" edge to the Tag entity.
-func (gtc *GroupTagCreate) SetTag(t *Tag) *GroupTagCreate {
-	return gtc.SetTagID(t.ID)
+func (_c *GroupTagCreate) SetTag(t *Tag) *GroupTagCreate {
+	return _c.SetTagID(t.ID)
 }
 
 // SetGroup sets the "group" edge to the Group entity.
-func (gtc *GroupTagCreate) SetGroup(g *Group) *GroupTagCreate {
-	return gtc.SetGroupID(g.ID)
+func (_c *GroupTagCreate) SetGroup(g *Group) *GroupTagCreate {
+	return _c.SetGroupID(g.ID)
 }
 
 // Mutation returns the GroupTagMutation object of the builder.
-func (gtc *GroupTagCreate) Mutation() *GroupTagMutation {
-	return gtc.mutation
+func (_c *GroupTagCreate) Mutation() *GroupTagMutation {
+	return _c.mutation
 }
 
 // Save creates the GroupTag in the database.
-func (gtc *GroupTagCreate) Save(ctx context.Context) (*GroupTag, error) {
-	return withHooks(ctx, gtc.sqlSave, gtc.mutation, gtc.hooks)
+func (_c *GroupTagCreate) Save(ctx context.Context) (*GroupTag, error) {
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (gtc *GroupTagCreate) SaveX(ctx context.Context) *GroupTag {
-	v, err := gtc.Save(ctx)
+func (_c *GroupTagCreate) SaveX(ctx context.Context) *GroupTag {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -69,41 +69,41 @@ func (gtc *GroupTagCreate) SaveX(ctx context.Context) *GroupTag {
 }
 
 // Exec executes the query.
-func (gtc *GroupTagCreate) Exec(ctx context.Context) error {
-	_, err := gtc.Save(ctx)
+func (_c *GroupTagCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gtc *GroupTagCreate) ExecX(ctx context.Context) {
-	if err := gtc.Exec(ctx); err != nil {
+func (_c *GroupTagCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (gtc *GroupTagCreate) check() error {
-	if _, ok := gtc.mutation.TagID(); !ok {
+func (_c *GroupTagCreate) check() error {
+	if _, ok := _c.mutation.TagID(); !ok {
 		return &ValidationError{Name: "tag_id", err: errors.New(`ent: missing required field "GroupTag.tag_id"`)}
 	}
-	if _, ok := gtc.mutation.GroupID(); !ok {
+	if _, ok := _c.mutation.GroupID(); !ok {
 		return &ValidationError{Name: "group_id", err: errors.New(`ent: missing required field "GroupTag.group_id"`)}
 	}
-	if len(gtc.mutation.TagIDs()) == 0 {
+	if len(_c.mutation.TagIDs()) == 0 {
 		return &ValidationError{Name: "tag", err: errors.New(`ent: missing required edge "GroupTag.tag"`)}
 	}
-	if len(gtc.mutation.GroupIDs()) == 0 {
+	if len(_c.mutation.GroupIDs()) == 0 {
 		return &ValidationError{Name: "group", err: errors.New(`ent: missing required edge "GroupTag.group"`)}
 	}
 	return nil
 }
 
-func (gtc *GroupTagCreate) sqlSave(ctx context.Context) (*GroupTag, error) {
-	if err := gtc.check(); err != nil {
+func (_c *GroupTagCreate) sqlSave(ctx context.Context) (*GroupTag, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := gtc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, gtc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -111,18 +111,18 @@ func (gtc *GroupTagCreate) sqlSave(ctx context.Context) (*GroupTag, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	gtc.mutation.id = &_node.ID
-	gtc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (gtc *GroupTagCreate) createSpec() (*GroupTag, *sqlgraph.CreateSpec) {
+func (_c *GroupTagCreate) createSpec() (*GroupTag, *sqlgraph.CreateSpec) {
 	var (
-		_node = &GroupTag{config: gtc.config}
+		_node = &GroupTag{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(grouptag.Table, sqlgraph.NewFieldSpec(grouptag.FieldID, field.TypeInt))
 	)
-	_spec.OnConflict = gtc.conflict
-	if nodes := gtc.mutation.TagIDs(); len(nodes) > 0 {
+	_spec.OnConflict = _c.conflict
+	if nodes := _c.mutation.TagIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -139,7 +139,7 @@ func (gtc *GroupTagCreate) createSpec() (*GroupTag, *sqlgraph.CreateSpec) {
 		_node.TagID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := gtc.mutation.GroupIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.GroupIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -175,10 +175,10 @@ func (gtc *GroupTagCreate) createSpec() (*GroupTag, *sqlgraph.CreateSpec) {
 //			SetTagID(v+v).
 //		}).
 //		Exec(ctx)
-func (gtc *GroupTagCreate) OnConflict(opts ...sql.ConflictOption) *GroupTagUpsertOne {
-	gtc.conflict = opts
+func (_c *GroupTagCreate) OnConflict(opts ...sql.ConflictOption) *GroupTagUpsertOne {
+	_c.conflict = opts
 	return &GroupTagUpsertOne{
-		create: gtc,
+		create: _c,
 	}
 }
 
@@ -188,10 +188,10 @@ func (gtc *GroupTagCreate) OnConflict(opts ...sql.ConflictOption) *GroupTagUpser
 //	client.GroupTag.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (gtc *GroupTagCreate) OnConflictColumns(columns ...string) *GroupTagUpsertOne {
-	gtc.conflict = append(gtc.conflict, sql.ConflictColumns(columns...))
+func (_c *GroupTagCreate) OnConflictColumns(columns ...string) *GroupTagUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &GroupTagUpsertOne{
-		create: gtc,
+		create: _c,
 	}
 }
 
@@ -342,16 +342,16 @@ type GroupTagCreateBulk struct {
 }
 
 // Save creates the GroupTag entities in the database.
-func (gtcb *GroupTagCreateBulk) Save(ctx context.Context) ([]*GroupTag, error) {
-	if gtcb.err != nil {
-		return nil, gtcb.err
+func (_c *GroupTagCreateBulk) Save(ctx context.Context) ([]*GroupTag, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(gtcb.builders))
-	nodes := make([]*GroupTag, len(gtcb.builders))
-	mutators := make([]Mutator, len(gtcb.builders))
-	for i := range gtcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*GroupTag, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := gtcb.builders[i]
+			builder := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*GroupTagMutation)
 				if !ok {
@@ -364,12 +364,12 @@ func (gtcb *GroupTagCreateBulk) Save(ctx context.Context) ([]*GroupTag, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, gtcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = gtcb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, gtcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -393,7 +393,7 @@ func (gtcb *GroupTagCreateBulk) Save(ctx context.Context) ([]*GroupTag, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, gtcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -401,8 +401,8 @@ func (gtcb *GroupTagCreateBulk) Save(ctx context.Context) ([]*GroupTag, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (gtcb *GroupTagCreateBulk) SaveX(ctx context.Context) []*GroupTag {
-	v, err := gtcb.Save(ctx)
+func (_c *GroupTagCreateBulk) SaveX(ctx context.Context) []*GroupTag {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -410,14 +410,14 @@ func (gtcb *GroupTagCreateBulk) SaveX(ctx context.Context) []*GroupTag {
 }
 
 // Exec executes the query.
-func (gtcb *GroupTagCreateBulk) Exec(ctx context.Context) error {
-	_, err := gtcb.Save(ctx)
+func (_c *GroupTagCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (gtcb *GroupTagCreateBulk) ExecX(ctx context.Context) {
-	if err := gtcb.Exec(ctx); err != nil {
+func (_c *GroupTagCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -437,10 +437,10 @@ func (gtcb *GroupTagCreateBulk) ExecX(ctx context.Context) {
 //			SetTagID(v+v).
 //		}).
 //		Exec(ctx)
-func (gtcb *GroupTagCreateBulk) OnConflict(opts ...sql.ConflictOption) *GroupTagUpsertBulk {
-	gtcb.conflict = opts
+func (_c *GroupTagCreateBulk) OnConflict(opts ...sql.ConflictOption) *GroupTagUpsertBulk {
+	_c.conflict = opts
 	return &GroupTagUpsertBulk{
-		create: gtcb,
+		create: _c,
 	}
 }
 
@@ -450,10 +450,10 @@ func (gtcb *GroupTagCreateBulk) OnConflict(opts ...sql.ConflictOption) *GroupTag
 //	client.GroupTag.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (gtcb *GroupTagCreateBulk) OnConflictColumns(columns ...string) *GroupTagUpsertBulk {
-	gtcb.conflict = append(gtcb.conflict, sql.ConflictColumns(columns...))
+func (_c *GroupTagCreateBulk) OnConflictColumns(columns ...string) *GroupTagUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &GroupTagUpsertBulk{
-		create: gtcb,
+		create: _c,
 	}
 }
 

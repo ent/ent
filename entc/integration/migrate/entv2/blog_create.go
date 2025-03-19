@@ -26,45 +26,45 @@ type BlogCreate struct {
 }
 
 // SetOid sets the "oid" field.
-func (bc *BlogCreate) SetOid(i int) *BlogCreate {
-	bc.mutation.SetOid(i)
-	return bc
+func (_c *BlogCreate) SetOid(i int) *BlogCreate {
+	_c.mutation.SetOid(i)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (bc *BlogCreate) SetID(i int) *BlogCreate {
-	bc.mutation.SetID(i)
-	return bc
+func (_c *BlogCreate) SetID(i int) *BlogCreate {
+	_c.mutation.SetID(i)
+	return _c
 }
 
 // AddAdminIDs adds the "admins" edge to the User entity by IDs.
-func (bc *BlogCreate) AddAdminIDs(ids ...int) *BlogCreate {
-	bc.mutation.AddAdminIDs(ids...)
-	return bc
+func (_c *BlogCreate) AddAdminIDs(ids ...int) *BlogCreate {
+	_c.mutation.AddAdminIDs(ids...)
+	return _c
 }
 
 // AddAdmins adds the "admins" edges to the User entity.
-func (bc *BlogCreate) AddAdmins(u ...*User) *BlogCreate {
+func (_c *BlogCreate) AddAdmins(u ...*User) *BlogCreate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return bc.AddAdminIDs(ids...)
+	return _c.AddAdminIDs(ids...)
 }
 
 // Mutation returns the BlogMutation object of the builder.
-func (bc *BlogCreate) Mutation() *BlogMutation {
-	return bc.mutation
+func (_c *BlogCreate) Mutation() *BlogMutation {
+	return _c.mutation
 }
 
 // Save creates the Blog in the database.
-func (bc *BlogCreate) Save(ctx context.Context) (*Blog, error) {
-	return withHooks(ctx, bc.sqlSave, bc.mutation, bc.hooks)
+func (_c *BlogCreate) Save(ctx context.Context) (*Blog, error) {
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (bc *BlogCreate) SaveX(ctx context.Context) *Blog {
-	v, err := bc.Save(ctx)
+func (_c *BlogCreate) SaveX(ctx context.Context) *Blog {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -72,35 +72,35 @@ func (bc *BlogCreate) SaveX(ctx context.Context) *Blog {
 }
 
 // Exec executes the query.
-func (bc *BlogCreate) Exec(ctx context.Context) error {
-	_, err := bc.Save(ctx)
+func (_c *BlogCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bc *BlogCreate) ExecX(ctx context.Context) {
-	if err := bc.Exec(ctx); err != nil {
+func (_c *BlogCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (bc *BlogCreate) check() error {
-	switch bc.driver.Dialect() {
+func (_c *BlogCreate) check() error {
+	switch _c.driver.Dialect() {
 	case dialect.MySQL, dialect.SQLite:
-		if _, ok := bc.mutation.Oid(); !ok {
+		if _, ok := _c.mutation.Oid(); !ok {
 			return &ValidationError{Name: "oid", err: errors.New(`entv2: missing required field "Blog.oid"`)}
 		}
 	}
 	return nil
 }
 
-func (bc *BlogCreate) sqlSave(ctx context.Context) (*Blog, error) {
-	if err := bc.check(); err != nil {
+func (_c *BlogCreate) sqlSave(ctx context.Context) (*Blog, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := bc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, bc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -110,25 +110,25 @@ func (bc *BlogCreate) sqlSave(ctx context.Context) (*Blog, error) {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int(id)
 	}
-	bc.mutation.id = &_node.ID
-	bc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (bc *BlogCreate) createSpec() (*Blog, *sqlgraph.CreateSpec) {
+func (_c *BlogCreate) createSpec() (*Blog, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Blog{config: bc.config}
+		_node = &Blog{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(blog.Table, sqlgraph.NewFieldSpec(blog.FieldID, field.TypeInt))
 	)
-	if id, ok := bc.mutation.ID(); ok {
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := bc.mutation.Oid(); ok {
+	if value, ok := _c.mutation.Oid(); ok {
 		_spec.SetField(blog.FieldOid, field.TypeInt, value)
 		_node.Oid = value
 	}
-	if nodes := bc.mutation.AdminsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.AdminsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -155,16 +155,16 @@ type BlogCreateBulk struct {
 }
 
 // Save creates the Blog entities in the database.
-func (bcb *BlogCreateBulk) Save(ctx context.Context) ([]*Blog, error) {
-	if bcb.err != nil {
-		return nil, bcb.err
+func (_c *BlogCreateBulk) Save(ctx context.Context) ([]*Blog, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(bcb.builders))
-	nodes := make([]*Blog, len(bcb.builders))
-	mutators := make([]Mutator, len(bcb.builders))
-	for i := range bcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Blog, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := bcb.builders[i]
+			builder := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*BlogMutation)
 				if !ok {
@@ -177,11 +177,11 @@ func (bcb *BlogCreateBulk) Save(ctx context.Context) ([]*Blog, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, bcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, bcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -205,7 +205,7 @@ func (bcb *BlogCreateBulk) Save(ctx context.Context) ([]*Blog, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, bcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -213,8 +213,8 @@ func (bcb *BlogCreateBulk) Save(ctx context.Context) ([]*Blog, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (bcb *BlogCreateBulk) SaveX(ctx context.Context) []*Blog {
-	v, err := bcb.Save(ctx)
+func (_c *BlogCreateBulk) SaveX(ctx context.Context) []*Blog {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -222,14 +222,14 @@ func (bcb *BlogCreateBulk) SaveX(ctx context.Context) []*Blog {
 }
 
 // Exec executes the query.
-func (bcb *BlogCreateBulk) Exec(ctx context.Context) error {
-	_, err := bcb.Save(ctx)
+func (_c *BlogCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (bcb *BlogCreateBulk) ExecX(ctx context.Context) {
-	if err := bcb.Exec(ctx); err != nil {
+func (_c *BlogCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

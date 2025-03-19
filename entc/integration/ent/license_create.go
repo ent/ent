@@ -27,53 +27,53 @@ type LicenseCreate struct {
 }
 
 // SetCreateTime sets the "create_time" field.
-func (lc *LicenseCreate) SetCreateTime(t time.Time) *LicenseCreate {
-	lc.mutation.SetCreateTime(t)
-	return lc
+func (_c *LicenseCreate) SetCreateTime(t time.Time) *LicenseCreate {
+	_c.mutation.SetCreateTime(t)
+	return _c
 }
 
 // SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (lc *LicenseCreate) SetNillableCreateTime(t *time.Time) *LicenseCreate {
+func (_c *LicenseCreate) SetNillableCreateTime(t *time.Time) *LicenseCreate {
 	if t != nil {
-		lc.SetCreateTime(*t)
+		_c.SetCreateTime(*t)
 	}
-	return lc
+	return _c
 }
 
 // SetUpdateTime sets the "update_time" field.
-func (lc *LicenseCreate) SetUpdateTime(t time.Time) *LicenseCreate {
-	lc.mutation.SetUpdateTime(t)
-	return lc
+func (_c *LicenseCreate) SetUpdateTime(t time.Time) *LicenseCreate {
+	_c.mutation.SetUpdateTime(t)
+	return _c
 }
 
 // SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (lc *LicenseCreate) SetNillableUpdateTime(t *time.Time) *LicenseCreate {
+func (_c *LicenseCreate) SetNillableUpdateTime(t *time.Time) *LicenseCreate {
 	if t != nil {
-		lc.SetUpdateTime(*t)
+		_c.SetUpdateTime(*t)
 	}
-	return lc
+	return _c
 }
 
 // SetID sets the "id" field.
-func (lc *LicenseCreate) SetID(i int) *LicenseCreate {
-	lc.mutation.SetID(i)
-	return lc
+func (_c *LicenseCreate) SetID(i int) *LicenseCreate {
+	_c.mutation.SetID(i)
+	return _c
 }
 
 // Mutation returns the LicenseMutation object of the builder.
-func (lc *LicenseCreate) Mutation() *LicenseMutation {
-	return lc.mutation
+func (_c *LicenseCreate) Mutation() *LicenseMutation {
+	return _c.mutation
 }
 
 // Save creates the License in the database.
-func (lc *LicenseCreate) Save(ctx context.Context) (*License, error) {
-	lc.defaults()
-	return withHooks(ctx, lc.sqlSave, lc.mutation, lc.hooks)
+func (_c *LicenseCreate) Save(ctx context.Context) (*License, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (lc *LicenseCreate) SaveX(ctx context.Context) *License {
-	v, err := lc.Save(ctx)
+func (_c *LicenseCreate) SaveX(ctx context.Context) *License {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -81,47 +81,47 @@ func (lc *LicenseCreate) SaveX(ctx context.Context) *License {
 }
 
 // Exec executes the query.
-func (lc *LicenseCreate) Exec(ctx context.Context) error {
-	_, err := lc.Save(ctx)
+func (_c *LicenseCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (lc *LicenseCreate) ExecX(ctx context.Context) {
-	if err := lc.Exec(ctx); err != nil {
+func (_c *LicenseCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (lc *LicenseCreate) defaults() {
-	if _, ok := lc.mutation.CreateTime(); !ok {
+func (_c *LicenseCreate) defaults() {
+	if _, ok := _c.mutation.CreateTime(); !ok {
 		v := license.DefaultCreateTime()
-		lc.mutation.SetCreateTime(v)
+		_c.mutation.SetCreateTime(v)
 	}
-	if _, ok := lc.mutation.UpdateTime(); !ok {
+	if _, ok := _c.mutation.UpdateTime(); !ok {
 		v := license.DefaultUpdateTime()
-		lc.mutation.SetUpdateTime(v)
+		_c.mutation.SetUpdateTime(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (lc *LicenseCreate) check() error {
-	if _, ok := lc.mutation.CreateTime(); !ok {
+func (_c *LicenseCreate) check() error {
+	if _, ok := _c.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "License.create_time"`)}
 	}
-	if _, ok := lc.mutation.UpdateTime(); !ok {
+	if _, ok := _c.mutation.UpdateTime(); !ok {
 		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "License.update_time"`)}
 	}
 	return nil
 }
 
-func (lc *LicenseCreate) sqlSave(ctx context.Context) (*License, error) {
-	if err := lc.check(); err != nil {
+func (_c *LicenseCreate) sqlSave(ctx context.Context) (*License, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := lc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, lc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -131,26 +131,26 @@ func (lc *LicenseCreate) sqlSave(ctx context.Context) (*License, error) {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int(id)
 	}
-	lc.mutation.id = &_node.ID
-	lc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (lc *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
+func (_c *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
 	var (
-		_node = &License{config: lc.config}
+		_node = &License{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(license.Table, sqlgraph.NewFieldSpec(license.FieldID, field.TypeInt))
 	)
-	_spec.OnConflict = lc.conflict
-	if id, ok := lc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := lc.mutation.CreateTime(); ok {
+	if value, ok := _c.mutation.CreateTime(); ok {
 		_spec.SetField(license.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
-	if value, ok := lc.mutation.UpdateTime(); ok {
+	if value, ok := _c.mutation.UpdateTime(); ok {
 		_spec.SetField(license.FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
@@ -173,10 +173,10 @@ func (lc *LicenseCreate) createSpec() (*License, *sqlgraph.CreateSpec) {
 //			SetCreateTime(v+v).
 //		}).
 //		Exec(ctx)
-func (lc *LicenseCreate) OnConflict(opts ...sql.ConflictOption) *LicenseUpsertOne {
-	lc.conflict = opts
+func (_c *LicenseCreate) OnConflict(opts ...sql.ConflictOption) *LicenseUpsertOne {
+	_c.conflict = opts
 	return &LicenseUpsertOne{
-		create: lc,
+		create: _c,
 	}
 }
 
@@ -186,10 +186,10 @@ func (lc *LicenseCreate) OnConflict(opts ...sql.ConflictOption) *LicenseUpsertOn
 //	client.License.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (lc *LicenseCreate) OnConflictColumns(columns ...string) *LicenseUpsertOne {
-	lc.conflict = append(lc.conflict, sql.ConflictColumns(columns...))
+func (_c *LicenseCreate) OnConflictColumns(columns ...string) *LicenseUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &LicenseUpsertOne{
-		create: lc,
+		create: _c,
 	}
 }
 
@@ -325,16 +325,16 @@ type LicenseCreateBulk struct {
 }
 
 // Save creates the License entities in the database.
-func (lcb *LicenseCreateBulk) Save(ctx context.Context) ([]*License, error) {
-	if lcb.err != nil {
-		return nil, lcb.err
+func (_c *LicenseCreateBulk) Save(ctx context.Context) ([]*License, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(lcb.builders))
-	nodes := make([]*License, len(lcb.builders))
-	mutators := make([]Mutator, len(lcb.builders))
-	for i := range lcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*License, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := lcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*LicenseMutation)
@@ -348,12 +348,12 @@ func (lcb *LicenseCreateBulk) Save(ctx context.Context) ([]*License, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, lcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = lcb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, lcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -377,7 +377,7 @@ func (lcb *LicenseCreateBulk) Save(ctx context.Context) ([]*License, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, lcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -385,8 +385,8 @@ func (lcb *LicenseCreateBulk) Save(ctx context.Context) ([]*License, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (lcb *LicenseCreateBulk) SaveX(ctx context.Context) []*License {
-	v, err := lcb.Save(ctx)
+func (_c *LicenseCreateBulk) SaveX(ctx context.Context) []*License {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -394,14 +394,14 @@ func (lcb *LicenseCreateBulk) SaveX(ctx context.Context) []*License {
 }
 
 // Exec executes the query.
-func (lcb *LicenseCreateBulk) Exec(ctx context.Context) error {
-	_, err := lcb.Save(ctx)
+func (_c *LicenseCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (lcb *LicenseCreateBulk) ExecX(ctx context.Context) {
-	if err := lcb.Exec(ctx); err != nil {
+func (_c *LicenseCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -421,10 +421,10 @@ func (lcb *LicenseCreateBulk) ExecX(ctx context.Context) {
 //			SetCreateTime(v+v).
 //		}).
 //		Exec(ctx)
-func (lcb *LicenseCreateBulk) OnConflict(opts ...sql.ConflictOption) *LicenseUpsertBulk {
-	lcb.conflict = opts
+func (_c *LicenseCreateBulk) OnConflict(opts ...sql.ConflictOption) *LicenseUpsertBulk {
+	_c.conflict = opts
 	return &LicenseUpsertBulk{
-		create: lcb,
+		create: _c,
 	}
 }
 
@@ -434,10 +434,10 @@ func (lcb *LicenseCreateBulk) OnConflict(opts ...sql.ConflictOption) *LicenseUps
 //	client.License.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (lcb *LicenseCreateBulk) OnConflictColumns(columns ...string) *LicenseUpsertBulk {
-	lcb.conflict = append(lcb.conflict, sql.ConflictColumns(columns...))
+func (_c *LicenseCreateBulk) OnConflictColumns(columns ...string) *LicenseUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &LicenseUpsertBulk{
-		create: lcb,
+		create: _c,
 	}
 }
 

@@ -81,7 +81,7 @@ func (*GroupTag) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the GroupTag fields.
-func (gt *GroupTag) assignValues(columns []string, values []any) error {
+func (_m *GroupTag) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -92,21 +92,21 @@ func (gt *GroupTag) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			gt.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case grouptag.FieldTagID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field tag_id", values[i])
 			} else if value.Valid {
-				gt.TagID = int(value.Int64)
+				_m.TagID = int(value.Int64)
 			}
 		case grouptag.FieldGroupID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field group_id", values[i])
 			} else if value.Valid {
-				gt.GroupID = int(value.Int64)
+				_m.GroupID = int(value.Int64)
 			}
 		default:
-			gt.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -114,48 +114,48 @@ func (gt *GroupTag) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the GroupTag.
 // This includes values selected through modifiers, order, etc.
-func (gt *GroupTag) Value(name string) (ent.Value, error) {
-	return gt.selectValues.Get(name)
+func (_m *GroupTag) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryTag queries the "tag" edge of the GroupTag entity.
-func (gt *GroupTag) QueryTag() *TagQuery {
-	return NewGroupTagClient(gt.config).QueryTag(gt)
+func (_m *GroupTag) QueryTag() *TagQuery {
+	return NewGroupTagClient(_m.config).QueryTag(_m)
 }
 
 // QueryGroup queries the "group" edge of the GroupTag entity.
-func (gt *GroupTag) QueryGroup() *GroupQuery {
-	return NewGroupTagClient(gt.config).QueryGroup(gt)
+func (_m *GroupTag) QueryGroup() *GroupQuery {
+	return NewGroupTagClient(_m.config).QueryGroup(_m)
 }
 
 // Update returns a builder for updating this GroupTag.
 // Note that you need to call GroupTag.Unwrap() before calling this method if this GroupTag
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (gt *GroupTag) Update() *GroupTagUpdateOne {
-	return NewGroupTagClient(gt.config).UpdateOne(gt)
+func (_m *GroupTag) Update() *GroupTagUpdateOne {
+	return NewGroupTagClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the GroupTag entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (gt *GroupTag) Unwrap() *GroupTag {
-	_tx, ok := gt.config.driver.(*txDriver)
+func (_m *GroupTag) Unwrap() *GroupTag {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: GroupTag is not a transactional entity")
 	}
-	gt.config.driver = _tx.drv
-	return gt
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (gt *GroupTag) String() string {
+func (_m *GroupTag) String() string {
 	var builder strings.Builder
 	builder.WriteString("GroupTag(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", gt.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("tag_id=")
-	builder.WriteString(fmt.Sprintf("%v", gt.TagID))
+	builder.WriteString(fmt.Sprintf("%v", _m.TagID))
 	builder.WriteString(", ")
 	builder.WriteString("group_id=")
-	builder.WriteString(fmt.Sprintf("%v", gt.GroupID))
+	builder.WriteString(fmt.Sprintf("%v", _m.GroupID))
 	builder.WriteByte(')')
 	return builder.String()
 }

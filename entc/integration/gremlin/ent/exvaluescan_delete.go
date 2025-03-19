@@ -25,38 +25,38 @@ type ExValueScanDelete struct {
 }
 
 // Where appends a list predicates to the ExValueScanDelete builder.
-func (evsd *ExValueScanDelete) Where(ps ...predicate.ExValueScan) *ExValueScanDelete {
-	evsd.mutation.Where(ps...)
-	return evsd
+func (_d *ExValueScanDelete) Where(ps ...predicate.ExValueScan) *ExValueScanDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (evsd *ExValueScanDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, evsd.gremlinExec, evsd.mutation, evsd.hooks)
+func (_d *ExValueScanDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.gremlinExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (evsd *ExValueScanDelete) ExecX(ctx context.Context) int {
-	n, err := evsd.Exec(ctx)
+func (_d *ExValueScanDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (evsd *ExValueScanDelete) gremlinExec(ctx context.Context) (int, error) {
+func (_d *ExValueScanDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := evsd.gremlin().Query()
-	if err := evsd.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _d.gremlin().Query()
+	if err := _d.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
-	evsd.mutation.done = true
+	_d.mutation.done = true
 	return res.ReadInt()
 }
 
-func (evsd *ExValueScanDelete) gremlin() *dsl.Traversal {
+func (_d *ExValueScanDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(exvaluescan.Label)
-	for _, p := range evsd.mutation.predicates {
+	for _, p := range _d.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()
@@ -64,18 +64,18 @@ func (evsd *ExValueScanDelete) gremlin() *dsl.Traversal {
 
 // ExValueScanDeleteOne is the builder for deleting a single ExValueScan entity.
 type ExValueScanDeleteOne struct {
-	evsd *ExValueScanDelete
+	_d *ExValueScanDelete
 }
 
 // Where appends a list predicates to the ExValueScanDelete builder.
-func (evsdo *ExValueScanDeleteOne) Where(ps ...predicate.ExValueScan) *ExValueScanDeleteOne {
-	evsdo.evsd.mutation.Where(ps...)
-	return evsdo
+func (_d *ExValueScanDeleteOne) Where(ps ...predicate.ExValueScan) *ExValueScanDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (evsdo *ExValueScanDeleteOne) Exec(ctx context.Context) error {
-	n, err := evsdo.evsd.Exec(ctx)
+func (_d *ExValueScanDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -87,8 +87,8 @@ func (evsdo *ExValueScanDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (evsdo *ExValueScanDeleteOne) ExecX(ctx context.Context) {
-	if err := evsdo.Exec(ctx); err != nil {
+func (_d *ExValueScanDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

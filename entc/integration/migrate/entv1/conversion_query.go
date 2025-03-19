@@ -32,40 +32,40 @@ type ConversionQuery struct {
 }
 
 // Where adds a new predicate for the ConversionQuery builder.
-func (cq *ConversionQuery) Where(ps ...predicate.Conversion) *ConversionQuery {
-	cq.predicates = append(cq.predicates, ps...)
-	return cq
+func (_q *ConversionQuery) Where(ps ...predicate.Conversion) *ConversionQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (cq *ConversionQuery) Limit(limit int) *ConversionQuery {
-	cq.ctx.Limit = &limit
-	return cq
+func (_q *ConversionQuery) Limit(limit int) *ConversionQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (cq *ConversionQuery) Offset(offset int) *ConversionQuery {
-	cq.ctx.Offset = &offset
-	return cq
+func (_q *ConversionQuery) Offset(offset int) *ConversionQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (cq *ConversionQuery) Unique(unique bool) *ConversionQuery {
-	cq.ctx.Unique = &unique
-	return cq
+func (_q *ConversionQuery) Unique(unique bool) *ConversionQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (cq *ConversionQuery) Order(o ...conversion.OrderOption) *ConversionQuery {
-	cq.order = append(cq.order, o...)
-	return cq
+func (_q *ConversionQuery) Order(o ...conversion.OrderOption) *ConversionQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // First returns the first Conversion entity from the query.
 // Returns a *NotFoundError when no Conversion was found.
-func (cq *ConversionQuery) First(ctx context.Context) (*Conversion, error) {
-	nodes, err := cq.Limit(1).All(setContextOp(ctx, cq.ctx, ent.OpQueryFirst))
+func (_q *ConversionQuery) First(ctx context.Context) (*Conversion, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -76,8 +76,8 @@ func (cq *ConversionQuery) First(ctx context.Context) (*Conversion, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (cq *ConversionQuery) FirstX(ctx context.Context) *Conversion {
-	node, err := cq.First(ctx)
+func (_q *ConversionQuery) FirstX(ctx context.Context) *Conversion {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -86,9 +86,9 @@ func (cq *ConversionQuery) FirstX(ctx context.Context) *Conversion {
 
 // FirstID returns the first Conversion ID from the query.
 // Returns a *NotFoundError when no Conversion ID was found.
-func (cq *ConversionQuery) FirstID(ctx context.Context) (id int, err error) {
+func (_q *ConversionQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = cq.Limit(1).IDs(setContextOp(ctx, cq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -99,8 +99,8 @@ func (cq *ConversionQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (cq *ConversionQuery) FirstIDX(ctx context.Context) int {
-	id, err := cq.FirstID(ctx)
+func (_q *ConversionQuery) FirstIDX(ctx context.Context) int {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -110,8 +110,8 @@ func (cq *ConversionQuery) FirstIDX(ctx context.Context) int {
 // Only returns a single Conversion entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one Conversion entity is found.
 // Returns a *NotFoundError when no Conversion entities are found.
-func (cq *ConversionQuery) Only(ctx context.Context) (*Conversion, error) {
-	nodes, err := cq.Limit(2).All(setContextOp(ctx, cq.ctx, ent.OpQueryOnly))
+func (_q *ConversionQuery) Only(ctx context.Context) (*Conversion, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -126,8 +126,8 @@ func (cq *ConversionQuery) Only(ctx context.Context) (*Conversion, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (cq *ConversionQuery) OnlyX(ctx context.Context) *Conversion {
-	node, err := cq.Only(ctx)
+func (_q *ConversionQuery) OnlyX(ctx context.Context) *Conversion {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -137,9 +137,9 @@ func (cq *ConversionQuery) OnlyX(ctx context.Context) *Conversion {
 // OnlyID is like Only, but returns the only Conversion ID in the query.
 // Returns a *NotSingularError when more than one Conversion ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (cq *ConversionQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (_q *ConversionQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = cq.Limit(2).IDs(setContextOp(ctx, cq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -154,8 +154,8 @@ func (cq *ConversionQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (cq *ConversionQuery) OnlyIDX(ctx context.Context) int {
-	id, err := cq.OnlyID(ctx)
+func (_q *ConversionQuery) OnlyIDX(ctx context.Context) int {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -163,18 +163,18 @@ func (cq *ConversionQuery) OnlyIDX(ctx context.Context) int {
 }
 
 // All executes the query and returns a list of Conversions.
-func (cq *ConversionQuery) All(ctx context.Context) ([]*Conversion, error) {
-	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryAll)
-	if err := cq.prepareQuery(ctx); err != nil {
+func (_q *ConversionQuery) All(ctx context.Context) ([]*Conversion, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*Conversion, *ConversionQuery]()
-	return withInterceptors[[]*Conversion](ctx, cq, qr, cq.inters)
+	return withInterceptors[[]*Conversion](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (cq *ConversionQuery) AllX(ctx context.Context) []*Conversion {
-	nodes, err := cq.All(ctx)
+func (_q *ConversionQuery) AllX(ctx context.Context) []*Conversion {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -182,20 +182,20 @@ func (cq *ConversionQuery) AllX(ctx context.Context) []*Conversion {
 }
 
 // IDs executes the query and returns a list of Conversion IDs.
-func (cq *ConversionQuery) IDs(ctx context.Context) (ids []int, err error) {
-	if cq.ctx.Unique == nil && cq.path != nil {
-		cq.Unique(true)
+func (_q *ConversionQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryIDs)
-	if err = cq.Select(conversion.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(conversion.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (cq *ConversionQuery) IDsX(ctx context.Context) []int {
-	ids, err := cq.IDs(ctx)
+func (_q *ConversionQuery) IDsX(ctx context.Context) []int {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -203,17 +203,17 @@ func (cq *ConversionQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (cq *ConversionQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryCount)
-	if err := cq.prepareQuery(ctx); err != nil {
+func (_q *ConversionQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, cq, querierCount[*ConversionQuery](), cq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*ConversionQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (cq *ConversionQuery) CountX(ctx context.Context) int {
-	count, err := cq.Count(ctx)
+func (_q *ConversionQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -221,9 +221,9 @@ func (cq *ConversionQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (cq *ConversionQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, cq.ctx, ent.OpQueryExist)
-	switch _, err := cq.FirstID(ctx); {
+func (_q *ConversionQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -234,8 +234,8 @@ func (cq *ConversionQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (cq *ConversionQuery) ExistX(ctx context.Context) bool {
-	exist, err := cq.Exist(ctx)
+func (_q *ConversionQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -244,19 +244,19 @@ func (cq *ConversionQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the ConversionQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (cq *ConversionQuery) Clone() *ConversionQuery {
-	if cq == nil {
+func (_q *ConversionQuery) Clone() *ConversionQuery {
+	if _q == nil {
 		return nil
 	}
 	return &ConversionQuery{
-		config:     cq.config,
-		ctx:        cq.ctx.Clone(),
-		order:      append([]conversion.OrderOption{}, cq.order...),
-		inters:     append([]Interceptor{}, cq.inters...),
-		predicates: append([]predicate.Conversion{}, cq.predicates...),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]conversion.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.Conversion{}, _q.predicates...),
 		// clone intermediate query.
-		sql:  cq.sql.Clone(),
-		path: cq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
@@ -274,10 +274,10 @@ func (cq *ConversionQuery) Clone() *ConversionQuery {
 //		GroupBy(conversion.FieldName).
 //		Aggregate(entv1.Count()).
 //		Scan(ctx, &v)
-func (cq *ConversionQuery) GroupBy(field string, fields ...string) *ConversionGroupBy {
-	cq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &ConversionGroupBy{build: cq}
-	grbuild.flds = &cq.ctx.Fields
+func (_q *ConversionQuery) GroupBy(field string, fields ...string) *ConversionGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &ConversionGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = conversion.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -295,62 +295,62 @@ func (cq *ConversionQuery) GroupBy(field string, fields ...string) *ConversionGr
 //	client.Conversion.Query().
 //		Select(conversion.FieldName).
 //		Scan(ctx, &v)
-func (cq *ConversionQuery) Select(fields ...string) *ConversionSelect {
-	cq.ctx.Fields = append(cq.ctx.Fields, fields...)
-	sbuild := &ConversionSelect{ConversionQuery: cq}
+func (_q *ConversionQuery) Select(fields ...string) *ConversionSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &ConversionSelect{ConversionQuery: _q}
 	sbuild.label = conversion.Label
-	sbuild.flds, sbuild.scan = &cq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a ConversionSelect configured with the given aggregations.
-func (cq *ConversionQuery) Aggregate(fns ...AggregateFunc) *ConversionSelect {
-	return cq.Select().Aggregate(fns...)
+func (_q *ConversionQuery) Aggregate(fns ...AggregateFunc) *ConversionSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (cq *ConversionQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range cq.inters {
+func (_q *ConversionQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("entv1: uninitialized interceptor (forgotten import entv1/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, cq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range cq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !conversion.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("entv1: invalid field %q for query", f)}
 		}
 	}
-	if cq.path != nil {
-		prev, err := cq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		cq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (cq *ConversionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Conversion, error) {
+func (_q *ConversionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Conversion, error) {
 	var (
 		nodes = []*Conversion{}
-		_spec = cq.querySpec()
+		_spec = _q.querySpec()
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Conversion).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &Conversion{config: cq.config}
+		node := &Conversion{config: _q.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, cq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
@@ -359,24 +359,24 @@ func (cq *ConversionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*C
 	return nodes, nil
 }
 
-func (cq *ConversionQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := cq.querySpec()
-	_spec.Node.Columns = cq.ctx.Fields
-	if len(cq.ctx.Fields) > 0 {
-		_spec.Unique = cq.ctx.Unique != nil && *cq.ctx.Unique
+func (_q *ConversionQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, cq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (cq *ConversionQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *ConversionQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(conversion.Table, conversion.Columns, sqlgraph.NewFieldSpec(conversion.FieldID, field.TypeInt))
-	_spec.From = cq.sql
-	if unique := cq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if cq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := cq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, conversion.FieldID)
 		for i := range fields {
@@ -385,20 +385,20 @@ func (cq *ConversionQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := cq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := cq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := cq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := cq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -408,33 +408,33 @@ func (cq *ConversionQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (cq *ConversionQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(cq.driver.Dialect())
+func (_q *ConversionQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(conversion.Table)
-	columns := cq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = conversion.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if cq.sql != nil {
-		selector = cq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if cq.ctx.Unique != nil && *cq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range cq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range cq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := cq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := cq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector

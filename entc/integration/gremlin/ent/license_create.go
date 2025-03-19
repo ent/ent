@@ -25,53 +25,53 @@ type LicenseCreate struct {
 }
 
 // SetCreateTime sets the "create_time" field.
-func (lc *LicenseCreate) SetCreateTime(t time.Time) *LicenseCreate {
-	lc.mutation.SetCreateTime(t)
-	return lc
+func (_c *LicenseCreate) SetCreateTime(t time.Time) *LicenseCreate {
+	_c.mutation.SetCreateTime(t)
+	return _c
 }
 
 // SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (lc *LicenseCreate) SetNillableCreateTime(t *time.Time) *LicenseCreate {
+func (_c *LicenseCreate) SetNillableCreateTime(t *time.Time) *LicenseCreate {
 	if t != nil {
-		lc.SetCreateTime(*t)
+		_c.SetCreateTime(*t)
 	}
-	return lc
+	return _c
 }
 
 // SetUpdateTime sets the "update_time" field.
-func (lc *LicenseCreate) SetUpdateTime(t time.Time) *LicenseCreate {
-	lc.mutation.SetUpdateTime(t)
-	return lc
+func (_c *LicenseCreate) SetUpdateTime(t time.Time) *LicenseCreate {
+	_c.mutation.SetUpdateTime(t)
+	return _c
 }
 
 // SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (lc *LicenseCreate) SetNillableUpdateTime(t *time.Time) *LicenseCreate {
+func (_c *LicenseCreate) SetNillableUpdateTime(t *time.Time) *LicenseCreate {
 	if t != nil {
-		lc.SetUpdateTime(*t)
+		_c.SetUpdateTime(*t)
 	}
-	return lc
+	return _c
 }
 
 // SetID sets the "id" field.
-func (lc *LicenseCreate) SetID(i int) *LicenseCreate {
-	lc.mutation.SetID(i)
-	return lc
+func (_c *LicenseCreate) SetID(i int) *LicenseCreate {
+	_c.mutation.SetID(i)
+	return _c
 }
 
 // Mutation returns the LicenseMutation object of the builder.
-func (lc *LicenseCreate) Mutation() *LicenseMutation {
-	return lc.mutation
+func (_c *LicenseCreate) Mutation() *LicenseMutation {
+	return _c.mutation
 }
 
 // Save creates the License in the database.
-func (lc *LicenseCreate) Save(ctx context.Context) (*License, error) {
-	lc.defaults()
-	return withHooks(ctx, lc.gremlinSave, lc.mutation, lc.hooks)
+func (_c *LicenseCreate) Save(ctx context.Context) (*License, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (lc *LicenseCreate) SaveX(ctx context.Context) *License {
-	v, err := lc.Save(ctx)
+func (_c *LicenseCreate) SaveX(ctx context.Context) *License {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -79,71 +79,71 @@ func (lc *LicenseCreate) SaveX(ctx context.Context) *License {
 }
 
 // Exec executes the query.
-func (lc *LicenseCreate) Exec(ctx context.Context) error {
-	_, err := lc.Save(ctx)
+func (_c *LicenseCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (lc *LicenseCreate) ExecX(ctx context.Context) {
-	if err := lc.Exec(ctx); err != nil {
+func (_c *LicenseCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (lc *LicenseCreate) defaults() {
-	if _, ok := lc.mutation.CreateTime(); !ok {
+func (_c *LicenseCreate) defaults() {
+	if _, ok := _c.mutation.CreateTime(); !ok {
 		v := license.DefaultCreateTime()
-		lc.mutation.SetCreateTime(v)
+		_c.mutation.SetCreateTime(v)
 	}
-	if _, ok := lc.mutation.UpdateTime(); !ok {
+	if _, ok := _c.mutation.UpdateTime(); !ok {
 		v := license.DefaultUpdateTime()
-		lc.mutation.SetUpdateTime(v)
+		_c.mutation.SetUpdateTime(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (lc *LicenseCreate) check() error {
-	if _, ok := lc.mutation.CreateTime(); !ok {
+func (_c *LicenseCreate) check() error {
+	if _, ok := _c.mutation.CreateTime(); !ok {
 		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "License.create_time"`)}
 	}
-	if _, ok := lc.mutation.UpdateTime(); !ok {
+	if _, ok := _c.mutation.UpdateTime(); !ok {
 		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "License.update_time"`)}
 	}
 	return nil
 }
 
-func (lc *LicenseCreate) gremlinSave(ctx context.Context) (*License, error) {
-	if err := lc.check(); err != nil {
+func (_c *LicenseCreate) gremlinSave(ctx context.Context) (*License, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := lc.gremlin().Query()
-	if err := lc.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _c.gremlin().Query()
+	if err := _c.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	rnode := &License{config: lc.config}
+	rnode := &License{config: _c.config}
 	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	lc.mutation.id = &rnode.ID
-	lc.mutation.done = true
+	_c.mutation.id = &rnode.ID
+	_c.mutation.done = true
 	return rnode, nil
 }
 
-func (lc *LicenseCreate) gremlin() *dsl.Traversal {
+func (_c *LicenseCreate) gremlin() *dsl.Traversal {
 	v := g.AddV(license.Label)
-	if id, ok := lc.mutation.ID(); ok {
+	if id, ok := _c.mutation.ID(); ok {
 		v.Property(dsl.ID, id)
 	}
-	if value, ok := lc.mutation.CreateTime(); ok {
+	if value, ok := _c.mutation.CreateTime(); ok {
 		v.Property(dsl.Single, license.FieldCreateTime, value)
 	}
-	if value, ok := lc.mutation.UpdateTime(); ok {
+	if value, ok := _c.mutation.UpdateTime(); ok {
 		v.Property(dsl.Single, license.FieldUpdateTime, value)
 	}
 	return v.ValueMap(true)

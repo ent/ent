@@ -61,7 +61,7 @@ func (*Spec) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Spec fields.
-func (s *Spec) assignValues(columns []string, values []any) error {
+func (_m *Spec) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -72,9 +72,9 @@ func (s *Spec) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			s.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		default:
-			s.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -82,63 +82,63 @@ func (s *Spec) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Spec.
 // This includes values selected through modifiers, order, etc.
-func (s *Spec) Value(name string) (ent.Value, error) {
-	return s.selectValues.Get(name)
+func (_m *Spec) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryCard queries the "card" edge of the Spec entity.
-func (s *Spec) QueryCard() *CardQuery {
-	return NewSpecClient(s.config).QueryCard(s)
+func (_m *Spec) QueryCard() *CardQuery {
+	return NewSpecClient(_m.config).QueryCard(_m)
 }
 
 // Update returns a builder for updating this Spec.
 // Note that you need to call Spec.Unwrap() before calling this method if this Spec
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (s *Spec) Update() *SpecUpdateOne {
-	return NewSpecClient(s.config).UpdateOne(s)
+func (_m *Spec) Update() *SpecUpdateOne {
+	return NewSpecClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Spec entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (s *Spec) Unwrap() *Spec {
-	_tx, ok := s.config.driver.(*txDriver)
+func (_m *Spec) Unwrap() *Spec {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Spec is not a transactional entity")
 	}
-	s.config.driver = _tx.drv
-	return s
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (s *Spec) String() string {
+func (_m *Spec) String() string {
 	var builder strings.Builder
 	builder.WriteString("Spec(")
-	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
+	builder.WriteString(fmt.Sprintf("id=%v", _m.ID))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedCard returns the Card named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (s *Spec) NamedCard(name string) ([]*Card, error) {
-	if s.Edges.namedCard == nil {
+func (_m *Spec) NamedCard(name string) ([]*Card, error) {
+	if _m.Edges.namedCard == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := s.Edges.namedCard[name]
+	nodes, ok := _m.Edges.namedCard[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (s *Spec) appendNamedCard(name string, edges ...*Card) {
-	if s.Edges.namedCard == nil {
-		s.Edges.namedCard = make(map[string][]*Card)
+func (_m *Spec) appendNamedCard(name string, edges ...*Card) {
+	if _m.Edges.namedCard == nil {
+		_m.Edges.namedCard = make(map[string][]*Card)
 	}
 	if len(edges) == 0 {
-		s.Edges.namedCard[name] = []*Card{}
+		_m.Edges.namedCard[name] = []*Card{}
 	} else {
-		s.Edges.namedCard[name] = append(s.Edges.namedCard[name], edges...)
+		_m.Edges.namedCard[name] = append(_m.Edges.namedCard[name], edges...)
 	}
 }
 

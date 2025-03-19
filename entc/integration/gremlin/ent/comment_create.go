@@ -27,86 +27,86 @@ type CommentCreate struct {
 }
 
 // SetUniqueInt sets the "unique_int" field.
-func (cc *CommentCreate) SetUniqueInt(i int) *CommentCreate {
-	cc.mutation.SetUniqueInt(i)
-	return cc
+func (_c *CommentCreate) SetUniqueInt(i int) *CommentCreate {
+	_c.mutation.SetUniqueInt(i)
+	return _c
 }
 
 // SetUniqueFloat sets the "unique_float" field.
-func (cc *CommentCreate) SetUniqueFloat(f float64) *CommentCreate {
-	cc.mutation.SetUniqueFloat(f)
-	return cc
+func (_c *CommentCreate) SetUniqueFloat(f float64) *CommentCreate {
+	_c.mutation.SetUniqueFloat(f)
+	return _c
 }
 
 // SetNillableInt sets the "nillable_int" field.
-func (cc *CommentCreate) SetNillableInt(i int) *CommentCreate {
-	cc.mutation.SetNillableInt(i)
-	return cc
+func (_c *CommentCreate) SetNillableInt(i int) *CommentCreate {
+	_c.mutation.SetNillableInt(i)
+	return _c
 }
 
 // SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
-func (cc *CommentCreate) SetNillableNillableInt(i *int) *CommentCreate {
+func (_c *CommentCreate) SetNillableNillableInt(i *int) *CommentCreate {
 	if i != nil {
-		cc.SetNillableInt(*i)
+		_c.SetNillableInt(*i)
 	}
-	return cc
+	return _c
 }
 
 // SetTable sets the "table" field.
-func (cc *CommentCreate) SetTable(s string) *CommentCreate {
-	cc.mutation.SetTable(s)
-	return cc
+func (_c *CommentCreate) SetTable(s string) *CommentCreate {
+	_c.mutation.SetTable(s)
+	return _c
 }
 
 // SetNillableTable sets the "table" field if the given value is not nil.
-func (cc *CommentCreate) SetNillableTable(s *string) *CommentCreate {
+func (_c *CommentCreate) SetNillableTable(s *string) *CommentCreate {
 	if s != nil {
-		cc.SetTable(*s)
+		_c.SetTable(*s)
 	}
-	return cc
+	return _c
 }
 
 // SetDir sets the "dir" field.
-func (cc *CommentCreate) SetDir(s schemadir.Dir) *CommentCreate {
-	cc.mutation.SetDir(s)
-	return cc
+func (_c *CommentCreate) SetDir(s schemadir.Dir) *CommentCreate {
+	_c.mutation.SetDir(s)
+	return _c
 }
 
 // SetNillableDir sets the "dir" field if the given value is not nil.
-func (cc *CommentCreate) SetNillableDir(s *schemadir.Dir) *CommentCreate {
+func (_c *CommentCreate) SetNillableDir(s *schemadir.Dir) *CommentCreate {
 	if s != nil {
-		cc.SetDir(*s)
+		_c.SetDir(*s)
 	}
-	return cc
+	return _c
 }
 
 // SetClient sets the "client" field.
-func (cc *CommentCreate) SetClient(s string) *CommentCreate {
-	cc.mutation.SetClient(s)
-	return cc
+func (_c *CommentCreate) SetClient(s string) *CommentCreate {
+	_c.mutation.SetClient(s)
+	return _c
 }
 
 // SetNillableClient sets the "client" field if the given value is not nil.
-func (cc *CommentCreate) SetNillableClient(s *string) *CommentCreate {
+func (_c *CommentCreate) SetNillableClient(s *string) *CommentCreate {
 	if s != nil {
-		cc.SetClient(*s)
+		_c.SetClient(*s)
 	}
-	return cc
+	return _c
 }
 
 // Mutation returns the CommentMutation object of the builder.
-func (cc *CommentCreate) Mutation() *CommentMutation {
-	return cc.mutation
+func (_c *CommentCreate) Mutation() *CommentMutation {
+	return _c.mutation
 }
 
 // Save creates the Comment in the database.
-func (cc *CommentCreate) Save(ctx context.Context) (*Comment, error) {
-	return withHooks(ctx, cc.gremlinSave, cc.mutation, cc.hooks)
+func (_c *CommentCreate) Save(ctx context.Context) (*Comment, error) {
+	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (cc *CommentCreate) SaveX(ctx context.Context) *Comment {
-	v, err := cc.Save(ctx)
+func (_c *CommentCreate) SaveX(ctx context.Context) *Comment {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -114,81 +114,81 @@ func (cc *CommentCreate) SaveX(ctx context.Context) *Comment {
 }
 
 // Exec executes the query.
-func (cc *CommentCreate) Exec(ctx context.Context) error {
-	_, err := cc.Save(ctx)
+func (_c *CommentCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cc *CommentCreate) ExecX(ctx context.Context) {
-	if err := cc.Exec(ctx); err != nil {
+func (_c *CommentCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cc *CommentCreate) check() error {
-	if _, ok := cc.mutation.UniqueInt(); !ok {
+func (_c *CommentCreate) check() error {
+	if _, ok := _c.mutation.UniqueInt(); !ok {
 		return &ValidationError{Name: "unique_int", err: errors.New(`ent: missing required field "Comment.unique_int"`)}
 	}
-	if _, ok := cc.mutation.UniqueFloat(); !ok {
+	if _, ok := _c.mutation.UniqueFloat(); !ok {
 		return &ValidationError{Name: "unique_float", err: errors.New(`ent: missing required field "Comment.unique_float"`)}
 	}
 	return nil
 }
 
-func (cc *CommentCreate) gremlinSave(ctx context.Context) (*Comment, error) {
-	if err := cc.check(); err != nil {
+func (_c *CommentCreate) gremlinSave(ctx context.Context) (*Comment, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := cc.gremlin().Query()
-	if err := cc.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _c.gremlin().Query()
+	if err := _c.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	rnode := &Comment{config: cc.config}
+	rnode := &Comment{config: _c.config}
 	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	cc.mutation.id = &rnode.ID
-	cc.mutation.done = true
+	_c.mutation.id = &rnode.ID
+	_c.mutation.done = true
 	return rnode, nil
 }
 
-func (cc *CommentCreate) gremlin() *dsl.Traversal {
+func (_c *CommentCreate) gremlin() *dsl.Traversal {
 	type constraint struct {
 		pred *dsl.Traversal // constraint predicate.
 		test *dsl.Traversal // test matches and its constant.
 	}
 	constraints := make([]*constraint, 0, 2)
 	v := g.AddV(comment.Label)
-	if value, ok := cc.mutation.UniqueInt(); ok {
+	if value, ok := _c.mutation.UniqueInt(); ok {
 		constraints = append(constraints, &constraint{
 			pred: g.V().Has(comment.Label, comment.FieldUniqueInt, value).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueInt, value)),
 		})
 		v.Property(dsl.Single, comment.FieldUniqueInt, value)
 	}
-	if value, ok := cc.mutation.UniqueFloat(); ok {
+	if value, ok := _c.mutation.UniqueFloat(); ok {
 		constraints = append(constraints, &constraint{
 			pred: g.V().Has(comment.Label, comment.FieldUniqueFloat, value).Count(),
 			test: __.Is(p.NEQ(0)).Constant(NewErrUniqueField(comment.Label, comment.FieldUniqueFloat, value)),
 		})
 		v.Property(dsl.Single, comment.FieldUniqueFloat, value)
 	}
-	if value, ok := cc.mutation.NillableInt(); ok {
+	if value, ok := _c.mutation.NillableInt(); ok {
 		v.Property(dsl.Single, comment.FieldNillableInt, value)
 	}
-	if value, ok := cc.mutation.Table(); ok {
+	if value, ok := _c.mutation.Table(); ok {
 		v.Property(dsl.Single, comment.FieldTable, value)
 	}
-	if value, ok := cc.mutation.Dir(); ok {
+	if value, ok := _c.mutation.Dir(); ok {
 		v.Property(dsl.Single, comment.FieldDir, value)
 	}
-	if value, ok := cc.mutation.GetClient(); ok {
+	if value, ok := _c.mutation.GetClient(); ok {
 		v.Property(dsl.Single, comment.FieldClient, value)
 	}
 	if len(constraints) == 0 {

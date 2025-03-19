@@ -27,123 +27,123 @@ type TaskCreate struct {
 }
 
 // SetPriority sets the "priority" field.
-func (tc *TaskCreate) SetPriority(t task.Priority) *TaskCreate {
-	tc.mutation.SetPriority(t)
-	return tc
+func (_c *TaskCreate) SetPriority(t task.Priority) *TaskCreate {
+	_c.mutation.SetPriority(t)
+	return _c
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
-func (tc *TaskCreate) SetNillablePriority(t *task.Priority) *TaskCreate {
+func (_c *TaskCreate) SetNillablePriority(t *task.Priority) *TaskCreate {
 	if t != nil {
-		tc.SetPriority(*t)
+		_c.SetPriority(*t)
 	}
-	return tc
+	return _c
 }
 
 // SetPriorities sets the "priorities" field.
-func (tc *TaskCreate) SetPriorities(m map[string]task.Priority) *TaskCreate {
-	tc.mutation.SetPriorities(m)
-	return tc
+func (_c *TaskCreate) SetPriorities(m map[string]task.Priority) *TaskCreate {
+	_c.mutation.SetPriorities(m)
+	return _c
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (tc *TaskCreate) SetCreatedAt(t time.Time) *TaskCreate {
-	tc.mutation.SetCreatedAt(t)
-	return tc
+func (_c *TaskCreate) SetCreatedAt(t time.Time) *TaskCreate {
+	_c.mutation.SetCreatedAt(t)
+	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (tc *TaskCreate) SetNillableCreatedAt(t *time.Time) *TaskCreate {
+func (_c *TaskCreate) SetNillableCreatedAt(t *time.Time) *TaskCreate {
 	if t != nil {
-		tc.SetCreatedAt(*t)
+		_c.SetCreatedAt(*t)
 	}
-	return tc
+	return _c
 }
 
 // SetName sets the "name" field.
-func (tc *TaskCreate) SetName(s string) *TaskCreate {
-	tc.mutation.SetName(s)
-	return tc
+func (_c *TaskCreate) SetName(s string) *TaskCreate {
+	_c.mutation.SetName(s)
+	return _c
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (tc *TaskCreate) SetNillableName(s *string) *TaskCreate {
+func (_c *TaskCreate) SetNillableName(s *string) *TaskCreate {
 	if s != nil {
-		tc.SetName(*s)
+		_c.SetName(*s)
 	}
-	return tc
+	return _c
 }
 
 // SetOwner sets the "owner" field.
-func (tc *TaskCreate) SetOwner(s string) *TaskCreate {
-	tc.mutation.SetOwner(s)
-	return tc
+func (_c *TaskCreate) SetOwner(s string) *TaskCreate {
+	_c.mutation.SetOwner(s)
+	return _c
 }
 
 // SetNillableOwner sets the "owner" field if the given value is not nil.
-func (tc *TaskCreate) SetNillableOwner(s *string) *TaskCreate {
+func (_c *TaskCreate) SetNillableOwner(s *string) *TaskCreate {
 	if s != nil {
-		tc.SetOwner(*s)
+		_c.SetOwner(*s)
 	}
-	return tc
+	return _c
 }
 
 // SetOrder sets the "order" field.
-func (tc *TaskCreate) SetOrder(i int) *TaskCreate {
-	tc.mutation.SetOrder(i)
-	return tc
+func (_c *TaskCreate) SetOrder(i int) *TaskCreate {
+	_c.mutation.SetOrder(i)
+	return _c
 }
 
 // SetNillableOrder sets the "order" field if the given value is not nil.
-func (tc *TaskCreate) SetNillableOrder(i *int) *TaskCreate {
+func (_c *TaskCreate) SetNillableOrder(i *int) *TaskCreate {
 	if i != nil {
-		tc.SetOrder(*i)
+		_c.SetOrder(*i)
 	}
-	return tc
+	return _c
 }
 
 // SetOrderOption sets the "order_option" field.
-func (tc *TaskCreate) SetOrderOption(i int) *TaskCreate {
-	tc.mutation.SetOrderOption(i)
-	return tc
+func (_c *TaskCreate) SetOrderOption(i int) *TaskCreate {
+	_c.mutation.SetOrderOption(i)
+	return _c
 }
 
 // SetNillableOrderOption sets the "order_option" field if the given value is not nil.
-func (tc *TaskCreate) SetNillableOrderOption(i *int) *TaskCreate {
+func (_c *TaskCreate) SetNillableOrderOption(i *int) *TaskCreate {
 	if i != nil {
-		tc.SetOrderOption(*i)
+		_c.SetOrderOption(*i)
 	}
-	return tc
+	return _c
 }
 
 // SetOp sets the "op" field.
-func (tc *TaskCreate) SetOp(s string) *TaskCreate {
-	tc.mutation.SetOpField(s)
-	return tc
+func (_c *TaskCreate) SetOp(s string) *TaskCreate {
+	_c.mutation.SetOpField(s)
+	return _c
 }
 
 // SetNillableOp sets the "op" field if the given value is not nil.
-func (tc *TaskCreate) SetNillableOp(s *string) *TaskCreate {
+func (_c *TaskCreate) SetNillableOp(s *string) *TaskCreate {
 	if s != nil {
-		tc.SetOp(*s)
+		_c.SetOp(*s)
 	}
-	return tc
+	return _c
 }
 
 // Mutation returns the TaskMutation object of the builder.
-func (tc *TaskCreate) Mutation() *TaskMutation {
-	return tc.mutation
+func (_c *TaskCreate) Mutation() *TaskMutation {
+	return _c.mutation
 }
 
 // Save creates the Task in the database.
-func (tc *TaskCreate) Save(ctx context.Context) (*Task, error) {
-	tc.defaults()
-	return withHooks(ctx, tc.gremlinSave, tc.mutation, tc.hooks)
+func (_c *TaskCreate) Save(ctx context.Context) (*Task, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (tc *TaskCreate) SaveX(ctx context.Context) *Task {
-	v, err := tc.Save(ctx)
+func (_c *TaskCreate) SaveX(ctx context.Context) *Task {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -151,51 +151,51 @@ func (tc *TaskCreate) SaveX(ctx context.Context) *Task {
 }
 
 // Exec executes the query.
-func (tc *TaskCreate) Exec(ctx context.Context) error {
-	_, err := tc.Save(ctx)
+func (_c *TaskCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tc *TaskCreate) ExecX(ctx context.Context) {
-	if err := tc.Exec(ctx); err != nil {
+func (_c *TaskCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (tc *TaskCreate) defaults() {
-	if _, ok := tc.mutation.Priority(); !ok {
+func (_c *TaskCreate) defaults() {
+	if _, ok := _c.mutation.Priority(); !ok {
 		v := enttask.DefaultPriority
-		tc.mutation.SetPriority(v)
+		_c.mutation.SetPriority(v)
 	}
-	if _, ok := tc.mutation.CreatedAt(); !ok {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := enttask.DefaultCreatedAt()
-		tc.mutation.SetCreatedAt(v)
+		_c.mutation.SetCreatedAt(v)
 	}
-	if _, ok := tc.mutation.GetOp(); !ok {
+	if _, ok := _c.mutation.GetOp(); !ok {
 		v := enttask.DefaultOp
-		tc.mutation.SetOpField(v)
+		_c.mutation.SetOpField(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (tc *TaskCreate) check() error {
-	if _, ok := tc.mutation.Priority(); !ok {
+func (_c *TaskCreate) check() error {
+	if _, ok := _c.mutation.Priority(); !ok {
 		return &ValidationError{Name: "priority", err: errors.New(`ent: missing required field "Task.priority"`)}
 	}
-	if v, ok := tc.mutation.Priority(); ok {
+	if v, ok := _c.mutation.Priority(); ok {
 		if err := v.Validate(); err != nil {
 			return &ValidationError{Name: "priority", err: fmt.Errorf(`ent: validator failed for field "Task.priority": %w`, err)}
 		}
 	}
-	if _, ok := tc.mutation.CreatedAt(); !ok {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Task.created_at"`)}
 	}
-	if _, ok := tc.mutation.GetOp(); !ok {
+	if _, ok := _c.mutation.GetOp(); !ok {
 		return &ValidationError{Name: "op", err: errors.New(`ent: missing required field "Task.op"`)}
 	}
-	if v, ok := tc.mutation.GetOp(); ok {
+	if v, ok := _c.mutation.GetOp(); ok {
 		if err := enttask.OpValidator(v); err != nil {
 			return &ValidationError{Name: "op", err: fmt.Errorf(`ent: validator failed for field "Task.op": %w`, err)}
 		}
@@ -203,51 +203,51 @@ func (tc *TaskCreate) check() error {
 	return nil
 }
 
-func (tc *TaskCreate) gremlinSave(ctx context.Context) (*Task, error) {
-	if err := tc.check(); err != nil {
+func (_c *TaskCreate) gremlinSave(ctx context.Context) (*Task, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := tc.gremlin().Query()
-	if err := tc.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _c.gremlin().Query()
+	if err := _c.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	rnode := &Task{config: tc.config}
+	rnode := &Task{config: _c.config}
 	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	tc.mutation.id = &rnode.ID
-	tc.mutation.done = true
+	_c.mutation.id = &rnode.ID
+	_c.mutation.done = true
 	return rnode, nil
 }
 
-func (tc *TaskCreate) gremlin() *dsl.Traversal {
+func (_c *TaskCreate) gremlin() *dsl.Traversal {
 	v := g.AddV(enttask.Label)
-	if value, ok := tc.mutation.Priority(); ok {
+	if value, ok := _c.mutation.Priority(); ok {
 		v.Property(dsl.Single, enttask.FieldPriority, value)
 	}
-	if value, ok := tc.mutation.Priorities(); ok {
+	if value, ok := _c.mutation.Priorities(); ok {
 		v.Property(dsl.Single, enttask.FieldPriorities, value)
 	}
-	if value, ok := tc.mutation.CreatedAt(); ok {
+	if value, ok := _c.mutation.CreatedAt(); ok {
 		v.Property(dsl.Single, enttask.FieldCreatedAt, value)
 	}
-	if value, ok := tc.mutation.Name(); ok {
+	if value, ok := _c.mutation.Name(); ok {
 		v.Property(dsl.Single, enttask.FieldName, value)
 	}
-	if value, ok := tc.mutation.Owner(); ok {
+	if value, ok := _c.mutation.Owner(); ok {
 		v.Property(dsl.Single, enttask.FieldOwner, value)
 	}
-	if value, ok := tc.mutation.Order(); ok {
+	if value, ok := _c.mutation.Order(); ok {
 		v.Property(dsl.Single, enttask.FieldOrder, value)
 	}
-	if value, ok := tc.mutation.OrderOption(); ok {
+	if value, ok := _c.mutation.OrderOption(); ok {
 		v.Property(dsl.Single, enttask.FieldOrderOption, value)
 	}
-	if value, ok := tc.mutation.GetOp(); ok {
+	if value, ok := _c.mutation.GetOp(); ok {
 		v.Property(dsl.Single, enttask.FieldOp, value)
 	}
 	return v.ValueMap(true)

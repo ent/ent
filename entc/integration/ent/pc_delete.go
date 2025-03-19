@@ -24,56 +24,56 @@ type PCDelete struct {
 }
 
 // Where appends a list predicates to the PCDelete builder.
-func (pd *PCDelete) Where(ps ...predicate.PC) *PCDelete {
-	pd.mutation.Where(ps...)
-	return pd
+func (_d *PCDelete) Where(ps ...predicate.PC) *PCDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (pd *PCDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, pd.sqlExec, pd.mutation, pd.hooks)
+func (_d *PCDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pd *PCDelete) ExecX(ctx context.Context) int {
-	n, err := pd.Exec(ctx)
+func (_d *PCDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (pd *PCDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *PCDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(pc.Table, sqlgraph.NewFieldSpec(pc.FieldID, field.TypeInt))
-	if ps := pd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, pd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	pd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // PCDeleteOne is the builder for deleting a single PC entity.
 type PCDeleteOne struct {
-	pd *PCDelete
+	_d *PCDelete
 }
 
 // Where appends a list predicates to the PCDelete builder.
-func (pdo *PCDeleteOne) Where(ps ...predicate.PC) *PCDeleteOne {
-	pdo.pd.mutation.Where(ps...)
-	return pdo
+func (_d *PCDeleteOne) Where(ps ...predicate.PC) *PCDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (pdo *PCDeleteOne) Exec(ctx context.Context) error {
-	n, err := pdo.pd.Exec(ctx)
+func (_d *PCDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (pdo *PCDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (pdo *PCDeleteOne) ExecX(ctx context.Context) {
-	if err := pdo.Exec(ctx); err != nil {
+func (_d *PCDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

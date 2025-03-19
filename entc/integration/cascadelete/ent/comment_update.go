@@ -27,63 +27,63 @@ type CommentUpdate struct {
 }
 
 // Where appends a list predicates to the CommentUpdate builder.
-func (cu *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
-	cu.mutation.Where(ps...)
-	return cu
+func (_u *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetText sets the "text" field.
-func (cu *CommentUpdate) SetText(s string) *CommentUpdate {
-	cu.mutation.SetText(s)
-	return cu
+func (_u *CommentUpdate) SetText(s string) *CommentUpdate {
+	_u.mutation.SetText(s)
+	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (cu *CommentUpdate) SetNillableText(s *string) *CommentUpdate {
+func (_u *CommentUpdate) SetNillableText(s *string) *CommentUpdate {
 	if s != nil {
-		cu.SetText(*s)
+		_u.SetText(*s)
 	}
-	return cu
+	return _u
 }
 
 // SetPostID sets the "post_id" field.
-func (cu *CommentUpdate) SetPostID(i int) *CommentUpdate {
-	cu.mutation.SetPostID(i)
-	return cu
+func (_u *CommentUpdate) SetPostID(i int) *CommentUpdate {
+	_u.mutation.SetPostID(i)
+	return _u
 }
 
 // SetNillablePostID sets the "post_id" field if the given value is not nil.
-func (cu *CommentUpdate) SetNillablePostID(i *int) *CommentUpdate {
+func (_u *CommentUpdate) SetNillablePostID(i *int) *CommentUpdate {
 	if i != nil {
-		cu.SetPostID(*i)
+		_u.SetPostID(*i)
 	}
-	return cu
+	return _u
 }
 
 // SetPost sets the "post" edge to the Post entity.
-func (cu *CommentUpdate) SetPost(p *Post) *CommentUpdate {
-	return cu.SetPostID(p.ID)
+func (_u *CommentUpdate) SetPost(p *Post) *CommentUpdate {
+	return _u.SetPostID(p.ID)
 }
 
 // Mutation returns the CommentMutation object of the builder.
-func (cu *CommentUpdate) Mutation() *CommentMutation {
-	return cu.mutation
+func (_u *CommentUpdate) Mutation() *CommentMutation {
+	return _u.mutation
 }
 
 // ClearPost clears the "post" edge to the Post entity.
-func (cu *CommentUpdate) ClearPost() *CommentUpdate {
-	cu.mutation.ClearPost()
-	return cu
+func (_u *CommentUpdate) ClearPost() *CommentUpdate {
+	_u.mutation.ClearPost()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (cu *CommentUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, cu.sqlSave, cu.mutation, cu.hooks)
+func (_u *CommentUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cu *CommentUpdate) SaveX(ctx context.Context) int {
-	affected, err := cu.Save(ctx)
+func (_u *CommentUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -91,42 +91,42 @@ func (cu *CommentUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (cu *CommentUpdate) Exec(ctx context.Context) error {
-	_, err := cu.Save(ctx)
+func (_u *CommentUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cu *CommentUpdate) ExecX(ctx context.Context) {
-	if err := cu.Exec(ctx); err != nil {
+func (_u *CommentUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cu *CommentUpdate) check() error {
-	if cu.mutation.PostCleared() && len(cu.mutation.PostIDs()) > 0 {
+func (_u *CommentUpdate) check() error {
+	if _u.mutation.PostCleared() && len(_u.mutation.PostIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Comment.post"`)
 	}
 	return nil
 }
 
-func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := cu.check(); err != nil {
+func (_u *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := _u.check(); err != nil {
 		return n, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(comment.Table, comment.Columns, sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt))
-	if ps := cu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := cu.mutation.Text(); ok {
+	if value, ok := _u.mutation.Text(); ok {
 		_spec.SetField(comment.FieldText, field.TypeString, value)
 	}
-	if cu.mutation.PostCleared() {
+	if _u.mutation.PostCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -139,7 +139,7 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.PostIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PostIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -155,7 +155,7 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{comment.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -163,7 +163,7 @@ func (cu *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	cu.mutation.done = true
+	_u.mutation.done = true
 	return n, nil
 }
 
@@ -176,70 +176,70 @@ type CommentUpdateOne struct {
 }
 
 // SetText sets the "text" field.
-func (cuo *CommentUpdateOne) SetText(s string) *CommentUpdateOne {
-	cuo.mutation.SetText(s)
-	return cuo
+func (_u *CommentUpdateOne) SetText(s string) *CommentUpdateOne {
+	_u.mutation.SetText(s)
+	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (cuo *CommentUpdateOne) SetNillableText(s *string) *CommentUpdateOne {
+func (_u *CommentUpdateOne) SetNillableText(s *string) *CommentUpdateOne {
 	if s != nil {
-		cuo.SetText(*s)
+		_u.SetText(*s)
 	}
-	return cuo
+	return _u
 }
 
 // SetPostID sets the "post_id" field.
-func (cuo *CommentUpdateOne) SetPostID(i int) *CommentUpdateOne {
-	cuo.mutation.SetPostID(i)
-	return cuo
+func (_u *CommentUpdateOne) SetPostID(i int) *CommentUpdateOne {
+	_u.mutation.SetPostID(i)
+	return _u
 }
 
 // SetNillablePostID sets the "post_id" field if the given value is not nil.
-func (cuo *CommentUpdateOne) SetNillablePostID(i *int) *CommentUpdateOne {
+func (_u *CommentUpdateOne) SetNillablePostID(i *int) *CommentUpdateOne {
 	if i != nil {
-		cuo.SetPostID(*i)
+		_u.SetPostID(*i)
 	}
-	return cuo
+	return _u
 }
 
 // SetPost sets the "post" edge to the Post entity.
-func (cuo *CommentUpdateOne) SetPost(p *Post) *CommentUpdateOne {
-	return cuo.SetPostID(p.ID)
+func (_u *CommentUpdateOne) SetPost(p *Post) *CommentUpdateOne {
+	return _u.SetPostID(p.ID)
 }
 
 // Mutation returns the CommentMutation object of the builder.
-func (cuo *CommentUpdateOne) Mutation() *CommentMutation {
-	return cuo.mutation
+func (_u *CommentUpdateOne) Mutation() *CommentMutation {
+	return _u.mutation
 }
 
 // ClearPost clears the "post" edge to the Post entity.
-func (cuo *CommentUpdateOne) ClearPost() *CommentUpdateOne {
-	cuo.mutation.ClearPost()
-	return cuo
+func (_u *CommentUpdateOne) ClearPost() *CommentUpdateOne {
+	_u.mutation.ClearPost()
+	return _u
 }
 
 // Where appends a list predicates to the CommentUpdate builder.
-func (cuo *CommentUpdateOne) Where(ps ...predicate.Comment) *CommentUpdateOne {
-	cuo.mutation.Where(ps...)
-	return cuo
+func (_u *CommentUpdateOne) Where(ps ...predicate.Comment) *CommentUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (cuo *CommentUpdateOne) Select(field string, fields ...string) *CommentUpdateOne {
-	cuo.fields = append([]string{field}, fields...)
-	return cuo
+func (_u *CommentUpdateOne) Select(field string, fields ...string) *CommentUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Comment entity.
-func (cuo *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
-	return withHooks(ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
+func (_u *CommentUpdateOne) Save(ctx context.Context) (*Comment, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cuo *CommentUpdateOne) SaveX(ctx context.Context) *Comment {
-	node, err := cuo.Save(ctx)
+func (_u *CommentUpdateOne) SaveX(ctx context.Context) *Comment {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -247,37 +247,37 @@ func (cuo *CommentUpdateOne) SaveX(ctx context.Context) *Comment {
 }
 
 // Exec executes the query on the entity.
-func (cuo *CommentUpdateOne) Exec(ctx context.Context) error {
-	_, err := cuo.Save(ctx)
+func (_u *CommentUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cuo *CommentUpdateOne) ExecX(ctx context.Context) {
-	if err := cuo.Exec(ctx); err != nil {
+func (_u *CommentUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cuo *CommentUpdateOne) check() error {
-	if cuo.mutation.PostCleared() && len(cuo.mutation.PostIDs()) > 0 {
+func (_u *CommentUpdateOne) check() error {
+	if _u.mutation.PostCleared() && len(_u.mutation.PostIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Comment.post"`)
 	}
 	return nil
 }
 
-func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err error) {
-	if err := cuo.check(); err != nil {
+func (_u *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(comment.Table, comment.Columns, sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt))
-	id, ok := cuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Comment.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := cuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, comment.FieldID)
 		for _, f := range fields {
@@ -289,17 +289,17 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 			}
 		}
 	}
-	if ps := cuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := cuo.mutation.Text(); ok {
+	if value, ok := _u.mutation.Text(); ok {
 		_spec.SetField(comment.FieldText, field.TypeString, value)
 	}
-	if cuo.mutation.PostCleared() {
+	if _u.mutation.PostCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -312,7 +312,7 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.PostIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.PostIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -328,10 +328,10 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Comment{config: cuo.config}
+	_node = &Comment{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{comment.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -339,6 +339,6 @@ func (cuo *CommentUpdateOne) sqlSave(ctx context.Context) (_node *Comment, err e
 		}
 		return nil, err
 	}
-	cuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

@@ -37,44 +37,44 @@ type IntSIDQuery struct {
 }
 
 // Where adds a new predicate for the IntSIDQuery builder.
-func (isq *IntSIDQuery) Where(ps ...predicate.IntSID) *IntSIDQuery {
-	isq.predicates = append(isq.predicates, ps...)
-	return isq
+func (_q *IntSIDQuery) Where(ps ...predicate.IntSID) *IntSIDQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (isq *IntSIDQuery) Limit(limit int) *IntSIDQuery {
-	isq.ctx.Limit = &limit
-	return isq
+func (_q *IntSIDQuery) Limit(limit int) *IntSIDQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (isq *IntSIDQuery) Offset(offset int) *IntSIDQuery {
-	isq.ctx.Offset = &offset
-	return isq
+func (_q *IntSIDQuery) Offset(offset int) *IntSIDQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (isq *IntSIDQuery) Unique(unique bool) *IntSIDQuery {
-	isq.ctx.Unique = &unique
-	return isq
+func (_q *IntSIDQuery) Unique(unique bool) *IntSIDQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (isq *IntSIDQuery) Order(o ...intsid.OrderOption) *IntSIDQuery {
-	isq.order = append(isq.order, o...)
-	return isq
+func (_q *IntSIDQuery) Order(o ...intsid.OrderOption) *IntSIDQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryParent chains the current query on the "parent" edge.
-func (isq *IntSIDQuery) QueryParent() *IntSIDQuery {
-	query := (&IntSIDClient{config: isq.config}).Query()
+func (_q *IntSIDQuery) QueryParent() *IntSIDQuery {
+	query := (&IntSIDClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := isq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := isq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -83,20 +83,20 @@ func (isq *IntSIDQuery) QueryParent() *IntSIDQuery {
 			sqlgraph.To(intsid.Table, intsid.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, intsid.ParentTable, intsid.ParentColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(isq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
 }
 
 // QueryChildren chains the current query on the "children" edge.
-func (isq *IntSIDQuery) QueryChildren() *IntSIDQuery {
-	query := (&IntSIDClient{config: isq.config}).Query()
+func (_q *IntSIDQuery) QueryChildren() *IntSIDQuery {
+	query := (&IntSIDClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := isq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		selector := isq.sqlQuery(ctx)
+		selector := _q.sqlQuery(ctx)
 		if err := selector.Err(); err != nil {
 			return nil, err
 		}
@@ -105,7 +105,7 @@ func (isq *IntSIDQuery) QueryChildren() *IntSIDQuery {
 			sqlgraph.To(intsid.Table, intsid.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, true, intsid.ChildrenTable, intsid.ChildrenColumn),
 		)
-		fromU = sqlgraph.SetNeighbors(isq.driver.Dialect(), step)
+		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
 	return query
@@ -113,8 +113,8 @@ func (isq *IntSIDQuery) QueryChildren() *IntSIDQuery {
 
 // First returns the first IntSID entity from the query.
 // Returns a *NotFoundError when no IntSID was found.
-func (isq *IntSIDQuery) First(ctx context.Context) (*IntSID, error) {
-	nodes, err := isq.Limit(1).All(setContextOp(ctx, isq.ctx, ent.OpQueryFirst))
+func (_q *IntSIDQuery) First(ctx context.Context) (*IntSID, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -125,8 +125,8 @@ func (isq *IntSIDQuery) First(ctx context.Context) (*IntSID, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (isq *IntSIDQuery) FirstX(ctx context.Context) *IntSID {
-	node, err := isq.First(ctx)
+func (_q *IntSIDQuery) FirstX(ctx context.Context) *IntSID {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -135,9 +135,9 @@ func (isq *IntSIDQuery) FirstX(ctx context.Context) *IntSID {
 
 // FirstID returns the first IntSID ID from the query.
 // Returns a *NotFoundError when no IntSID ID was found.
-func (isq *IntSIDQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
+func (_q *IntSIDQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
 	var ids []sid.ID
-	if ids, err = isq.Limit(1).IDs(setContextOp(ctx, isq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -148,8 +148,8 @@ func (isq *IntSIDQuery) FirstID(ctx context.Context) (id sid.ID, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (isq *IntSIDQuery) FirstIDX(ctx context.Context) sid.ID {
-	id, err := isq.FirstID(ctx)
+func (_q *IntSIDQuery) FirstIDX(ctx context.Context) sid.ID {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -159,8 +159,8 @@ func (isq *IntSIDQuery) FirstIDX(ctx context.Context) sid.ID {
 // Only returns a single IntSID entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one IntSID entity is found.
 // Returns a *NotFoundError when no IntSID entities are found.
-func (isq *IntSIDQuery) Only(ctx context.Context) (*IntSID, error) {
-	nodes, err := isq.Limit(2).All(setContextOp(ctx, isq.ctx, ent.OpQueryOnly))
+func (_q *IntSIDQuery) Only(ctx context.Context) (*IntSID, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -175,8 +175,8 @@ func (isq *IntSIDQuery) Only(ctx context.Context) (*IntSID, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (isq *IntSIDQuery) OnlyX(ctx context.Context) *IntSID {
-	node, err := isq.Only(ctx)
+func (_q *IntSIDQuery) OnlyX(ctx context.Context) *IntSID {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -186,9 +186,9 @@ func (isq *IntSIDQuery) OnlyX(ctx context.Context) *IntSID {
 // OnlyID is like Only, but returns the only IntSID ID in the query.
 // Returns a *NotSingularError when more than one IntSID ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (isq *IntSIDQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
+func (_q *IntSIDQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
 	var ids []sid.ID
-	if ids, err = isq.Limit(2).IDs(setContextOp(ctx, isq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -203,8 +203,8 @@ func (isq *IntSIDQuery) OnlyID(ctx context.Context) (id sid.ID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (isq *IntSIDQuery) OnlyIDX(ctx context.Context) sid.ID {
-	id, err := isq.OnlyID(ctx)
+func (_q *IntSIDQuery) OnlyIDX(ctx context.Context) sid.ID {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -212,18 +212,18 @@ func (isq *IntSIDQuery) OnlyIDX(ctx context.Context) sid.ID {
 }
 
 // All executes the query and returns a list of IntSIDs.
-func (isq *IntSIDQuery) All(ctx context.Context) ([]*IntSID, error) {
-	ctx = setContextOp(ctx, isq.ctx, ent.OpQueryAll)
-	if err := isq.prepareQuery(ctx); err != nil {
+func (_q *IntSIDQuery) All(ctx context.Context) ([]*IntSID, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*IntSID, *IntSIDQuery]()
-	return withInterceptors[[]*IntSID](ctx, isq, qr, isq.inters)
+	return withInterceptors[[]*IntSID](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (isq *IntSIDQuery) AllX(ctx context.Context) []*IntSID {
-	nodes, err := isq.All(ctx)
+func (_q *IntSIDQuery) AllX(ctx context.Context) []*IntSID {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -231,20 +231,20 @@ func (isq *IntSIDQuery) AllX(ctx context.Context) []*IntSID {
 }
 
 // IDs executes the query and returns a list of IntSID IDs.
-func (isq *IntSIDQuery) IDs(ctx context.Context) (ids []sid.ID, err error) {
-	if isq.ctx.Unique == nil && isq.path != nil {
-		isq.Unique(true)
+func (_q *IntSIDQuery) IDs(ctx context.Context) (ids []sid.ID, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, isq.ctx, ent.OpQueryIDs)
-	if err = isq.Select(intsid.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(intsid.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (isq *IntSIDQuery) IDsX(ctx context.Context) []sid.ID {
-	ids, err := isq.IDs(ctx)
+func (_q *IntSIDQuery) IDsX(ctx context.Context) []sid.ID {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -252,17 +252,17 @@ func (isq *IntSIDQuery) IDsX(ctx context.Context) []sid.ID {
 }
 
 // Count returns the count of the given query.
-func (isq *IntSIDQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, isq.ctx, ent.OpQueryCount)
-	if err := isq.prepareQuery(ctx); err != nil {
+func (_q *IntSIDQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, isq, querierCount[*IntSIDQuery](), isq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*IntSIDQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (isq *IntSIDQuery) CountX(ctx context.Context) int {
-	count, err := isq.Count(ctx)
+func (_q *IntSIDQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -270,9 +270,9 @@ func (isq *IntSIDQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (isq *IntSIDQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, isq.ctx, ent.OpQueryExist)
-	switch _, err := isq.FirstID(ctx); {
+func (_q *IntSIDQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -283,8 +283,8 @@ func (isq *IntSIDQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (isq *IntSIDQuery) ExistX(ctx context.Context) bool {
-	exist, err := isq.Exist(ctx)
+func (_q *IntSIDQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -293,52 +293,52 @@ func (isq *IntSIDQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the IntSIDQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (isq *IntSIDQuery) Clone() *IntSIDQuery {
-	if isq == nil {
+func (_q *IntSIDQuery) Clone() *IntSIDQuery {
+	if _q == nil {
 		return nil
 	}
 	return &IntSIDQuery{
-		config:       isq.config,
-		ctx:          isq.ctx.Clone(),
-		order:        append([]intsid.OrderOption{}, isq.order...),
-		inters:       append([]Interceptor{}, isq.inters...),
-		predicates:   append([]predicate.IntSID{}, isq.predicates...),
-		withParent:   isq.withParent.Clone(),
-		withChildren: isq.withChildren.Clone(),
+		config:       _q.config,
+		ctx:          _q.ctx.Clone(),
+		order:        append([]intsid.OrderOption{}, _q.order...),
+		inters:       append([]Interceptor{}, _q.inters...),
+		predicates:   append([]predicate.IntSID{}, _q.predicates...),
+		withParent:   _q.withParent.Clone(),
+		withChildren: _q.withChildren.Clone(),
 		// clone intermediate query.
-		sql:  isq.sql.Clone(),
-		path: isq.path,
+		sql:  _q.sql.Clone(),
+		path: _q.path,
 	}
 }
 
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
-func (isq *IntSIDQuery) WithParent(opts ...func(*IntSIDQuery)) *IntSIDQuery {
-	query := (&IntSIDClient{config: isq.config}).Query()
+func (_q *IntSIDQuery) WithParent(opts ...func(*IntSIDQuery)) *IntSIDQuery {
+	query := (&IntSIDClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	isq.withParent = query
-	return isq
+	_q.withParent = query
+	return _q
 }
 
 // WithChildren tells the query-builder to eager-load the nodes that are connected to
 // the "children" edge. The optional arguments are used to configure the query builder of the edge.
-func (isq *IntSIDQuery) WithChildren(opts ...func(*IntSIDQuery)) *IntSIDQuery {
-	query := (&IntSIDClient{config: isq.config}).Query()
+func (_q *IntSIDQuery) WithChildren(opts ...func(*IntSIDQuery)) *IntSIDQuery {
+	query := (&IntSIDClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	isq.withChildren = query
-	return isq
+	_q.withChildren = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
-func (isq *IntSIDQuery) GroupBy(field string, fields ...string) *IntSIDGroupBy {
-	isq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &IntSIDGroupBy{build: isq}
-	grbuild.flds = &isq.ctx.Fields
+func (_q *IntSIDQuery) GroupBy(field string, fields ...string) *IntSIDGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &IntSIDGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = intsid.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -346,56 +346,56 @@ func (isq *IntSIDQuery) GroupBy(field string, fields ...string) *IntSIDGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
-func (isq *IntSIDQuery) Select(fields ...string) *IntSIDSelect {
-	isq.ctx.Fields = append(isq.ctx.Fields, fields...)
-	sbuild := &IntSIDSelect{IntSIDQuery: isq}
+func (_q *IntSIDQuery) Select(fields ...string) *IntSIDSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &IntSIDSelect{IntSIDQuery: _q}
 	sbuild.label = intsid.Label
-	sbuild.flds, sbuild.scan = &isq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a IntSIDSelect configured with the given aggregations.
-func (isq *IntSIDQuery) Aggregate(fns ...AggregateFunc) *IntSIDSelect {
-	return isq.Select().Aggregate(fns...)
+func (_q *IntSIDQuery) Aggregate(fns ...AggregateFunc) *IntSIDSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (isq *IntSIDQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range isq.inters {
+func (_q *IntSIDQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, isq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	for _, f := range isq.ctx.Fields {
+	for _, f := range _q.ctx.Fields {
 		if !intsid.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
-	if isq.path != nil {
-		prev, err := isq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		isq.sql = prev
+		_q.sql = prev
 	}
 	return nil
 }
 
-func (isq *IntSIDQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*IntSID, error) {
+func (_q *IntSIDQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*IntSID, error) {
 	var (
 		nodes       = []*IntSID{}
-		withFKs     = isq.withFKs
-		_spec       = isq.querySpec()
+		withFKs     = _q.withFKs
+		_spec       = _q.querySpec()
 		loadedTypes = [2]bool{
-			isq.withParent != nil,
-			isq.withChildren != nil,
+			_q.withParent != nil,
+			_q.withChildren != nil,
 		}
 	)
-	if isq.withParent != nil {
+	if _q.withParent != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -405,7 +405,7 @@ func (isq *IntSIDQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*IntS
 		return (*IntSID).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
-		node := &IntSID{config: isq.config}
+		node := &IntSID{config: _q.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
@@ -413,20 +413,20 @@ func (isq *IntSIDQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*IntS
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
-	if err := sqlgraph.QueryNodes(ctx, isq.driver, _spec); err != nil {
+	if err := sqlgraph.QueryNodes(ctx, _q.driver, _spec); err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := isq.withParent; query != nil {
-		if err := isq.loadParent(ctx, query, nodes, nil,
+	if query := _q.withParent; query != nil {
+		if err := _q.loadParent(ctx, query, nodes, nil,
 			func(n *IntSID, e *IntSID) { n.Edges.Parent = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := isq.withChildren; query != nil {
-		if err := isq.loadChildren(ctx, query, nodes,
+	if query := _q.withChildren; query != nil {
+		if err := _q.loadChildren(ctx, query, nodes,
 			func(n *IntSID) { n.Edges.Children = []*IntSID{} },
 			func(n *IntSID, e *IntSID) { n.Edges.Children = append(n.Edges.Children, e) }); err != nil {
 			return nil, err
@@ -435,7 +435,7 @@ func (isq *IntSIDQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*IntS
 	return nodes, nil
 }
 
-func (isq *IntSIDQuery) loadParent(ctx context.Context, query *IntSIDQuery, nodes []*IntSID, init func(*IntSID), assign func(*IntSID, *IntSID)) error {
+func (_q *IntSIDQuery) loadParent(ctx context.Context, query *IntSIDQuery, nodes []*IntSID, init func(*IntSID), assign func(*IntSID, *IntSID)) error {
 	ids := make([]sid.ID, 0, len(nodes))
 	nodeids := make(map[sid.ID][]*IntSID)
 	for i := range nodes {
@@ -467,7 +467,7 @@ func (isq *IntSIDQuery) loadParent(ctx context.Context, query *IntSIDQuery, node
 	}
 	return nil
 }
-func (isq *IntSIDQuery) loadChildren(ctx context.Context, query *IntSIDQuery, nodes []*IntSID, init func(*IntSID), assign func(*IntSID, *IntSID)) error {
+func (_q *IntSIDQuery) loadChildren(ctx context.Context, query *IntSIDQuery, nodes []*IntSID, init func(*IntSID), assign func(*IntSID, *IntSID)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[sid.ID]*IntSID)
 	for i := range nodes {
@@ -499,24 +499,24 @@ func (isq *IntSIDQuery) loadChildren(ctx context.Context, query *IntSIDQuery, no
 	return nil
 }
 
-func (isq *IntSIDQuery) sqlCount(ctx context.Context) (int, error) {
-	_spec := isq.querySpec()
-	_spec.Node.Columns = isq.ctx.Fields
-	if len(isq.ctx.Fields) > 0 {
-		_spec.Unique = isq.ctx.Unique != nil && *isq.ctx.Unique
+func (_q *IntSIDQuery) sqlCount(ctx context.Context) (int, error) {
+	_spec := _q.querySpec()
+	_spec.Node.Columns = _q.ctx.Fields
+	if len(_q.ctx.Fields) > 0 {
+		_spec.Unique = _q.ctx.Unique != nil && *_q.ctx.Unique
 	}
-	return sqlgraph.CountNodes(ctx, isq.driver, _spec)
+	return sqlgraph.CountNodes(ctx, _q.driver, _spec)
 }
 
-func (isq *IntSIDQuery) querySpec() *sqlgraph.QuerySpec {
+func (_q *IntSIDQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := sqlgraph.NewQuerySpec(intsid.Table, intsid.Columns, sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64))
-	_spec.From = isq.sql
-	if unique := isq.ctx.Unique; unique != nil {
+	_spec.From = _q.sql
+	if unique := _q.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
-	} else if isq.path != nil {
+	} else if _q.path != nil {
 		_spec.Unique = true
 	}
-	if fields := isq.ctx.Fields; len(fields) > 0 {
+	if fields := _q.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, intsid.FieldID)
 		for i := range fields {
@@ -525,20 +525,20 @@ func (isq *IntSIDQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if ps := isq.predicates; len(ps) > 0 {
+	if ps := _q.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if limit := isq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := isq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
-	if ps := isq.order; len(ps) > 0 {
+	if ps := _q.order; len(ps) > 0 {
 		_spec.Order = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -548,33 +548,33 @@ func (isq *IntSIDQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (isq *IntSIDQuery) sqlQuery(ctx context.Context) *sql.Selector {
-	builder := sql.Dialect(isq.driver.Dialect())
+func (_q *IntSIDQuery) sqlQuery(ctx context.Context) *sql.Selector {
+	builder := sql.Dialect(_q.driver.Dialect())
 	t1 := builder.Table(intsid.Table)
-	columns := isq.ctx.Fields
+	columns := _q.ctx.Fields
 	if len(columns) == 0 {
 		columns = intsid.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
-	if isq.sql != nil {
-		selector = isq.sql
+	if _q.sql != nil {
+		selector = _q.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if isq.ctx.Unique != nil && *isq.ctx.Unique {
+	if _q.ctx.Unique != nil && *_q.ctx.Unique {
 		selector.Distinct()
 	}
-	for _, p := range isq.predicates {
+	for _, p := range _q.predicates {
 		p(selector)
 	}
-	for _, p := range isq.order {
+	for _, p := range _q.order {
 		p(selector)
 	}
-	if offset := isq.ctx.Offset; offset != nil {
+	if offset := _q.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := isq.ctx.Limit; limit != nil {
+	if limit := _q.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector

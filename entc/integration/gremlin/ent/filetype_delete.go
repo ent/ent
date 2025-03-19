@@ -25,38 +25,38 @@ type FileTypeDelete struct {
 }
 
 // Where appends a list predicates to the FileTypeDelete builder.
-func (ftd *FileTypeDelete) Where(ps ...predicate.FileType) *FileTypeDelete {
-	ftd.mutation.Where(ps...)
-	return ftd
+func (_d *FileTypeDelete) Where(ps ...predicate.FileType) *FileTypeDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (ftd *FileTypeDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, ftd.gremlinExec, ftd.mutation, ftd.hooks)
+func (_d *FileTypeDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.gremlinExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ftd *FileTypeDelete) ExecX(ctx context.Context) int {
-	n, err := ftd.Exec(ctx)
+func (_d *FileTypeDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (ftd *FileTypeDelete) gremlinExec(ctx context.Context) (int, error) {
+func (_d *FileTypeDelete) gremlinExec(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := ftd.gremlin().Query()
-	if err := ftd.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _d.gremlin().Query()
+	if err := _d.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
-	ftd.mutation.done = true
+	_d.mutation.done = true
 	return res.ReadInt()
 }
 
-func (ftd *FileTypeDelete) gremlin() *dsl.Traversal {
+func (_d *FileTypeDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(filetype.Label)
-	for _, p := range ftd.mutation.predicates {
+	for _, p := range _d.mutation.predicates {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()
@@ -64,18 +64,18 @@ func (ftd *FileTypeDelete) gremlin() *dsl.Traversal {
 
 // FileTypeDeleteOne is the builder for deleting a single FileType entity.
 type FileTypeDeleteOne struct {
-	ftd *FileTypeDelete
+	_d *FileTypeDelete
 }
 
 // Where appends a list predicates to the FileTypeDelete builder.
-func (ftdo *FileTypeDeleteOne) Where(ps ...predicate.FileType) *FileTypeDeleteOne {
-	ftdo.ftd.mutation.Where(ps...)
-	return ftdo
+func (_d *FileTypeDeleteOne) Where(ps ...predicate.FileType) *FileTypeDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (ftdo *FileTypeDeleteOne) Exec(ctx context.Context) error {
-	n, err := ftdo.ftd.Exec(ctx)
+func (_d *FileTypeDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -87,8 +87,8 @@ func (ftdo *FileTypeDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ftdo *FileTypeDeleteOne) ExecX(ctx context.Context) {
-	if err := ftdo.Exec(ctx); err != nil {
+func (_d *FileTypeDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

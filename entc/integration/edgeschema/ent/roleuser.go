@@ -84,7 +84,7 @@ func (*RoleUser) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the RoleUser fields.
-func (ru *RoleUser) assignValues(columns []string, values []any) error {
+func (_m *RoleUser) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -94,22 +94,22 @@ func (ru *RoleUser) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				ru.CreatedAt = value.Time
+				_m.CreatedAt = value.Time
 			}
 		case roleuser.FieldRoleID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field role_id", values[i])
 			} else if value.Valid {
-				ru.RoleID = int(value.Int64)
+				_m.RoleID = int(value.Int64)
 			}
 		case roleuser.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				ru.UserID = int(value.Int64)
+				_m.UserID = int(value.Int64)
 			}
 		default:
-			ru.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -117,50 +117,50 @@ func (ru *RoleUser) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the RoleUser.
 // This includes values selected through modifiers, order, etc.
-func (ru *RoleUser) Value(name string) (ent.Value, error) {
-	return ru.selectValues.Get(name)
+func (_m *RoleUser) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryRole queries the "role" edge of the RoleUser entity.
-func (ru *RoleUser) QueryRole() *RoleQuery {
-	return NewRoleUserClient(ru.config).QueryRole(ru)
+func (_m *RoleUser) QueryRole() *RoleQuery {
+	return NewRoleUserClient(_m.config).QueryRole(_m)
 }
 
 // QueryUser queries the "user" edge of the RoleUser entity.
-func (ru *RoleUser) QueryUser() *UserQuery {
-	return NewRoleUserClient(ru.config).QueryUser(ru)
+func (_m *RoleUser) QueryUser() *UserQuery {
+	return NewRoleUserClient(_m.config).QueryUser(_m)
 }
 
 // Update returns a builder for updating this RoleUser.
 // Note that you need to call RoleUser.Unwrap() before calling this method if this RoleUser
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (ru *RoleUser) Update() *RoleUserUpdateOne {
-	return NewRoleUserClient(ru.config).UpdateOne(ru)
+func (_m *RoleUser) Update() *RoleUserUpdateOne {
+	return NewRoleUserClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the RoleUser entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (ru *RoleUser) Unwrap() *RoleUser {
-	_tx, ok := ru.config.driver.(*txDriver)
+func (_m *RoleUser) Unwrap() *RoleUser {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: RoleUser is not a transactional entity")
 	}
-	ru.config.driver = _tx.drv
-	return ru
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (ru *RoleUser) String() string {
+func (_m *RoleUser) String() string {
 	var builder strings.Builder
 	builder.WriteString("RoleUser(")
 	builder.WriteString("created_at=")
-	builder.WriteString(ru.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("role_id=")
-	builder.WriteString(fmt.Sprintf("%v", ru.RoleID))
+	builder.WriteString(fmt.Sprintf("%v", _m.RoleID))
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", ru.UserID))
+	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteByte(')')
 	return builder.String()
 }

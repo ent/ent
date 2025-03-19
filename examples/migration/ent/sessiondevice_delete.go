@@ -24,56 +24,56 @@ type SessionDeviceDelete struct {
 }
 
 // Where appends a list predicates to the SessionDeviceDelete builder.
-func (sdd *SessionDeviceDelete) Where(ps ...predicate.SessionDevice) *SessionDeviceDelete {
-	sdd.mutation.Where(ps...)
-	return sdd
+func (_d *SessionDeviceDelete) Where(ps ...predicate.SessionDevice) *SessionDeviceDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (sdd *SessionDeviceDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, sdd.sqlExec, sdd.mutation, sdd.hooks)
+func (_d *SessionDeviceDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (sdd *SessionDeviceDelete) ExecX(ctx context.Context) int {
-	n, err := sdd.Exec(ctx)
+func (_d *SessionDeviceDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (sdd *SessionDeviceDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *SessionDeviceDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(sessiondevice.Table, sqlgraph.NewFieldSpec(sessiondevice.FieldID, field.TypeUUID))
-	if ps := sdd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, sdd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	sdd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // SessionDeviceDeleteOne is the builder for deleting a single SessionDevice entity.
 type SessionDeviceDeleteOne struct {
-	sdd *SessionDeviceDelete
+	_d *SessionDeviceDelete
 }
 
 // Where appends a list predicates to the SessionDeviceDelete builder.
-func (sddo *SessionDeviceDeleteOne) Where(ps ...predicate.SessionDevice) *SessionDeviceDeleteOne {
-	sddo.sdd.mutation.Where(ps...)
-	return sddo
+func (_d *SessionDeviceDeleteOne) Where(ps ...predicate.SessionDevice) *SessionDeviceDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (sddo *SessionDeviceDeleteOne) Exec(ctx context.Context) error {
-	n, err := sddo.sdd.Exec(ctx)
+func (_d *SessionDeviceDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (sddo *SessionDeviceDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (sddo *SessionDeviceDeleteOne) ExecX(ctx context.Context) {
-	if err := sddo.Exec(ctx); err != nil {
+func (_d *SessionDeviceDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

@@ -84,7 +84,7 @@ func (*BlobLink) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the BlobLink fields.
-func (bl *BlobLink) assignValues(columns []string, values []any) error {
+func (_m *BlobLink) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -94,22 +94,22 @@ func (bl *BlobLink) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				bl.CreatedAt = value.Time
+				_m.CreatedAt = value.Time
 			}
 		case bloblink.FieldBlobID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field blob_id", values[i])
 			} else if value != nil {
-				bl.BlobID = *value
+				_m.BlobID = *value
 			}
 		case bloblink.FieldLinkID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
 				return fmt.Errorf("unexpected type %T for field link_id", values[i])
 			} else if value != nil {
-				bl.LinkID = *value
+				_m.LinkID = *value
 			}
 		default:
-			bl.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -117,50 +117,50 @@ func (bl *BlobLink) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the BlobLink.
 // This includes values selected through modifiers, order, etc.
-func (bl *BlobLink) Value(name string) (ent.Value, error) {
-	return bl.selectValues.Get(name)
+func (_m *BlobLink) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryBlob queries the "blob" edge of the BlobLink entity.
-func (bl *BlobLink) QueryBlob() *BlobQuery {
-	return NewBlobLinkClient(bl.config).QueryBlob(bl)
+func (_m *BlobLink) QueryBlob() *BlobQuery {
+	return NewBlobLinkClient(_m.config).QueryBlob(_m)
 }
 
 // QueryLink queries the "link" edge of the BlobLink entity.
-func (bl *BlobLink) QueryLink() *BlobQuery {
-	return NewBlobLinkClient(bl.config).QueryLink(bl)
+func (_m *BlobLink) QueryLink() *BlobQuery {
+	return NewBlobLinkClient(_m.config).QueryLink(_m)
 }
 
 // Update returns a builder for updating this BlobLink.
 // Note that you need to call BlobLink.Unwrap() before calling this method if this BlobLink
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (bl *BlobLink) Update() *BlobLinkUpdateOne {
-	return NewBlobLinkClient(bl.config).UpdateOne(bl)
+func (_m *BlobLink) Update() *BlobLinkUpdateOne {
+	return NewBlobLinkClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the BlobLink entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (bl *BlobLink) Unwrap() *BlobLink {
-	_tx, ok := bl.config.driver.(*txDriver)
+func (_m *BlobLink) Unwrap() *BlobLink {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: BlobLink is not a transactional entity")
 	}
-	bl.config.driver = _tx.drv
-	return bl
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (bl *BlobLink) String() string {
+func (_m *BlobLink) String() string {
 	var builder strings.Builder
 	builder.WriteString("BlobLink(")
 	builder.WriteString("created_at=")
-	builder.WriteString(bl.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("blob_id=")
-	builder.WriteString(fmt.Sprintf("%v", bl.BlobID))
+	builder.WriteString(fmt.Sprintf("%v", _m.BlobID))
 	builder.WriteString(", ")
 	builder.WriteString("link_id=")
-	builder.WriteString(fmt.Sprintf("%v", bl.LinkID))
+	builder.WriteString(fmt.Sprintf("%v", _m.LinkID))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -28,45 +28,45 @@ type MixinIDCreate struct {
 }
 
 // SetSomeField sets the "some_field" field.
-func (mic *MixinIDCreate) SetSomeField(s string) *MixinIDCreate {
-	mic.mutation.SetSomeField(s)
-	return mic
+func (_c *MixinIDCreate) SetSomeField(s string) *MixinIDCreate {
+	_c.mutation.SetSomeField(s)
+	return _c
 }
 
 // SetMixinField sets the "mixin_field" field.
-func (mic *MixinIDCreate) SetMixinField(s string) *MixinIDCreate {
-	mic.mutation.SetMixinField(s)
-	return mic
+func (_c *MixinIDCreate) SetMixinField(s string) *MixinIDCreate {
+	_c.mutation.SetMixinField(s)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (mic *MixinIDCreate) SetID(u uuid.UUID) *MixinIDCreate {
-	mic.mutation.SetID(u)
-	return mic
+func (_c *MixinIDCreate) SetID(u uuid.UUID) *MixinIDCreate {
+	_c.mutation.SetID(u)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (mic *MixinIDCreate) SetNillableID(u *uuid.UUID) *MixinIDCreate {
+func (_c *MixinIDCreate) SetNillableID(u *uuid.UUID) *MixinIDCreate {
 	if u != nil {
-		mic.SetID(*u)
+		_c.SetID(*u)
 	}
-	return mic
+	return _c
 }
 
 // Mutation returns the MixinIDMutation object of the builder.
-func (mic *MixinIDCreate) Mutation() *MixinIDMutation {
-	return mic.mutation
+func (_c *MixinIDCreate) Mutation() *MixinIDMutation {
+	return _c.mutation
 }
 
 // Save creates the MixinID in the database.
-func (mic *MixinIDCreate) Save(ctx context.Context) (*MixinID, error) {
-	mic.defaults()
-	return withHooks(ctx, mic.sqlSave, mic.mutation, mic.hooks)
+func (_c *MixinIDCreate) Save(ctx context.Context) (*MixinID, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (mic *MixinIDCreate) SaveX(ctx context.Context) *MixinID {
-	v, err := mic.Save(ctx)
+func (_c *MixinIDCreate) SaveX(ctx context.Context) *MixinID {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -74,43 +74,43 @@ func (mic *MixinIDCreate) SaveX(ctx context.Context) *MixinID {
 }
 
 // Exec executes the query.
-func (mic *MixinIDCreate) Exec(ctx context.Context) error {
-	_, err := mic.Save(ctx)
+func (_c *MixinIDCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (mic *MixinIDCreate) ExecX(ctx context.Context) {
-	if err := mic.Exec(ctx); err != nil {
+func (_c *MixinIDCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (mic *MixinIDCreate) defaults() {
-	if _, ok := mic.mutation.ID(); !ok {
+func (_c *MixinIDCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := mixinid.DefaultID()
-		mic.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (mic *MixinIDCreate) check() error {
-	if _, ok := mic.mutation.SomeField(); !ok {
+func (_c *MixinIDCreate) check() error {
+	if _, ok := _c.mutation.SomeField(); !ok {
 		return &ValidationError{Name: "some_field", err: errors.New(`ent: missing required field "MixinID.some_field"`)}
 	}
-	if _, ok := mic.mutation.MixinField(); !ok {
+	if _, ok := _c.mutation.MixinField(); !ok {
 		return &ValidationError{Name: "mixin_field", err: errors.New(`ent: missing required field "MixinID.mixin_field"`)}
 	}
 	return nil
 }
 
-func (mic *MixinIDCreate) sqlSave(ctx context.Context) (*MixinID, error) {
-	if err := mic.check(); err != nil {
+func (_c *MixinIDCreate) sqlSave(ctx context.Context) (*MixinID, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := mic.createSpec()
-	if err := sqlgraph.CreateNode(ctx, mic.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -123,26 +123,26 @@ func (mic *MixinIDCreate) sqlSave(ctx context.Context) (*MixinID, error) {
 			return nil, err
 		}
 	}
-	mic.mutation.id = &_node.ID
-	mic.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (mic *MixinIDCreate) createSpec() (*MixinID, *sqlgraph.CreateSpec) {
+func (_c *MixinIDCreate) createSpec() (*MixinID, *sqlgraph.CreateSpec) {
 	var (
-		_node = &MixinID{config: mic.config}
+		_node = &MixinID{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(mixinid.Table, sqlgraph.NewFieldSpec(mixinid.FieldID, field.TypeUUID))
 	)
-	_spec.OnConflict = mic.conflict
-	if id, ok := mic.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := mic.mutation.SomeField(); ok {
+	if value, ok := _c.mutation.SomeField(); ok {
 		_spec.SetField(mixinid.FieldSomeField, field.TypeString, value)
 		_node.SomeField = value
 	}
-	if value, ok := mic.mutation.MixinField(); ok {
+	if value, ok := _c.mutation.MixinField(); ok {
 		_spec.SetField(mixinid.FieldMixinField, field.TypeString, value)
 		_node.MixinField = value
 	}
@@ -165,10 +165,10 @@ func (mic *MixinIDCreate) createSpec() (*MixinID, *sqlgraph.CreateSpec) {
 //			SetSomeField(v+v).
 //		}).
 //		Exec(ctx)
-func (mic *MixinIDCreate) OnConflict(opts ...sql.ConflictOption) *MixinIDUpsertOne {
-	mic.conflict = opts
+func (_c *MixinIDCreate) OnConflict(opts ...sql.ConflictOption) *MixinIDUpsertOne {
+	_c.conflict = opts
 	return &MixinIDUpsertOne{
-		create: mic,
+		create: _c,
 	}
 }
 
@@ -178,10 +178,10 @@ func (mic *MixinIDCreate) OnConflict(opts ...sql.ConflictOption) *MixinIDUpsertO
 //	client.MixinID.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (mic *MixinIDCreate) OnConflictColumns(columns ...string) *MixinIDUpsertOne {
-	mic.conflict = append(mic.conflict, sql.ConflictColumns(columns...))
+func (_c *MixinIDCreate) OnConflictColumns(columns ...string) *MixinIDUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &MixinIDUpsertOne{
-		create: mic,
+		create: _c,
 	}
 }
 
@@ -345,16 +345,16 @@ type MixinIDCreateBulk struct {
 }
 
 // Save creates the MixinID entities in the database.
-func (micb *MixinIDCreateBulk) Save(ctx context.Context) ([]*MixinID, error) {
-	if micb.err != nil {
-		return nil, micb.err
+func (_c *MixinIDCreateBulk) Save(ctx context.Context) ([]*MixinID, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(micb.builders))
-	nodes := make([]*MixinID, len(micb.builders))
-	mutators := make([]Mutator, len(micb.builders))
-	for i := range micb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*MixinID, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := micb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*MixinIDMutation)
@@ -368,12 +368,12 @@ func (micb *MixinIDCreateBulk) Save(ctx context.Context) ([]*MixinID, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, micb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = micb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, micb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -393,7 +393,7 @@ func (micb *MixinIDCreateBulk) Save(ctx context.Context) ([]*MixinID, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, micb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -401,8 +401,8 @@ func (micb *MixinIDCreateBulk) Save(ctx context.Context) ([]*MixinID, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (micb *MixinIDCreateBulk) SaveX(ctx context.Context) []*MixinID {
-	v, err := micb.Save(ctx)
+func (_c *MixinIDCreateBulk) SaveX(ctx context.Context) []*MixinID {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -410,14 +410,14 @@ func (micb *MixinIDCreateBulk) SaveX(ctx context.Context) []*MixinID {
 }
 
 // Exec executes the query.
-func (micb *MixinIDCreateBulk) Exec(ctx context.Context) error {
-	_, err := micb.Save(ctx)
+func (_c *MixinIDCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (micb *MixinIDCreateBulk) ExecX(ctx context.Context) {
-	if err := micb.Exec(ctx); err != nil {
+func (_c *MixinIDCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -437,10 +437,10 @@ func (micb *MixinIDCreateBulk) ExecX(ctx context.Context) {
 //			SetSomeField(v+v).
 //		}).
 //		Exec(ctx)
-func (micb *MixinIDCreateBulk) OnConflict(opts ...sql.ConflictOption) *MixinIDUpsertBulk {
-	micb.conflict = opts
+func (_c *MixinIDCreateBulk) OnConflict(opts ...sql.ConflictOption) *MixinIDUpsertBulk {
+	_c.conflict = opts
 	return &MixinIDUpsertBulk{
-		create: micb,
+		create: _c,
 	}
 }
 
@@ -450,10 +450,10 @@ func (micb *MixinIDCreateBulk) OnConflict(opts ...sql.ConflictOption) *MixinIDUp
 //	client.MixinID.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (micb *MixinIDCreateBulk) OnConflictColumns(columns ...string) *MixinIDUpsertBulk {
-	micb.conflict = append(micb.conflict, sql.ConflictColumns(columns...))
+func (_c *MixinIDCreateBulk) OnConflictColumns(columns ...string) *MixinIDUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &MixinIDUpsertBulk{
-		create: micb,
+		create: _c,
 	}
 }
 

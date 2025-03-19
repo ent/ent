@@ -47,7 +47,7 @@ func (*Media) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Media fields.
-func (m *Media) assignValues(columns []string, values []any) error {
+func (_m *Media) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -58,27 +58,27 @@ func (m *Media) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			m.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case media.FieldSource:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field source", values[i])
 			} else if value.Valid {
-				m.Source = value.String
+				_m.Source = value.String
 			}
 		case media.FieldSourceURI:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field source_uri", values[i])
 			} else if value.Valid {
-				m.SourceURI = value.String
+				_m.SourceURI = value.String
 			}
 		case media.FieldText:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field text", values[i])
 			} else if value.Valid {
-				m.Text = value.String
+				_m.Text = value.String
 			}
 		default:
-			m.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -86,41 +86,41 @@ func (m *Media) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Media.
 // This includes values selected through modifiers, order, etc.
-func (m *Media) Value(name string) (ent.Value, error) {
-	return m.selectValues.Get(name)
+func (_m *Media) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Media.
 // Note that you need to call Media.Unwrap() before calling this method if this Media
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (m *Media) Update() *MediaUpdateOne {
-	return NewMediaClient(m.config).UpdateOne(m)
+func (_m *Media) Update() *MediaUpdateOne {
+	return NewMediaClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Media entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (m *Media) Unwrap() *Media {
-	_tx, ok := m.config.driver.(*txDriver)
+func (_m *Media) Unwrap() *Media {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("entv2: Media is not a transactional entity")
 	}
-	m.config.driver = _tx.drv
-	return m
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (m *Media) String() string {
+func (_m *Media) String() string {
 	var builder strings.Builder
 	builder.WriteString("Media(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("source=")
-	builder.WriteString(m.Source)
+	builder.WriteString(_m.Source)
 	builder.WriteString(", ")
 	builder.WriteString("source_uri=")
-	builder.WriteString(m.SourceURI)
+	builder.WriteString(_m.SourceURI)
 	builder.WriteString(", ")
 	builder.WriteString("text=")
-	builder.WriteString(m.Text)
+	builder.WriteString(_m.Text)
 	builder.WriteByte(')')
 	return builder.String()
 }

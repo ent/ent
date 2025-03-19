@@ -86,7 +86,7 @@ func (*AttachedFile) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the AttachedFile fields.
-func (af *AttachedFile) assignValues(columns []string, values []any) error {
+func (_m *AttachedFile) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -97,27 +97,27 @@ func (af *AttachedFile) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			af.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case attachedfile.FieldAttachTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field attach_time", values[i])
 			} else if value.Valid {
-				af.AttachTime = value.Time
+				_m.AttachTime = value.Time
 			}
 		case attachedfile.FieldFID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field f_id", values[i])
 			} else if value.Valid {
-				af.FID = int(value.Int64)
+				_m.FID = int(value.Int64)
 			}
 		case attachedfile.FieldProcID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field proc_id", values[i])
 			} else if value.Valid {
-				af.ProcID = int(value.Int64)
+				_m.ProcID = int(value.Int64)
 			}
 		default:
-			af.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -125,51 +125,51 @@ func (af *AttachedFile) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the AttachedFile.
 // This includes values selected through modifiers, order, etc.
-func (af *AttachedFile) Value(name string) (ent.Value, error) {
-	return af.selectValues.Get(name)
+func (_m *AttachedFile) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryFi queries the "fi" edge of the AttachedFile entity.
-func (af *AttachedFile) QueryFi() *FileQuery {
-	return NewAttachedFileClient(af.config).QueryFi(af)
+func (_m *AttachedFile) QueryFi() *FileQuery {
+	return NewAttachedFileClient(_m.config).QueryFi(_m)
 }
 
 // QueryProc queries the "proc" edge of the AttachedFile entity.
-func (af *AttachedFile) QueryProc() *ProcessQuery {
-	return NewAttachedFileClient(af.config).QueryProc(af)
+func (_m *AttachedFile) QueryProc() *ProcessQuery {
+	return NewAttachedFileClient(_m.config).QueryProc(_m)
 }
 
 // Update returns a builder for updating this AttachedFile.
 // Note that you need to call AttachedFile.Unwrap() before calling this method if this AttachedFile
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (af *AttachedFile) Update() *AttachedFileUpdateOne {
-	return NewAttachedFileClient(af.config).UpdateOne(af)
+func (_m *AttachedFile) Update() *AttachedFileUpdateOne {
+	return NewAttachedFileClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the AttachedFile entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (af *AttachedFile) Unwrap() *AttachedFile {
-	_tx, ok := af.config.driver.(*txDriver)
+func (_m *AttachedFile) Unwrap() *AttachedFile {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: AttachedFile is not a transactional entity")
 	}
-	af.config.driver = _tx.drv
-	return af
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (af *AttachedFile) String() string {
+func (_m *AttachedFile) String() string {
 	var builder strings.Builder
 	builder.WriteString("AttachedFile(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", af.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("attach_time=")
-	builder.WriteString(af.AttachTime.Format(time.ANSIC))
+	builder.WriteString(_m.AttachTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("f_id=")
-	builder.WriteString(fmt.Sprintf("%v", af.FID))
+	builder.WriteString(fmt.Sprintf("%v", _m.FID))
 	builder.WriteString(", ")
 	builder.WriteString("proc_id=")
-	builder.WriteString(fmt.Sprintf("%v", af.ProcID))
+	builder.WriteString(fmt.Sprintf("%v", _m.ProcID))
 	builder.WriteByte(')')
 	return builder.String()
 }

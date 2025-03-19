@@ -63,63 +63,63 @@ func (e NodeEdges) NextOrErr() (*Node, error) {
 }
 
 // FromResponse scans the gremlin response data into Node.
-func (n *Node) FromResponse(res *gremlin.Response) error {
+func (_m *Node) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scann struct {
+	var scan_m struct {
 		ID        string `json:"id,omitempty"`
 		Value     int    `json:"value,omitempty"`
 		UpdatedAt int64  `json:"updated_at,omitempty"`
 	}
-	if err := vmap.Decode(&scann); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	n.ID = scann.ID
-	n.Value = scann.Value
-	v1 := time.Unix(0, scann.UpdatedAt)
-	n.UpdatedAt = &v1
+	_m.ID = scan_m.ID
+	_m.Value = scan_m.Value
+	v1 := time.Unix(0, scan_m.UpdatedAt)
+	_m.UpdatedAt = &v1
 	return nil
 }
 
 // QueryPrev queries the "prev" edge of the Node entity.
-func (n *Node) QueryPrev() *NodeQuery {
-	return NewNodeClient(n.config).QueryPrev(n)
+func (_m *Node) QueryPrev() *NodeQuery {
+	return NewNodeClient(_m.config).QueryPrev(_m)
 }
 
 // QueryNext queries the "next" edge of the Node entity.
-func (n *Node) QueryNext() *NodeQuery {
-	return NewNodeClient(n.config).QueryNext(n)
+func (_m *Node) QueryNext() *NodeQuery {
+	return NewNodeClient(_m.config).QueryNext(_m)
 }
 
 // Update returns a builder for updating this Node.
 // Note that you need to call Node.Unwrap() before calling this method if this Node
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (n *Node) Update() *NodeUpdateOne {
-	return NewNodeClient(n.config).UpdateOne(n)
+func (_m *Node) Update() *NodeUpdateOne {
+	return NewNodeClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Node entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (n *Node) Unwrap() *Node {
-	_tx, ok := n.config.driver.(*txDriver)
+func (_m *Node) Unwrap() *Node {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Node is not a transactional entity")
 	}
-	n.config.driver = _tx.drv
-	return n
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (n *Node) String() string {
+func (_m *Node) String() string {
 	var builder strings.Builder
 	builder.WriteString("Node(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", n.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("value=")
-	builder.WriteString(fmt.Sprintf("%v", n.Value))
+	builder.WriteString(fmt.Sprintf("%v", _m.Value))
 	builder.WriteString(", ")
-	if v := n.UpdatedAt; v != nil {
+	if v := _m.UpdatedAt; v != nil {
 		builder.WriteString("updated_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
@@ -131,25 +131,25 @@ func (n *Node) String() string {
 type Nodes []*Node
 
 // FromResponse scans the gremlin response data into Nodes.
-func (n *Nodes) FromResponse(res *gremlin.Response) error {
+func (_m *Nodes) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scann []struct {
+	var scan_m []struct {
 		ID        string `json:"id,omitempty"`
 		Value     int    `json:"value,omitempty"`
 		UpdatedAt int64  `json:"updated_at,omitempty"`
 	}
-	if err := vmap.Decode(&scann); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	for _, v := range scann {
+	for _, v := range scan_m {
 		node := &Node{ID: v.ID}
 		node.Value = v.Value
 		v1 := time.Unix(0, v.UpdatedAt)
 		node.UpdatedAt = &v1
-		*n = append(*n, node)
+		*_m = append(*_m, node)
 	}
 	return nil
 }

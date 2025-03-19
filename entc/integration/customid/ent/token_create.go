@@ -29,50 +29,50 @@ type TokenCreate struct {
 }
 
 // SetBody sets the "body" field.
-func (tc *TokenCreate) SetBody(s string) *TokenCreate {
-	tc.mutation.SetBody(s)
-	return tc
+func (_c *TokenCreate) SetBody(s string) *TokenCreate {
+	_c.mutation.SetBody(s)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (tc *TokenCreate) SetID(s sid.ID) *TokenCreate {
-	tc.mutation.SetID(s)
-	return tc
+func (_c *TokenCreate) SetID(s sid.ID) *TokenCreate {
+	_c.mutation.SetID(s)
+	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (tc *TokenCreate) SetNillableID(s *sid.ID) *TokenCreate {
+func (_c *TokenCreate) SetNillableID(s *sid.ID) *TokenCreate {
 	if s != nil {
-		tc.SetID(*s)
+		_c.SetID(*s)
 	}
-	return tc
+	return _c
 }
 
 // SetAccountID sets the "account" edge to the Account entity by ID.
-func (tc *TokenCreate) SetAccountID(id sid.ID) *TokenCreate {
-	tc.mutation.SetAccountID(id)
-	return tc
+func (_c *TokenCreate) SetAccountID(id sid.ID) *TokenCreate {
+	_c.mutation.SetAccountID(id)
+	return _c
 }
 
 // SetAccount sets the "account" edge to the Account entity.
-func (tc *TokenCreate) SetAccount(a *Account) *TokenCreate {
-	return tc.SetAccountID(a.ID)
+func (_c *TokenCreate) SetAccount(a *Account) *TokenCreate {
+	return _c.SetAccountID(a.ID)
 }
 
 // Mutation returns the TokenMutation object of the builder.
-func (tc *TokenCreate) Mutation() *TokenMutation {
-	return tc.mutation
+func (_c *TokenCreate) Mutation() *TokenMutation {
+	return _c.mutation
 }
 
 // Save creates the Token in the database.
-func (tc *TokenCreate) Save(ctx context.Context) (*Token, error) {
-	tc.defaults()
-	return withHooks(ctx, tc.sqlSave, tc.mutation, tc.hooks)
+func (_c *TokenCreate) Save(ctx context.Context) (*Token, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (tc *TokenCreate) SaveX(ctx context.Context) *Token {
-	v, err := tc.Save(ctx)
+func (_c *TokenCreate) SaveX(ctx context.Context) *Token {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -80,48 +80,48 @@ func (tc *TokenCreate) SaveX(ctx context.Context) *Token {
 }
 
 // Exec executes the query.
-func (tc *TokenCreate) Exec(ctx context.Context) error {
-	_, err := tc.Save(ctx)
+func (_c *TokenCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tc *TokenCreate) ExecX(ctx context.Context) {
-	if err := tc.Exec(ctx); err != nil {
+func (_c *TokenCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (tc *TokenCreate) defaults() {
-	if _, ok := tc.mutation.ID(); !ok {
+func (_c *TokenCreate) defaults() {
+	if _, ok := _c.mutation.ID(); !ok {
 		v := token.DefaultID()
-		tc.mutation.SetID(v)
+		_c.mutation.SetID(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (tc *TokenCreate) check() error {
-	if _, ok := tc.mutation.Body(); !ok {
+func (_c *TokenCreate) check() error {
+	if _, ok := _c.mutation.Body(); !ok {
 		return &ValidationError{Name: "body", err: errors.New(`ent: missing required field "Token.body"`)}
 	}
-	if v, ok := tc.mutation.Body(); ok {
+	if v, ok := _c.mutation.Body(); ok {
 		if err := token.BodyValidator(v); err != nil {
 			return &ValidationError{Name: "body", err: fmt.Errorf(`ent: validator failed for field "Token.body": %w`, err)}
 		}
 	}
-	if len(tc.mutation.AccountIDs()) == 0 {
+	if len(_c.mutation.AccountIDs()) == 0 {
 		return &ValidationError{Name: "account", err: errors.New(`ent: missing required edge "Token.account"`)}
 	}
 	return nil
 }
 
-func (tc *TokenCreate) sqlSave(ctx context.Context) (*Token, error) {
-	if err := tc.check(); err != nil {
+func (_c *TokenCreate) sqlSave(ctx context.Context) (*Token, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := tc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, tc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -134,26 +134,26 @@ func (tc *TokenCreate) sqlSave(ctx context.Context) (*Token, error) {
 			return nil, err
 		}
 	}
-	tc.mutation.id = &_node.ID
-	tc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (tc *TokenCreate) createSpec() (*Token, *sqlgraph.CreateSpec) {
+func (_c *TokenCreate) createSpec() (*Token, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Token{config: tc.config}
+		_node = &Token{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(token.Table, sqlgraph.NewFieldSpec(token.FieldID, field.TypeOther))
 	)
-	_spec.OnConflict = tc.conflict
-	if id, ok := tc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := tc.mutation.Body(); ok {
+	if value, ok := _c.mutation.Body(); ok {
 		_spec.SetField(token.FieldBody, field.TypeString, value)
 		_node.Body = value
 	}
-	if nodes := tc.mutation.AccountIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.AccountIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -189,10 +189,10 @@ func (tc *TokenCreate) createSpec() (*Token, *sqlgraph.CreateSpec) {
 //			SetBody(v+v).
 //		}).
 //		Exec(ctx)
-func (tc *TokenCreate) OnConflict(opts ...sql.ConflictOption) *TokenUpsertOne {
-	tc.conflict = opts
+func (_c *TokenCreate) OnConflict(opts ...sql.ConflictOption) *TokenUpsertOne {
+	_c.conflict = opts
 	return &TokenUpsertOne{
-		create: tc,
+		create: _c,
 	}
 }
 
@@ -202,10 +202,10 @@ func (tc *TokenCreate) OnConflict(opts ...sql.ConflictOption) *TokenUpsertOne {
 //	client.Token.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (tc *TokenCreate) OnConflictColumns(columns ...string) *TokenUpsertOne {
-	tc.conflict = append(tc.conflict, sql.ConflictColumns(columns...))
+func (_c *TokenCreate) OnConflictColumns(columns ...string) *TokenUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &TokenUpsertOne{
-		create: tc,
+		create: _c,
 	}
 }
 
@@ -343,16 +343,16 @@ type TokenCreateBulk struct {
 }
 
 // Save creates the Token entities in the database.
-func (tcb *TokenCreateBulk) Save(ctx context.Context) ([]*Token, error) {
-	if tcb.err != nil {
-		return nil, tcb.err
+func (_c *TokenCreateBulk) Save(ctx context.Context) ([]*Token, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(tcb.builders))
-	nodes := make([]*Token, len(tcb.builders))
-	mutators := make([]Mutator, len(tcb.builders))
-	for i := range tcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Token, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := tcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TokenMutation)
@@ -366,12 +366,12 @@ func (tcb *TokenCreateBulk) Save(ctx context.Context) ([]*Token, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, tcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = tcb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, tcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -391,7 +391,7 @@ func (tcb *TokenCreateBulk) Save(ctx context.Context) ([]*Token, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, tcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -399,8 +399,8 @@ func (tcb *TokenCreateBulk) Save(ctx context.Context) ([]*Token, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (tcb *TokenCreateBulk) SaveX(ctx context.Context) []*Token {
-	v, err := tcb.Save(ctx)
+func (_c *TokenCreateBulk) SaveX(ctx context.Context) []*Token {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -408,14 +408,14 @@ func (tcb *TokenCreateBulk) SaveX(ctx context.Context) []*Token {
 }
 
 // Exec executes the query.
-func (tcb *TokenCreateBulk) Exec(ctx context.Context) error {
-	_, err := tcb.Save(ctx)
+func (_c *TokenCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tcb *TokenCreateBulk) ExecX(ctx context.Context) {
-	if err := tcb.Exec(ctx); err != nil {
+func (_c *TokenCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -435,10 +435,10 @@ func (tcb *TokenCreateBulk) ExecX(ctx context.Context) {
 //			SetBody(v+v).
 //		}).
 //		Exec(ctx)
-func (tcb *TokenCreateBulk) OnConflict(opts ...sql.ConflictOption) *TokenUpsertBulk {
-	tcb.conflict = opts
+func (_c *TokenCreateBulk) OnConflict(opts ...sql.ConflictOption) *TokenUpsertBulk {
+	_c.conflict = opts
 	return &TokenUpsertBulk{
-		create: tcb,
+		create: _c,
 	}
 }
 
@@ -448,10 +448,10 @@ func (tcb *TokenCreateBulk) OnConflict(opts ...sql.ConflictOption) *TokenUpsertB
 //	client.Token.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (tcb *TokenCreateBulk) OnConflictColumns(columns ...string) *TokenUpsertBulk {
-	tcb.conflict = append(tcb.conflict, sql.ConflictColumns(columns...))
+func (_c *TokenCreateBulk) OnConflictColumns(columns ...string) *TokenUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &TokenUpsertBulk{
-		create: tcb,
+		create: _c,
 	}
 }
 

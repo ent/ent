@@ -24,56 +24,56 @@ type MediaDelete struct {
 }
 
 // Where appends a list predicates to the MediaDelete builder.
-func (md *MediaDelete) Where(ps ...predicate.Media) *MediaDelete {
-	md.mutation.Where(ps...)
-	return md
+func (_d *MediaDelete) Where(ps ...predicate.Media) *MediaDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (md *MediaDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, md.sqlExec, md.mutation, md.hooks)
+func (_d *MediaDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (md *MediaDelete) ExecX(ctx context.Context) int {
-	n, err := md.Exec(ctx)
+func (_d *MediaDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (md *MediaDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *MediaDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(media.Table, sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt))
-	if ps := md.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, md.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	md.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // MediaDeleteOne is the builder for deleting a single Media entity.
 type MediaDeleteOne struct {
-	md *MediaDelete
+	_d *MediaDelete
 }
 
 // Where appends a list predicates to the MediaDelete builder.
-func (mdo *MediaDeleteOne) Where(ps ...predicate.Media) *MediaDeleteOne {
-	mdo.md.mutation.Where(ps...)
-	return mdo
+func (_d *MediaDeleteOne) Where(ps ...predicate.Media) *MediaDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (mdo *MediaDeleteOne) Exec(ctx context.Context) error {
-	n, err := mdo.md.Exec(ctx)
+func (_d *MediaDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (mdo *MediaDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (mdo *MediaDeleteOne) ExecX(ctx context.Context) {
-	if err := mdo.Exec(ctx); err != nil {
+func (_d *MediaDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

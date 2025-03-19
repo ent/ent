@@ -185,7 +185,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
-func (u *User) assignValues(columns []string, values []any) error {
+func (_m *User) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -196,15 +196,15 @@ func (u *User) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			u.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case user.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				u.Name = value.String
+				_m.Name = value.String
 			}
 		default:
-			u.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -212,95 +212,95 @@ func (u *User) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the User.
 // This includes values selected through modifiers, order, etc.
-func (u *User) Value(name string) (ent.Value, error) {
-	return u.selectValues.Get(name)
+func (_m *User) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryGroups queries the "groups" edge of the User entity.
-func (u *User) QueryGroups() *GroupQuery {
-	return NewUserClient(u.config).QueryGroups(u)
+func (_m *User) QueryGroups() *GroupQuery {
+	return NewUserClient(_m.config).QueryGroups(_m)
 }
 
 // QueryFriends queries the "friends" edge of the User entity.
-func (u *User) QueryFriends() *UserQuery {
-	return NewUserClient(u.config).QueryFriends(u)
+func (_m *User) QueryFriends() *UserQuery {
+	return NewUserClient(_m.config).QueryFriends(_m)
 }
 
 // QueryRelatives queries the "relatives" edge of the User entity.
-func (u *User) QueryRelatives() *UserQuery {
-	return NewUserClient(u.config).QueryRelatives(u)
+func (_m *User) QueryRelatives() *UserQuery {
+	return NewUserClient(_m.config).QueryRelatives(_m)
 }
 
 // QueryLikedTweets queries the "liked_tweets" edge of the User entity.
-func (u *User) QueryLikedTweets() *TweetQuery {
-	return NewUserClient(u.config).QueryLikedTweets(u)
+func (_m *User) QueryLikedTweets() *TweetQuery {
+	return NewUserClient(_m.config).QueryLikedTweets(_m)
 }
 
 // QueryTweets queries the "tweets" edge of the User entity.
-func (u *User) QueryTweets() *TweetQuery {
-	return NewUserClient(u.config).QueryTweets(u)
+func (_m *User) QueryTweets() *TweetQuery {
+	return NewUserClient(_m.config).QueryTweets(_m)
 }
 
 // QueryRoles queries the "roles" edge of the User entity.
-func (u *User) QueryRoles() *RoleQuery {
-	return NewUserClient(u.config).QueryRoles(u)
+func (_m *User) QueryRoles() *RoleQuery {
+	return NewUserClient(_m.config).QueryRoles(_m)
 }
 
 // QueryJoinedGroups queries the "joined_groups" edge of the User entity.
-func (u *User) QueryJoinedGroups() *UserGroupQuery {
-	return NewUserClient(u.config).QueryJoinedGroups(u)
+func (_m *User) QueryJoinedGroups() *UserGroupQuery {
+	return NewUserClient(_m.config).QueryJoinedGroups(_m)
 }
 
 // QueryFriendships queries the "friendships" edge of the User entity.
-func (u *User) QueryFriendships() *FriendshipQuery {
-	return NewUserClient(u.config).QueryFriendships(u)
+func (_m *User) QueryFriendships() *FriendshipQuery {
+	return NewUserClient(_m.config).QueryFriendships(_m)
 }
 
 // QueryRelationship queries the "relationship" edge of the User entity.
-func (u *User) QueryRelationship() *RelationshipQuery {
-	return NewUserClient(u.config).QueryRelationship(u)
+func (_m *User) QueryRelationship() *RelationshipQuery {
+	return NewUserClient(_m.config).QueryRelationship(_m)
 }
 
 // QueryLikes queries the "likes" edge of the User entity.
-func (u *User) QueryLikes() *TweetLikeQuery {
-	return NewUserClient(u.config).QueryLikes(u)
+func (_m *User) QueryLikes() *TweetLikeQuery {
+	return NewUserClient(_m.config).QueryLikes(_m)
 }
 
 // QueryUserTweets queries the "user_tweets" edge of the User entity.
-func (u *User) QueryUserTweets() *UserTweetQuery {
-	return NewUserClient(u.config).QueryUserTweets(u)
+func (_m *User) QueryUserTweets() *UserTweetQuery {
+	return NewUserClient(_m.config).QueryUserTweets(_m)
 }
 
 // QueryRolesUsers queries the "roles_users" edge of the User entity.
-func (u *User) QueryRolesUsers() *RoleUserQuery {
-	return NewUserClient(u.config).QueryRolesUsers(u)
+func (_m *User) QueryRolesUsers() *RoleUserQuery {
+	return NewUserClient(_m.config).QueryRolesUsers(_m)
 }
 
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (u *User) Update() *UserUpdateOne {
-	return NewUserClient(u.config).UpdateOne(u)
+func (_m *User) Update() *UserUpdateOne {
+	return NewUserClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the User entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (u *User) Unwrap() *User {
-	_tx, ok := u.config.driver.(*txDriver)
+func (_m *User) Unwrap() *User {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: User is not a transactional entity")
 	}
-	u.config.driver = _tx.drv
-	return u
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (u *User) String() string {
+func (_m *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("name=")
-	builder.WriteString(u.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }

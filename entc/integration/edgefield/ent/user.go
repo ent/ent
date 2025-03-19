@@ -155,7 +155,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the User fields.
-func (u *User) assignValues(columns []string, values []any) error {
+func (_m *User) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -166,21 +166,21 @@ func (u *User) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			u.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case user.FieldParentID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field parent_id", values[i])
 			} else if value.Valid {
-				u.ParentID = int(value.Int64)
+				_m.ParentID = int(value.Int64)
 			}
 		case user.FieldSpouseID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field spouse_id", values[i])
 			} else if value.Valid {
-				u.SpouseID = int(value.Int64)
+				_m.SpouseID = int(value.Int64)
 			}
 		default:
-			u.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -188,175 +188,175 @@ func (u *User) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the User.
 // This includes values selected through modifiers, order, etc.
-func (u *User) Value(name string) (ent.Value, error) {
-	return u.selectValues.Get(name)
+func (_m *User) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryPets queries the "pets" edge of the User entity.
-func (u *User) QueryPets() *PetQuery {
-	return NewUserClient(u.config).QueryPets(u)
+func (_m *User) QueryPets() *PetQuery {
+	return NewUserClient(_m.config).QueryPets(_m)
 }
 
 // QueryParent queries the "parent" edge of the User entity.
-func (u *User) QueryParent() *UserQuery {
-	return NewUserClient(u.config).QueryParent(u)
+func (_m *User) QueryParent() *UserQuery {
+	return NewUserClient(_m.config).QueryParent(_m)
 }
 
 // QueryChildren queries the "children" edge of the User entity.
-func (u *User) QueryChildren() *UserQuery {
-	return NewUserClient(u.config).QueryChildren(u)
+func (_m *User) QueryChildren() *UserQuery {
+	return NewUserClient(_m.config).QueryChildren(_m)
 }
 
 // QuerySpouse queries the "spouse" edge of the User entity.
-func (u *User) QuerySpouse() *UserQuery {
-	return NewUserClient(u.config).QuerySpouse(u)
+func (_m *User) QuerySpouse() *UserQuery {
+	return NewUserClient(_m.config).QuerySpouse(_m)
 }
 
 // QueryCard queries the "card" edge of the User entity.
-func (u *User) QueryCard() *CardQuery {
-	return NewUserClient(u.config).QueryCard(u)
+func (_m *User) QueryCard() *CardQuery {
+	return NewUserClient(_m.config).QueryCard(_m)
 }
 
 // QueryMetadata queries the "metadata" edge of the User entity.
-func (u *User) QueryMetadata() *MetadataQuery {
-	return NewUserClient(u.config).QueryMetadata(u)
+func (_m *User) QueryMetadata() *MetadataQuery {
+	return NewUserClient(_m.config).QueryMetadata(_m)
 }
 
 // QueryInfo queries the "info" edge of the User entity.
-func (u *User) QueryInfo() *InfoQuery {
-	return NewUserClient(u.config).QueryInfo(u)
+func (_m *User) QueryInfo() *InfoQuery {
+	return NewUserClient(_m.config).QueryInfo(_m)
 }
 
 // QueryRentals queries the "rentals" edge of the User entity.
-func (u *User) QueryRentals() *RentalQuery {
-	return NewUserClient(u.config).QueryRentals(u)
+func (_m *User) QueryRentals() *RentalQuery {
+	return NewUserClient(_m.config).QueryRentals(_m)
 }
 
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (u *User) Update() *UserUpdateOne {
-	return NewUserClient(u.config).UpdateOne(u)
+func (_m *User) Update() *UserUpdateOne {
+	return NewUserClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the User entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (u *User) Unwrap() *User {
-	_tx, ok := u.config.driver.(*txDriver)
+func (_m *User) Unwrap() *User {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: User is not a transactional entity")
 	}
-	u.config.driver = _tx.drv
-	return u
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (u *User) String() string {
+func (_m *User) String() string {
 	var builder strings.Builder
 	builder.WriteString("User(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", u.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("parent_id=")
-	builder.WriteString(fmt.Sprintf("%v", u.ParentID))
+	builder.WriteString(fmt.Sprintf("%v", _m.ParentID))
 	builder.WriteString(", ")
 	builder.WriteString("spouse_id=")
-	builder.WriteString(fmt.Sprintf("%v", u.SpouseID))
+	builder.WriteString(fmt.Sprintf("%v", _m.SpouseID))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedPets returns the Pets named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (u *User) NamedPets(name string) ([]*Pet, error) {
-	if u.Edges.namedPets == nil {
+func (_m *User) NamedPets(name string) ([]*Pet, error) {
+	if _m.Edges.namedPets == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := u.Edges.namedPets[name]
+	nodes, ok := _m.Edges.namedPets[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (u *User) appendNamedPets(name string, edges ...*Pet) {
-	if u.Edges.namedPets == nil {
-		u.Edges.namedPets = make(map[string][]*Pet)
+func (_m *User) appendNamedPets(name string, edges ...*Pet) {
+	if _m.Edges.namedPets == nil {
+		_m.Edges.namedPets = make(map[string][]*Pet)
 	}
 	if len(edges) == 0 {
-		u.Edges.namedPets[name] = []*Pet{}
+		_m.Edges.namedPets[name] = []*Pet{}
 	} else {
-		u.Edges.namedPets[name] = append(u.Edges.namedPets[name], edges...)
+		_m.Edges.namedPets[name] = append(_m.Edges.namedPets[name], edges...)
 	}
 }
 
 // NamedChildren returns the Children named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (u *User) NamedChildren(name string) ([]*User, error) {
-	if u.Edges.namedChildren == nil {
+func (_m *User) NamedChildren(name string) ([]*User, error) {
+	if _m.Edges.namedChildren == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := u.Edges.namedChildren[name]
+	nodes, ok := _m.Edges.namedChildren[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (u *User) appendNamedChildren(name string, edges ...*User) {
-	if u.Edges.namedChildren == nil {
-		u.Edges.namedChildren = make(map[string][]*User)
+func (_m *User) appendNamedChildren(name string, edges ...*User) {
+	if _m.Edges.namedChildren == nil {
+		_m.Edges.namedChildren = make(map[string][]*User)
 	}
 	if len(edges) == 0 {
-		u.Edges.namedChildren[name] = []*User{}
+		_m.Edges.namedChildren[name] = []*User{}
 	} else {
-		u.Edges.namedChildren[name] = append(u.Edges.namedChildren[name], edges...)
+		_m.Edges.namedChildren[name] = append(_m.Edges.namedChildren[name], edges...)
 	}
 }
 
 // NamedInfo returns the Info named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (u *User) NamedInfo(name string) ([]*Info, error) {
-	if u.Edges.namedInfo == nil {
+func (_m *User) NamedInfo(name string) ([]*Info, error) {
+	if _m.Edges.namedInfo == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := u.Edges.namedInfo[name]
+	nodes, ok := _m.Edges.namedInfo[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (u *User) appendNamedInfo(name string, edges ...*Info) {
-	if u.Edges.namedInfo == nil {
-		u.Edges.namedInfo = make(map[string][]*Info)
+func (_m *User) appendNamedInfo(name string, edges ...*Info) {
+	if _m.Edges.namedInfo == nil {
+		_m.Edges.namedInfo = make(map[string][]*Info)
 	}
 	if len(edges) == 0 {
-		u.Edges.namedInfo[name] = []*Info{}
+		_m.Edges.namedInfo[name] = []*Info{}
 	} else {
-		u.Edges.namedInfo[name] = append(u.Edges.namedInfo[name], edges...)
+		_m.Edges.namedInfo[name] = append(_m.Edges.namedInfo[name], edges...)
 	}
 }
 
 // NamedRentals returns the Rentals named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (u *User) NamedRentals(name string) ([]*Rental, error) {
-	if u.Edges.namedRentals == nil {
+func (_m *User) NamedRentals(name string) ([]*Rental, error) {
+	if _m.Edges.namedRentals == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := u.Edges.namedRentals[name]
+	nodes, ok := _m.Edges.namedRentals[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (u *User) appendNamedRentals(name string, edges ...*Rental) {
-	if u.Edges.namedRentals == nil {
-		u.Edges.namedRentals = make(map[string][]*Rental)
+func (_m *User) appendNamedRentals(name string, edges ...*Rental) {
+	if _m.Edges.namedRentals == nil {
+		_m.Edges.namedRentals = make(map[string][]*Rental)
 	}
 	if len(edges) == 0 {
-		u.Edges.namedRentals[name] = []*Rental{}
+		_m.Edges.namedRentals[name] = []*Rental{}
 	} else {
-		u.Edges.namedRentals[name] = append(u.Edges.namedRentals[name], edges...)
+		_m.Edges.namedRentals[name] = append(_m.Edges.namedRentals[name], edges...)
 	}
 }
 

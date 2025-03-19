@@ -26,204 +26,204 @@ type ConversionUpdate struct {
 }
 
 // Where appends a list predicates to the ConversionUpdate builder.
-func (cu *ConversionUpdate) Where(ps ...predicate.Conversion) *ConversionUpdate {
-	cu.mutation.Where(ps...)
-	return cu
+func (_u *ConversionUpdate) Where(ps ...predicate.Conversion) *ConversionUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetName sets the "name" field.
-func (cu *ConversionUpdate) SetName(s string) *ConversionUpdate {
-	cu.mutation.SetName(s)
-	return cu
+func (_u *ConversionUpdate) SetName(s string) *ConversionUpdate {
+	_u.mutation.SetName(s)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (cu *ConversionUpdate) SetNillableName(s *string) *ConversionUpdate {
+func (_u *ConversionUpdate) SetNillableName(s *string) *ConversionUpdate {
 	if s != nil {
-		cu.SetName(*s)
+		_u.SetName(*s)
 	}
-	return cu
+	return _u
 }
 
 // ClearName clears the value of the "name" field.
-func (cu *ConversionUpdate) ClearName() *ConversionUpdate {
-	cu.mutation.ClearName()
-	return cu
+func (_u *ConversionUpdate) ClearName() *ConversionUpdate {
+	_u.mutation.ClearName()
+	return _u
 }
 
 // SetInt8ToString sets the "int8_to_string" field.
-func (cu *ConversionUpdate) SetInt8ToString(s string) *ConversionUpdate {
-	cu.mutation.SetInt8ToString(s)
-	return cu
+func (_u *ConversionUpdate) SetInt8ToString(s string) *ConversionUpdate {
+	_u.mutation.SetInt8ToString(s)
+	return _u
 }
 
 // SetNillableInt8ToString sets the "int8_to_string" field if the given value is not nil.
-func (cu *ConversionUpdate) SetNillableInt8ToString(s *string) *ConversionUpdate {
+func (_u *ConversionUpdate) SetNillableInt8ToString(s *string) *ConversionUpdate {
 	if s != nil {
-		cu.SetInt8ToString(*s)
+		_u.SetInt8ToString(*s)
 	}
-	return cu
+	return _u
 }
 
 // ClearInt8ToString clears the value of the "int8_to_string" field.
-func (cu *ConversionUpdate) ClearInt8ToString() *ConversionUpdate {
-	cu.mutation.ClearInt8ToString()
-	return cu
+func (_u *ConversionUpdate) ClearInt8ToString() *ConversionUpdate {
+	_u.mutation.ClearInt8ToString()
+	return _u
 }
 
 // SetUint8ToString sets the "uint8_to_string" field.
-func (cu *ConversionUpdate) SetUint8ToString(s string) *ConversionUpdate {
-	cu.mutation.SetUint8ToString(s)
-	return cu
+func (_u *ConversionUpdate) SetUint8ToString(s string) *ConversionUpdate {
+	_u.mutation.SetUint8ToString(s)
+	return _u
 }
 
 // SetNillableUint8ToString sets the "uint8_to_string" field if the given value is not nil.
-func (cu *ConversionUpdate) SetNillableUint8ToString(s *string) *ConversionUpdate {
+func (_u *ConversionUpdate) SetNillableUint8ToString(s *string) *ConversionUpdate {
 	if s != nil {
-		cu.SetUint8ToString(*s)
+		_u.SetUint8ToString(*s)
 	}
-	return cu
+	return _u
 }
 
 // ClearUint8ToString clears the value of the "uint8_to_string" field.
-func (cu *ConversionUpdate) ClearUint8ToString() *ConversionUpdate {
-	cu.mutation.ClearUint8ToString()
-	return cu
+func (_u *ConversionUpdate) ClearUint8ToString() *ConversionUpdate {
+	_u.mutation.ClearUint8ToString()
+	return _u
 }
 
 // SetInt16ToString sets the "int16_to_string" field.
-func (cu *ConversionUpdate) SetInt16ToString(s string) *ConversionUpdate {
-	cu.mutation.SetInt16ToString(s)
-	return cu
+func (_u *ConversionUpdate) SetInt16ToString(s string) *ConversionUpdate {
+	_u.mutation.SetInt16ToString(s)
+	return _u
 }
 
 // SetNillableInt16ToString sets the "int16_to_string" field if the given value is not nil.
-func (cu *ConversionUpdate) SetNillableInt16ToString(s *string) *ConversionUpdate {
+func (_u *ConversionUpdate) SetNillableInt16ToString(s *string) *ConversionUpdate {
 	if s != nil {
-		cu.SetInt16ToString(*s)
+		_u.SetInt16ToString(*s)
 	}
-	return cu
+	return _u
 }
 
 // ClearInt16ToString clears the value of the "int16_to_string" field.
-func (cu *ConversionUpdate) ClearInt16ToString() *ConversionUpdate {
-	cu.mutation.ClearInt16ToString()
-	return cu
+func (_u *ConversionUpdate) ClearInt16ToString() *ConversionUpdate {
+	_u.mutation.ClearInt16ToString()
+	return _u
 }
 
 // SetUint16ToString sets the "uint16_to_string" field.
-func (cu *ConversionUpdate) SetUint16ToString(s string) *ConversionUpdate {
-	cu.mutation.SetUint16ToString(s)
-	return cu
+func (_u *ConversionUpdate) SetUint16ToString(s string) *ConversionUpdate {
+	_u.mutation.SetUint16ToString(s)
+	return _u
 }
 
 // SetNillableUint16ToString sets the "uint16_to_string" field if the given value is not nil.
-func (cu *ConversionUpdate) SetNillableUint16ToString(s *string) *ConversionUpdate {
+func (_u *ConversionUpdate) SetNillableUint16ToString(s *string) *ConversionUpdate {
 	if s != nil {
-		cu.SetUint16ToString(*s)
+		_u.SetUint16ToString(*s)
 	}
-	return cu
+	return _u
 }
 
 // ClearUint16ToString clears the value of the "uint16_to_string" field.
-func (cu *ConversionUpdate) ClearUint16ToString() *ConversionUpdate {
-	cu.mutation.ClearUint16ToString()
-	return cu
+func (_u *ConversionUpdate) ClearUint16ToString() *ConversionUpdate {
+	_u.mutation.ClearUint16ToString()
+	return _u
 }
 
 // SetInt32ToString sets the "int32_to_string" field.
-func (cu *ConversionUpdate) SetInt32ToString(s string) *ConversionUpdate {
-	cu.mutation.SetInt32ToString(s)
-	return cu
+func (_u *ConversionUpdate) SetInt32ToString(s string) *ConversionUpdate {
+	_u.mutation.SetInt32ToString(s)
+	return _u
 }
 
 // SetNillableInt32ToString sets the "int32_to_string" field if the given value is not nil.
-func (cu *ConversionUpdate) SetNillableInt32ToString(s *string) *ConversionUpdate {
+func (_u *ConversionUpdate) SetNillableInt32ToString(s *string) *ConversionUpdate {
 	if s != nil {
-		cu.SetInt32ToString(*s)
+		_u.SetInt32ToString(*s)
 	}
-	return cu
+	return _u
 }
 
 // ClearInt32ToString clears the value of the "int32_to_string" field.
-func (cu *ConversionUpdate) ClearInt32ToString() *ConversionUpdate {
-	cu.mutation.ClearInt32ToString()
-	return cu
+func (_u *ConversionUpdate) ClearInt32ToString() *ConversionUpdate {
+	_u.mutation.ClearInt32ToString()
+	return _u
 }
 
 // SetUint32ToString sets the "uint32_to_string" field.
-func (cu *ConversionUpdate) SetUint32ToString(s string) *ConversionUpdate {
-	cu.mutation.SetUint32ToString(s)
-	return cu
+func (_u *ConversionUpdate) SetUint32ToString(s string) *ConversionUpdate {
+	_u.mutation.SetUint32ToString(s)
+	return _u
 }
 
 // SetNillableUint32ToString sets the "uint32_to_string" field if the given value is not nil.
-func (cu *ConversionUpdate) SetNillableUint32ToString(s *string) *ConversionUpdate {
+func (_u *ConversionUpdate) SetNillableUint32ToString(s *string) *ConversionUpdate {
 	if s != nil {
-		cu.SetUint32ToString(*s)
+		_u.SetUint32ToString(*s)
 	}
-	return cu
+	return _u
 }
 
 // ClearUint32ToString clears the value of the "uint32_to_string" field.
-func (cu *ConversionUpdate) ClearUint32ToString() *ConversionUpdate {
-	cu.mutation.ClearUint32ToString()
-	return cu
+func (_u *ConversionUpdate) ClearUint32ToString() *ConversionUpdate {
+	_u.mutation.ClearUint32ToString()
+	return _u
 }
 
 // SetInt64ToString sets the "int64_to_string" field.
-func (cu *ConversionUpdate) SetInt64ToString(s string) *ConversionUpdate {
-	cu.mutation.SetInt64ToString(s)
-	return cu
+func (_u *ConversionUpdate) SetInt64ToString(s string) *ConversionUpdate {
+	_u.mutation.SetInt64ToString(s)
+	return _u
 }
 
 // SetNillableInt64ToString sets the "int64_to_string" field if the given value is not nil.
-func (cu *ConversionUpdate) SetNillableInt64ToString(s *string) *ConversionUpdate {
+func (_u *ConversionUpdate) SetNillableInt64ToString(s *string) *ConversionUpdate {
 	if s != nil {
-		cu.SetInt64ToString(*s)
+		_u.SetInt64ToString(*s)
 	}
-	return cu
+	return _u
 }
 
 // ClearInt64ToString clears the value of the "int64_to_string" field.
-func (cu *ConversionUpdate) ClearInt64ToString() *ConversionUpdate {
-	cu.mutation.ClearInt64ToString()
-	return cu
+func (_u *ConversionUpdate) ClearInt64ToString() *ConversionUpdate {
+	_u.mutation.ClearInt64ToString()
+	return _u
 }
 
 // SetUint64ToString sets the "uint64_to_string" field.
-func (cu *ConversionUpdate) SetUint64ToString(s string) *ConversionUpdate {
-	cu.mutation.SetUint64ToString(s)
-	return cu
+func (_u *ConversionUpdate) SetUint64ToString(s string) *ConversionUpdate {
+	_u.mutation.SetUint64ToString(s)
+	return _u
 }
 
 // SetNillableUint64ToString sets the "uint64_to_string" field if the given value is not nil.
-func (cu *ConversionUpdate) SetNillableUint64ToString(s *string) *ConversionUpdate {
+func (_u *ConversionUpdate) SetNillableUint64ToString(s *string) *ConversionUpdate {
 	if s != nil {
-		cu.SetUint64ToString(*s)
+		_u.SetUint64ToString(*s)
 	}
-	return cu
+	return _u
 }
 
 // ClearUint64ToString clears the value of the "uint64_to_string" field.
-func (cu *ConversionUpdate) ClearUint64ToString() *ConversionUpdate {
-	cu.mutation.ClearUint64ToString()
-	return cu
+func (_u *ConversionUpdate) ClearUint64ToString() *ConversionUpdate {
+	_u.mutation.ClearUint64ToString()
+	return _u
 }
 
 // Mutation returns the ConversionMutation object of the builder.
-func (cu *ConversionUpdate) Mutation() *ConversionMutation {
-	return cu.mutation
+func (_u *ConversionUpdate) Mutation() *ConversionMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (cu *ConversionUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, cu.sqlSave, cu.mutation, cu.hooks)
+func (_u *ConversionUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cu *ConversionUpdate) SaveX(ctx context.Context) int {
-	affected, err := cu.Save(ctx)
+func (_u *ConversionUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -231,82 +231,82 @@ func (cu *ConversionUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (cu *ConversionUpdate) Exec(ctx context.Context) error {
-	_, err := cu.Save(ctx)
+func (_u *ConversionUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cu *ConversionUpdate) ExecX(ctx context.Context) {
-	if err := cu.Exec(ctx); err != nil {
+func (_u *ConversionUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (cu *ConversionUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *ConversionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(conversion.Table, conversion.Columns, sqlgraph.NewFieldSpec(conversion.FieldID, field.TypeInt))
-	if ps := cu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := cu.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(conversion.FieldName, field.TypeString, value)
 	}
-	if cu.mutation.NameCleared() {
+	if _u.mutation.NameCleared() {
 		_spec.ClearField(conversion.FieldName, field.TypeString)
 	}
-	if value, ok := cu.mutation.Int8ToString(); ok {
+	if value, ok := _u.mutation.Int8ToString(); ok {
 		_spec.SetField(conversion.FieldInt8ToString, field.TypeString, value)
 	}
-	if cu.mutation.Int8ToStringCleared() {
+	if _u.mutation.Int8ToStringCleared() {
 		_spec.ClearField(conversion.FieldInt8ToString, field.TypeString)
 	}
-	if value, ok := cu.mutation.Uint8ToString(); ok {
+	if value, ok := _u.mutation.Uint8ToString(); ok {
 		_spec.SetField(conversion.FieldUint8ToString, field.TypeString, value)
 	}
-	if cu.mutation.Uint8ToStringCleared() {
+	if _u.mutation.Uint8ToStringCleared() {
 		_spec.ClearField(conversion.FieldUint8ToString, field.TypeString)
 	}
-	if value, ok := cu.mutation.Int16ToString(); ok {
+	if value, ok := _u.mutation.Int16ToString(); ok {
 		_spec.SetField(conversion.FieldInt16ToString, field.TypeString, value)
 	}
-	if cu.mutation.Int16ToStringCleared() {
+	if _u.mutation.Int16ToStringCleared() {
 		_spec.ClearField(conversion.FieldInt16ToString, field.TypeString)
 	}
-	if value, ok := cu.mutation.Uint16ToString(); ok {
+	if value, ok := _u.mutation.Uint16ToString(); ok {
 		_spec.SetField(conversion.FieldUint16ToString, field.TypeString, value)
 	}
-	if cu.mutation.Uint16ToStringCleared() {
+	if _u.mutation.Uint16ToStringCleared() {
 		_spec.ClearField(conversion.FieldUint16ToString, field.TypeString)
 	}
-	if value, ok := cu.mutation.Int32ToString(); ok {
+	if value, ok := _u.mutation.Int32ToString(); ok {
 		_spec.SetField(conversion.FieldInt32ToString, field.TypeString, value)
 	}
-	if cu.mutation.Int32ToStringCleared() {
+	if _u.mutation.Int32ToStringCleared() {
 		_spec.ClearField(conversion.FieldInt32ToString, field.TypeString)
 	}
-	if value, ok := cu.mutation.Uint32ToString(); ok {
+	if value, ok := _u.mutation.Uint32ToString(); ok {
 		_spec.SetField(conversion.FieldUint32ToString, field.TypeString, value)
 	}
-	if cu.mutation.Uint32ToStringCleared() {
+	if _u.mutation.Uint32ToStringCleared() {
 		_spec.ClearField(conversion.FieldUint32ToString, field.TypeString)
 	}
-	if value, ok := cu.mutation.Int64ToString(); ok {
+	if value, ok := _u.mutation.Int64ToString(); ok {
 		_spec.SetField(conversion.FieldInt64ToString, field.TypeString, value)
 	}
-	if cu.mutation.Int64ToStringCleared() {
+	if _u.mutation.Int64ToStringCleared() {
 		_spec.ClearField(conversion.FieldInt64ToString, field.TypeString)
 	}
-	if value, ok := cu.mutation.Uint64ToString(); ok {
+	if value, ok := _u.mutation.Uint64ToString(); ok {
 		_spec.SetField(conversion.FieldUint64ToString, field.TypeString, value)
 	}
-	if cu.mutation.Uint64ToStringCleared() {
+	if _u.mutation.Uint64ToStringCleared() {
 		_spec.ClearField(conversion.FieldUint64ToString, field.TypeString)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
+	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{conversion.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -314,7 +314,7 @@ func (cu *ConversionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	cu.mutation.done = true
+	_u.mutation.done = true
 	return n, nil
 }
 
@@ -327,211 +327,211 @@ type ConversionUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (cuo *ConversionUpdateOne) SetName(s string) *ConversionUpdateOne {
-	cuo.mutation.SetName(s)
-	return cuo
+func (_u *ConversionUpdateOne) SetName(s string) *ConversionUpdateOne {
+	_u.mutation.SetName(s)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (cuo *ConversionUpdateOne) SetNillableName(s *string) *ConversionUpdateOne {
+func (_u *ConversionUpdateOne) SetNillableName(s *string) *ConversionUpdateOne {
 	if s != nil {
-		cuo.SetName(*s)
+		_u.SetName(*s)
 	}
-	return cuo
+	return _u
 }
 
 // ClearName clears the value of the "name" field.
-func (cuo *ConversionUpdateOne) ClearName() *ConversionUpdateOne {
-	cuo.mutation.ClearName()
-	return cuo
+func (_u *ConversionUpdateOne) ClearName() *ConversionUpdateOne {
+	_u.mutation.ClearName()
+	return _u
 }
 
 // SetInt8ToString sets the "int8_to_string" field.
-func (cuo *ConversionUpdateOne) SetInt8ToString(s string) *ConversionUpdateOne {
-	cuo.mutation.SetInt8ToString(s)
-	return cuo
+func (_u *ConversionUpdateOne) SetInt8ToString(s string) *ConversionUpdateOne {
+	_u.mutation.SetInt8ToString(s)
+	return _u
 }
 
 // SetNillableInt8ToString sets the "int8_to_string" field if the given value is not nil.
-func (cuo *ConversionUpdateOne) SetNillableInt8ToString(s *string) *ConversionUpdateOne {
+func (_u *ConversionUpdateOne) SetNillableInt8ToString(s *string) *ConversionUpdateOne {
 	if s != nil {
-		cuo.SetInt8ToString(*s)
+		_u.SetInt8ToString(*s)
 	}
-	return cuo
+	return _u
 }
 
 // ClearInt8ToString clears the value of the "int8_to_string" field.
-func (cuo *ConversionUpdateOne) ClearInt8ToString() *ConversionUpdateOne {
-	cuo.mutation.ClearInt8ToString()
-	return cuo
+func (_u *ConversionUpdateOne) ClearInt8ToString() *ConversionUpdateOne {
+	_u.mutation.ClearInt8ToString()
+	return _u
 }
 
 // SetUint8ToString sets the "uint8_to_string" field.
-func (cuo *ConversionUpdateOne) SetUint8ToString(s string) *ConversionUpdateOne {
-	cuo.mutation.SetUint8ToString(s)
-	return cuo
+func (_u *ConversionUpdateOne) SetUint8ToString(s string) *ConversionUpdateOne {
+	_u.mutation.SetUint8ToString(s)
+	return _u
 }
 
 // SetNillableUint8ToString sets the "uint8_to_string" field if the given value is not nil.
-func (cuo *ConversionUpdateOne) SetNillableUint8ToString(s *string) *ConversionUpdateOne {
+func (_u *ConversionUpdateOne) SetNillableUint8ToString(s *string) *ConversionUpdateOne {
 	if s != nil {
-		cuo.SetUint8ToString(*s)
+		_u.SetUint8ToString(*s)
 	}
-	return cuo
+	return _u
 }
 
 // ClearUint8ToString clears the value of the "uint8_to_string" field.
-func (cuo *ConversionUpdateOne) ClearUint8ToString() *ConversionUpdateOne {
-	cuo.mutation.ClearUint8ToString()
-	return cuo
+func (_u *ConversionUpdateOne) ClearUint8ToString() *ConversionUpdateOne {
+	_u.mutation.ClearUint8ToString()
+	return _u
 }
 
 // SetInt16ToString sets the "int16_to_string" field.
-func (cuo *ConversionUpdateOne) SetInt16ToString(s string) *ConversionUpdateOne {
-	cuo.mutation.SetInt16ToString(s)
-	return cuo
+func (_u *ConversionUpdateOne) SetInt16ToString(s string) *ConversionUpdateOne {
+	_u.mutation.SetInt16ToString(s)
+	return _u
 }
 
 // SetNillableInt16ToString sets the "int16_to_string" field if the given value is not nil.
-func (cuo *ConversionUpdateOne) SetNillableInt16ToString(s *string) *ConversionUpdateOne {
+func (_u *ConversionUpdateOne) SetNillableInt16ToString(s *string) *ConversionUpdateOne {
 	if s != nil {
-		cuo.SetInt16ToString(*s)
+		_u.SetInt16ToString(*s)
 	}
-	return cuo
+	return _u
 }
 
 // ClearInt16ToString clears the value of the "int16_to_string" field.
-func (cuo *ConversionUpdateOne) ClearInt16ToString() *ConversionUpdateOne {
-	cuo.mutation.ClearInt16ToString()
-	return cuo
+func (_u *ConversionUpdateOne) ClearInt16ToString() *ConversionUpdateOne {
+	_u.mutation.ClearInt16ToString()
+	return _u
 }
 
 // SetUint16ToString sets the "uint16_to_string" field.
-func (cuo *ConversionUpdateOne) SetUint16ToString(s string) *ConversionUpdateOne {
-	cuo.mutation.SetUint16ToString(s)
-	return cuo
+func (_u *ConversionUpdateOne) SetUint16ToString(s string) *ConversionUpdateOne {
+	_u.mutation.SetUint16ToString(s)
+	return _u
 }
 
 // SetNillableUint16ToString sets the "uint16_to_string" field if the given value is not nil.
-func (cuo *ConversionUpdateOne) SetNillableUint16ToString(s *string) *ConversionUpdateOne {
+func (_u *ConversionUpdateOne) SetNillableUint16ToString(s *string) *ConversionUpdateOne {
 	if s != nil {
-		cuo.SetUint16ToString(*s)
+		_u.SetUint16ToString(*s)
 	}
-	return cuo
+	return _u
 }
 
 // ClearUint16ToString clears the value of the "uint16_to_string" field.
-func (cuo *ConversionUpdateOne) ClearUint16ToString() *ConversionUpdateOne {
-	cuo.mutation.ClearUint16ToString()
-	return cuo
+func (_u *ConversionUpdateOne) ClearUint16ToString() *ConversionUpdateOne {
+	_u.mutation.ClearUint16ToString()
+	return _u
 }
 
 // SetInt32ToString sets the "int32_to_string" field.
-func (cuo *ConversionUpdateOne) SetInt32ToString(s string) *ConversionUpdateOne {
-	cuo.mutation.SetInt32ToString(s)
-	return cuo
+func (_u *ConversionUpdateOne) SetInt32ToString(s string) *ConversionUpdateOne {
+	_u.mutation.SetInt32ToString(s)
+	return _u
 }
 
 // SetNillableInt32ToString sets the "int32_to_string" field if the given value is not nil.
-func (cuo *ConversionUpdateOne) SetNillableInt32ToString(s *string) *ConversionUpdateOne {
+func (_u *ConversionUpdateOne) SetNillableInt32ToString(s *string) *ConversionUpdateOne {
 	if s != nil {
-		cuo.SetInt32ToString(*s)
+		_u.SetInt32ToString(*s)
 	}
-	return cuo
+	return _u
 }
 
 // ClearInt32ToString clears the value of the "int32_to_string" field.
-func (cuo *ConversionUpdateOne) ClearInt32ToString() *ConversionUpdateOne {
-	cuo.mutation.ClearInt32ToString()
-	return cuo
+func (_u *ConversionUpdateOne) ClearInt32ToString() *ConversionUpdateOne {
+	_u.mutation.ClearInt32ToString()
+	return _u
 }
 
 // SetUint32ToString sets the "uint32_to_string" field.
-func (cuo *ConversionUpdateOne) SetUint32ToString(s string) *ConversionUpdateOne {
-	cuo.mutation.SetUint32ToString(s)
-	return cuo
+func (_u *ConversionUpdateOne) SetUint32ToString(s string) *ConversionUpdateOne {
+	_u.mutation.SetUint32ToString(s)
+	return _u
 }
 
 // SetNillableUint32ToString sets the "uint32_to_string" field if the given value is not nil.
-func (cuo *ConversionUpdateOne) SetNillableUint32ToString(s *string) *ConversionUpdateOne {
+func (_u *ConversionUpdateOne) SetNillableUint32ToString(s *string) *ConversionUpdateOne {
 	if s != nil {
-		cuo.SetUint32ToString(*s)
+		_u.SetUint32ToString(*s)
 	}
-	return cuo
+	return _u
 }
 
 // ClearUint32ToString clears the value of the "uint32_to_string" field.
-func (cuo *ConversionUpdateOne) ClearUint32ToString() *ConversionUpdateOne {
-	cuo.mutation.ClearUint32ToString()
-	return cuo
+func (_u *ConversionUpdateOne) ClearUint32ToString() *ConversionUpdateOne {
+	_u.mutation.ClearUint32ToString()
+	return _u
 }
 
 // SetInt64ToString sets the "int64_to_string" field.
-func (cuo *ConversionUpdateOne) SetInt64ToString(s string) *ConversionUpdateOne {
-	cuo.mutation.SetInt64ToString(s)
-	return cuo
+func (_u *ConversionUpdateOne) SetInt64ToString(s string) *ConversionUpdateOne {
+	_u.mutation.SetInt64ToString(s)
+	return _u
 }
 
 // SetNillableInt64ToString sets the "int64_to_string" field if the given value is not nil.
-func (cuo *ConversionUpdateOne) SetNillableInt64ToString(s *string) *ConversionUpdateOne {
+func (_u *ConversionUpdateOne) SetNillableInt64ToString(s *string) *ConversionUpdateOne {
 	if s != nil {
-		cuo.SetInt64ToString(*s)
+		_u.SetInt64ToString(*s)
 	}
-	return cuo
+	return _u
 }
 
 // ClearInt64ToString clears the value of the "int64_to_string" field.
-func (cuo *ConversionUpdateOne) ClearInt64ToString() *ConversionUpdateOne {
-	cuo.mutation.ClearInt64ToString()
-	return cuo
+func (_u *ConversionUpdateOne) ClearInt64ToString() *ConversionUpdateOne {
+	_u.mutation.ClearInt64ToString()
+	return _u
 }
 
 // SetUint64ToString sets the "uint64_to_string" field.
-func (cuo *ConversionUpdateOne) SetUint64ToString(s string) *ConversionUpdateOne {
-	cuo.mutation.SetUint64ToString(s)
-	return cuo
+func (_u *ConversionUpdateOne) SetUint64ToString(s string) *ConversionUpdateOne {
+	_u.mutation.SetUint64ToString(s)
+	return _u
 }
 
 // SetNillableUint64ToString sets the "uint64_to_string" field if the given value is not nil.
-func (cuo *ConversionUpdateOne) SetNillableUint64ToString(s *string) *ConversionUpdateOne {
+func (_u *ConversionUpdateOne) SetNillableUint64ToString(s *string) *ConversionUpdateOne {
 	if s != nil {
-		cuo.SetUint64ToString(*s)
+		_u.SetUint64ToString(*s)
 	}
-	return cuo
+	return _u
 }
 
 // ClearUint64ToString clears the value of the "uint64_to_string" field.
-func (cuo *ConversionUpdateOne) ClearUint64ToString() *ConversionUpdateOne {
-	cuo.mutation.ClearUint64ToString()
-	return cuo
+func (_u *ConversionUpdateOne) ClearUint64ToString() *ConversionUpdateOne {
+	_u.mutation.ClearUint64ToString()
+	return _u
 }
 
 // Mutation returns the ConversionMutation object of the builder.
-func (cuo *ConversionUpdateOne) Mutation() *ConversionMutation {
-	return cuo.mutation
+func (_u *ConversionUpdateOne) Mutation() *ConversionMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the ConversionUpdate builder.
-func (cuo *ConversionUpdateOne) Where(ps ...predicate.Conversion) *ConversionUpdateOne {
-	cuo.mutation.Where(ps...)
-	return cuo
+func (_u *ConversionUpdateOne) Where(ps ...predicate.Conversion) *ConversionUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (cuo *ConversionUpdateOne) Select(field string, fields ...string) *ConversionUpdateOne {
-	cuo.fields = append([]string{field}, fields...)
-	return cuo
+func (_u *ConversionUpdateOne) Select(field string, fields ...string) *ConversionUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Conversion entity.
-func (cuo *ConversionUpdateOne) Save(ctx context.Context) (*Conversion, error) {
-	return withHooks(ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
+func (_u *ConversionUpdateOne) Save(ctx context.Context) (*Conversion, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cuo *ConversionUpdateOne) SaveX(ctx context.Context) *Conversion {
-	node, err := cuo.Save(ctx)
+func (_u *ConversionUpdateOne) SaveX(ctx context.Context) *Conversion {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -539,26 +539,26 @@ func (cuo *ConversionUpdateOne) SaveX(ctx context.Context) *Conversion {
 }
 
 // Exec executes the query on the entity.
-func (cuo *ConversionUpdateOne) Exec(ctx context.Context) error {
-	_, err := cuo.Save(ctx)
+func (_u *ConversionUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cuo *ConversionUpdateOne) ExecX(ctx context.Context) {
-	if err := cuo.Exec(ctx); err != nil {
+func (_u *ConversionUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (cuo *ConversionUpdateOne) sqlSave(ctx context.Context) (_node *Conversion, err error) {
+func (_u *ConversionUpdateOne) sqlSave(ctx context.Context) (_node *Conversion, err error) {
 	_spec := sqlgraph.NewUpdateSpec(conversion.Table, conversion.Columns, sqlgraph.NewFieldSpec(conversion.FieldID, field.TypeInt))
-	id, ok := cuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`entv2: missing "Conversion.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := cuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, conversion.FieldID)
 		for _, f := range fields {
@@ -570,71 +570,71 @@ func (cuo *ConversionUpdateOne) sqlSave(ctx context.Context) (_node *Conversion,
 			}
 		}
 	}
-	if ps := cuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := cuo.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(conversion.FieldName, field.TypeString, value)
 	}
-	if cuo.mutation.NameCleared() {
+	if _u.mutation.NameCleared() {
 		_spec.ClearField(conversion.FieldName, field.TypeString)
 	}
-	if value, ok := cuo.mutation.Int8ToString(); ok {
+	if value, ok := _u.mutation.Int8ToString(); ok {
 		_spec.SetField(conversion.FieldInt8ToString, field.TypeString, value)
 	}
-	if cuo.mutation.Int8ToStringCleared() {
+	if _u.mutation.Int8ToStringCleared() {
 		_spec.ClearField(conversion.FieldInt8ToString, field.TypeString)
 	}
-	if value, ok := cuo.mutation.Uint8ToString(); ok {
+	if value, ok := _u.mutation.Uint8ToString(); ok {
 		_spec.SetField(conversion.FieldUint8ToString, field.TypeString, value)
 	}
-	if cuo.mutation.Uint8ToStringCleared() {
+	if _u.mutation.Uint8ToStringCleared() {
 		_spec.ClearField(conversion.FieldUint8ToString, field.TypeString)
 	}
-	if value, ok := cuo.mutation.Int16ToString(); ok {
+	if value, ok := _u.mutation.Int16ToString(); ok {
 		_spec.SetField(conversion.FieldInt16ToString, field.TypeString, value)
 	}
-	if cuo.mutation.Int16ToStringCleared() {
+	if _u.mutation.Int16ToStringCleared() {
 		_spec.ClearField(conversion.FieldInt16ToString, field.TypeString)
 	}
-	if value, ok := cuo.mutation.Uint16ToString(); ok {
+	if value, ok := _u.mutation.Uint16ToString(); ok {
 		_spec.SetField(conversion.FieldUint16ToString, field.TypeString, value)
 	}
-	if cuo.mutation.Uint16ToStringCleared() {
+	if _u.mutation.Uint16ToStringCleared() {
 		_spec.ClearField(conversion.FieldUint16ToString, field.TypeString)
 	}
-	if value, ok := cuo.mutation.Int32ToString(); ok {
+	if value, ok := _u.mutation.Int32ToString(); ok {
 		_spec.SetField(conversion.FieldInt32ToString, field.TypeString, value)
 	}
-	if cuo.mutation.Int32ToStringCleared() {
+	if _u.mutation.Int32ToStringCleared() {
 		_spec.ClearField(conversion.FieldInt32ToString, field.TypeString)
 	}
-	if value, ok := cuo.mutation.Uint32ToString(); ok {
+	if value, ok := _u.mutation.Uint32ToString(); ok {
 		_spec.SetField(conversion.FieldUint32ToString, field.TypeString, value)
 	}
-	if cuo.mutation.Uint32ToStringCleared() {
+	if _u.mutation.Uint32ToStringCleared() {
 		_spec.ClearField(conversion.FieldUint32ToString, field.TypeString)
 	}
-	if value, ok := cuo.mutation.Int64ToString(); ok {
+	if value, ok := _u.mutation.Int64ToString(); ok {
 		_spec.SetField(conversion.FieldInt64ToString, field.TypeString, value)
 	}
-	if cuo.mutation.Int64ToStringCleared() {
+	if _u.mutation.Int64ToStringCleared() {
 		_spec.ClearField(conversion.FieldInt64ToString, field.TypeString)
 	}
-	if value, ok := cuo.mutation.Uint64ToString(); ok {
+	if value, ok := _u.mutation.Uint64ToString(); ok {
 		_spec.SetField(conversion.FieldUint64ToString, field.TypeString, value)
 	}
-	if cuo.mutation.Uint64ToStringCleared() {
+	if _u.mutation.Uint64ToStringCleared() {
 		_spec.ClearField(conversion.FieldUint64ToString, field.TypeString)
 	}
-	_node = &Conversion{config: cuo.config}
+	_node = &Conversion{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{conversion.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -642,6 +642,6 @@ func (cuo *ConversionUpdateOne) sqlSave(ctx context.Context) (_node *Conversion,
 		}
 		return nil, err
 	}
-	cuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

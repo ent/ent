@@ -23,33 +23,33 @@ type SpecCreate struct {
 }
 
 // AddCardIDs adds the "card" edge to the Card entity by IDs.
-func (sc *SpecCreate) AddCardIDs(ids ...string) *SpecCreate {
-	sc.mutation.AddCardIDs(ids...)
-	return sc
+func (_c *SpecCreate) AddCardIDs(ids ...string) *SpecCreate {
+	_c.mutation.AddCardIDs(ids...)
+	return _c
 }
 
 // AddCard adds the "card" edges to the Card entity.
-func (sc *SpecCreate) AddCard(c ...*Card) *SpecCreate {
+func (_c *SpecCreate) AddCard(c ...*Card) *SpecCreate {
 	ids := make([]string, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
-	return sc.AddCardIDs(ids...)
+	return _c.AddCardIDs(ids...)
 }
 
 // Mutation returns the SpecMutation object of the builder.
-func (sc *SpecCreate) Mutation() *SpecMutation {
-	return sc.mutation
+func (_c *SpecCreate) Mutation() *SpecMutation {
+	return _c.mutation
 }
 
 // Save creates the Spec in the database.
-func (sc *SpecCreate) Save(ctx context.Context) (*Spec, error) {
-	return withHooks(ctx, sc.gremlinSave, sc.mutation, sc.hooks)
+func (_c *SpecCreate) Save(ctx context.Context) (*Spec, error) {
+	return withHooks(ctx, _c.gremlinSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (sc *SpecCreate) SaveX(ctx context.Context) *Spec {
-	v, err := sc.Save(ctx)
+func (_c *SpecCreate) SaveX(ctx context.Context) *Spec {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -57,47 +57,47 @@ func (sc *SpecCreate) SaveX(ctx context.Context) *Spec {
 }
 
 // Exec executes the query.
-func (sc *SpecCreate) Exec(ctx context.Context) error {
-	_, err := sc.Save(ctx)
+func (_c *SpecCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (sc *SpecCreate) ExecX(ctx context.Context) {
-	if err := sc.Exec(ctx); err != nil {
+func (_c *SpecCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (sc *SpecCreate) check() error {
+func (_c *SpecCreate) check() error {
 	return nil
 }
 
-func (sc *SpecCreate) gremlinSave(ctx context.Context) (*Spec, error) {
-	if err := sc.check(); err != nil {
+func (_c *SpecCreate) gremlinSave(ctx context.Context) (*Spec, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
 	res := &gremlin.Response{}
-	query, bindings := sc.gremlin().Query()
-	if err := sc.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _c.gremlin().Query()
+	if err := _c.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
 	if err, ok := isConstantError(res); ok {
 		return nil, err
 	}
-	rnode := &Spec{config: sc.config}
+	rnode := &Spec{config: _c.config}
 	if err := rnode.FromResponse(res); err != nil {
 		return nil, err
 	}
-	sc.mutation.id = &rnode.ID
-	sc.mutation.done = true
+	_c.mutation.id = &rnode.ID
+	_c.mutation.done = true
 	return rnode, nil
 }
 
-func (sc *SpecCreate) gremlin() *dsl.Traversal {
+func (_c *SpecCreate) gremlin() *dsl.Traversal {
 	v := g.AddV(spec.Label)
-	for _, id := range sc.mutation.CardIDs() {
+	for _, id := range _c.mutation.CardIDs() {
 		v.AddE(spec.CardLabel).To(g.V(id)).OutV()
 	}
 	return v.ValueMap(true)

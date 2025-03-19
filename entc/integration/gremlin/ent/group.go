@@ -89,12 +89,12 @@ func (e GroupEdges) InfoOrErr() (*GroupInfo, error) {
 }
 
 // FromResponse scans the gremlin response data into Group.
-func (gr *Group) FromResponse(res *gremlin.Response) error {
+func (_m *Group) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scangr struct {
+	var scan_m struct {
 		ID       string  `json:"id,omitempty"`
 		Active   bool    `json:"active,omitempty"`
 		Expire   int64   `json:"expire,omitempty"`
@@ -102,77 +102,77 @@ func (gr *Group) FromResponse(res *gremlin.Response) error {
 		MaxUsers int     `json:"max_users,omitempty"`
 		Name     string  `json:"name,omitempty"`
 	}
-	if err := vmap.Decode(&scangr); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	gr.ID = scangr.ID
-	gr.Active = scangr.Active
-	gr.Expire = time.Unix(0, scangr.Expire)
-	gr.Type = scangr.Type
-	gr.MaxUsers = scangr.MaxUsers
-	gr.Name = scangr.Name
+	_m.ID = scan_m.ID
+	_m.Active = scan_m.Active
+	_m.Expire = time.Unix(0, scan_m.Expire)
+	_m.Type = scan_m.Type
+	_m.MaxUsers = scan_m.MaxUsers
+	_m.Name = scan_m.Name
 	return nil
 }
 
 // QueryFiles queries the "files" edge of the Group entity.
-func (gr *Group) QueryFiles() *FileQuery {
-	return NewGroupClient(gr.config).QueryFiles(gr)
+func (_m *Group) QueryFiles() *FileQuery {
+	return NewGroupClient(_m.config).QueryFiles(_m)
 }
 
 // QueryBlocked queries the "blocked" edge of the Group entity.
-func (gr *Group) QueryBlocked() *UserQuery {
-	return NewGroupClient(gr.config).QueryBlocked(gr)
+func (_m *Group) QueryBlocked() *UserQuery {
+	return NewGroupClient(_m.config).QueryBlocked(_m)
 }
 
 // QueryUsers queries the "users" edge of the Group entity.
-func (gr *Group) QueryUsers() *UserQuery {
-	return NewGroupClient(gr.config).QueryUsers(gr)
+func (_m *Group) QueryUsers() *UserQuery {
+	return NewGroupClient(_m.config).QueryUsers(_m)
 }
 
 // QueryInfo queries the "info" edge of the Group entity.
-func (gr *Group) QueryInfo() *GroupInfoQuery {
-	return NewGroupClient(gr.config).QueryInfo(gr)
+func (_m *Group) QueryInfo() *GroupInfoQuery {
+	return NewGroupClient(_m.config).QueryInfo(_m)
 }
 
 // Update returns a builder for updating this Group.
 // Note that you need to call Group.Unwrap() before calling this method if this Group
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (gr *Group) Update() *GroupUpdateOne {
-	return NewGroupClient(gr.config).UpdateOne(gr)
+func (_m *Group) Update() *GroupUpdateOne {
+	return NewGroupClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Group entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (gr *Group) Unwrap() *Group {
-	_tx, ok := gr.config.driver.(*txDriver)
+func (_m *Group) Unwrap() *Group {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Group is not a transactional entity")
 	}
-	gr.config.driver = _tx.drv
-	return gr
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (gr *Group) String() string {
+func (_m *Group) String() string {
 	var builder strings.Builder
 	builder.WriteString("Group(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", gr.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("active=")
-	builder.WriteString(fmt.Sprintf("%v", gr.Active))
+	builder.WriteString(fmt.Sprintf("%v", _m.Active))
 	builder.WriteString(", ")
 	builder.WriteString("expire=")
-	builder.WriteString(gr.Expire.Format(time.ANSIC))
+	builder.WriteString(_m.Expire.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := gr.Type; v != nil {
+	if v := _m.Type; v != nil {
 		builder.WriteString("type=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")
 	builder.WriteString("max_users=")
-	builder.WriteString(fmt.Sprintf("%v", gr.MaxUsers))
+	builder.WriteString(fmt.Sprintf("%v", _m.MaxUsers))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
-	builder.WriteString(gr.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -181,12 +181,12 @@ func (gr *Group) String() string {
 type Groups []*Group
 
 // FromResponse scans the gremlin response data into Groups.
-func (gr *Groups) FromResponse(res *gremlin.Response) error {
+func (_m *Groups) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scangr []struct {
+	var scan_m []struct {
 		ID       string  `json:"id,omitempty"`
 		Active   bool    `json:"active,omitempty"`
 		Expire   int64   `json:"expire,omitempty"`
@@ -194,17 +194,17 @@ func (gr *Groups) FromResponse(res *gremlin.Response) error {
 		MaxUsers int     `json:"max_users,omitempty"`
 		Name     string  `json:"name,omitempty"`
 	}
-	if err := vmap.Decode(&scangr); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	for _, v := range scangr {
+	for _, v := range scan_m {
 		node := &Group{ID: v.ID}
 		node.Active = v.Active
 		node.Expire = time.Unix(0, v.Expire)
 		node.Type = v.Type
 		node.MaxUsers = v.MaxUsers
 		node.Name = v.Name
-		*gr = append(*gr, node)
+		*_m = append(*_m, node)
 	}
 	return nil
 }

@@ -23,24 +23,24 @@ type ZooCreate struct {
 }
 
 // SetID sets the "id" field.
-func (zc *ZooCreate) SetID(i int) *ZooCreate {
-	zc.mutation.SetID(i)
-	return zc
+func (_c *ZooCreate) SetID(i int) *ZooCreate {
+	_c.mutation.SetID(i)
+	return _c
 }
 
 // Mutation returns the ZooMutation object of the builder.
-func (zc *ZooCreate) Mutation() *ZooMutation {
-	return zc.mutation
+func (_c *ZooCreate) Mutation() *ZooMutation {
+	return _c.mutation
 }
 
 // Save creates the Zoo in the database.
-func (zc *ZooCreate) Save(ctx context.Context) (*Zoo, error) {
-	return withHooks(ctx, zc.sqlSave, zc.mutation, zc.hooks)
+func (_c *ZooCreate) Save(ctx context.Context) (*Zoo, error) {
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (zc *ZooCreate) SaveX(ctx context.Context) *Zoo {
-	v, err := zc.Save(ctx)
+func (_c *ZooCreate) SaveX(ctx context.Context) *Zoo {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -48,29 +48,29 @@ func (zc *ZooCreate) SaveX(ctx context.Context) *Zoo {
 }
 
 // Exec executes the query.
-func (zc *ZooCreate) Exec(ctx context.Context) error {
-	_, err := zc.Save(ctx)
+func (_c *ZooCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (zc *ZooCreate) ExecX(ctx context.Context) {
-	if err := zc.Exec(ctx); err != nil {
+func (_c *ZooCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (zc *ZooCreate) check() error {
+func (_c *ZooCreate) check() error {
 	return nil
 }
 
-func (zc *ZooCreate) sqlSave(ctx context.Context) (*Zoo, error) {
-	if err := zc.check(); err != nil {
+func (_c *ZooCreate) sqlSave(ctx context.Context) (*Zoo, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := zc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, zc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -80,17 +80,17 @@ func (zc *ZooCreate) sqlSave(ctx context.Context) (*Zoo, error) {
 		id := _spec.ID.Value.(int64)
 		_node.ID = int(id)
 	}
-	zc.mutation.id = &_node.ID
-	zc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (zc *ZooCreate) createSpec() (*Zoo, *sqlgraph.CreateSpec) {
+func (_c *ZooCreate) createSpec() (*Zoo, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Zoo{config: zc.config}
+		_node = &Zoo{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(zoo.Table, sqlgraph.NewFieldSpec(zoo.FieldID, field.TypeInt))
 	)
-	if id, ok := zc.mutation.ID(); ok {
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
@@ -105,16 +105,16 @@ type ZooCreateBulk struct {
 }
 
 // Save creates the Zoo entities in the database.
-func (zcb *ZooCreateBulk) Save(ctx context.Context) ([]*Zoo, error) {
-	if zcb.err != nil {
-		return nil, zcb.err
+func (_c *ZooCreateBulk) Save(ctx context.Context) ([]*Zoo, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(zcb.builders))
-	nodes := make([]*Zoo, len(zcb.builders))
-	mutators := make([]Mutator, len(zcb.builders))
-	for i := range zcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Zoo, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := zcb.builders[i]
+			builder := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ZooMutation)
 				if !ok {
@@ -127,11 +127,11 @@ func (zcb *ZooCreateBulk) Save(ctx context.Context) ([]*Zoo, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, zcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, zcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -155,7 +155,7 @@ func (zcb *ZooCreateBulk) Save(ctx context.Context) ([]*Zoo, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, zcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -163,8 +163,8 @@ func (zcb *ZooCreateBulk) Save(ctx context.Context) ([]*Zoo, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (zcb *ZooCreateBulk) SaveX(ctx context.Context) []*Zoo {
-	v, err := zcb.Save(ctx)
+func (_c *ZooCreateBulk) SaveX(ctx context.Context) []*Zoo {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -172,14 +172,14 @@ func (zcb *ZooCreateBulk) SaveX(ctx context.Context) []*Zoo {
 }
 
 // Exec executes the query.
-func (zcb *ZooCreateBulk) Exec(ctx context.Context) error {
-	_, err := zcb.Save(ctx)
+func (_c *ZooCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (zcb *ZooCreateBulk) ExecX(ctx context.Context) {
-	if err := zcb.Exec(ctx); err != nil {
+func (_c *ZooCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

@@ -336,11 +336,7 @@ func (t Type) PackageAlias() string { return t.alias }
 // Receiver returns the receiver name of this node. It makes sure the
 // receiver names doesn't conflict with import names.
 func (t Type) Receiver() string {
-	r := receiver(t.Name)
-	if t.Package() == r {
-		return "_" + r
-	}
-	return r
+	return "_m"
 }
 
 // hasEdge returns true if this type as an edge (reverse or assoc)
@@ -825,11 +821,7 @@ func (t Type) QueryName() string {
 
 // QueryReceiver returns the receiver name of the query-builder for this type.
 func (t Type) QueryReceiver() string {
-	r := receiver(t.QueryName())
-	if t.Package() == r {
-		return "_" + r
-	}
-	return r
+	return "_q"
 }
 
 // FilterName returns the struct name denoting the filter-builder for this type.
@@ -844,11 +836,7 @@ func (t Type) CreateName() string {
 
 // CreateReceiver returns the receiver name of the create-builder for this type.
 func (t Type) CreateReceiver() string {
-	r := receiver(t.CreateName())
-	if t.Package() == r {
-		return "_" + r
-	}
-	return r
+	return "_c"
 }
 
 // CreateBulkName returns the struct name denoting the create-bulk-builder for this type.
@@ -858,11 +846,7 @@ func (t Type) CreateBulkName() string {
 
 // CreateBulReceiver returns the receiver name of the create-bulk-builder for this type.
 func (t Type) CreateBulReceiver() string {
-	r := receiver(t.CreateBulkName())
-	if t.Package() == r {
-		return "_" + r
-	}
-	return r
+	return "_c"
 }
 
 // UpdateName returns the struct name denoting the update-builder for this type.
@@ -872,11 +856,7 @@ func (t Type) UpdateName() string {
 
 // UpdateReceiver returns the receiver name of the update-builder for this type.
 func (t Type) UpdateReceiver() string {
-	r := receiver(t.UpdateName())
-	if t.Package() == r {
-		return "_" + r
-	}
-	return r
+	return "_u"
 }
 
 // UpdateOneName returns the struct name denoting the update-one-builder for this type.
@@ -886,11 +866,7 @@ func (t Type) UpdateOneName() string {
 
 // UpdateOneReceiver returns the receiver name of the update-one-builder for this type.
 func (t Type) UpdateOneReceiver() string {
-	r := receiver(t.UpdateOneName())
-	if t.Package() == r {
-		return "_" + r
-	}
-	return r
+	return "_u"
 }
 
 // DeleteName returns the struct name denoting the delete-builder for this type.
@@ -900,11 +876,7 @@ func (t Type) DeleteName() string {
 
 // DeleteReceiver returns the receiver name of the delete-builder for this type.
 func (t Type) DeleteReceiver() string {
-	r := receiver(t.DeleteName())
-	if t.Package() == r {
-		return "_" + r
-	}
-	return r
+	return "_d"
 }
 
 // DeleteOneName returns the struct name denoting the delete-one-builder for this type.
@@ -914,11 +886,7 @@ func (t Type) DeleteOneName() string {
 
 // DeleteOneReceiver returns the receiver name of the delete-one-builder for this type.
 func (t Type) DeleteOneReceiver() string {
-	r := receiver(t.DeleteOneName())
-	if t.Package() == r {
-		return "_" + r
-	}
-	return r
+	return "_d"
 }
 
 // MutationName returns the struct name of the mutation builder for this type.

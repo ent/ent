@@ -42,49 +42,49 @@ func (e SpecEdges) CardOrErr() ([]*Card, error) {
 }
 
 // FromResponse scans the gremlin response data into Spec.
-func (s *Spec) FromResponse(res *gremlin.Response) error {
+func (_m *Spec) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scans struct {
+	var scan_m struct {
 		ID string `json:"id,omitempty"`
 	}
-	if err := vmap.Decode(&scans); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	s.ID = scans.ID
+	_m.ID = scan_m.ID
 	return nil
 }
 
 // QueryCard queries the "card" edge of the Spec entity.
-func (s *Spec) QueryCard() *CardQuery {
-	return NewSpecClient(s.config).QueryCard(s)
+func (_m *Spec) QueryCard() *CardQuery {
+	return NewSpecClient(_m.config).QueryCard(_m)
 }
 
 // Update returns a builder for updating this Spec.
 // Note that you need to call Spec.Unwrap() before calling this method if this Spec
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (s *Spec) Update() *SpecUpdateOne {
-	return NewSpecClient(s.config).UpdateOne(s)
+func (_m *Spec) Update() *SpecUpdateOne {
+	return NewSpecClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Spec entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (s *Spec) Unwrap() *Spec {
-	_tx, ok := s.config.driver.(*txDriver)
+func (_m *Spec) Unwrap() *Spec {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Spec is not a transactional entity")
 	}
-	s.config.driver = _tx.drv
-	return s
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (s *Spec) String() string {
+func (_m *Spec) String() string {
 	var builder strings.Builder
 	builder.WriteString("Spec(")
-	builder.WriteString(fmt.Sprintf("id=%v", s.ID))
+	builder.WriteString(fmt.Sprintf("id=%v", _m.ID))
 	builder.WriteByte(')')
 	return builder.String()
 }
@@ -93,20 +93,20 @@ func (s *Spec) String() string {
 type Specs []*Spec
 
 // FromResponse scans the gremlin response data into Specs.
-func (s *Specs) FromResponse(res *gremlin.Response) error {
+func (_m *Specs) FromResponse(res *gremlin.Response) error {
 	vmap, err := res.ReadValueMap()
 	if err != nil {
 		return err
 	}
-	var scans []struct {
+	var scan_m []struct {
 		ID string `json:"id,omitempty"`
 	}
-	if err := vmap.Decode(&scans); err != nil {
+	if err := vmap.Decode(&scan_m); err != nil {
 		return err
 	}
-	for _, v := range scans {
+	for _, v := range scan_m {
 		node := &Spec{ID: v.ID}
-		*s = append(*s, node)
+		*_m = append(*_m, node)
 	}
 	return nil
 }

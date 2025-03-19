@@ -24,56 +24,56 @@ type ZooDelete struct {
 }
 
 // Where appends a list predicates to the ZooDelete builder.
-func (zd *ZooDelete) Where(ps ...predicate.Zoo) *ZooDelete {
-	zd.mutation.Where(ps...)
-	return zd
+func (_d *ZooDelete) Where(ps ...predicate.Zoo) *ZooDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (zd *ZooDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, zd.sqlExec, zd.mutation, zd.hooks)
+func (_d *ZooDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (zd *ZooDelete) ExecX(ctx context.Context) int {
-	n, err := zd.Exec(ctx)
+func (_d *ZooDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (zd *ZooDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *ZooDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(zoo.Table, sqlgraph.NewFieldSpec(zoo.FieldID, field.TypeInt))
-	if ps := zd.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, zd.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	zd.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // ZooDeleteOne is the builder for deleting a single Zoo entity.
 type ZooDeleteOne struct {
-	zd *ZooDelete
+	_d *ZooDelete
 }
 
 // Where appends a list predicates to the ZooDelete builder.
-func (zdo *ZooDeleteOne) Where(ps ...predicate.Zoo) *ZooDeleteOne {
-	zdo.zd.mutation.Where(ps...)
-	return zdo
+func (_d *ZooDeleteOne) Where(ps ...predicate.Zoo) *ZooDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (zdo *ZooDeleteOne) Exec(ctx context.Context) error {
-	n, err := zdo.zd.Exec(ctx)
+func (_d *ZooDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -85,8 +85,8 @@ func (zdo *ZooDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (zdo *ZooDeleteOne) ExecX(ctx context.Context) {
-	if err := zdo.Exec(ctx); err != nil {
+func (_d *ZooDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

@@ -46,7 +46,7 @@ func (*Link) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Link fields.
-func (l *Link) assignValues(columns []string, values []any) error {
+func (_m *Link) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -56,18 +56,18 @@ func (l *Link) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*uuidc.UUIDC); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
-				l.ID = *value
+				_m.ID = *value
 			}
 		case link.FieldLinkInformation:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field link_information", values[i])
 			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &l.LinkInformation); err != nil {
+				if err := json.Unmarshal(*value, &_m.LinkInformation); err != nil {
 					return fmt.Errorf("unmarshal field link_information: %w", err)
 				}
 			}
 		default:
-			l.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -75,35 +75,35 @@ func (l *Link) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Link.
 // This includes values selected through modifiers, order, etc.
-func (l *Link) Value(name string) (ent.Value, error) {
-	return l.selectValues.Get(name)
+func (_m *Link) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Link.
 // Note that you need to call Link.Unwrap() before calling this method if this Link
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (l *Link) Update() *LinkUpdateOne {
-	return NewLinkClient(l.config).UpdateOne(l)
+func (_m *Link) Update() *LinkUpdateOne {
+	return NewLinkClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Link entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (l *Link) Unwrap() *Link {
-	_tx, ok := l.config.driver.(*txDriver)
+func (_m *Link) Unwrap() *Link {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Link is not a transactional entity")
 	}
-	l.config.driver = _tx.drv
-	return l
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (l *Link) String() string {
+func (_m *Link) String() string {
 	var builder strings.Builder
 	builder.WriteString("Link(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", l.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("link_information=")
-	builder.WriteString(fmt.Sprintf("%v", l.LinkInformation))
+	builder.WriteString(fmt.Sprintf("%v", _m.LinkInformation))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -59,7 +59,7 @@ func (*Comment) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Comment fields.
-func (c *Comment) assignValues(columns []string, values []any) error {
+func (_m *Comment) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -70,37 +70,37 @@ func (c *Comment) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			c.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case comment.FieldUniqueInt:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field unique_int", values[i])
 			} else if value.Valid {
-				c.UniqueInt = int(value.Int64)
+				_m.UniqueInt = int(value.Int64)
 			}
 		case comment.FieldUniqueFloat:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field unique_float", values[i])
 			} else if value.Valid {
-				c.UniqueFloat = value.Float64
+				_m.UniqueFloat = value.Float64
 			}
 		case comment.FieldNillableInt:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field nillable_int", values[i])
 			} else if value.Valid {
-				c.NillableInt = new(int)
-				*c.NillableInt = int(value.Int64)
+				_m.NillableInt = new(int)
+				*_m.NillableInt = int(value.Int64)
 			}
 		case comment.FieldTable:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field table", values[i])
 			} else if value.Valid {
-				c.Table = value.String
+				_m.Table = value.String
 			}
 		case comment.FieldDir:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field dir", values[i])
 			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &c.Dir); err != nil {
+				if err := json.Unmarshal(*value, &_m.Dir); err != nil {
 					return fmt.Errorf("unmarshal field dir: %w", err)
 				}
 			}
@@ -108,10 +108,10 @@ func (c *Comment) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field client", values[i])
 			} else if value.Valid {
-				c.Client = value.String
+				_m.Client = value.String
 			}
 		default:
-			c.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -119,52 +119,52 @@ func (c *Comment) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Comment.
 // This includes values selected through modifiers, order, etc.
-func (c *Comment) Value(name string) (ent.Value, error) {
-	return c.selectValues.Get(name)
+func (_m *Comment) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Comment.
 // Note that you need to call Comment.Unwrap() before calling this method if this Comment
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (c *Comment) Update() *CommentUpdateOne {
-	return NewCommentClient(c.config).UpdateOne(c)
+func (_m *Comment) Update() *CommentUpdateOne {
+	return NewCommentClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Comment entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (c *Comment) Unwrap() *Comment {
-	_tx, ok := c.config.driver.(*txDriver)
+func (_m *Comment) Unwrap() *Comment {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Comment is not a transactional entity")
 	}
-	c.config.driver = _tx.drv
-	return c
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (c *Comment) String() string {
+func (_m *Comment) String() string {
 	var builder strings.Builder
 	builder.WriteString("Comment(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("unique_int=")
-	builder.WriteString(fmt.Sprintf("%v", c.UniqueInt))
+	builder.WriteString(fmt.Sprintf("%v", _m.UniqueInt))
 	builder.WriteString(", ")
 	builder.WriteString("unique_float=")
-	builder.WriteString(fmt.Sprintf("%v", c.UniqueFloat))
+	builder.WriteString(fmt.Sprintf("%v", _m.UniqueFloat))
 	builder.WriteString(", ")
-	if v := c.NillableInt; v != nil {
+	if v := _m.NillableInt; v != nil {
 		builder.WriteString("nillable_int=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("table=")
-	builder.WriteString(c.Table)
+	builder.WriteString(_m.Table)
 	builder.WriteString(", ")
 	builder.WriteString("dir=")
-	builder.WriteString(fmt.Sprintf("%v", c.Dir))
+	builder.WriteString(fmt.Sprintf("%v", _m.Dir))
 	builder.WriteString(", ")
 	builder.WriteString("client=")
-	builder.WriteString(c.Client)
+	builder.WriteString(_m.Client)
 	builder.WriteByte(')')
 	return builder.String()
 }

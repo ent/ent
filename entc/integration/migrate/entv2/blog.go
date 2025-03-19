@@ -62,7 +62,7 @@ func (*Blog) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Blog fields.
-func (b *Blog) assignValues(columns []string, values []any) error {
+func (_m *Blog) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -73,15 +73,15 @@ func (b *Blog) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			b.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case blog.FieldOid:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field oid", values[i])
 			} else if value.Valid {
-				b.Oid = int(value.Int64)
+				_m.Oid = int(value.Int64)
 			}
 		default:
-			b.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -89,40 +89,40 @@ func (b *Blog) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Blog.
 // This includes values selected through modifiers, order, etc.
-func (b *Blog) Value(name string) (ent.Value, error) {
-	return b.selectValues.Get(name)
+func (_m *Blog) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryAdmins queries the "admins" edge of the Blog entity.
-func (b *Blog) QueryAdmins() *UserQuery {
-	return NewBlogClient(b.config).QueryAdmins(b)
+func (_m *Blog) QueryAdmins() *UserQuery {
+	return NewBlogClient(_m.config).QueryAdmins(_m)
 }
 
 // Update returns a builder for updating this Blog.
 // Note that you need to call Blog.Unwrap() before calling this method if this Blog
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (b *Blog) Update() *BlogUpdateOne {
-	return NewBlogClient(b.config).UpdateOne(b)
+func (_m *Blog) Update() *BlogUpdateOne {
+	return NewBlogClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Blog entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (b *Blog) Unwrap() *Blog {
-	_tx, ok := b.config.driver.(*txDriver)
+func (_m *Blog) Unwrap() *Blog {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("entv2: Blog is not a transactional entity")
 	}
-	b.config.driver = _tx.drv
-	return b
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (b *Blog) String() string {
+func (_m *Blog) String() string {
 	var builder strings.Builder
 	builder.WriteString("Blog(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", b.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("oid=")
-	builder.WriteString(fmt.Sprintf("%v", b.Oid))
+	builder.WriteString(fmt.Sprintf("%v", _m.Oid))
 	builder.WriteByte(')')
 	return builder.String()
 }

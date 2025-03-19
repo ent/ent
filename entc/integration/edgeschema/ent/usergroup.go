@@ -86,7 +86,7 @@ func (*UserGroup) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the UserGroup fields.
-func (ug *UserGroup) assignValues(columns []string, values []any) error {
+func (_m *UserGroup) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -97,27 +97,27 @@ func (ug *UserGroup) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			ug.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case usergroup.FieldJoinedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field joined_at", values[i])
 			} else if value.Valid {
-				ug.JoinedAt = value.Time
+				_m.JoinedAt = value.Time
 			}
 		case usergroup.FieldUserID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field user_id", values[i])
 			} else if value.Valid {
-				ug.UserID = int(value.Int64)
+				_m.UserID = int(value.Int64)
 			}
 		case usergroup.FieldGroupID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field group_id", values[i])
 			} else if value.Valid {
-				ug.GroupID = int(value.Int64)
+				_m.GroupID = int(value.Int64)
 			}
 		default:
-			ug.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -125,51 +125,51 @@ func (ug *UserGroup) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the UserGroup.
 // This includes values selected through modifiers, order, etc.
-func (ug *UserGroup) Value(name string) (ent.Value, error) {
-	return ug.selectValues.Get(name)
+func (_m *UserGroup) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryUser queries the "user" edge of the UserGroup entity.
-func (ug *UserGroup) QueryUser() *UserQuery {
-	return NewUserGroupClient(ug.config).QueryUser(ug)
+func (_m *UserGroup) QueryUser() *UserQuery {
+	return NewUserGroupClient(_m.config).QueryUser(_m)
 }
 
 // QueryGroup queries the "group" edge of the UserGroup entity.
-func (ug *UserGroup) QueryGroup() *GroupQuery {
-	return NewUserGroupClient(ug.config).QueryGroup(ug)
+func (_m *UserGroup) QueryGroup() *GroupQuery {
+	return NewUserGroupClient(_m.config).QueryGroup(_m)
 }
 
 // Update returns a builder for updating this UserGroup.
 // Note that you need to call UserGroup.Unwrap() before calling this method if this UserGroup
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (ug *UserGroup) Update() *UserGroupUpdateOne {
-	return NewUserGroupClient(ug.config).UpdateOne(ug)
+func (_m *UserGroup) Update() *UserGroupUpdateOne {
+	return NewUserGroupClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the UserGroup entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (ug *UserGroup) Unwrap() *UserGroup {
-	_tx, ok := ug.config.driver.(*txDriver)
+func (_m *UserGroup) Unwrap() *UserGroup {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: UserGroup is not a transactional entity")
 	}
-	ug.config.driver = _tx.drv
-	return ug
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (ug *UserGroup) String() string {
+func (_m *UserGroup) String() string {
 	var builder strings.Builder
 	builder.WriteString("UserGroup(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", ug.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("joined_at=")
-	builder.WriteString(ug.JoinedAt.Format(time.ANSIC))
+	builder.WriteString(_m.JoinedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("user_id=")
-	builder.WriteString(fmt.Sprintf("%v", ug.UserID))
+	builder.WriteString(fmt.Sprintf("%v", _m.UserID))
 	builder.WriteString(", ")
 	builder.WriteString("group_id=")
-	builder.WriteString(fmt.Sprintf("%v", ug.GroupID))
+	builder.WriteString(fmt.Sprintf("%v", _m.GroupID))
 	builder.WriteByte(')')
 	return builder.String()
 }

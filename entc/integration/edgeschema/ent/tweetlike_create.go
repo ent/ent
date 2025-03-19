@@ -29,57 +29,57 @@ type TweetLikeCreate struct {
 }
 
 // SetLikedAt sets the "liked_at" field.
-func (tlc *TweetLikeCreate) SetLikedAt(t time.Time) *TweetLikeCreate {
-	tlc.mutation.SetLikedAt(t)
-	return tlc
+func (_c *TweetLikeCreate) SetLikedAt(t time.Time) *TweetLikeCreate {
+	_c.mutation.SetLikedAt(t)
+	return _c
 }
 
 // SetNillableLikedAt sets the "liked_at" field if the given value is not nil.
-func (tlc *TweetLikeCreate) SetNillableLikedAt(t *time.Time) *TweetLikeCreate {
+func (_c *TweetLikeCreate) SetNillableLikedAt(t *time.Time) *TweetLikeCreate {
 	if t != nil {
-		tlc.SetLikedAt(*t)
+		_c.SetLikedAt(*t)
 	}
-	return tlc
+	return _c
 }
 
 // SetUserID sets the "user_id" field.
-func (tlc *TweetLikeCreate) SetUserID(i int) *TweetLikeCreate {
-	tlc.mutation.SetUserID(i)
-	return tlc
+func (_c *TweetLikeCreate) SetUserID(i int) *TweetLikeCreate {
+	_c.mutation.SetUserID(i)
+	return _c
 }
 
 // SetTweetID sets the "tweet_id" field.
-func (tlc *TweetLikeCreate) SetTweetID(i int) *TweetLikeCreate {
-	tlc.mutation.SetTweetID(i)
-	return tlc
+func (_c *TweetLikeCreate) SetTweetID(i int) *TweetLikeCreate {
+	_c.mutation.SetTweetID(i)
+	return _c
 }
 
 // SetTweet sets the "tweet" edge to the Tweet entity.
-func (tlc *TweetLikeCreate) SetTweet(t *Tweet) *TweetLikeCreate {
-	return tlc.SetTweetID(t.ID)
+func (_c *TweetLikeCreate) SetTweet(t *Tweet) *TweetLikeCreate {
+	return _c.SetTweetID(t.ID)
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (tlc *TweetLikeCreate) SetUser(u *User) *TweetLikeCreate {
-	return tlc.SetUserID(u.ID)
+func (_c *TweetLikeCreate) SetUser(u *User) *TweetLikeCreate {
+	return _c.SetUserID(u.ID)
 }
 
 // Mutation returns the TweetLikeMutation object of the builder.
-func (tlc *TweetLikeCreate) Mutation() *TweetLikeMutation {
-	return tlc.mutation
+func (_c *TweetLikeCreate) Mutation() *TweetLikeMutation {
+	return _c.mutation
 }
 
 // Save creates the TweetLike in the database.
-func (tlc *TweetLikeCreate) Save(ctx context.Context) (*TweetLike, error) {
-	if err := tlc.defaults(); err != nil {
+func (_c *TweetLikeCreate) Save(ctx context.Context) (*TweetLike, error) {
+	if err := _c.defaults(); err != nil {
 		return nil, err
 	}
-	return withHooks(ctx, tlc.sqlSave, tlc.mutation, tlc.hooks)
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (tlc *TweetLikeCreate) SaveX(ctx context.Context) *TweetLike {
-	v, err := tlc.Save(ctx)
+func (_c *TweetLikeCreate) SaveX(ctx context.Context) *TweetLike {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -87,56 +87,56 @@ func (tlc *TweetLikeCreate) SaveX(ctx context.Context) *TweetLike {
 }
 
 // Exec executes the query.
-func (tlc *TweetLikeCreate) Exec(ctx context.Context) error {
-	_, err := tlc.Save(ctx)
+func (_c *TweetLikeCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tlc *TweetLikeCreate) ExecX(ctx context.Context) {
-	if err := tlc.Exec(ctx); err != nil {
+func (_c *TweetLikeCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (tlc *TweetLikeCreate) defaults() error {
-	if _, ok := tlc.mutation.LikedAt(); !ok {
+func (_c *TweetLikeCreate) defaults() error {
+	if _, ok := _c.mutation.LikedAt(); !ok {
 		if tweetlike.DefaultLikedAt == nil {
 			return fmt.Errorf("ent: uninitialized tweetlike.DefaultLikedAt (forgotten import ent/runtime?)")
 		}
 		v := tweetlike.DefaultLikedAt()
-		tlc.mutation.SetLikedAt(v)
+		_c.mutation.SetLikedAt(v)
 	}
 	return nil
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (tlc *TweetLikeCreate) check() error {
-	if _, ok := tlc.mutation.LikedAt(); !ok {
+func (_c *TweetLikeCreate) check() error {
+	if _, ok := _c.mutation.LikedAt(); !ok {
 		return &ValidationError{Name: "liked_at", err: errors.New(`ent: missing required field "TweetLike.liked_at"`)}
 	}
-	if _, ok := tlc.mutation.UserID(); !ok {
+	if _, ok := _c.mutation.UserID(); !ok {
 		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "TweetLike.user_id"`)}
 	}
-	if _, ok := tlc.mutation.TweetID(); !ok {
+	if _, ok := _c.mutation.TweetID(); !ok {
 		return &ValidationError{Name: "tweet_id", err: errors.New(`ent: missing required field "TweetLike.tweet_id"`)}
 	}
-	if len(tlc.mutation.TweetIDs()) == 0 {
+	if len(_c.mutation.TweetIDs()) == 0 {
 		return &ValidationError{Name: "tweet", err: errors.New(`ent: missing required edge "TweetLike.tweet"`)}
 	}
-	if len(tlc.mutation.UserIDs()) == 0 {
+	if len(_c.mutation.UserIDs()) == 0 {
 		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "TweetLike.user"`)}
 	}
 	return nil
 }
 
-func (tlc *TweetLikeCreate) sqlSave(ctx context.Context) (*TweetLike, error) {
-	if err := tlc.check(); err != nil {
+func (_c *TweetLikeCreate) sqlSave(ctx context.Context) (*TweetLike, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := tlc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, tlc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -145,17 +145,17 @@ func (tlc *TweetLikeCreate) sqlSave(ctx context.Context) (*TweetLike, error) {
 	return _node, nil
 }
 
-func (tlc *TweetLikeCreate) createSpec() (*TweetLike, *sqlgraph.CreateSpec) {
+func (_c *TweetLikeCreate) createSpec() (*TweetLike, *sqlgraph.CreateSpec) {
 	var (
-		_node = &TweetLike{config: tlc.config}
+		_node = &TweetLike{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(tweetlike.Table, nil)
 	)
-	_spec.OnConflict = tlc.conflict
-	if value, ok := tlc.mutation.LikedAt(); ok {
+	_spec.OnConflict = _c.conflict
+	if value, ok := _c.mutation.LikedAt(); ok {
 		_spec.SetField(tweetlike.FieldLikedAt, field.TypeTime, value)
 		_node.LikedAt = value
 	}
-	if nodes := tlc.mutation.TweetIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.TweetIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -172,7 +172,7 @@ func (tlc *TweetLikeCreate) createSpec() (*TweetLike, *sqlgraph.CreateSpec) {
 		_node.TweetID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := tlc.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: false,
@@ -208,10 +208,10 @@ func (tlc *TweetLikeCreate) createSpec() (*TweetLike, *sqlgraph.CreateSpec) {
 //			SetLikedAt(v+v).
 //		}).
 //		Exec(ctx)
-func (tlc *TweetLikeCreate) OnConflict(opts ...sql.ConflictOption) *TweetLikeUpsertOne {
-	tlc.conflict = opts
+func (_c *TweetLikeCreate) OnConflict(opts ...sql.ConflictOption) *TweetLikeUpsertOne {
+	_c.conflict = opts
 	return &TweetLikeUpsertOne{
-		create: tlc,
+		create: _c,
 	}
 }
 
@@ -221,10 +221,10 @@ func (tlc *TweetLikeCreate) OnConflict(opts ...sql.ConflictOption) *TweetLikeUps
 //	client.TweetLike.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (tlc *TweetLikeCreate) OnConflictColumns(columns ...string) *TweetLikeUpsertOne {
-	tlc.conflict = append(tlc.conflict, sql.ConflictColumns(columns...))
+func (_c *TweetLikeCreate) OnConflictColumns(columns ...string) *TweetLikeUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &TweetLikeUpsertOne{
-		create: tlc,
+		create: _c,
 	}
 }
 
@@ -383,16 +383,16 @@ type TweetLikeCreateBulk struct {
 }
 
 // Save creates the TweetLike entities in the database.
-func (tlcb *TweetLikeCreateBulk) Save(ctx context.Context) ([]*TweetLike, error) {
-	if tlcb.err != nil {
-		return nil, tlcb.err
+func (_c *TweetLikeCreateBulk) Save(ctx context.Context) ([]*TweetLike, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(tlcb.builders))
-	nodes := make([]*TweetLike, len(tlcb.builders))
-	mutators := make([]Mutator, len(tlcb.builders))
-	for i := range tlcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*TweetLike, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := tlcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TweetLikeMutation)
@@ -406,12 +406,12 @@ func (tlcb *TweetLikeCreateBulk) Save(ctx context.Context) ([]*TweetLike, error)
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, tlcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = tlcb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, tlcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -430,7 +430,7 @@ func (tlcb *TweetLikeCreateBulk) Save(ctx context.Context) ([]*TweetLike, error)
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, tlcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -438,8 +438,8 @@ func (tlcb *TweetLikeCreateBulk) Save(ctx context.Context) ([]*TweetLike, error)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (tlcb *TweetLikeCreateBulk) SaveX(ctx context.Context) []*TweetLike {
-	v, err := tlcb.Save(ctx)
+func (_c *TweetLikeCreateBulk) SaveX(ctx context.Context) []*TweetLike {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -447,14 +447,14 @@ func (tlcb *TweetLikeCreateBulk) SaveX(ctx context.Context) []*TweetLike {
 }
 
 // Exec executes the query.
-func (tlcb *TweetLikeCreateBulk) Exec(ctx context.Context) error {
-	_, err := tlcb.Save(ctx)
+func (_c *TweetLikeCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tlcb *TweetLikeCreateBulk) ExecX(ctx context.Context) {
-	if err := tlcb.Exec(ctx); err != nil {
+func (_c *TweetLikeCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -474,10 +474,10 @@ func (tlcb *TweetLikeCreateBulk) ExecX(ctx context.Context) {
 //			SetLikedAt(v+v).
 //		}).
 //		Exec(ctx)
-func (tlcb *TweetLikeCreateBulk) OnConflict(opts ...sql.ConflictOption) *TweetLikeUpsertBulk {
-	tlcb.conflict = opts
+func (_c *TweetLikeCreateBulk) OnConflict(opts ...sql.ConflictOption) *TweetLikeUpsertBulk {
+	_c.conflict = opts
 	return &TweetLikeUpsertBulk{
-		create: tlcb,
+		create: _c,
 	}
 }
 
@@ -487,10 +487,10 @@ func (tlcb *TweetLikeCreateBulk) OnConflict(opts ...sql.ConflictOption) *TweetLi
 //	client.TweetLike.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (tlcb *TweetLikeCreateBulk) OnConflictColumns(columns ...string) *TweetLikeUpsertBulk {
-	tlcb.conflict = append(tlcb.conflict, sql.ConflictColumns(columns...))
+func (_c *TweetLikeCreateBulk) OnConflictColumns(columns ...string) *TweetLikeUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &TweetLikeUpsertBulk{
-		create: tlcb,
+		create: _c,
 	}
 }
 

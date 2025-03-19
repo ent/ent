@@ -34,44 +34,44 @@ type FileTypeQuery struct {
 }
 
 // Where adds a new predicate for the FileTypeQuery builder.
-func (ftq *FileTypeQuery) Where(ps ...predicate.FileType) *FileTypeQuery {
-	ftq.predicates = append(ftq.predicates, ps...)
-	return ftq
+func (_q *FileTypeQuery) Where(ps ...predicate.FileType) *FileTypeQuery {
+	_q.predicates = append(_q.predicates, ps...)
+	return _q
 }
 
 // Limit the number of records to be returned by this query.
-func (ftq *FileTypeQuery) Limit(limit int) *FileTypeQuery {
-	ftq.ctx.Limit = &limit
-	return ftq
+func (_q *FileTypeQuery) Limit(limit int) *FileTypeQuery {
+	_q.ctx.Limit = &limit
+	return _q
 }
 
 // Offset to start from.
-func (ftq *FileTypeQuery) Offset(offset int) *FileTypeQuery {
-	ftq.ctx.Offset = &offset
-	return ftq
+func (_q *FileTypeQuery) Offset(offset int) *FileTypeQuery {
+	_q.ctx.Offset = &offset
+	return _q
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (ftq *FileTypeQuery) Unique(unique bool) *FileTypeQuery {
-	ftq.ctx.Unique = &unique
-	return ftq
+func (_q *FileTypeQuery) Unique(unique bool) *FileTypeQuery {
+	_q.ctx.Unique = &unique
+	return _q
 }
 
 // Order specifies how the records should be ordered.
-func (ftq *FileTypeQuery) Order(o ...filetype.OrderOption) *FileTypeQuery {
-	ftq.order = append(ftq.order, o...)
-	return ftq
+func (_q *FileTypeQuery) Order(o ...filetype.OrderOption) *FileTypeQuery {
+	_q.order = append(_q.order, o...)
+	return _q
 }
 
 // QueryFiles chains the current query on the "files" edge.
-func (ftq *FileTypeQuery) QueryFiles() *FileQuery {
-	query := (&FileClient{config: ftq.config}).Query()
+func (_q *FileTypeQuery) QueryFiles() *FileQuery {
+	query := (&FileClient{config: _q.config}).Query()
 	query.path = func(ctx context.Context) (fromU *dsl.Traversal, err error) {
-		if err := ftq.prepareQuery(ctx); err != nil {
+		if err := _q.prepareQuery(ctx); err != nil {
 			return nil, err
 		}
-		gremlin := ftq.gremlinQuery(ctx)
+		gremlin := _q.gremlinQuery(ctx)
 		fromU = gremlin.OutE(filetype.FilesLabel).InV()
 		return fromU, nil
 	}
@@ -80,8 +80,8 @@ func (ftq *FileTypeQuery) QueryFiles() *FileQuery {
 
 // First returns the first FileType entity from the query.
 // Returns a *NotFoundError when no FileType was found.
-func (ftq *FileTypeQuery) First(ctx context.Context) (*FileType, error) {
-	nodes, err := ftq.Limit(1).All(setContextOp(ctx, ftq.ctx, ent.OpQueryFirst))
+func (_q *FileTypeQuery) First(ctx context.Context) (*FileType, error) {
+	nodes, err := _q.Limit(1).All(setContextOp(ctx, _q.ctx, ent.OpQueryFirst))
 	if err != nil {
 		return nil, err
 	}
@@ -92,8 +92,8 @@ func (ftq *FileTypeQuery) First(ctx context.Context) (*FileType, error) {
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (ftq *FileTypeQuery) FirstX(ctx context.Context) *FileType {
-	node, err := ftq.First(ctx)
+func (_q *FileTypeQuery) FirstX(ctx context.Context) *FileType {
+	node, err := _q.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -102,9 +102,9 @@ func (ftq *FileTypeQuery) FirstX(ctx context.Context) *FileType {
 
 // FirstID returns the first FileType ID from the query.
 // Returns a *NotFoundError when no FileType ID was found.
-func (ftq *FileTypeQuery) FirstID(ctx context.Context) (id string, err error) {
+func (_q *FileTypeQuery) FirstID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = ftq.Limit(1).IDs(setContextOp(ctx, ftq.ctx, ent.OpQueryFirstID)); err != nil {
+	if ids, err = _q.Limit(1).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -115,8 +115,8 @@ func (ftq *FileTypeQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (ftq *FileTypeQuery) FirstIDX(ctx context.Context) string {
-	id, err := ftq.FirstID(ctx)
+func (_q *FileTypeQuery) FirstIDX(ctx context.Context) string {
+	id, err := _q.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
 	}
@@ -126,8 +126,8 @@ func (ftq *FileTypeQuery) FirstIDX(ctx context.Context) string {
 // Only returns a single FileType entity found by the query, ensuring it only returns one.
 // Returns a *NotSingularError when more than one FileType entity is found.
 // Returns a *NotFoundError when no FileType entities are found.
-func (ftq *FileTypeQuery) Only(ctx context.Context) (*FileType, error) {
-	nodes, err := ftq.Limit(2).All(setContextOp(ctx, ftq.ctx, ent.OpQueryOnly))
+func (_q *FileTypeQuery) Only(ctx context.Context) (*FileType, error) {
+	nodes, err := _q.Limit(2).All(setContextOp(ctx, _q.ctx, ent.OpQueryOnly))
 	if err != nil {
 		return nil, err
 	}
@@ -142,8 +142,8 @@ func (ftq *FileTypeQuery) Only(ctx context.Context) (*FileType, error) {
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (ftq *FileTypeQuery) OnlyX(ctx context.Context) *FileType {
-	node, err := ftq.Only(ctx)
+func (_q *FileTypeQuery) OnlyX(ctx context.Context) *FileType {
+	node, err := _q.Only(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -153,9 +153,9 @@ func (ftq *FileTypeQuery) OnlyX(ctx context.Context) *FileType {
 // OnlyID is like Only, but returns the only FileType ID in the query.
 // Returns a *NotSingularError when more than one FileType ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (ftq *FileTypeQuery) OnlyID(ctx context.Context) (id string, err error) {
+func (_q *FileTypeQuery) OnlyID(ctx context.Context) (id string, err error) {
 	var ids []string
-	if ids, err = ftq.Limit(2).IDs(setContextOp(ctx, ftq.ctx, ent.OpQueryOnlyID)); err != nil {
+	if ids, err = _q.Limit(2).IDs(setContextOp(ctx, _q.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -170,8 +170,8 @@ func (ftq *FileTypeQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (ftq *FileTypeQuery) OnlyIDX(ctx context.Context) string {
-	id, err := ftq.OnlyID(ctx)
+func (_q *FileTypeQuery) OnlyIDX(ctx context.Context) string {
+	id, err := _q.OnlyID(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -179,18 +179,18 @@ func (ftq *FileTypeQuery) OnlyIDX(ctx context.Context) string {
 }
 
 // All executes the query and returns a list of FileTypes.
-func (ftq *FileTypeQuery) All(ctx context.Context) ([]*FileType, error) {
-	ctx = setContextOp(ctx, ftq.ctx, ent.OpQueryAll)
-	if err := ftq.prepareQuery(ctx); err != nil {
+func (_q *FileTypeQuery) All(ctx context.Context) ([]*FileType, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryAll)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
 	qr := querierAll[[]*FileType, *FileTypeQuery]()
-	return withInterceptors[[]*FileType](ctx, ftq, qr, ftq.inters)
+	return withInterceptors[[]*FileType](ctx, _q, qr, _q.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
-func (ftq *FileTypeQuery) AllX(ctx context.Context) []*FileType {
-	nodes, err := ftq.All(ctx)
+func (_q *FileTypeQuery) AllX(ctx context.Context) []*FileType {
+	nodes, err := _q.All(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -198,20 +198,20 @@ func (ftq *FileTypeQuery) AllX(ctx context.Context) []*FileType {
 }
 
 // IDs executes the query and returns a list of FileType IDs.
-func (ftq *FileTypeQuery) IDs(ctx context.Context) (ids []string, err error) {
-	if ftq.ctx.Unique == nil && ftq.path != nil {
-		ftq.Unique(true)
+func (_q *FileTypeQuery) IDs(ctx context.Context) (ids []string, err error) {
+	if _q.ctx.Unique == nil && _q.path != nil {
+		_q.Unique(true)
 	}
-	ctx = setContextOp(ctx, ftq.ctx, ent.OpQueryIDs)
-	if err = ftq.Select(filetype.FieldID).Scan(ctx, &ids); err != nil {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryIDs)
+	if err = _q.Select(filetype.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (ftq *FileTypeQuery) IDsX(ctx context.Context) []string {
-	ids, err := ftq.IDs(ctx)
+func (_q *FileTypeQuery) IDsX(ctx context.Context) []string {
+	ids, err := _q.IDs(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -219,17 +219,17 @@ func (ftq *FileTypeQuery) IDsX(ctx context.Context) []string {
 }
 
 // Count returns the count of the given query.
-func (ftq *FileTypeQuery) Count(ctx context.Context) (int, error) {
-	ctx = setContextOp(ctx, ftq.ctx, ent.OpQueryCount)
-	if err := ftq.prepareQuery(ctx); err != nil {
+func (_q *FileTypeQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryCount)
+	if err := _q.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return withInterceptors[int](ctx, ftq, querierCount[*FileTypeQuery](), ftq.inters)
+	return withInterceptors[int](ctx, _q, querierCount[*FileTypeQuery](), _q.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (ftq *FileTypeQuery) CountX(ctx context.Context) int {
-	count, err := ftq.Count(ctx)
+func (_q *FileTypeQuery) CountX(ctx context.Context) int {
+	count, err := _q.Count(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -237,9 +237,9 @@ func (ftq *FileTypeQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (ftq *FileTypeQuery) Exist(ctx context.Context) (bool, error) {
-	ctx = setContextOp(ctx, ftq.ctx, ent.OpQueryExist)
-	switch _, err := ftq.FirstID(ctx); {
+func (_q *FileTypeQuery) Exist(ctx context.Context) (bool, error) {
+	ctx = setContextOp(ctx, _q.ctx, ent.OpQueryExist)
+	switch _, err := _q.FirstID(ctx); {
 	case IsNotFound(err):
 		return false, nil
 	case err != nil:
@@ -250,8 +250,8 @@ func (ftq *FileTypeQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (ftq *FileTypeQuery) ExistX(ctx context.Context) bool {
-	exist, err := ftq.Exist(ctx)
+func (_q *FileTypeQuery) ExistX(ctx context.Context) bool {
+	exist, err := _q.Exist(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -260,32 +260,32 @@ func (ftq *FileTypeQuery) ExistX(ctx context.Context) bool {
 
 // Clone returns a duplicate of the FileTypeQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (ftq *FileTypeQuery) Clone() *FileTypeQuery {
-	if ftq == nil {
+func (_q *FileTypeQuery) Clone() *FileTypeQuery {
+	if _q == nil {
 		return nil
 	}
 	return &FileTypeQuery{
-		config:     ftq.config,
-		ctx:        ftq.ctx.Clone(),
-		order:      append([]filetype.OrderOption{}, ftq.order...),
-		inters:     append([]Interceptor{}, ftq.inters...),
-		predicates: append([]predicate.FileType{}, ftq.predicates...),
-		withFiles:  ftq.withFiles.Clone(),
+		config:     _q.config,
+		ctx:        _q.ctx.Clone(),
+		order:      append([]filetype.OrderOption{}, _q.order...),
+		inters:     append([]Interceptor{}, _q.inters...),
+		predicates: append([]predicate.FileType{}, _q.predicates...),
+		withFiles:  _q.withFiles.Clone(),
 		// clone intermediate query.
-		gremlin: ftq.gremlin.Clone(),
-		path:    ftq.path,
+		gremlin: _q.gremlin.Clone(),
+		path:    _q.path,
 	}
 }
 
 // WithFiles tells the query-builder to eager-load the nodes that are connected to
 // the "files" edge. The optional arguments are used to configure the query builder of the edge.
-func (ftq *FileTypeQuery) WithFiles(opts ...func(*FileQuery)) *FileTypeQuery {
-	query := (&FileClient{config: ftq.config}).Query()
+func (_q *FileTypeQuery) WithFiles(opts ...func(*FileQuery)) *FileTypeQuery {
+	query := (&FileClient{config: _q.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	ftq.withFiles = query
-	return ftq
+	_q.withFiles = query
+	return _q
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -302,10 +302,10 @@ func (ftq *FileTypeQuery) WithFiles(opts ...func(*FileQuery)) *FileTypeQuery {
 //		GroupBy(filetype.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-func (ftq *FileTypeQuery) GroupBy(field string, fields ...string) *FileTypeGroupBy {
-	ftq.ctx.Fields = append([]string{field}, fields...)
-	grbuild := &FileTypeGroupBy{build: ftq}
-	grbuild.flds = &ftq.ctx.Fields
+func (_q *FileTypeQuery) GroupBy(field string, fields ...string) *FileTypeGroupBy {
+	_q.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &FileTypeGroupBy{build: _q}
+	grbuild.flds = &_q.ctx.Fields
 	grbuild.label = filetype.Label
 	grbuild.scan = grbuild.Scan
 	return grbuild
@@ -323,46 +323,46 @@ func (ftq *FileTypeQuery) GroupBy(field string, fields ...string) *FileTypeGroup
 //	client.FileType.Query().
 //		Select(filetype.FieldName).
 //		Scan(ctx, &v)
-func (ftq *FileTypeQuery) Select(fields ...string) *FileTypeSelect {
-	ftq.ctx.Fields = append(ftq.ctx.Fields, fields...)
-	sbuild := &FileTypeSelect{FileTypeQuery: ftq}
+func (_q *FileTypeQuery) Select(fields ...string) *FileTypeSelect {
+	_q.ctx.Fields = append(_q.ctx.Fields, fields...)
+	sbuild := &FileTypeSelect{FileTypeQuery: _q}
 	sbuild.label = filetype.Label
-	sbuild.flds, sbuild.scan = &ftq.ctx.Fields, sbuild.Scan
+	sbuild.flds, sbuild.scan = &_q.ctx.Fields, sbuild.Scan
 	return sbuild
 }
 
 // Aggregate returns a FileTypeSelect configured with the given aggregations.
-func (ftq *FileTypeQuery) Aggregate(fns ...AggregateFunc) *FileTypeSelect {
-	return ftq.Select().Aggregate(fns...)
+func (_q *FileTypeQuery) Aggregate(fns ...AggregateFunc) *FileTypeSelect {
+	return _q.Select().Aggregate(fns...)
 }
 
-func (ftq *FileTypeQuery) prepareQuery(ctx context.Context) error {
-	for _, inter := range ftq.inters {
+func (_q *FileTypeQuery) prepareQuery(ctx context.Context) error {
+	for _, inter := range _q.inters {
 		if inter == nil {
 			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
 		}
 		if trv, ok := inter.(Traverser); ok {
-			if err := trv.Traverse(ctx, ftq); err != nil {
+			if err := trv.Traverse(ctx, _q); err != nil {
 				return err
 			}
 		}
 	}
-	if ftq.path != nil {
-		prev, err := ftq.path(ctx)
+	if _q.path != nil {
+		prev, err := _q.path(ctx)
 		if err != nil {
 			return err
 		}
-		ftq.gremlin = prev
+		_q.gremlin = prev
 	}
 	return nil
 }
 
-func (ftq *FileTypeQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*FileType, error) {
+func (_q *FileTypeQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([]*FileType, error) {
 	res := &gremlin.Response{}
-	traversal := ftq.gremlinQuery(ctx)
-	if len(ftq.ctx.Fields) > 0 {
-		fields := make([]any, len(ftq.ctx.Fields))
-		for i, f := range ftq.ctx.Fields {
+	traversal := _q.gremlinQuery(ctx)
+	if len(_q.ctx.Fields) > 0 {
+		fields := make([]any, len(_q.ctx.Fields))
+		for i, f := range _q.ctx.Fields {
 			fields[i] = f
 		}
 		traversal.ValueMap(fields...)
@@ -370,43 +370,43 @@ func (ftq *FileTypeQuery) gremlinAll(ctx context.Context, hooks ...queryHook) ([
 		traversal.ValueMap(true)
 	}
 	query, bindings := traversal.Query()
-	if err := ftq.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return nil, err
 	}
-	var fts FileTypes
-	if err := fts.FromResponse(res); err != nil {
+	var _ms FileTypes
+	if err := _ms.FromResponse(res); err != nil {
 		return nil, err
 	}
-	for i := range fts {
-		fts[i].config = ftq.config
+	for i := range _ms {
+		_ms[i].config = _q.config
 	}
-	return fts, nil
+	return _ms, nil
 }
 
-func (ftq *FileTypeQuery) gremlinCount(ctx context.Context) (int, error) {
+func (_q *FileTypeQuery) gremlinCount(ctx context.Context) (int, error) {
 	res := &gremlin.Response{}
-	query, bindings := ftq.gremlinQuery(ctx).Count().Query()
-	if err := ftq.driver.Exec(ctx, query, bindings, res); err != nil {
+	query, bindings := _q.gremlinQuery(ctx).Count().Query()
+	if err := _q.driver.Exec(ctx, query, bindings, res); err != nil {
 		return 0, err
 	}
 	return res.ReadInt()
 }
 
-func (ftq *FileTypeQuery) gremlinQuery(context.Context) *dsl.Traversal {
+func (_q *FileTypeQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	v := g.V().HasLabel(filetype.Label)
-	if ftq.gremlin != nil {
-		v = ftq.gremlin.Clone()
+	if _q.gremlin != nil {
+		v = _q.gremlin.Clone()
 	}
-	for _, p := range ftq.predicates {
+	for _, p := range _q.predicates {
 		p(v)
 	}
-	if len(ftq.order) > 0 {
+	if len(_q.order) > 0 {
 		v.Order()
-		for _, p := range ftq.order {
+		for _, p := range _q.order {
 			p(v)
 		}
 	}
-	switch limit, offset := ftq.ctx.Limit, ftq.ctx.Offset; {
+	switch limit, offset := _q.ctx.Limit, _q.ctx.Offset; {
 	case limit != nil && offset != nil:
 		v.Range(*offset, *offset+*limit)
 	case offset != nil:
@@ -414,7 +414,7 @@ func (ftq *FileTypeQuery) gremlinQuery(context.Context) *dsl.Traversal {
 	case limit != nil:
 		v.Limit(*limit)
 	}
-	if unique := ftq.ctx.Unique; unique == nil || *unique {
+	if unique := _q.ctx.Unique; unique == nil || *unique {
 		v.Dedup()
 	}
 	return v

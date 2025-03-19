@@ -208,9 +208,9 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 				{{- range $n := $.Nodes }}
 					{{ $n.Name }}: tableSchemas[{{ indexOf $all $n.TableSchema }}],
 					{{- range $e := $n.Edges }}
-			    		{{- if and $e.M2M (not $e.Inverse) (not $e.Through) }}
-				    		{{ $n.Name }}{{ $e.StructField }}: tableSchemas[{{ indexOf $all $e.TableSchema }}],
-			    		{{- end }}
+							{{- if and $e.M2M (not $e.Inverse) (not $e.Through) }}
+								{{ $n.Name }}{{ $e.StructField }}: tableSchemas[{{ indexOf $all $e.TableSchema }}],
+							{{- end }}
 					{{- end }}
 				{{- end }}
 			}

@@ -75,7 +75,7 @@ func (*Card) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Card fields.
-func (c *Card) assignValues(columns []string, values []any) error {
+func (_m *Card) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -86,28 +86,28 @@ func (c *Card) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			c.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case card.FieldExpired:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field expired", values[i])
 			} else if value.Valid {
-				c.Expired = value.Time
+				_m.Expired = value.Time
 			}
 		case card.FieldNumber:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field number", values[i])
 			} else if value.Valid {
-				c.Number = value.String
+				_m.Number = value.String
 			}
 		case card.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field user_card", value)
 			} else if value.Valid {
-				c.user_card = new(int)
-				*c.user_card = int(value.Int64)
+				_m.user_card = new(int)
+				*_m.user_card = int(value.Int64)
 			}
 		default:
-			c.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -115,43 +115,43 @@ func (c *Card) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Card.
 // This includes values selected through modifiers, order, etc.
-func (c *Card) Value(name string) (ent.Value, error) {
-	return c.selectValues.Get(name)
+func (_m *Card) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryOwner queries the "owner" edge of the Card entity.
-func (c *Card) QueryOwner() *UserQuery {
-	return NewCardClient(c.config).QueryOwner(c)
+func (_m *Card) QueryOwner() *UserQuery {
+	return NewCardClient(_m.config).QueryOwner(_m)
 }
 
 // Update returns a builder for updating this Card.
 // Note that you need to call Card.Unwrap() before calling this method if this Card
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (c *Card) Update() *CardUpdateOne {
-	return NewCardClient(c.config).UpdateOne(c)
+func (_m *Card) Update() *CardUpdateOne {
+	return NewCardClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Card entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (c *Card) Unwrap() *Card {
-	_tx, ok := c.config.driver.(*txDriver)
+func (_m *Card) Unwrap() *Card {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Card is not a transactional entity")
 	}
-	c.config.driver = _tx.drv
-	return c
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (c *Card) String() string {
+func (_m *Card) String() string {
 	var builder strings.Builder
 	builder.WriteString("Card(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("expired=")
-	builder.WriteString(c.Expired.Format(time.ANSIC))
+	builder.WriteString(_m.Expired.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("number=")
-	builder.WriteString(c.Number)
+	builder.WriteString(_m.Number)
 	builder.WriteByte(')')
 	return builder.String()
 }
