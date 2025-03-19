@@ -17,7 +17,7 @@ var (
 )
 
 // checkColumn checks if the column exists in the given table.
-func checkColumn(table, column string) error {
+func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			{{- range $n := $.Nodes }}
@@ -25,7 +25,7 @@ func checkColumn(table, column string) error {
 			{{- end }}
 		})
 	})
-	return columnCheck(table, column)
+	return columnCheck(t, c)
 }
 {{- end }}
 
