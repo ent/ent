@@ -22,15 +22,15 @@ func init() {
 	// user.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	user.NameValidator = userDescName.Validators[0].(func(string) error)
 	// userDescOldToken is the schema descriptor for old_token field.
-	userDescOldToken := userFields[7].Descriptor()
+	userDescOldToken := userFields[8].Descriptor()
 	// user.DefaultOldToken holds the default value on creation for the old_token field.
 	user.DefaultOldToken = userDescOldToken.Default.(func() string)
 	// userDescBlob is the schema descriptor for blob field.
-	userDescBlob := userFields[8].Descriptor()
+	userDescBlob := userFields[9].Descriptor()
 	// user.BlobValidator is a validator for the "blob" field. It is called by the builders before save.
 	user.BlobValidator = userDescBlob.Validators[0].(func([]byte) error)
 	// userDescWorkplace is the schema descriptor for workplace field.
-	userDescWorkplace := userFields[11].Descriptor()
+	userDescWorkplace := userFields[12].Descriptor()
 	// user.WorkplaceValidator is a validator for the "workplace" field. It is called by the builders before save.
 	user.WorkplaceValidator = userDescWorkplace.Validators[0].(func(string) error)
 }
