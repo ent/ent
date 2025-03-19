@@ -37,43 +37,43 @@ func (_u *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 }
 
 // SetActive sets the "active" field.
-func (_u *GroupUpdate) SetActive(b bool) *GroupUpdate {
-	_u.mutation.SetActive(b)
+func (_u *GroupUpdate) SetActive(v bool) *GroupUpdate {
+	_u.mutation.SetActive(v)
 	return _u
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
-func (_u *GroupUpdate) SetNillableActive(b *bool) *GroupUpdate {
-	if b != nil {
-		_u.SetActive(*b)
+func (_u *GroupUpdate) SetNillableActive(v *bool) *GroupUpdate {
+	if v != nil {
+		_u.SetActive(*v)
 	}
 	return _u
 }
 
 // SetExpire sets the "expire" field.
-func (_u *GroupUpdate) SetExpire(t time.Time) *GroupUpdate {
-	_u.mutation.SetExpire(t)
+func (_u *GroupUpdate) SetExpire(v time.Time) *GroupUpdate {
+	_u.mutation.SetExpire(v)
 	return _u
 }
 
 // SetNillableExpire sets the "expire" field if the given value is not nil.
-func (_u *GroupUpdate) SetNillableExpire(t *time.Time) *GroupUpdate {
-	if t != nil {
-		_u.SetExpire(*t)
+func (_u *GroupUpdate) SetNillableExpire(v *time.Time) *GroupUpdate {
+	if v != nil {
+		_u.SetExpire(*v)
 	}
 	return _u
 }
 
 // SetType sets the "type" field.
-func (_u *GroupUpdate) SetType(s string) *GroupUpdate {
-	_u.mutation.SetType(s)
+func (_u *GroupUpdate) SetType(v string) *GroupUpdate {
+	_u.mutation.SetType(v)
 	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (_u *GroupUpdate) SetNillableType(s *string) *GroupUpdate {
-	if s != nil {
-		_u.SetType(*s)
+func (_u *GroupUpdate) SetNillableType(v *string) *GroupUpdate {
+	if v != nil {
+		_u.SetType(*v)
 	}
 	return _u
 }
@@ -85,23 +85,23 @@ func (_u *GroupUpdate) ClearType() *GroupUpdate {
 }
 
 // SetMaxUsers sets the "max_users" field.
-func (_u *GroupUpdate) SetMaxUsers(i int) *GroupUpdate {
+func (_u *GroupUpdate) SetMaxUsers(v int) *GroupUpdate {
 	_u.mutation.ResetMaxUsers()
-	_u.mutation.SetMaxUsers(i)
+	_u.mutation.SetMaxUsers(v)
 	return _u
 }
 
 // SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (_u *GroupUpdate) SetNillableMaxUsers(i *int) *GroupUpdate {
-	if i != nil {
-		_u.SetMaxUsers(*i)
+func (_u *GroupUpdate) SetNillableMaxUsers(v *int) *GroupUpdate {
+	if v != nil {
+		_u.SetMaxUsers(*v)
 	}
 	return _u
 }
 
-// AddMaxUsers adds i to the "max_users" field.
-func (_u *GroupUpdate) AddMaxUsers(i int) *GroupUpdate {
-	_u.mutation.AddMaxUsers(i)
+// AddMaxUsers adds value to the "max_users" field.
+func (_u *GroupUpdate) AddMaxUsers(v int) *GroupUpdate {
+	_u.mutation.AddMaxUsers(v)
 	return _u
 }
 
@@ -112,15 +112,15 @@ func (_u *GroupUpdate) ClearMaxUsers() *GroupUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *GroupUpdate) SetName(s string) *GroupUpdate {
-	_u.mutation.SetName(s)
+func (_u *GroupUpdate) SetName(v string) *GroupUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *GroupUpdate) SetNillableName(s *string) *GroupUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *GroupUpdate) SetNillableName(v *string) *GroupUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -132,10 +132,10 @@ func (_u *GroupUpdate) AddFileIDs(ids ...int) *GroupUpdate {
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (_u *GroupUpdate) AddFiles(f ...*File) *GroupUpdate {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *GroupUpdate) AddFiles(v ...*File) *GroupUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFileIDs(ids...)
 }
@@ -147,10 +147,10 @@ func (_u *GroupUpdate) AddBlockedIDs(ids ...int) *GroupUpdate {
 }
 
 // AddBlocked adds the "blocked" edges to the User entity.
-func (_u *GroupUpdate) AddBlocked(u ...*User) *GroupUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdate) AddBlocked(v ...*User) *GroupUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddBlockedIDs(ids...)
 }
@@ -162,10 +162,10 @@ func (_u *GroupUpdate) AddUserIDs(ids ...int) *GroupUpdate {
 }
 
 // AddUsers adds the "users" edges to the User entity.
-func (_u *GroupUpdate) AddUsers(u ...*User) *GroupUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdate) AddUsers(v ...*User) *GroupUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddUserIDs(ids...)
 }
@@ -177,8 +177,8 @@ func (_u *GroupUpdate) SetInfoID(id int) *GroupUpdate {
 }
 
 // SetInfo sets the "info" edge to the GroupInfo entity.
-func (_u *GroupUpdate) SetInfo(g *GroupInfo) *GroupUpdate {
-	return _u.SetInfoID(g.ID)
+func (_u *GroupUpdate) SetInfo(v *GroupInfo) *GroupUpdate {
+	return _u.SetInfoID(v.ID)
 }
 
 // Mutation returns the GroupMutation object of the builder.
@@ -199,10 +199,10 @@ func (_u *GroupUpdate) RemoveFileIDs(ids ...int) *GroupUpdate {
 }
 
 // RemoveFiles removes "files" edges to File entities.
-func (_u *GroupUpdate) RemoveFiles(f ...*File) *GroupUpdate {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *GroupUpdate) RemoveFiles(v ...*File) *GroupUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFileIDs(ids...)
 }
@@ -220,10 +220,10 @@ func (_u *GroupUpdate) RemoveBlockedIDs(ids ...int) *GroupUpdate {
 }
 
 // RemoveBlocked removes "blocked" edges to User entities.
-func (_u *GroupUpdate) RemoveBlocked(u ...*User) *GroupUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdate) RemoveBlocked(v ...*User) *GroupUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveBlockedIDs(ids...)
 }
@@ -241,10 +241,10 @@ func (_u *GroupUpdate) RemoveUserIDs(ids ...int) *GroupUpdate {
 }
 
 // RemoveUsers removes "users" edges to User entities.
-func (_u *GroupUpdate) RemoveUsers(u ...*User) *GroupUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdate) RemoveUsers(v ...*User) *GroupUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveUserIDs(ids...)
 }
@@ -311,9 +311,9 @@ func (_u *GroupUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *GroupUpd
 	return _u
 }
 
-func (_u *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *GroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(group.Table, group.Columns, sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -512,7 +512,7 @@ func (_u *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_spec.AddModifiers(_u.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{group.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -521,7 +521,7 @@ func (_u *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // GroupUpdateOne is the builder for updating a single Group entity.
@@ -534,43 +534,43 @@ type GroupUpdateOne struct {
 }
 
 // SetActive sets the "active" field.
-func (_u *GroupUpdateOne) SetActive(b bool) *GroupUpdateOne {
-	_u.mutation.SetActive(b)
+func (_u *GroupUpdateOne) SetActive(v bool) *GroupUpdateOne {
+	_u.mutation.SetActive(v)
 	return _u
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
-func (_u *GroupUpdateOne) SetNillableActive(b *bool) *GroupUpdateOne {
-	if b != nil {
-		_u.SetActive(*b)
+func (_u *GroupUpdateOne) SetNillableActive(v *bool) *GroupUpdateOne {
+	if v != nil {
+		_u.SetActive(*v)
 	}
 	return _u
 }
 
 // SetExpire sets the "expire" field.
-func (_u *GroupUpdateOne) SetExpire(t time.Time) *GroupUpdateOne {
-	_u.mutation.SetExpire(t)
+func (_u *GroupUpdateOne) SetExpire(v time.Time) *GroupUpdateOne {
+	_u.mutation.SetExpire(v)
 	return _u
 }
 
 // SetNillableExpire sets the "expire" field if the given value is not nil.
-func (_u *GroupUpdateOne) SetNillableExpire(t *time.Time) *GroupUpdateOne {
-	if t != nil {
-		_u.SetExpire(*t)
+func (_u *GroupUpdateOne) SetNillableExpire(v *time.Time) *GroupUpdateOne {
+	if v != nil {
+		_u.SetExpire(*v)
 	}
 	return _u
 }
 
 // SetType sets the "type" field.
-func (_u *GroupUpdateOne) SetType(s string) *GroupUpdateOne {
-	_u.mutation.SetType(s)
+func (_u *GroupUpdateOne) SetType(v string) *GroupUpdateOne {
+	_u.mutation.SetType(v)
 	return _u
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (_u *GroupUpdateOne) SetNillableType(s *string) *GroupUpdateOne {
-	if s != nil {
-		_u.SetType(*s)
+func (_u *GroupUpdateOne) SetNillableType(v *string) *GroupUpdateOne {
+	if v != nil {
+		_u.SetType(*v)
 	}
 	return _u
 }
@@ -582,23 +582,23 @@ func (_u *GroupUpdateOne) ClearType() *GroupUpdateOne {
 }
 
 // SetMaxUsers sets the "max_users" field.
-func (_u *GroupUpdateOne) SetMaxUsers(i int) *GroupUpdateOne {
+func (_u *GroupUpdateOne) SetMaxUsers(v int) *GroupUpdateOne {
 	_u.mutation.ResetMaxUsers()
-	_u.mutation.SetMaxUsers(i)
+	_u.mutation.SetMaxUsers(v)
 	return _u
 }
 
 // SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (_u *GroupUpdateOne) SetNillableMaxUsers(i *int) *GroupUpdateOne {
-	if i != nil {
-		_u.SetMaxUsers(*i)
+func (_u *GroupUpdateOne) SetNillableMaxUsers(v *int) *GroupUpdateOne {
+	if v != nil {
+		_u.SetMaxUsers(*v)
 	}
 	return _u
 }
 
-// AddMaxUsers adds i to the "max_users" field.
-func (_u *GroupUpdateOne) AddMaxUsers(i int) *GroupUpdateOne {
-	_u.mutation.AddMaxUsers(i)
+// AddMaxUsers adds value to the "max_users" field.
+func (_u *GroupUpdateOne) AddMaxUsers(v int) *GroupUpdateOne {
+	_u.mutation.AddMaxUsers(v)
 	return _u
 }
 
@@ -609,15 +609,15 @@ func (_u *GroupUpdateOne) ClearMaxUsers() *GroupUpdateOne {
 }
 
 // SetName sets the "name" field.
-func (_u *GroupUpdateOne) SetName(s string) *GroupUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *GroupUpdateOne) SetName(v string) *GroupUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *GroupUpdateOne) SetNillableName(s *string) *GroupUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *GroupUpdateOne) SetNillableName(v *string) *GroupUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -629,10 +629,10 @@ func (_u *GroupUpdateOne) AddFileIDs(ids ...int) *GroupUpdateOne {
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (_u *GroupUpdateOne) AddFiles(f ...*File) *GroupUpdateOne {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *GroupUpdateOne) AddFiles(v ...*File) *GroupUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFileIDs(ids...)
 }
@@ -644,10 +644,10 @@ func (_u *GroupUpdateOne) AddBlockedIDs(ids ...int) *GroupUpdateOne {
 }
 
 // AddBlocked adds the "blocked" edges to the User entity.
-func (_u *GroupUpdateOne) AddBlocked(u ...*User) *GroupUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdateOne) AddBlocked(v ...*User) *GroupUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddBlockedIDs(ids...)
 }
@@ -659,10 +659,10 @@ func (_u *GroupUpdateOne) AddUserIDs(ids ...int) *GroupUpdateOne {
 }
 
 // AddUsers adds the "users" edges to the User entity.
-func (_u *GroupUpdateOne) AddUsers(u ...*User) *GroupUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdateOne) AddUsers(v ...*User) *GroupUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddUserIDs(ids...)
 }
@@ -674,8 +674,8 @@ func (_u *GroupUpdateOne) SetInfoID(id int) *GroupUpdateOne {
 }
 
 // SetInfo sets the "info" edge to the GroupInfo entity.
-func (_u *GroupUpdateOne) SetInfo(g *GroupInfo) *GroupUpdateOne {
-	return _u.SetInfoID(g.ID)
+func (_u *GroupUpdateOne) SetInfo(v *GroupInfo) *GroupUpdateOne {
+	return _u.SetInfoID(v.ID)
 }
 
 // Mutation returns the GroupMutation object of the builder.
@@ -696,10 +696,10 @@ func (_u *GroupUpdateOne) RemoveFileIDs(ids ...int) *GroupUpdateOne {
 }
 
 // RemoveFiles removes "files" edges to File entities.
-func (_u *GroupUpdateOne) RemoveFiles(f ...*File) *GroupUpdateOne {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *GroupUpdateOne) RemoveFiles(v ...*File) *GroupUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFileIDs(ids...)
 }
@@ -717,10 +717,10 @@ func (_u *GroupUpdateOne) RemoveBlockedIDs(ids ...int) *GroupUpdateOne {
 }
 
 // RemoveBlocked removes "blocked" edges to User entities.
-func (_u *GroupUpdateOne) RemoveBlocked(u ...*User) *GroupUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdateOne) RemoveBlocked(v ...*User) *GroupUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveBlockedIDs(ids...)
 }
@@ -738,10 +738,10 @@ func (_u *GroupUpdateOne) RemoveUserIDs(ids ...int) *GroupUpdateOne {
 }
 
 // RemoveUsers removes "users" edges to User entities.
-func (_u *GroupUpdateOne) RemoveUsers(u ...*User) *GroupUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdateOne) RemoveUsers(v ...*User) *GroupUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveUserIDs(ids...)
 }

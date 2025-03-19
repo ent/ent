@@ -33,8 +33,8 @@ func (_u *LinkUpdate) Where(ps ...predicate.Link) *LinkUpdate {
 }
 
 // SetLinkInformation sets the "link_information" field.
-func (_u *LinkUpdate) SetLinkInformation(mi map[string]schema.LinkInformation) *LinkUpdate {
-	_u.mutation.SetLinkInformation(mi)
+func (_u *LinkUpdate) SetLinkInformation(v map[string]schema.LinkInformation) *LinkUpdate {
+	_u.mutation.SetLinkInformation(v)
 	return _u
 }
 
@@ -70,7 +70,7 @@ func (_u *LinkUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *LinkUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *LinkUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(link.Table, link.Columns, sqlgraph.NewFieldSpec(link.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -82,7 +82,7 @@ func (_u *LinkUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := _u.mutation.LinkInformation(); ok {
 		_spec.SetField(link.FieldLinkInformation, field.TypeJSON, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{link.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -91,7 +91,7 @@ func (_u *LinkUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // LinkUpdateOne is the builder for updating a single Link entity.
@@ -103,8 +103,8 @@ type LinkUpdateOne struct {
 }
 
 // SetLinkInformation sets the "link_information" field.
-func (_u *LinkUpdateOne) SetLinkInformation(mi map[string]schema.LinkInformation) *LinkUpdateOne {
-	_u.mutation.SetLinkInformation(mi)
+func (_u *LinkUpdateOne) SetLinkInformation(v map[string]schema.LinkInformation) *LinkUpdateOne {
+	_u.mutation.SetLinkInformation(v)
 	return _u
 }
 

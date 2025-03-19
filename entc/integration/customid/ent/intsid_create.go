@@ -27,8 +27,8 @@ type IntSIDCreate struct {
 }
 
 // SetID sets the "id" field.
-func (_c *IntSIDCreate) SetID(s sid.ID) *IntSIDCreate {
-	_c.mutation.SetID(s)
+func (_c *IntSIDCreate) SetID(v sid.ID) *IntSIDCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
@@ -47,8 +47,8 @@ func (_c *IntSIDCreate) SetNillableParentID(id *sid.ID) *IntSIDCreate {
 }
 
 // SetParent sets the "parent" edge to the IntSID entity.
-func (_c *IntSIDCreate) SetParent(i *IntSID) *IntSIDCreate {
-	return _c.SetParentID(i.ID)
+func (_c *IntSIDCreate) SetParent(v *IntSID) *IntSIDCreate {
+	return _c.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the IntSID entity by IDs.
@@ -58,10 +58,10 @@ func (_c *IntSIDCreate) AddChildIDs(ids ...sid.ID) *IntSIDCreate {
 }
 
 // AddChildren adds the "children" edges to the IntSID entity.
-func (_c *IntSIDCreate) AddChildren(i ...*IntSID) *IntSIDCreate {
-	ids := make([]sid.ID, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
+func (_c *IntSIDCreate) AddChildren(v ...*IntSID) *IntSIDCreate {
+	ids := make([]sid.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddChildIDs(ids...)
 }

@@ -27,254 +27,254 @@ type UserCreate struct {
 }
 
 // SetMixedString sets the "mixed_string" field.
-func (_c *UserCreate) SetMixedString(s string) *UserCreate {
-	_c.mutation.SetMixedString(s)
+func (_c *UserCreate) SetMixedString(v string) *UserCreate {
+	_c.mutation.SetMixedString(v)
 	return _c
 }
 
 // SetNillableMixedString sets the "mixed_string" field if the given value is not nil.
-func (_c *UserCreate) SetNillableMixedString(s *string) *UserCreate {
-	if s != nil {
-		_c.SetMixedString(*s)
+func (_c *UserCreate) SetNillableMixedString(v *string) *UserCreate {
+	if v != nil {
+		_c.SetMixedString(*v)
 	}
 	return _c
 }
 
 // SetMixedEnum sets the "mixed_enum" field.
-func (_c *UserCreate) SetMixedEnum(ue user.MixedEnum) *UserCreate {
-	_c.mutation.SetMixedEnum(ue)
+func (_c *UserCreate) SetMixedEnum(v user.MixedEnum) *UserCreate {
+	_c.mutation.SetMixedEnum(v)
 	return _c
 }
 
 // SetNillableMixedEnum sets the "mixed_enum" field if the given value is not nil.
-func (_c *UserCreate) SetNillableMixedEnum(ue *user.MixedEnum) *UserCreate {
-	if ue != nil {
-		_c.SetMixedEnum(*ue)
+func (_c *UserCreate) SetNillableMixedEnum(v *user.MixedEnum) *UserCreate {
+	if v != nil {
+		_c.SetMixedEnum(*v)
 	}
 	return _c
 }
 
 // SetActive sets the "active" field.
-func (_c *UserCreate) SetActive(b bool) *UserCreate {
-	_c.mutation.SetActive(b)
+func (_c *UserCreate) SetActive(v bool) *UserCreate {
+	_c.mutation.SetActive(v)
 	return _c
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
-func (_c *UserCreate) SetNillableActive(b *bool) *UserCreate {
-	if b != nil {
-		_c.SetActive(*b)
+func (_c *UserCreate) SetNillableActive(v *bool) *UserCreate {
+	if v != nil {
+		_c.SetActive(*v)
 	}
 	return _c
 }
 
 // SetAge sets the "age" field.
-func (_c *UserCreate) SetAge(i int) *UserCreate {
-	_c.mutation.SetAge(i)
+func (_c *UserCreate) SetAge(v int) *UserCreate {
+	_c.mutation.SetAge(v)
 	return _c
 }
 
 // SetName sets the "name" field.
-func (_c *UserCreate) SetName(s string) *UserCreate {
-	_c.mutation.SetName(s)
+func (_c *UserCreate) SetName(v string) *UserCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetDescription sets the "description" field.
-func (_c *UserCreate) SetDescription(s string) *UserCreate {
-	_c.mutation.SetDescription(s)
+func (_c *UserCreate) SetDescription(v string) *UserCreate {
+	_c.mutation.SetDescription(v)
 	return _c
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (_c *UserCreate) SetNillableDescription(s *string) *UserCreate {
-	if s != nil {
-		_c.SetDescription(*s)
+func (_c *UserCreate) SetNillableDescription(v *string) *UserCreate {
+	if v != nil {
+		_c.SetDescription(*v)
 	}
 	return _c
 }
 
 // SetNickname sets the "nickname" field.
-func (_c *UserCreate) SetNickname(s string) *UserCreate {
-	_c.mutation.SetNickname(s)
+func (_c *UserCreate) SetNickname(v string) *UserCreate {
+	_c.mutation.SetNickname(v)
 	return _c
 }
 
 // SetPhone sets the "phone" field.
-func (_c *UserCreate) SetPhone(s string) *UserCreate {
-	_c.mutation.SetPhone(s)
+func (_c *UserCreate) SetPhone(v string) *UserCreate {
+	_c.mutation.SetPhone(v)
 	return _c
 }
 
 // SetNillablePhone sets the "phone" field if the given value is not nil.
-func (_c *UserCreate) SetNillablePhone(s *string) *UserCreate {
-	if s != nil {
-		_c.SetPhone(*s)
+func (_c *UserCreate) SetNillablePhone(v *string) *UserCreate {
+	if v != nil {
+		_c.SetPhone(*v)
 	}
 	return _c
 }
 
 // SetBuffer sets the "buffer" field.
-func (_c *UserCreate) SetBuffer(b []byte) *UserCreate {
-	_c.mutation.SetBuffer(b)
+func (_c *UserCreate) SetBuffer(v []byte) *UserCreate {
+	_c.mutation.SetBuffer(v)
 	return _c
 }
 
 // SetTitle sets the "title" field.
-func (_c *UserCreate) SetTitle(s string) *UserCreate {
-	_c.mutation.SetTitle(s)
+func (_c *UserCreate) SetTitle(v string) *UserCreate {
+	_c.mutation.SetTitle(v)
 	return _c
 }
 
 // SetNillableTitle sets the "title" field if the given value is not nil.
-func (_c *UserCreate) SetNillableTitle(s *string) *UserCreate {
-	if s != nil {
-		_c.SetTitle(*s)
+func (_c *UserCreate) SetNillableTitle(v *string) *UserCreate {
+	if v != nil {
+		_c.SetTitle(*v)
 	}
 	return _c
 }
 
 // SetNewName sets the "new_name" field.
-func (_c *UserCreate) SetNewName(s string) *UserCreate {
-	_c.mutation.SetNewName(s)
+func (_c *UserCreate) SetNewName(v string) *UserCreate {
+	_c.mutation.SetNewName(v)
 	return _c
 }
 
 // SetNillableNewName sets the "new_name" field if the given value is not nil.
-func (_c *UserCreate) SetNillableNewName(s *string) *UserCreate {
-	if s != nil {
-		_c.SetNewName(*s)
+func (_c *UserCreate) SetNillableNewName(v *string) *UserCreate {
+	if v != nil {
+		_c.SetNewName(*v)
 	}
 	return _c
 }
 
 // SetNewToken sets the "new_token" field.
-func (_c *UserCreate) SetNewToken(s string) *UserCreate {
-	_c.mutation.SetNewToken(s)
+func (_c *UserCreate) SetNewToken(v string) *UserCreate {
+	_c.mutation.SetNewToken(v)
 	return _c
 }
 
 // SetNillableNewToken sets the "new_token" field if the given value is not nil.
-func (_c *UserCreate) SetNillableNewToken(s *string) *UserCreate {
-	if s != nil {
-		_c.SetNewToken(*s)
+func (_c *UserCreate) SetNillableNewToken(v *string) *UserCreate {
+	if v != nil {
+		_c.SetNewToken(*v)
 	}
 	return _c
 }
 
 // SetBlob sets the "blob" field.
-func (_c *UserCreate) SetBlob(b []byte) *UserCreate {
-	_c.mutation.SetBlob(b)
+func (_c *UserCreate) SetBlob(v []byte) *UserCreate {
+	_c.mutation.SetBlob(v)
 	return _c
 }
 
 // SetState sets the "state" field.
-func (_c *UserCreate) SetState(u user.State) *UserCreate {
-	_c.mutation.SetState(u)
+func (_c *UserCreate) SetState(v user.State) *UserCreate {
+	_c.mutation.SetState(v)
 	return _c
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
-func (_c *UserCreate) SetNillableState(u *user.State) *UserCreate {
-	if u != nil {
-		_c.SetState(*u)
+func (_c *UserCreate) SetNillableState(v *user.State) *UserCreate {
+	if v != nil {
+		_c.SetState(*v)
 	}
 	return _c
 }
 
 // SetStatus sets the "status" field.
-func (_c *UserCreate) SetStatus(u user.Status) *UserCreate {
-	_c.mutation.SetStatus(u)
+func (_c *UserCreate) SetStatus(v user.Status) *UserCreate {
+	_c.mutation.SetStatus(v)
 	return _c
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_c *UserCreate) SetNillableStatus(u *user.Status) *UserCreate {
-	if u != nil {
-		_c.SetStatus(*u)
+func (_c *UserCreate) SetNillableStatus(v *user.Status) *UserCreate {
+	if v != nil {
+		_c.SetStatus(*v)
 	}
 	return _c
 }
 
 // SetWorkplace sets the "workplace" field.
-func (_c *UserCreate) SetWorkplace(s string) *UserCreate {
-	_c.mutation.SetWorkplace(s)
+func (_c *UserCreate) SetWorkplace(v string) *UserCreate {
+	_c.mutation.SetWorkplace(v)
 	return _c
 }
 
 // SetNillableWorkplace sets the "workplace" field if the given value is not nil.
-func (_c *UserCreate) SetNillableWorkplace(s *string) *UserCreate {
-	if s != nil {
-		_c.SetWorkplace(*s)
+func (_c *UserCreate) SetNillableWorkplace(v *string) *UserCreate {
+	if v != nil {
+		_c.SetWorkplace(*v)
 	}
 	return _c
 }
 
 // SetRoles sets the "roles" field.
-func (_c *UserCreate) SetRoles(s []string) *UserCreate {
-	_c.mutation.SetRoles(s)
+func (_c *UserCreate) SetRoles(v []string) *UserCreate {
+	_c.mutation.SetRoles(v)
 	return _c
 }
 
 // SetDefaultExpr sets the "default_expr" field.
-func (_c *UserCreate) SetDefaultExpr(s string) *UserCreate {
-	_c.mutation.SetDefaultExpr(s)
+func (_c *UserCreate) SetDefaultExpr(v string) *UserCreate {
+	_c.mutation.SetDefaultExpr(v)
 	return _c
 }
 
 // SetNillableDefaultExpr sets the "default_expr" field if the given value is not nil.
-func (_c *UserCreate) SetNillableDefaultExpr(s *string) *UserCreate {
-	if s != nil {
-		_c.SetDefaultExpr(*s)
+func (_c *UserCreate) SetNillableDefaultExpr(v *string) *UserCreate {
+	if v != nil {
+		_c.SetDefaultExpr(*v)
 	}
 	return _c
 }
 
 // SetDefaultExprs sets the "default_exprs" field.
-func (_c *UserCreate) SetDefaultExprs(s string) *UserCreate {
-	_c.mutation.SetDefaultExprs(s)
+func (_c *UserCreate) SetDefaultExprs(v string) *UserCreate {
+	_c.mutation.SetDefaultExprs(v)
 	return _c
 }
 
 // SetNillableDefaultExprs sets the "default_exprs" field if the given value is not nil.
-func (_c *UserCreate) SetNillableDefaultExprs(s *string) *UserCreate {
-	if s != nil {
-		_c.SetDefaultExprs(*s)
+func (_c *UserCreate) SetNillableDefaultExprs(v *string) *UserCreate {
+	if v != nil {
+		_c.SetDefaultExprs(*v)
 	}
 	return _c
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *UserCreate) SetCreatedAt(t time.Time) *UserCreate {
-	_c.mutation.SetCreatedAt(t)
+func (_c *UserCreate) SetCreatedAt(v time.Time) *UserCreate {
+	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *UserCreate) SetNillableCreatedAt(t *time.Time) *UserCreate {
-	if t != nil {
-		_c.SetCreatedAt(*t)
+func (_c *UserCreate) SetNillableCreatedAt(v *time.Time) *UserCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
 	return _c
 }
 
 // SetDropOptional sets the "drop_optional" field.
-func (_c *UserCreate) SetDropOptional(s string) *UserCreate {
-	_c.mutation.SetDropOptional(s)
+func (_c *UserCreate) SetDropOptional(v string) *UserCreate {
+	_c.mutation.SetDropOptional(v)
 	return _c
 }
 
 // SetNillableDropOptional sets the "drop_optional" field if the given value is not nil.
-func (_c *UserCreate) SetNillableDropOptional(s *string) *UserCreate {
-	if s != nil {
-		_c.SetDropOptional(*s)
+func (_c *UserCreate) SetNillableDropOptional(v *string) *UserCreate {
+	if v != nil {
+		_c.SetDropOptional(*v)
 	}
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *UserCreate) SetID(i int) *UserCreate {
-	_c.mutation.SetID(i)
+func (_c *UserCreate) SetID(v int) *UserCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
@@ -285,10 +285,10 @@ func (_c *UserCreate) AddCarIDs(ids ...int) *UserCreate {
 }
 
 // AddCar adds the "car" edges to the Car entity.
-func (_c *UserCreate) AddCar(c ...*Car) *UserCreate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_c *UserCreate) AddCar(v ...*Car) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddCarIDs(ids...)
 }
@@ -308,8 +308,8 @@ func (_c *UserCreate) SetNillablePetsID(id *int) *UserCreate {
 }
 
 // SetPets sets the "pets" edge to the Pet entity.
-func (_c *UserCreate) SetPets(p *Pet) *UserCreate {
-	return _c.SetPetsID(p.ID)
+func (_c *UserCreate) SetPets(v *Pet) *UserCreate {
+	return _c.SetPetsID(v.ID)
 }
 
 // AddFriendIDs adds the "friends" edge to the User entity by IDs.
@@ -319,10 +319,10 @@ func (_c *UserCreate) AddFriendIDs(ids ...int) *UserCreate {
 }
 
 // AddFriends adds the "friends" edges to the User entity.
-func (_c *UserCreate) AddFriends(u ...*User) *UserCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *UserCreate) AddFriends(v ...*User) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddFriendIDs(ids...)
 }

@@ -32,23 +32,23 @@ func (_u *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 }
 
 // SetMaxUsers sets the "max_users" field.
-func (_u *GroupUpdate) SetMaxUsers(i int) *GroupUpdate {
+func (_u *GroupUpdate) SetMaxUsers(v int) *GroupUpdate {
 	_u.mutation.ResetMaxUsers()
-	_u.mutation.SetMaxUsers(i)
+	_u.mutation.SetMaxUsers(v)
 	return _u
 }
 
 // SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (_u *GroupUpdate) SetNillableMaxUsers(i *int) *GroupUpdate {
-	if i != nil {
-		_u.SetMaxUsers(*i)
+func (_u *GroupUpdate) SetNillableMaxUsers(v *int) *GroupUpdate {
+	if v != nil {
+		_u.SetMaxUsers(*v)
 	}
 	return _u
 }
 
-// AddMaxUsers adds i to the "max_users" field.
-func (_u *GroupUpdate) AddMaxUsers(i int) *GroupUpdate {
-	_u.mutation.AddMaxUsers(i)
+// AddMaxUsers adds value to the "max_users" field.
+func (_u *GroupUpdate) AddMaxUsers(v int) *GroupUpdate {
+	_u.mutation.AddMaxUsers(v)
 	return _u
 }
 
@@ -84,7 +84,7 @@ func (_u *GroupUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *GroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(group.Table, group.Columns, sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -99,7 +99,7 @@ func (_u *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := _u.mutation.AddedMaxUsers(); ok {
 		_spec.AddField(group.FieldMaxUsers, field.TypeInt, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{group.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -108,7 +108,7 @@ func (_u *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // GroupUpdateOne is the builder for updating a single Group entity.
@@ -120,23 +120,23 @@ type GroupUpdateOne struct {
 }
 
 // SetMaxUsers sets the "max_users" field.
-func (_u *GroupUpdateOne) SetMaxUsers(i int) *GroupUpdateOne {
+func (_u *GroupUpdateOne) SetMaxUsers(v int) *GroupUpdateOne {
 	_u.mutation.ResetMaxUsers()
-	_u.mutation.SetMaxUsers(i)
+	_u.mutation.SetMaxUsers(v)
 	return _u
 }
 
 // SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (_u *GroupUpdateOne) SetNillableMaxUsers(i *int) *GroupUpdateOne {
-	if i != nil {
-		_u.SetMaxUsers(*i)
+func (_u *GroupUpdateOne) SetNillableMaxUsers(v *int) *GroupUpdateOne {
+	if v != nil {
+		_u.SetMaxUsers(*v)
 	}
 	return _u
 }
 
-// AddMaxUsers adds i to the "max_users" field.
-func (_u *GroupUpdateOne) AddMaxUsers(i int) *GroupUpdateOne {
-	_u.mutation.AddMaxUsers(i)
+// AddMaxUsers adds value to the "max_users" field.
+func (_u *GroupUpdateOne) AddMaxUsers(v int) *GroupUpdateOne {
+	_u.mutation.AddMaxUsers(v)
 	return _u
 }
 

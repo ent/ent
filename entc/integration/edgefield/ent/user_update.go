@@ -37,15 +37,15 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 }
 
 // SetSpouseID sets the "spouse_id" field.
-func (_u *UserUpdate) SetSpouseID(i int) *UserUpdate {
-	_u.mutation.SetSpouseID(i)
+func (_u *UserUpdate) SetSpouseID(v int) *UserUpdate {
+	_u.mutation.SetSpouseID(v)
 	return _u
 }
 
 // SetNillableSpouseID sets the "spouse_id" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableSpouseID(i *int) *UserUpdate {
-	if i != nil {
-		_u.SetSpouseID(*i)
+func (_u *UserUpdate) SetNillableSpouseID(v *int) *UserUpdate {
+	if v != nil {
+		_u.SetSpouseID(*v)
 	}
 	return _u
 }
@@ -63,10 +63,10 @@ func (_u *UserUpdate) AddPetIDs(ids ...int) *UserUpdate {
 }
 
 // AddPets adds the "pets" edges to the Pet entity.
-func (_u *UserUpdate) AddPets(p ...*Pet) *UserUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *UserUpdate) AddPets(v ...*Pet) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddPetIDs(ids...)
 }
@@ -78,17 +78,17 @@ func (_u *UserUpdate) AddChildIDs(ids ...int) *UserUpdate {
 }
 
 // AddChildren adds the "children" edges to the User entity.
-func (_u *UserUpdate) AddChildren(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) AddChildren(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
 
 // SetSpouse sets the "spouse" edge to the User entity.
-func (_u *UserUpdate) SetSpouse(u *User) *UserUpdate {
-	return _u.SetSpouseID(u.ID)
+func (_u *UserUpdate) SetSpouse(v *User) *UserUpdate {
+	return _u.SetSpouseID(v.ID)
 }
 
 // SetCardID sets the "card" edge to the Card entity by ID.
@@ -106,8 +106,8 @@ func (_u *UserUpdate) SetNillableCardID(id *int) *UserUpdate {
 }
 
 // SetCard sets the "card" edge to the Card entity.
-func (_u *UserUpdate) SetCard(c *Card) *UserUpdate {
-	return _u.SetCardID(c.ID)
+func (_u *UserUpdate) SetCard(v *Card) *UserUpdate {
+	return _u.SetCardID(v.ID)
 }
 
 // SetMetadataID sets the "metadata" edge to the Metadata entity by ID.
@@ -125,8 +125,8 @@ func (_u *UserUpdate) SetNillableMetadataID(id *int) *UserUpdate {
 }
 
 // SetMetadata sets the "metadata" edge to the Metadata entity.
-func (_u *UserUpdate) SetMetadata(m *Metadata) *UserUpdate {
-	return _u.SetMetadataID(m.ID)
+func (_u *UserUpdate) SetMetadata(v *Metadata) *UserUpdate {
+	return _u.SetMetadataID(v.ID)
 }
 
 // AddInfoIDs adds the "info" edge to the Info entity by IDs.
@@ -136,10 +136,10 @@ func (_u *UserUpdate) AddInfoIDs(ids ...int) *UserUpdate {
 }
 
 // AddInfo adds the "info" edges to the Info entity.
-func (_u *UserUpdate) AddInfo(i ...*Info) *UserUpdate {
-	ids := make([]int, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
+func (_u *UserUpdate) AddInfo(v ...*Info) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddInfoIDs(ids...)
 }
@@ -151,10 +151,10 @@ func (_u *UserUpdate) AddRentalIDs(ids ...int) *UserUpdate {
 }
 
 // AddRentals adds the "rentals" edges to the Rental entity.
-func (_u *UserUpdate) AddRentals(r ...*Rental) *UserUpdate {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *UserUpdate) AddRentals(v ...*Rental) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddRentalIDs(ids...)
 }
@@ -177,10 +177,10 @@ func (_u *UserUpdate) RemovePetIDs(ids ...int) *UserUpdate {
 }
 
 // RemovePets removes "pets" edges to Pet entities.
-func (_u *UserUpdate) RemovePets(p ...*Pet) *UserUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *UserUpdate) RemovePets(v ...*Pet) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemovePetIDs(ids...)
 }
@@ -198,10 +198,10 @@ func (_u *UserUpdate) RemoveChildIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveChildren removes "children" edges to User entities.
-func (_u *UserUpdate) RemoveChildren(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) RemoveChildren(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }
@@ -237,10 +237,10 @@ func (_u *UserUpdate) RemoveInfoIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveInfo removes "info" edges to Info entities.
-func (_u *UserUpdate) RemoveInfo(i ...*Info) *UserUpdate {
-	ids := make([]int, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
+func (_u *UserUpdate) RemoveInfo(v ...*Info) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveInfoIDs(ids...)
 }
@@ -258,10 +258,10 @@ func (_u *UserUpdate) RemoveRentalIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveRentals removes "rentals" edges to Rental entities.
-func (_u *UserUpdate) RemoveRentals(r ...*Rental) *UserUpdate {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *UserUpdate) RemoveRentals(v ...*Rental) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveRentalIDs(ids...)
 }
@@ -293,7 +293,7 @@ func (_u *UserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -569,7 +569,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -578,7 +578,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -590,15 +590,15 @@ type UserUpdateOne struct {
 }
 
 // SetSpouseID sets the "spouse_id" field.
-func (_u *UserUpdateOne) SetSpouseID(i int) *UserUpdateOne {
-	_u.mutation.SetSpouseID(i)
+func (_u *UserUpdateOne) SetSpouseID(v int) *UserUpdateOne {
+	_u.mutation.SetSpouseID(v)
 	return _u
 }
 
 // SetNillableSpouseID sets the "spouse_id" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableSpouseID(i *int) *UserUpdateOne {
-	if i != nil {
-		_u.SetSpouseID(*i)
+func (_u *UserUpdateOne) SetNillableSpouseID(v *int) *UserUpdateOne {
+	if v != nil {
+		_u.SetSpouseID(*v)
 	}
 	return _u
 }
@@ -616,10 +616,10 @@ func (_u *UserUpdateOne) AddPetIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddPets adds the "pets" edges to the Pet entity.
-func (_u *UserUpdateOne) AddPets(p ...*Pet) *UserUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *UserUpdateOne) AddPets(v ...*Pet) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddPetIDs(ids...)
 }
@@ -631,17 +631,17 @@ func (_u *UserUpdateOne) AddChildIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddChildren adds the "children" edges to the User entity.
-func (_u *UserUpdateOne) AddChildren(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) AddChildren(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
 
 // SetSpouse sets the "spouse" edge to the User entity.
-func (_u *UserUpdateOne) SetSpouse(u *User) *UserUpdateOne {
-	return _u.SetSpouseID(u.ID)
+func (_u *UserUpdateOne) SetSpouse(v *User) *UserUpdateOne {
+	return _u.SetSpouseID(v.ID)
 }
 
 // SetCardID sets the "card" edge to the Card entity by ID.
@@ -659,8 +659,8 @@ func (_u *UserUpdateOne) SetNillableCardID(id *int) *UserUpdateOne {
 }
 
 // SetCard sets the "card" edge to the Card entity.
-func (_u *UserUpdateOne) SetCard(c *Card) *UserUpdateOne {
-	return _u.SetCardID(c.ID)
+func (_u *UserUpdateOne) SetCard(v *Card) *UserUpdateOne {
+	return _u.SetCardID(v.ID)
 }
 
 // SetMetadataID sets the "metadata" edge to the Metadata entity by ID.
@@ -678,8 +678,8 @@ func (_u *UserUpdateOne) SetNillableMetadataID(id *int) *UserUpdateOne {
 }
 
 // SetMetadata sets the "metadata" edge to the Metadata entity.
-func (_u *UserUpdateOne) SetMetadata(m *Metadata) *UserUpdateOne {
-	return _u.SetMetadataID(m.ID)
+func (_u *UserUpdateOne) SetMetadata(v *Metadata) *UserUpdateOne {
+	return _u.SetMetadataID(v.ID)
 }
 
 // AddInfoIDs adds the "info" edge to the Info entity by IDs.
@@ -689,10 +689,10 @@ func (_u *UserUpdateOne) AddInfoIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddInfo adds the "info" edges to the Info entity.
-func (_u *UserUpdateOne) AddInfo(i ...*Info) *UserUpdateOne {
-	ids := make([]int, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
+func (_u *UserUpdateOne) AddInfo(v ...*Info) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddInfoIDs(ids...)
 }
@@ -704,10 +704,10 @@ func (_u *UserUpdateOne) AddRentalIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddRentals adds the "rentals" edges to the Rental entity.
-func (_u *UserUpdateOne) AddRentals(r ...*Rental) *UserUpdateOne {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *UserUpdateOne) AddRentals(v ...*Rental) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddRentalIDs(ids...)
 }
@@ -730,10 +730,10 @@ func (_u *UserUpdateOne) RemovePetIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemovePets removes "pets" edges to Pet entities.
-func (_u *UserUpdateOne) RemovePets(p ...*Pet) *UserUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *UserUpdateOne) RemovePets(v ...*Pet) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemovePetIDs(ids...)
 }
@@ -751,10 +751,10 @@ func (_u *UserUpdateOne) RemoveChildIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveChildren removes "children" edges to User entities.
-func (_u *UserUpdateOne) RemoveChildren(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) RemoveChildren(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }
@@ -790,10 +790,10 @@ func (_u *UserUpdateOne) RemoveInfoIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveInfo removes "info" edges to Info entities.
-func (_u *UserUpdateOne) RemoveInfo(i ...*Info) *UserUpdateOne {
-	ids := make([]int, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
+func (_u *UserUpdateOne) RemoveInfo(v ...*Info) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveInfoIDs(ids...)
 }
@@ -811,10 +811,10 @@ func (_u *UserUpdateOne) RemoveRentalIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveRentals removes "rentals" edges to Rental entities.
-func (_u *UserUpdateOne) RemoveRentals(r ...*Rental) *UserUpdateOne {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *UserUpdateOne) RemoveRentals(v ...*Rental) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveRentalIDs(ids...)
 }

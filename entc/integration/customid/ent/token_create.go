@@ -29,21 +29,21 @@ type TokenCreate struct {
 }
 
 // SetBody sets the "body" field.
-func (_c *TokenCreate) SetBody(s string) *TokenCreate {
-	_c.mutation.SetBody(s)
+func (_c *TokenCreate) SetBody(v string) *TokenCreate {
+	_c.mutation.SetBody(v)
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *TokenCreate) SetID(s sid.ID) *TokenCreate {
-	_c.mutation.SetID(s)
+func (_c *TokenCreate) SetID(v sid.ID) *TokenCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *TokenCreate) SetNillableID(s *sid.ID) *TokenCreate {
-	if s != nil {
-		_c.SetID(*s)
+func (_c *TokenCreate) SetNillableID(v *sid.ID) *TokenCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
 	return _c
 }
@@ -55,8 +55,8 @@ func (_c *TokenCreate) SetAccountID(id sid.ID) *TokenCreate {
 }
 
 // SetAccount sets the "account" edge to the Account entity.
-func (_c *TokenCreate) SetAccount(a *Account) *TokenCreate {
-	return _c.SetAccountID(a.ID)
+func (_c *TokenCreate) SetAccount(v *Account) *TokenCreate {
+	return _c.SetAccountID(v.ID)
 }
 
 // Mutation returns the TokenMutation object of the builder.

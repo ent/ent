@@ -28,88 +28,88 @@ type UserCreate struct {
 }
 
 // SetT sets the "t" field.
-func (_c *UserCreate) SetT(s *schema.T) *UserCreate {
-	_c.mutation.SetT(s)
+func (_c *UserCreate) SetT(v *schema.T) *UserCreate {
+	_c.mutation.SetT(v)
 	return _c
 }
 
 // SetURL sets the "url" field.
-func (_c *UserCreate) SetURL(u *url.URL) *UserCreate {
-	_c.mutation.SetURL(u)
+func (_c *UserCreate) SetURL(v *url.URL) *UserCreate {
+	_c.mutation.SetURL(v)
 	return _c
 }
 
 // SetURLs sets the "URLs" field.
-func (_c *UserCreate) SetURLs(u []*url.URL) *UserCreate {
-	_c.mutation.SetURLs(u)
+func (_c *UserCreate) SetURLs(v []*url.URL) *UserCreate {
+	_c.mutation.SetURLs(v)
 	return _c
 }
 
 // SetRaw sets the "raw" field.
-func (_c *UserCreate) SetRaw(jm json.RawMessage) *UserCreate {
-	_c.mutation.SetRaw(jm)
+func (_c *UserCreate) SetRaw(v json.RawMessage) *UserCreate {
+	_c.mutation.SetRaw(v)
 	return _c
 }
 
 // SetDirs sets the "dirs" field.
-func (_c *UserCreate) SetDirs(h []http.Dir) *UserCreate {
-	_c.mutation.SetDirs(h)
+func (_c *UserCreate) SetDirs(v []http.Dir) *UserCreate {
+	_c.mutation.SetDirs(v)
 	return _c
 }
 
 // SetInts sets the "ints" field.
-func (_c *UserCreate) SetInts(i []int) *UserCreate {
-	_c.mutation.SetInts(i)
+func (_c *UserCreate) SetInts(v []int) *UserCreate {
+	_c.mutation.SetInts(v)
 	return _c
 }
 
 // SetFloats sets the "floats" field.
-func (_c *UserCreate) SetFloats(f []float64) *UserCreate {
-	_c.mutation.SetFloats(f)
+func (_c *UserCreate) SetFloats(v []float64) *UserCreate {
+	_c.mutation.SetFloats(v)
 	return _c
 }
 
 // SetStrings sets the "strings" field.
-func (_c *UserCreate) SetStrings(s []string) *UserCreate {
-	_c.mutation.SetStrings(s)
+func (_c *UserCreate) SetStrings(v []string) *UserCreate {
+	_c.mutation.SetStrings(v)
 	return _c
 }
 
 // SetIntsValidate sets the "ints_validate" field.
-func (_c *UserCreate) SetIntsValidate(i []int) *UserCreate {
-	_c.mutation.SetIntsValidate(i)
+func (_c *UserCreate) SetIntsValidate(v []int) *UserCreate {
+	_c.mutation.SetIntsValidate(v)
 	return _c
 }
 
 // SetFloatsValidate sets the "floats_validate" field.
-func (_c *UserCreate) SetFloatsValidate(f []float64) *UserCreate {
-	_c.mutation.SetFloatsValidate(f)
+func (_c *UserCreate) SetFloatsValidate(v []float64) *UserCreate {
+	_c.mutation.SetFloatsValidate(v)
 	return _c
 }
 
 // SetStringsValidate sets the "strings_validate" field.
-func (_c *UserCreate) SetStringsValidate(s []string) *UserCreate {
-	_c.mutation.SetStringsValidate(s)
+func (_c *UserCreate) SetStringsValidate(v []string) *UserCreate {
+	_c.mutation.SetStringsValidate(v)
 	return _c
 }
 
 // SetAddr sets the "addr" field.
-func (_c *UserCreate) SetAddr(s schema.Addr) *UserCreate {
-	_c.mutation.SetAddr(s)
+func (_c *UserCreate) SetAddr(v schema.Addr) *UserCreate {
+	_c.mutation.SetAddr(v)
 	return _c
 }
 
 // SetNillableAddr sets the "addr" field if the given value is not nil.
-func (_c *UserCreate) SetNillableAddr(s *schema.Addr) *UserCreate {
-	if s != nil {
-		_c.SetAddr(*s)
+func (_c *UserCreate) SetNillableAddr(v *schema.Addr) *UserCreate {
+	if v != nil {
+		_c.SetAddr(*v)
 	}
 	return _c
 }
 
 // SetUnknown sets the "unknown" field.
-func (_c *UserCreate) SetUnknown(a any) *UserCreate {
-	_c.mutation.SetUnknown(a)
+func (_c *UserCreate) SetUnknown(v any) *UserCreate {
+	_c.mutation.SetUnknown(v)
 	return _c
 }
 

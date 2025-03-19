@@ -29,15 +29,15 @@ type DeviceCreate struct {
 }
 
 // SetID sets the "id" field.
-func (_c *DeviceCreate) SetID(s schema.ID) *DeviceCreate {
-	_c.mutation.SetID(s)
+func (_c *DeviceCreate) SetID(v schema.ID) *DeviceCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *DeviceCreate) SetNillableID(s *schema.ID) *DeviceCreate {
-	if s != nil {
-		_c.SetID(*s)
+func (_c *DeviceCreate) SetNillableID(v *schema.ID) *DeviceCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
 	return _c
 }
@@ -57,8 +57,8 @@ func (_c *DeviceCreate) SetNillableActiveSessionID(id *schema.ID) *DeviceCreate 
 }
 
 // SetActiveSession sets the "active_session" edge to the Session entity.
-func (_c *DeviceCreate) SetActiveSession(s *Session) *DeviceCreate {
-	return _c.SetActiveSessionID(s.ID)
+func (_c *DeviceCreate) SetActiveSession(v *Session) *DeviceCreate {
+	return _c.SetActiveSessionID(v.ID)
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
@@ -68,10 +68,10 @@ func (_c *DeviceCreate) AddSessionIDs(ids ...schema.ID) *DeviceCreate {
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
-func (_c *DeviceCreate) AddSessions(s ...*Session) *DeviceCreate {
-	ids := make([]schema.ID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_c *DeviceCreate) AddSessions(v ...*Session) *DeviceCreate {
+	ids := make([]schema.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddSessionIDs(ids...)
 }

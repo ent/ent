@@ -34,23 +34,23 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 }
 
 // SetAge sets the "age" field.
-func (_u *UserUpdate) SetAge(u uint) *UserUpdate {
+func (_u *UserUpdate) SetAge(v uint) *UserUpdate {
 	_u.mutation.ResetAge()
-	_u.mutation.SetAge(u)
+	_u.mutation.SetAge(v)
 	return _u
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableAge(u *uint) *UserUpdate {
-	if u != nil {
-		_u.SetAge(*u)
+func (_u *UserUpdate) SetNillableAge(v *uint) *UserUpdate {
+	if v != nil {
+		_u.SetAge(*v)
 	}
 	return _u
 }
 
-// AddAge adds u to the "age" field.
-func (_u *UserUpdate) AddAge(u int) *UserUpdate {
-	_u.mutation.AddAge(u)
+// AddAge adds value to the "age" field.
+func (_u *UserUpdate) AddAge(v int) *UserUpdate {
+	_u.mutation.AddAge(v)
 	return _u
 }
 
@@ -67,10 +67,10 @@ func (_u *UserUpdate) AddTeamIDs(ids ...int) *UserUpdate {
 }
 
 // AddTeams adds the "teams" edges to the Team entity.
-func (_u *UserUpdate) AddTeams(t ...*Team) *UserUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *UserUpdate) AddTeams(v ...*Team) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddTeamIDs(ids...)
 }
@@ -82,10 +82,10 @@ func (_u *UserUpdate) AddTaskIDs(ids ...int) *UserUpdate {
 }
 
 // AddTasks adds the "tasks" edges to the Task entity.
-func (_u *UserUpdate) AddTasks(t ...*Task) *UserUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *UserUpdate) AddTasks(v ...*Task) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddTaskIDs(ids...)
 }
@@ -108,10 +108,10 @@ func (_u *UserUpdate) RemoveTeamIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveTeams removes "teams" edges to Team entities.
-func (_u *UserUpdate) RemoveTeams(t ...*Team) *UserUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *UserUpdate) RemoveTeams(v ...*Team) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveTeamIDs(ids...)
 }
@@ -129,10 +129,10 @@ func (_u *UserUpdate) RemoveTaskIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveTasks removes "tasks" edges to Task entities.
-func (_u *UserUpdate) RemoveTasks(t ...*Task) *UserUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *UserUpdate) RemoveTasks(v ...*Task) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveTaskIDs(ids...)
 }
@@ -164,7 +164,7 @@ func (_u *UserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -272,7 +272,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -281,7 +281,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -293,23 +293,23 @@ type UserUpdateOne struct {
 }
 
 // SetAge sets the "age" field.
-func (_u *UserUpdateOne) SetAge(u uint) *UserUpdateOne {
+func (_u *UserUpdateOne) SetAge(v uint) *UserUpdateOne {
 	_u.mutation.ResetAge()
-	_u.mutation.SetAge(u)
+	_u.mutation.SetAge(v)
 	return _u
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableAge(u *uint) *UserUpdateOne {
-	if u != nil {
-		_u.SetAge(*u)
+func (_u *UserUpdateOne) SetNillableAge(v *uint) *UserUpdateOne {
+	if v != nil {
+		_u.SetAge(*v)
 	}
 	return _u
 }
 
-// AddAge adds u to the "age" field.
-func (_u *UserUpdateOne) AddAge(u int) *UserUpdateOne {
-	_u.mutation.AddAge(u)
+// AddAge adds value to the "age" field.
+func (_u *UserUpdateOne) AddAge(v int) *UserUpdateOne {
+	_u.mutation.AddAge(v)
 	return _u
 }
 
@@ -326,10 +326,10 @@ func (_u *UserUpdateOne) AddTeamIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddTeams adds the "teams" edges to the Team entity.
-func (_u *UserUpdateOne) AddTeams(t ...*Team) *UserUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *UserUpdateOne) AddTeams(v ...*Team) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddTeamIDs(ids...)
 }
@@ -341,10 +341,10 @@ func (_u *UserUpdateOne) AddTaskIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddTasks adds the "tasks" edges to the Task entity.
-func (_u *UserUpdateOne) AddTasks(t ...*Task) *UserUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *UserUpdateOne) AddTasks(v ...*Task) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddTaskIDs(ids...)
 }
@@ -367,10 +367,10 @@ func (_u *UserUpdateOne) RemoveTeamIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveTeams removes "teams" edges to Team entities.
-func (_u *UserUpdateOne) RemoveTeams(t ...*Team) *UserUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *UserUpdateOne) RemoveTeams(v ...*Team) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveTeamIDs(ids...)
 }
@@ -388,10 +388,10 @@ func (_u *UserUpdateOne) RemoveTaskIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveTasks removes "tasks" edges to Task entities.
-func (_u *UserUpdateOne) RemoveTasks(t ...*Task) *UserUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *UserUpdateOne) RemoveTasks(v ...*Task) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveTaskIDs(ids...)
 }

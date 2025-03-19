@@ -25,36 +25,36 @@ type LicenseCreate struct {
 }
 
 // SetCreateTime sets the "create_time" field.
-func (_c *LicenseCreate) SetCreateTime(t time.Time) *LicenseCreate {
-	_c.mutation.SetCreateTime(t)
+func (_c *LicenseCreate) SetCreateTime(v time.Time) *LicenseCreate {
+	_c.mutation.SetCreateTime(v)
 	return _c
 }
 
 // SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (_c *LicenseCreate) SetNillableCreateTime(t *time.Time) *LicenseCreate {
-	if t != nil {
-		_c.SetCreateTime(*t)
+func (_c *LicenseCreate) SetNillableCreateTime(v *time.Time) *LicenseCreate {
+	if v != nil {
+		_c.SetCreateTime(*v)
 	}
 	return _c
 }
 
 // SetUpdateTime sets the "update_time" field.
-func (_c *LicenseCreate) SetUpdateTime(t time.Time) *LicenseCreate {
-	_c.mutation.SetUpdateTime(t)
+func (_c *LicenseCreate) SetUpdateTime(v time.Time) *LicenseCreate {
+	_c.mutation.SetUpdateTime(v)
 	return _c
 }
 
 // SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (_c *LicenseCreate) SetNillableUpdateTime(t *time.Time) *LicenseCreate {
-	if t != nil {
-		_c.SetUpdateTime(*t)
+func (_c *LicenseCreate) SetNillableUpdateTime(v *time.Time) *LicenseCreate {
+	if v != nil {
+		_c.SetUpdateTime(*v)
 	}
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *LicenseCreate) SetID(i int) *LicenseCreate {
-	_c.mutation.SetID(i)
+func (_c *LicenseCreate) SetID(v int) *LicenseCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 

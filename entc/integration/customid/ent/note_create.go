@@ -28,29 +28,29 @@ type NoteCreate struct {
 }
 
 // SetText sets the "text" field.
-func (_c *NoteCreate) SetText(s string) *NoteCreate {
-	_c.mutation.SetText(s)
+func (_c *NoteCreate) SetText(v string) *NoteCreate {
+	_c.mutation.SetText(v)
 	return _c
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_c *NoteCreate) SetNillableText(s *string) *NoteCreate {
-	if s != nil {
-		_c.SetText(*s)
+func (_c *NoteCreate) SetNillableText(v *string) *NoteCreate {
+	if v != nil {
+		_c.SetText(*v)
 	}
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *NoteCreate) SetID(si schema.NoteID) *NoteCreate {
-	_c.mutation.SetID(si)
+func (_c *NoteCreate) SetID(v schema.NoteID) *NoteCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *NoteCreate) SetNillableID(si *schema.NoteID) *NoteCreate {
-	if si != nil {
-		_c.SetID(*si)
+func (_c *NoteCreate) SetNillableID(v *schema.NoteID) *NoteCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
 	return _c
 }
@@ -70,8 +70,8 @@ func (_c *NoteCreate) SetNillableParentID(id *schema.NoteID) *NoteCreate {
 }
 
 // SetParent sets the "parent" edge to the Note entity.
-func (_c *NoteCreate) SetParent(n *Note) *NoteCreate {
-	return _c.SetParentID(n.ID)
+func (_c *NoteCreate) SetParent(v *Note) *NoteCreate {
+	return _c.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the Note entity by IDs.
@@ -81,10 +81,10 @@ func (_c *NoteCreate) AddChildIDs(ids ...schema.NoteID) *NoteCreate {
 }
 
 // AddChildren adds the "children" edges to the Note entity.
-func (_c *NoteCreate) AddChildren(n ...*Note) *NoteCreate {
-	ids := make([]schema.NoteID, len(n))
-	for i := range n {
-		ids[i] = n[i].ID
+func (_c *NoteCreate) AddChildren(v ...*Note) *NoteCreate {
+	ids := make([]schema.NoteID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddChildIDs(ids...)
 }

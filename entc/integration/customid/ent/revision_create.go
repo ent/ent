@@ -27,8 +27,8 @@ type RevisionCreate struct {
 }
 
 // SetID sets the "id" field.
-func (_c *RevisionCreate) SetID(s string) *RevisionCreate {
-	_c.mutation.SetID(s)
+func (_c *RevisionCreate) SetID(v string) *RevisionCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 

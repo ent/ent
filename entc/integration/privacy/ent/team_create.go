@@ -26,8 +26,8 @@ type TeamCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *TeamCreate) SetName(s string) *TeamCreate {
-	_c.mutation.SetName(s)
+func (_c *TeamCreate) SetName(v string) *TeamCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
@@ -38,10 +38,10 @@ func (_c *TeamCreate) AddTaskIDs(ids ...int) *TeamCreate {
 }
 
 // AddTasks adds the "tasks" edges to the Task entity.
-func (_c *TeamCreate) AddTasks(t ...*Task) *TeamCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_c *TeamCreate) AddTasks(v ...*Task) *TeamCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddTaskIDs(ids...)
 }
@@ -53,10 +53,10 @@ func (_c *TeamCreate) AddUserIDs(ids ...int) *TeamCreate {
 }
 
 // AddUsers adds the "users" edges to the User entity.
-func (_c *TeamCreate) AddUsers(u ...*User) *TeamCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *TeamCreate) AddUsers(v ...*User) *TeamCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddUserIDs(ids...)
 }

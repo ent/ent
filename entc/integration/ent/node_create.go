@@ -27,29 +27,29 @@ type NodeCreate struct {
 }
 
 // SetValue sets the "value" field.
-func (_c *NodeCreate) SetValue(i int) *NodeCreate {
-	_c.mutation.SetValue(i)
+func (_c *NodeCreate) SetValue(v int) *NodeCreate {
+	_c.mutation.SetValue(v)
 	return _c
 }
 
 // SetNillableValue sets the "value" field if the given value is not nil.
-func (_c *NodeCreate) SetNillableValue(i *int) *NodeCreate {
-	if i != nil {
-		_c.SetValue(*i)
+func (_c *NodeCreate) SetNillableValue(v *int) *NodeCreate {
+	if v != nil {
+		_c.SetValue(*v)
 	}
 	return _c
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_c *NodeCreate) SetUpdatedAt(t time.Time) *NodeCreate {
-	_c.mutation.SetUpdatedAt(t)
+func (_c *NodeCreate) SetUpdatedAt(v time.Time) *NodeCreate {
+	_c.mutation.SetUpdatedAt(v)
 	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (_c *NodeCreate) SetNillableUpdatedAt(t *time.Time) *NodeCreate {
-	if t != nil {
-		_c.SetUpdatedAt(*t)
+func (_c *NodeCreate) SetNillableUpdatedAt(v *time.Time) *NodeCreate {
+	if v != nil {
+		_c.SetUpdatedAt(*v)
 	}
 	return _c
 }
@@ -69,8 +69,8 @@ func (_c *NodeCreate) SetNillablePrevID(id *int) *NodeCreate {
 }
 
 // SetPrev sets the "prev" edge to the Node entity.
-func (_c *NodeCreate) SetPrev(n *Node) *NodeCreate {
-	return _c.SetPrevID(n.ID)
+func (_c *NodeCreate) SetPrev(v *Node) *NodeCreate {
+	return _c.SetPrevID(v.ID)
 }
 
 // SetNextID sets the "next" edge to the Node entity by ID.
@@ -88,8 +88,8 @@ func (_c *NodeCreate) SetNillableNextID(id *int) *NodeCreate {
 }
 
 // SetNext sets the "next" edge to the Node entity.
-func (_c *NodeCreate) SetNext(n *Node) *NodeCreate {
-	return _c.SetNextID(n.ID)
+func (_c *NodeCreate) SetNext(v *Node) *NodeCreate {
+	return _c.SetNextID(v.ID)
 }
 
 // Mutation returns the NodeMutation object of the builder.

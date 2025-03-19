@@ -32,15 +32,15 @@ func (_u *MediaUpdate) Where(ps ...predicate.Media) *MediaUpdate {
 }
 
 // SetSource sets the "source" field.
-func (_u *MediaUpdate) SetSource(s string) *MediaUpdate {
-	_u.mutation.SetSource(s)
+func (_u *MediaUpdate) SetSource(v string) *MediaUpdate {
+	_u.mutation.SetSource(v)
 	return _u
 }
 
 // SetNillableSource sets the "source" field if the given value is not nil.
-func (_u *MediaUpdate) SetNillableSource(s *string) *MediaUpdate {
-	if s != nil {
-		_u.SetSource(*s)
+func (_u *MediaUpdate) SetNillableSource(v *string) *MediaUpdate {
+	if v != nil {
+		_u.SetSource(*v)
 	}
 	return _u
 }
@@ -52,15 +52,15 @@ func (_u *MediaUpdate) ClearSource() *MediaUpdate {
 }
 
 // SetSourceURI sets the "source_uri" field.
-func (_u *MediaUpdate) SetSourceURI(s string) *MediaUpdate {
-	_u.mutation.SetSourceURI(s)
+func (_u *MediaUpdate) SetSourceURI(v string) *MediaUpdate {
+	_u.mutation.SetSourceURI(v)
 	return _u
 }
 
 // SetNillableSourceURI sets the "source_uri" field if the given value is not nil.
-func (_u *MediaUpdate) SetNillableSourceURI(s *string) *MediaUpdate {
-	if s != nil {
-		_u.SetSourceURI(*s)
+func (_u *MediaUpdate) SetNillableSourceURI(v *string) *MediaUpdate {
+	if v != nil {
+		_u.SetSourceURI(*v)
 	}
 	return _u
 }
@@ -72,15 +72,15 @@ func (_u *MediaUpdate) ClearSourceURI() *MediaUpdate {
 }
 
 // SetText sets the "text" field.
-func (_u *MediaUpdate) SetText(s string) *MediaUpdate {
-	_u.mutation.SetText(s)
+func (_u *MediaUpdate) SetText(v string) *MediaUpdate {
+	_u.mutation.SetText(v)
 	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_u *MediaUpdate) SetNillableText(s *string) *MediaUpdate {
-	if s != nil {
-		_u.SetText(*s)
+func (_u *MediaUpdate) SetNillableText(v *string) *MediaUpdate {
+	if v != nil {
+		_u.SetText(*v)
 	}
 	return _u
 }
@@ -123,7 +123,7 @@ func (_u *MediaUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *MediaUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *MediaUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(media.Table, media.Columns, sqlgraph.NewFieldSpec(media.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -150,7 +150,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if _u.mutation.TextCleared() {
 		_spec.ClearField(media.FieldText, field.TypeString)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{media.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -159,7 +159,7 @@ func (_u *MediaUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // MediaUpdateOne is the builder for updating a single Media entity.
@@ -171,15 +171,15 @@ type MediaUpdateOne struct {
 }
 
 // SetSource sets the "source" field.
-func (_u *MediaUpdateOne) SetSource(s string) *MediaUpdateOne {
-	_u.mutation.SetSource(s)
+func (_u *MediaUpdateOne) SetSource(v string) *MediaUpdateOne {
+	_u.mutation.SetSource(v)
 	return _u
 }
 
 // SetNillableSource sets the "source" field if the given value is not nil.
-func (_u *MediaUpdateOne) SetNillableSource(s *string) *MediaUpdateOne {
-	if s != nil {
-		_u.SetSource(*s)
+func (_u *MediaUpdateOne) SetNillableSource(v *string) *MediaUpdateOne {
+	if v != nil {
+		_u.SetSource(*v)
 	}
 	return _u
 }
@@ -191,15 +191,15 @@ func (_u *MediaUpdateOne) ClearSource() *MediaUpdateOne {
 }
 
 // SetSourceURI sets the "source_uri" field.
-func (_u *MediaUpdateOne) SetSourceURI(s string) *MediaUpdateOne {
-	_u.mutation.SetSourceURI(s)
+func (_u *MediaUpdateOne) SetSourceURI(v string) *MediaUpdateOne {
+	_u.mutation.SetSourceURI(v)
 	return _u
 }
 
 // SetNillableSourceURI sets the "source_uri" field if the given value is not nil.
-func (_u *MediaUpdateOne) SetNillableSourceURI(s *string) *MediaUpdateOne {
-	if s != nil {
-		_u.SetSourceURI(*s)
+func (_u *MediaUpdateOne) SetNillableSourceURI(v *string) *MediaUpdateOne {
+	if v != nil {
+		_u.SetSourceURI(*v)
 	}
 	return _u
 }
@@ -211,15 +211,15 @@ func (_u *MediaUpdateOne) ClearSourceURI() *MediaUpdateOne {
 }
 
 // SetText sets the "text" field.
-func (_u *MediaUpdateOne) SetText(s string) *MediaUpdateOne {
-	_u.mutation.SetText(s)
+func (_u *MediaUpdateOne) SetText(v string) *MediaUpdateOne {
+	_u.mutation.SetText(v)
 	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_u *MediaUpdateOne) SetNillableText(s *string) *MediaUpdateOne {
-	if s != nil {
-		_u.SetText(*s)
+func (_u *MediaUpdateOne) SetNillableText(v *string) *MediaUpdateOne {
+	if v != nil {
+		_u.SetText(*v)
 	}
 	return _u
 }

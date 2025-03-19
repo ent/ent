@@ -48,8 +48,8 @@ func (_u *PetUpdate) SetNillableOwnerID(id *int) *PetUpdate {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *PetUpdate) SetOwner(u *User) *PetUpdate {
-	return _u.SetOwnerID(u.ID)
+func (_u *PetUpdate) SetOwner(v *User) *PetUpdate {
+	return _u.SetOwnerID(v.ID)
 }
 
 // AddCarIDs adds the "cars" edge to the Car entity by IDs.
@@ -59,10 +59,10 @@ func (_u *PetUpdate) AddCarIDs(ids ...int) *PetUpdate {
 }
 
 // AddCars adds the "cars" edges to the Car entity.
-func (_u *PetUpdate) AddCars(c ...*Car) *PetUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *PetUpdate) AddCars(v ...*Car) *PetUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddCarIDs(ids...)
 }
@@ -74,10 +74,10 @@ func (_u *PetUpdate) AddFriendIDs(ids ...string) *PetUpdate {
 }
 
 // AddFriends adds the "friends" edges to the Pet entity.
-func (_u *PetUpdate) AddFriends(p ...*Pet) *PetUpdate {
-	ids := make([]string, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *PetUpdate) AddFriends(v ...*Pet) *PetUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFriendIDs(ids...)
 }
@@ -97,8 +97,8 @@ func (_u *PetUpdate) SetNillableBestFriendID(id *string) *PetUpdate {
 }
 
 // SetBestFriend sets the "best_friend" edge to the Pet entity.
-func (_u *PetUpdate) SetBestFriend(p *Pet) *PetUpdate {
-	return _u.SetBestFriendID(p.ID)
+func (_u *PetUpdate) SetBestFriend(v *Pet) *PetUpdate {
+	return _u.SetBestFriendID(v.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.
@@ -125,10 +125,10 @@ func (_u *PetUpdate) RemoveCarIDs(ids ...int) *PetUpdate {
 }
 
 // RemoveCars removes "cars" edges to Car entities.
-func (_u *PetUpdate) RemoveCars(c ...*Car) *PetUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *PetUpdate) RemoveCars(v ...*Car) *PetUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveCarIDs(ids...)
 }
@@ -146,10 +146,10 @@ func (_u *PetUpdate) RemoveFriendIDs(ids ...string) *PetUpdate {
 }
 
 // RemoveFriends removes "friends" edges to Pet entities.
-func (_u *PetUpdate) RemoveFriends(p ...*Pet) *PetUpdate {
-	ids := make([]string, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *PetUpdate) RemoveFriends(v ...*Pet) *PetUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFriendIDs(ids...)
 }
@@ -187,7 +187,7 @@ func (_u *PetUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *PetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(pet.Table, pet.Columns, sqlgraph.NewFieldSpec(pet.FieldID, field.TypeString))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -344,7 +344,7 @@ func (_u *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{pet.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -353,7 +353,7 @@ func (_u *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // PetUpdateOne is the builder for updating a single Pet entity.
@@ -379,8 +379,8 @@ func (_u *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *PetUpdateOne) SetOwner(u *User) *PetUpdateOne {
-	return _u.SetOwnerID(u.ID)
+func (_u *PetUpdateOne) SetOwner(v *User) *PetUpdateOne {
+	return _u.SetOwnerID(v.ID)
 }
 
 // AddCarIDs adds the "cars" edge to the Car entity by IDs.
@@ -390,10 +390,10 @@ func (_u *PetUpdateOne) AddCarIDs(ids ...int) *PetUpdateOne {
 }
 
 // AddCars adds the "cars" edges to the Car entity.
-func (_u *PetUpdateOne) AddCars(c ...*Car) *PetUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *PetUpdateOne) AddCars(v ...*Car) *PetUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddCarIDs(ids...)
 }
@@ -405,10 +405,10 @@ func (_u *PetUpdateOne) AddFriendIDs(ids ...string) *PetUpdateOne {
 }
 
 // AddFriends adds the "friends" edges to the Pet entity.
-func (_u *PetUpdateOne) AddFriends(p ...*Pet) *PetUpdateOne {
-	ids := make([]string, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *PetUpdateOne) AddFriends(v ...*Pet) *PetUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFriendIDs(ids...)
 }
@@ -428,8 +428,8 @@ func (_u *PetUpdateOne) SetNillableBestFriendID(id *string) *PetUpdateOne {
 }
 
 // SetBestFriend sets the "best_friend" edge to the Pet entity.
-func (_u *PetUpdateOne) SetBestFriend(p *Pet) *PetUpdateOne {
-	return _u.SetBestFriendID(p.ID)
+func (_u *PetUpdateOne) SetBestFriend(v *Pet) *PetUpdateOne {
+	return _u.SetBestFriendID(v.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.
@@ -456,10 +456,10 @@ func (_u *PetUpdateOne) RemoveCarIDs(ids ...int) *PetUpdateOne {
 }
 
 // RemoveCars removes "cars" edges to Car entities.
-func (_u *PetUpdateOne) RemoveCars(c ...*Car) *PetUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_u *PetUpdateOne) RemoveCars(v ...*Car) *PetUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveCarIDs(ids...)
 }
@@ -477,10 +477,10 @@ func (_u *PetUpdateOne) RemoveFriendIDs(ids ...string) *PetUpdateOne {
 }
 
 // RemoveFriends removes "friends" edges to Pet entities.
-func (_u *PetUpdateOne) RemoveFriends(p ...*Pet) *PetUpdateOne {
-	ids := make([]string, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *PetUpdateOne) RemoveFriends(v ...*Pet) *PetUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFriendIDs(ids...)
 }

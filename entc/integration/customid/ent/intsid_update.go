@@ -47,8 +47,8 @@ func (_u *IntSIDUpdate) SetNillableParentID(id *sid.ID) *IntSIDUpdate {
 }
 
 // SetParent sets the "parent" edge to the IntSID entity.
-func (_u *IntSIDUpdate) SetParent(i *IntSID) *IntSIDUpdate {
-	return _u.SetParentID(i.ID)
+func (_u *IntSIDUpdate) SetParent(v *IntSID) *IntSIDUpdate {
+	return _u.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the IntSID entity by IDs.
@@ -58,10 +58,10 @@ func (_u *IntSIDUpdate) AddChildIDs(ids ...sid.ID) *IntSIDUpdate {
 }
 
 // AddChildren adds the "children" edges to the IntSID entity.
-func (_u *IntSIDUpdate) AddChildren(i ...*IntSID) *IntSIDUpdate {
-	ids := make([]sid.ID, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
+func (_u *IntSIDUpdate) AddChildren(v ...*IntSID) *IntSIDUpdate {
+	ids := make([]sid.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
@@ -90,10 +90,10 @@ func (_u *IntSIDUpdate) RemoveChildIDs(ids ...sid.ID) *IntSIDUpdate {
 }
 
 // RemoveChildren removes "children" edges to IntSID entities.
-func (_u *IntSIDUpdate) RemoveChildren(i ...*IntSID) *IntSIDUpdate {
-	ids := make([]sid.ID, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
+func (_u *IntSIDUpdate) RemoveChildren(v ...*IntSID) *IntSIDUpdate {
+	ids := make([]sid.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }
@@ -125,7 +125,7 @@ func (_u *IntSIDUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *IntSIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *IntSIDUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(intsid.Table, intsid.Columns, sqlgraph.NewFieldSpec(intsid.FieldID, field.TypeInt64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -208,7 +208,7 @@ func (_u *IntSIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{intsid.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -217,7 +217,7 @@ func (_u *IntSIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // IntSIDUpdateOne is the builder for updating a single IntSID entity.
@@ -243,8 +243,8 @@ func (_u *IntSIDUpdateOne) SetNillableParentID(id *sid.ID) *IntSIDUpdateOne {
 }
 
 // SetParent sets the "parent" edge to the IntSID entity.
-func (_u *IntSIDUpdateOne) SetParent(i *IntSID) *IntSIDUpdateOne {
-	return _u.SetParentID(i.ID)
+func (_u *IntSIDUpdateOne) SetParent(v *IntSID) *IntSIDUpdateOne {
+	return _u.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the IntSID entity by IDs.
@@ -254,10 +254,10 @@ func (_u *IntSIDUpdateOne) AddChildIDs(ids ...sid.ID) *IntSIDUpdateOne {
 }
 
 // AddChildren adds the "children" edges to the IntSID entity.
-func (_u *IntSIDUpdateOne) AddChildren(i ...*IntSID) *IntSIDUpdateOne {
-	ids := make([]sid.ID, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
+func (_u *IntSIDUpdateOne) AddChildren(v ...*IntSID) *IntSIDUpdateOne {
+	ids := make([]sid.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
@@ -286,10 +286,10 @@ func (_u *IntSIDUpdateOne) RemoveChildIDs(ids ...sid.ID) *IntSIDUpdateOne {
 }
 
 // RemoveChildren removes "children" edges to IntSID entities.
-func (_u *IntSIDUpdateOne) RemoveChildren(i ...*IntSID) *IntSIDUpdateOne {
-	ids := make([]sid.ID, len(i))
-	for j := range i {
-		ids[j] = i[j].ID
+func (_u *IntSIDUpdateOne) RemoveChildren(v ...*IntSID) *IntSIDUpdateOne {
+	ids := make([]sid.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }

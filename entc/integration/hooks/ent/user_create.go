@@ -26,63 +26,63 @@ type UserCreate struct {
 }
 
 // SetVersion sets the "version" field.
-func (_c *UserCreate) SetVersion(i int) *UserCreate {
-	_c.mutation.SetVersion(i)
+func (_c *UserCreate) SetVersion(v int) *UserCreate {
+	_c.mutation.SetVersion(v)
 	return _c
 }
 
 // SetNillableVersion sets the "version" field if the given value is not nil.
-func (_c *UserCreate) SetNillableVersion(i *int) *UserCreate {
-	if i != nil {
-		_c.SetVersion(*i)
+func (_c *UserCreate) SetNillableVersion(v *int) *UserCreate {
+	if v != nil {
+		_c.SetVersion(*v)
 	}
 	return _c
 }
 
 // SetName sets the "name" field.
-func (_c *UserCreate) SetName(s string) *UserCreate {
-	_c.mutation.SetName(s)
+func (_c *UserCreate) SetName(v string) *UserCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetWorth sets the "worth" field.
-func (_c *UserCreate) SetWorth(u uint) *UserCreate {
-	_c.mutation.SetWorth(u)
+func (_c *UserCreate) SetWorth(v uint) *UserCreate {
+	_c.mutation.SetWorth(v)
 	return _c
 }
 
 // SetNillableWorth sets the "worth" field if the given value is not nil.
-func (_c *UserCreate) SetNillableWorth(u *uint) *UserCreate {
-	if u != nil {
-		_c.SetWorth(*u)
+func (_c *UserCreate) SetNillableWorth(v *uint) *UserCreate {
+	if v != nil {
+		_c.SetWorth(*v)
 	}
 	return _c
 }
 
 // SetPassword sets the "password" field.
-func (_c *UserCreate) SetPassword(s string) *UserCreate {
-	_c.mutation.SetPassword(s)
+func (_c *UserCreate) SetPassword(v string) *UserCreate {
+	_c.mutation.SetPassword(v)
 	return _c
 }
 
 // SetNillablePassword sets the "password" field if the given value is not nil.
-func (_c *UserCreate) SetNillablePassword(s *string) *UserCreate {
-	if s != nil {
-		_c.SetPassword(*s)
+func (_c *UserCreate) SetNillablePassword(v *string) *UserCreate {
+	if v != nil {
+		_c.SetPassword(*v)
 	}
 	return _c
 }
 
 // SetActive sets the "active" field.
-func (_c *UserCreate) SetActive(b bool) *UserCreate {
-	_c.mutation.SetActive(b)
+func (_c *UserCreate) SetActive(v bool) *UserCreate {
+	_c.mutation.SetActive(v)
 	return _c
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
-func (_c *UserCreate) SetNillableActive(b *bool) *UserCreate {
-	if b != nil {
-		_c.SetActive(*b)
+func (_c *UserCreate) SetNillableActive(v *bool) *UserCreate {
+	if v != nil {
+		_c.SetActive(*v)
 	}
 	return _c
 }
@@ -94,10 +94,10 @@ func (_c *UserCreate) AddCardIDs(ids ...int) *UserCreate {
 }
 
 // AddCards adds the "cards" edges to the Card entity.
-func (_c *UserCreate) AddCards(c ...*Card) *UserCreate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_c *UserCreate) AddCards(v ...*Card) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddCardIDs(ids...)
 }
@@ -109,10 +109,10 @@ func (_c *UserCreate) AddPetIDs(ids ...int) *UserCreate {
 }
 
 // AddPets adds the "pets" edges to the Pet entity.
-func (_c *UserCreate) AddPets(p ...*Pet) *UserCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_c *UserCreate) AddPets(v ...*Pet) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddPetIDs(ids...)
 }
@@ -124,10 +124,10 @@ func (_c *UserCreate) AddFriendIDs(ids ...int) *UserCreate {
 }
 
 // AddFriends adds the "friends" edges to the User entity.
-func (_c *UserCreate) AddFriends(u ...*User) *UserCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *UserCreate) AddFriends(v ...*User) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddFriendIDs(ids...)
 }
@@ -147,8 +147,8 @@ func (_c *UserCreate) SetNillableBestFriendID(id *int) *UserCreate {
 }
 
 // SetBestFriend sets the "best_friend" edge to the User entity.
-func (_c *UserCreate) SetBestFriend(u *User) *UserCreate {
-	return _c.SetBestFriendID(u.ID)
+func (_c *UserCreate) SetBestFriend(v *User) *UserCreate {
+	return _c.SetBestFriendID(v.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.

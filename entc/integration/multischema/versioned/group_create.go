@@ -25,15 +25,15 @@ type GroupCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *GroupCreate) SetName(s string) *GroupCreate {
-	_c.mutation.SetName(s)
+func (_c *GroupCreate) SetName(v string) *GroupCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_c *GroupCreate) SetNillableName(s *string) *GroupCreate {
-	if s != nil {
-		_c.SetName(*s)
+func (_c *GroupCreate) SetNillableName(v *string) *GroupCreate {
+	if v != nil {
+		_c.SetName(*v)
 	}
 	return _c
 }
@@ -45,10 +45,10 @@ func (_c *GroupCreate) AddUserIDs(ids ...int) *GroupCreate {
 }
 
 // AddUsers adds the "users" edges to the User entity.
-func (_c *GroupCreate) AddUsers(u ...*User) *GroupCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *GroupCreate) AddUsers(v ...*User) *GroupCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddUserIDs(ids...)
 }

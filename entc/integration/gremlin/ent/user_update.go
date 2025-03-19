@@ -34,23 +34,23 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 }
 
 // SetOptionalInt sets the "optional_int" field.
-func (_u *UserUpdate) SetOptionalInt(i int) *UserUpdate {
+func (_u *UserUpdate) SetOptionalInt(v int) *UserUpdate {
 	_u.mutation.ResetOptionalInt()
-	_u.mutation.SetOptionalInt(i)
+	_u.mutation.SetOptionalInt(v)
 	return _u
 }
 
 // SetNillableOptionalInt sets the "optional_int" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableOptionalInt(i *int) *UserUpdate {
-	if i != nil {
-		_u.SetOptionalInt(*i)
+func (_u *UserUpdate) SetNillableOptionalInt(v *int) *UserUpdate {
+	if v != nil {
+		_u.SetOptionalInt(*v)
 	}
 	return _u
 }
 
-// AddOptionalInt adds i to the "optional_int" field.
-func (_u *UserUpdate) AddOptionalInt(i int) *UserUpdate {
-	_u.mutation.AddOptionalInt(i)
+// AddOptionalInt adds value to the "optional_int" field.
+func (_u *UserUpdate) AddOptionalInt(v int) *UserUpdate {
+	_u.mutation.AddOptionalInt(v)
 	return _u
 }
 
@@ -61,64 +61,64 @@ func (_u *UserUpdate) ClearOptionalInt() *UserUpdate {
 }
 
 // SetAge sets the "age" field.
-func (_u *UserUpdate) SetAge(i int) *UserUpdate {
+func (_u *UserUpdate) SetAge(v int) *UserUpdate {
 	_u.mutation.ResetAge()
-	_u.mutation.SetAge(i)
+	_u.mutation.SetAge(v)
 	return _u
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableAge(i *int) *UserUpdate {
-	if i != nil {
-		_u.SetAge(*i)
+func (_u *UserUpdate) SetNillableAge(v *int) *UserUpdate {
+	if v != nil {
+		_u.SetAge(*v)
 	}
 	return _u
 }
 
-// AddAge adds i to the "age" field.
-func (_u *UserUpdate) AddAge(i int) *UserUpdate {
-	_u.mutation.AddAge(i)
+// AddAge adds value to the "age" field.
+func (_u *UserUpdate) AddAge(v int) *UserUpdate {
+	_u.mutation.AddAge(v)
 	return _u
 }
 
 // SetName sets the "name" field.
-func (_u *UserUpdate) SetName(s string) *UserUpdate {
-	_u.mutation.SetName(s)
+func (_u *UserUpdate) SetName(v string) *UserUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableName(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
 
 // SetLast sets the "last" field.
-func (_u *UserUpdate) SetLast(s string) *UserUpdate {
-	_u.mutation.SetLast(s)
+func (_u *UserUpdate) SetLast(v string) *UserUpdate {
+	_u.mutation.SetLast(v)
 	return _u
 }
 
 // SetNillableLast sets the "last" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableLast(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetLast(*s)
+func (_u *UserUpdate) SetNillableLast(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetLast(*v)
 	}
 	return _u
 }
 
 // SetNickname sets the "nickname" field.
-func (_u *UserUpdate) SetNickname(s string) *UserUpdate {
-	_u.mutation.SetNickname(s)
+func (_u *UserUpdate) SetNickname(v string) *UserUpdate {
+	_u.mutation.SetNickname(v)
 	return _u
 }
 
 // SetNillableNickname sets the "nickname" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableNickname(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetNickname(*s)
+func (_u *UserUpdate) SetNillableNickname(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetNickname(*v)
 	}
 	return _u
 }
@@ -130,15 +130,15 @@ func (_u *UserUpdate) ClearNickname() *UserUpdate {
 }
 
 // SetAddress sets the "address" field.
-func (_u *UserUpdate) SetAddress(s string) *UserUpdate {
-	_u.mutation.SetAddress(s)
+func (_u *UserUpdate) SetAddress(v string) *UserUpdate {
+	_u.mutation.SetAddress(v)
 	return _u
 }
 
 // SetNillableAddress sets the "address" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableAddress(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetAddress(*s)
+func (_u *UserUpdate) SetNillableAddress(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetAddress(*v)
 	}
 	return _u
 }
@@ -150,15 +150,15 @@ func (_u *UserUpdate) ClearAddress() *UserUpdate {
 }
 
 // SetPhone sets the "phone" field.
-func (_u *UserUpdate) SetPhone(s string) *UserUpdate {
-	_u.mutation.SetPhone(s)
+func (_u *UserUpdate) SetPhone(v string) *UserUpdate {
+	_u.mutation.SetPhone(v)
 	return _u
 }
 
 // SetNillablePhone sets the "phone" field if the given value is not nil.
-func (_u *UserUpdate) SetNillablePhone(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetPhone(*s)
+func (_u *UserUpdate) SetNillablePhone(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetPhone(*v)
 	}
 	return _u
 }
@@ -170,15 +170,15 @@ func (_u *UserUpdate) ClearPhone() *UserUpdate {
 }
 
 // SetPassword sets the "password" field.
-func (_u *UserUpdate) SetPassword(s string) *UserUpdate {
-	_u.mutation.SetPassword(s)
+func (_u *UserUpdate) SetPassword(v string) *UserUpdate {
+	_u.mutation.SetPassword(v)
 	return _u
 }
 
 // SetNillablePassword sets the "password" field if the given value is not nil.
-func (_u *UserUpdate) SetNillablePassword(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetPassword(*s)
+func (_u *UserUpdate) SetNillablePassword(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetPassword(*v)
 	}
 	return _u
 }
@@ -190,43 +190,43 @@ func (_u *UserUpdate) ClearPassword() *UserUpdate {
 }
 
 // SetRole sets the "role" field.
-func (_u *UserUpdate) SetRole(u user.Role) *UserUpdate {
-	_u.mutation.SetRole(u)
+func (_u *UserUpdate) SetRole(v user.Role) *UserUpdate {
+	_u.mutation.SetRole(v)
 	return _u
 }
 
 // SetNillableRole sets the "role" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableRole(u *user.Role) *UserUpdate {
-	if u != nil {
-		_u.SetRole(*u)
+func (_u *UserUpdate) SetNillableRole(v *user.Role) *UserUpdate {
+	if v != nil {
+		_u.SetRole(*v)
 	}
 	return _u
 }
 
 // SetEmployment sets the "employment" field.
-func (_u *UserUpdate) SetEmployment(u user.Employment) *UserUpdate {
-	_u.mutation.SetEmployment(u)
+func (_u *UserUpdate) SetEmployment(v user.Employment) *UserUpdate {
+	_u.mutation.SetEmployment(v)
 	return _u
 }
 
 // SetNillableEmployment sets the "employment" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableEmployment(u *user.Employment) *UserUpdate {
-	if u != nil {
-		_u.SetEmployment(*u)
+func (_u *UserUpdate) SetNillableEmployment(v *user.Employment) *UserUpdate {
+	if v != nil {
+		_u.SetEmployment(*v)
 	}
 	return _u
 }
 
 // SetSSOCert sets the "SSOCert" field.
-func (_u *UserUpdate) SetSSOCert(s string) *UserUpdate {
-	_u.mutation.SetSSOCert(s)
+func (_u *UserUpdate) SetSSOCert(v string) *UserUpdate {
+	_u.mutation.SetSSOCert(v)
 	return _u
 }
 
 // SetNillableSSOCert sets the "SSOCert" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableSSOCert(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetSSOCert(*s)
+func (_u *UserUpdate) SetNillableSSOCert(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetSSOCert(*v)
 	}
 	return _u
 }
@@ -238,23 +238,23 @@ func (_u *UserUpdate) ClearSSOCert() *UserUpdate {
 }
 
 // SetFilesCount sets the "files_count" field.
-func (_u *UserUpdate) SetFilesCount(i int) *UserUpdate {
+func (_u *UserUpdate) SetFilesCount(v int) *UserUpdate {
 	_u.mutation.ResetFilesCount()
-	_u.mutation.SetFilesCount(i)
+	_u.mutation.SetFilesCount(v)
 	return _u
 }
 
 // SetNillableFilesCount sets the "files_count" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableFilesCount(i *int) *UserUpdate {
-	if i != nil {
-		_u.SetFilesCount(*i)
+func (_u *UserUpdate) SetNillableFilesCount(v *int) *UserUpdate {
+	if v != nil {
+		_u.SetFilesCount(*v)
 	}
 	return _u
 }
 
-// AddFilesCount adds i to the "files_count" field.
-func (_u *UserUpdate) AddFilesCount(i int) *UserUpdate {
-	_u.mutation.AddFilesCount(i)
+// AddFilesCount adds value to the "files_count" field.
+func (_u *UserUpdate) AddFilesCount(v int) *UserUpdate {
+	_u.mutation.AddFilesCount(v)
 	return _u
 }
 
@@ -279,8 +279,8 @@ func (_u *UserUpdate) SetNillableCardID(id *string) *UserUpdate {
 }
 
 // SetCard sets the "card" edge to the Card entity.
-func (_u *UserUpdate) SetCard(c *Card) *UserUpdate {
-	return _u.SetCardID(c.ID)
+func (_u *UserUpdate) SetCard(v *Card) *UserUpdate {
+	return _u.SetCardID(v.ID)
 }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
@@ -290,10 +290,10 @@ func (_u *UserUpdate) AddPetIDs(ids ...string) *UserUpdate {
 }
 
 // AddPets adds the "pets" edges to the Pet entity.
-func (_u *UserUpdate) AddPets(p ...*Pet) *UserUpdate {
-	ids := make([]string, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *UserUpdate) AddPets(v ...*Pet) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddPetIDs(ids...)
 }
@@ -305,10 +305,10 @@ func (_u *UserUpdate) AddFileIDs(ids ...string) *UserUpdate {
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (_u *UserUpdate) AddFiles(f ...*File) *UserUpdate {
-	ids := make([]string, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *UserUpdate) AddFiles(v ...*File) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFileIDs(ids...)
 }
@@ -320,10 +320,10 @@ func (_u *UserUpdate) AddGroupIDs(ids ...string) *UserUpdate {
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (_u *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
-	ids := make([]string, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *UserUpdate) AddGroups(v ...*Group) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddGroupIDs(ids...)
 }
@@ -335,10 +335,10 @@ func (_u *UserUpdate) AddFriendIDs(ids ...string) *UserUpdate {
 }
 
 // AddFriends adds the "friends" edges to the User entity.
-func (_u *UserUpdate) AddFriends(u ...*User) *UserUpdate {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) AddFriends(v ...*User) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFriendIDs(ids...)
 }
@@ -350,10 +350,10 @@ func (_u *UserUpdate) AddFollowerIDs(ids ...string) *UserUpdate {
 }
 
 // AddFollowers adds the "followers" edges to the User entity.
-func (_u *UserUpdate) AddFollowers(u ...*User) *UserUpdate {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) AddFollowers(v ...*User) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFollowerIDs(ids...)
 }
@@ -365,10 +365,10 @@ func (_u *UserUpdate) AddFollowingIDs(ids ...string) *UserUpdate {
 }
 
 // AddFollowing adds the "following" edges to the User entity.
-func (_u *UserUpdate) AddFollowing(u ...*User) *UserUpdate {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) AddFollowing(v ...*User) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFollowingIDs(ids...)
 }
@@ -388,8 +388,8 @@ func (_u *UserUpdate) SetNillableTeamID(id *string) *UserUpdate {
 }
 
 // SetTeam sets the "team" edge to the Pet entity.
-func (_u *UserUpdate) SetTeam(p *Pet) *UserUpdate {
-	return _u.SetTeamID(p.ID)
+func (_u *UserUpdate) SetTeam(v *Pet) *UserUpdate {
+	return _u.SetTeamID(v.ID)
 }
 
 // SetSpouseID sets the "spouse" edge to the User entity by ID.
@@ -407,8 +407,8 @@ func (_u *UserUpdate) SetNillableSpouseID(id *string) *UserUpdate {
 }
 
 // SetSpouse sets the "spouse" edge to the User entity.
-func (_u *UserUpdate) SetSpouse(u *User) *UserUpdate {
-	return _u.SetSpouseID(u.ID)
+func (_u *UserUpdate) SetSpouse(v *User) *UserUpdate {
+	return _u.SetSpouseID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
@@ -418,10 +418,10 @@ func (_u *UserUpdate) AddChildIDs(ids ...string) *UserUpdate {
 }
 
 // AddChildren adds the "children" edges to the User entity.
-func (_u *UserUpdate) AddChildren(u ...*User) *UserUpdate {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) AddChildren(v ...*User) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
@@ -441,8 +441,8 @@ func (_u *UserUpdate) SetNillableParentID(id *string) *UserUpdate {
 }
 
 // SetParent sets the "parent" edge to the User entity.
-func (_u *UserUpdate) SetParent(u *User) *UserUpdate {
-	return _u.SetParentID(u.ID)
+func (_u *UserUpdate) SetParent(v *User) *UserUpdate {
+	return _u.SetParentID(v.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -469,10 +469,10 @@ func (_u *UserUpdate) RemovePetIDs(ids ...string) *UserUpdate {
 }
 
 // RemovePets removes "pets" edges to Pet entities.
-func (_u *UserUpdate) RemovePets(p ...*Pet) *UserUpdate {
-	ids := make([]string, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *UserUpdate) RemovePets(v ...*Pet) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemovePetIDs(ids...)
 }
@@ -490,10 +490,10 @@ func (_u *UserUpdate) RemoveFileIDs(ids ...string) *UserUpdate {
 }
 
 // RemoveFiles removes "files" edges to File entities.
-func (_u *UserUpdate) RemoveFiles(f ...*File) *UserUpdate {
-	ids := make([]string, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *UserUpdate) RemoveFiles(v ...*File) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFileIDs(ids...)
 }
@@ -511,10 +511,10 @@ func (_u *UserUpdate) RemoveGroupIDs(ids ...string) *UserUpdate {
 }
 
 // RemoveGroups removes "groups" edges to Group entities.
-func (_u *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
-	ids := make([]string, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *UserUpdate) RemoveGroups(v ...*Group) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveGroupIDs(ids...)
 }
@@ -532,10 +532,10 @@ func (_u *UserUpdate) RemoveFriendIDs(ids ...string) *UserUpdate {
 }
 
 // RemoveFriends removes "friends" edges to User entities.
-func (_u *UserUpdate) RemoveFriends(u ...*User) *UserUpdate {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) RemoveFriends(v ...*User) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFriendIDs(ids...)
 }
@@ -553,10 +553,10 @@ func (_u *UserUpdate) RemoveFollowerIDs(ids ...string) *UserUpdate {
 }
 
 // RemoveFollowers removes "followers" edges to User entities.
-func (_u *UserUpdate) RemoveFollowers(u ...*User) *UserUpdate {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) RemoveFollowers(v ...*User) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFollowerIDs(ids...)
 }
@@ -574,10 +574,10 @@ func (_u *UserUpdate) RemoveFollowingIDs(ids ...string) *UserUpdate {
 }
 
 // RemoveFollowing removes "following" edges to User entities.
-func (_u *UserUpdate) RemoveFollowing(u ...*User) *UserUpdate {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) RemoveFollowing(v ...*User) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFollowingIDs(ids...)
 }
@@ -607,10 +607,10 @@ func (_u *UserUpdate) RemoveChildIDs(ids ...string) *UserUpdate {
 }
 
 // RemoveChildren removes "children" edges to User entities.
-func (_u *UserUpdate) RemoveChildren(u ...*User) *UserUpdate {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) RemoveChildren(v ...*User) *UserUpdate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }
@@ -907,23 +907,23 @@ type UserUpdateOne struct {
 }
 
 // SetOptionalInt sets the "optional_int" field.
-func (_u *UserUpdateOne) SetOptionalInt(i int) *UserUpdateOne {
+func (_u *UserUpdateOne) SetOptionalInt(v int) *UserUpdateOne {
 	_u.mutation.ResetOptionalInt()
-	_u.mutation.SetOptionalInt(i)
+	_u.mutation.SetOptionalInt(v)
 	return _u
 }
 
 // SetNillableOptionalInt sets the "optional_int" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableOptionalInt(i *int) *UserUpdateOne {
-	if i != nil {
-		_u.SetOptionalInt(*i)
+func (_u *UserUpdateOne) SetNillableOptionalInt(v *int) *UserUpdateOne {
+	if v != nil {
+		_u.SetOptionalInt(*v)
 	}
 	return _u
 }
 
-// AddOptionalInt adds i to the "optional_int" field.
-func (_u *UserUpdateOne) AddOptionalInt(i int) *UserUpdateOne {
-	_u.mutation.AddOptionalInt(i)
+// AddOptionalInt adds value to the "optional_int" field.
+func (_u *UserUpdateOne) AddOptionalInt(v int) *UserUpdateOne {
+	_u.mutation.AddOptionalInt(v)
 	return _u
 }
 
@@ -934,64 +934,64 @@ func (_u *UserUpdateOne) ClearOptionalInt() *UserUpdateOne {
 }
 
 // SetAge sets the "age" field.
-func (_u *UserUpdateOne) SetAge(i int) *UserUpdateOne {
+func (_u *UserUpdateOne) SetAge(v int) *UserUpdateOne {
 	_u.mutation.ResetAge()
-	_u.mutation.SetAge(i)
+	_u.mutation.SetAge(v)
 	return _u
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableAge(i *int) *UserUpdateOne {
-	if i != nil {
-		_u.SetAge(*i)
+func (_u *UserUpdateOne) SetNillableAge(v *int) *UserUpdateOne {
+	if v != nil {
+		_u.SetAge(*v)
 	}
 	return _u
 }
 
-// AddAge adds i to the "age" field.
-func (_u *UserUpdateOne) AddAge(i int) *UserUpdateOne {
-	_u.mutation.AddAge(i)
+// AddAge adds value to the "age" field.
+func (_u *UserUpdateOne) AddAge(v int) *UserUpdateOne {
+	_u.mutation.AddAge(v)
 	return _u
 }
 
 // SetName sets the "name" field.
-func (_u *UserUpdateOne) SetName(s string) *UserUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
 
 // SetLast sets the "last" field.
-func (_u *UserUpdateOne) SetLast(s string) *UserUpdateOne {
-	_u.mutation.SetLast(s)
+func (_u *UserUpdateOne) SetLast(v string) *UserUpdateOne {
+	_u.mutation.SetLast(v)
 	return _u
 }
 
 // SetNillableLast sets the "last" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableLast(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetLast(*s)
+func (_u *UserUpdateOne) SetNillableLast(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetLast(*v)
 	}
 	return _u
 }
 
 // SetNickname sets the "nickname" field.
-func (_u *UserUpdateOne) SetNickname(s string) *UserUpdateOne {
-	_u.mutation.SetNickname(s)
+func (_u *UserUpdateOne) SetNickname(v string) *UserUpdateOne {
+	_u.mutation.SetNickname(v)
 	return _u
 }
 
 // SetNillableNickname sets the "nickname" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableNickname(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetNickname(*s)
+func (_u *UserUpdateOne) SetNillableNickname(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetNickname(*v)
 	}
 	return _u
 }
@@ -1003,15 +1003,15 @@ func (_u *UserUpdateOne) ClearNickname() *UserUpdateOne {
 }
 
 // SetAddress sets the "address" field.
-func (_u *UserUpdateOne) SetAddress(s string) *UserUpdateOne {
-	_u.mutation.SetAddress(s)
+func (_u *UserUpdateOne) SetAddress(v string) *UserUpdateOne {
+	_u.mutation.SetAddress(v)
 	return _u
 }
 
 // SetNillableAddress sets the "address" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableAddress(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetAddress(*s)
+func (_u *UserUpdateOne) SetNillableAddress(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetAddress(*v)
 	}
 	return _u
 }
@@ -1023,15 +1023,15 @@ func (_u *UserUpdateOne) ClearAddress() *UserUpdateOne {
 }
 
 // SetPhone sets the "phone" field.
-func (_u *UserUpdateOne) SetPhone(s string) *UserUpdateOne {
-	_u.mutation.SetPhone(s)
+func (_u *UserUpdateOne) SetPhone(v string) *UserUpdateOne {
+	_u.mutation.SetPhone(v)
 	return _u
 }
 
 // SetNillablePhone sets the "phone" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillablePhone(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetPhone(*s)
+func (_u *UserUpdateOne) SetNillablePhone(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetPhone(*v)
 	}
 	return _u
 }
@@ -1043,15 +1043,15 @@ func (_u *UserUpdateOne) ClearPhone() *UserUpdateOne {
 }
 
 // SetPassword sets the "password" field.
-func (_u *UserUpdateOne) SetPassword(s string) *UserUpdateOne {
-	_u.mutation.SetPassword(s)
+func (_u *UserUpdateOne) SetPassword(v string) *UserUpdateOne {
+	_u.mutation.SetPassword(v)
 	return _u
 }
 
 // SetNillablePassword sets the "password" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillablePassword(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetPassword(*s)
+func (_u *UserUpdateOne) SetNillablePassword(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetPassword(*v)
 	}
 	return _u
 }
@@ -1063,43 +1063,43 @@ func (_u *UserUpdateOne) ClearPassword() *UserUpdateOne {
 }
 
 // SetRole sets the "role" field.
-func (_u *UserUpdateOne) SetRole(u user.Role) *UserUpdateOne {
-	_u.mutation.SetRole(u)
+func (_u *UserUpdateOne) SetRole(v user.Role) *UserUpdateOne {
+	_u.mutation.SetRole(v)
 	return _u
 }
 
 // SetNillableRole sets the "role" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableRole(u *user.Role) *UserUpdateOne {
-	if u != nil {
-		_u.SetRole(*u)
+func (_u *UserUpdateOne) SetNillableRole(v *user.Role) *UserUpdateOne {
+	if v != nil {
+		_u.SetRole(*v)
 	}
 	return _u
 }
 
 // SetEmployment sets the "employment" field.
-func (_u *UserUpdateOne) SetEmployment(u user.Employment) *UserUpdateOne {
-	_u.mutation.SetEmployment(u)
+func (_u *UserUpdateOne) SetEmployment(v user.Employment) *UserUpdateOne {
+	_u.mutation.SetEmployment(v)
 	return _u
 }
 
 // SetNillableEmployment sets the "employment" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableEmployment(u *user.Employment) *UserUpdateOne {
-	if u != nil {
-		_u.SetEmployment(*u)
+func (_u *UserUpdateOne) SetNillableEmployment(v *user.Employment) *UserUpdateOne {
+	if v != nil {
+		_u.SetEmployment(*v)
 	}
 	return _u
 }
 
 // SetSSOCert sets the "SSOCert" field.
-func (_u *UserUpdateOne) SetSSOCert(s string) *UserUpdateOne {
-	_u.mutation.SetSSOCert(s)
+func (_u *UserUpdateOne) SetSSOCert(v string) *UserUpdateOne {
+	_u.mutation.SetSSOCert(v)
 	return _u
 }
 
 // SetNillableSSOCert sets the "SSOCert" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableSSOCert(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetSSOCert(*s)
+func (_u *UserUpdateOne) SetNillableSSOCert(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetSSOCert(*v)
 	}
 	return _u
 }
@@ -1111,23 +1111,23 @@ func (_u *UserUpdateOne) ClearSSOCert() *UserUpdateOne {
 }
 
 // SetFilesCount sets the "files_count" field.
-func (_u *UserUpdateOne) SetFilesCount(i int) *UserUpdateOne {
+func (_u *UserUpdateOne) SetFilesCount(v int) *UserUpdateOne {
 	_u.mutation.ResetFilesCount()
-	_u.mutation.SetFilesCount(i)
+	_u.mutation.SetFilesCount(v)
 	return _u
 }
 
 // SetNillableFilesCount sets the "files_count" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableFilesCount(i *int) *UserUpdateOne {
-	if i != nil {
-		_u.SetFilesCount(*i)
+func (_u *UserUpdateOne) SetNillableFilesCount(v *int) *UserUpdateOne {
+	if v != nil {
+		_u.SetFilesCount(*v)
 	}
 	return _u
 }
 
-// AddFilesCount adds i to the "files_count" field.
-func (_u *UserUpdateOne) AddFilesCount(i int) *UserUpdateOne {
-	_u.mutation.AddFilesCount(i)
+// AddFilesCount adds value to the "files_count" field.
+func (_u *UserUpdateOne) AddFilesCount(v int) *UserUpdateOne {
+	_u.mutation.AddFilesCount(v)
 	return _u
 }
 
@@ -1152,8 +1152,8 @@ func (_u *UserUpdateOne) SetNillableCardID(id *string) *UserUpdateOne {
 }
 
 // SetCard sets the "card" edge to the Card entity.
-func (_u *UserUpdateOne) SetCard(c *Card) *UserUpdateOne {
-	return _u.SetCardID(c.ID)
+func (_u *UserUpdateOne) SetCard(v *Card) *UserUpdateOne {
+	return _u.SetCardID(v.ID)
 }
 
 // AddPetIDs adds the "pets" edge to the Pet entity by IDs.
@@ -1163,10 +1163,10 @@ func (_u *UserUpdateOne) AddPetIDs(ids ...string) *UserUpdateOne {
 }
 
 // AddPets adds the "pets" edges to the Pet entity.
-func (_u *UserUpdateOne) AddPets(p ...*Pet) *UserUpdateOne {
-	ids := make([]string, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *UserUpdateOne) AddPets(v ...*Pet) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddPetIDs(ids...)
 }
@@ -1178,10 +1178,10 @@ func (_u *UserUpdateOne) AddFileIDs(ids ...string) *UserUpdateOne {
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (_u *UserUpdateOne) AddFiles(f ...*File) *UserUpdateOne {
-	ids := make([]string, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *UserUpdateOne) AddFiles(v ...*File) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFileIDs(ids...)
 }
@@ -1193,10 +1193,10 @@ func (_u *UserUpdateOne) AddGroupIDs(ids ...string) *UserUpdateOne {
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (_u *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
-	ids := make([]string, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *UserUpdateOne) AddGroups(v ...*Group) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddGroupIDs(ids...)
 }
@@ -1208,10 +1208,10 @@ func (_u *UserUpdateOne) AddFriendIDs(ids ...string) *UserUpdateOne {
 }
 
 // AddFriends adds the "friends" edges to the User entity.
-func (_u *UserUpdateOne) AddFriends(u ...*User) *UserUpdateOne {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) AddFriends(v ...*User) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFriendIDs(ids...)
 }
@@ -1223,10 +1223,10 @@ func (_u *UserUpdateOne) AddFollowerIDs(ids ...string) *UserUpdateOne {
 }
 
 // AddFollowers adds the "followers" edges to the User entity.
-func (_u *UserUpdateOne) AddFollowers(u ...*User) *UserUpdateOne {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) AddFollowers(v ...*User) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFollowerIDs(ids...)
 }
@@ -1238,10 +1238,10 @@ func (_u *UserUpdateOne) AddFollowingIDs(ids ...string) *UserUpdateOne {
 }
 
 // AddFollowing adds the "following" edges to the User entity.
-func (_u *UserUpdateOne) AddFollowing(u ...*User) *UserUpdateOne {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) AddFollowing(v ...*User) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFollowingIDs(ids...)
 }
@@ -1261,8 +1261,8 @@ func (_u *UserUpdateOne) SetNillableTeamID(id *string) *UserUpdateOne {
 }
 
 // SetTeam sets the "team" edge to the Pet entity.
-func (_u *UserUpdateOne) SetTeam(p *Pet) *UserUpdateOne {
-	return _u.SetTeamID(p.ID)
+func (_u *UserUpdateOne) SetTeam(v *Pet) *UserUpdateOne {
+	return _u.SetTeamID(v.ID)
 }
 
 // SetSpouseID sets the "spouse" edge to the User entity by ID.
@@ -1280,8 +1280,8 @@ func (_u *UserUpdateOne) SetNillableSpouseID(id *string) *UserUpdateOne {
 }
 
 // SetSpouse sets the "spouse" edge to the User entity.
-func (_u *UserUpdateOne) SetSpouse(u *User) *UserUpdateOne {
-	return _u.SetSpouseID(u.ID)
+func (_u *UserUpdateOne) SetSpouse(v *User) *UserUpdateOne {
+	return _u.SetSpouseID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
@@ -1291,10 +1291,10 @@ func (_u *UserUpdateOne) AddChildIDs(ids ...string) *UserUpdateOne {
 }
 
 // AddChildren adds the "children" edges to the User entity.
-func (_u *UserUpdateOne) AddChildren(u ...*User) *UserUpdateOne {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) AddChildren(v ...*User) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
@@ -1314,8 +1314,8 @@ func (_u *UserUpdateOne) SetNillableParentID(id *string) *UserUpdateOne {
 }
 
 // SetParent sets the "parent" edge to the User entity.
-func (_u *UserUpdateOne) SetParent(u *User) *UserUpdateOne {
-	return _u.SetParentID(u.ID)
+func (_u *UserUpdateOne) SetParent(v *User) *UserUpdateOne {
+	return _u.SetParentID(v.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -1342,10 +1342,10 @@ func (_u *UserUpdateOne) RemovePetIDs(ids ...string) *UserUpdateOne {
 }
 
 // RemovePets removes "pets" edges to Pet entities.
-func (_u *UserUpdateOne) RemovePets(p ...*Pet) *UserUpdateOne {
-	ids := make([]string, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_u *UserUpdateOne) RemovePets(v ...*Pet) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemovePetIDs(ids...)
 }
@@ -1363,10 +1363,10 @@ func (_u *UserUpdateOne) RemoveFileIDs(ids ...string) *UserUpdateOne {
 }
 
 // RemoveFiles removes "files" edges to File entities.
-func (_u *UserUpdateOne) RemoveFiles(f ...*File) *UserUpdateOne {
-	ids := make([]string, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *UserUpdateOne) RemoveFiles(v ...*File) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFileIDs(ids...)
 }
@@ -1384,10 +1384,10 @@ func (_u *UserUpdateOne) RemoveGroupIDs(ids ...string) *UserUpdateOne {
 }
 
 // RemoveGroups removes "groups" edges to Group entities.
-func (_u *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
-	ids := make([]string, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *UserUpdateOne) RemoveGroups(v ...*Group) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveGroupIDs(ids...)
 }
@@ -1405,10 +1405,10 @@ func (_u *UserUpdateOne) RemoveFriendIDs(ids ...string) *UserUpdateOne {
 }
 
 // RemoveFriends removes "friends" edges to User entities.
-func (_u *UserUpdateOne) RemoveFriends(u ...*User) *UserUpdateOne {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) RemoveFriends(v ...*User) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFriendIDs(ids...)
 }
@@ -1426,10 +1426,10 @@ func (_u *UserUpdateOne) RemoveFollowerIDs(ids ...string) *UserUpdateOne {
 }
 
 // RemoveFollowers removes "followers" edges to User entities.
-func (_u *UserUpdateOne) RemoveFollowers(u ...*User) *UserUpdateOne {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) RemoveFollowers(v ...*User) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFollowerIDs(ids...)
 }
@@ -1447,10 +1447,10 @@ func (_u *UserUpdateOne) RemoveFollowingIDs(ids ...string) *UserUpdateOne {
 }
 
 // RemoveFollowing removes "following" edges to User entities.
-func (_u *UserUpdateOne) RemoveFollowing(u ...*User) *UserUpdateOne {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) RemoveFollowing(v ...*User) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFollowingIDs(ids...)
 }
@@ -1480,10 +1480,10 @@ func (_u *UserUpdateOne) RemoveChildIDs(ids ...string) *UserUpdateOne {
 }
 
 // RemoveChildren removes "children" edges to User entities.
-func (_u *UserUpdateOne) RemoveChildren(u ...*User) *UserUpdateOne {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) RemoveChildren(v ...*User) *UserUpdateOne {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }

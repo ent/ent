@@ -25,36 +25,36 @@ type PetCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *PetCreate) SetName(s string) *PetCreate {
-	_c.mutation.SetName(s)
+func (_c *PetCreate) SetName(v string) *PetCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_c *PetCreate) SetNillableName(s *string) *PetCreate {
-	if s != nil {
-		_c.SetName(*s)
+func (_c *PetCreate) SetNillableName(v *string) *PetCreate {
+	if v != nil {
+		_c.SetName(*v)
 	}
 	return _c
 }
 
 // SetOwnerID sets the "owner_id" field.
-func (_c *PetCreate) SetOwnerID(i int) *PetCreate {
-	_c.mutation.SetOwnerID(i)
+func (_c *PetCreate) SetOwnerID(v int) *PetCreate {
+	_c.mutation.SetOwnerID(v)
 	return _c
 }
 
 // SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (_c *PetCreate) SetNillableOwnerID(i *int) *PetCreate {
-	if i != nil {
-		_c.SetOwnerID(*i)
+func (_c *PetCreate) SetNillableOwnerID(v *int) *PetCreate {
+	if v != nil {
+		_c.SetOwnerID(*v)
 	}
 	return _c
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_c *PetCreate) SetOwner(u *User) *PetCreate {
-	return _c.SetOwnerID(u.ID)
+func (_c *PetCreate) SetOwner(v *User) *PetCreate {
+	return _c.SetOwnerID(v.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.

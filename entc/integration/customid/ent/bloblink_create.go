@@ -29,39 +29,39 @@ type BlobLinkCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *BlobLinkCreate) SetCreatedAt(t time.Time) *BlobLinkCreate {
-	_c.mutation.SetCreatedAt(t)
+func (_c *BlobLinkCreate) SetCreatedAt(v time.Time) *BlobLinkCreate {
+	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *BlobLinkCreate) SetNillableCreatedAt(t *time.Time) *BlobLinkCreate {
-	if t != nil {
-		_c.SetCreatedAt(*t)
+func (_c *BlobLinkCreate) SetNillableCreatedAt(v *time.Time) *BlobLinkCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
 	return _c
 }
 
 // SetBlobID sets the "blob_id" field.
-func (_c *BlobLinkCreate) SetBlobID(u uuid.UUID) *BlobLinkCreate {
-	_c.mutation.SetBlobID(u)
+func (_c *BlobLinkCreate) SetBlobID(v uuid.UUID) *BlobLinkCreate {
+	_c.mutation.SetBlobID(v)
 	return _c
 }
 
 // SetLinkID sets the "link_id" field.
-func (_c *BlobLinkCreate) SetLinkID(u uuid.UUID) *BlobLinkCreate {
-	_c.mutation.SetLinkID(u)
+func (_c *BlobLinkCreate) SetLinkID(v uuid.UUID) *BlobLinkCreate {
+	_c.mutation.SetLinkID(v)
 	return _c
 }
 
 // SetBlob sets the "blob" edge to the Blob entity.
-func (_c *BlobLinkCreate) SetBlob(b *Blob) *BlobLinkCreate {
-	return _c.SetBlobID(b.ID)
+func (_c *BlobLinkCreate) SetBlob(v *Blob) *BlobLinkCreate {
+	return _c.SetBlobID(v.ID)
 }
 
 // SetLink sets the "link" edge to the Blob entity.
-func (_c *BlobLinkCreate) SetLink(b *Blob) *BlobLinkCreate {
-	return _c.SetLinkID(b.ID)
+func (_c *BlobLinkCreate) SetLink(v *Blob) *BlobLinkCreate {
+	return _c.SetLinkID(v.ID)
 }
 
 // Mutation returns the BlobLinkMutation object of the builder.

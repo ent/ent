@@ -33,50 +33,50 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 }
 
 // SetAge sets the "age" field.
-func (_u *UserUpdate) SetAge(i int32) *UserUpdate {
+func (_u *UserUpdate) SetAge(v int32) *UserUpdate {
 	_u.mutation.ResetAge()
-	_u.mutation.SetAge(i)
+	_u.mutation.SetAge(v)
 	return _u
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableAge(i *int32) *UserUpdate {
-	if i != nil {
-		_u.SetAge(*i)
+func (_u *UserUpdate) SetNillableAge(v *int32) *UserUpdate {
+	if v != nil {
+		_u.SetAge(*v)
 	}
 	return _u
 }
 
-// AddAge adds i to the "age" field.
-func (_u *UserUpdate) AddAge(i int32) *UserUpdate {
-	_u.mutation.AddAge(i)
+// AddAge adds value to the "age" field.
+func (_u *UserUpdate) AddAge(v int32) *UserUpdate {
+	_u.mutation.AddAge(v)
 	return _u
 }
 
 // SetName sets the "name" field.
-func (_u *UserUpdate) SetName(s string) *UserUpdate {
-	_u.mutation.SetName(s)
+func (_u *UserUpdate) SetName(v string) *UserUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableName(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
 
 // SetDescription sets the "description" field.
-func (_u *UserUpdate) SetDescription(s string) *UserUpdate {
-	_u.mutation.SetDescription(s)
+func (_u *UserUpdate) SetDescription(v string) *UserUpdate {
+	_u.mutation.SetDescription(v)
 	return _u
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableDescription(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetDescription(*s)
+func (_u *UserUpdate) SetNillableDescription(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetDescription(*v)
 	}
 	return _u
 }
@@ -88,29 +88,29 @@ func (_u *UserUpdate) ClearDescription() *UserUpdate {
 }
 
 // SetNickname sets the "nickname" field.
-func (_u *UserUpdate) SetNickname(s string) *UserUpdate {
-	_u.mutation.SetNickname(s)
+func (_u *UserUpdate) SetNickname(v string) *UserUpdate {
+	_u.mutation.SetNickname(v)
 	return _u
 }
 
 // SetNillableNickname sets the "nickname" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableNickname(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetNickname(*s)
+func (_u *UserUpdate) SetNillableNickname(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetNickname(*v)
 	}
 	return _u
 }
 
 // SetAddress sets the "address" field.
-func (_u *UserUpdate) SetAddress(s string) *UserUpdate {
-	_u.mutation.SetAddress(s)
+func (_u *UserUpdate) SetAddress(v string) *UserUpdate {
+	_u.mutation.SetAddress(v)
 	return _u
 }
 
 // SetNillableAddress sets the "address" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableAddress(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetAddress(*s)
+func (_u *UserUpdate) SetNillableAddress(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetAddress(*v)
 	}
 	return _u
 }
@@ -122,15 +122,15 @@ func (_u *UserUpdate) ClearAddress() *UserUpdate {
 }
 
 // SetRenamed sets the "renamed" field.
-func (_u *UserUpdate) SetRenamed(s string) *UserUpdate {
-	_u.mutation.SetRenamed(s)
+func (_u *UserUpdate) SetRenamed(v string) *UserUpdate {
+	_u.mutation.SetRenamed(v)
 	return _u
 }
 
 // SetNillableRenamed sets the "renamed" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableRenamed(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetRenamed(*s)
+func (_u *UserUpdate) SetNillableRenamed(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetRenamed(*v)
 	}
 	return _u
 }
@@ -142,22 +142,22 @@ func (_u *UserUpdate) ClearRenamed() *UserUpdate {
 }
 
 // SetOldToken sets the "old_token" field.
-func (_u *UserUpdate) SetOldToken(s string) *UserUpdate {
-	_u.mutation.SetOldToken(s)
+func (_u *UserUpdate) SetOldToken(v string) *UserUpdate {
+	_u.mutation.SetOldToken(v)
 	return _u
 }
 
 // SetNillableOldToken sets the "old_token" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableOldToken(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetOldToken(*s)
+func (_u *UserUpdate) SetNillableOldToken(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetOldToken(*v)
 	}
 	return _u
 }
 
 // SetBlob sets the "blob" field.
-func (_u *UserUpdate) SetBlob(b []byte) *UserUpdate {
-	_u.mutation.SetBlob(b)
+func (_u *UserUpdate) SetBlob(v []byte) *UserUpdate {
+	_u.mutation.SetBlob(v)
 	return _u
 }
 
@@ -168,15 +168,15 @@ func (_u *UserUpdate) ClearBlob() *UserUpdate {
 }
 
 // SetState sets the "state" field.
-func (_u *UserUpdate) SetState(u user.State) *UserUpdate {
-	_u.mutation.SetState(u)
+func (_u *UserUpdate) SetState(v user.State) *UserUpdate {
+	_u.mutation.SetState(v)
 	return _u
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableState(u *user.State) *UserUpdate {
-	if u != nil {
-		_u.SetState(*u)
+func (_u *UserUpdate) SetNillableState(v *user.State) *UserUpdate {
+	if v != nil {
+		_u.SetState(*v)
 	}
 	return _u
 }
@@ -188,15 +188,15 @@ func (_u *UserUpdate) ClearState() *UserUpdate {
 }
 
 // SetStatus sets the "status" field.
-func (_u *UserUpdate) SetStatus(s string) *UserUpdate {
-	_u.mutation.SetStatus(s)
+func (_u *UserUpdate) SetStatus(v string) *UserUpdate {
+	_u.mutation.SetStatus(v)
 	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableStatus(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetStatus(*s)
+func (_u *UserUpdate) SetNillableStatus(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
 	return _u
 }
@@ -208,15 +208,15 @@ func (_u *UserUpdate) ClearStatus() *UserUpdate {
 }
 
 // SetWorkplace sets the "workplace" field.
-func (_u *UserUpdate) SetWorkplace(s string) *UserUpdate {
-	_u.mutation.SetWorkplace(s)
+func (_u *UserUpdate) SetWorkplace(v string) *UserUpdate {
+	_u.mutation.SetWorkplace(v)
 	return _u
 }
 
 // SetNillableWorkplace sets the "workplace" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableWorkplace(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetWorkplace(*s)
+func (_u *UserUpdate) SetNillableWorkplace(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetWorkplace(*v)
 	}
 	return _u
 }
@@ -228,15 +228,15 @@ func (_u *UserUpdate) ClearWorkplace() *UserUpdate {
 }
 
 // SetDropOptional sets the "drop_optional" field.
-func (_u *UserUpdate) SetDropOptional(s string) *UserUpdate {
-	_u.mutation.SetDropOptional(s)
+func (_u *UserUpdate) SetDropOptional(v string) *UserUpdate {
+	_u.mutation.SetDropOptional(v)
 	return _u
 }
 
 // SetNillableDropOptional sets the "drop_optional" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableDropOptional(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetDropOptional(*s)
+func (_u *UserUpdate) SetNillableDropOptional(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetDropOptional(*v)
 	}
 	return _u
 }
@@ -262,8 +262,8 @@ func (_u *UserUpdate) SetNillableParentID(id *int) *UserUpdate {
 }
 
 // SetParent sets the "parent" edge to the User entity.
-func (_u *UserUpdate) SetParent(u *User) *UserUpdate {
-	return _u.SetParentID(u.ID)
+func (_u *UserUpdate) SetParent(v *User) *UserUpdate {
+	return _u.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
@@ -273,10 +273,10 @@ func (_u *UserUpdate) AddChildIDs(ids ...int) *UserUpdate {
 }
 
 // AddChildren adds the "children" edges to the User entity.
-func (_u *UserUpdate) AddChildren(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) AddChildren(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
@@ -296,8 +296,8 @@ func (_u *UserUpdate) SetNillableSpouseID(id *int) *UserUpdate {
 }
 
 // SetSpouse sets the "spouse" edge to the User entity.
-func (_u *UserUpdate) SetSpouse(u *User) *UserUpdate {
-	return _u.SetSpouseID(u.ID)
+func (_u *UserUpdate) SetSpouse(v *User) *UserUpdate {
+	return _u.SetSpouseID(v.ID)
 }
 
 // SetCarID sets the "car" edge to the Car entity by ID.
@@ -315,8 +315,8 @@ func (_u *UserUpdate) SetNillableCarID(id *int) *UserUpdate {
 }
 
 // SetCar sets the "car" edge to the Car entity.
-func (_u *UserUpdate) SetCar(c *Car) *UserUpdate {
-	return _u.SetCarID(c.ID)
+func (_u *UserUpdate) SetCar(v *Car) *UserUpdate {
+	return _u.SetCarID(v.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -343,10 +343,10 @@ func (_u *UserUpdate) RemoveChildIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveChildren removes "children" edges to User entities.
-func (_u *UserUpdate) RemoveChildren(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) RemoveChildren(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }
@@ -415,9 +415,9 @@ func (_u *UserUpdate) check() error {
 	return nil
 }
 
-func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -622,7 +622,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -631,7 +631,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -643,50 +643,50 @@ type UserUpdateOne struct {
 }
 
 // SetAge sets the "age" field.
-func (_u *UserUpdateOne) SetAge(i int32) *UserUpdateOne {
+func (_u *UserUpdateOne) SetAge(v int32) *UserUpdateOne {
 	_u.mutation.ResetAge()
-	_u.mutation.SetAge(i)
+	_u.mutation.SetAge(v)
 	return _u
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableAge(i *int32) *UserUpdateOne {
-	if i != nil {
-		_u.SetAge(*i)
+func (_u *UserUpdateOne) SetNillableAge(v *int32) *UserUpdateOne {
+	if v != nil {
+		_u.SetAge(*v)
 	}
 	return _u
 }
 
-// AddAge adds i to the "age" field.
-func (_u *UserUpdateOne) AddAge(i int32) *UserUpdateOne {
-	_u.mutation.AddAge(i)
+// AddAge adds value to the "age" field.
+func (_u *UserUpdateOne) AddAge(v int32) *UserUpdateOne {
+	_u.mutation.AddAge(v)
 	return _u
 }
 
 // SetName sets the "name" field.
-func (_u *UserUpdateOne) SetName(s string) *UserUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
 
 // SetDescription sets the "description" field.
-func (_u *UserUpdateOne) SetDescription(s string) *UserUpdateOne {
-	_u.mutation.SetDescription(s)
+func (_u *UserUpdateOne) SetDescription(v string) *UserUpdateOne {
+	_u.mutation.SetDescription(v)
 	return _u
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableDescription(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetDescription(*s)
+func (_u *UserUpdateOne) SetNillableDescription(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetDescription(*v)
 	}
 	return _u
 }
@@ -698,29 +698,29 @@ func (_u *UserUpdateOne) ClearDescription() *UserUpdateOne {
 }
 
 // SetNickname sets the "nickname" field.
-func (_u *UserUpdateOne) SetNickname(s string) *UserUpdateOne {
-	_u.mutation.SetNickname(s)
+func (_u *UserUpdateOne) SetNickname(v string) *UserUpdateOne {
+	_u.mutation.SetNickname(v)
 	return _u
 }
 
 // SetNillableNickname sets the "nickname" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableNickname(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetNickname(*s)
+func (_u *UserUpdateOne) SetNillableNickname(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetNickname(*v)
 	}
 	return _u
 }
 
 // SetAddress sets the "address" field.
-func (_u *UserUpdateOne) SetAddress(s string) *UserUpdateOne {
-	_u.mutation.SetAddress(s)
+func (_u *UserUpdateOne) SetAddress(v string) *UserUpdateOne {
+	_u.mutation.SetAddress(v)
 	return _u
 }
 
 // SetNillableAddress sets the "address" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableAddress(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetAddress(*s)
+func (_u *UserUpdateOne) SetNillableAddress(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetAddress(*v)
 	}
 	return _u
 }
@@ -732,15 +732,15 @@ func (_u *UserUpdateOne) ClearAddress() *UserUpdateOne {
 }
 
 // SetRenamed sets the "renamed" field.
-func (_u *UserUpdateOne) SetRenamed(s string) *UserUpdateOne {
-	_u.mutation.SetRenamed(s)
+func (_u *UserUpdateOne) SetRenamed(v string) *UserUpdateOne {
+	_u.mutation.SetRenamed(v)
 	return _u
 }
 
 // SetNillableRenamed sets the "renamed" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableRenamed(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetRenamed(*s)
+func (_u *UserUpdateOne) SetNillableRenamed(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetRenamed(*v)
 	}
 	return _u
 }
@@ -752,22 +752,22 @@ func (_u *UserUpdateOne) ClearRenamed() *UserUpdateOne {
 }
 
 // SetOldToken sets the "old_token" field.
-func (_u *UserUpdateOne) SetOldToken(s string) *UserUpdateOne {
-	_u.mutation.SetOldToken(s)
+func (_u *UserUpdateOne) SetOldToken(v string) *UserUpdateOne {
+	_u.mutation.SetOldToken(v)
 	return _u
 }
 
 // SetNillableOldToken sets the "old_token" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableOldToken(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetOldToken(*s)
+func (_u *UserUpdateOne) SetNillableOldToken(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetOldToken(*v)
 	}
 	return _u
 }
 
 // SetBlob sets the "blob" field.
-func (_u *UserUpdateOne) SetBlob(b []byte) *UserUpdateOne {
-	_u.mutation.SetBlob(b)
+func (_u *UserUpdateOne) SetBlob(v []byte) *UserUpdateOne {
+	_u.mutation.SetBlob(v)
 	return _u
 }
 
@@ -778,15 +778,15 @@ func (_u *UserUpdateOne) ClearBlob() *UserUpdateOne {
 }
 
 // SetState sets the "state" field.
-func (_u *UserUpdateOne) SetState(u user.State) *UserUpdateOne {
-	_u.mutation.SetState(u)
+func (_u *UserUpdateOne) SetState(v user.State) *UserUpdateOne {
+	_u.mutation.SetState(v)
 	return _u
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableState(u *user.State) *UserUpdateOne {
-	if u != nil {
-		_u.SetState(*u)
+func (_u *UserUpdateOne) SetNillableState(v *user.State) *UserUpdateOne {
+	if v != nil {
+		_u.SetState(*v)
 	}
 	return _u
 }
@@ -798,15 +798,15 @@ func (_u *UserUpdateOne) ClearState() *UserUpdateOne {
 }
 
 // SetStatus sets the "status" field.
-func (_u *UserUpdateOne) SetStatus(s string) *UserUpdateOne {
-	_u.mutation.SetStatus(s)
+func (_u *UserUpdateOne) SetStatus(v string) *UserUpdateOne {
+	_u.mutation.SetStatus(v)
 	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableStatus(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetStatus(*s)
+func (_u *UserUpdateOne) SetNillableStatus(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
 	return _u
 }
@@ -818,15 +818,15 @@ func (_u *UserUpdateOne) ClearStatus() *UserUpdateOne {
 }
 
 // SetWorkplace sets the "workplace" field.
-func (_u *UserUpdateOne) SetWorkplace(s string) *UserUpdateOne {
-	_u.mutation.SetWorkplace(s)
+func (_u *UserUpdateOne) SetWorkplace(v string) *UserUpdateOne {
+	_u.mutation.SetWorkplace(v)
 	return _u
 }
 
 // SetNillableWorkplace sets the "workplace" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableWorkplace(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetWorkplace(*s)
+func (_u *UserUpdateOne) SetNillableWorkplace(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetWorkplace(*v)
 	}
 	return _u
 }
@@ -838,15 +838,15 @@ func (_u *UserUpdateOne) ClearWorkplace() *UserUpdateOne {
 }
 
 // SetDropOptional sets the "drop_optional" field.
-func (_u *UserUpdateOne) SetDropOptional(s string) *UserUpdateOne {
-	_u.mutation.SetDropOptional(s)
+func (_u *UserUpdateOne) SetDropOptional(v string) *UserUpdateOne {
+	_u.mutation.SetDropOptional(v)
 	return _u
 }
 
 // SetNillableDropOptional sets the "drop_optional" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableDropOptional(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetDropOptional(*s)
+func (_u *UserUpdateOne) SetNillableDropOptional(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetDropOptional(*v)
 	}
 	return _u
 }
@@ -872,8 +872,8 @@ func (_u *UserUpdateOne) SetNillableParentID(id *int) *UserUpdateOne {
 }
 
 // SetParent sets the "parent" edge to the User entity.
-func (_u *UserUpdateOne) SetParent(u *User) *UserUpdateOne {
-	return _u.SetParentID(u.ID)
+func (_u *UserUpdateOne) SetParent(v *User) *UserUpdateOne {
+	return _u.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
@@ -883,10 +883,10 @@ func (_u *UserUpdateOne) AddChildIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddChildren adds the "children" edges to the User entity.
-func (_u *UserUpdateOne) AddChildren(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) AddChildren(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddChildIDs(ids...)
 }
@@ -906,8 +906,8 @@ func (_u *UserUpdateOne) SetNillableSpouseID(id *int) *UserUpdateOne {
 }
 
 // SetSpouse sets the "spouse" edge to the User entity.
-func (_u *UserUpdateOne) SetSpouse(u *User) *UserUpdateOne {
-	return _u.SetSpouseID(u.ID)
+func (_u *UserUpdateOne) SetSpouse(v *User) *UserUpdateOne {
+	return _u.SetSpouseID(v.ID)
 }
 
 // SetCarID sets the "car" edge to the Car entity by ID.
@@ -925,8 +925,8 @@ func (_u *UserUpdateOne) SetNillableCarID(id *int) *UserUpdateOne {
 }
 
 // SetCar sets the "car" edge to the Car entity.
-func (_u *UserUpdateOne) SetCar(c *Car) *UserUpdateOne {
-	return _u.SetCarID(c.ID)
+func (_u *UserUpdateOne) SetCar(v *Car) *UserUpdateOne {
+	return _u.SetCarID(v.ID)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -953,10 +953,10 @@ func (_u *UserUpdateOne) RemoveChildIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveChildren removes "children" edges to User entities.
-func (_u *UserUpdateOne) RemoveChildren(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) RemoveChildren(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveChildIDs(ids...)
 }

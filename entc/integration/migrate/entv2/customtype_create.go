@@ -24,43 +24,43 @@ type CustomTypeCreate struct {
 }
 
 // SetCustom sets the "custom" field.
-func (_c *CustomTypeCreate) SetCustom(s string) *CustomTypeCreate {
-	_c.mutation.SetCustom(s)
+func (_c *CustomTypeCreate) SetCustom(v string) *CustomTypeCreate {
+	_c.mutation.SetCustom(v)
 	return _c
 }
 
 // SetNillableCustom sets the "custom" field if the given value is not nil.
-func (_c *CustomTypeCreate) SetNillableCustom(s *string) *CustomTypeCreate {
-	if s != nil {
-		_c.SetCustom(*s)
+func (_c *CustomTypeCreate) SetNillableCustom(v *string) *CustomTypeCreate {
+	if v != nil {
+		_c.SetCustom(*v)
 	}
 	return _c
 }
 
 // SetTz0 sets the "tz0" field.
-func (_c *CustomTypeCreate) SetTz0(t time.Time) *CustomTypeCreate {
-	_c.mutation.SetTz0(t)
+func (_c *CustomTypeCreate) SetTz0(v time.Time) *CustomTypeCreate {
+	_c.mutation.SetTz0(v)
 	return _c
 }
 
 // SetNillableTz0 sets the "tz0" field if the given value is not nil.
-func (_c *CustomTypeCreate) SetNillableTz0(t *time.Time) *CustomTypeCreate {
-	if t != nil {
-		_c.SetTz0(*t)
+func (_c *CustomTypeCreate) SetNillableTz0(v *time.Time) *CustomTypeCreate {
+	if v != nil {
+		_c.SetTz0(*v)
 	}
 	return _c
 }
 
 // SetTz3 sets the "tz3" field.
-func (_c *CustomTypeCreate) SetTz3(t time.Time) *CustomTypeCreate {
-	_c.mutation.SetTz3(t)
+func (_c *CustomTypeCreate) SetTz3(v time.Time) *CustomTypeCreate {
+	_c.mutation.SetTz3(v)
 	return _c
 }
 
 // SetNillableTz3 sets the "tz3" field if the given value is not nil.
-func (_c *CustomTypeCreate) SetNillableTz3(t *time.Time) *CustomTypeCreate {
-	if t != nil {
-		_c.SetTz3(*t)
+func (_c *CustomTypeCreate) SetNillableTz3(v *time.Time) *CustomTypeCreate {
+	if v != nil {
+		_c.SetTz3(*v)
 	}
 	return _c
 }

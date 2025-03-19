@@ -28,21 +28,21 @@ type RoleCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *RoleCreate) SetName(s string) *RoleCreate {
-	_c.mutation.SetName(s)
+func (_c *RoleCreate) SetName(v string) *RoleCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *RoleCreate) SetCreatedAt(t time.Time) *RoleCreate {
-	_c.mutation.SetCreatedAt(t)
+func (_c *RoleCreate) SetCreatedAt(v time.Time) *RoleCreate {
+	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *RoleCreate) SetNillableCreatedAt(t *time.Time) *RoleCreate {
-	if t != nil {
-		_c.SetCreatedAt(*t)
+func (_c *RoleCreate) SetNillableCreatedAt(v *time.Time) *RoleCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
 	return _c
 }
@@ -54,10 +54,10 @@ func (_c *RoleCreate) AddUserIDs(ids ...int) *RoleCreate {
 }
 
 // AddUser adds the "user" edges to the User entity.
-func (_c *RoleCreate) AddUser(u ...*User) *RoleCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *RoleCreate) AddUser(v ...*User) *RoleCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddUserIDs(ids...)
 }

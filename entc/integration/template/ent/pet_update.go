@@ -34,36 +34,36 @@ func (_u *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 }
 
 // SetAge sets the "age" field.
-func (_u *PetUpdate) SetAge(i int) *PetUpdate {
+func (_u *PetUpdate) SetAge(v int) *PetUpdate {
 	_u.mutation.ResetAge()
-	_u.mutation.SetAge(i)
+	_u.mutation.SetAge(v)
 	return _u
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *PetUpdate) SetNillableAge(i *int) *PetUpdate {
-	if i != nil {
-		_u.SetAge(*i)
+func (_u *PetUpdate) SetNillableAge(v *int) *PetUpdate {
+	if v != nil {
+		_u.SetAge(*v)
 	}
 	return _u
 }
 
-// AddAge adds i to the "age" field.
-func (_u *PetUpdate) AddAge(i int) *PetUpdate {
-	_u.mutation.AddAge(i)
+// AddAge adds value to the "age" field.
+func (_u *PetUpdate) AddAge(v int) *PetUpdate {
+	_u.mutation.AddAge(v)
 	return _u
 }
 
 // SetLicensedAt sets the "licensed_at" field.
-func (_u *PetUpdate) SetLicensedAt(t time.Time) *PetUpdate {
-	_u.mutation.SetLicensedAt(t)
+func (_u *PetUpdate) SetLicensedAt(v time.Time) *PetUpdate {
+	_u.mutation.SetLicensedAt(v)
 	return _u
 }
 
 // SetNillableLicensedAt sets the "licensed_at" field if the given value is not nil.
-func (_u *PetUpdate) SetNillableLicensedAt(t *time.Time) *PetUpdate {
-	if t != nil {
-		_u.SetLicensedAt(*t)
+func (_u *PetUpdate) SetNillableLicensedAt(v *time.Time) *PetUpdate {
+	if v != nil {
+		_u.SetLicensedAt(*v)
 	}
 	return _u
 }
@@ -89,8 +89,8 @@ func (_u *PetUpdate) SetNillableOwnerID(id *int) *PetUpdate {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *PetUpdate) SetOwner(u *User) *PetUpdate {
-	return _u.SetOwnerID(u.ID)
+func (_u *PetUpdate) SetOwner(v *User) *PetUpdate {
+	return _u.SetOwnerID(v.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.
@@ -131,7 +131,7 @@ func (_u *PetUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *PetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(pet.Table, pet.Columns, sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -181,7 +181,7 @@ func (_u *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{pet.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -190,7 +190,7 @@ func (_u *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // PetUpdateOne is the builder for updating a single Pet entity.
@@ -202,36 +202,36 @@ type PetUpdateOne struct {
 }
 
 // SetAge sets the "age" field.
-func (_u *PetUpdateOne) SetAge(i int) *PetUpdateOne {
+func (_u *PetUpdateOne) SetAge(v int) *PetUpdateOne {
 	_u.mutation.ResetAge()
-	_u.mutation.SetAge(i)
+	_u.mutation.SetAge(v)
 	return _u
 }
 
 // SetNillableAge sets the "age" field if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableAge(i *int) *PetUpdateOne {
-	if i != nil {
-		_u.SetAge(*i)
+func (_u *PetUpdateOne) SetNillableAge(v *int) *PetUpdateOne {
+	if v != nil {
+		_u.SetAge(*v)
 	}
 	return _u
 }
 
-// AddAge adds i to the "age" field.
-func (_u *PetUpdateOne) AddAge(i int) *PetUpdateOne {
-	_u.mutation.AddAge(i)
+// AddAge adds value to the "age" field.
+func (_u *PetUpdateOne) AddAge(v int) *PetUpdateOne {
+	_u.mutation.AddAge(v)
 	return _u
 }
 
 // SetLicensedAt sets the "licensed_at" field.
-func (_u *PetUpdateOne) SetLicensedAt(t time.Time) *PetUpdateOne {
-	_u.mutation.SetLicensedAt(t)
+func (_u *PetUpdateOne) SetLicensedAt(v time.Time) *PetUpdateOne {
+	_u.mutation.SetLicensedAt(v)
 	return _u
 }
 
 // SetNillableLicensedAt sets the "licensed_at" field if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableLicensedAt(t *time.Time) *PetUpdateOne {
-	if t != nil {
-		_u.SetLicensedAt(*t)
+func (_u *PetUpdateOne) SetNillableLicensedAt(v *time.Time) *PetUpdateOne {
+	if v != nil {
+		_u.SetLicensedAt(*v)
 	}
 	return _u
 }
@@ -257,8 +257,8 @@ func (_u *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *PetUpdateOne) SetOwner(u *User) *PetUpdateOne {
-	return _u.SetOwnerID(u.ID)
+func (_u *PetUpdateOne) SetOwner(v *User) *PetUpdateOne {
+	return _u.SetOwnerID(v.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.

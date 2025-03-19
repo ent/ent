@@ -36,15 +36,15 @@ func (_u *GroupUpdate) Where(ps ...predicate.Group) *GroupUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *GroupUpdate) SetName(s string) *GroupUpdate {
-	_u.mutation.SetName(s)
+func (_u *GroupUpdate) SetName(v string) *GroupUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *GroupUpdate) SetNillableName(s *string) *GroupUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *GroupUpdate) SetNillableName(v *string) *GroupUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -56,10 +56,10 @@ func (_u *GroupUpdate) AddUserIDs(ids ...int) *GroupUpdate {
 }
 
 // AddUsers adds the "users" edges to the User entity.
-func (_u *GroupUpdate) AddUsers(u ...*User) *GroupUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdate) AddUsers(v ...*User) *GroupUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddUserIDs(ids...)
 }
@@ -71,10 +71,10 @@ func (_u *GroupUpdate) AddTagIDs(ids ...int) *GroupUpdate {
 }
 
 // AddTags adds the "tags" edges to the Tag entity.
-func (_u *GroupUpdate) AddTags(t ...*Tag) *GroupUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *GroupUpdate) AddTags(v ...*Tag) *GroupUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddTagIDs(ids...)
 }
@@ -86,10 +86,10 @@ func (_u *GroupUpdate) AddJoinedUserIDs(ids ...int) *GroupUpdate {
 }
 
 // AddJoinedUsers adds the "joined_users" edges to the UserGroup entity.
-func (_u *GroupUpdate) AddJoinedUsers(u ...*UserGroup) *GroupUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdate) AddJoinedUsers(v ...*UserGroup) *GroupUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddJoinedUserIDs(ids...)
 }
@@ -101,10 +101,10 @@ func (_u *GroupUpdate) AddGroupTagIDs(ids ...int) *GroupUpdate {
 }
 
 // AddGroupTags adds the "group_tags" edges to the GroupTag entity.
-func (_u *GroupUpdate) AddGroupTags(g ...*GroupTag) *GroupUpdate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *GroupUpdate) AddGroupTags(v ...*GroupTag) *GroupUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddGroupTagIDs(ids...)
 }
@@ -127,10 +127,10 @@ func (_u *GroupUpdate) RemoveUserIDs(ids ...int) *GroupUpdate {
 }
 
 // RemoveUsers removes "users" edges to User entities.
-func (_u *GroupUpdate) RemoveUsers(u ...*User) *GroupUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdate) RemoveUsers(v ...*User) *GroupUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveUserIDs(ids...)
 }
@@ -148,10 +148,10 @@ func (_u *GroupUpdate) RemoveTagIDs(ids ...int) *GroupUpdate {
 }
 
 // RemoveTags removes "tags" edges to Tag entities.
-func (_u *GroupUpdate) RemoveTags(t ...*Tag) *GroupUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *GroupUpdate) RemoveTags(v ...*Tag) *GroupUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveTagIDs(ids...)
 }
@@ -169,10 +169,10 @@ func (_u *GroupUpdate) RemoveJoinedUserIDs(ids ...int) *GroupUpdate {
 }
 
 // RemoveJoinedUsers removes "joined_users" edges to UserGroup entities.
-func (_u *GroupUpdate) RemoveJoinedUsers(u ...*UserGroup) *GroupUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdate) RemoveJoinedUsers(v ...*UserGroup) *GroupUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveJoinedUserIDs(ids...)
 }
@@ -190,10 +190,10 @@ func (_u *GroupUpdate) RemoveGroupTagIDs(ids ...int) *GroupUpdate {
 }
 
 // RemoveGroupTags removes "group_tags" edges to GroupTag entities.
-func (_u *GroupUpdate) RemoveGroupTags(g ...*GroupTag) *GroupUpdate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *GroupUpdate) RemoveGroupTags(v ...*GroupTag) *GroupUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveGroupTagIDs(ids...)
 }
@@ -225,7 +225,7 @@ func (_u *GroupUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *GroupUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(group.Table, group.Columns, sqlgraph.NewFieldSpec(group.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -429,7 +429,7 @@ func (_u *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{group.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -438,7 +438,7 @@ func (_u *GroupUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // GroupUpdateOne is the builder for updating a single Group entity.
@@ -450,15 +450,15 @@ type GroupUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (_u *GroupUpdateOne) SetName(s string) *GroupUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *GroupUpdateOne) SetName(v string) *GroupUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *GroupUpdateOne) SetNillableName(s *string) *GroupUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *GroupUpdateOne) SetNillableName(v *string) *GroupUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -470,10 +470,10 @@ func (_u *GroupUpdateOne) AddUserIDs(ids ...int) *GroupUpdateOne {
 }
 
 // AddUsers adds the "users" edges to the User entity.
-func (_u *GroupUpdateOne) AddUsers(u ...*User) *GroupUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdateOne) AddUsers(v ...*User) *GroupUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddUserIDs(ids...)
 }
@@ -485,10 +485,10 @@ func (_u *GroupUpdateOne) AddTagIDs(ids ...int) *GroupUpdateOne {
 }
 
 // AddTags adds the "tags" edges to the Tag entity.
-func (_u *GroupUpdateOne) AddTags(t ...*Tag) *GroupUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *GroupUpdateOne) AddTags(v ...*Tag) *GroupUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddTagIDs(ids...)
 }
@@ -500,10 +500,10 @@ func (_u *GroupUpdateOne) AddJoinedUserIDs(ids ...int) *GroupUpdateOne {
 }
 
 // AddJoinedUsers adds the "joined_users" edges to the UserGroup entity.
-func (_u *GroupUpdateOne) AddJoinedUsers(u ...*UserGroup) *GroupUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdateOne) AddJoinedUsers(v ...*UserGroup) *GroupUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddJoinedUserIDs(ids...)
 }
@@ -515,10 +515,10 @@ func (_u *GroupUpdateOne) AddGroupTagIDs(ids ...int) *GroupUpdateOne {
 }
 
 // AddGroupTags adds the "group_tags" edges to the GroupTag entity.
-func (_u *GroupUpdateOne) AddGroupTags(g ...*GroupTag) *GroupUpdateOne {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *GroupUpdateOne) AddGroupTags(v ...*GroupTag) *GroupUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddGroupTagIDs(ids...)
 }
@@ -541,10 +541,10 @@ func (_u *GroupUpdateOne) RemoveUserIDs(ids ...int) *GroupUpdateOne {
 }
 
 // RemoveUsers removes "users" edges to User entities.
-func (_u *GroupUpdateOne) RemoveUsers(u ...*User) *GroupUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdateOne) RemoveUsers(v ...*User) *GroupUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveUserIDs(ids...)
 }
@@ -562,10 +562,10 @@ func (_u *GroupUpdateOne) RemoveTagIDs(ids ...int) *GroupUpdateOne {
 }
 
 // RemoveTags removes "tags" edges to Tag entities.
-func (_u *GroupUpdateOne) RemoveTags(t ...*Tag) *GroupUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *GroupUpdateOne) RemoveTags(v ...*Tag) *GroupUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveTagIDs(ids...)
 }
@@ -583,10 +583,10 @@ func (_u *GroupUpdateOne) RemoveJoinedUserIDs(ids ...int) *GroupUpdateOne {
 }
 
 // RemoveJoinedUsers removes "joined_users" edges to UserGroup entities.
-func (_u *GroupUpdateOne) RemoveJoinedUsers(u ...*UserGroup) *GroupUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *GroupUpdateOne) RemoveJoinedUsers(v ...*UserGroup) *GroupUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveJoinedUserIDs(ids...)
 }
@@ -604,10 +604,10 @@ func (_u *GroupUpdateOne) RemoveGroupTagIDs(ids ...int) *GroupUpdateOne {
 }
 
 // RemoveGroupTags removes "group_tags" edges to GroupTag entities.
-func (_u *GroupUpdateOne) RemoveGroupTags(g ...*GroupTag) *GroupUpdateOne {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *GroupUpdateOne) RemoveGroupTags(v ...*GroupTag) *GroupUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveGroupTagIDs(ids...)
 }

@@ -27,69 +27,69 @@ type CommentCreate struct {
 }
 
 // SetUniqueInt sets the "unique_int" field.
-func (_c *CommentCreate) SetUniqueInt(i int) *CommentCreate {
-	_c.mutation.SetUniqueInt(i)
+func (_c *CommentCreate) SetUniqueInt(v int) *CommentCreate {
+	_c.mutation.SetUniqueInt(v)
 	return _c
 }
 
 // SetUniqueFloat sets the "unique_float" field.
-func (_c *CommentCreate) SetUniqueFloat(f float64) *CommentCreate {
-	_c.mutation.SetUniqueFloat(f)
+func (_c *CommentCreate) SetUniqueFloat(v float64) *CommentCreate {
+	_c.mutation.SetUniqueFloat(v)
 	return _c
 }
 
 // SetNillableInt sets the "nillable_int" field.
-func (_c *CommentCreate) SetNillableInt(i int) *CommentCreate {
-	_c.mutation.SetNillableInt(i)
+func (_c *CommentCreate) SetNillableInt(v int) *CommentCreate {
+	_c.mutation.SetNillableInt(v)
 	return _c
 }
 
 // SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
-func (_c *CommentCreate) SetNillableNillableInt(i *int) *CommentCreate {
-	if i != nil {
-		_c.SetNillableInt(*i)
+func (_c *CommentCreate) SetNillableNillableInt(v *int) *CommentCreate {
+	if v != nil {
+		_c.SetNillableInt(*v)
 	}
 	return _c
 }
 
 // SetTable sets the "table" field.
-func (_c *CommentCreate) SetTable(s string) *CommentCreate {
-	_c.mutation.SetTable(s)
+func (_c *CommentCreate) SetTable(v string) *CommentCreate {
+	_c.mutation.SetTable(v)
 	return _c
 }
 
 // SetNillableTable sets the "table" field if the given value is not nil.
-func (_c *CommentCreate) SetNillableTable(s *string) *CommentCreate {
-	if s != nil {
-		_c.SetTable(*s)
+func (_c *CommentCreate) SetNillableTable(v *string) *CommentCreate {
+	if v != nil {
+		_c.SetTable(*v)
 	}
 	return _c
 }
 
 // SetDir sets the "dir" field.
-func (_c *CommentCreate) SetDir(s schemadir.Dir) *CommentCreate {
-	_c.mutation.SetDir(s)
+func (_c *CommentCreate) SetDir(v schemadir.Dir) *CommentCreate {
+	_c.mutation.SetDir(v)
 	return _c
 }
 
 // SetNillableDir sets the "dir" field if the given value is not nil.
-func (_c *CommentCreate) SetNillableDir(s *schemadir.Dir) *CommentCreate {
-	if s != nil {
-		_c.SetDir(*s)
+func (_c *CommentCreate) SetNillableDir(v *schemadir.Dir) *CommentCreate {
+	if v != nil {
+		_c.SetDir(*v)
 	}
 	return _c
 }
 
 // SetClient sets the "client" field.
-func (_c *CommentCreate) SetClient(s string) *CommentCreate {
-	_c.mutation.SetClient(s)
+func (_c *CommentCreate) SetClient(v string) *CommentCreate {
+	_c.mutation.SetClient(v)
 	return _c
 }
 
 // SetNillableClient sets the "client" field if the given value is not nil.
-func (_c *CommentCreate) SetNillableClient(s *string) *CommentCreate {
-	if s != nil {
-		_c.SetClient(*s)
+func (_c *CommentCreate) SetNillableClient(v *string) *CommentCreate {
+	if v != nil {
+		_c.SetClient(*v)
 	}
 	return _c
 }

@@ -40,88 +40,88 @@ func (_u *FieldTypeUpdate) Where(ps ...predicate.FieldType) *FieldTypeUpdate {
 }
 
 // SetInt sets the "int" field.
-func (_u *FieldTypeUpdate) SetInt(i int) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetInt(v int) *FieldTypeUpdate {
 	_u.mutation.ResetInt()
-	_u.mutation.SetInt(i)
+	_u.mutation.SetInt(v)
 	return _u
 }
 
-// AddInt adds i to the "int" field.
-func (_u *FieldTypeUpdate) AddInt(i int) *FieldTypeUpdate {
-	_u.mutation.AddInt(i)
+// AddInt adds value to the "int" field.
+func (_u *FieldTypeUpdate) AddInt(v int) *FieldTypeUpdate {
+	_u.mutation.AddInt(v)
 	return _u
 }
 
 // SetInt8 sets the "int8" field.
-func (_u *FieldTypeUpdate) SetInt8(i int8) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetInt8(v int8) *FieldTypeUpdate {
 	_u.mutation.ResetInt8()
-	_u.mutation.SetInt8(i)
+	_u.mutation.SetInt8(v)
 	return _u
 }
 
-// AddInt8 adds i to the "int8" field.
-func (_u *FieldTypeUpdate) AddInt8(i int8) *FieldTypeUpdate {
-	_u.mutation.AddInt8(i)
+// AddInt8 adds value to the "int8" field.
+func (_u *FieldTypeUpdate) AddInt8(v int8) *FieldTypeUpdate {
+	_u.mutation.AddInt8(v)
 	return _u
 }
 
 // SetInt16 sets the "int16" field.
-func (_u *FieldTypeUpdate) SetInt16(i int16) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetInt16(v int16) *FieldTypeUpdate {
 	_u.mutation.ResetInt16()
-	_u.mutation.SetInt16(i)
+	_u.mutation.SetInt16(v)
 	return _u
 }
 
-// AddInt16 adds i to the "int16" field.
-func (_u *FieldTypeUpdate) AddInt16(i int16) *FieldTypeUpdate {
-	_u.mutation.AddInt16(i)
+// AddInt16 adds value to the "int16" field.
+func (_u *FieldTypeUpdate) AddInt16(v int16) *FieldTypeUpdate {
+	_u.mutation.AddInt16(v)
 	return _u
 }
 
 // SetInt32 sets the "int32" field.
-func (_u *FieldTypeUpdate) SetInt32(i int32) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetInt32(v int32) *FieldTypeUpdate {
 	_u.mutation.ResetInt32()
-	_u.mutation.SetInt32(i)
+	_u.mutation.SetInt32(v)
 	return _u
 }
 
-// AddInt32 adds i to the "int32" field.
-func (_u *FieldTypeUpdate) AddInt32(i int32) *FieldTypeUpdate {
-	_u.mutation.AddInt32(i)
+// AddInt32 adds value to the "int32" field.
+func (_u *FieldTypeUpdate) AddInt32(v int32) *FieldTypeUpdate {
+	_u.mutation.AddInt32(v)
 	return _u
 }
 
 // SetInt64 sets the "int64" field.
-func (_u *FieldTypeUpdate) SetInt64(i int64) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetInt64(v int64) *FieldTypeUpdate {
 	_u.mutation.ResetInt64()
-	_u.mutation.SetInt64(i)
+	_u.mutation.SetInt64(v)
 	return _u
 }
 
-// AddInt64 adds i to the "int64" field.
-func (_u *FieldTypeUpdate) AddInt64(i int64) *FieldTypeUpdate {
-	_u.mutation.AddInt64(i)
+// AddInt64 adds value to the "int64" field.
+func (_u *FieldTypeUpdate) AddInt64(v int64) *FieldTypeUpdate {
+	_u.mutation.AddInt64(v)
 	return _u
 }
 
 // SetOptionalInt sets the "optional_int" field.
-func (_u *FieldTypeUpdate) SetOptionalInt(i int) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetOptionalInt(v int) *FieldTypeUpdate {
 	_u.mutation.ResetOptionalInt()
-	_u.mutation.SetOptionalInt(i)
+	_u.mutation.SetOptionalInt(v)
 	return _u
 }
 
 // SetNillableOptionalInt sets the "optional_int" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableOptionalInt(i *int) *FieldTypeUpdate {
-	if i != nil {
-		_u.SetOptionalInt(*i)
+func (_u *FieldTypeUpdate) SetNillableOptionalInt(v *int) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetOptionalInt(*v)
 	}
 	return _u
 }
 
-// AddOptionalInt adds i to the "optional_int" field.
-func (_u *FieldTypeUpdate) AddOptionalInt(i int) *FieldTypeUpdate {
-	_u.mutation.AddOptionalInt(i)
+// AddOptionalInt adds value to the "optional_int" field.
+func (_u *FieldTypeUpdate) AddOptionalInt(v int) *FieldTypeUpdate {
+	_u.mutation.AddOptionalInt(v)
 	return _u
 }
 
@@ -132,23 +132,23 @@ func (_u *FieldTypeUpdate) ClearOptionalInt() *FieldTypeUpdate {
 }
 
 // SetOptionalInt8 sets the "optional_int8" field.
-func (_u *FieldTypeUpdate) SetOptionalInt8(i int8) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetOptionalInt8(v int8) *FieldTypeUpdate {
 	_u.mutation.ResetOptionalInt8()
-	_u.mutation.SetOptionalInt8(i)
+	_u.mutation.SetOptionalInt8(v)
 	return _u
 }
 
 // SetNillableOptionalInt8 sets the "optional_int8" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableOptionalInt8(i *int8) *FieldTypeUpdate {
-	if i != nil {
-		_u.SetOptionalInt8(*i)
+func (_u *FieldTypeUpdate) SetNillableOptionalInt8(v *int8) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetOptionalInt8(*v)
 	}
 	return _u
 }
 
-// AddOptionalInt8 adds i to the "optional_int8" field.
-func (_u *FieldTypeUpdate) AddOptionalInt8(i int8) *FieldTypeUpdate {
-	_u.mutation.AddOptionalInt8(i)
+// AddOptionalInt8 adds value to the "optional_int8" field.
+func (_u *FieldTypeUpdate) AddOptionalInt8(v int8) *FieldTypeUpdate {
+	_u.mutation.AddOptionalInt8(v)
 	return _u
 }
 
@@ -159,23 +159,23 @@ func (_u *FieldTypeUpdate) ClearOptionalInt8() *FieldTypeUpdate {
 }
 
 // SetOptionalInt16 sets the "optional_int16" field.
-func (_u *FieldTypeUpdate) SetOptionalInt16(i int16) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetOptionalInt16(v int16) *FieldTypeUpdate {
 	_u.mutation.ResetOptionalInt16()
-	_u.mutation.SetOptionalInt16(i)
+	_u.mutation.SetOptionalInt16(v)
 	return _u
 }
 
 // SetNillableOptionalInt16 sets the "optional_int16" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableOptionalInt16(i *int16) *FieldTypeUpdate {
-	if i != nil {
-		_u.SetOptionalInt16(*i)
+func (_u *FieldTypeUpdate) SetNillableOptionalInt16(v *int16) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetOptionalInt16(*v)
 	}
 	return _u
 }
 
-// AddOptionalInt16 adds i to the "optional_int16" field.
-func (_u *FieldTypeUpdate) AddOptionalInt16(i int16) *FieldTypeUpdate {
-	_u.mutation.AddOptionalInt16(i)
+// AddOptionalInt16 adds value to the "optional_int16" field.
+func (_u *FieldTypeUpdate) AddOptionalInt16(v int16) *FieldTypeUpdate {
+	_u.mutation.AddOptionalInt16(v)
 	return _u
 }
 
@@ -186,23 +186,23 @@ func (_u *FieldTypeUpdate) ClearOptionalInt16() *FieldTypeUpdate {
 }
 
 // SetOptionalInt32 sets the "optional_int32" field.
-func (_u *FieldTypeUpdate) SetOptionalInt32(i int32) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetOptionalInt32(v int32) *FieldTypeUpdate {
 	_u.mutation.ResetOptionalInt32()
-	_u.mutation.SetOptionalInt32(i)
+	_u.mutation.SetOptionalInt32(v)
 	return _u
 }
 
 // SetNillableOptionalInt32 sets the "optional_int32" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableOptionalInt32(i *int32) *FieldTypeUpdate {
-	if i != nil {
-		_u.SetOptionalInt32(*i)
+func (_u *FieldTypeUpdate) SetNillableOptionalInt32(v *int32) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetOptionalInt32(*v)
 	}
 	return _u
 }
 
-// AddOptionalInt32 adds i to the "optional_int32" field.
-func (_u *FieldTypeUpdate) AddOptionalInt32(i int32) *FieldTypeUpdate {
-	_u.mutation.AddOptionalInt32(i)
+// AddOptionalInt32 adds value to the "optional_int32" field.
+func (_u *FieldTypeUpdate) AddOptionalInt32(v int32) *FieldTypeUpdate {
+	_u.mutation.AddOptionalInt32(v)
 	return _u
 }
 
@@ -213,23 +213,23 @@ func (_u *FieldTypeUpdate) ClearOptionalInt32() *FieldTypeUpdate {
 }
 
 // SetOptionalInt64 sets the "optional_int64" field.
-func (_u *FieldTypeUpdate) SetOptionalInt64(i int64) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetOptionalInt64(v int64) *FieldTypeUpdate {
 	_u.mutation.ResetOptionalInt64()
-	_u.mutation.SetOptionalInt64(i)
+	_u.mutation.SetOptionalInt64(v)
 	return _u
 }
 
 // SetNillableOptionalInt64 sets the "optional_int64" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableOptionalInt64(i *int64) *FieldTypeUpdate {
-	if i != nil {
-		_u.SetOptionalInt64(*i)
+func (_u *FieldTypeUpdate) SetNillableOptionalInt64(v *int64) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetOptionalInt64(*v)
 	}
 	return _u
 }
 
-// AddOptionalInt64 adds i to the "optional_int64" field.
-func (_u *FieldTypeUpdate) AddOptionalInt64(i int64) *FieldTypeUpdate {
-	_u.mutation.AddOptionalInt64(i)
+// AddOptionalInt64 adds value to the "optional_int64" field.
+func (_u *FieldTypeUpdate) AddOptionalInt64(v int64) *FieldTypeUpdate {
+	_u.mutation.AddOptionalInt64(v)
 	return _u
 }
 
@@ -240,23 +240,23 @@ func (_u *FieldTypeUpdate) ClearOptionalInt64() *FieldTypeUpdate {
 }
 
 // SetNillableInt sets the "nillable_int" field.
-func (_u *FieldTypeUpdate) SetNillableInt(i int) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetNillableInt(v int) *FieldTypeUpdate {
 	_u.mutation.ResetNillableInt()
-	_u.mutation.SetNillableInt(i)
+	_u.mutation.SetNillableInt(v)
 	return _u
 }
 
 // SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableNillableInt(i *int) *FieldTypeUpdate {
-	if i != nil {
-		_u.SetNillableInt(*i)
+func (_u *FieldTypeUpdate) SetNillableNillableInt(v *int) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetNillableInt(*v)
 	}
 	return _u
 }
 
-// AddNillableInt adds i to the "nillable_int" field.
-func (_u *FieldTypeUpdate) AddNillableInt(i int) *FieldTypeUpdate {
-	_u.mutation.AddNillableInt(i)
+// AddNillableInt adds value to the "nillable_int" field.
+func (_u *FieldTypeUpdate) AddNillableInt(v int) *FieldTypeUpdate {
+	_u.mutation.AddNillableInt(v)
 	return _u
 }
 
@@ -267,23 +267,23 @@ func (_u *FieldTypeUpdate) ClearNillableInt() *FieldTypeUpdate {
 }
 
 // SetNillableInt8 sets the "nillable_int8" field.
-func (_u *FieldTypeUpdate) SetNillableInt8(i int8) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetNillableInt8(v int8) *FieldTypeUpdate {
 	_u.mutation.ResetNillableInt8()
-	_u.mutation.SetNillableInt8(i)
+	_u.mutation.SetNillableInt8(v)
 	return _u
 }
 
 // SetNillableNillableInt8 sets the "nillable_int8" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableNillableInt8(i *int8) *FieldTypeUpdate {
-	if i != nil {
-		_u.SetNillableInt8(*i)
+func (_u *FieldTypeUpdate) SetNillableNillableInt8(v *int8) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetNillableInt8(*v)
 	}
 	return _u
 }
 
-// AddNillableInt8 adds i to the "nillable_int8" field.
-func (_u *FieldTypeUpdate) AddNillableInt8(i int8) *FieldTypeUpdate {
-	_u.mutation.AddNillableInt8(i)
+// AddNillableInt8 adds value to the "nillable_int8" field.
+func (_u *FieldTypeUpdate) AddNillableInt8(v int8) *FieldTypeUpdate {
+	_u.mutation.AddNillableInt8(v)
 	return _u
 }
 
@@ -294,23 +294,23 @@ func (_u *FieldTypeUpdate) ClearNillableInt8() *FieldTypeUpdate {
 }
 
 // SetNillableInt16 sets the "nillable_int16" field.
-func (_u *FieldTypeUpdate) SetNillableInt16(i int16) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetNillableInt16(v int16) *FieldTypeUpdate {
 	_u.mutation.ResetNillableInt16()
-	_u.mutation.SetNillableInt16(i)
+	_u.mutation.SetNillableInt16(v)
 	return _u
 }
 
 // SetNillableNillableInt16 sets the "nillable_int16" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableNillableInt16(i *int16) *FieldTypeUpdate {
-	if i != nil {
-		_u.SetNillableInt16(*i)
+func (_u *FieldTypeUpdate) SetNillableNillableInt16(v *int16) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetNillableInt16(*v)
 	}
 	return _u
 }
 
-// AddNillableInt16 adds i to the "nillable_int16" field.
-func (_u *FieldTypeUpdate) AddNillableInt16(i int16) *FieldTypeUpdate {
-	_u.mutation.AddNillableInt16(i)
+// AddNillableInt16 adds value to the "nillable_int16" field.
+func (_u *FieldTypeUpdate) AddNillableInt16(v int16) *FieldTypeUpdate {
+	_u.mutation.AddNillableInt16(v)
 	return _u
 }
 
@@ -321,23 +321,23 @@ func (_u *FieldTypeUpdate) ClearNillableInt16() *FieldTypeUpdate {
 }
 
 // SetNillableInt32 sets the "nillable_int32" field.
-func (_u *FieldTypeUpdate) SetNillableInt32(i int32) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetNillableInt32(v int32) *FieldTypeUpdate {
 	_u.mutation.ResetNillableInt32()
-	_u.mutation.SetNillableInt32(i)
+	_u.mutation.SetNillableInt32(v)
 	return _u
 }
 
 // SetNillableNillableInt32 sets the "nillable_int32" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableNillableInt32(i *int32) *FieldTypeUpdate {
-	if i != nil {
-		_u.SetNillableInt32(*i)
+func (_u *FieldTypeUpdate) SetNillableNillableInt32(v *int32) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetNillableInt32(*v)
 	}
 	return _u
 }
 
-// AddNillableInt32 adds i to the "nillable_int32" field.
-func (_u *FieldTypeUpdate) AddNillableInt32(i int32) *FieldTypeUpdate {
-	_u.mutation.AddNillableInt32(i)
+// AddNillableInt32 adds value to the "nillable_int32" field.
+func (_u *FieldTypeUpdate) AddNillableInt32(v int32) *FieldTypeUpdate {
+	_u.mutation.AddNillableInt32(v)
 	return _u
 }
 
@@ -348,23 +348,23 @@ func (_u *FieldTypeUpdate) ClearNillableInt32() *FieldTypeUpdate {
 }
 
 // SetNillableInt64 sets the "nillable_int64" field.
-func (_u *FieldTypeUpdate) SetNillableInt64(i int64) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetNillableInt64(v int64) *FieldTypeUpdate {
 	_u.mutation.ResetNillableInt64()
-	_u.mutation.SetNillableInt64(i)
+	_u.mutation.SetNillableInt64(v)
 	return _u
 }
 
 // SetNillableNillableInt64 sets the "nillable_int64" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableNillableInt64(i *int64) *FieldTypeUpdate {
-	if i != nil {
-		_u.SetNillableInt64(*i)
+func (_u *FieldTypeUpdate) SetNillableNillableInt64(v *int64) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetNillableInt64(*v)
 	}
 	return _u
 }
 
-// AddNillableInt64 adds i to the "nillable_int64" field.
-func (_u *FieldTypeUpdate) AddNillableInt64(i int64) *FieldTypeUpdate {
-	_u.mutation.AddNillableInt64(i)
+// AddNillableInt64 adds value to the "nillable_int64" field.
+func (_u *FieldTypeUpdate) AddNillableInt64(v int64) *FieldTypeUpdate {
+	_u.mutation.AddNillableInt64(v)
 	return _u
 }
 
@@ -375,23 +375,23 @@ func (_u *FieldTypeUpdate) ClearNillableInt64() *FieldTypeUpdate {
 }
 
 // SetValidateOptionalInt32 sets the "validate_optional_int32" field.
-func (_u *FieldTypeUpdate) SetValidateOptionalInt32(i int32) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetValidateOptionalInt32(v int32) *FieldTypeUpdate {
 	_u.mutation.ResetValidateOptionalInt32()
-	_u.mutation.SetValidateOptionalInt32(i)
+	_u.mutation.SetValidateOptionalInt32(v)
 	return _u
 }
 
 // SetNillableValidateOptionalInt32 sets the "validate_optional_int32" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableValidateOptionalInt32(i *int32) *FieldTypeUpdate {
-	if i != nil {
-		_u.SetValidateOptionalInt32(*i)
+func (_u *FieldTypeUpdate) SetNillableValidateOptionalInt32(v *int32) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetValidateOptionalInt32(*v)
 	}
 	return _u
 }
 
-// AddValidateOptionalInt32 adds i to the "validate_optional_int32" field.
-func (_u *FieldTypeUpdate) AddValidateOptionalInt32(i int32) *FieldTypeUpdate {
-	_u.mutation.AddValidateOptionalInt32(i)
+// AddValidateOptionalInt32 adds value to the "validate_optional_int32" field.
+func (_u *FieldTypeUpdate) AddValidateOptionalInt32(v int32) *FieldTypeUpdate {
+	_u.mutation.AddValidateOptionalInt32(v)
 	return _u
 }
 
@@ -402,23 +402,23 @@ func (_u *FieldTypeUpdate) ClearValidateOptionalInt32() *FieldTypeUpdate {
 }
 
 // SetOptionalUint sets the "optional_uint" field.
-func (_u *FieldTypeUpdate) SetOptionalUint(u uint) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetOptionalUint(v uint) *FieldTypeUpdate {
 	_u.mutation.ResetOptionalUint()
-	_u.mutation.SetOptionalUint(u)
+	_u.mutation.SetOptionalUint(v)
 	return _u
 }
 
 // SetNillableOptionalUint sets the "optional_uint" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableOptionalUint(u *uint) *FieldTypeUpdate {
-	if u != nil {
-		_u.SetOptionalUint(*u)
+func (_u *FieldTypeUpdate) SetNillableOptionalUint(v *uint) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetOptionalUint(*v)
 	}
 	return _u
 }
 
-// AddOptionalUint adds u to the "optional_uint" field.
-func (_u *FieldTypeUpdate) AddOptionalUint(u int) *FieldTypeUpdate {
-	_u.mutation.AddOptionalUint(u)
+// AddOptionalUint adds value to the "optional_uint" field.
+func (_u *FieldTypeUpdate) AddOptionalUint(v int) *FieldTypeUpdate {
+	_u.mutation.AddOptionalUint(v)
 	return _u
 }
 
@@ -429,23 +429,23 @@ func (_u *FieldTypeUpdate) ClearOptionalUint() *FieldTypeUpdate {
 }
 
 // SetOptionalUint8 sets the "optional_uint8" field.
-func (_u *FieldTypeUpdate) SetOptionalUint8(u uint8) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetOptionalUint8(v uint8) *FieldTypeUpdate {
 	_u.mutation.ResetOptionalUint8()
-	_u.mutation.SetOptionalUint8(u)
+	_u.mutation.SetOptionalUint8(v)
 	return _u
 }
 
 // SetNillableOptionalUint8 sets the "optional_uint8" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableOptionalUint8(u *uint8) *FieldTypeUpdate {
-	if u != nil {
-		_u.SetOptionalUint8(*u)
+func (_u *FieldTypeUpdate) SetNillableOptionalUint8(v *uint8) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetOptionalUint8(*v)
 	}
 	return _u
 }
 
-// AddOptionalUint8 adds u to the "optional_uint8" field.
-func (_u *FieldTypeUpdate) AddOptionalUint8(u int8) *FieldTypeUpdate {
-	_u.mutation.AddOptionalUint8(u)
+// AddOptionalUint8 adds value to the "optional_uint8" field.
+func (_u *FieldTypeUpdate) AddOptionalUint8(v int8) *FieldTypeUpdate {
+	_u.mutation.AddOptionalUint8(v)
 	return _u
 }
 
@@ -456,23 +456,23 @@ func (_u *FieldTypeUpdate) ClearOptionalUint8() *FieldTypeUpdate {
 }
 
 // SetOptionalUint16 sets the "optional_uint16" field.
-func (_u *FieldTypeUpdate) SetOptionalUint16(u uint16) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetOptionalUint16(v uint16) *FieldTypeUpdate {
 	_u.mutation.ResetOptionalUint16()
-	_u.mutation.SetOptionalUint16(u)
+	_u.mutation.SetOptionalUint16(v)
 	return _u
 }
 
 // SetNillableOptionalUint16 sets the "optional_uint16" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableOptionalUint16(u *uint16) *FieldTypeUpdate {
-	if u != nil {
-		_u.SetOptionalUint16(*u)
+func (_u *FieldTypeUpdate) SetNillableOptionalUint16(v *uint16) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetOptionalUint16(*v)
 	}
 	return _u
 }
 
-// AddOptionalUint16 adds u to the "optional_uint16" field.
-func (_u *FieldTypeUpdate) AddOptionalUint16(u int16) *FieldTypeUpdate {
-	_u.mutation.AddOptionalUint16(u)
+// AddOptionalUint16 adds value to the "optional_uint16" field.
+func (_u *FieldTypeUpdate) AddOptionalUint16(v int16) *FieldTypeUpdate {
+	_u.mutation.AddOptionalUint16(v)
 	return _u
 }
 
@@ -483,23 +483,23 @@ func (_u *FieldTypeUpdate) ClearOptionalUint16() *FieldTypeUpdate {
 }
 
 // SetOptionalUint32 sets the "optional_uint32" field.
-func (_u *FieldTypeUpdate) SetOptionalUint32(u uint32) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetOptionalUint32(v uint32) *FieldTypeUpdate {
 	_u.mutation.ResetOptionalUint32()
-	_u.mutation.SetOptionalUint32(u)
+	_u.mutation.SetOptionalUint32(v)
 	return _u
 }
 
 // SetNillableOptionalUint32 sets the "optional_uint32" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableOptionalUint32(u *uint32) *FieldTypeUpdate {
-	if u != nil {
-		_u.SetOptionalUint32(*u)
+func (_u *FieldTypeUpdate) SetNillableOptionalUint32(v *uint32) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetOptionalUint32(*v)
 	}
 	return _u
 }
 
-// AddOptionalUint32 adds u to the "optional_uint32" field.
-func (_u *FieldTypeUpdate) AddOptionalUint32(u int32) *FieldTypeUpdate {
-	_u.mutation.AddOptionalUint32(u)
+// AddOptionalUint32 adds value to the "optional_uint32" field.
+func (_u *FieldTypeUpdate) AddOptionalUint32(v int32) *FieldTypeUpdate {
+	_u.mutation.AddOptionalUint32(v)
 	return _u
 }
 
@@ -510,23 +510,23 @@ func (_u *FieldTypeUpdate) ClearOptionalUint32() *FieldTypeUpdate {
 }
 
 // SetOptionalUint64 sets the "optional_uint64" field.
-func (_u *FieldTypeUpdate) SetOptionalUint64(u uint64) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetOptionalUint64(v uint64) *FieldTypeUpdate {
 	_u.mutation.ResetOptionalUint64()
-	_u.mutation.SetOptionalUint64(u)
+	_u.mutation.SetOptionalUint64(v)
 	return _u
 }
 
 // SetNillableOptionalUint64 sets the "optional_uint64" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableOptionalUint64(u *uint64) *FieldTypeUpdate {
-	if u != nil {
-		_u.SetOptionalUint64(*u)
+func (_u *FieldTypeUpdate) SetNillableOptionalUint64(v *uint64) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetOptionalUint64(*v)
 	}
 	return _u
 }
 
-// AddOptionalUint64 adds u to the "optional_uint64" field.
-func (_u *FieldTypeUpdate) AddOptionalUint64(u int64) *FieldTypeUpdate {
-	_u.mutation.AddOptionalUint64(u)
+// AddOptionalUint64 adds value to the "optional_uint64" field.
+func (_u *FieldTypeUpdate) AddOptionalUint64(v int64) *FieldTypeUpdate {
+	_u.mutation.AddOptionalUint64(v)
 	return _u
 }
 
@@ -537,15 +537,15 @@ func (_u *FieldTypeUpdate) ClearOptionalUint64() *FieldTypeUpdate {
 }
 
 // SetState sets the "state" field.
-func (_u *FieldTypeUpdate) SetState(f fieldtype.State) *FieldTypeUpdate {
-	_u.mutation.SetState(f)
+func (_u *FieldTypeUpdate) SetState(v fieldtype.State) *FieldTypeUpdate {
+	_u.mutation.SetState(v)
 	return _u
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableState(f *fieldtype.State) *FieldTypeUpdate {
-	if f != nil {
-		_u.SetState(*f)
+func (_u *FieldTypeUpdate) SetNillableState(v *fieldtype.State) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetState(*v)
 	}
 	return _u
 }
@@ -557,23 +557,23 @@ func (_u *FieldTypeUpdate) ClearState() *FieldTypeUpdate {
 }
 
 // SetOptionalFloat sets the "optional_float" field.
-func (_u *FieldTypeUpdate) SetOptionalFloat(f float64) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetOptionalFloat(v float64) *FieldTypeUpdate {
 	_u.mutation.ResetOptionalFloat()
-	_u.mutation.SetOptionalFloat(f)
+	_u.mutation.SetOptionalFloat(v)
 	return _u
 }
 
 // SetNillableOptionalFloat sets the "optional_float" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableOptionalFloat(f *float64) *FieldTypeUpdate {
-	if f != nil {
-		_u.SetOptionalFloat(*f)
+func (_u *FieldTypeUpdate) SetNillableOptionalFloat(v *float64) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetOptionalFloat(*v)
 	}
 	return _u
 }
 
-// AddOptionalFloat adds f to the "optional_float" field.
-func (_u *FieldTypeUpdate) AddOptionalFloat(f float64) *FieldTypeUpdate {
-	_u.mutation.AddOptionalFloat(f)
+// AddOptionalFloat adds value to the "optional_float" field.
+func (_u *FieldTypeUpdate) AddOptionalFloat(v float64) *FieldTypeUpdate {
+	_u.mutation.AddOptionalFloat(v)
 	return _u
 }
 
@@ -584,23 +584,23 @@ func (_u *FieldTypeUpdate) ClearOptionalFloat() *FieldTypeUpdate {
 }
 
 // SetOptionalFloat32 sets the "optional_float32" field.
-func (_u *FieldTypeUpdate) SetOptionalFloat32(f float32) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetOptionalFloat32(v float32) *FieldTypeUpdate {
 	_u.mutation.ResetOptionalFloat32()
-	_u.mutation.SetOptionalFloat32(f)
+	_u.mutation.SetOptionalFloat32(v)
 	return _u
 }
 
 // SetNillableOptionalFloat32 sets the "optional_float32" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableOptionalFloat32(f *float32) *FieldTypeUpdate {
-	if f != nil {
-		_u.SetOptionalFloat32(*f)
+func (_u *FieldTypeUpdate) SetNillableOptionalFloat32(v *float32) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetOptionalFloat32(*v)
 	}
 	return _u
 }
 
-// AddOptionalFloat32 adds f to the "optional_float32" field.
-func (_u *FieldTypeUpdate) AddOptionalFloat32(f float32) *FieldTypeUpdate {
-	_u.mutation.AddOptionalFloat32(f)
+// AddOptionalFloat32 adds value to the "optional_float32" field.
+func (_u *FieldTypeUpdate) AddOptionalFloat32(v float32) *FieldTypeUpdate {
+	_u.mutation.AddOptionalFloat32(v)
 	return _u
 }
 
@@ -611,15 +611,15 @@ func (_u *FieldTypeUpdate) ClearOptionalFloat32() *FieldTypeUpdate {
 }
 
 // SetText sets the "text" field.
-func (_u *FieldTypeUpdate) SetText(s string) *FieldTypeUpdate {
-	_u.mutation.SetText(s)
+func (_u *FieldTypeUpdate) SetText(v string) *FieldTypeUpdate {
+	_u.mutation.SetText(v)
 	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableText(s *string) *FieldTypeUpdate {
-	if s != nil {
-		_u.SetText(*s)
+func (_u *FieldTypeUpdate) SetNillableText(v *string) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetText(*v)
 	}
 	return _u
 }
@@ -631,15 +631,15 @@ func (_u *FieldTypeUpdate) ClearText() *FieldTypeUpdate {
 }
 
 // SetDatetime sets the "datetime" field.
-func (_u *FieldTypeUpdate) SetDatetime(t time.Time) *FieldTypeUpdate {
-	_u.mutation.SetDatetime(t)
+func (_u *FieldTypeUpdate) SetDatetime(v time.Time) *FieldTypeUpdate {
+	_u.mutation.SetDatetime(v)
 	return _u
 }
 
 // SetNillableDatetime sets the "datetime" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableDatetime(t *time.Time) *FieldTypeUpdate {
-	if t != nil {
-		_u.SetDatetime(*t)
+func (_u *FieldTypeUpdate) SetNillableDatetime(v *time.Time) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetDatetime(*v)
 	}
 	return _u
 }
@@ -651,23 +651,23 @@ func (_u *FieldTypeUpdate) ClearDatetime() *FieldTypeUpdate {
 }
 
 // SetDecimal sets the "decimal" field.
-func (_u *FieldTypeUpdate) SetDecimal(f float64) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetDecimal(v float64) *FieldTypeUpdate {
 	_u.mutation.ResetDecimal()
-	_u.mutation.SetDecimal(f)
+	_u.mutation.SetDecimal(v)
 	return _u
 }
 
 // SetNillableDecimal sets the "decimal" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableDecimal(f *float64) *FieldTypeUpdate {
-	if f != nil {
-		_u.SetDecimal(*f)
+func (_u *FieldTypeUpdate) SetNillableDecimal(v *float64) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetDecimal(*v)
 	}
 	return _u
 }
 
-// AddDecimal adds f to the "decimal" field.
-func (_u *FieldTypeUpdate) AddDecimal(f float64) *FieldTypeUpdate {
-	_u.mutation.AddDecimal(f)
+// AddDecimal adds value to the "decimal" field.
+func (_u *FieldTypeUpdate) AddDecimal(v float64) *FieldTypeUpdate {
+	_u.mutation.AddDecimal(v)
 	return _u
 }
 
@@ -678,8 +678,8 @@ func (_u *FieldTypeUpdate) ClearDecimal() *FieldTypeUpdate {
 }
 
 // SetLinkOther sets the "link_other" field.
-func (_u *FieldTypeUpdate) SetLinkOther(s *schema.Link) *FieldTypeUpdate {
-	_u.mutation.SetLinkOther(s)
+func (_u *FieldTypeUpdate) SetLinkOther(v *schema.Link) *FieldTypeUpdate {
+	_u.mutation.SetLinkOther(v)
 	return _u
 }
 
@@ -690,8 +690,8 @@ func (_u *FieldTypeUpdate) ClearLinkOther() *FieldTypeUpdate {
 }
 
 // SetLinkOtherFunc sets the "link_other_func" field.
-func (_u *FieldTypeUpdate) SetLinkOtherFunc(s *schema.Link) *FieldTypeUpdate {
-	_u.mutation.SetLinkOtherFunc(s)
+func (_u *FieldTypeUpdate) SetLinkOtherFunc(v *schema.Link) *FieldTypeUpdate {
+	_u.mutation.SetLinkOtherFunc(v)
 	return _u
 }
 
@@ -702,15 +702,15 @@ func (_u *FieldTypeUpdate) ClearLinkOtherFunc() *FieldTypeUpdate {
 }
 
 // SetMAC sets the "mac" field.
-func (_u *FieldTypeUpdate) SetMAC(s schema.MAC) *FieldTypeUpdate {
-	_u.mutation.SetMAC(s)
+func (_u *FieldTypeUpdate) SetMAC(v schema.MAC) *FieldTypeUpdate {
+	_u.mutation.SetMAC(v)
 	return _u
 }
 
 // SetNillableMAC sets the "mac" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableMAC(s *schema.MAC) *FieldTypeUpdate {
-	if s != nil {
-		_u.SetMAC(*s)
+func (_u *FieldTypeUpdate) SetNillableMAC(v *schema.MAC) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetMAC(*v)
 	}
 	return _u
 }
@@ -722,8 +722,8 @@ func (_u *FieldTypeUpdate) ClearMAC() *FieldTypeUpdate {
 }
 
 // SetStringArray sets the "string_array" field.
-func (_u *FieldTypeUpdate) SetStringArray(s schema.Strings) *FieldTypeUpdate {
-	_u.mutation.SetStringArray(s)
+func (_u *FieldTypeUpdate) SetStringArray(v schema.Strings) *FieldTypeUpdate {
+	_u.mutation.SetStringArray(v)
 	return _u
 }
 
@@ -734,15 +734,15 @@ func (_u *FieldTypeUpdate) ClearStringArray() *FieldTypeUpdate {
 }
 
 // SetPassword sets the "password" field.
-func (_u *FieldTypeUpdate) SetPassword(s string) *FieldTypeUpdate {
-	_u.mutation.SetPassword(s)
+func (_u *FieldTypeUpdate) SetPassword(v string) *FieldTypeUpdate {
+	_u.mutation.SetPassword(v)
 	return _u
 }
 
 // SetNillablePassword sets the "password" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillablePassword(s *string) *FieldTypeUpdate {
-	if s != nil {
-		_u.SetPassword(*s)
+func (_u *FieldTypeUpdate) SetNillablePassword(v *string) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetPassword(*v)
 	}
 	return _u
 }
@@ -754,15 +754,15 @@ func (_u *FieldTypeUpdate) ClearPassword() *FieldTypeUpdate {
 }
 
 // SetStringScanner sets the "string_scanner" field.
-func (_u *FieldTypeUpdate) SetStringScanner(ss schema.StringScanner) *FieldTypeUpdate {
-	_u.mutation.SetStringScanner(ss)
+func (_u *FieldTypeUpdate) SetStringScanner(v schema.StringScanner) *FieldTypeUpdate {
+	_u.mutation.SetStringScanner(v)
 	return _u
 }
 
 // SetNillableStringScanner sets the "string_scanner" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableStringScanner(ss *schema.StringScanner) *FieldTypeUpdate {
-	if ss != nil {
-		_u.SetStringScanner(*ss)
+func (_u *FieldTypeUpdate) SetNillableStringScanner(v *schema.StringScanner) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetStringScanner(*v)
 	}
 	return _u
 }
@@ -774,15 +774,15 @@ func (_u *FieldTypeUpdate) ClearStringScanner() *FieldTypeUpdate {
 }
 
 // SetDuration sets the "duration" field.
-func (_u *FieldTypeUpdate) SetDuration(t time.Duration) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetDuration(v time.Duration) *FieldTypeUpdate {
 	_u.mutation.ResetDuration()
-	_u.mutation.SetDuration(t)
+	_u.mutation.SetDuration(v)
 	return _u
 }
 
-// AddDuration adds t to the "duration" field.
-func (_u *FieldTypeUpdate) AddDuration(t time.Duration) *FieldTypeUpdate {
-	_u.mutation.AddDuration(t)
+// AddDuration adds value to the "duration" field.
+func (_u *FieldTypeUpdate) AddDuration(v time.Duration) *FieldTypeUpdate {
+	_u.mutation.AddDuration(v)
 	return _u
 }
 
@@ -793,29 +793,29 @@ func (_u *FieldTypeUpdate) ClearDuration() *FieldTypeUpdate {
 }
 
 // SetDir sets the "dir" field.
-func (_u *FieldTypeUpdate) SetDir(h http.Dir) *FieldTypeUpdate {
-	_u.mutation.SetDir(h)
+func (_u *FieldTypeUpdate) SetDir(v http.Dir) *FieldTypeUpdate {
+	_u.mutation.SetDir(v)
 	return _u
 }
 
 // SetNillableDir sets the "dir" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableDir(h *http.Dir) *FieldTypeUpdate {
-	if h != nil {
-		_u.SetDir(*h)
+func (_u *FieldTypeUpdate) SetNillableDir(v *http.Dir) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetDir(*v)
 	}
 	return _u
 }
 
 // SetNdir sets the "ndir" field.
-func (_u *FieldTypeUpdate) SetNdir(h http.Dir) *FieldTypeUpdate {
-	_u.mutation.SetNdir(h)
+func (_u *FieldTypeUpdate) SetNdir(v http.Dir) *FieldTypeUpdate {
+	_u.mutation.SetNdir(v)
 	return _u
 }
 
 // SetNillableNdir sets the "ndir" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableNdir(h *http.Dir) *FieldTypeUpdate {
-	if h != nil {
-		_u.SetNdir(*h)
+func (_u *FieldTypeUpdate) SetNillableNdir(v *http.Dir) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetNdir(*v)
 	}
 	return _u
 }
@@ -827,15 +827,15 @@ func (_u *FieldTypeUpdate) ClearNdir() *FieldTypeUpdate {
 }
 
 // SetStr sets the "str" field.
-func (_u *FieldTypeUpdate) SetStr(ss sql.NullString) *FieldTypeUpdate {
-	_u.mutation.SetStr(ss)
+func (_u *FieldTypeUpdate) SetStr(v sql.NullString) *FieldTypeUpdate {
+	_u.mutation.SetStr(v)
 	return _u
 }
 
 // SetNillableStr sets the "str" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableStr(ss *sql.NullString) *FieldTypeUpdate {
-	if ss != nil {
-		_u.SetStr(*ss)
+func (_u *FieldTypeUpdate) SetNillableStr(v *sql.NullString) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetStr(*v)
 	}
 	return _u
 }
@@ -847,8 +847,8 @@ func (_u *FieldTypeUpdate) ClearStr() *FieldTypeUpdate {
 }
 
 // SetNullStr sets the "null_str" field.
-func (_u *FieldTypeUpdate) SetNullStr(ss *sql.NullString) *FieldTypeUpdate {
-	_u.mutation.SetNullStr(ss)
+func (_u *FieldTypeUpdate) SetNullStr(v *sql.NullString) *FieldTypeUpdate {
+	_u.mutation.SetNullStr(v)
 	return _u
 }
 
@@ -859,15 +859,15 @@ func (_u *FieldTypeUpdate) ClearNullStr() *FieldTypeUpdate {
 }
 
 // SetLink sets the "link" field.
-func (_u *FieldTypeUpdate) SetLink(s schema.Link) *FieldTypeUpdate {
-	_u.mutation.SetLink(s)
+func (_u *FieldTypeUpdate) SetLink(v schema.Link) *FieldTypeUpdate {
+	_u.mutation.SetLink(v)
 	return _u
 }
 
 // SetNillableLink sets the "link" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableLink(s *schema.Link) *FieldTypeUpdate {
-	if s != nil {
-		_u.SetLink(*s)
+func (_u *FieldTypeUpdate) SetNillableLink(v *schema.Link) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetLink(*v)
 	}
 	return _u
 }
@@ -879,8 +879,8 @@ func (_u *FieldTypeUpdate) ClearLink() *FieldTypeUpdate {
 }
 
 // SetNullLink sets the "null_link" field.
-func (_u *FieldTypeUpdate) SetNullLink(s *schema.Link) *FieldTypeUpdate {
-	_u.mutation.SetNullLink(s)
+func (_u *FieldTypeUpdate) SetNullLink(v *schema.Link) *FieldTypeUpdate {
+	_u.mutation.SetNullLink(v)
 	return _u
 }
 
@@ -891,15 +891,15 @@ func (_u *FieldTypeUpdate) ClearNullLink() *FieldTypeUpdate {
 }
 
 // SetActive sets the "active" field.
-func (_u *FieldTypeUpdate) SetActive(s schema.Status) *FieldTypeUpdate {
-	_u.mutation.SetActive(s)
+func (_u *FieldTypeUpdate) SetActive(v schema.Status) *FieldTypeUpdate {
+	_u.mutation.SetActive(v)
 	return _u
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableActive(s *schema.Status) *FieldTypeUpdate {
-	if s != nil {
-		_u.SetActive(*s)
+func (_u *FieldTypeUpdate) SetNillableActive(v *schema.Status) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetActive(*v)
 	}
 	return _u
 }
@@ -911,15 +911,15 @@ func (_u *FieldTypeUpdate) ClearActive() *FieldTypeUpdate {
 }
 
 // SetNullActive sets the "null_active" field.
-func (_u *FieldTypeUpdate) SetNullActive(s schema.Status) *FieldTypeUpdate {
-	_u.mutation.SetNullActive(s)
+func (_u *FieldTypeUpdate) SetNullActive(v schema.Status) *FieldTypeUpdate {
+	_u.mutation.SetNullActive(v)
 	return _u
 }
 
 // SetNillableNullActive sets the "null_active" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableNullActive(s *schema.Status) *FieldTypeUpdate {
-	if s != nil {
-		_u.SetNullActive(*s)
+func (_u *FieldTypeUpdate) SetNillableNullActive(v *schema.Status) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetNullActive(*v)
 	}
 	return _u
 }
@@ -931,8 +931,8 @@ func (_u *FieldTypeUpdate) ClearNullActive() *FieldTypeUpdate {
 }
 
 // SetDeleted sets the "deleted" field.
-func (_u *FieldTypeUpdate) SetDeleted(sb *sql.NullBool) *FieldTypeUpdate {
-	_u.mutation.SetDeleted(sb)
+func (_u *FieldTypeUpdate) SetDeleted(v *sql.NullBool) *FieldTypeUpdate {
+	_u.mutation.SetDeleted(v)
 	return _u
 }
 
@@ -943,8 +943,8 @@ func (_u *FieldTypeUpdate) ClearDeleted() *FieldTypeUpdate {
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (_u *FieldTypeUpdate) SetDeletedAt(st *sql.NullTime) *FieldTypeUpdate {
-	_u.mutation.SetDeletedAt(st)
+func (_u *FieldTypeUpdate) SetDeletedAt(v *sql.NullTime) *FieldTypeUpdate {
+	_u.mutation.SetDeletedAt(v)
 	return _u
 }
 
@@ -955,8 +955,8 @@ func (_u *FieldTypeUpdate) ClearDeletedAt() *FieldTypeUpdate {
 }
 
 // SetRawData sets the "raw_data" field.
-func (_u *FieldTypeUpdate) SetRawData(b []byte) *FieldTypeUpdate {
-	_u.mutation.SetRawData(b)
+func (_u *FieldTypeUpdate) SetRawData(v []byte) *FieldTypeUpdate {
+	_u.mutation.SetRawData(v)
 	return _u
 }
 
@@ -967,8 +967,8 @@ func (_u *FieldTypeUpdate) ClearRawData() *FieldTypeUpdate {
 }
 
 // SetSensitive sets the "sensitive" field.
-func (_u *FieldTypeUpdate) SetSensitive(b []byte) *FieldTypeUpdate {
-	_u.mutation.SetSensitive(b)
+func (_u *FieldTypeUpdate) SetSensitive(v []byte) *FieldTypeUpdate {
+	_u.mutation.SetSensitive(v)
 	return _u
 }
 
@@ -979,8 +979,8 @@ func (_u *FieldTypeUpdate) ClearSensitive() *FieldTypeUpdate {
 }
 
 // SetIP sets the "ip" field.
-func (_u *FieldTypeUpdate) SetIP(n net.IP) *FieldTypeUpdate {
-	_u.mutation.SetIP(n)
+func (_u *FieldTypeUpdate) SetIP(v net.IP) *FieldTypeUpdate {
+	_u.mutation.SetIP(v)
 	return _u
 }
 
@@ -991,8 +991,8 @@ func (_u *FieldTypeUpdate) ClearIP() *FieldTypeUpdate {
 }
 
 // SetNullInt64 sets the "null_int64" field.
-func (_u *FieldTypeUpdate) SetNullInt64(si *sql.NullInt64) *FieldTypeUpdate {
-	_u.mutation.SetNullInt64(si)
+func (_u *FieldTypeUpdate) SetNullInt64(v *sql.NullInt64) *FieldTypeUpdate {
+	_u.mutation.SetNullInt64(v)
 	return _u
 }
 
@@ -1003,23 +1003,23 @@ func (_u *FieldTypeUpdate) ClearNullInt64() *FieldTypeUpdate {
 }
 
 // SetSchemaInt sets the "schema_int" field.
-func (_u *FieldTypeUpdate) SetSchemaInt(s schema.Int) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetSchemaInt(v schema.Int) *FieldTypeUpdate {
 	_u.mutation.ResetSchemaInt()
-	_u.mutation.SetSchemaInt(s)
+	_u.mutation.SetSchemaInt(v)
 	return _u
 }
 
 // SetNillableSchemaInt sets the "schema_int" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableSchemaInt(s *schema.Int) *FieldTypeUpdate {
-	if s != nil {
-		_u.SetSchemaInt(*s)
+func (_u *FieldTypeUpdate) SetNillableSchemaInt(v *schema.Int) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetSchemaInt(*v)
 	}
 	return _u
 }
 
-// AddSchemaInt adds s to the "schema_int" field.
-func (_u *FieldTypeUpdate) AddSchemaInt(s schema.Int) *FieldTypeUpdate {
-	_u.mutation.AddSchemaInt(s)
+// AddSchemaInt adds value to the "schema_int" field.
+func (_u *FieldTypeUpdate) AddSchemaInt(v schema.Int) *FieldTypeUpdate {
+	_u.mutation.AddSchemaInt(v)
 	return _u
 }
 
@@ -1030,23 +1030,23 @@ func (_u *FieldTypeUpdate) ClearSchemaInt() *FieldTypeUpdate {
 }
 
 // SetSchemaInt8 sets the "schema_int8" field.
-func (_u *FieldTypeUpdate) SetSchemaInt8(s schema.Int8) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetSchemaInt8(v schema.Int8) *FieldTypeUpdate {
 	_u.mutation.ResetSchemaInt8()
-	_u.mutation.SetSchemaInt8(s)
+	_u.mutation.SetSchemaInt8(v)
 	return _u
 }
 
 // SetNillableSchemaInt8 sets the "schema_int8" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableSchemaInt8(s *schema.Int8) *FieldTypeUpdate {
-	if s != nil {
-		_u.SetSchemaInt8(*s)
+func (_u *FieldTypeUpdate) SetNillableSchemaInt8(v *schema.Int8) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetSchemaInt8(*v)
 	}
 	return _u
 }
 
-// AddSchemaInt8 adds s to the "schema_int8" field.
-func (_u *FieldTypeUpdate) AddSchemaInt8(s schema.Int8) *FieldTypeUpdate {
-	_u.mutation.AddSchemaInt8(s)
+// AddSchemaInt8 adds value to the "schema_int8" field.
+func (_u *FieldTypeUpdate) AddSchemaInt8(v schema.Int8) *FieldTypeUpdate {
+	_u.mutation.AddSchemaInt8(v)
 	return _u
 }
 
@@ -1057,23 +1057,23 @@ func (_u *FieldTypeUpdate) ClearSchemaInt8() *FieldTypeUpdate {
 }
 
 // SetSchemaInt64 sets the "schema_int64" field.
-func (_u *FieldTypeUpdate) SetSchemaInt64(s schema.Int64) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetSchemaInt64(v schema.Int64) *FieldTypeUpdate {
 	_u.mutation.ResetSchemaInt64()
-	_u.mutation.SetSchemaInt64(s)
+	_u.mutation.SetSchemaInt64(v)
 	return _u
 }
 
 // SetNillableSchemaInt64 sets the "schema_int64" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableSchemaInt64(s *schema.Int64) *FieldTypeUpdate {
-	if s != nil {
-		_u.SetSchemaInt64(*s)
+func (_u *FieldTypeUpdate) SetNillableSchemaInt64(v *schema.Int64) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetSchemaInt64(*v)
 	}
 	return _u
 }
 
-// AddSchemaInt64 adds s to the "schema_int64" field.
-func (_u *FieldTypeUpdate) AddSchemaInt64(s schema.Int64) *FieldTypeUpdate {
-	_u.mutation.AddSchemaInt64(s)
+// AddSchemaInt64 adds value to the "schema_int64" field.
+func (_u *FieldTypeUpdate) AddSchemaInt64(v schema.Int64) *FieldTypeUpdate {
+	_u.mutation.AddSchemaInt64(v)
 	return _u
 }
 
@@ -1084,23 +1084,23 @@ func (_u *FieldTypeUpdate) ClearSchemaInt64() *FieldTypeUpdate {
 }
 
 // SetSchemaFloat sets the "schema_float" field.
-func (_u *FieldTypeUpdate) SetSchemaFloat(s schema.Float64) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetSchemaFloat(v schema.Float64) *FieldTypeUpdate {
 	_u.mutation.ResetSchemaFloat()
-	_u.mutation.SetSchemaFloat(s)
+	_u.mutation.SetSchemaFloat(v)
 	return _u
 }
 
 // SetNillableSchemaFloat sets the "schema_float" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableSchemaFloat(s *schema.Float64) *FieldTypeUpdate {
-	if s != nil {
-		_u.SetSchemaFloat(*s)
+func (_u *FieldTypeUpdate) SetNillableSchemaFloat(v *schema.Float64) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetSchemaFloat(*v)
 	}
 	return _u
 }
 
-// AddSchemaFloat adds s to the "schema_float" field.
-func (_u *FieldTypeUpdate) AddSchemaFloat(s schema.Float64) *FieldTypeUpdate {
-	_u.mutation.AddSchemaFloat(s)
+// AddSchemaFloat adds value to the "schema_float" field.
+func (_u *FieldTypeUpdate) AddSchemaFloat(v schema.Float64) *FieldTypeUpdate {
+	_u.mutation.AddSchemaFloat(v)
 	return _u
 }
 
@@ -1111,23 +1111,23 @@ func (_u *FieldTypeUpdate) ClearSchemaFloat() *FieldTypeUpdate {
 }
 
 // SetSchemaFloat32 sets the "schema_float32" field.
-func (_u *FieldTypeUpdate) SetSchemaFloat32(s schema.Float32) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetSchemaFloat32(v schema.Float32) *FieldTypeUpdate {
 	_u.mutation.ResetSchemaFloat32()
-	_u.mutation.SetSchemaFloat32(s)
+	_u.mutation.SetSchemaFloat32(v)
 	return _u
 }
 
 // SetNillableSchemaFloat32 sets the "schema_float32" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableSchemaFloat32(s *schema.Float32) *FieldTypeUpdate {
-	if s != nil {
-		_u.SetSchemaFloat32(*s)
+func (_u *FieldTypeUpdate) SetNillableSchemaFloat32(v *schema.Float32) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetSchemaFloat32(*v)
 	}
 	return _u
 }
 
-// AddSchemaFloat32 adds s to the "schema_float32" field.
-func (_u *FieldTypeUpdate) AddSchemaFloat32(s schema.Float32) *FieldTypeUpdate {
-	_u.mutation.AddSchemaFloat32(s)
+// AddSchemaFloat32 adds value to the "schema_float32" field.
+func (_u *FieldTypeUpdate) AddSchemaFloat32(v schema.Float32) *FieldTypeUpdate {
+	_u.mutation.AddSchemaFloat32(v)
 	return _u
 }
 
@@ -1138,8 +1138,8 @@ func (_u *FieldTypeUpdate) ClearSchemaFloat32() *FieldTypeUpdate {
 }
 
 // SetNullFloat sets the "null_float" field.
-func (_u *FieldTypeUpdate) SetNullFloat(sf *sql.NullFloat64) *FieldTypeUpdate {
-	_u.mutation.SetNullFloat(sf)
+func (_u *FieldTypeUpdate) SetNullFloat(v *sql.NullFloat64) *FieldTypeUpdate {
+	_u.mutation.SetNullFloat(v)
 	return _u
 }
 
@@ -1150,29 +1150,29 @@ func (_u *FieldTypeUpdate) ClearNullFloat() *FieldTypeUpdate {
 }
 
 // SetRole sets the "role" field.
-func (_u *FieldTypeUpdate) SetRole(r role.Role) *FieldTypeUpdate {
-	_u.mutation.SetRole(r)
+func (_u *FieldTypeUpdate) SetRole(v role.Role) *FieldTypeUpdate {
+	_u.mutation.SetRole(v)
 	return _u
 }
 
 // SetNillableRole sets the "role" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableRole(r *role.Role) *FieldTypeUpdate {
-	if r != nil {
-		_u.SetRole(*r)
+func (_u *FieldTypeUpdate) SetNillableRole(v *role.Role) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetRole(*v)
 	}
 	return _u
 }
 
 // SetPriority sets the "priority" field.
-func (_u *FieldTypeUpdate) SetPriority(r role.Priority) *FieldTypeUpdate {
-	_u.mutation.SetPriority(r)
+func (_u *FieldTypeUpdate) SetPriority(v role.Priority) *FieldTypeUpdate {
+	_u.mutation.SetPriority(v)
 	return _u
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillablePriority(r *role.Priority) *FieldTypeUpdate {
-	if r != nil {
-		_u.SetPriority(*r)
+func (_u *FieldTypeUpdate) SetNillablePriority(v *role.Priority) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetPriority(*v)
 	}
 	return _u
 }
@@ -1184,15 +1184,15 @@ func (_u *FieldTypeUpdate) ClearPriority() *FieldTypeUpdate {
 }
 
 // SetOptionalUUID sets the "optional_uuid" field.
-func (_u *FieldTypeUpdate) SetOptionalUUID(u uuid.UUID) *FieldTypeUpdate {
-	_u.mutation.SetOptionalUUID(u)
+func (_u *FieldTypeUpdate) SetOptionalUUID(v uuid.UUID) *FieldTypeUpdate {
+	_u.mutation.SetOptionalUUID(v)
 	return _u
 }
 
 // SetNillableOptionalUUID sets the "optional_uuid" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableOptionalUUID(u *uuid.UUID) *FieldTypeUpdate {
-	if u != nil {
-		_u.SetOptionalUUID(*u)
+func (_u *FieldTypeUpdate) SetNillableOptionalUUID(v *uuid.UUID) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetOptionalUUID(*v)
 	}
 	return _u
 }
@@ -1204,15 +1204,15 @@ func (_u *FieldTypeUpdate) ClearOptionalUUID() *FieldTypeUpdate {
 }
 
 // SetNillableUUID sets the "nillable_uuid" field.
-func (_u *FieldTypeUpdate) SetNillableUUID(u uuid.UUID) *FieldTypeUpdate {
-	_u.mutation.SetNillableUUID(u)
+func (_u *FieldTypeUpdate) SetNillableUUID(v uuid.UUID) *FieldTypeUpdate {
+	_u.mutation.SetNillableUUID(v)
 	return _u
 }
 
 // SetNillableNillableUUID sets the "nillable_uuid" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableNillableUUID(u *uuid.UUID) *FieldTypeUpdate {
-	if u != nil {
-		_u.SetNillableUUID(*u)
+func (_u *FieldTypeUpdate) SetNillableNillableUUID(v *uuid.UUID) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetNillableUUID(*v)
 	}
 	return _u
 }
@@ -1224,14 +1224,14 @@ func (_u *FieldTypeUpdate) ClearNillableUUID() *FieldTypeUpdate {
 }
 
 // SetStrings sets the "strings" field.
-func (_u *FieldTypeUpdate) SetStrings(s []string) *FieldTypeUpdate {
-	_u.mutation.SetStrings(s)
+func (_u *FieldTypeUpdate) SetStrings(v []string) *FieldTypeUpdate {
+	_u.mutation.SetStrings(v)
 	return _u
 }
 
-// AppendStrings appends s to the "strings" field.
-func (_u *FieldTypeUpdate) AppendStrings(s []string) *FieldTypeUpdate {
-	_u.mutation.AppendStrings(s)
+// AppendStrings appends value to the "strings" field.
+func (_u *FieldTypeUpdate) AppendStrings(v []string) *FieldTypeUpdate {
+	_u.mutation.AppendStrings(v)
 	return _u
 }
 
@@ -1242,22 +1242,22 @@ func (_u *FieldTypeUpdate) ClearStrings() *FieldTypeUpdate {
 }
 
 // SetPair sets the "pair" field.
-func (_u *FieldTypeUpdate) SetPair(s schema.Pair) *FieldTypeUpdate {
-	_u.mutation.SetPair(s)
+func (_u *FieldTypeUpdate) SetPair(v schema.Pair) *FieldTypeUpdate {
+	_u.mutation.SetPair(v)
 	return _u
 }
 
 // SetNillablePair sets the "pair" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillablePair(s *schema.Pair) *FieldTypeUpdate {
-	if s != nil {
-		_u.SetPair(*s)
+func (_u *FieldTypeUpdate) SetNillablePair(v *schema.Pair) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetPair(*v)
 	}
 	return _u
 }
 
 // SetNilPair sets the "nil_pair" field.
-func (_u *FieldTypeUpdate) SetNilPair(s *schema.Pair) *FieldTypeUpdate {
-	_u.mutation.SetNilPair(s)
+func (_u *FieldTypeUpdate) SetNilPair(v *schema.Pair) *FieldTypeUpdate {
+	_u.mutation.SetNilPair(v)
 	return _u
 }
 
@@ -1268,51 +1268,51 @@ func (_u *FieldTypeUpdate) ClearNilPair() *FieldTypeUpdate {
 }
 
 // SetVstring sets the "vstring" field.
-func (_u *FieldTypeUpdate) SetVstring(ss schema.VString) *FieldTypeUpdate {
-	_u.mutation.SetVstring(ss)
+func (_u *FieldTypeUpdate) SetVstring(v schema.VString) *FieldTypeUpdate {
+	_u.mutation.SetVstring(v)
 	return _u
 }
 
 // SetNillableVstring sets the "vstring" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableVstring(ss *schema.VString) *FieldTypeUpdate {
-	if ss != nil {
-		_u.SetVstring(*ss)
+func (_u *FieldTypeUpdate) SetNillableVstring(v *schema.VString) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetVstring(*v)
 	}
 	return _u
 }
 
 // SetTriple sets the "triple" field.
-func (_u *FieldTypeUpdate) SetTriple(s schema.Triple) *FieldTypeUpdate {
-	_u.mutation.SetTriple(s)
+func (_u *FieldTypeUpdate) SetTriple(v schema.Triple) *FieldTypeUpdate {
+	_u.mutation.SetTriple(v)
 	return _u
 }
 
 // SetNillableTriple sets the "triple" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableTriple(s *schema.Triple) *FieldTypeUpdate {
-	if s != nil {
-		_u.SetTriple(*s)
+func (_u *FieldTypeUpdate) SetNillableTriple(v *schema.Triple) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetTriple(*v)
 	}
 	return _u
 }
 
 // SetBigInt sets the "big_int" field.
-func (_u *FieldTypeUpdate) SetBigInt(si schema.BigInt) *FieldTypeUpdate {
+func (_u *FieldTypeUpdate) SetBigInt(v schema.BigInt) *FieldTypeUpdate {
 	_u.mutation.ResetBigInt()
-	_u.mutation.SetBigInt(si)
+	_u.mutation.SetBigInt(v)
 	return _u
 }
 
 // SetNillableBigInt sets the "big_int" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillableBigInt(si *schema.BigInt) *FieldTypeUpdate {
-	if si != nil {
-		_u.SetBigInt(*si)
+func (_u *FieldTypeUpdate) SetNillableBigInt(v *schema.BigInt) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetBigInt(*v)
 	}
 	return _u
 }
 
-// AddBigInt adds si to the "big_int" field.
-func (_u *FieldTypeUpdate) AddBigInt(si schema.BigInt) *FieldTypeUpdate {
-	_u.mutation.AddBigInt(si)
+// AddBigInt adds value to the "big_int" field.
+func (_u *FieldTypeUpdate) AddBigInt(v schema.BigInt) *FieldTypeUpdate {
+	_u.mutation.AddBigInt(v)
 	return _u
 }
 
@@ -1323,15 +1323,15 @@ func (_u *FieldTypeUpdate) ClearBigInt() *FieldTypeUpdate {
 }
 
 // SetPasswordOther sets the "password_other" field.
-func (_u *FieldTypeUpdate) SetPasswordOther(s schema.Password) *FieldTypeUpdate {
-	_u.mutation.SetPasswordOther(s)
+func (_u *FieldTypeUpdate) SetPasswordOther(v schema.Password) *FieldTypeUpdate {
+	_u.mutation.SetPasswordOther(v)
 	return _u
 }
 
 // SetNillablePasswordOther sets the "password_other" field if the given value is not nil.
-func (_u *FieldTypeUpdate) SetNillablePasswordOther(s *schema.Password) *FieldTypeUpdate {
-	if s != nil {
-		_u.SetPasswordOther(*s)
+func (_u *FieldTypeUpdate) SetNillablePasswordOther(v *schema.Password) *FieldTypeUpdate {
+	if v != nil {
+		_u.SetPasswordOther(*v)
 	}
 	return _u
 }
@@ -1447,9 +1447,9 @@ func (_u *FieldTypeUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Fiel
 	return _u
 }
 
-func (_u *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *FieldTypeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(fieldtype.Table, fieldtype.Columns, sqlgraph.NewFieldSpec(fieldtype.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -1918,7 +1918,7 @@ func (_u *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.ClearField(fieldtype.FieldPasswordOther, field.TypeOther)
 	}
 	_spec.AddModifiers(_u.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{fieldtype.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -1927,7 +1927,7 @@ func (_u *FieldTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // FieldTypeUpdateOne is the builder for updating a single FieldType entity.
@@ -1940,88 +1940,88 @@ type FieldTypeUpdateOne struct {
 }
 
 // SetInt sets the "int" field.
-func (_u *FieldTypeUpdateOne) SetInt(i int) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetInt(v int) *FieldTypeUpdateOne {
 	_u.mutation.ResetInt()
-	_u.mutation.SetInt(i)
+	_u.mutation.SetInt(v)
 	return _u
 }
 
-// AddInt adds i to the "int" field.
-func (_u *FieldTypeUpdateOne) AddInt(i int) *FieldTypeUpdateOne {
-	_u.mutation.AddInt(i)
+// AddInt adds value to the "int" field.
+func (_u *FieldTypeUpdateOne) AddInt(v int) *FieldTypeUpdateOne {
+	_u.mutation.AddInt(v)
 	return _u
 }
 
 // SetInt8 sets the "int8" field.
-func (_u *FieldTypeUpdateOne) SetInt8(i int8) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetInt8(v int8) *FieldTypeUpdateOne {
 	_u.mutation.ResetInt8()
-	_u.mutation.SetInt8(i)
+	_u.mutation.SetInt8(v)
 	return _u
 }
 
-// AddInt8 adds i to the "int8" field.
-func (_u *FieldTypeUpdateOne) AddInt8(i int8) *FieldTypeUpdateOne {
-	_u.mutation.AddInt8(i)
+// AddInt8 adds value to the "int8" field.
+func (_u *FieldTypeUpdateOne) AddInt8(v int8) *FieldTypeUpdateOne {
+	_u.mutation.AddInt8(v)
 	return _u
 }
 
 // SetInt16 sets the "int16" field.
-func (_u *FieldTypeUpdateOne) SetInt16(i int16) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetInt16(v int16) *FieldTypeUpdateOne {
 	_u.mutation.ResetInt16()
-	_u.mutation.SetInt16(i)
+	_u.mutation.SetInt16(v)
 	return _u
 }
 
-// AddInt16 adds i to the "int16" field.
-func (_u *FieldTypeUpdateOne) AddInt16(i int16) *FieldTypeUpdateOne {
-	_u.mutation.AddInt16(i)
+// AddInt16 adds value to the "int16" field.
+func (_u *FieldTypeUpdateOne) AddInt16(v int16) *FieldTypeUpdateOne {
+	_u.mutation.AddInt16(v)
 	return _u
 }
 
 // SetInt32 sets the "int32" field.
-func (_u *FieldTypeUpdateOne) SetInt32(i int32) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetInt32(v int32) *FieldTypeUpdateOne {
 	_u.mutation.ResetInt32()
-	_u.mutation.SetInt32(i)
+	_u.mutation.SetInt32(v)
 	return _u
 }
 
-// AddInt32 adds i to the "int32" field.
-func (_u *FieldTypeUpdateOne) AddInt32(i int32) *FieldTypeUpdateOne {
-	_u.mutation.AddInt32(i)
+// AddInt32 adds value to the "int32" field.
+func (_u *FieldTypeUpdateOne) AddInt32(v int32) *FieldTypeUpdateOne {
+	_u.mutation.AddInt32(v)
 	return _u
 }
 
 // SetInt64 sets the "int64" field.
-func (_u *FieldTypeUpdateOne) SetInt64(i int64) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetInt64(v int64) *FieldTypeUpdateOne {
 	_u.mutation.ResetInt64()
-	_u.mutation.SetInt64(i)
+	_u.mutation.SetInt64(v)
 	return _u
 }
 
-// AddInt64 adds i to the "int64" field.
-func (_u *FieldTypeUpdateOne) AddInt64(i int64) *FieldTypeUpdateOne {
-	_u.mutation.AddInt64(i)
+// AddInt64 adds value to the "int64" field.
+func (_u *FieldTypeUpdateOne) AddInt64(v int64) *FieldTypeUpdateOne {
+	_u.mutation.AddInt64(v)
 	return _u
 }
 
 // SetOptionalInt sets the "optional_int" field.
-func (_u *FieldTypeUpdateOne) SetOptionalInt(i int) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetOptionalInt(v int) *FieldTypeUpdateOne {
 	_u.mutation.ResetOptionalInt()
-	_u.mutation.SetOptionalInt(i)
+	_u.mutation.SetOptionalInt(v)
 	return _u
 }
 
 // SetNillableOptionalInt sets the "optional_int" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableOptionalInt(i *int) *FieldTypeUpdateOne {
-	if i != nil {
-		_u.SetOptionalInt(*i)
+func (_u *FieldTypeUpdateOne) SetNillableOptionalInt(v *int) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetOptionalInt(*v)
 	}
 	return _u
 }
 
-// AddOptionalInt adds i to the "optional_int" field.
-func (_u *FieldTypeUpdateOne) AddOptionalInt(i int) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalInt(i)
+// AddOptionalInt adds value to the "optional_int" field.
+func (_u *FieldTypeUpdateOne) AddOptionalInt(v int) *FieldTypeUpdateOne {
+	_u.mutation.AddOptionalInt(v)
 	return _u
 }
 
@@ -2032,23 +2032,23 @@ func (_u *FieldTypeUpdateOne) ClearOptionalInt() *FieldTypeUpdateOne {
 }
 
 // SetOptionalInt8 sets the "optional_int8" field.
-func (_u *FieldTypeUpdateOne) SetOptionalInt8(i int8) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetOptionalInt8(v int8) *FieldTypeUpdateOne {
 	_u.mutation.ResetOptionalInt8()
-	_u.mutation.SetOptionalInt8(i)
+	_u.mutation.SetOptionalInt8(v)
 	return _u
 }
 
 // SetNillableOptionalInt8 sets the "optional_int8" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableOptionalInt8(i *int8) *FieldTypeUpdateOne {
-	if i != nil {
-		_u.SetOptionalInt8(*i)
+func (_u *FieldTypeUpdateOne) SetNillableOptionalInt8(v *int8) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetOptionalInt8(*v)
 	}
 	return _u
 }
 
-// AddOptionalInt8 adds i to the "optional_int8" field.
-func (_u *FieldTypeUpdateOne) AddOptionalInt8(i int8) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalInt8(i)
+// AddOptionalInt8 adds value to the "optional_int8" field.
+func (_u *FieldTypeUpdateOne) AddOptionalInt8(v int8) *FieldTypeUpdateOne {
+	_u.mutation.AddOptionalInt8(v)
 	return _u
 }
 
@@ -2059,23 +2059,23 @@ func (_u *FieldTypeUpdateOne) ClearOptionalInt8() *FieldTypeUpdateOne {
 }
 
 // SetOptionalInt16 sets the "optional_int16" field.
-func (_u *FieldTypeUpdateOne) SetOptionalInt16(i int16) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetOptionalInt16(v int16) *FieldTypeUpdateOne {
 	_u.mutation.ResetOptionalInt16()
-	_u.mutation.SetOptionalInt16(i)
+	_u.mutation.SetOptionalInt16(v)
 	return _u
 }
 
 // SetNillableOptionalInt16 sets the "optional_int16" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableOptionalInt16(i *int16) *FieldTypeUpdateOne {
-	if i != nil {
-		_u.SetOptionalInt16(*i)
+func (_u *FieldTypeUpdateOne) SetNillableOptionalInt16(v *int16) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetOptionalInt16(*v)
 	}
 	return _u
 }
 
-// AddOptionalInt16 adds i to the "optional_int16" field.
-func (_u *FieldTypeUpdateOne) AddOptionalInt16(i int16) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalInt16(i)
+// AddOptionalInt16 adds value to the "optional_int16" field.
+func (_u *FieldTypeUpdateOne) AddOptionalInt16(v int16) *FieldTypeUpdateOne {
+	_u.mutation.AddOptionalInt16(v)
 	return _u
 }
 
@@ -2086,23 +2086,23 @@ func (_u *FieldTypeUpdateOne) ClearOptionalInt16() *FieldTypeUpdateOne {
 }
 
 // SetOptionalInt32 sets the "optional_int32" field.
-func (_u *FieldTypeUpdateOne) SetOptionalInt32(i int32) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetOptionalInt32(v int32) *FieldTypeUpdateOne {
 	_u.mutation.ResetOptionalInt32()
-	_u.mutation.SetOptionalInt32(i)
+	_u.mutation.SetOptionalInt32(v)
 	return _u
 }
 
 // SetNillableOptionalInt32 sets the "optional_int32" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableOptionalInt32(i *int32) *FieldTypeUpdateOne {
-	if i != nil {
-		_u.SetOptionalInt32(*i)
+func (_u *FieldTypeUpdateOne) SetNillableOptionalInt32(v *int32) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetOptionalInt32(*v)
 	}
 	return _u
 }
 
-// AddOptionalInt32 adds i to the "optional_int32" field.
-func (_u *FieldTypeUpdateOne) AddOptionalInt32(i int32) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalInt32(i)
+// AddOptionalInt32 adds value to the "optional_int32" field.
+func (_u *FieldTypeUpdateOne) AddOptionalInt32(v int32) *FieldTypeUpdateOne {
+	_u.mutation.AddOptionalInt32(v)
 	return _u
 }
 
@@ -2113,23 +2113,23 @@ func (_u *FieldTypeUpdateOne) ClearOptionalInt32() *FieldTypeUpdateOne {
 }
 
 // SetOptionalInt64 sets the "optional_int64" field.
-func (_u *FieldTypeUpdateOne) SetOptionalInt64(i int64) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetOptionalInt64(v int64) *FieldTypeUpdateOne {
 	_u.mutation.ResetOptionalInt64()
-	_u.mutation.SetOptionalInt64(i)
+	_u.mutation.SetOptionalInt64(v)
 	return _u
 }
 
 // SetNillableOptionalInt64 sets the "optional_int64" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableOptionalInt64(i *int64) *FieldTypeUpdateOne {
-	if i != nil {
-		_u.SetOptionalInt64(*i)
+func (_u *FieldTypeUpdateOne) SetNillableOptionalInt64(v *int64) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetOptionalInt64(*v)
 	}
 	return _u
 }
 
-// AddOptionalInt64 adds i to the "optional_int64" field.
-func (_u *FieldTypeUpdateOne) AddOptionalInt64(i int64) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalInt64(i)
+// AddOptionalInt64 adds value to the "optional_int64" field.
+func (_u *FieldTypeUpdateOne) AddOptionalInt64(v int64) *FieldTypeUpdateOne {
+	_u.mutation.AddOptionalInt64(v)
 	return _u
 }
 
@@ -2140,23 +2140,23 @@ func (_u *FieldTypeUpdateOne) ClearOptionalInt64() *FieldTypeUpdateOne {
 }
 
 // SetNillableInt sets the "nillable_int" field.
-func (_u *FieldTypeUpdateOne) SetNillableInt(i int) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetNillableInt(v int) *FieldTypeUpdateOne {
 	_u.mutation.ResetNillableInt()
-	_u.mutation.SetNillableInt(i)
+	_u.mutation.SetNillableInt(v)
 	return _u
 }
 
 // SetNillableNillableInt sets the "nillable_int" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableNillableInt(i *int) *FieldTypeUpdateOne {
-	if i != nil {
-		_u.SetNillableInt(*i)
+func (_u *FieldTypeUpdateOne) SetNillableNillableInt(v *int) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetNillableInt(*v)
 	}
 	return _u
 }
 
-// AddNillableInt adds i to the "nillable_int" field.
-func (_u *FieldTypeUpdateOne) AddNillableInt(i int) *FieldTypeUpdateOne {
-	_u.mutation.AddNillableInt(i)
+// AddNillableInt adds value to the "nillable_int" field.
+func (_u *FieldTypeUpdateOne) AddNillableInt(v int) *FieldTypeUpdateOne {
+	_u.mutation.AddNillableInt(v)
 	return _u
 }
 
@@ -2167,23 +2167,23 @@ func (_u *FieldTypeUpdateOne) ClearNillableInt() *FieldTypeUpdateOne {
 }
 
 // SetNillableInt8 sets the "nillable_int8" field.
-func (_u *FieldTypeUpdateOne) SetNillableInt8(i int8) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetNillableInt8(v int8) *FieldTypeUpdateOne {
 	_u.mutation.ResetNillableInt8()
-	_u.mutation.SetNillableInt8(i)
+	_u.mutation.SetNillableInt8(v)
 	return _u
 }
 
 // SetNillableNillableInt8 sets the "nillable_int8" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableNillableInt8(i *int8) *FieldTypeUpdateOne {
-	if i != nil {
-		_u.SetNillableInt8(*i)
+func (_u *FieldTypeUpdateOne) SetNillableNillableInt8(v *int8) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetNillableInt8(*v)
 	}
 	return _u
 }
 
-// AddNillableInt8 adds i to the "nillable_int8" field.
-func (_u *FieldTypeUpdateOne) AddNillableInt8(i int8) *FieldTypeUpdateOne {
-	_u.mutation.AddNillableInt8(i)
+// AddNillableInt8 adds value to the "nillable_int8" field.
+func (_u *FieldTypeUpdateOne) AddNillableInt8(v int8) *FieldTypeUpdateOne {
+	_u.mutation.AddNillableInt8(v)
 	return _u
 }
 
@@ -2194,23 +2194,23 @@ func (_u *FieldTypeUpdateOne) ClearNillableInt8() *FieldTypeUpdateOne {
 }
 
 // SetNillableInt16 sets the "nillable_int16" field.
-func (_u *FieldTypeUpdateOne) SetNillableInt16(i int16) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetNillableInt16(v int16) *FieldTypeUpdateOne {
 	_u.mutation.ResetNillableInt16()
-	_u.mutation.SetNillableInt16(i)
+	_u.mutation.SetNillableInt16(v)
 	return _u
 }
 
 // SetNillableNillableInt16 sets the "nillable_int16" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableNillableInt16(i *int16) *FieldTypeUpdateOne {
-	if i != nil {
-		_u.SetNillableInt16(*i)
+func (_u *FieldTypeUpdateOne) SetNillableNillableInt16(v *int16) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetNillableInt16(*v)
 	}
 	return _u
 }
 
-// AddNillableInt16 adds i to the "nillable_int16" field.
-func (_u *FieldTypeUpdateOne) AddNillableInt16(i int16) *FieldTypeUpdateOne {
-	_u.mutation.AddNillableInt16(i)
+// AddNillableInt16 adds value to the "nillable_int16" field.
+func (_u *FieldTypeUpdateOne) AddNillableInt16(v int16) *FieldTypeUpdateOne {
+	_u.mutation.AddNillableInt16(v)
 	return _u
 }
 
@@ -2221,23 +2221,23 @@ func (_u *FieldTypeUpdateOne) ClearNillableInt16() *FieldTypeUpdateOne {
 }
 
 // SetNillableInt32 sets the "nillable_int32" field.
-func (_u *FieldTypeUpdateOne) SetNillableInt32(i int32) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetNillableInt32(v int32) *FieldTypeUpdateOne {
 	_u.mutation.ResetNillableInt32()
-	_u.mutation.SetNillableInt32(i)
+	_u.mutation.SetNillableInt32(v)
 	return _u
 }
 
 // SetNillableNillableInt32 sets the "nillable_int32" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableNillableInt32(i *int32) *FieldTypeUpdateOne {
-	if i != nil {
-		_u.SetNillableInt32(*i)
+func (_u *FieldTypeUpdateOne) SetNillableNillableInt32(v *int32) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetNillableInt32(*v)
 	}
 	return _u
 }
 
-// AddNillableInt32 adds i to the "nillable_int32" field.
-func (_u *FieldTypeUpdateOne) AddNillableInt32(i int32) *FieldTypeUpdateOne {
-	_u.mutation.AddNillableInt32(i)
+// AddNillableInt32 adds value to the "nillable_int32" field.
+func (_u *FieldTypeUpdateOne) AddNillableInt32(v int32) *FieldTypeUpdateOne {
+	_u.mutation.AddNillableInt32(v)
 	return _u
 }
 
@@ -2248,23 +2248,23 @@ func (_u *FieldTypeUpdateOne) ClearNillableInt32() *FieldTypeUpdateOne {
 }
 
 // SetNillableInt64 sets the "nillable_int64" field.
-func (_u *FieldTypeUpdateOne) SetNillableInt64(i int64) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetNillableInt64(v int64) *FieldTypeUpdateOne {
 	_u.mutation.ResetNillableInt64()
-	_u.mutation.SetNillableInt64(i)
+	_u.mutation.SetNillableInt64(v)
 	return _u
 }
 
 // SetNillableNillableInt64 sets the "nillable_int64" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableNillableInt64(i *int64) *FieldTypeUpdateOne {
-	if i != nil {
-		_u.SetNillableInt64(*i)
+func (_u *FieldTypeUpdateOne) SetNillableNillableInt64(v *int64) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetNillableInt64(*v)
 	}
 	return _u
 }
 
-// AddNillableInt64 adds i to the "nillable_int64" field.
-func (_u *FieldTypeUpdateOne) AddNillableInt64(i int64) *FieldTypeUpdateOne {
-	_u.mutation.AddNillableInt64(i)
+// AddNillableInt64 adds value to the "nillable_int64" field.
+func (_u *FieldTypeUpdateOne) AddNillableInt64(v int64) *FieldTypeUpdateOne {
+	_u.mutation.AddNillableInt64(v)
 	return _u
 }
 
@@ -2275,23 +2275,23 @@ func (_u *FieldTypeUpdateOne) ClearNillableInt64() *FieldTypeUpdateOne {
 }
 
 // SetValidateOptionalInt32 sets the "validate_optional_int32" field.
-func (_u *FieldTypeUpdateOne) SetValidateOptionalInt32(i int32) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetValidateOptionalInt32(v int32) *FieldTypeUpdateOne {
 	_u.mutation.ResetValidateOptionalInt32()
-	_u.mutation.SetValidateOptionalInt32(i)
+	_u.mutation.SetValidateOptionalInt32(v)
 	return _u
 }
 
 // SetNillableValidateOptionalInt32 sets the "validate_optional_int32" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableValidateOptionalInt32(i *int32) *FieldTypeUpdateOne {
-	if i != nil {
-		_u.SetValidateOptionalInt32(*i)
+func (_u *FieldTypeUpdateOne) SetNillableValidateOptionalInt32(v *int32) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetValidateOptionalInt32(*v)
 	}
 	return _u
 }
 
-// AddValidateOptionalInt32 adds i to the "validate_optional_int32" field.
-func (_u *FieldTypeUpdateOne) AddValidateOptionalInt32(i int32) *FieldTypeUpdateOne {
-	_u.mutation.AddValidateOptionalInt32(i)
+// AddValidateOptionalInt32 adds value to the "validate_optional_int32" field.
+func (_u *FieldTypeUpdateOne) AddValidateOptionalInt32(v int32) *FieldTypeUpdateOne {
+	_u.mutation.AddValidateOptionalInt32(v)
 	return _u
 }
 
@@ -2302,23 +2302,23 @@ func (_u *FieldTypeUpdateOne) ClearValidateOptionalInt32() *FieldTypeUpdateOne {
 }
 
 // SetOptionalUint sets the "optional_uint" field.
-func (_u *FieldTypeUpdateOne) SetOptionalUint(u uint) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetOptionalUint(v uint) *FieldTypeUpdateOne {
 	_u.mutation.ResetOptionalUint()
-	_u.mutation.SetOptionalUint(u)
+	_u.mutation.SetOptionalUint(v)
 	return _u
 }
 
 // SetNillableOptionalUint sets the "optional_uint" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableOptionalUint(u *uint) *FieldTypeUpdateOne {
-	if u != nil {
-		_u.SetOptionalUint(*u)
+func (_u *FieldTypeUpdateOne) SetNillableOptionalUint(v *uint) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetOptionalUint(*v)
 	}
 	return _u
 }
 
-// AddOptionalUint adds u to the "optional_uint" field.
-func (_u *FieldTypeUpdateOne) AddOptionalUint(u int) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalUint(u)
+// AddOptionalUint adds value to the "optional_uint" field.
+func (_u *FieldTypeUpdateOne) AddOptionalUint(v int) *FieldTypeUpdateOne {
+	_u.mutation.AddOptionalUint(v)
 	return _u
 }
 
@@ -2329,23 +2329,23 @@ func (_u *FieldTypeUpdateOne) ClearOptionalUint() *FieldTypeUpdateOne {
 }
 
 // SetOptionalUint8 sets the "optional_uint8" field.
-func (_u *FieldTypeUpdateOne) SetOptionalUint8(u uint8) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetOptionalUint8(v uint8) *FieldTypeUpdateOne {
 	_u.mutation.ResetOptionalUint8()
-	_u.mutation.SetOptionalUint8(u)
+	_u.mutation.SetOptionalUint8(v)
 	return _u
 }
 
 // SetNillableOptionalUint8 sets the "optional_uint8" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableOptionalUint8(u *uint8) *FieldTypeUpdateOne {
-	if u != nil {
-		_u.SetOptionalUint8(*u)
+func (_u *FieldTypeUpdateOne) SetNillableOptionalUint8(v *uint8) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetOptionalUint8(*v)
 	}
 	return _u
 }
 
-// AddOptionalUint8 adds u to the "optional_uint8" field.
-func (_u *FieldTypeUpdateOne) AddOptionalUint8(u int8) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalUint8(u)
+// AddOptionalUint8 adds value to the "optional_uint8" field.
+func (_u *FieldTypeUpdateOne) AddOptionalUint8(v int8) *FieldTypeUpdateOne {
+	_u.mutation.AddOptionalUint8(v)
 	return _u
 }
 
@@ -2356,23 +2356,23 @@ func (_u *FieldTypeUpdateOne) ClearOptionalUint8() *FieldTypeUpdateOne {
 }
 
 // SetOptionalUint16 sets the "optional_uint16" field.
-func (_u *FieldTypeUpdateOne) SetOptionalUint16(u uint16) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetOptionalUint16(v uint16) *FieldTypeUpdateOne {
 	_u.mutation.ResetOptionalUint16()
-	_u.mutation.SetOptionalUint16(u)
+	_u.mutation.SetOptionalUint16(v)
 	return _u
 }
 
 // SetNillableOptionalUint16 sets the "optional_uint16" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableOptionalUint16(u *uint16) *FieldTypeUpdateOne {
-	if u != nil {
-		_u.SetOptionalUint16(*u)
+func (_u *FieldTypeUpdateOne) SetNillableOptionalUint16(v *uint16) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetOptionalUint16(*v)
 	}
 	return _u
 }
 
-// AddOptionalUint16 adds u to the "optional_uint16" field.
-func (_u *FieldTypeUpdateOne) AddOptionalUint16(u int16) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalUint16(u)
+// AddOptionalUint16 adds value to the "optional_uint16" field.
+func (_u *FieldTypeUpdateOne) AddOptionalUint16(v int16) *FieldTypeUpdateOne {
+	_u.mutation.AddOptionalUint16(v)
 	return _u
 }
 
@@ -2383,23 +2383,23 @@ func (_u *FieldTypeUpdateOne) ClearOptionalUint16() *FieldTypeUpdateOne {
 }
 
 // SetOptionalUint32 sets the "optional_uint32" field.
-func (_u *FieldTypeUpdateOne) SetOptionalUint32(u uint32) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetOptionalUint32(v uint32) *FieldTypeUpdateOne {
 	_u.mutation.ResetOptionalUint32()
-	_u.mutation.SetOptionalUint32(u)
+	_u.mutation.SetOptionalUint32(v)
 	return _u
 }
 
 // SetNillableOptionalUint32 sets the "optional_uint32" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableOptionalUint32(u *uint32) *FieldTypeUpdateOne {
-	if u != nil {
-		_u.SetOptionalUint32(*u)
+func (_u *FieldTypeUpdateOne) SetNillableOptionalUint32(v *uint32) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetOptionalUint32(*v)
 	}
 	return _u
 }
 
-// AddOptionalUint32 adds u to the "optional_uint32" field.
-func (_u *FieldTypeUpdateOne) AddOptionalUint32(u int32) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalUint32(u)
+// AddOptionalUint32 adds value to the "optional_uint32" field.
+func (_u *FieldTypeUpdateOne) AddOptionalUint32(v int32) *FieldTypeUpdateOne {
+	_u.mutation.AddOptionalUint32(v)
 	return _u
 }
 
@@ -2410,23 +2410,23 @@ func (_u *FieldTypeUpdateOne) ClearOptionalUint32() *FieldTypeUpdateOne {
 }
 
 // SetOptionalUint64 sets the "optional_uint64" field.
-func (_u *FieldTypeUpdateOne) SetOptionalUint64(u uint64) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetOptionalUint64(v uint64) *FieldTypeUpdateOne {
 	_u.mutation.ResetOptionalUint64()
-	_u.mutation.SetOptionalUint64(u)
+	_u.mutation.SetOptionalUint64(v)
 	return _u
 }
 
 // SetNillableOptionalUint64 sets the "optional_uint64" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableOptionalUint64(u *uint64) *FieldTypeUpdateOne {
-	if u != nil {
-		_u.SetOptionalUint64(*u)
+func (_u *FieldTypeUpdateOne) SetNillableOptionalUint64(v *uint64) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetOptionalUint64(*v)
 	}
 	return _u
 }
 
-// AddOptionalUint64 adds u to the "optional_uint64" field.
-func (_u *FieldTypeUpdateOne) AddOptionalUint64(u int64) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalUint64(u)
+// AddOptionalUint64 adds value to the "optional_uint64" field.
+func (_u *FieldTypeUpdateOne) AddOptionalUint64(v int64) *FieldTypeUpdateOne {
+	_u.mutation.AddOptionalUint64(v)
 	return _u
 }
 
@@ -2437,15 +2437,15 @@ func (_u *FieldTypeUpdateOne) ClearOptionalUint64() *FieldTypeUpdateOne {
 }
 
 // SetState sets the "state" field.
-func (_u *FieldTypeUpdateOne) SetState(f fieldtype.State) *FieldTypeUpdateOne {
-	_u.mutation.SetState(f)
+func (_u *FieldTypeUpdateOne) SetState(v fieldtype.State) *FieldTypeUpdateOne {
+	_u.mutation.SetState(v)
 	return _u
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableState(f *fieldtype.State) *FieldTypeUpdateOne {
-	if f != nil {
-		_u.SetState(*f)
+func (_u *FieldTypeUpdateOne) SetNillableState(v *fieldtype.State) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetState(*v)
 	}
 	return _u
 }
@@ -2457,23 +2457,23 @@ func (_u *FieldTypeUpdateOne) ClearState() *FieldTypeUpdateOne {
 }
 
 // SetOptionalFloat sets the "optional_float" field.
-func (_u *FieldTypeUpdateOne) SetOptionalFloat(f float64) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetOptionalFloat(v float64) *FieldTypeUpdateOne {
 	_u.mutation.ResetOptionalFloat()
-	_u.mutation.SetOptionalFloat(f)
+	_u.mutation.SetOptionalFloat(v)
 	return _u
 }
 
 // SetNillableOptionalFloat sets the "optional_float" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableOptionalFloat(f *float64) *FieldTypeUpdateOne {
-	if f != nil {
-		_u.SetOptionalFloat(*f)
+func (_u *FieldTypeUpdateOne) SetNillableOptionalFloat(v *float64) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetOptionalFloat(*v)
 	}
 	return _u
 }
 
-// AddOptionalFloat adds f to the "optional_float" field.
-func (_u *FieldTypeUpdateOne) AddOptionalFloat(f float64) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalFloat(f)
+// AddOptionalFloat adds value to the "optional_float" field.
+func (_u *FieldTypeUpdateOne) AddOptionalFloat(v float64) *FieldTypeUpdateOne {
+	_u.mutation.AddOptionalFloat(v)
 	return _u
 }
 
@@ -2484,23 +2484,23 @@ func (_u *FieldTypeUpdateOne) ClearOptionalFloat() *FieldTypeUpdateOne {
 }
 
 // SetOptionalFloat32 sets the "optional_float32" field.
-func (_u *FieldTypeUpdateOne) SetOptionalFloat32(f float32) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetOptionalFloat32(v float32) *FieldTypeUpdateOne {
 	_u.mutation.ResetOptionalFloat32()
-	_u.mutation.SetOptionalFloat32(f)
+	_u.mutation.SetOptionalFloat32(v)
 	return _u
 }
 
 // SetNillableOptionalFloat32 sets the "optional_float32" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableOptionalFloat32(f *float32) *FieldTypeUpdateOne {
-	if f != nil {
-		_u.SetOptionalFloat32(*f)
+func (_u *FieldTypeUpdateOne) SetNillableOptionalFloat32(v *float32) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetOptionalFloat32(*v)
 	}
 	return _u
 }
 
-// AddOptionalFloat32 adds f to the "optional_float32" field.
-func (_u *FieldTypeUpdateOne) AddOptionalFloat32(f float32) *FieldTypeUpdateOne {
-	_u.mutation.AddOptionalFloat32(f)
+// AddOptionalFloat32 adds value to the "optional_float32" field.
+func (_u *FieldTypeUpdateOne) AddOptionalFloat32(v float32) *FieldTypeUpdateOne {
+	_u.mutation.AddOptionalFloat32(v)
 	return _u
 }
 
@@ -2511,15 +2511,15 @@ func (_u *FieldTypeUpdateOne) ClearOptionalFloat32() *FieldTypeUpdateOne {
 }
 
 // SetText sets the "text" field.
-func (_u *FieldTypeUpdateOne) SetText(s string) *FieldTypeUpdateOne {
-	_u.mutation.SetText(s)
+func (_u *FieldTypeUpdateOne) SetText(v string) *FieldTypeUpdateOne {
+	_u.mutation.SetText(v)
 	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableText(s *string) *FieldTypeUpdateOne {
-	if s != nil {
-		_u.SetText(*s)
+func (_u *FieldTypeUpdateOne) SetNillableText(v *string) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetText(*v)
 	}
 	return _u
 }
@@ -2531,15 +2531,15 @@ func (_u *FieldTypeUpdateOne) ClearText() *FieldTypeUpdateOne {
 }
 
 // SetDatetime sets the "datetime" field.
-func (_u *FieldTypeUpdateOne) SetDatetime(t time.Time) *FieldTypeUpdateOne {
-	_u.mutation.SetDatetime(t)
+func (_u *FieldTypeUpdateOne) SetDatetime(v time.Time) *FieldTypeUpdateOne {
+	_u.mutation.SetDatetime(v)
 	return _u
 }
 
 // SetNillableDatetime sets the "datetime" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableDatetime(t *time.Time) *FieldTypeUpdateOne {
-	if t != nil {
-		_u.SetDatetime(*t)
+func (_u *FieldTypeUpdateOne) SetNillableDatetime(v *time.Time) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetDatetime(*v)
 	}
 	return _u
 }
@@ -2551,23 +2551,23 @@ func (_u *FieldTypeUpdateOne) ClearDatetime() *FieldTypeUpdateOne {
 }
 
 // SetDecimal sets the "decimal" field.
-func (_u *FieldTypeUpdateOne) SetDecimal(f float64) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetDecimal(v float64) *FieldTypeUpdateOne {
 	_u.mutation.ResetDecimal()
-	_u.mutation.SetDecimal(f)
+	_u.mutation.SetDecimal(v)
 	return _u
 }
 
 // SetNillableDecimal sets the "decimal" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableDecimal(f *float64) *FieldTypeUpdateOne {
-	if f != nil {
-		_u.SetDecimal(*f)
+func (_u *FieldTypeUpdateOne) SetNillableDecimal(v *float64) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetDecimal(*v)
 	}
 	return _u
 }
 
-// AddDecimal adds f to the "decimal" field.
-func (_u *FieldTypeUpdateOne) AddDecimal(f float64) *FieldTypeUpdateOne {
-	_u.mutation.AddDecimal(f)
+// AddDecimal adds value to the "decimal" field.
+func (_u *FieldTypeUpdateOne) AddDecimal(v float64) *FieldTypeUpdateOne {
+	_u.mutation.AddDecimal(v)
 	return _u
 }
 
@@ -2578,8 +2578,8 @@ func (_u *FieldTypeUpdateOne) ClearDecimal() *FieldTypeUpdateOne {
 }
 
 // SetLinkOther sets the "link_other" field.
-func (_u *FieldTypeUpdateOne) SetLinkOther(s *schema.Link) *FieldTypeUpdateOne {
-	_u.mutation.SetLinkOther(s)
+func (_u *FieldTypeUpdateOne) SetLinkOther(v *schema.Link) *FieldTypeUpdateOne {
+	_u.mutation.SetLinkOther(v)
 	return _u
 }
 
@@ -2590,8 +2590,8 @@ func (_u *FieldTypeUpdateOne) ClearLinkOther() *FieldTypeUpdateOne {
 }
 
 // SetLinkOtherFunc sets the "link_other_func" field.
-func (_u *FieldTypeUpdateOne) SetLinkOtherFunc(s *schema.Link) *FieldTypeUpdateOne {
-	_u.mutation.SetLinkOtherFunc(s)
+func (_u *FieldTypeUpdateOne) SetLinkOtherFunc(v *schema.Link) *FieldTypeUpdateOne {
+	_u.mutation.SetLinkOtherFunc(v)
 	return _u
 }
 
@@ -2602,15 +2602,15 @@ func (_u *FieldTypeUpdateOne) ClearLinkOtherFunc() *FieldTypeUpdateOne {
 }
 
 // SetMAC sets the "mac" field.
-func (_u *FieldTypeUpdateOne) SetMAC(s schema.MAC) *FieldTypeUpdateOne {
-	_u.mutation.SetMAC(s)
+func (_u *FieldTypeUpdateOne) SetMAC(v schema.MAC) *FieldTypeUpdateOne {
+	_u.mutation.SetMAC(v)
 	return _u
 }
 
 // SetNillableMAC sets the "mac" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableMAC(s *schema.MAC) *FieldTypeUpdateOne {
-	if s != nil {
-		_u.SetMAC(*s)
+func (_u *FieldTypeUpdateOne) SetNillableMAC(v *schema.MAC) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetMAC(*v)
 	}
 	return _u
 }
@@ -2622,8 +2622,8 @@ func (_u *FieldTypeUpdateOne) ClearMAC() *FieldTypeUpdateOne {
 }
 
 // SetStringArray sets the "string_array" field.
-func (_u *FieldTypeUpdateOne) SetStringArray(s schema.Strings) *FieldTypeUpdateOne {
-	_u.mutation.SetStringArray(s)
+func (_u *FieldTypeUpdateOne) SetStringArray(v schema.Strings) *FieldTypeUpdateOne {
+	_u.mutation.SetStringArray(v)
 	return _u
 }
 
@@ -2634,15 +2634,15 @@ func (_u *FieldTypeUpdateOne) ClearStringArray() *FieldTypeUpdateOne {
 }
 
 // SetPassword sets the "password" field.
-func (_u *FieldTypeUpdateOne) SetPassword(s string) *FieldTypeUpdateOne {
-	_u.mutation.SetPassword(s)
+func (_u *FieldTypeUpdateOne) SetPassword(v string) *FieldTypeUpdateOne {
+	_u.mutation.SetPassword(v)
 	return _u
 }
 
 // SetNillablePassword sets the "password" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillablePassword(s *string) *FieldTypeUpdateOne {
-	if s != nil {
-		_u.SetPassword(*s)
+func (_u *FieldTypeUpdateOne) SetNillablePassword(v *string) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetPassword(*v)
 	}
 	return _u
 }
@@ -2654,15 +2654,15 @@ func (_u *FieldTypeUpdateOne) ClearPassword() *FieldTypeUpdateOne {
 }
 
 // SetStringScanner sets the "string_scanner" field.
-func (_u *FieldTypeUpdateOne) SetStringScanner(ss schema.StringScanner) *FieldTypeUpdateOne {
-	_u.mutation.SetStringScanner(ss)
+func (_u *FieldTypeUpdateOne) SetStringScanner(v schema.StringScanner) *FieldTypeUpdateOne {
+	_u.mutation.SetStringScanner(v)
 	return _u
 }
 
 // SetNillableStringScanner sets the "string_scanner" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableStringScanner(ss *schema.StringScanner) *FieldTypeUpdateOne {
-	if ss != nil {
-		_u.SetStringScanner(*ss)
+func (_u *FieldTypeUpdateOne) SetNillableStringScanner(v *schema.StringScanner) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetStringScanner(*v)
 	}
 	return _u
 }
@@ -2674,15 +2674,15 @@ func (_u *FieldTypeUpdateOne) ClearStringScanner() *FieldTypeUpdateOne {
 }
 
 // SetDuration sets the "duration" field.
-func (_u *FieldTypeUpdateOne) SetDuration(t time.Duration) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetDuration(v time.Duration) *FieldTypeUpdateOne {
 	_u.mutation.ResetDuration()
-	_u.mutation.SetDuration(t)
+	_u.mutation.SetDuration(v)
 	return _u
 }
 
-// AddDuration adds t to the "duration" field.
-func (_u *FieldTypeUpdateOne) AddDuration(t time.Duration) *FieldTypeUpdateOne {
-	_u.mutation.AddDuration(t)
+// AddDuration adds value to the "duration" field.
+func (_u *FieldTypeUpdateOne) AddDuration(v time.Duration) *FieldTypeUpdateOne {
+	_u.mutation.AddDuration(v)
 	return _u
 }
 
@@ -2693,29 +2693,29 @@ func (_u *FieldTypeUpdateOne) ClearDuration() *FieldTypeUpdateOne {
 }
 
 // SetDir sets the "dir" field.
-func (_u *FieldTypeUpdateOne) SetDir(h http.Dir) *FieldTypeUpdateOne {
-	_u.mutation.SetDir(h)
+func (_u *FieldTypeUpdateOne) SetDir(v http.Dir) *FieldTypeUpdateOne {
+	_u.mutation.SetDir(v)
 	return _u
 }
 
 // SetNillableDir sets the "dir" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableDir(h *http.Dir) *FieldTypeUpdateOne {
-	if h != nil {
-		_u.SetDir(*h)
+func (_u *FieldTypeUpdateOne) SetNillableDir(v *http.Dir) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetDir(*v)
 	}
 	return _u
 }
 
 // SetNdir sets the "ndir" field.
-func (_u *FieldTypeUpdateOne) SetNdir(h http.Dir) *FieldTypeUpdateOne {
-	_u.mutation.SetNdir(h)
+func (_u *FieldTypeUpdateOne) SetNdir(v http.Dir) *FieldTypeUpdateOne {
+	_u.mutation.SetNdir(v)
 	return _u
 }
 
 // SetNillableNdir sets the "ndir" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableNdir(h *http.Dir) *FieldTypeUpdateOne {
-	if h != nil {
-		_u.SetNdir(*h)
+func (_u *FieldTypeUpdateOne) SetNillableNdir(v *http.Dir) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetNdir(*v)
 	}
 	return _u
 }
@@ -2727,15 +2727,15 @@ func (_u *FieldTypeUpdateOne) ClearNdir() *FieldTypeUpdateOne {
 }
 
 // SetStr sets the "str" field.
-func (_u *FieldTypeUpdateOne) SetStr(ss sql.NullString) *FieldTypeUpdateOne {
-	_u.mutation.SetStr(ss)
+func (_u *FieldTypeUpdateOne) SetStr(v sql.NullString) *FieldTypeUpdateOne {
+	_u.mutation.SetStr(v)
 	return _u
 }
 
 // SetNillableStr sets the "str" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableStr(ss *sql.NullString) *FieldTypeUpdateOne {
-	if ss != nil {
-		_u.SetStr(*ss)
+func (_u *FieldTypeUpdateOne) SetNillableStr(v *sql.NullString) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetStr(*v)
 	}
 	return _u
 }
@@ -2747,8 +2747,8 @@ func (_u *FieldTypeUpdateOne) ClearStr() *FieldTypeUpdateOne {
 }
 
 // SetNullStr sets the "null_str" field.
-func (_u *FieldTypeUpdateOne) SetNullStr(ss *sql.NullString) *FieldTypeUpdateOne {
-	_u.mutation.SetNullStr(ss)
+func (_u *FieldTypeUpdateOne) SetNullStr(v *sql.NullString) *FieldTypeUpdateOne {
+	_u.mutation.SetNullStr(v)
 	return _u
 }
 
@@ -2759,15 +2759,15 @@ func (_u *FieldTypeUpdateOne) ClearNullStr() *FieldTypeUpdateOne {
 }
 
 // SetLink sets the "link" field.
-func (_u *FieldTypeUpdateOne) SetLink(s schema.Link) *FieldTypeUpdateOne {
-	_u.mutation.SetLink(s)
+func (_u *FieldTypeUpdateOne) SetLink(v schema.Link) *FieldTypeUpdateOne {
+	_u.mutation.SetLink(v)
 	return _u
 }
 
 // SetNillableLink sets the "link" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableLink(s *schema.Link) *FieldTypeUpdateOne {
-	if s != nil {
-		_u.SetLink(*s)
+func (_u *FieldTypeUpdateOne) SetNillableLink(v *schema.Link) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetLink(*v)
 	}
 	return _u
 }
@@ -2779,8 +2779,8 @@ func (_u *FieldTypeUpdateOne) ClearLink() *FieldTypeUpdateOne {
 }
 
 // SetNullLink sets the "null_link" field.
-func (_u *FieldTypeUpdateOne) SetNullLink(s *schema.Link) *FieldTypeUpdateOne {
-	_u.mutation.SetNullLink(s)
+func (_u *FieldTypeUpdateOne) SetNullLink(v *schema.Link) *FieldTypeUpdateOne {
+	_u.mutation.SetNullLink(v)
 	return _u
 }
 
@@ -2791,15 +2791,15 @@ func (_u *FieldTypeUpdateOne) ClearNullLink() *FieldTypeUpdateOne {
 }
 
 // SetActive sets the "active" field.
-func (_u *FieldTypeUpdateOne) SetActive(s schema.Status) *FieldTypeUpdateOne {
-	_u.mutation.SetActive(s)
+func (_u *FieldTypeUpdateOne) SetActive(v schema.Status) *FieldTypeUpdateOne {
+	_u.mutation.SetActive(v)
 	return _u
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableActive(s *schema.Status) *FieldTypeUpdateOne {
-	if s != nil {
-		_u.SetActive(*s)
+func (_u *FieldTypeUpdateOne) SetNillableActive(v *schema.Status) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetActive(*v)
 	}
 	return _u
 }
@@ -2811,15 +2811,15 @@ func (_u *FieldTypeUpdateOne) ClearActive() *FieldTypeUpdateOne {
 }
 
 // SetNullActive sets the "null_active" field.
-func (_u *FieldTypeUpdateOne) SetNullActive(s schema.Status) *FieldTypeUpdateOne {
-	_u.mutation.SetNullActive(s)
+func (_u *FieldTypeUpdateOne) SetNullActive(v schema.Status) *FieldTypeUpdateOne {
+	_u.mutation.SetNullActive(v)
 	return _u
 }
 
 // SetNillableNullActive sets the "null_active" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableNullActive(s *schema.Status) *FieldTypeUpdateOne {
-	if s != nil {
-		_u.SetNullActive(*s)
+func (_u *FieldTypeUpdateOne) SetNillableNullActive(v *schema.Status) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetNullActive(*v)
 	}
 	return _u
 }
@@ -2831,8 +2831,8 @@ func (_u *FieldTypeUpdateOne) ClearNullActive() *FieldTypeUpdateOne {
 }
 
 // SetDeleted sets the "deleted" field.
-func (_u *FieldTypeUpdateOne) SetDeleted(sb *sql.NullBool) *FieldTypeUpdateOne {
-	_u.mutation.SetDeleted(sb)
+func (_u *FieldTypeUpdateOne) SetDeleted(v *sql.NullBool) *FieldTypeUpdateOne {
+	_u.mutation.SetDeleted(v)
 	return _u
 }
 
@@ -2843,8 +2843,8 @@ func (_u *FieldTypeUpdateOne) ClearDeleted() *FieldTypeUpdateOne {
 }
 
 // SetDeletedAt sets the "deleted_at" field.
-func (_u *FieldTypeUpdateOne) SetDeletedAt(st *sql.NullTime) *FieldTypeUpdateOne {
-	_u.mutation.SetDeletedAt(st)
+func (_u *FieldTypeUpdateOne) SetDeletedAt(v *sql.NullTime) *FieldTypeUpdateOne {
+	_u.mutation.SetDeletedAt(v)
 	return _u
 }
 
@@ -2855,8 +2855,8 @@ func (_u *FieldTypeUpdateOne) ClearDeletedAt() *FieldTypeUpdateOne {
 }
 
 // SetRawData sets the "raw_data" field.
-func (_u *FieldTypeUpdateOne) SetRawData(b []byte) *FieldTypeUpdateOne {
-	_u.mutation.SetRawData(b)
+func (_u *FieldTypeUpdateOne) SetRawData(v []byte) *FieldTypeUpdateOne {
+	_u.mutation.SetRawData(v)
 	return _u
 }
 
@@ -2867,8 +2867,8 @@ func (_u *FieldTypeUpdateOne) ClearRawData() *FieldTypeUpdateOne {
 }
 
 // SetSensitive sets the "sensitive" field.
-func (_u *FieldTypeUpdateOne) SetSensitive(b []byte) *FieldTypeUpdateOne {
-	_u.mutation.SetSensitive(b)
+func (_u *FieldTypeUpdateOne) SetSensitive(v []byte) *FieldTypeUpdateOne {
+	_u.mutation.SetSensitive(v)
 	return _u
 }
 
@@ -2879,8 +2879,8 @@ func (_u *FieldTypeUpdateOne) ClearSensitive() *FieldTypeUpdateOne {
 }
 
 // SetIP sets the "ip" field.
-func (_u *FieldTypeUpdateOne) SetIP(n net.IP) *FieldTypeUpdateOne {
-	_u.mutation.SetIP(n)
+func (_u *FieldTypeUpdateOne) SetIP(v net.IP) *FieldTypeUpdateOne {
+	_u.mutation.SetIP(v)
 	return _u
 }
 
@@ -2891,8 +2891,8 @@ func (_u *FieldTypeUpdateOne) ClearIP() *FieldTypeUpdateOne {
 }
 
 // SetNullInt64 sets the "null_int64" field.
-func (_u *FieldTypeUpdateOne) SetNullInt64(si *sql.NullInt64) *FieldTypeUpdateOne {
-	_u.mutation.SetNullInt64(si)
+func (_u *FieldTypeUpdateOne) SetNullInt64(v *sql.NullInt64) *FieldTypeUpdateOne {
+	_u.mutation.SetNullInt64(v)
 	return _u
 }
 
@@ -2903,23 +2903,23 @@ func (_u *FieldTypeUpdateOne) ClearNullInt64() *FieldTypeUpdateOne {
 }
 
 // SetSchemaInt sets the "schema_int" field.
-func (_u *FieldTypeUpdateOne) SetSchemaInt(s schema.Int) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetSchemaInt(v schema.Int) *FieldTypeUpdateOne {
 	_u.mutation.ResetSchemaInt()
-	_u.mutation.SetSchemaInt(s)
+	_u.mutation.SetSchemaInt(v)
 	return _u
 }
 
 // SetNillableSchemaInt sets the "schema_int" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableSchemaInt(s *schema.Int) *FieldTypeUpdateOne {
-	if s != nil {
-		_u.SetSchemaInt(*s)
+func (_u *FieldTypeUpdateOne) SetNillableSchemaInt(v *schema.Int) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetSchemaInt(*v)
 	}
 	return _u
 }
 
-// AddSchemaInt adds s to the "schema_int" field.
-func (_u *FieldTypeUpdateOne) AddSchemaInt(s schema.Int) *FieldTypeUpdateOne {
-	_u.mutation.AddSchemaInt(s)
+// AddSchemaInt adds value to the "schema_int" field.
+func (_u *FieldTypeUpdateOne) AddSchemaInt(v schema.Int) *FieldTypeUpdateOne {
+	_u.mutation.AddSchemaInt(v)
 	return _u
 }
 
@@ -2930,23 +2930,23 @@ func (_u *FieldTypeUpdateOne) ClearSchemaInt() *FieldTypeUpdateOne {
 }
 
 // SetSchemaInt8 sets the "schema_int8" field.
-func (_u *FieldTypeUpdateOne) SetSchemaInt8(s schema.Int8) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetSchemaInt8(v schema.Int8) *FieldTypeUpdateOne {
 	_u.mutation.ResetSchemaInt8()
-	_u.mutation.SetSchemaInt8(s)
+	_u.mutation.SetSchemaInt8(v)
 	return _u
 }
 
 // SetNillableSchemaInt8 sets the "schema_int8" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableSchemaInt8(s *schema.Int8) *FieldTypeUpdateOne {
-	if s != nil {
-		_u.SetSchemaInt8(*s)
+func (_u *FieldTypeUpdateOne) SetNillableSchemaInt8(v *schema.Int8) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetSchemaInt8(*v)
 	}
 	return _u
 }
 
-// AddSchemaInt8 adds s to the "schema_int8" field.
-func (_u *FieldTypeUpdateOne) AddSchemaInt8(s schema.Int8) *FieldTypeUpdateOne {
-	_u.mutation.AddSchemaInt8(s)
+// AddSchemaInt8 adds value to the "schema_int8" field.
+func (_u *FieldTypeUpdateOne) AddSchemaInt8(v schema.Int8) *FieldTypeUpdateOne {
+	_u.mutation.AddSchemaInt8(v)
 	return _u
 }
 
@@ -2957,23 +2957,23 @@ func (_u *FieldTypeUpdateOne) ClearSchemaInt8() *FieldTypeUpdateOne {
 }
 
 // SetSchemaInt64 sets the "schema_int64" field.
-func (_u *FieldTypeUpdateOne) SetSchemaInt64(s schema.Int64) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetSchemaInt64(v schema.Int64) *FieldTypeUpdateOne {
 	_u.mutation.ResetSchemaInt64()
-	_u.mutation.SetSchemaInt64(s)
+	_u.mutation.SetSchemaInt64(v)
 	return _u
 }
 
 // SetNillableSchemaInt64 sets the "schema_int64" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableSchemaInt64(s *schema.Int64) *FieldTypeUpdateOne {
-	if s != nil {
-		_u.SetSchemaInt64(*s)
+func (_u *FieldTypeUpdateOne) SetNillableSchemaInt64(v *schema.Int64) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetSchemaInt64(*v)
 	}
 	return _u
 }
 
-// AddSchemaInt64 adds s to the "schema_int64" field.
-func (_u *FieldTypeUpdateOne) AddSchemaInt64(s schema.Int64) *FieldTypeUpdateOne {
-	_u.mutation.AddSchemaInt64(s)
+// AddSchemaInt64 adds value to the "schema_int64" field.
+func (_u *FieldTypeUpdateOne) AddSchemaInt64(v schema.Int64) *FieldTypeUpdateOne {
+	_u.mutation.AddSchemaInt64(v)
 	return _u
 }
 
@@ -2984,23 +2984,23 @@ func (_u *FieldTypeUpdateOne) ClearSchemaInt64() *FieldTypeUpdateOne {
 }
 
 // SetSchemaFloat sets the "schema_float" field.
-func (_u *FieldTypeUpdateOne) SetSchemaFloat(s schema.Float64) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetSchemaFloat(v schema.Float64) *FieldTypeUpdateOne {
 	_u.mutation.ResetSchemaFloat()
-	_u.mutation.SetSchemaFloat(s)
+	_u.mutation.SetSchemaFloat(v)
 	return _u
 }
 
 // SetNillableSchemaFloat sets the "schema_float" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableSchemaFloat(s *schema.Float64) *FieldTypeUpdateOne {
-	if s != nil {
-		_u.SetSchemaFloat(*s)
+func (_u *FieldTypeUpdateOne) SetNillableSchemaFloat(v *schema.Float64) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetSchemaFloat(*v)
 	}
 	return _u
 }
 
-// AddSchemaFloat adds s to the "schema_float" field.
-func (_u *FieldTypeUpdateOne) AddSchemaFloat(s schema.Float64) *FieldTypeUpdateOne {
-	_u.mutation.AddSchemaFloat(s)
+// AddSchemaFloat adds value to the "schema_float" field.
+func (_u *FieldTypeUpdateOne) AddSchemaFloat(v schema.Float64) *FieldTypeUpdateOne {
+	_u.mutation.AddSchemaFloat(v)
 	return _u
 }
 
@@ -3011,23 +3011,23 @@ func (_u *FieldTypeUpdateOne) ClearSchemaFloat() *FieldTypeUpdateOne {
 }
 
 // SetSchemaFloat32 sets the "schema_float32" field.
-func (_u *FieldTypeUpdateOne) SetSchemaFloat32(s schema.Float32) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetSchemaFloat32(v schema.Float32) *FieldTypeUpdateOne {
 	_u.mutation.ResetSchemaFloat32()
-	_u.mutation.SetSchemaFloat32(s)
+	_u.mutation.SetSchemaFloat32(v)
 	return _u
 }
 
 // SetNillableSchemaFloat32 sets the "schema_float32" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableSchemaFloat32(s *schema.Float32) *FieldTypeUpdateOne {
-	if s != nil {
-		_u.SetSchemaFloat32(*s)
+func (_u *FieldTypeUpdateOne) SetNillableSchemaFloat32(v *schema.Float32) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetSchemaFloat32(*v)
 	}
 	return _u
 }
 
-// AddSchemaFloat32 adds s to the "schema_float32" field.
-func (_u *FieldTypeUpdateOne) AddSchemaFloat32(s schema.Float32) *FieldTypeUpdateOne {
-	_u.mutation.AddSchemaFloat32(s)
+// AddSchemaFloat32 adds value to the "schema_float32" field.
+func (_u *FieldTypeUpdateOne) AddSchemaFloat32(v schema.Float32) *FieldTypeUpdateOne {
+	_u.mutation.AddSchemaFloat32(v)
 	return _u
 }
 
@@ -3038,8 +3038,8 @@ func (_u *FieldTypeUpdateOne) ClearSchemaFloat32() *FieldTypeUpdateOne {
 }
 
 // SetNullFloat sets the "null_float" field.
-func (_u *FieldTypeUpdateOne) SetNullFloat(sf *sql.NullFloat64) *FieldTypeUpdateOne {
-	_u.mutation.SetNullFloat(sf)
+func (_u *FieldTypeUpdateOne) SetNullFloat(v *sql.NullFloat64) *FieldTypeUpdateOne {
+	_u.mutation.SetNullFloat(v)
 	return _u
 }
 
@@ -3050,29 +3050,29 @@ func (_u *FieldTypeUpdateOne) ClearNullFloat() *FieldTypeUpdateOne {
 }
 
 // SetRole sets the "role" field.
-func (_u *FieldTypeUpdateOne) SetRole(r role.Role) *FieldTypeUpdateOne {
-	_u.mutation.SetRole(r)
+func (_u *FieldTypeUpdateOne) SetRole(v role.Role) *FieldTypeUpdateOne {
+	_u.mutation.SetRole(v)
 	return _u
 }
 
 // SetNillableRole sets the "role" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableRole(r *role.Role) *FieldTypeUpdateOne {
-	if r != nil {
-		_u.SetRole(*r)
+func (_u *FieldTypeUpdateOne) SetNillableRole(v *role.Role) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetRole(*v)
 	}
 	return _u
 }
 
 // SetPriority sets the "priority" field.
-func (_u *FieldTypeUpdateOne) SetPriority(r role.Priority) *FieldTypeUpdateOne {
-	_u.mutation.SetPriority(r)
+func (_u *FieldTypeUpdateOne) SetPriority(v role.Priority) *FieldTypeUpdateOne {
+	_u.mutation.SetPriority(v)
 	return _u
 }
 
 // SetNillablePriority sets the "priority" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillablePriority(r *role.Priority) *FieldTypeUpdateOne {
-	if r != nil {
-		_u.SetPriority(*r)
+func (_u *FieldTypeUpdateOne) SetNillablePriority(v *role.Priority) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetPriority(*v)
 	}
 	return _u
 }
@@ -3084,15 +3084,15 @@ func (_u *FieldTypeUpdateOne) ClearPriority() *FieldTypeUpdateOne {
 }
 
 // SetOptionalUUID sets the "optional_uuid" field.
-func (_u *FieldTypeUpdateOne) SetOptionalUUID(u uuid.UUID) *FieldTypeUpdateOne {
-	_u.mutation.SetOptionalUUID(u)
+func (_u *FieldTypeUpdateOne) SetOptionalUUID(v uuid.UUID) *FieldTypeUpdateOne {
+	_u.mutation.SetOptionalUUID(v)
 	return _u
 }
 
 // SetNillableOptionalUUID sets the "optional_uuid" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableOptionalUUID(u *uuid.UUID) *FieldTypeUpdateOne {
-	if u != nil {
-		_u.SetOptionalUUID(*u)
+func (_u *FieldTypeUpdateOne) SetNillableOptionalUUID(v *uuid.UUID) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetOptionalUUID(*v)
 	}
 	return _u
 }
@@ -3104,15 +3104,15 @@ func (_u *FieldTypeUpdateOne) ClearOptionalUUID() *FieldTypeUpdateOne {
 }
 
 // SetNillableUUID sets the "nillable_uuid" field.
-func (_u *FieldTypeUpdateOne) SetNillableUUID(u uuid.UUID) *FieldTypeUpdateOne {
-	_u.mutation.SetNillableUUID(u)
+func (_u *FieldTypeUpdateOne) SetNillableUUID(v uuid.UUID) *FieldTypeUpdateOne {
+	_u.mutation.SetNillableUUID(v)
 	return _u
 }
 
 // SetNillableNillableUUID sets the "nillable_uuid" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableNillableUUID(u *uuid.UUID) *FieldTypeUpdateOne {
-	if u != nil {
-		_u.SetNillableUUID(*u)
+func (_u *FieldTypeUpdateOne) SetNillableNillableUUID(v *uuid.UUID) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetNillableUUID(*v)
 	}
 	return _u
 }
@@ -3124,14 +3124,14 @@ func (_u *FieldTypeUpdateOne) ClearNillableUUID() *FieldTypeUpdateOne {
 }
 
 // SetStrings sets the "strings" field.
-func (_u *FieldTypeUpdateOne) SetStrings(s []string) *FieldTypeUpdateOne {
-	_u.mutation.SetStrings(s)
+func (_u *FieldTypeUpdateOne) SetStrings(v []string) *FieldTypeUpdateOne {
+	_u.mutation.SetStrings(v)
 	return _u
 }
 
-// AppendStrings appends s to the "strings" field.
-func (_u *FieldTypeUpdateOne) AppendStrings(s []string) *FieldTypeUpdateOne {
-	_u.mutation.AppendStrings(s)
+// AppendStrings appends value to the "strings" field.
+func (_u *FieldTypeUpdateOne) AppendStrings(v []string) *FieldTypeUpdateOne {
+	_u.mutation.AppendStrings(v)
 	return _u
 }
 
@@ -3142,22 +3142,22 @@ func (_u *FieldTypeUpdateOne) ClearStrings() *FieldTypeUpdateOne {
 }
 
 // SetPair sets the "pair" field.
-func (_u *FieldTypeUpdateOne) SetPair(s schema.Pair) *FieldTypeUpdateOne {
-	_u.mutation.SetPair(s)
+func (_u *FieldTypeUpdateOne) SetPair(v schema.Pair) *FieldTypeUpdateOne {
+	_u.mutation.SetPair(v)
 	return _u
 }
 
 // SetNillablePair sets the "pair" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillablePair(s *schema.Pair) *FieldTypeUpdateOne {
-	if s != nil {
-		_u.SetPair(*s)
+func (_u *FieldTypeUpdateOne) SetNillablePair(v *schema.Pair) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetPair(*v)
 	}
 	return _u
 }
 
 // SetNilPair sets the "nil_pair" field.
-func (_u *FieldTypeUpdateOne) SetNilPair(s *schema.Pair) *FieldTypeUpdateOne {
-	_u.mutation.SetNilPair(s)
+func (_u *FieldTypeUpdateOne) SetNilPair(v *schema.Pair) *FieldTypeUpdateOne {
+	_u.mutation.SetNilPair(v)
 	return _u
 }
 
@@ -3168,51 +3168,51 @@ func (_u *FieldTypeUpdateOne) ClearNilPair() *FieldTypeUpdateOne {
 }
 
 // SetVstring sets the "vstring" field.
-func (_u *FieldTypeUpdateOne) SetVstring(ss schema.VString) *FieldTypeUpdateOne {
-	_u.mutation.SetVstring(ss)
+func (_u *FieldTypeUpdateOne) SetVstring(v schema.VString) *FieldTypeUpdateOne {
+	_u.mutation.SetVstring(v)
 	return _u
 }
 
 // SetNillableVstring sets the "vstring" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableVstring(ss *schema.VString) *FieldTypeUpdateOne {
-	if ss != nil {
-		_u.SetVstring(*ss)
+func (_u *FieldTypeUpdateOne) SetNillableVstring(v *schema.VString) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetVstring(*v)
 	}
 	return _u
 }
 
 // SetTriple sets the "triple" field.
-func (_u *FieldTypeUpdateOne) SetTriple(s schema.Triple) *FieldTypeUpdateOne {
-	_u.mutation.SetTriple(s)
+func (_u *FieldTypeUpdateOne) SetTriple(v schema.Triple) *FieldTypeUpdateOne {
+	_u.mutation.SetTriple(v)
 	return _u
 }
 
 // SetNillableTriple sets the "triple" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableTriple(s *schema.Triple) *FieldTypeUpdateOne {
-	if s != nil {
-		_u.SetTriple(*s)
+func (_u *FieldTypeUpdateOne) SetNillableTriple(v *schema.Triple) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetTriple(*v)
 	}
 	return _u
 }
 
 // SetBigInt sets the "big_int" field.
-func (_u *FieldTypeUpdateOne) SetBigInt(si schema.BigInt) *FieldTypeUpdateOne {
+func (_u *FieldTypeUpdateOne) SetBigInt(v schema.BigInt) *FieldTypeUpdateOne {
 	_u.mutation.ResetBigInt()
-	_u.mutation.SetBigInt(si)
+	_u.mutation.SetBigInt(v)
 	return _u
 }
 
 // SetNillableBigInt sets the "big_int" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillableBigInt(si *schema.BigInt) *FieldTypeUpdateOne {
-	if si != nil {
-		_u.SetBigInt(*si)
+func (_u *FieldTypeUpdateOne) SetNillableBigInt(v *schema.BigInt) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetBigInt(*v)
 	}
 	return _u
 }
 
-// AddBigInt adds si to the "big_int" field.
-func (_u *FieldTypeUpdateOne) AddBigInt(si schema.BigInt) *FieldTypeUpdateOne {
-	_u.mutation.AddBigInt(si)
+// AddBigInt adds value to the "big_int" field.
+func (_u *FieldTypeUpdateOne) AddBigInt(v schema.BigInt) *FieldTypeUpdateOne {
+	_u.mutation.AddBigInt(v)
 	return _u
 }
 
@@ -3223,15 +3223,15 @@ func (_u *FieldTypeUpdateOne) ClearBigInt() *FieldTypeUpdateOne {
 }
 
 // SetPasswordOther sets the "password_other" field.
-func (_u *FieldTypeUpdateOne) SetPasswordOther(s schema.Password) *FieldTypeUpdateOne {
-	_u.mutation.SetPasswordOther(s)
+func (_u *FieldTypeUpdateOne) SetPasswordOther(v schema.Password) *FieldTypeUpdateOne {
+	_u.mutation.SetPasswordOther(v)
 	return _u
 }
 
 // SetNillablePasswordOther sets the "password_other" field if the given value is not nil.
-func (_u *FieldTypeUpdateOne) SetNillablePasswordOther(s *schema.Password) *FieldTypeUpdateOne {
-	if s != nil {
-		_u.SetPasswordOther(*s)
+func (_u *FieldTypeUpdateOne) SetNillablePasswordOther(v *schema.Password) *FieldTypeUpdateOne {
+	if v != nil {
+		_u.SetPasswordOther(*v)
 	}
 	return _u
 }

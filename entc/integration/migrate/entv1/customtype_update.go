@@ -32,15 +32,15 @@ func (_u *CustomTypeUpdate) Where(ps ...predicate.CustomType) *CustomTypeUpdate 
 }
 
 // SetCustom sets the "custom" field.
-func (_u *CustomTypeUpdate) SetCustom(s string) *CustomTypeUpdate {
-	_u.mutation.SetCustom(s)
+func (_u *CustomTypeUpdate) SetCustom(v string) *CustomTypeUpdate {
+	_u.mutation.SetCustom(v)
 	return _u
 }
 
 // SetNillableCustom sets the "custom" field if the given value is not nil.
-func (_u *CustomTypeUpdate) SetNillableCustom(s *string) *CustomTypeUpdate {
-	if s != nil {
-		_u.SetCustom(*s)
+func (_u *CustomTypeUpdate) SetNillableCustom(v *string) *CustomTypeUpdate {
+	if v != nil {
+		_u.SetCustom(*v)
 	}
 	return _u
 }
@@ -83,7 +83,7 @@ func (_u *CustomTypeUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *CustomTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *CustomTypeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(customtype.Table, customtype.Columns, sqlgraph.NewFieldSpec(customtype.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -98,7 +98,7 @@ func (_u *CustomTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if _u.mutation.CustomCleared() {
 		_spec.ClearField(customtype.FieldCustom, field.TypeString)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{customtype.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -107,7 +107,7 @@ func (_u *CustomTypeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // CustomTypeUpdateOne is the builder for updating a single CustomType entity.
@@ -119,15 +119,15 @@ type CustomTypeUpdateOne struct {
 }
 
 // SetCustom sets the "custom" field.
-func (_u *CustomTypeUpdateOne) SetCustom(s string) *CustomTypeUpdateOne {
-	_u.mutation.SetCustom(s)
+func (_u *CustomTypeUpdateOne) SetCustom(v string) *CustomTypeUpdateOne {
+	_u.mutation.SetCustom(v)
 	return _u
 }
 
 // SetNillableCustom sets the "custom" field if the given value is not nil.
-func (_u *CustomTypeUpdateOne) SetNillableCustom(s *string) *CustomTypeUpdateOne {
-	if s != nil {
-		_u.SetCustom(*s)
+func (_u *CustomTypeUpdateOne) SetNillableCustom(v *string) *CustomTypeUpdateOne {
+	if v != nil {
+		_u.SetCustom(*v)
 	}
 	return _u
 }

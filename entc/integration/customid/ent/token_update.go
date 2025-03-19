@@ -34,15 +34,15 @@ func (_u *TokenUpdate) Where(ps ...predicate.Token) *TokenUpdate {
 }
 
 // SetBody sets the "body" field.
-func (_u *TokenUpdate) SetBody(s string) *TokenUpdate {
-	_u.mutation.SetBody(s)
+func (_u *TokenUpdate) SetBody(v string) *TokenUpdate {
+	_u.mutation.SetBody(v)
 	return _u
 }
 
 // SetNillableBody sets the "body" field if the given value is not nil.
-func (_u *TokenUpdate) SetNillableBody(s *string) *TokenUpdate {
-	if s != nil {
-		_u.SetBody(*s)
+func (_u *TokenUpdate) SetNillableBody(v *string) *TokenUpdate {
+	if v != nil {
+		_u.SetBody(*v)
 	}
 	return _u
 }
@@ -54,8 +54,8 @@ func (_u *TokenUpdate) SetAccountID(id sid.ID) *TokenUpdate {
 }
 
 // SetAccount sets the "account" edge to the Account entity.
-func (_u *TokenUpdate) SetAccount(a *Account) *TokenUpdate {
-	return _u.SetAccountID(a.ID)
+func (_u *TokenUpdate) SetAccount(v *Account) *TokenUpdate {
+	return _u.SetAccountID(v.ID)
 }
 
 // Mutation returns the TokenMutation object of the builder.
@@ -109,9 +109,9 @@ func (_u *TokenUpdate) check() error {
 	return nil
 }
 
-func (_u *TokenUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *TokenUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(token.Table, token.Columns, sqlgraph.NewFieldSpec(token.FieldID, field.TypeOther))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -153,7 +153,7 @@ func (_u *TokenUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{token.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -162,7 +162,7 @@ func (_u *TokenUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // TokenUpdateOne is the builder for updating a single Token entity.
@@ -174,15 +174,15 @@ type TokenUpdateOne struct {
 }
 
 // SetBody sets the "body" field.
-func (_u *TokenUpdateOne) SetBody(s string) *TokenUpdateOne {
-	_u.mutation.SetBody(s)
+func (_u *TokenUpdateOne) SetBody(v string) *TokenUpdateOne {
+	_u.mutation.SetBody(v)
 	return _u
 }
 
 // SetNillableBody sets the "body" field if the given value is not nil.
-func (_u *TokenUpdateOne) SetNillableBody(s *string) *TokenUpdateOne {
-	if s != nil {
-		_u.SetBody(*s)
+func (_u *TokenUpdateOne) SetNillableBody(v *string) *TokenUpdateOne {
+	if v != nil {
+		_u.SetBody(*v)
 	}
 	return _u
 }
@@ -194,8 +194,8 @@ func (_u *TokenUpdateOne) SetAccountID(id sid.ID) *TokenUpdateOne {
 }
 
 // SetAccount sets the "account" edge to the Account entity.
-func (_u *TokenUpdateOne) SetAccount(a *Account) *TokenUpdateOne {
-	return _u.SetAccountID(a.ID)
+func (_u *TokenUpdateOne) SetAccount(v *Account) *TokenUpdateOne {
+	return _u.SetAccountID(v.ID)
 }
 
 // Mutation returns the TokenMutation object of the builder.

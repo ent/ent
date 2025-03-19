@@ -38,15 +38,15 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *UserUpdate) SetName(s string) *UserUpdate {
-	_u.mutation.SetName(s)
+func (_u *UserUpdate) SetName(v string) *UserUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableName(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -58,10 +58,10 @@ func (_u *UserUpdate) AddGroupIDs(ids ...int) *UserUpdate {
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (_u *UserUpdate) AddGroups(g ...*Group) *UserUpdate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *UserUpdate) AddGroups(v ...*Group) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddGroupIDs(ids...)
 }
@@ -73,10 +73,10 @@ func (_u *UserUpdate) AddFriendIDs(ids ...int) *UserUpdate {
 }
 
 // AddFriends adds the "friends" edges to the User entity.
-func (_u *UserUpdate) AddFriends(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) AddFriends(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFriendIDs(ids...)
 }
@@ -88,10 +88,10 @@ func (_u *UserUpdate) AddRelativeIDs(ids ...int) *UserUpdate {
 }
 
 // AddRelatives adds the "relatives" edges to the User entity.
-func (_u *UserUpdate) AddRelatives(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) AddRelatives(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddRelativeIDs(ids...)
 }
@@ -103,10 +103,10 @@ func (_u *UserUpdate) AddLikedTweetIDs(ids ...int) *UserUpdate {
 }
 
 // AddLikedTweets adds the "liked_tweets" edges to the Tweet entity.
-func (_u *UserUpdate) AddLikedTweets(t ...*Tweet) *UserUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *UserUpdate) AddLikedTweets(v ...*Tweet) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddLikedTweetIDs(ids...)
 }
@@ -118,10 +118,10 @@ func (_u *UserUpdate) AddTweetIDs(ids ...int) *UserUpdate {
 }
 
 // AddTweets adds the "tweets" edges to the Tweet entity.
-func (_u *UserUpdate) AddTweets(t ...*Tweet) *UserUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *UserUpdate) AddTweets(v ...*Tweet) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddTweetIDs(ids...)
 }
@@ -133,10 +133,10 @@ func (_u *UserUpdate) AddRoleIDs(ids ...int) *UserUpdate {
 }
 
 // AddRoles adds the "roles" edges to the Role entity.
-func (_u *UserUpdate) AddRoles(r ...*Role) *UserUpdate {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *UserUpdate) AddRoles(v ...*Role) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddRoleIDs(ids...)
 }
@@ -148,10 +148,10 @@ func (_u *UserUpdate) AddJoinedGroupIDs(ids ...int) *UserUpdate {
 }
 
 // AddJoinedGroups adds the "joined_groups" edges to the UserGroup entity.
-func (_u *UserUpdate) AddJoinedGroups(u ...*UserGroup) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) AddJoinedGroups(v ...*UserGroup) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddJoinedGroupIDs(ids...)
 }
@@ -163,10 +163,10 @@ func (_u *UserUpdate) AddFriendshipIDs(ids ...int) *UserUpdate {
 }
 
 // AddFriendships adds the "friendships" edges to the Friendship entity.
-func (_u *UserUpdate) AddFriendships(f ...*Friendship) *UserUpdate {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *UserUpdate) AddFriendships(v ...*Friendship) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFriendshipIDs(ids...)
 }
@@ -178,10 +178,10 @@ func (_u *UserUpdate) AddUserTweetIDs(ids ...int) *UserUpdate {
 }
 
 // AddUserTweets adds the "user_tweets" edges to the UserTweet entity.
-func (_u *UserUpdate) AddUserTweets(u ...*UserTweet) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) AddUserTweets(v ...*UserTweet) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddUserTweetIDs(ids...)
 }
@@ -204,10 +204,10 @@ func (_u *UserUpdate) RemoveGroupIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveGroups removes "groups" edges to Group entities.
-func (_u *UserUpdate) RemoveGroups(g ...*Group) *UserUpdate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *UserUpdate) RemoveGroups(v ...*Group) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveGroupIDs(ids...)
 }
@@ -225,10 +225,10 @@ func (_u *UserUpdate) RemoveFriendIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveFriends removes "friends" edges to User entities.
-func (_u *UserUpdate) RemoveFriends(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) RemoveFriends(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFriendIDs(ids...)
 }
@@ -246,10 +246,10 @@ func (_u *UserUpdate) RemoveRelativeIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveRelatives removes "relatives" edges to User entities.
-func (_u *UserUpdate) RemoveRelatives(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) RemoveRelatives(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveRelativeIDs(ids...)
 }
@@ -267,10 +267,10 @@ func (_u *UserUpdate) RemoveLikedTweetIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveLikedTweets removes "liked_tweets" edges to Tweet entities.
-func (_u *UserUpdate) RemoveLikedTweets(t ...*Tweet) *UserUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *UserUpdate) RemoveLikedTweets(v ...*Tweet) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveLikedTweetIDs(ids...)
 }
@@ -288,10 +288,10 @@ func (_u *UserUpdate) RemoveTweetIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveTweets removes "tweets" edges to Tweet entities.
-func (_u *UserUpdate) RemoveTweets(t ...*Tweet) *UserUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *UserUpdate) RemoveTweets(v ...*Tweet) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveTweetIDs(ids...)
 }
@@ -309,10 +309,10 @@ func (_u *UserUpdate) RemoveRoleIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveRoles removes "roles" edges to Role entities.
-func (_u *UserUpdate) RemoveRoles(r ...*Role) *UserUpdate {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *UserUpdate) RemoveRoles(v ...*Role) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveRoleIDs(ids...)
 }
@@ -330,10 +330,10 @@ func (_u *UserUpdate) RemoveJoinedGroupIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveJoinedGroups removes "joined_groups" edges to UserGroup entities.
-func (_u *UserUpdate) RemoveJoinedGroups(u ...*UserGroup) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) RemoveJoinedGroups(v ...*UserGroup) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveJoinedGroupIDs(ids...)
 }
@@ -351,10 +351,10 @@ func (_u *UserUpdate) RemoveFriendshipIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveFriendships removes "friendships" edges to Friendship entities.
-func (_u *UserUpdate) RemoveFriendships(f ...*Friendship) *UserUpdate {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *UserUpdate) RemoveFriendships(v ...*Friendship) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFriendshipIDs(ids...)
 }
@@ -372,10 +372,10 @@ func (_u *UserUpdate) RemoveUserTweetIDs(ids ...int) *UserUpdate {
 }
 
 // RemoveUserTweets removes "user_tweets" edges to UserTweet entities.
-func (_u *UserUpdate) RemoveUserTweets(u ...*UserTweet) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) RemoveUserTweets(v ...*UserTweet) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveUserTweetIDs(ids...)
 }
@@ -407,7 +407,7 @@ func (_u *UserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -896,7 +896,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -905,7 +905,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -917,15 +917,15 @@ type UserUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (_u *UserUpdateOne) SetName(s string) *UserUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -937,10 +937,10 @@ func (_u *UserUpdateOne) AddGroupIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (_u *UserUpdateOne) AddGroups(g ...*Group) *UserUpdateOne {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *UserUpdateOne) AddGroups(v ...*Group) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddGroupIDs(ids...)
 }
@@ -952,10 +952,10 @@ func (_u *UserUpdateOne) AddFriendIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddFriends adds the "friends" edges to the User entity.
-func (_u *UserUpdateOne) AddFriends(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) AddFriends(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFriendIDs(ids...)
 }
@@ -967,10 +967,10 @@ func (_u *UserUpdateOne) AddRelativeIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddRelatives adds the "relatives" edges to the User entity.
-func (_u *UserUpdateOne) AddRelatives(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) AddRelatives(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddRelativeIDs(ids...)
 }
@@ -982,10 +982,10 @@ func (_u *UserUpdateOne) AddLikedTweetIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddLikedTweets adds the "liked_tweets" edges to the Tweet entity.
-func (_u *UserUpdateOne) AddLikedTweets(t ...*Tweet) *UserUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *UserUpdateOne) AddLikedTweets(v ...*Tweet) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddLikedTweetIDs(ids...)
 }
@@ -997,10 +997,10 @@ func (_u *UserUpdateOne) AddTweetIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddTweets adds the "tweets" edges to the Tweet entity.
-func (_u *UserUpdateOne) AddTweets(t ...*Tweet) *UserUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *UserUpdateOne) AddTweets(v ...*Tweet) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddTweetIDs(ids...)
 }
@@ -1012,10 +1012,10 @@ func (_u *UserUpdateOne) AddRoleIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddRoles adds the "roles" edges to the Role entity.
-func (_u *UserUpdateOne) AddRoles(r ...*Role) *UserUpdateOne {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *UserUpdateOne) AddRoles(v ...*Role) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddRoleIDs(ids...)
 }
@@ -1027,10 +1027,10 @@ func (_u *UserUpdateOne) AddJoinedGroupIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddJoinedGroups adds the "joined_groups" edges to the UserGroup entity.
-func (_u *UserUpdateOne) AddJoinedGroups(u ...*UserGroup) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) AddJoinedGroups(v ...*UserGroup) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddJoinedGroupIDs(ids...)
 }
@@ -1042,10 +1042,10 @@ func (_u *UserUpdateOne) AddFriendshipIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddFriendships adds the "friendships" edges to the Friendship entity.
-func (_u *UserUpdateOne) AddFriendships(f ...*Friendship) *UserUpdateOne {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *UserUpdateOne) AddFriendships(v ...*Friendship) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFriendshipIDs(ids...)
 }
@@ -1057,10 +1057,10 @@ func (_u *UserUpdateOne) AddUserTweetIDs(ids ...int) *UserUpdateOne {
 }
 
 // AddUserTweets adds the "user_tweets" edges to the UserTweet entity.
-func (_u *UserUpdateOne) AddUserTweets(u ...*UserTweet) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) AddUserTweets(v ...*UserTweet) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddUserTweetIDs(ids...)
 }
@@ -1083,10 +1083,10 @@ func (_u *UserUpdateOne) RemoveGroupIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveGroups removes "groups" edges to Group entities.
-func (_u *UserUpdateOne) RemoveGroups(g ...*Group) *UserUpdateOne {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_u *UserUpdateOne) RemoveGroups(v ...*Group) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveGroupIDs(ids...)
 }
@@ -1104,10 +1104,10 @@ func (_u *UserUpdateOne) RemoveFriendIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveFriends removes "friends" edges to User entities.
-func (_u *UserUpdateOne) RemoveFriends(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) RemoveFriends(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFriendIDs(ids...)
 }
@@ -1125,10 +1125,10 @@ func (_u *UserUpdateOne) RemoveRelativeIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveRelatives removes "relatives" edges to User entities.
-func (_u *UserUpdateOne) RemoveRelatives(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) RemoveRelatives(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveRelativeIDs(ids...)
 }
@@ -1146,10 +1146,10 @@ func (_u *UserUpdateOne) RemoveLikedTweetIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveLikedTweets removes "liked_tweets" edges to Tweet entities.
-func (_u *UserUpdateOne) RemoveLikedTweets(t ...*Tweet) *UserUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *UserUpdateOne) RemoveLikedTweets(v ...*Tweet) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveLikedTweetIDs(ids...)
 }
@@ -1167,10 +1167,10 @@ func (_u *UserUpdateOne) RemoveTweetIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveTweets removes "tweets" edges to Tweet entities.
-func (_u *UserUpdateOne) RemoveTweets(t ...*Tweet) *UserUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *UserUpdateOne) RemoveTweets(v ...*Tweet) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveTweetIDs(ids...)
 }
@@ -1188,10 +1188,10 @@ func (_u *UserUpdateOne) RemoveRoleIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveRoles removes "roles" edges to Role entities.
-func (_u *UserUpdateOne) RemoveRoles(r ...*Role) *UserUpdateOne {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *UserUpdateOne) RemoveRoles(v ...*Role) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveRoleIDs(ids...)
 }
@@ -1209,10 +1209,10 @@ func (_u *UserUpdateOne) RemoveJoinedGroupIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveJoinedGroups removes "joined_groups" edges to UserGroup entities.
-func (_u *UserUpdateOne) RemoveJoinedGroups(u ...*UserGroup) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) RemoveJoinedGroups(v ...*UserGroup) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveJoinedGroupIDs(ids...)
 }
@@ -1230,10 +1230,10 @@ func (_u *UserUpdateOne) RemoveFriendshipIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveFriendships removes "friendships" edges to Friendship entities.
-func (_u *UserUpdateOne) RemoveFriendships(f ...*Friendship) *UserUpdateOne {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *UserUpdateOne) RemoveFriendships(v ...*Friendship) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFriendshipIDs(ids...)
 }
@@ -1251,10 +1251,10 @@ func (_u *UserUpdateOne) RemoveUserTweetIDs(ids ...int) *UserUpdateOne {
 }
 
 // RemoveUserTweets removes "user_tweets" edges to UserTweet entities.
-func (_u *UserUpdateOne) RemoveUserTweets(u ...*UserTweet) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) RemoveUserTweets(v ...*UserTweet) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveUserTweetIDs(ids...)
 }

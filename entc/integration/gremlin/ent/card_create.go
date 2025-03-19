@@ -30,63 +30,63 @@ type CardCreate struct {
 }
 
 // SetCreateTime sets the "create_time" field.
-func (_c *CardCreate) SetCreateTime(t time.Time) *CardCreate {
-	_c.mutation.SetCreateTime(t)
+func (_c *CardCreate) SetCreateTime(v time.Time) *CardCreate {
+	_c.mutation.SetCreateTime(v)
 	return _c
 }
 
 // SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (_c *CardCreate) SetNillableCreateTime(t *time.Time) *CardCreate {
-	if t != nil {
-		_c.SetCreateTime(*t)
+func (_c *CardCreate) SetNillableCreateTime(v *time.Time) *CardCreate {
+	if v != nil {
+		_c.SetCreateTime(*v)
 	}
 	return _c
 }
 
 // SetUpdateTime sets the "update_time" field.
-func (_c *CardCreate) SetUpdateTime(t time.Time) *CardCreate {
-	_c.mutation.SetUpdateTime(t)
+func (_c *CardCreate) SetUpdateTime(v time.Time) *CardCreate {
+	_c.mutation.SetUpdateTime(v)
 	return _c
 }
 
 // SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (_c *CardCreate) SetNillableUpdateTime(t *time.Time) *CardCreate {
-	if t != nil {
-		_c.SetUpdateTime(*t)
+func (_c *CardCreate) SetNillableUpdateTime(v *time.Time) *CardCreate {
+	if v != nil {
+		_c.SetUpdateTime(*v)
 	}
 	return _c
 }
 
 // SetBalance sets the "balance" field.
-func (_c *CardCreate) SetBalance(f float64) *CardCreate {
-	_c.mutation.SetBalance(f)
+func (_c *CardCreate) SetBalance(v float64) *CardCreate {
+	_c.mutation.SetBalance(v)
 	return _c
 }
 
 // SetNillableBalance sets the "balance" field if the given value is not nil.
-func (_c *CardCreate) SetNillableBalance(f *float64) *CardCreate {
-	if f != nil {
-		_c.SetBalance(*f)
+func (_c *CardCreate) SetNillableBalance(v *float64) *CardCreate {
+	if v != nil {
+		_c.SetBalance(*v)
 	}
 	return _c
 }
 
 // SetNumber sets the "number" field.
-func (_c *CardCreate) SetNumber(s string) *CardCreate {
-	_c.mutation.SetNumber(s)
+func (_c *CardCreate) SetNumber(v string) *CardCreate {
+	_c.mutation.SetNumber(v)
 	return _c
 }
 
 // SetName sets the "name" field.
-func (_c *CardCreate) SetName(s string) *CardCreate {
-	_c.mutation.SetName(s)
+func (_c *CardCreate) SetName(v string) *CardCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_c *CardCreate) SetNillableName(s *string) *CardCreate {
-	if s != nil {
-		_c.SetName(*s)
+func (_c *CardCreate) SetNillableName(v *string) *CardCreate {
+	if v != nil {
+		_c.SetName(*v)
 	}
 	return _c
 }
@@ -106,8 +106,8 @@ func (_c *CardCreate) SetNillableOwnerID(id *string) *CardCreate {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_c *CardCreate) SetOwner(u *User) *CardCreate {
-	return _c.SetOwnerID(u.ID)
+func (_c *CardCreate) SetOwner(v *User) *CardCreate {
+	return _c.SetOwnerID(v.ID)
 }
 
 // AddSpecIDs adds the "spec" edge to the Spec entity by IDs.
@@ -117,10 +117,10 @@ func (_c *CardCreate) AddSpecIDs(ids ...string) *CardCreate {
 }
 
 // AddSpec adds the "spec" edges to the Spec entity.
-func (_c *CardCreate) AddSpec(s ...*Spec) *CardCreate {
-	ids := make([]string, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_c *CardCreate) AddSpec(v ...*Spec) *CardCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddSpecIDs(ids...)
 }

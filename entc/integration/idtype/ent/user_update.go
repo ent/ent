@@ -32,15 +32,15 @@ func (_u *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *UserUpdate) SetName(s string) *UserUpdate {
-	_u.mutation.SetName(s)
+func (_u *UserUpdate) SetName(v string) *UserUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdate) SetNillableName(s *string) *UserUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *UserUpdate) SetNillableName(v *string) *UserUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -60,8 +60,8 @@ func (_u *UserUpdate) SetNillableSpouseID(id *uint64) *UserUpdate {
 }
 
 // SetSpouse sets the "spouse" edge to the User entity.
-func (_u *UserUpdate) SetSpouse(u *User) *UserUpdate {
-	return _u.SetSpouseID(u.ID)
+func (_u *UserUpdate) SetSpouse(v *User) *UserUpdate {
+	return _u.SetSpouseID(v.ID)
 }
 
 // AddFollowerIDs adds the "followers" edge to the User entity by IDs.
@@ -71,10 +71,10 @@ func (_u *UserUpdate) AddFollowerIDs(ids ...uint64) *UserUpdate {
 }
 
 // AddFollowers adds the "followers" edges to the User entity.
-func (_u *UserUpdate) AddFollowers(u ...*User) *UserUpdate {
-	ids := make([]uint64, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) AddFollowers(v ...*User) *UserUpdate {
+	ids := make([]uint64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFollowerIDs(ids...)
 }
@@ -86,10 +86,10 @@ func (_u *UserUpdate) AddFollowingIDs(ids ...uint64) *UserUpdate {
 }
 
 // AddFollowing adds the "following" edges to the User entity.
-func (_u *UserUpdate) AddFollowing(u ...*User) *UserUpdate {
-	ids := make([]uint64, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) AddFollowing(v ...*User) *UserUpdate {
+	ids := make([]uint64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFollowingIDs(ids...)
 }
@@ -118,10 +118,10 @@ func (_u *UserUpdate) RemoveFollowerIDs(ids ...uint64) *UserUpdate {
 }
 
 // RemoveFollowers removes "followers" edges to User entities.
-func (_u *UserUpdate) RemoveFollowers(u ...*User) *UserUpdate {
-	ids := make([]uint64, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) RemoveFollowers(v ...*User) *UserUpdate {
+	ids := make([]uint64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFollowerIDs(ids...)
 }
@@ -139,10 +139,10 @@ func (_u *UserUpdate) RemoveFollowingIDs(ids ...uint64) *UserUpdate {
 }
 
 // RemoveFollowing removes "following" edges to User entities.
-func (_u *UserUpdate) RemoveFollowing(u ...*User) *UserUpdate {
-	ids := make([]uint64, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdate) RemoveFollowing(v ...*User) *UserUpdate {
+	ids := make([]uint64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFollowingIDs(ids...)
 }
@@ -174,7 +174,7 @@ func (_u *UserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(user.Table, user.Columns, sqlgraph.NewFieldSpec(user.FieldID, field.TypeUint64))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -305,7 +305,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -314,7 +314,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // UserUpdateOne is the builder for updating a single User entity.
@@ -326,15 +326,15 @@ type UserUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (_u *UserUpdateOne) SetName(s string) *UserUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *UserUpdateOne) SetName(v string) *UserUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *UserUpdateOne) SetNillableName(s *string) *UserUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *UserUpdateOne) SetNillableName(v *string) *UserUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -354,8 +354,8 @@ func (_u *UserUpdateOne) SetNillableSpouseID(id *uint64) *UserUpdateOne {
 }
 
 // SetSpouse sets the "spouse" edge to the User entity.
-func (_u *UserUpdateOne) SetSpouse(u *User) *UserUpdateOne {
-	return _u.SetSpouseID(u.ID)
+func (_u *UserUpdateOne) SetSpouse(v *User) *UserUpdateOne {
+	return _u.SetSpouseID(v.ID)
 }
 
 // AddFollowerIDs adds the "followers" edge to the User entity by IDs.
@@ -365,10 +365,10 @@ func (_u *UserUpdateOne) AddFollowerIDs(ids ...uint64) *UserUpdateOne {
 }
 
 // AddFollowers adds the "followers" edges to the User entity.
-func (_u *UserUpdateOne) AddFollowers(u ...*User) *UserUpdateOne {
-	ids := make([]uint64, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) AddFollowers(v ...*User) *UserUpdateOne {
+	ids := make([]uint64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFollowerIDs(ids...)
 }
@@ -380,10 +380,10 @@ func (_u *UserUpdateOne) AddFollowingIDs(ids ...uint64) *UserUpdateOne {
 }
 
 // AddFollowing adds the "following" edges to the User entity.
-func (_u *UserUpdateOne) AddFollowing(u ...*User) *UserUpdateOne {
-	ids := make([]uint64, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) AddFollowing(v ...*User) *UserUpdateOne {
+	ids := make([]uint64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFollowingIDs(ids...)
 }
@@ -412,10 +412,10 @@ func (_u *UserUpdateOne) RemoveFollowerIDs(ids ...uint64) *UserUpdateOne {
 }
 
 // RemoveFollowers removes "followers" edges to User entities.
-func (_u *UserUpdateOne) RemoveFollowers(u ...*User) *UserUpdateOne {
-	ids := make([]uint64, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) RemoveFollowers(v ...*User) *UserUpdateOne {
+	ids := make([]uint64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFollowerIDs(ids...)
 }
@@ -433,10 +433,10 @@ func (_u *UserUpdateOne) RemoveFollowingIDs(ids ...uint64) *UserUpdateOne {
 }
 
 // RemoveFollowing removes "following" edges to User entities.
-func (_u *UserUpdateOne) RemoveFollowing(u ...*User) *UserUpdateOne {
-	ids := make([]uint64, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *UserUpdateOne) RemoveFollowing(v ...*User) *UserUpdateOne {
+	ids := make([]uint64, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFollowingIDs(ids...)
 }

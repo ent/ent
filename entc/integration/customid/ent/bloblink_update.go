@@ -35,55 +35,55 @@ func (_u *BlobLinkUpdate) Where(ps ...predicate.BlobLink) *BlobLinkUpdate {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_u *BlobLinkUpdate) SetCreatedAt(t time.Time) *BlobLinkUpdate {
-	_u.mutation.SetCreatedAt(t)
+func (_u *BlobLinkUpdate) SetCreatedAt(v time.Time) *BlobLinkUpdate {
+	_u.mutation.SetCreatedAt(v)
 	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *BlobLinkUpdate) SetNillableCreatedAt(t *time.Time) *BlobLinkUpdate {
-	if t != nil {
-		_u.SetCreatedAt(*t)
+func (_u *BlobLinkUpdate) SetNillableCreatedAt(v *time.Time) *BlobLinkUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
 	return _u
 }
 
 // SetBlobID sets the "blob_id" field.
-func (_u *BlobLinkUpdate) SetBlobID(u uuid.UUID) *BlobLinkUpdate {
-	_u.mutation.SetBlobID(u)
+func (_u *BlobLinkUpdate) SetBlobID(v uuid.UUID) *BlobLinkUpdate {
+	_u.mutation.SetBlobID(v)
 	return _u
 }
 
 // SetNillableBlobID sets the "blob_id" field if the given value is not nil.
-func (_u *BlobLinkUpdate) SetNillableBlobID(u *uuid.UUID) *BlobLinkUpdate {
-	if u != nil {
-		_u.SetBlobID(*u)
+func (_u *BlobLinkUpdate) SetNillableBlobID(v *uuid.UUID) *BlobLinkUpdate {
+	if v != nil {
+		_u.SetBlobID(*v)
 	}
 	return _u
 }
 
 // SetLinkID sets the "link_id" field.
-func (_u *BlobLinkUpdate) SetLinkID(u uuid.UUID) *BlobLinkUpdate {
-	_u.mutation.SetLinkID(u)
+func (_u *BlobLinkUpdate) SetLinkID(v uuid.UUID) *BlobLinkUpdate {
+	_u.mutation.SetLinkID(v)
 	return _u
 }
 
 // SetNillableLinkID sets the "link_id" field if the given value is not nil.
-func (_u *BlobLinkUpdate) SetNillableLinkID(u *uuid.UUID) *BlobLinkUpdate {
-	if u != nil {
-		_u.SetLinkID(*u)
+func (_u *BlobLinkUpdate) SetNillableLinkID(v *uuid.UUID) *BlobLinkUpdate {
+	if v != nil {
+		_u.SetLinkID(*v)
 	}
 	return _u
 }
 
 // SetBlob sets the "blob" edge to the Blob entity.
-func (_u *BlobLinkUpdate) SetBlob(b *Blob) *BlobLinkUpdate {
-	return _u.SetBlobID(b.ID)
+func (_u *BlobLinkUpdate) SetBlob(v *Blob) *BlobLinkUpdate {
+	return _u.SetBlobID(v.ID)
 }
 
 // SetLink sets the "link" edge to the Blob entity.
-func (_u *BlobLinkUpdate) SetLink(b *Blob) *BlobLinkUpdate {
-	return _u.SetLinkID(b.ID)
+func (_u *BlobLinkUpdate) SetLink(v *Blob) *BlobLinkUpdate {
+	return _u.SetLinkID(v.ID)
 }
 
 // Mutation returns the BlobLinkMutation object of the builder.
@@ -141,9 +141,9 @@ func (_u *BlobLinkUpdate) check() error {
 	return nil
 }
 
-func (_u *BlobLinkUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *BlobLinkUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(bloblink.Table, bloblink.Columns, sqlgraph.NewFieldSpec(bloblink.FieldBlobID, field.TypeUUID), sqlgraph.NewFieldSpec(bloblink.FieldLinkID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -214,7 +214,7 @@ func (_u *BlobLinkUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{bloblink.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -223,7 +223,7 @@ func (_u *BlobLinkUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // BlobLinkUpdateOne is the builder for updating a single BlobLink entity.
@@ -235,55 +235,55 @@ type BlobLinkUpdateOne struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_u *BlobLinkUpdateOne) SetCreatedAt(t time.Time) *BlobLinkUpdateOne {
-	_u.mutation.SetCreatedAt(t)
+func (_u *BlobLinkUpdateOne) SetCreatedAt(v time.Time) *BlobLinkUpdateOne {
+	_u.mutation.SetCreatedAt(v)
 	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *BlobLinkUpdateOne) SetNillableCreatedAt(t *time.Time) *BlobLinkUpdateOne {
-	if t != nil {
-		_u.SetCreatedAt(*t)
+func (_u *BlobLinkUpdateOne) SetNillableCreatedAt(v *time.Time) *BlobLinkUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
 	return _u
 }
 
 // SetBlobID sets the "blob_id" field.
-func (_u *BlobLinkUpdateOne) SetBlobID(u uuid.UUID) *BlobLinkUpdateOne {
-	_u.mutation.SetBlobID(u)
+func (_u *BlobLinkUpdateOne) SetBlobID(v uuid.UUID) *BlobLinkUpdateOne {
+	_u.mutation.SetBlobID(v)
 	return _u
 }
 
 // SetNillableBlobID sets the "blob_id" field if the given value is not nil.
-func (_u *BlobLinkUpdateOne) SetNillableBlobID(u *uuid.UUID) *BlobLinkUpdateOne {
-	if u != nil {
-		_u.SetBlobID(*u)
+func (_u *BlobLinkUpdateOne) SetNillableBlobID(v *uuid.UUID) *BlobLinkUpdateOne {
+	if v != nil {
+		_u.SetBlobID(*v)
 	}
 	return _u
 }
 
 // SetLinkID sets the "link_id" field.
-func (_u *BlobLinkUpdateOne) SetLinkID(u uuid.UUID) *BlobLinkUpdateOne {
-	_u.mutation.SetLinkID(u)
+func (_u *BlobLinkUpdateOne) SetLinkID(v uuid.UUID) *BlobLinkUpdateOne {
+	_u.mutation.SetLinkID(v)
 	return _u
 }
 
 // SetNillableLinkID sets the "link_id" field if the given value is not nil.
-func (_u *BlobLinkUpdateOne) SetNillableLinkID(u *uuid.UUID) *BlobLinkUpdateOne {
-	if u != nil {
-		_u.SetLinkID(*u)
+func (_u *BlobLinkUpdateOne) SetNillableLinkID(v *uuid.UUID) *BlobLinkUpdateOne {
+	if v != nil {
+		_u.SetLinkID(*v)
 	}
 	return _u
 }
 
 // SetBlob sets the "blob" edge to the Blob entity.
-func (_u *BlobLinkUpdateOne) SetBlob(b *Blob) *BlobLinkUpdateOne {
-	return _u.SetBlobID(b.ID)
+func (_u *BlobLinkUpdateOne) SetBlob(v *Blob) *BlobLinkUpdateOne {
+	return _u.SetBlobID(v.ID)
 }
 
 // SetLink sets the "link" edge to the Blob entity.
-func (_u *BlobLinkUpdateOne) SetLink(b *Blob) *BlobLinkUpdateOne {
-	return _u.SetLinkID(b.ID)
+func (_u *BlobLinkUpdateOne) SetLink(v *Blob) *BlobLinkUpdateOne {
+	return _u.SetLinkID(v.ID)
 }
 
 // Mutation returns the BlobLinkMutation object of the builder.

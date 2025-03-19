@@ -29,56 +29,56 @@ type GroupCreate struct {
 }
 
 // SetActive sets the "active" field.
-func (_c *GroupCreate) SetActive(b bool) *GroupCreate {
-	_c.mutation.SetActive(b)
+func (_c *GroupCreate) SetActive(v bool) *GroupCreate {
+	_c.mutation.SetActive(v)
 	return _c
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
-func (_c *GroupCreate) SetNillableActive(b *bool) *GroupCreate {
-	if b != nil {
-		_c.SetActive(*b)
+func (_c *GroupCreate) SetNillableActive(v *bool) *GroupCreate {
+	if v != nil {
+		_c.SetActive(*v)
 	}
 	return _c
 }
 
 // SetExpire sets the "expire" field.
-func (_c *GroupCreate) SetExpire(t time.Time) *GroupCreate {
-	_c.mutation.SetExpire(t)
+func (_c *GroupCreate) SetExpire(v time.Time) *GroupCreate {
+	_c.mutation.SetExpire(v)
 	return _c
 }
 
 // SetType sets the "type" field.
-func (_c *GroupCreate) SetType(s string) *GroupCreate {
-	_c.mutation.SetType(s)
+func (_c *GroupCreate) SetType(v string) *GroupCreate {
+	_c.mutation.SetType(v)
 	return _c
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (_c *GroupCreate) SetNillableType(s *string) *GroupCreate {
-	if s != nil {
-		_c.SetType(*s)
+func (_c *GroupCreate) SetNillableType(v *string) *GroupCreate {
+	if v != nil {
+		_c.SetType(*v)
 	}
 	return _c
 }
 
 // SetMaxUsers sets the "max_users" field.
-func (_c *GroupCreate) SetMaxUsers(i int) *GroupCreate {
-	_c.mutation.SetMaxUsers(i)
+func (_c *GroupCreate) SetMaxUsers(v int) *GroupCreate {
+	_c.mutation.SetMaxUsers(v)
 	return _c
 }
 
 // SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (_c *GroupCreate) SetNillableMaxUsers(i *int) *GroupCreate {
-	if i != nil {
-		_c.SetMaxUsers(*i)
+func (_c *GroupCreate) SetNillableMaxUsers(v *int) *GroupCreate {
+	if v != nil {
+		_c.SetMaxUsers(*v)
 	}
 	return _c
 }
 
 // SetName sets the "name" field.
-func (_c *GroupCreate) SetName(s string) *GroupCreate {
-	_c.mutation.SetName(s)
+func (_c *GroupCreate) SetName(v string) *GroupCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
@@ -89,10 +89,10 @@ func (_c *GroupCreate) AddFileIDs(ids ...string) *GroupCreate {
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (_c *GroupCreate) AddFiles(f ...*File) *GroupCreate {
-	ids := make([]string, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_c *GroupCreate) AddFiles(v ...*File) *GroupCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddFileIDs(ids...)
 }
@@ -104,10 +104,10 @@ func (_c *GroupCreate) AddBlockedIDs(ids ...string) *GroupCreate {
 }
 
 // AddBlocked adds the "blocked" edges to the User entity.
-func (_c *GroupCreate) AddBlocked(u ...*User) *GroupCreate {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *GroupCreate) AddBlocked(v ...*User) *GroupCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddBlockedIDs(ids...)
 }
@@ -119,10 +119,10 @@ func (_c *GroupCreate) AddUserIDs(ids ...string) *GroupCreate {
 }
 
 // AddUsers adds the "users" edges to the User entity.
-func (_c *GroupCreate) AddUsers(u ...*User) *GroupCreate {
-	ids := make([]string, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *GroupCreate) AddUsers(v ...*User) *GroupCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddUserIDs(ids...)
 }
@@ -134,8 +134,8 @@ func (_c *GroupCreate) SetInfoID(id string) *GroupCreate {
 }
 
 // SetInfo sets the "info" edge to the GroupInfo entity.
-func (_c *GroupCreate) SetInfo(g *GroupInfo) *GroupCreate {
-	return _c.SetInfoID(g.ID)
+func (_c *GroupCreate) SetInfo(v *GroupInfo) *GroupCreate {
+	return _c.SetInfoID(v.ID)
 }
 
 // Mutation returns the GroupMutation object of the builder.

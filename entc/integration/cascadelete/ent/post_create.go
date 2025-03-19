@@ -26,36 +26,36 @@ type PostCreate struct {
 }
 
 // SetText sets the "text" field.
-func (_c *PostCreate) SetText(s string) *PostCreate {
-	_c.mutation.SetText(s)
+func (_c *PostCreate) SetText(v string) *PostCreate {
+	_c.mutation.SetText(v)
 	return _c
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_c *PostCreate) SetNillableText(s *string) *PostCreate {
-	if s != nil {
-		_c.SetText(*s)
+func (_c *PostCreate) SetNillableText(v *string) *PostCreate {
+	if v != nil {
+		_c.SetText(*v)
 	}
 	return _c
 }
 
 // SetAuthorID sets the "author_id" field.
-func (_c *PostCreate) SetAuthorID(i int) *PostCreate {
-	_c.mutation.SetAuthorID(i)
+func (_c *PostCreate) SetAuthorID(v int) *PostCreate {
+	_c.mutation.SetAuthorID(v)
 	return _c
 }
 
 // SetNillableAuthorID sets the "author_id" field if the given value is not nil.
-func (_c *PostCreate) SetNillableAuthorID(i *int) *PostCreate {
-	if i != nil {
-		_c.SetAuthorID(*i)
+func (_c *PostCreate) SetNillableAuthorID(v *int) *PostCreate {
+	if v != nil {
+		_c.SetAuthorID(*v)
 	}
 	return _c
 }
 
 // SetAuthor sets the "author" edge to the User entity.
-func (_c *PostCreate) SetAuthor(u *User) *PostCreate {
-	return _c.SetAuthorID(u.ID)
+func (_c *PostCreate) SetAuthor(v *User) *PostCreate {
+	return _c.SetAuthorID(v.ID)
 }
 
 // AddCommentIDs adds the "comments" edge to the Comment entity by IDs.
@@ -65,10 +65,10 @@ func (_c *PostCreate) AddCommentIDs(ids ...int) *PostCreate {
 }
 
 // AddComments adds the "comments" edges to the Comment entity.
-func (_c *PostCreate) AddComments(c ...*Comment) *PostCreate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
+func (_c *PostCreate) AddComments(v ...*Comment) *PostCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddCommentIDs(ids...)
 }

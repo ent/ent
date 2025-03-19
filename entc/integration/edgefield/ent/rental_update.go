@@ -33,15 +33,15 @@ func (_u *RentalUpdate) Where(ps ...predicate.Rental) *RentalUpdate {
 }
 
 // SetDate sets the "date" field.
-func (_u *RentalUpdate) SetDate(t time.Time) *RentalUpdate {
-	_u.mutation.SetDate(t)
+func (_u *RentalUpdate) SetDate(v time.Time) *RentalUpdate {
+	_u.mutation.SetDate(v)
 	return _u
 }
 
 // SetNillableDate sets the "date" field if the given value is not nil.
-func (_u *RentalUpdate) SetNillableDate(t *time.Time) *RentalUpdate {
-	if t != nil {
-		_u.SetDate(*t)
+func (_u *RentalUpdate) SetNillableDate(v *time.Time) *RentalUpdate {
+	if v != nil {
+		_u.SetDate(*v)
 	}
 	return _u
 }
@@ -89,9 +89,9 @@ func (_u *RentalUpdate) check() error {
 	return nil
 }
 
-func (_u *RentalUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *RentalUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(rental.Table, rental.Columns, sqlgraph.NewFieldSpec(rental.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -104,7 +104,7 @@ func (_u *RentalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := _u.mutation.Date(); ok {
 		_spec.SetField(rental.FieldDate, field.TypeTime, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{rental.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -113,7 +113,7 @@ func (_u *RentalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // RentalUpdateOne is the builder for updating a single Rental entity.
@@ -125,15 +125,15 @@ type RentalUpdateOne struct {
 }
 
 // SetDate sets the "date" field.
-func (_u *RentalUpdateOne) SetDate(t time.Time) *RentalUpdateOne {
-	_u.mutation.SetDate(t)
+func (_u *RentalUpdateOne) SetDate(v time.Time) *RentalUpdateOne {
+	_u.mutation.SetDate(v)
 	return _u
 }
 
 // SetNillableDate sets the "date" field if the given value is not nil.
-func (_u *RentalUpdateOne) SetNillableDate(t *time.Time) *RentalUpdateOne {
-	if t != nil {
-		_u.SetDate(*t)
+func (_u *RentalUpdateOne) SetNillableDate(v *time.Time) *RentalUpdateOne {
+	if v != nil {
+		_u.SetDate(*v)
 	}
 	return _u
 }

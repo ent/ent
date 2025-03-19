@@ -34,15 +34,15 @@ func (_u *PetUpdate) Where(ps ...predicate.Pet) *PetUpdate {
 }
 
 // SetDeleteTime sets the "delete_time" field.
-func (_u *PetUpdate) SetDeleteTime(t time.Time) *PetUpdate {
-	_u.mutation.SetDeleteTime(t)
+func (_u *PetUpdate) SetDeleteTime(v time.Time) *PetUpdate {
+	_u.mutation.SetDeleteTime(v)
 	return _u
 }
 
 // SetNillableDeleteTime sets the "delete_time" field if the given value is not nil.
-func (_u *PetUpdate) SetNillableDeleteTime(t *time.Time) *PetUpdate {
-	if t != nil {
-		_u.SetDeleteTime(*t)
+func (_u *PetUpdate) SetNillableDeleteTime(v *time.Time) *PetUpdate {
+	if v != nil {
+		_u.SetDeleteTime(*v)
 	}
 	return _u
 }
@@ -54,15 +54,15 @@ func (_u *PetUpdate) ClearDeleteTime() *PetUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *PetUpdate) SetName(s string) *PetUpdate {
-	_u.mutation.SetName(s)
+func (_u *PetUpdate) SetName(v string) *PetUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *PetUpdate) SetNillableName(s *string) *PetUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *PetUpdate) SetNillableName(v *string) *PetUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -88,8 +88,8 @@ func (_u *PetUpdate) SetNillableOwnerID(id *int) *PetUpdate {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *PetUpdate) SetOwner(u *User) *PetUpdate {
-	return _u.SetOwnerID(u.ID)
+func (_u *PetUpdate) SetOwner(v *User) *PetUpdate {
+	return _u.SetOwnerID(v.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.
@@ -130,7 +130,7 @@ func (_u *PetUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *PetUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(pet.Table, pet.Columns, sqlgraph.NewFieldSpec(pet.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -180,7 +180,7 @@ func (_u *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{pet.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -189,7 +189,7 @@ func (_u *PetUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // PetUpdateOne is the builder for updating a single Pet entity.
@@ -201,15 +201,15 @@ type PetUpdateOne struct {
 }
 
 // SetDeleteTime sets the "delete_time" field.
-func (_u *PetUpdateOne) SetDeleteTime(t time.Time) *PetUpdateOne {
-	_u.mutation.SetDeleteTime(t)
+func (_u *PetUpdateOne) SetDeleteTime(v time.Time) *PetUpdateOne {
+	_u.mutation.SetDeleteTime(v)
 	return _u
 }
 
 // SetNillableDeleteTime sets the "delete_time" field if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableDeleteTime(t *time.Time) *PetUpdateOne {
-	if t != nil {
-		_u.SetDeleteTime(*t)
+func (_u *PetUpdateOne) SetNillableDeleteTime(v *time.Time) *PetUpdateOne {
+	if v != nil {
+		_u.SetDeleteTime(*v)
 	}
 	return _u
 }
@@ -221,15 +221,15 @@ func (_u *PetUpdateOne) ClearDeleteTime() *PetUpdateOne {
 }
 
 // SetName sets the "name" field.
-func (_u *PetUpdateOne) SetName(s string) *PetUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *PetUpdateOne) SetName(v string) *PetUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *PetUpdateOne) SetNillableName(s *string) *PetUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *PetUpdateOne) SetNillableName(v *string) *PetUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -255,8 +255,8 @@ func (_u *PetUpdateOne) SetNillableOwnerID(id *int) *PetUpdateOne {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *PetUpdateOne) SetOwner(u *User) *PetUpdateOne {
-	return _u.SetOwnerID(u.ID)
+func (_u *PetUpdateOne) SetOwner(v *User) *PetUpdateOne {
+	return _u.SetOwnerID(v.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.

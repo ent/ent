@@ -34,23 +34,23 @@ func (_u *NodeUpdate) Where(ps ...predicate.Node) *NodeUpdate {
 }
 
 // SetValue sets the "value" field.
-func (_u *NodeUpdate) SetValue(i int) *NodeUpdate {
+func (_u *NodeUpdate) SetValue(v int) *NodeUpdate {
 	_u.mutation.ResetValue()
-	_u.mutation.SetValue(i)
+	_u.mutation.SetValue(v)
 	return _u
 }
 
 // SetNillableValue sets the "value" field if the given value is not nil.
-func (_u *NodeUpdate) SetNillableValue(i *int) *NodeUpdate {
-	if i != nil {
-		_u.SetValue(*i)
+func (_u *NodeUpdate) SetNillableValue(v *int) *NodeUpdate {
+	if v != nil {
+		_u.SetValue(*v)
 	}
 	return _u
 }
 
-// AddValue adds i to the "value" field.
-func (_u *NodeUpdate) AddValue(i int) *NodeUpdate {
-	_u.mutation.AddValue(i)
+// AddValue adds value to the "value" field.
+func (_u *NodeUpdate) AddValue(v int) *NodeUpdate {
+	_u.mutation.AddValue(v)
 	return _u
 }
 
@@ -61,8 +61,8 @@ func (_u *NodeUpdate) ClearValue() *NodeUpdate {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *NodeUpdate) SetUpdatedAt(t time.Time) *NodeUpdate {
-	_u.mutation.SetUpdatedAt(t)
+func (_u *NodeUpdate) SetUpdatedAt(v time.Time) *NodeUpdate {
+	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
@@ -87,8 +87,8 @@ func (_u *NodeUpdate) SetNillablePrevID(id *string) *NodeUpdate {
 }
 
 // SetPrev sets the "prev" edge to the Node entity.
-func (_u *NodeUpdate) SetPrev(n *Node) *NodeUpdate {
-	return _u.SetPrevID(n.ID)
+func (_u *NodeUpdate) SetPrev(v *Node) *NodeUpdate {
+	return _u.SetPrevID(v.ID)
 }
 
 // SetNextID sets the "next" edge to the Node entity by ID.
@@ -106,8 +106,8 @@ func (_u *NodeUpdate) SetNillableNextID(id *string) *NodeUpdate {
 }
 
 // SetNext sets the "next" edge to the Node entity.
-func (_u *NodeUpdate) SetNext(n *Node) *NodeUpdate {
-	return _u.SetNextID(n.ID)
+func (_u *NodeUpdate) SetNext(v *Node) *NodeUpdate {
+	return _u.SetNextID(v.ID)
 }
 
 // Mutation returns the NodeMutation object of the builder.
@@ -257,23 +257,23 @@ type NodeUpdateOne struct {
 }
 
 // SetValue sets the "value" field.
-func (_u *NodeUpdateOne) SetValue(i int) *NodeUpdateOne {
+func (_u *NodeUpdateOne) SetValue(v int) *NodeUpdateOne {
 	_u.mutation.ResetValue()
-	_u.mutation.SetValue(i)
+	_u.mutation.SetValue(v)
 	return _u
 }
 
 // SetNillableValue sets the "value" field if the given value is not nil.
-func (_u *NodeUpdateOne) SetNillableValue(i *int) *NodeUpdateOne {
-	if i != nil {
-		_u.SetValue(*i)
+func (_u *NodeUpdateOne) SetNillableValue(v *int) *NodeUpdateOne {
+	if v != nil {
+		_u.SetValue(*v)
 	}
 	return _u
 }
 
-// AddValue adds i to the "value" field.
-func (_u *NodeUpdateOne) AddValue(i int) *NodeUpdateOne {
-	_u.mutation.AddValue(i)
+// AddValue adds value to the "value" field.
+func (_u *NodeUpdateOne) AddValue(v int) *NodeUpdateOne {
+	_u.mutation.AddValue(v)
 	return _u
 }
 
@@ -284,8 +284,8 @@ func (_u *NodeUpdateOne) ClearValue() *NodeUpdateOne {
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (_u *NodeUpdateOne) SetUpdatedAt(t time.Time) *NodeUpdateOne {
-	_u.mutation.SetUpdatedAt(t)
+func (_u *NodeUpdateOne) SetUpdatedAt(v time.Time) *NodeUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
 	return _u
 }
 
@@ -310,8 +310,8 @@ func (_u *NodeUpdateOne) SetNillablePrevID(id *string) *NodeUpdateOne {
 }
 
 // SetPrev sets the "prev" edge to the Node entity.
-func (_u *NodeUpdateOne) SetPrev(n *Node) *NodeUpdateOne {
-	return _u.SetPrevID(n.ID)
+func (_u *NodeUpdateOne) SetPrev(v *Node) *NodeUpdateOne {
+	return _u.SetPrevID(v.ID)
 }
 
 // SetNextID sets the "next" edge to the Node entity by ID.
@@ -329,8 +329,8 @@ func (_u *NodeUpdateOne) SetNillableNextID(id *string) *NodeUpdateOne {
 }
 
 // SetNext sets the "next" edge to the Node entity.
-func (_u *NodeUpdateOne) SetNext(n *Node) *NodeUpdateOne {
-	return _u.SetNextID(n.ID)
+func (_u *NodeUpdateOne) SetNext(v *Node) *NodeUpdateOne {
+	return _u.SetNextID(v.ID)
 }
 
 // Mutation returns the NodeMutation object of the builder.

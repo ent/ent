@@ -26,14 +26,14 @@ type InfoCreate struct {
 }
 
 // SetContent sets the "content" field.
-func (_c *InfoCreate) SetContent(jm json.RawMessage) *InfoCreate {
-	_c.mutation.SetContent(jm)
+func (_c *InfoCreate) SetContent(v json.RawMessage) *InfoCreate {
+	_c.mutation.SetContent(v)
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *InfoCreate) SetID(i int) *InfoCreate {
-	_c.mutation.SetID(i)
+func (_c *InfoCreate) SetID(v int) *InfoCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
@@ -52,8 +52,8 @@ func (_c *InfoCreate) SetNillableUserID(id *int) *InfoCreate {
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_c *InfoCreate) SetUser(u *User) *InfoCreate {
-	return _c.SetUserID(u.ID)
+func (_c *InfoCreate) SetUser(v *User) *InfoCreate {
+	return _c.SetUserID(v.ID)
 }
 
 // Mutation returns the InfoMutation object of the builder.

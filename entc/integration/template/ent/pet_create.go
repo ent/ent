@@ -26,21 +26,21 @@ type PetCreate struct {
 }
 
 // SetAge sets the "age" field.
-func (_c *PetCreate) SetAge(i int) *PetCreate {
-	_c.mutation.SetAge(i)
+func (_c *PetCreate) SetAge(v int) *PetCreate {
+	_c.mutation.SetAge(v)
 	return _c
 }
 
 // SetLicensedAt sets the "licensed_at" field.
-func (_c *PetCreate) SetLicensedAt(t time.Time) *PetCreate {
-	_c.mutation.SetLicensedAt(t)
+func (_c *PetCreate) SetLicensedAt(v time.Time) *PetCreate {
+	_c.mutation.SetLicensedAt(v)
 	return _c
 }
 
 // SetNillableLicensedAt sets the "licensed_at" field if the given value is not nil.
-func (_c *PetCreate) SetNillableLicensedAt(t *time.Time) *PetCreate {
-	if t != nil {
-		_c.SetLicensedAt(*t)
+func (_c *PetCreate) SetNillableLicensedAt(v *time.Time) *PetCreate {
+	if v != nil {
+		_c.SetLicensedAt(*v)
 	}
 	return _c
 }
@@ -60,8 +60,8 @@ func (_c *PetCreate) SetNillableOwnerID(id *int) *PetCreate {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_c *PetCreate) SetOwner(u *User) *PetCreate {
-	return _c.SetOwnerID(u.ID)
+func (_c *PetCreate) SetOwner(v *User) *PetCreate {
+	return _c.SetOwnerID(v.ID)
 }
 
 // Mutation returns the PetMutation object of the builder.

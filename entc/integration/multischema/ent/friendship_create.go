@@ -26,53 +26,53 @@ type FriendshipCreate struct {
 }
 
 // SetWeight sets the "weight" field.
-func (_c *FriendshipCreate) SetWeight(i int) *FriendshipCreate {
-	_c.mutation.SetWeight(i)
+func (_c *FriendshipCreate) SetWeight(v int) *FriendshipCreate {
+	_c.mutation.SetWeight(v)
 	return _c
 }
 
 // SetNillableWeight sets the "weight" field if the given value is not nil.
-func (_c *FriendshipCreate) SetNillableWeight(i *int) *FriendshipCreate {
-	if i != nil {
-		_c.SetWeight(*i)
+func (_c *FriendshipCreate) SetNillableWeight(v *int) *FriendshipCreate {
+	if v != nil {
+		_c.SetWeight(*v)
 	}
 	return _c
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *FriendshipCreate) SetCreatedAt(t time.Time) *FriendshipCreate {
-	_c.mutation.SetCreatedAt(t)
+func (_c *FriendshipCreate) SetCreatedAt(v time.Time) *FriendshipCreate {
+	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *FriendshipCreate) SetNillableCreatedAt(t *time.Time) *FriendshipCreate {
-	if t != nil {
-		_c.SetCreatedAt(*t)
+func (_c *FriendshipCreate) SetNillableCreatedAt(v *time.Time) *FriendshipCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
 	return _c
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *FriendshipCreate) SetUserID(i int) *FriendshipCreate {
-	_c.mutation.SetUserID(i)
+func (_c *FriendshipCreate) SetUserID(v int) *FriendshipCreate {
+	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetFriendID sets the "friend_id" field.
-func (_c *FriendshipCreate) SetFriendID(i int) *FriendshipCreate {
-	_c.mutation.SetFriendID(i)
+func (_c *FriendshipCreate) SetFriendID(v int) *FriendshipCreate {
+	_c.mutation.SetFriendID(v)
 	return _c
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_c *FriendshipCreate) SetUser(u *User) *FriendshipCreate {
-	return _c.SetUserID(u.ID)
+func (_c *FriendshipCreate) SetUser(v *User) *FriendshipCreate {
+	return _c.SetUserID(v.ID)
 }
 
 // SetFriend sets the "friend" edge to the User entity.
-func (_c *FriendshipCreate) SetFriend(u *User) *FriendshipCreate {
-	return _c.SetFriendID(u.ID)
+func (_c *FriendshipCreate) SetFriend(v *User) *FriendshipCreate {
+	return _c.SetFriendID(v.ID)
 }
 
 // Mutation returns the FriendshipMutation object of the builder.

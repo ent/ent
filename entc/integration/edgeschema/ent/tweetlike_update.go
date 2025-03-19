@@ -35,55 +35,55 @@ func (_u *TweetLikeUpdate) Where(ps ...predicate.TweetLike) *TweetLikeUpdate {
 }
 
 // SetLikedAt sets the "liked_at" field.
-func (_u *TweetLikeUpdate) SetLikedAt(t time.Time) *TweetLikeUpdate {
-	_u.mutation.SetLikedAt(t)
+func (_u *TweetLikeUpdate) SetLikedAt(v time.Time) *TweetLikeUpdate {
+	_u.mutation.SetLikedAt(v)
 	return _u
 }
 
 // SetNillableLikedAt sets the "liked_at" field if the given value is not nil.
-func (_u *TweetLikeUpdate) SetNillableLikedAt(t *time.Time) *TweetLikeUpdate {
-	if t != nil {
-		_u.SetLikedAt(*t)
+func (_u *TweetLikeUpdate) SetNillableLikedAt(v *time.Time) *TweetLikeUpdate {
+	if v != nil {
+		_u.SetLikedAt(*v)
 	}
 	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *TweetLikeUpdate) SetUserID(i int) *TweetLikeUpdate {
-	_u.mutation.SetUserID(i)
+func (_u *TweetLikeUpdate) SetUserID(v int) *TweetLikeUpdate {
+	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *TweetLikeUpdate) SetNillableUserID(i *int) *TweetLikeUpdate {
-	if i != nil {
-		_u.SetUserID(*i)
+func (_u *TweetLikeUpdate) SetNillableUserID(v *int) *TweetLikeUpdate {
+	if v != nil {
+		_u.SetUserID(*v)
 	}
 	return _u
 }
 
 // SetTweetID sets the "tweet_id" field.
-func (_u *TweetLikeUpdate) SetTweetID(i int) *TweetLikeUpdate {
-	_u.mutation.SetTweetID(i)
+func (_u *TweetLikeUpdate) SetTweetID(v int) *TweetLikeUpdate {
+	_u.mutation.SetTweetID(v)
 	return _u
 }
 
 // SetNillableTweetID sets the "tweet_id" field if the given value is not nil.
-func (_u *TweetLikeUpdate) SetNillableTweetID(i *int) *TweetLikeUpdate {
-	if i != nil {
-		_u.SetTweetID(*i)
+func (_u *TweetLikeUpdate) SetNillableTweetID(v *int) *TweetLikeUpdate {
+	if v != nil {
+		_u.SetTweetID(*v)
 	}
 	return _u
 }
 
 // SetTweet sets the "tweet" edge to the Tweet entity.
-func (_u *TweetLikeUpdate) SetTweet(t *Tweet) *TweetLikeUpdate {
-	return _u.SetTweetID(t.ID)
+func (_u *TweetLikeUpdate) SetTweet(v *Tweet) *TweetLikeUpdate {
+	return _u.SetTweetID(v.ID)
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *TweetLikeUpdate) SetUser(u *User) *TweetLikeUpdate {
-	return _u.SetUserID(u.ID)
+func (_u *TweetLikeUpdate) SetUser(v *User) *TweetLikeUpdate {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the TweetLikeMutation object of the builder.
@@ -141,9 +141,9 @@ func (_u *TweetLikeUpdate) check() error {
 	return nil
 }
 
-func (_u *TweetLikeUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *TweetLikeUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(tweetlike.Table, tweetlike.Columns, sqlgraph.NewFieldSpec(tweetlike.FieldUserID, field.TypeInt), sqlgraph.NewFieldSpec(tweetlike.FieldTweetID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -214,7 +214,7 @@ func (_u *TweetLikeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{tweetlike.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -223,7 +223,7 @@ func (_u *TweetLikeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // TweetLikeUpdateOne is the builder for updating a single TweetLike entity.
@@ -235,55 +235,55 @@ type TweetLikeUpdateOne struct {
 }
 
 // SetLikedAt sets the "liked_at" field.
-func (_u *TweetLikeUpdateOne) SetLikedAt(t time.Time) *TweetLikeUpdateOne {
-	_u.mutation.SetLikedAt(t)
+func (_u *TweetLikeUpdateOne) SetLikedAt(v time.Time) *TweetLikeUpdateOne {
+	_u.mutation.SetLikedAt(v)
 	return _u
 }
 
 // SetNillableLikedAt sets the "liked_at" field if the given value is not nil.
-func (_u *TweetLikeUpdateOne) SetNillableLikedAt(t *time.Time) *TweetLikeUpdateOne {
-	if t != nil {
-		_u.SetLikedAt(*t)
+func (_u *TweetLikeUpdateOne) SetNillableLikedAt(v *time.Time) *TweetLikeUpdateOne {
+	if v != nil {
+		_u.SetLikedAt(*v)
 	}
 	return _u
 }
 
 // SetUserID sets the "user_id" field.
-func (_u *TweetLikeUpdateOne) SetUserID(i int) *TweetLikeUpdateOne {
-	_u.mutation.SetUserID(i)
+func (_u *TweetLikeUpdateOne) SetUserID(v int) *TweetLikeUpdateOne {
+	_u.mutation.SetUserID(v)
 	return _u
 }
 
 // SetNillableUserID sets the "user_id" field if the given value is not nil.
-func (_u *TweetLikeUpdateOne) SetNillableUserID(i *int) *TweetLikeUpdateOne {
-	if i != nil {
-		_u.SetUserID(*i)
+func (_u *TweetLikeUpdateOne) SetNillableUserID(v *int) *TweetLikeUpdateOne {
+	if v != nil {
+		_u.SetUserID(*v)
 	}
 	return _u
 }
 
 // SetTweetID sets the "tweet_id" field.
-func (_u *TweetLikeUpdateOne) SetTweetID(i int) *TweetLikeUpdateOne {
-	_u.mutation.SetTweetID(i)
+func (_u *TweetLikeUpdateOne) SetTweetID(v int) *TweetLikeUpdateOne {
+	_u.mutation.SetTweetID(v)
 	return _u
 }
 
 // SetNillableTweetID sets the "tweet_id" field if the given value is not nil.
-func (_u *TweetLikeUpdateOne) SetNillableTweetID(i *int) *TweetLikeUpdateOne {
-	if i != nil {
-		_u.SetTweetID(*i)
+func (_u *TweetLikeUpdateOne) SetNillableTweetID(v *int) *TweetLikeUpdateOne {
+	if v != nil {
+		_u.SetTweetID(*v)
 	}
 	return _u
 }
 
 // SetTweet sets the "tweet" edge to the Tweet entity.
-func (_u *TweetLikeUpdateOne) SetTweet(t *Tweet) *TweetLikeUpdateOne {
-	return _u.SetTweetID(t.ID)
+func (_u *TweetLikeUpdateOne) SetTweet(v *Tweet) *TweetLikeUpdateOne {
+	return _u.SetTweetID(v.ID)
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_u *TweetLikeUpdateOne) SetUser(u *User) *TweetLikeUpdateOne {
-	return _u.SetUserID(u.ID)
+func (_u *TweetLikeUpdateOne) SetUser(v *User) *TweetLikeUpdateOne {
+	return _u.SetUserID(v.ID)
 }
 
 // Mutation returns the TweetLikeMutation object of the builder.

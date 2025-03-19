@@ -29,39 +29,39 @@ type UserGroupCreate struct {
 }
 
 // SetJoinedAt sets the "joined_at" field.
-func (_c *UserGroupCreate) SetJoinedAt(t time.Time) *UserGroupCreate {
-	_c.mutation.SetJoinedAt(t)
+func (_c *UserGroupCreate) SetJoinedAt(v time.Time) *UserGroupCreate {
+	_c.mutation.SetJoinedAt(v)
 	return _c
 }
 
 // SetNillableJoinedAt sets the "joined_at" field if the given value is not nil.
-func (_c *UserGroupCreate) SetNillableJoinedAt(t *time.Time) *UserGroupCreate {
-	if t != nil {
-		_c.SetJoinedAt(*t)
+func (_c *UserGroupCreate) SetNillableJoinedAt(v *time.Time) *UserGroupCreate {
+	if v != nil {
+		_c.SetJoinedAt(*v)
 	}
 	return _c
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *UserGroupCreate) SetUserID(i int) *UserGroupCreate {
-	_c.mutation.SetUserID(i)
+func (_c *UserGroupCreate) SetUserID(v int) *UserGroupCreate {
+	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetGroupID sets the "group_id" field.
-func (_c *UserGroupCreate) SetGroupID(i int) *UserGroupCreate {
-	_c.mutation.SetGroupID(i)
+func (_c *UserGroupCreate) SetGroupID(v int) *UserGroupCreate {
+	_c.mutation.SetGroupID(v)
 	return _c
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_c *UserGroupCreate) SetUser(u *User) *UserGroupCreate {
-	return _c.SetUserID(u.ID)
+func (_c *UserGroupCreate) SetUser(v *User) *UserGroupCreate {
+	return _c.SetUserID(v.ID)
 }
 
 // SetGroup sets the "group" edge to the Group entity.
-func (_c *UserGroupCreate) SetGroup(g *Group) *UserGroupCreate {
-	return _c.SetGroupID(g.ID)
+func (_c *UserGroupCreate) SetGroup(v *Group) *UserGroupCreate {
+	return _c.SetGroupID(v.ID)
 }
 
 // Mutation returns the UserGroupMutation object of the builder.

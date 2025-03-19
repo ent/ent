@@ -28,8 +28,8 @@ type UserCreate struct {
 }
 
 // SetID sets the "id" field.
-func (_c *UserCreate) SetID(i int) *UserCreate {
-	_c.mutation.SetID(i)
+func (_c *UserCreate) SetID(v int) *UserCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
@@ -40,10 +40,10 @@ func (_c *UserCreate) AddGroupIDs(ids ...int) *UserCreate {
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (_c *UserCreate) AddGroups(g ...*Group) *UserCreate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_c *UserCreate) AddGroups(v ...*Group) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddGroupIDs(ids...)
 }
@@ -63,8 +63,8 @@ func (_c *UserCreate) SetNillableParentID(id *int) *UserCreate {
 }
 
 // SetParent sets the "parent" edge to the User entity.
-func (_c *UserCreate) SetParent(u *User) *UserCreate {
-	return _c.SetParentID(u.ID)
+func (_c *UserCreate) SetParent(v *User) *UserCreate {
+	return _c.SetParentID(v.ID)
 }
 
 // AddChildIDs adds the "children" edge to the User entity by IDs.
@@ -74,10 +74,10 @@ func (_c *UserCreate) AddChildIDs(ids ...int) *UserCreate {
 }
 
 // AddChildren adds the "children" edges to the User entity.
-func (_c *UserCreate) AddChildren(u ...*User) *UserCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *UserCreate) AddChildren(v ...*User) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddChildIDs(ids...)
 }
@@ -89,10 +89,10 @@ func (_c *UserCreate) AddPetIDs(ids ...string) *UserCreate {
 }
 
 // AddPets adds the "pets" edges to the Pet entity.
-func (_c *UserCreate) AddPets(p ...*Pet) *UserCreate {
-	ids := make([]string, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_c *UserCreate) AddPets(v ...*Pet) *UserCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddPetIDs(ids...)
 }

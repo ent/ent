@@ -32,8 +32,8 @@ func (_u *LicenseUpdate) Where(ps ...predicate.License) *LicenseUpdate {
 }
 
 // SetUpdateTime sets the "update_time" field.
-func (_u *LicenseUpdate) SetUpdateTime(t time.Time) *LicenseUpdate {
-	_u.mutation.SetUpdateTime(t)
+func (_u *LicenseUpdate) SetUpdateTime(v time.Time) *LicenseUpdate {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -116,8 +116,8 @@ type LicenseUpdateOne struct {
 }
 
 // SetUpdateTime sets the "update_time" field.
-func (_u *LicenseUpdateOne) SetUpdateTime(t time.Time) *LicenseUpdateOne {
-	_u.mutation.SetUpdateTime(t)
+func (_u *LicenseUpdateOne) SetUpdateTime(v time.Time) *LicenseUpdateOne {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 

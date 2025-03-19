@@ -23,43 +23,43 @@ type MediaCreate struct {
 }
 
 // SetSource sets the "source" field.
-func (_c *MediaCreate) SetSource(s string) *MediaCreate {
-	_c.mutation.SetSource(s)
+func (_c *MediaCreate) SetSource(v string) *MediaCreate {
+	_c.mutation.SetSource(v)
 	return _c
 }
 
 // SetNillableSource sets the "source" field if the given value is not nil.
-func (_c *MediaCreate) SetNillableSource(s *string) *MediaCreate {
-	if s != nil {
-		_c.SetSource(*s)
+func (_c *MediaCreate) SetNillableSource(v *string) *MediaCreate {
+	if v != nil {
+		_c.SetSource(*v)
 	}
 	return _c
 }
 
 // SetSourceURI sets the "source_uri" field.
-func (_c *MediaCreate) SetSourceURI(s string) *MediaCreate {
-	_c.mutation.SetSourceURI(s)
+func (_c *MediaCreate) SetSourceURI(v string) *MediaCreate {
+	_c.mutation.SetSourceURI(v)
 	return _c
 }
 
 // SetNillableSourceURI sets the "source_uri" field if the given value is not nil.
-func (_c *MediaCreate) SetNillableSourceURI(s *string) *MediaCreate {
-	if s != nil {
-		_c.SetSourceURI(*s)
+func (_c *MediaCreate) SetNillableSourceURI(v *string) *MediaCreate {
+	if v != nil {
+		_c.SetSourceURI(*v)
 	}
 	return _c
 }
 
 // SetText sets the "text" field.
-func (_c *MediaCreate) SetText(s string) *MediaCreate {
-	_c.mutation.SetText(s)
+func (_c *MediaCreate) SetText(v string) *MediaCreate {
+	_c.mutation.SetText(v)
 	return _c
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_c *MediaCreate) SetNillableText(s *string) *MediaCreate {
-	if s != nil {
-		_c.SetText(*s)
+func (_c *MediaCreate) SetNillableText(v *string) *MediaCreate {
+	if v != nil {
+		_c.SetText(*v)
 	}
 	return _c
 }

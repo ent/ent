@@ -70,7 +70,7 @@ func (_u *APIUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *APIUpdate 
 	return _u
 }
 
-func (_u *APIUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *APIUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(api.Table, api.Columns, sqlgraph.NewFieldSpec(api.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -80,7 +80,7 @@ func (_u *APIUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	_spec.AddModifiers(_u.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{api.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -89,7 +89,7 @@ func (_u *APIUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // APIUpdateOne is the builder for updating a single Api entity.

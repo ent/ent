@@ -40,10 +40,10 @@ func (_u *ProcessUpdate) AddFileIDs(ids ...int) *ProcessUpdate {
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (_u *ProcessUpdate) AddFiles(f ...*File) *ProcessUpdate {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *ProcessUpdate) AddFiles(v ...*File) *ProcessUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFileIDs(ids...)
 }
@@ -55,10 +55,10 @@ func (_u *ProcessUpdate) AddAttachedFileIDs(ids ...int) *ProcessUpdate {
 }
 
 // AddAttachedFiles adds the "attached_files" edges to the AttachedFile entity.
-func (_u *ProcessUpdate) AddAttachedFiles(a ...*AttachedFile) *ProcessUpdate {
-	ids := make([]int, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *ProcessUpdate) AddAttachedFiles(v ...*AttachedFile) *ProcessUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddAttachedFileIDs(ids...)
 }
@@ -81,10 +81,10 @@ func (_u *ProcessUpdate) RemoveFileIDs(ids ...int) *ProcessUpdate {
 }
 
 // RemoveFiles removes "files" edges to File entities.
-func (_u *ProcessUpdate) RemoveFiles(f ...*File) *ProcessUpdate {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *ProcessUpdate) RemoveFiles(v ...*File) *ProcessUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFileIDs(ids...)
 }
@@ -102,10 +102,10 @@ func (_u *ProcessUpdate) RemoveAttachedFileIDs(ids ...int) *ProcessUpdate {
 }
 
 // RemoveAttachedFiles removes "attached_files" edges to AttachedFile entities.
-func (_u *ProcessUpdate) RemoveAttachedFiles(a ...*AttachedFile) *ProcessUpdate {
-	ids := make([]int, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *ProcessUpdate) RemoveAttachedFiles(v ...*AttachedFile) *ProcessUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveAttachedFileIDs(ids...)
 }
@@ -137,7 +137,7 @@ func (_u *ProcessUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *ProcessUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *ProcessUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(process.Table, process.Columns, sqlgraph.NewFieldSpec(process.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -248,7 +248,7 @@ func (_u *ProcessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{process.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -257,7 +257,7 @@ func (_u *ProcessUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // ProcessUpdateOne is the builder for updating a single Process entity.
@@ -275,10 +275,10 @@ func (_u *ProcessUpdateOne) AddFileIDs(ids ...int) *ProcessUpdateOne {
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (_u *ProcessUpdateOne) AddFiles(f ...*File) *ProcessUpdateOne {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *ProcessUpdateOne) AddFiles(v ...*File) *ProcessUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddFileIDs(ids...)
 }
@@ -290,10 +290,10 @@ func (_u *ProcessUpdateOne) AddAttachedFileIDs(ids ...int) *ProcessUpdateOne {
 }
 
 // AddAttachedFiles adds the "attached_files" edges to the AttachedFile entity.
-func (_u *ProcessUpdateOne) AddAttachedFiles(a ...*AttachedFile) *ProcessUpdateOne {
-	ids := make([]int, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *ProcessUpdateOne) AddAttachedFiles(v ...*AttachedFile) *ProcessUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddAttachedFileIDs(ids...)
 }
@@ -316,10 +316,10 @@ func (_u *ProcessUpdateOne) RemoveFileIDs(ids ...int) *ProcessUpdateOne {
 }
 
 // RemoveFiles removes "files" edges to File entities.
-func (_u *ProcessUpdateOne) RemoveFiles(f ...*File) *ProcessUpdateOne {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_u *ProcessUpdateOne) RemoveFiles(v ...*File) *ProcessUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveFileIDs(ids...)
 }
@@ -337,10 +337,10 @@ func (_u *ProcessUpdateOne) RemoveAttachedFileIDs(ids ...int) *ProcessUpdateOne 
 }
 
 // RemoveAttachedFiles removes "attached_files" edges to AttachedFile entities.
-func (_u *ProcessUpdateOne) RemoveAttachedFiles(a ...*AttachedFile) *ProcessUpdateOne {
-	ids := make([]int, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_u *ProcessUpdateOne) RemoveAttachedFiles(v ...*AttachedFile) *ProcessUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveAttachedFileIDs(ids...)
 }

@@ -29,39 +29,39 @@ type TweetLikeCreate struct {
 }
 
 // SetLikedAt sets the "liked_at" field.
-func (_c *TweetLikeCreate) SetLikedAt(t time.Time) *TweetLikeCreate {
-	_c.mutation.SetLikedAt(t)
+func (_c *TweetLikeCreate) SetLikedAt(v time.Time) *TweetLikeCreate {
+	_c.mutation.SetLikedAt(v)
 	return _c
 }
 
 // SetNillableLikedAt sets the "liked_at" field if the given value is not nil.
-func (_c *TweetLikeCreate) SetNillableLikedAt(t *time.Time) *TweetLikeCreate {
-	if t != nil {
-		_c.SetLikedAt(*t)
+func (_c *TweetLikeCreate) SetNillableLikedAt(v *time.Time) *TweetLikeCreate {
+	if v != nil {
+		_c.SetLikedAt(*v)
 	}
 	return _c
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *TweetLikeCreate) SetUserID(i int) *TweetLikeCreate {
-	_c.mutation.SetUserID(i)
+func (_c *TweetLikeCreate) SetUserID(v int) *TweetLikeCreate {
+	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetTweetID sets the "tweet_id" field.
-func (_c *TweetLikeCreate) SetTweetID(i int) *TweetLikeCreate {
-	_c.mutation.SetTweetID(i)
+func (_c *TweetLikeCreate) SetTweetID(v int) *TweetLikeCreate {
+	_c.mutation.SetTweetID(v)
 	return _c
 }
 
 // SetTweet sets the "tweet" edge to the Tweet entity.
-func (_c *TweetLikeCreate) SetTweet(t *Tweet) *TweetLikeCreate {
-	return _c.SetTweetID(t.ID)
+func (_c *TweetLikeCreate) SetTweet(v *Tweet) *TweetLikeCreate {
+	return _c.SetTweetID(v.ID)
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_c *TweetLikeCreate) SetUser(u *User) *TweetLikeCreate {
-	return _c.SetUserID(u.ID)
+func (_c *TweetLikeCreate) SetUser(v *User) *TweetLikeCreate {
+	return _c.SetUserID(v.ID)
 }
 
 // Mutation returns the TweetLikeMutation object of the builder.

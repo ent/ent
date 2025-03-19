@@ -26,14 +26,14 @@ type BlogCreate struct {
 }
 
 // SetOid sets the "oid" field.
-func (_c *BlogCreate) SetOid(i int) *BlogCreate {
-	_c.mutation.SetOid(i)
+func (_c *BlogCreate) SetOid(v int) *BlogCreate {
+	_c.mutation.SetOid(v)
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *BlogCreate) SetID(i int) *BlogCreate {
-	_c.mutation.SetID(i)
+func (_c *BlogCreate) SetID(v int) *BlogCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
@@ -44,10 +44,10 @@ func (_c *BlogCreate) AddAdminIDs(ids ...int) *BlogCreate {
 }
 
 // AddAdmins adds the "admins" edges to the User entity.
-func (_c *BlogCreate) AddAdmins(u ...*User) *BlogCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *BlogCreate) AddAdmins(v ...*User) *BlogCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddAdminIDs(ids...)
 }

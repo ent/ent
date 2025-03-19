@@ -33,36 +33,36 @@ func (_u *CommentUpdate) Where(ps ...predicate.Comment) *CommentUpdate {
 }
 
 // SetText sets the "text" field.
-func (_u *CommentUpdate) SetText(s string) *CommentUpdate {
-	_u.mutation.SetText(s)
+func (_u *CommentUpdate) SetText(v string) *CommentUpdate {
+	_u.mutation.SetText(v)
 	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillableText(s *string) *CommentUpdate {
-	if s != nil {
-		_u.SetText(*s)
+func (_u *CommentUpdate) SetNillableText(v *string) *CommentUpdate {
+	if v != nil {
+		_u.SetText(*v)
 	}
 	return _u
 }
 
 // SetPostID sets the "post_id" field.
-func (_u *CommentUpdate) SetPostID(i int) *CommentUpdate {
-	_u.mutation.SetPostID(i)
+func (_u *CommentUpdate) SetPostID(v int) *CommentUpdate {
+	_u.mutation.SetPostID(v)
 	return _u
 }
 
 // SetNillablePostID sets the "post_id" field if the given value is not nil.
-func (_u *CommentUpdate) SetNillablePostID(i *int) *CommentUpdate {
-	if i != nil {
-		_u.SetPostID(*i)
+func (_u *CommentUpdate) SetNillablePostID(v *int) *CommentUpdate {
+	if v != nil {
+		_u.SetPostID(*v)
 	}
 	return _u
 }
 
 // SetPost sets the "post" edge to the Post entity.
-func (_u *CommentUpdate) SetPost(p *Post) *CommentUpdate {
-	return _u.SetPostID(p.ID)
+func (_u *CommentUpdate) SetPost(v *Post) *CommentUpdate {
+	return _u.SetPostID(v.ID)
 }
 
 // Mutation returns the CommentMutation object of the builder.
@@ -111,9 +111,9 @@ func (_u *CommentUpdate) check() error {
 	return nil
 }
 
-func (_u *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *CommentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(comment.Table, comment.Columns, sqlgraph.NewFieldSpec(comment.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -155,7 +155,7 @@ func (_u *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{comment.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -164,7 +164,7 @@ func (_u *CommentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // CommentUpdateOne is the builder for updating a single Comment entity.
@@ -176,36 +176,36 @@ type CommentUpdateOne struct {
 }
 
 // SetText sets the "text" field.
-func (_u *CommentUpdateOne) SetText(s string) *CommentUpdateOne {
-	_u.mutation.SetText(s)
+func (_u *CommentUpdateOne) SetText(v string) *CommentUpdateOne {
+	_u.mutation.SetText(v)
 	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillableText(s *string) *CommentUpdateOne {
-	if s != nil {
-		_u.SetText(*s)
+func (_u *CommentUpdateOne) SetNillableText(v *string) *CommentUpdateOne {
+	if v != nil {
+		_u.SetText(*v)
 	}
 	return _u
 }
 
 // SetPostID sets the "post_id" field.
-func (_u *CommentUpdateOne) SetPostID(i int) *CommentUpdateOne {
-	_u.mutation.SetPostID(i)
+func (_u *CommentUpdateOne) SetPostID(v int) *CommentUpdateOne {
+	_u.mutation.SetPostID(v)
 	return _u
 }
 
 // SetNillablePostID sets the "post_id" field if the given value is not nil.
-func (_u *CommentUpdateOne) SetNillablePostID(i *int) *CommentUpdateOne {
-	if i != nil {
-		_u.SetPostID(*i)
+func (_u *CommentUpdateOne) SetNillablePostID(v *int) *CommentUpdateOne {
+	if v != nil {
+		_u.SetPostID(*v)
 	}
 	return _u
 }
 
 // SetPost sets the "post" edge to the Post entity.
-func (_u *CommentUpdateOne) SetPost(p *Post) *CommentUpdateOne {
-	return _u.SetPostID(p.ID)
+func (_u *CommentUpdateOne) SetPost(v *Post) *CommentUpdateOne {
+	return _u.SetPostID(v.ID)
 }
 
 // Mutation returns the CommentMutation object of the builder.

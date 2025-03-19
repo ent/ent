@@ -33,29 +33,29 @@ func (_u *PostUpdate) Where(ps ...predicate.Post) *PostUpdate {
 }
 
 // SetText sets the "text" field.
-func (_u *PostUpdate) SetText(s string) *PostUpdate {
-	_u.mutation.SetText(s)
+func (_u *PostUpdate) SetText(v string) *PostUpdate {
+	_u.mutation.SetText(v)
 	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_u *PostUpdate) SetNillableText(s *string) *PostUpdate {
-	if s != nil {
-		_u.SetText(*s)
+func (_u *PostUpdate) SetNillableText(v *string) *PostUpdate {
+	if v != nil {
+		_u.SetText(*v)
 	}
 	return _u
 }
 
 // SetAuthorID sets the "author_id" field.
-func (_u *PostUpdate) SetAuthorID(i int) *PostUpdate {
-	_u.mutation.SetAuthorID(i)
+func (_u *PostUpdate) SetAuthorID(v int) *PostUpdate {
+	_u.mutation.SetAuthorID(v)
 	return _u
 }
 
 // SetNillableAuthorID sets the "author_id" field if the given value is not nil.
-func (_u *PostUpdate) SetNillableAuthorID(i *int) *PostUpdate {
-	if i != nil {
-		_u.SetAuthorID(*i)
+func (_u *PostUpdate) SetNillableAuthorID(v *int) *PostUpdate {
+	if v != nil {
+		_u.SetAuthorID(*v)
 	}
 	return _u
 }
@@ -67,8 +67,8 @@ func (_u *PostUpdate) ClearAuthorID() *PostUpdate {
 }
 
 // SetAuthor sets the "author" edge to the User entity.
-func (_u *PostUpdate) SetAuthor(u *User) *PostUpdate {
-	return _u.SetAuthorID(u.ID)
+func (_u *PostUpdate) SetAuthor(v *User) *PostUpdate {
+	return _u.SetAuthorID(v.ID)
 }
 
 // Mutation returns the PostMutation object of the builder.
@@ -109,7 +109,7 @@ func (_u *PostUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *PostUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *PostUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(post.Table, post.Columns, sqlgraph.NewFieldSpec(post.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -150,7 +150,7 @@ func (_u *PostUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{post.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -159,7 +159,7 @@ func (_u *PostUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // PostUpdateOne is the builder for updating a single Post entity.
@@ -171,29 +171,29 @@ type PostUpdateOne struct {
 }
 
 // SetText sets the "text" field.
-func (_u *PostUpdateOne) SetText(s string) *PostUpdateOne {
-	_u.mutation.SetText(s)
+func (_u *PostUpdateOne) SetText(v string) *PostUpdateOne {
+	_u.mutation.SetText(v)
 	return _u
 }
 
 // SetNillableText sets the "text" field if the given value is not nil.
-func (_u *PostUpdateOne) SetNillableText(s *string) *PostUpdateOne {
-	if s != nil {
-		_u.SetText(*s)
+func (_u *PostUpdateOne) SetNillableText(v *string) *PostUpdateOne {
+	if v != nil {
+		_u.SetText(*v)
 	}
 	return _u
 }
 
 // SetAuthorID sets the "author_id" field.
-func (_u *PostUpdateOne) SetAuthorID(i int) *PostUpdateOne {
-	_u.mutation.SetAuthorID(i)
+func (_u *PostUpdateOne) SetAuthorID(v int) *PostUpdateOne {
+	_u.mutation.SetAuthorID(v)
 	return _u
 }
 
 // SetNillableAuthorID sets the "author_id" field if the given value is not nil.
-func (_u *PostUpdateOne) SetNillableAuthorID(i *int) *PostUpdateOne {
-	if i != nil {
-		_u.SetAuthorID(*i)
+func (_u *PostUpdateOne) SetNillableAuthorID(v *int) *PostUpdateOne {
+	if v != nil {
+		_u.SetAuthorID(*v)
 	}
 	return _u
 }
@@ -205,8 +205,8 @@ func (_u *PostUpdateOne) ClearAuthorID() *PostUpdateOne {
 }
 
 // SetAuthor sets the "author" edge to the User entity.
-func (_u *PostUpdateOne) SetAuthor(u *User) *PostUpdateOne {
-	return _u.SetAuthorID(u.ID)
+func (_u *PostUpdateOne) SetAuthor(v *User) *PostUpdateOne {
+	return _u.SetAuthorID(v.ID)
 }
 
 // Mutation returns the PostMutation object of the builder.

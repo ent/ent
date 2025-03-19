@@ -25,29 +25,29 @@ type CarCreate struct {
 }
 
 // SetNumber sets the "number" field.
-func (_c *CarCreate) SetNumber(s string) *CarCreate {
-	_c.mutation.SetNumber(s)
+func (_c *CarCreate) SetNumber(v string) *CarCreate {
+	_c.mutation.SetNumber(v)
 	return _c
 }
 
 // SetNillableNumber sets the "number" field if the given value is not nil.
-func (_c *CarCreate) SetNillableNumber(s *string) *CarCreate {
-	if s != nil {
-		_c.SetNumber(*s)
+func (_c *CarCreate) SetNillableNumber(v *string) *CarCreate {
+	if v != nil {
+		_c.SetNumber(*v)
 	}
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *CarCreate) SetID(u uuid.UUID) *CarCreate {
-	_c.mutation.SetID(u)
+func (_c *CarCreate) SetID(v uuid.UUID) *CarCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *CarCreate) SetNillableID(u *uuid.UUID) *CarCreate {
-	if u != nil {
-		_c.SetID(*u)
+func (_c *CarCreate) SetNillableID(v *uuid.UUID) *CarCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
 	return _c
 }
@@ -59,10 +59,10 @@ func (_c *CarCreate) AddRentalIDs(ids ...int) *CarCreate {
 }
 
 // AddRentals adds the "rentals" edges to the Rental entity.
-func (_c *CarCreate) AddRentals(r ...*Rental) *CarCreate {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_c *CarCreate) AddRentals(v ...*Rental) *CarCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddRentalIDs(ids...)
 }

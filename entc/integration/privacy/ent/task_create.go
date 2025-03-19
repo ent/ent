@@ -27,49 +27,49 @@ type TaskCreate struct {
 }
 
 // SetTitle sets the "title" field.
-func (_c *TaskCreate) SetTitle(s string) *TaskCreate {
-	_c.mutation.SetTitle(s)
+func (_c *TaskCreate) SetTitle(v string) *TaskCreate {
+	_c.mutation.SetTitle(v)
 	return _c
 }
 
 // SetDescription sets the "description" field.
-func (_c *TaskCreate) SetDescription(s string) *TaskCreate {
-	_c.mutation.SetDescription(s)
+func (_c *TaskCreate) SetDescription(v string) *TaskCreate {
+	_c.mutation.SetDescription(v)
 	return _c
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (_c *TaskCreate) SetNillableDescription(s *string) *TaskCreate {
-	if s != nil {
-		_c.SetDescription(*s)
+func (_c *TaskCreate) SetNillableDescription(v *string) *TaskCreate {
+	if v != nil {
+		_c.SetDescription(*v)
 	}
 	return _c
 }
 
 // SetStatus sets the "status" field.
-func (_c *TaskCreate) SetStatus(t task.Status) *TaskCreate {
-	_c.mutation.SetStatus(t)
+func (_c *TaskCreate) SetStatus(v task.Status) *TaskCreate {
+	_c.mutation.SetStatus(v)
 	return _c
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (_c *TaskCreate) SetNillableStatus(t *task.Status) *TaskCreate {
-	if t != nil {
-		_c.SetStatus(*t)
+func (_c *TaskCreate) SetNillableStatus(v *task.Status) *TaskCreate {
+	if v != nil {
+		_c.SetStatus(*v)
 	}
 	return _c
 }
 
 // SetUUID sets the "uuid" field.
-func (_c *TaskCreate) SetUUID(u uuid.UUID) *TaskCreate {
-	_c.mutation.SetUUID(u)
+func (_c *TaskCreate) SetUUID(v uuid.UUID) *TaskCreate {
+	_c.mutation.SetUUID(v)
 	return _c
 }
 
 // SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (_c *TaskCreate) SetNillableUUID(u *uuid.UUID) *TaskCreate {
-	if u != nil {
-		_c.SetUUID(*u)
+func (_c *TaskCreate) SetNillableUUID(v *uuid.UUID) *TaskCreate {
+	if v != nil {
+		_c.SetUUID(*v)
 	}
 	return _c
 }
@@ -81,10 +81,10 @@ func (_c *TaskCreate) AddTeamIDs(ids ...int) *TaskCreate {
 }
 
 // AddTeams adds the "teams" edges to the Team entity.
-func (_c *TaskCreate) AddTeams(t ...*Team) *TaskCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_c *TaskCreate) AddTeams(v ...*Team) *TaskCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddTeamIDs(ids...)
 }
@@ -104,8 +104,8 @@ func (_c *TaskCreate) SetNillableOwnerID(id *int) *TaskCreate {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_c *TaskCreate) SetOwner(u *User) *TaskCreate {
-	return _c.SetOwnerID(u.ID)
+func (_c *TaskCreate) SetOwner(v *User) *TaskCreate {
+	return _c.SetOwnerID(v.ID)
 }
 
 // Mutation returns the TaskMutation object of the builder.

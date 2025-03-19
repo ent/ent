@@ -27,21 +27,21 @@ type GroupInfoCreate struct {
 }
 
 // SetDesc sets the "desc" field.
-func (_c *GroupInfoCreate) SetDesc(s string) *GroupInfoCreate {
-	_c.mutation.SetDesc(s)
+func (_c *GroupInfoCreate) SetDesc(v string) *GroupInfoCreate {
+	_c.mutation.SetDesc(v)
 	return _c
 }
 
 // SetMaxUsers sets the "max_users" field.
-func (_c *GroupInfoCreate) SetMaxUsers(i int) *GroupInfoCreate {
-	_c.mutation.SetMaxUsers(i)
+func (_c *GroupInfoCreate) SetMaxUsers(v int) *GroupInfoCreate {
+	_c.mutation.SetMaxUsers(v)
 	return _c
 }
 
 // SetNillableMaxUsers sets the "max_users" field if the given value is not nil.
-func (_c *GroupInfoCreate) SetNillableMaxUsers(i *int) *GroupInfoCreate {
-	if i != nil {
-		_c.SetMaxUsers(*i)
+func (_c *GroupInfoCreate) SetNillableMaxUsers(v *int) *GroupInfoCreate {
+	if v != nil {
+		_c.SetMaxUsers(*v)
 	}
 	return _c
 }
@@ -53,10 +53,10 @@ func (_c *GroupInfoCreate) AddGroupIDs(ids ...int) *GroupInfoCreate {
 }
 
 // AddGroups adds the "groups" edges to the Group entity.
-func (_c *GroupInfoCreate) AddGroups(g ...*Group) *GroupInfoCreate {
-	ids := make([]int, len(g))
-	for i := range g {
-		ids[i] = g[i].ID
+func (_c *GroupInfoCreate) AddGroups(v ...*Group) *GroupInfoCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddGroupIDs(ids...)
 }

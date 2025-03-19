@@ -34,8 +34,8 @@ func (_u *LicenseUpdate) Where(ps ...predicate.License) *LicenseUpdate {
 }
 
 // SetUpdateTime sets the "update_time" field.
-func (_u *LicenseUpdate) SetUpdateTime(t time.Time) *LicenseUpdate {
-	_u.mutation.SetUpdateTime(t)
+func (_u *LicenseUpdate) SetUpdateTime(v time.Time) *LicenseUpdate {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 
@@ -86,7 +86,7 @@ func (_u *LicenseUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Licens
 	return _u
 }
 
-func (_u *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *LicenseUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(license.Table, license.Columns, sqlgraph.NewFieldSpec(license.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -99,7 +99,7 @@ func (_u *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(license.FieldUpdateTime, field.TypeTime, value)
 	}
 	_spec.AddModifiers(_u.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{license.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -108,7 +108,7 @@ func (_u *LicenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // LicenseUpdateOne is the builder for updating a single License entity.
@@ -121,8 +121,8 @@ type LicenseUpdateOne struct {
 }
 
 // SetUpdateTime sets the "update_time" field.
-func (_u *LicenseUpdateOne) SetUpdateTime(t time.Time) *LicenseUpdateOne {
-	_u.mutation.SetUpdateTime(t)
+func (_u *LicenseUpdateOne) SetUpdateTime(v time.Time) *LicenseUpdateOne {
+	_u.mutation.SetUpdateTime(v)
 	return _u
 }
 

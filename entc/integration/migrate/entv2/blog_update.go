@@ -33,23 +33,23 @@ func (_u *BlogUpdate) Where(ps ...predicate.Blog) *BlogUpdate {
 }
 
 // SetOid sets the "oid" field.
-func (_u *BlogUpdate) SetOid(i int) *BlogUpdate {
+func (_u *BlogUpdate) SetOid(v int) *BlogUpdate {
 	_u.mutation.ResetOid()
-	_u.mutation.SetOid(i)
+	_u.mutation.SetOid(v)
 	return _u
 }
 
 // SetNillableOid sets the "oid" field if the given value is not nil.
-func (_u *BlogUpdate) SetNillableOid(i *int) *BlogUpdate {
-	if i != nil {
-		_u.SetOid(*i)
+func (_u *BlogUpdate) SetNillableOid(v *int) *BlogUpdate {
+	if v != nil {
+		_u.SetOid(*v)
 	}
 	return _u
 }
 
-// AddOid adds i to the "oid" field.
-func (_u *BlogUpdate) AddOid(i int) *BlogUpdate {
-	_u.mutation.AddOid(i)
+// AddOid adds value to the "oid" field.
+func (_u *BlogUpdate) AddOid(v int) *BlogUpdate {
+	_u.mutation.AddOid(v)
 	return _u
 }
 
@@ -60,10 +60,10 @@ func (_u *BlogUpdate) AddAdminIDs(ids ...int) *BlogUpdate {
 }
 
 // AddAdmins adds the "admins" edges to the User entity.
-func (_u *BlogUpdate) AddAdmins(u ...*User) *BlogUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *BlogUpdate) AddAdmins(v ...*User) *BlogUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddAdminIDs(ids...)
 }
@@ -86,10 +86,10 @@ func (_u *BlogUpdate) RemoveAdminIDs(ids ...int) *BlogUpdate {
 }
 
 // RemoveAdmins removes "admins" edges to User entities.
-func (_u *BlogUpdate) RemoveAdmins(u ...*User) *BlogUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *BlogUpdate) RemoveAdmins(v ...*User) *BlogUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveAdminIDs(ids...)
 }
@@ -121,7 +121,7 @@ func (_u *BlogUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *BlogUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *BlogUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(blog.Table, blog.Columns, sqlgraph.NewFieldSpec(blog.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -181,7 +181,7 @@ func (_u *BlogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{blog.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -190,7 +190,7 @@ func (_u *BlogUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // BlogUpdateOne is the builder for updating a single Blog entity.
@@ -202,23 +202,23 @@ type BlogUpdateOne struct {
 }
 
 // SetOid sets the "oid" field.
-func (_u *BlogUpdateOne) SetOid(i int) *BlogUpdateOne {
+func (_u *BlogUpdateOne) SetOid(v int) *BlogUpdateOne {
 	_u.mutation.ResetOid()
-	_u.mutation.SetOid(i)
+	_u.mutation.SetOid(v)
 	return _u
 }
 
 // SetNillableOid sets the "oid" field if the given value is not nil.
-func (_u *BlogUpdateOne) SetNillableOid(i *int) *BlogUpdateOne {
-	if i != nil {
-		_u.SetOid(*i)
+func (_u *BlogUpdateOne) SetNillableOid(v *int) *BlogUpdateOne {
+	if v != nil {
+		_u.SetOid(*v)
 	}
 	return _u
 }
 
-// AddOid adds i to the "oid" field.
-func (_u *BlogUpdateOne) AddOid(i int) *BlogUpdateOne {
-	_u.mutation.AddOid(i)
+// AddOid adds value to the "oid" field.
+func (_u *BlogUpdateOne) AddOid(v int) *BlogUpdateOne {
+	_u.mutation.AddOid(v)
 	return _u
 }
 
@@ -229,10 +229,10 @@ func (_u *BlogUpdateOne) AddAdminIDs(ids ...int) *BlogUpdateOne {
 }
 
 // AddAdmins adds the "admins" edges to the User entity.
-func (_u *BlogUpdateOne) AddAdmins(u ...*User) *BlogUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *BlogUpdateOne) AddAdmins(v ...*User) *BlogUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddAdminIDs(ids...)
 }
@@ -255,10 +255,10 @@ func (_u *BlogUpdateOne) RemoveAdminIDs(ids ...int) *BlogUpdateOne {
 }
 
 // RemoveAdmins removes "admins" edges to User entities.
-func (_u *BlogUpdateOne) RemoveAdmins(u ...*User) *BlogUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *BlogUpdateOne) RemoveAdmins(v ...*User) *BlogUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveAdminIDs(ids...)
 }

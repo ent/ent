@@ -34,10 +34,10 @@ func (_c *ProcessCreate) AddFileIDs(ids ...int) *ProcessCreate {
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (_c *ProcessCreate) AddFiles(f ...*File) *ProcessCreate {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_c *ProcessCreate) AddFiles(v ...*File) *ProcessCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddFileIDs(ids...)
 }
@@ -49,10 +49,10 @@ func (_c *ProcessCreate) AddAttachedFileIDs(ids ...int) *ProcessCreate {
 }
 
 // AddAttachedFiles adds the "attached_files" edges to the AttachedFile entity.
-func (_c *ProcessCreate) AddAttachedFiles(a ...*AttachedFile) *ProcessCreate {
-	ids := make([]int, len(a))
-	for i := range a {
-		ids[i] = a[i].ID
+func (_c *ProcessCreate) AddAttachedFiles(v ...*AttachedFile) *ProcessCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddAttachedFileIDs(ids...)
 }

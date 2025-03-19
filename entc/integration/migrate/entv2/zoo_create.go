@@ -23,8 +23,8 @@ type ZooCreate struct {
 }
 
 // SetID sets the "id" field.
-func (_c *ZooCreate) SetID(i int) *ZooCreate {
-	_c.mutation.SetID(i)
+func (_c *ZooCreate) SetID(v int) *ZooCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 

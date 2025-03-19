@@ -32,29 +32,29 @@ func (_u *MixinIDUpdate) Where(ps ...predicate.MixinID) *MixinIDUpdate {
 }
 
 // SetSomeField sets the "some_field" field.
-func (_u *MixinIDUpdate) SetSomeField(s string) *MixinIDUpdate {
-	_u.mutation.SetSomeField(s)
+func (_u *MixinIDUpdate) SetSomeField(v string) *MixinIDUpdate {
+	_u.mutation.SetSomeField(v)
 	return _u
 }
 
 // SetNillableSomeField sets the "some_field" field if the given value is not nil.
-func (_u *MixinIDUpdate) SetNillableSomeField(s *string) *MixinIDUpdate {
-	if s != nil {
-		_u.SetSomeField(*s)
+func (_u *MixinIDUpdate) SetNillableSomeField(v *string) *MixinIDUpdate {
+	if v != nil {
+		_u.SetSomeField(*v)
 	}
 	return _u
 }
 
 // SetMixinField sets the "mixin_field" field.
-func (_u *MixinIDUpdate) SetMixinField(s string) *MixinIDUpdate {
-	_u.mutation.SetMixinField(s)
+func (_u *MixinIDUpdate) SetMixinField(v string) *MixinIDUpdate {
+	_u.mutation.SetMixinField(v)
 	return _u
 }
 
 // SetNillableMixinField sets the "mixin_field" field if the given value is not nil.
-func (_u *MixinIDUpdate) SetNillableMixinField(s *string) *MixinIDUpdate {
-	if s != nil {
-		_u.SetMixinField(*s)
+func (_u *MixinIDUpdate) SetNillableMixinField(v *string) *MixinIDUpdate {
+	if v != nil {
+		_u.SetMixinField(*v)
 	}
 	return _u
 }
@@ -91,7 +91,7 @@ func (_u *MixinIDUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *MixinIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *MixinIDUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(mixinid.Table, mixinid.Columns, sqlgraph.NewFieldSpec(mixinid.FieldID, field.TypeUUID))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -106,7 +106,7 @@ func (_u *MixinIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := _u.mutation.MixinField(); ok {
 		_spec.SetField(mixinid.FieldMixinField, field.TypeString, value)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{mixinid.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -115,7 +115,7 @@ func (_u *MixinIDUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // MixinIDUpdateOne is the builder for updating a single MixinID entity.
@@ -127,29 +127,29 @@ type MixinIDUpdateOne struct {
 }
 
 // SetSomeField sets the "some_field" field.
-func (_u *MixinIDUpdateOne) SetSomeField(s string) *MixinIDUpdateOne {
-	_u.mutation.SetSomeField(s)
+func (_u *MixinIDUpdateOne) SetSomeField(v string) *MixinIDUpdateOne {
+	_u.mutation.SetSomeField(v)
 	return _u
 }
 
 // SetNillableSomeField sets the "some_field" field if the given value is not nil.
-func (_u *MixinIDUpdateOne) SetNillableSomeField(s *string) *MixinIDUpdateOne {
-	if s != nil {
-		_u.SetSomeField(*s)
+func (_u *MixinIDUpdateOne) SetNillableSomeField(v *string) *MixinIDUpdateOne {
+	if v != nil {
+		_u.SetSomeField(*v)
 	}
 	return _u
 }
 
 // SetMixinField sets the "mixin_field" field.
-func (_u *MixinIDUpdateOne) SetMixinField(s string) *MixinIDUpdateOne {
-	_u.mutation.SetMixinField(s)
+func (_u *MixinIDUpdateOne) SetMixinField(v string) *MixinIDUpdateOne {
+	_u.mutation.SetMixinField(v)
 	return _u
 }
 
 // SetNillableMixinField sets the "mixin_field" field if the given value is not nil.
-func (_u *MixinIDUpdateOne) SetNillableMixinField(s *string) *MixinIDUpdateOne {
-	if s != nil {
-		_u.SetMixinField(*s)
+func (_u *MixinIDUpdateOne) SetNillableMixinField(v *string) *MixinIDUpdateOne {
+	if v != nil {
+		_u.SetMixinField(*v)
 	}
 	return _u
 }

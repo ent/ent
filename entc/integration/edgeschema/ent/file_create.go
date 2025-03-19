@@ -27,8 +27,8 @@ type FileCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *FileCreate) SetName(s string) *FileCreate {
-	_c.mutation.SetName(s)
+func (_c *FileCreate) SetName(v string) *FileCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
@@ -39,10 +39,10 @@ func (_c *FileCreate) AddProcessIDs(ids ...int) *FileCreate {
 }
 
 // AddProcesses adds the "processes" edges to the Process entity.
-func (_c *FileCreate) AddProcesses(p ...*Process) *FileCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+func (_c *FileCreate) AddProcesses(v ...*Process) *FileCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddProcessIDs(ids...)
 }

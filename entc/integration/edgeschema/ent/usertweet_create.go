@@ -29,39 +29,39 @@ type UserTweetCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *UserTweetCreate) SetCreatedAt(t time.Time) *UserTweetCreate {
-	_c.mutation.SetCreatedAt(t)
+func (_c *UserTweetCreate) SetCreatedAt(v time.Time) *UserTweetCreate {
+	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *UserTweetCreate) SetNillableCreatedAt(t *time.Time) *UserTweetCreate {
-	if t != nil {
-		_c.SetCreatedAt(*t)
+func (_c *UserTweetCreate) SetNillableCreatedAt(v *time.Time) *UserTweetCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
 	return _c
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *UserTweetCreate) SetUserID(i int) *UserTweetCreate {
-	_c.mutation.SetUserID(i)
+func (_c *UserTweetCreate) SetUserID(v int) *UserTweetCreate {
+	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetTweetID sets the "tweet_id" field.
-func (_c *UserTweetCreate) SetTweetID(i int) *UserTweetCreate {
-	_c.mutation.SetTweetID(i)
+func (_c *UserTweetCreate) SetTweetID(v int) *UserTweetCreate {
+	_c.mutation.SetTweetID(v)
 	return _c
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_c *UserTweetCreate) SetUser(u *User) *UserTweetCreate {
-	return _c.SetUserID(u.ID)
+func (_c *UserTweetCreate) SetUser(v *User) *UserTweetCreate {
+	return _c.SetUserID(v.ID)
 }
 
 // SetTweet sets the "tweet" edge to the Tweet entity.
-func (_c *UserTweetCreate) SetTweet(t *Tweet) *UserTweetCreate {
-	return _c.SetTweetID(t.ID)
+func (_c *UserTweetCreate) SetTweet(v *Tweet) *UserTweetCreate {
+	return _c.SetTweetID(v.ID)
 }
 
 // Mutation returns the UserTweetMutation object of the builder.

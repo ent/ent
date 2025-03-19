@@ -31,8 +31,8 @@ type TweetCreate struct {
 }
 
 // SetText sets the "text" field.
-func (_c *TweetCreate) SetText(s string) *TweetCreate {
-	_c.mutation.SetText(s)
+func (_c *TweetCreate) SetText(v string) *TweetCreate {
+	_c.mutation.SetText(v)
 	return _c
 }
 
@@ -43,10 +43,10 @@ func (_c *TweetCreate) AddLikedUserIDs(ids ...int) *TweetCreate {
 }
 
 // AddLikedUsers adds the "liked_users" edges to the User entity.
-func (_c *TweetCreate) AddLikedUsers(u ...*User) *TweetCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *TweetCreate) AddLikedUsers(v ...*User) *TweetCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddLikedUserIDs(ids...)
 }
@@ -58,10 +58,10 @@ func (_c *TweetCreate) AddUserIDs(ids ...int) *TweetCreate {
 }
 
 // AddUser adds the "user" edges to the User entity.
-func (_c *TweetCreate) AddUser(u ...*User) *TweetCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *TweetCreate) AddUser(v ...*User) *TweetCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddUserIDs(ids...)
 }
@@ -73,10 +73,10 @@ func (_c *TweetCreate) AddTagIDs(ids ...int) *TweetCreate {
 }
 
 // AddTags adds the "tags" edges to the Tag entity.
-func (_c *TweetCreate) AddTags(t ...*Tag) *TweetCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_c *TweetCreate) AddTags(v ...*Tag) *TweetCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddTagIDs(ids...)
 }
@@ -88,10 +88,10 @@ func (_c *TweetCreate) AddTweetUserIDs(ids ...int) *TweetCreate {
 }
 
 // AddTweetUser adds the "tweet_user" edges to the UserTweet entity.
-func (_c *TweetCreate) AddTweetUser(u ...*UserTweet) *TweetCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_c *TweetCreate) AddTweetUser(v ...*UserTweet) *TweetCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddTweetUserIDs(ids...)
 }
@@ -103,10 +103,10 @@ func (_c *TweetCreate) AddTweetTagIDs(ids ...uuid.UUID) *TweetCreate {
 }
 
 // AddTweetTags adds the "tweet_tags" edges to the TweetTag entity.
-func (_c *TweetCreate) AddTweetTags(t ...*TweetTag) *TweetCreate {
-	ids := make([]uuid.UUID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_c *TweetCreate) AddTweetTags(v ...*TweetTag) *TweetCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddTweetTagIDs(ids...)
 }

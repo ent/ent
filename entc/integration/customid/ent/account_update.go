@@ -34,15 +34,15 @@ func (_u *AccountUpdate) Where(ps ...predicate.Account) *AccountUpdate {
 }
 
 // SetEmail sets the "email" field.
-func (_u *AccountUpdate) SetEmail(s string) *AccountUpdate {
-	_u.mutation.SetEmail(s)
+func (_u *AccountUpdate) SetEmail(v string) *AccountUpdate {
+	_u.mutation.SetEmail(v)
 	return _u
 }
 
 // SetNillableEmail sets the "email" field if the given value is not nil.
-func (_u *AccountUpdate) SetNillableEmail(s *string) *AccountUpdate {
-	if s != nil {
-		_u.SetEmail(*s)
+func (_u *AccountUpdate) SetNillableEmail(v *string) *AccountUpdate {
+	if v != nil {
+		_u.SetEmail(*v)
 	}
 	return _u
 }
@@ -54,10 +54,10 @@ func (_u *AccountUpdate) AddTokenIDs(ids ...sid.ID) *AccountUpdate {
 }
 
 // AddToken adds the "token" edges to the Token entity.
-func (_u *AccountUpdate) AddToken(t ...*Token) *AccountUpdate {
-	ids := make([]sid.ID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *AccountUpdate) AddToken(v ...*Token) *AccountUpdate {
+	ids := make([]sid.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddTokenIDs(ids...)
 }
@@ -80,10 +80,10 @@ func (_u *AccountUpdate) RemoveTokenIDs(ids ...sid.ID) *AccountUpdate {
 }
 
 // RemoveToken removes "token" edges to Token entities.
-func (_u *AccountUpdate) RemoveToken(t ...*Token) *AccountUpdate {
-	ids := make([]sid.ID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *AccountUpdate) RemoveToken(v ...*Token) *AccountUpdate {
+	ids := make([]sid.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveTokenIDs(ids...)
 }
@@ -125,9 +125,9 @@ func (_u *AccountUpdate) check() error {
 	return nil
 }
 
-func (_u *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *AccountUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(account.Table, account.Columns, sqlgraph.NewFieldSpec(account.FieldID, field.TypeOther))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -185,7 +185,7 @@ func (_u *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{account.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -194,7 +194,7 @@ func (_u *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // AccountUpdateOne is the builder for updating a single Account entity.
@@ -206,15 +206,15 @@ type AccountUpdateOne struct {
 }
 
 // SetEmail sets the "email" field.
-func (_u *AccountUpdateOne) SetEmail(s string) *AccountUpdateOne {
-	_u.mutation.SetEmail(s)
+func (_u *AccountUpdateOne) SetEmail(v string) *AccountUpdateOne {
+	_u.mutation.SetEmail(v)
 	return _u
 }
 
 // SetNillableEmail sets the "email" field if the given value is not nil.
-func (_u *AccountUpdateOne) SetNillableEmail(s *string) *AccountUpdateOne {
-	if s != nil {
-		_u.SetEmail(*s)
+func (_u *AccountUpdateOne) SetNillableEmail(v *string) *AccountUpdateOne {
+	if v != nil {
+		_u.SetEmail(*v)
 	}
 	return _u
 }
@@ -226,10 +226,10 @@ func (_u *AccountUpdateOne) AddTokenIDs(ids ...sid.ID) *AccountUpdateOne {
 }
 
 // AddToken adds the "token" edges to the Token entity.
-func (_u *AccountUpdateOne) AddToken(t ...*Token) *AccountUpdateOne {
-	ids := make([]sid.ID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *AccountUpdateOne) AddToken(v ...*Token) *AccountUpdateOne {
+	ids := make([]sid.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddTokenIDs(ids...)
 }
@@ -252,10 +252,10 @@ func (_u *AccountUpdateOne) RemoveTokenIDs(ids ...sid.ID) *AccountUpdateOne {
 }
 
 // RemoveToken removes "token" edges to Token entities.
-func (_u *AccountUpdateOne) RemoveToken(t ...*Token) *AccountUpdateOne {
-	ids := make([]sid.ID, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *AccountUpdateOne) RemoveToken(v ...*Token) *AccountUpdateOne {
+	ids := make([]sid.ID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveTokenIDs(ids...)
 }

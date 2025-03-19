@@ -29,21 +29,21 @@ type LinkCreate struct {
 }
 
 // SetLinkInformation sets the "link_information" field.
-func (_c *LinkCreate) SetLinkInformation(mi map[string]schema.LinkInformation) *LinkCreate {
-	_c.mutation.SetLinkInformation(mi)
+func (_c *LinkCreate) SetLinkInformation(v map[string]schema.LinkInformation) *LinkCreate {
+	_c.mutation.SetLinkInformation(v)
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *LinkCreate) SetID(u uuidc.UUIDC) *LinkCreate {
-	_c.mutation.SetID(u)
+func (_c *LinkCreate) SetID(v uuidc.UUIDC) *LinkCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *LinkCreate) SetNillableID(u *uuidc.UUIDC) *LinkCreate {
-	if u != nil {
-		_c.SetID(*u)
+func (_c *LinkCreate) SetNillableID(v *uuidc.UUIDC) *LinkCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
 	return _c
 }

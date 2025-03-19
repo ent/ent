@@ -27,35 +27,35 @@ type FileTypeCreate struct {
 }
 
 // SetName sets the "name" field.
-func (_c *FileTypeCreate) SetName(s string) *FileTypeCreate {
-	_c.mutation.SetName(s)
+func (_c *FileTypeCreate) SetName(v string) *FileTypeCreate {
+	_c.mutation.SetName(v)
 	return _c
 }
 
 // SetType sets the "type" field.
-func (_c *FileTypeCreate) SetType(f filetype.Type) *FileTypeCreate {
-	_c.mutation.SetType(f)
+func (_c *FileTypeCreate) SetType(v filetype.Type) *FileTypeCreate {
+	_c.mutation.SetType(v)
 	return _c
 }
 
 // SetNillableType sets the "type" field if the given value is not nil.
-func (_c *FileTypeCreate) SetNillableType(f *filetype.Type) *FileTypeCreate {
-	if f != nil {
-		_c.SetType(*f)
+func (_c *FileTypeCreate) SetNillableType(v *filetype.Type) *FileTypeCreate {
+	if v != nil {
+		_c.SetType(*v)
 	}
 	return _c
 }
 
 // SetState sets the "state" field.
-func (_c *FileTypeCreate) SetState(f filetype.State) *FileTypeCreate {
-	_c.mutation.SetState(f)
+func (_c *FileTypeCreate) SetState(v filetype.State) *FileTypeCreate {
+	_c.mutation.SetState(v)
 	return _c
 }
 
 // SetNillableState sets the "state" field if the given value is not nil.
-func (_c *FileTypeCreate) SetNillableState(f *filetype.State) *FileTypeCreate {
-	if f != nil {
-		_c.SetState(*f)
+func (_c *FileTypeCreate) SetNillableState(v *filetype.State) *FileTypeCreate {
+	if v != nil {
+		_c.SetState(*v)
 	}
 	return _c
 }
@@ -67,10 +67,10 @@ func (_c *FileTypeCreate) AddFileIDs(ids ...string) *FileTypeCreate {
 }
 
 // AddFiles adds the "files" edges to the File entity.
-func (_c *FileTypeCreate) AddFiles(f ...*File) *FileTypeCreate {
-	ids := make([]string, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+func (_c *FileTypeCreate) AddFiles(v ...*File) *FileTypeCreate {
+	ids := make([]string, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddFileIDs(ids...)
 }

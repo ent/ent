@@ -29,39 +29,39 @@ type RoleUserCreate struct {
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_c *RoleUserCreate) SetCreatedAt(t time.Time) *RoleUserCreate {
-	_c.mutation.SetCreatedAt(t)
+func (_c *RoleUserCreate) SetCreatedAt(v time.Time) *RoleUserCreate {
+	_c.mutation.SetCreatedAt(v)
 	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_c *RoleUserCreate) SetNillableCreatedAt(t *time.Time) *RoleUserCreate {
-	if t != nil {
-		_c.SetCreatedAt(*t)
+func (_c *RoleUserCreate) SetNillableCreatedAt(v *time.Time) *RoleUserCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
 	return _c
 }
 
 // SetRoleID sets the "role_id" field.
-func (_c *RoleUserCreate) SetRoleID(i int) *RoleUserCreate {
-	_c.mutation.SetRoleID(i)
+func (_c *RoleUserCreate) SetRoleID(v int) *RoleUserCreate {
+	_c.mutation.SetRoleID(v)
 	return _c
 }
 
 // SetUserID sets the "user_id" field.
-func (_c *RoleUserCreate) SetUserID(i int) *RoleUserCreate {
-	_c.mutation.SetUserID(i)
+func (_c *RoleUserCreate) SetUserID(v int) *RoleUserCreate {
+	_c.mutation.SetUserID(v)
 	return _c
 }
 
 // SetRole sets the "role" edge to the Role entity.
-func (_c *RoleUserCreate) SetRole(r *Role) *RoleUserCreate {
-	return _c.SetRoleID(r.ID)
+func (_c *RoleUserCreate) SetRole(v *Role) *RoleUserCreate {
+	return _c.SetRoleID(v.ID)
 }
 
 // SetUser sets the "user" edge to the User entity.
-func (_c *RoleUserCreate) SetUser(u *User) *RoleUserCreate {
-	return _c.SetUserID(u.ID)
+func (_c *RoleUserCreate) SetUser(v *User) *RoleUserCreate {
+	return _c.SetUserID(v.ID)
 }
 
 // Mutation returns the RoleUserMutation object of the builder.

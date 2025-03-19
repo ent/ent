@@ -34,29 +34,29 @@ func (_u *RoleUpdate) Where(ps ...predicate.Role) *RoleUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *RoleUpdate) SetName(s string) *RoleUpdate {
-	_u.mutation.SetName(s)
+func (_u *RoleUpdate) SetName(v string) *RoleUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *RoleUpdate) SetNillableName(s *string) *RoleUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *RoleUpdate) SetNillableName(v *string) *RoleUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_u *RoleUpdate) SetCreatedAt(t time.Time) *RoleUpdate {
-	_u.mutation.SetCreatedAt(t)
+func (_u *RoleUpdate) SetCreatedAt(v time.Time) *RoleUpdate {
+	_u.mutation.SetCreatedAt(v)
 	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *RoleUpdate) SetNillableCreatedAt(t *time.Time) *RoleUpdate {
-	if t != nil {
-		_u.SetCreatedAt(*t)
+func (_u *RoleUpdate) SetNillableCreatedAt(v *time.Time) *RoleUpdate {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
 	return _u
 }
@@ -68,10 +68,10 @@ func (_u *RoleUpdate) AddUserIDs(ids ...int) *RoleUpdate {
 }
 
 // AddUser adds the "user" edges to the User entity.
-func (_u *RoleUpdate) AddUser(u ...*User) *RoleUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *RoleUpdate) AddUser(v ...*User) *RoleUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddUserIDs(ids...)
 }
@@ -94,10 +94,10 @@ func (_u *RoleUpdate) RemoveUserIDs(ids ...int) *RoleUpdate {
 }
 
 // RemoveUser removes "user" edges to User entities.
-func (_u *RoleUpdate) RemoveUser(u ...*User) *RoleUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *RoleUpdate) RemoveUser(v ...*User) *RoleUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveUserIDs(ids...)
 }
@@ -129,7 +129,7 @@ func (_u *RoleUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *RoleUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *RoleUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(role.Table, role.Columns, sqlgraph.NewFieldSpec(role.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -201,7 +201,7 @@ func (_u *RoleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{role.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -210,7 +210,7 @@ func (_u *RoleUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // RoleUpdateOne is the builder for updating a single Role entity.
@@ -222,29 +222,29 @@ type RoleUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (_u *RoleUpdateOne) SetName(s string) *RoleUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *RoleUpdateOne) SetName(v string) *RoleUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *RoleUpdateOne) SetNillableName(s *string) *RoleUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *RoleUpdateOne) SetNillableName(v *string) *RoleUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (_u *RoleUpdateOne) SetCreatedAt(t time.Time) *RoleUpdateOne {
-	_u.mutation.SetCreatedAt(t)
+func (_u *RoleUpdateOne) SetCreatedAt(v time.Time) *RoleUpdateOne {
+	_u.mutation.SetCreatedAt(v)
 	return _u
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (_u *RoleUpdateOne) SetNillableCreatedAt(t *time.Time) *RoleUpdateOne {
-	if t != nil {
-		_u.SetCreatedAt(*t)
+func (_u *RoleUpdateOne) SetNillableCreatedAt(v *time.Time) *RoleUpdateOne {
+	if v != nil {
+		_u.SetCreatedAt(*v)
 	}
 	return _u
 }
@@ -256,10 +256,10 @@ func (_u *RoleUpdateOne) AddUserIDs(ids ...int) *RoleUpdateOne {
 }
 
 // AddUser adds the "user" edges to the User entity.
-func (_u *RoleUpdateOne) AddUser(u ...*User) *RoleUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *RoleUpdateOne) AddUser(v ...*User) *RoleUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddUserIDs(ids...)
 }
@@ -282,10 +282,10 @@ func (_u *RoleUpdateOne) RemoveUserIDs(ids ...int) *RoleUpdateOne {
 }
 
 // RemoveUser removes "user" edges to User entities.
-func (_u *RoleUpdateOne) RemoveUser(u ...*User) *RoleUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *RoleUpdateOne) RemoveUser(v ...*User) *RoleUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveUserIDs(ids...)
 }

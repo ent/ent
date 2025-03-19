@@ -33,15 +33,15 @@ func (_u *CardUpdate) Where(ps ...predicate.Card) *CardUpdate {
 }
 
 // SetNumber sets the "number" field.
-func (_u *CardUpdate) SetNumber(s string) *CardUpdate {
-	_u.mutation.SetNumber(s)
+func (_u *CardUpdate) SetNumber(v string) *CardUpdate {
+	_u.mutation.SetNumber(v)
 	return _u
 }
 
 // SetNillableNumber sets the "number" field if the given value is not nil.
-func (_u *CardUpdate) SetNillableNumber(s *string) *CardUpdate {
-	if s != nil {
-		_u.SetNumber(*s)
+func (_u *CardUpdate) SetNillableNumber(v *string) *CardUpdate {
+	if v != nil {
+		_u.SetNumber(*v)
 	}
 	return _u
 }
@@ -53,15 +53,15 @@ func (_u *CardUpdate) ClearNumber() *CardUpdate {
 }
 
 // SetOwnerID sets the "owner_id" field.
-func (_u *CardUpdate) SetOwnerID(i int) *CardUpdate {
-	_u.mutation.SetOwnerID(i)
+func (_u *CardUpdate) SetOwnerID(v int) *CardUpdate {
+	_u.mutation.SetOwnerID(v)
 	return _u
 }
 
 // SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (_u *CardUpdate) SetNillableOwnerID(i *int) *CardUpdate {
-	if i != nil {
-		_u.SetOwnerID(*i)
+func (_u *CardUpdate) SetNillableOwnerID(v *int) *CardUpdate {
+	if v != nil {
+		_u.SetOwnerID(*v)
 	}
 	return _u
 }
@@ -73,8 +73,8 @@ func (_u *CardUpdate) ClearOwnerID() *CardUpdate {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *CardUpdate) SetOwner(u *User) *CardUpdate {
-	return _u.SetOwnerID(u.ID)
+func (_u *CardUpdate) SetOwner(v *User) *CardUpdate {
+	return _u.SetOwnerID(v.ID)
 }
 
 // Mutation returns the CardMutation object of the builder.
@@ -115,7 +115,7 @@ func (_u *CardUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-func (_u *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *CardUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(card.Table, card.Columns, sqlgraph.NewFieldSpec(card.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -159,7 +159,7 @@ func (_u *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{card.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -168,7 +168,7 @@ func (_u *CardUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // CardUpdateOne is the builder for updating a single Card entity.
@@ -180,15 +180,15 @@ type CardUpdateOne struct {
 }
 
 // SetNumber sets the "number" field.
-func (_u *CardUpdateOne) SetNumber(s string) *CardUpdateOne {
-	_u.mutation.SetNumber(s)
+func (_u *CardUpdateOne) SetNumber(v string) *CardUpdateOne {
+	_u.mutation.SetNumber(v)
 	return _u
 }
 
 // SetNillableNumber sets the "number" field if the given value is not nil.
-func (_u *CardUpdateOne) SetNillableNumber(s *string) *CardUpdateOne {
-	if s != nil {
-		_u.SetNumber(*s)
+func (_u *CardUpdateOne) SetNillableNumber(v *string) *CardUpdateOne {
+	if v != nil {
+		_u.SetNumber(*v)
 	}
 	return _u
 }
@@ -200,15 +200,15 @@ func (_u *CardUpdateOne) ClearNumber() *CardUpdateOne {
 }
 
 // SetOwnerID sets the "owner_id" field.
-func (_u *CardUpdateOne) SetOwnerID(i int) *CardUpdateOne {
-	_u.mutation.SetOwnerID(i)
+func (_u *CardUpdateOne) SetOwnerID(v int) *CardUpdateOne {
+	_u.mutation.SetOwnerID(v)
 	return _u
 }
 
 // SetNillableOwnerID sets the "owner_id" field if the given value is not nil.
-func (_u *CardUpdateOne) SetNillableOwnerID(i *int) *CardUpdateOne {
-	if i != nil {
-		_u.SetOwnerID(*i)
+func (_u *CardUpdateOne) SetNillableOwnerID(v *int) *CardUpdateOne {
+	if v != nil {
+		_u.SetOwnerID(*v)
 	}
 	return _u
 }
@@ -220,8 +220,8 @@ func (_u *CardUpdateOne) ClearOwnerID() *CardUpdateOne {
 }
 
 // SetOwner sets the "owner" edge to the User entity.
-func (_u *CardUpdateOne) SetOwner(u *User) *CardUpdateOne {
-	return _u.SetOwnerID(u.ID)
+func (_u *CardUpdateOne) SetOwner(v *User) *CardUpdateOne {
+	return _u.SetOwnerID(v.ID)
 }
 
 // Mutation returns the CardMutation object of the builder.

@@ -26,57 +26,57 @@ type ExValueScanCreate struct {
 }
 
 // SetBinary sets the "binary" field.
-func (_c *ExValueScanCreate) SetBinary(u *url.URL) *ExValueScanCreate {
-	_c.mutation.SetBinary(u)
+func (_c *ExValueScanCreate) SetBinary(v *url.URL) *ExValueScanCreate {
+	_c.mutation.SetBinary(v)
 	return _c
 }
 
 // SetBinaryBytes sets the "binary_bytes" field.
-func (_c *ExValueScanCreate) SetBinaryBytes(u *url.URL) *ExValueScanCreate {
-	_c.mutation.SetBinaryBytes(u)
+func (_c *ExValueScanCreate) SetBinaryBytes(v *url.URL) *ExValueScanCreate {
+	_c.mutation.SetBinaryBytes(v)
 	return _c
 }
 
 // SetBinaryOptional sets the "binary_optional" field.
-func (_c *ExValueScanCreate) SetBinaryOptional(u *url.URL) *ExValueScanCreate {
-	_c.mutation.SetBinaryOptional(u)
+func (_c *ExValueScanCreate) SetBinaryOptional(v *url.URL) *ExValueScanCreate {
+	_c.mutation.SetBinaryOptional(v)
 	return _c
 }
 
 // SetText sets the "text" field.
-func (_c *ExValueScanCreate) SetText(b *big.Int) *ExValueScanCreate {
-	_c.mutation.SetText(b)
+func (_c *ExValueScanCreate) SetText(v *big.Int) *ExValueScanCreate {
+	_c.mutation.SetText(v)
 	return _c
 }
 
 // SetTextOptional sets the "text_optional" field.
-func (_c *ExValueScanCreate) SetTextOptional(b *big.Int) *ExValueScanCreate {
-	_c.mutation.SetTextOptional(b)
+func (_c *ExValueScanCreate) SetTextOptional(v *big.Int) *ExValueScanCreate {
+	_c.mutation.SetTextOptional(v)
 	return _c
 }
 
 // SetBase64 sets the "base64" field.
-func (_c *ExValueScanCreate) SetBase64(s string) *ExValueScanCreate {
-	_c.mutation.SetBase64(s)
+func (_c *ExValueScanCreate) SetBase64(v string) *ExValueScanCreate {
+	_c.mutation.SetBase64(v)
 	return _c
 }
 
 // SetCustom sets the "custom" field.
-func (_c *ExValueScanCreate) SetCustom(s string) *ExValueScanCreate {
-	_c.mutation.SetCustom(s)
+func (_c *ExValueScanCreate) SetCustom(v string) *ExValueScanCreate {
+	_c.mutation.SetCustom(v)
 	return _c
 }
 
 // SetCustomOptional sets the "custom_optional" field.
-func (_c *ExValueScanCreate) SetCustomOptional(s string) *ExValueScanCreate {
-	_c.mutation.SetCustomOptional(s)
+func (_c *ExValueScanCreate) SetCustomOptional(v string) *ExValueScanCreate {
+	_c.mutation.SetCustomOptional(v)
 	return _c
 }
 
 // SetNillableCustomOptional sets the "custom_optional" field if the given value is not nil.
-func (_c *ExValueScanCreate) SetNillableCustomOptional(s *string) *ExValueScanCreate {
-	if s != nil {
-		_c.SetCustomOptional(*s)
+func (_c *ExValueScanCreate) SetNillableCustomOptional(v *string) *ExValueScanCreate {
+	if v != nil {
+		_c.SetCustomOptional(*v)
 	}
 	return _c
 }

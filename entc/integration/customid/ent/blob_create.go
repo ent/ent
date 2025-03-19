@@ -28,43 +28,43 @@ type BlobCreate struct {
 }
 
 // SetUUID sets the "uuid" field.
-func (_c *BlobCreate) SetUUID(u uuid.UUID) *BlobCreate {
-	_c.mutation.SetUUID(u)
+func (_c *BlobCreate) SetUUID(v uuid.UUID) *BlobCreate {
+	_c.mutation.SetUUID(v)
 	return _c
 }
 
 // SetNillableUUID sets the "uuid" field if the given value is not nil.
-func (_c *BlobCreate) SetNillableUUID(u *uuid.UUID) *BlobCreate {
-	if u != nil {
-		_c.SetUUID(*u)
+func (_c *BlobCreate) SetNillableUUID(v *uuid.UUID) *BlobCreate {
+	if v != nil {
+		_c.SetUUID(*v)
 	}
 	return _c
 }
 
 // SetCount sets the "count" field.
-func (_c *BlobCreate) SetCount(i int) *BlobCreate {
-	_c.mutation.SetCount(i)
+func (_c *BlobCreate) SetCount(v int) *BlobCreate {
+	_c.mutation.SetCount(v)
 	return _c
 }
 
 // SetNillableCount sets the "count" field if the given value is not nil.
-func (_c *BlobCreate) SetNillableCount(i *int) *BlobCreate {
-	if i != nil {
-		_c.SetCount(*i)
+func (_c *BlobCreate) SetNillableCount(v *int) *BlobCreate {
+	if v != nil {
+		_c.SetCount(*v)
 	}
 	return _c
 }
 
 // SetID sets the "id" field.
-func (_c *BlobCreate) SetID(u uuid.UUID) *BlobCreate {
-	_c.mutation.SetID(u)
+func (_c *BlobCreate) SetID(v uuid.UUID) *BlobCreate {
+	_c.mutation.SetID(v)
 	return _c
 }
 
 // SetNillableID sets the "id" field if the given value is not nil.
-func (_c *BlobCreate) SetNillableID(u *uuid.UUID) *BlobCreate {
-	if u != nil {
-		_c.SetID(*u)
+func (_c *BlobCreate) SetNillableID(v *uuid.UUID) *BlobCreate {
+	if v != nil {
+		_c.SetID(*v)
 	}
 	return _c
 }
@@ -84,8 +84,8 @@ func (_c *BlobCreate) SetNillableParentID(id *uuid.UUID) *BlobCreate {
 }
 
 // SetParent sets the "parent" edge to the Blob entity.
-func (_c *BlobCreate) SetParent(b *Blob) *BlobCreate {
-	return _c.SetParentID(b.ID)
+func (_c *BlobCreate) SetParent(v *Blob) *BlobCreate {
+	return _c.SetParentID(v.ID)
 }
 
 // AddLinkIDs adds the "links" edge to the Blob entity by IDs.
@@ -95,10 +95,10 @@ func (_c *BlobCreate) AddLinkIDs(ids ...uuid.UUID) *BlobCreate {
 }
 
 // AddLinks adds the "links" edges to the Blob entity.
-func (_c *BlobCreate) AddLinks(b ...*Blob) *BlobCreate {
-	ids := make([]uuid.UUID, len(b))
-	for i := range b {
-		ids[i] = b[i].ID
+func (_c *BlobCreate) AddLinks(v ...*Blob) *BlobCreate {
+	ids := make([]uuid.UUID, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _c.AddLinkIDs(ids...)
 }

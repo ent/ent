@@ -34,15 +34,15 @@ func (_u *TeamUpdate) Where(ps ...predicate.Team) *TeamUpdate {
 }
 
 // SetName sets the "name" field.
-func (_u *TeamUpdate) SetName(s string) *TeamUpdate {
-	_u.mutation.SetName(s)
+func (_u *TeamUpdate) SetName(v string) *TeamUpdate {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *TeamUpdate) SetNillableName(s *string) *TeamUpdate {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *TeamUpdate) SetNillableName(v *string) *TeamUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -54,10 +54,10 @@ func (_u *TeamUpdate) AddTaskIDs(ids ...int) *TeamUpdate {
 }
 
 // AddTasks adds the "tasks" edges to the Task entity.
-func (_u *TeamUpdate) AddTasks(t ...*Task) *TeamUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *TeamUpdate) AddTasks(v ...*Task) *TeamUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddTaskIDs(ids...)
 }
@@ -69,10 +69,10 @@ func (_u *TeamUpdate) AddUserIDs(ids ...int) *TeamUpdate {
 }
 
 // AddUsers adds the "users" edges to the User entity.
-func (_u *TeamUpdate) AddUsers(u ...*User) *TeamUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *TeamUpdate) AddUsers(v ...*User) *TeamUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddUserIDs(ids...)
 }
@@ -95,10 +95,10 @@ func (_u *TeamUpdate) RemoveTaskIDs(ids ...int) *TeamUpdate {
 }
 
 // RemoveTasks removes "tasks" edges to Task entities.
-func (_u *TeamUpdate) RemoveTasks(t ...*Task) *TeamUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *TeamUpdate) RemoveTasks(v ...*Task) *TeamUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveTaskIDs(ids...)
 }
@@ -116,10 +116,10 @@ func (_u *TeamUpdate) RemoveUserIDs(ids ...int) *TeamUpdate {
 }
 
 // RemoveUsers removes "users" edges to User entities.
-func (_u *TeamUpdate) RemoveUsers(u ...*User) *TeamUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *TeamUpdate) RemoveUsers(v ...*User) *TeamUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveUserIDs(ids...)
 }
@@ -161,9 +161,9 @@ func (_u *TeamUpdate) check() error {
 	return nil
 }
 
-func (_u *TeamUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (_u *TeamUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if err := _u.check(); err != nil {
-		return n, err
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(team.Table, team.Columns, sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt))
 	if ps := _u.mutation.predicates; len(ps) > 0 {
@@ -266,7 +266,7 @@ func (_u *TeamUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{team.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -275,7 +275,7 @@ func (_u *TeamUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		return 0, err
 	}
 	_u.mutation.done = true
-	return n, nil
+	return _node, nil
 }
 
 // TeamUpdateOne is the builder for updating a single Team entity.
@@ -287,15 +287,15 @@ type TeamUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (_u *TeamUpdateOne) SetName(s string) *TeamUpdateOne {
-	_u.mutation.SetName(s)
+func (_u *TeamUpdateOne) SetName(v string) *TeamUpdateOne {
+	_u.mutation.SetName(v)
 	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (_u *TeamUpdateOne) SetNillableName(s *string) *TeamUpdateOne {
-	if s != nil {
-		_u.SetName(*s)
+func (_u *TeamUpdateOne) SetNillableName(v *string) *TeamUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
 	return _u
 }
@@ -307,10 +307,10 @@ func (_u *TeamUpdateOne) AddTaskIDs(ids ...int) *TeamUpdateOne {
 }
 
 // AddTasks adds the "tasks" edges to the Task entity.
-func (_u *TeamUpdateOne) AddTasks(t ...*Task) *TeamUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *TeamUpdateOne) AddTasks(v ...*Task) *TeamUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddTaskIDs(ids...)
 }
@@ -322,10 +322,10 @@ func (_u *TeamUpdateOne) AddUserIDs(ids ...int) *TeamUpdateOne {
 }
 
 // AddUsers adds the "users" edges to the User entity.
-func (_u *TeamUpdateOne) AddUsers(u ...*User) *TeamUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *TeamUpdateOne) AddUsers(v ...*User) *TeamUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.AddUserIDs(ids...)
 }
@@ -348,10 +348,10 @@ func (_u *TeamUpdateOne) RemoveTaskIDs(ids ...int) *TeamUpdateOne {
 }
 
 // RemoveTasks removes "tasks" edges to Task entities.
-func (_u *TeamUpdateOne) RemoveTasks(t ...*Task) *TeamUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+func (_u *TeamUpdateOne) RemoveTasks(v ...*Task) *TeamUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveTaskIDs(ids...)
 }
@@ -369,10 +369,10 @@ func (_u *TeamUpdateOne) RemoveUserIDs(ids ...int) *TeamUpdateOne {
 }
 
 // RemoveUsers removes "users" edges to User entities.
-func (_u *TeamUpdateOne) RemoveUsers(u ...*User) *TeamUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
+func (_u *TeamUpdateOne) RemoveUsers(v ...*User) *TeamUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
 	return _u.RemoveUserIDs(ids...)
 }
