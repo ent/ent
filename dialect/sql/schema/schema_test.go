@@ -302,7 +302,7 @@ CREATE UNIQUE INDEX $name$ ON $pets$ ($name$ DESC);
 CREATE VIEW $pets_without_fur$ ($id$, $name$, $owner_id$) AS SELECT id, name, owner_id FROM pets;
 `, "$", "`"),
 		},
-		{dialect.MySQL, "5.6", my(191)},
+		{dialect.MySQL, "5.6", my(255)},
 		{dialect.MySQL, "5.7", my(255)},
 		{dialect.MySQL, "8", my(255)},
 		{dialect.Postgres, "12", pg},

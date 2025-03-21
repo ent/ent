@@ -528,7 +528,6 @@ func (a *Atlas) StateReader(tables ...*Table) migrate.StateReaderFunc {
 			}
 			a.sqlDialect = drv
 		}
-		a.setupTables(tables)
 		return a.realm(tables)
 	}
 }
