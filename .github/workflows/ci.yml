@@ -205,66 +205,18 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-      postgres13:
-        image: postgres:13.1
-        env:
-          POSTGRES_DB: test
-          POSTGRES_PASSWORD: pass
+      ydb:
+        image: ydbplatform/local-ydb:latest
         ports:
-          - 5433:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      postgres14:
-        image: postgres:14
+          - 2135:2135
+          - 2136:2136
+          - 8765:8765
         env:
-          POSTGRES_DB: test
-          POSTGRES_PASSWORD: pass
-        ports:
-          - 5434:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      postgres15:
-        image: postgres:15
-        env:
-          POSTGRES_DB: test
-          POSTGRES_PASSWORD: pass
-        ports:
-          - 5435:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      postgres16:
-        image: postgres:16
-        env:
-          POSTGRES_DB: test
-          POSTGRES_PASSWORD: pass
-        ports:
-          - 5436:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      postgres17:
-        image: postgres:17
-        env:
-          POSTGRES_DB: test
-          POSTGRES_PASSWORD: pass
-        ports:
-          - 5437:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          YDB_LOCAL_SURVIVE_RESTART: true
+          YDB_USE_IN_MEMORY_PDISKS: true
+          YDB_TABLE_ENABLE_PREPARED_DDL: true
+          YDB_ENABLE_COLUMN_TABLES: true
+        options: '-h localhost'
       gremlin-server:
         image: entgo/gremlin-server
         ports:
@@ -407,63 +359,14 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-      postgres13:
-        image: postgres:13.1
-        env:
-          POSTGRES_DB: test
-          POSTGRES_PASSWORD: pass
+      ydb:
+        image: cr.yandex/yc/yandex-docker-local/ydb:latest
         ports:
-          - 5433:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      postgres14:
-        image: postgres:14
+          - 2136:2136
         env:
-          POSTGRES_DB: test
-          POSTGRES_PASSWORD: pass
-        ports:
-          - 5434:5432
+          YDB_USE_IN_MEMORY_PDISKS: true
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      postgres15:
-        image: postgres:15
-        env:
-          POSTGRES_DB: test
-          POSTGRES_PASSWORD: pass
-        ports:
-          - 5435:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      postgres16:
-        image: postgres:16
-        env:
-          POSTGRES_DB: test
-          POSTGRES_PASSWORD: pass
-        ports:
-          - 5436:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      postgres17:
-        image: postgres:17
-        env:
-          POSTGRES_DB: test
-          POSTGRES_PASSWORD: pass
-        ports:
-          - 5437:5432
-        options: >-
-          --health-cmd pg_isready
+          --health-cmd "ydbd admin bs --node-port=2136 --timeout=5s"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5

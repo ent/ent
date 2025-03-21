@@ -6,7 +6,7 @@ require (
 	ariga.io/atlas v0.31.1-0.20250212144724-069be8033e83
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/go-openapi/inflect v0.19.0
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/json-iterator/go v1.1.12
@@ -41,6 +41,6 @@ require (
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
 	golang.org/x/mod v0.23.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
