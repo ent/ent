@@ -114,6 +114,7 @@ func TestType_Table(t *testing.T) {
 		{"UserInfo", "user_infos"},
 		{"PHBOrg", "phb_orgs"},
 		{"HTTPCode", "http_codes"},
+		{"MyPublicAPI", "my_public_apis"},
 	}
 	for _, tt := range tests {
 		typ := &Type{Name: tt.name}
