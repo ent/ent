@@ -24,8 +24,15 @@ import (
 // {{ $builder }} is the builder for deleting a {{ $.Name }} entity.
 type {{ $builder }} struct {
 	config
+	newTable   string // New table name, if not set, the default table name is used
 	hooks      []Hook
 	mutation   *{{ $.MutationName }}
+}
+
+// SetTable Set the table name. If not, the default table name is used
+func ({{ $receiver }} *{{ $builder }}) SetTable(table string) *{{ $builder }} {
+	{{ $receiver }}.newTable = table
+	return {{ $receiver }}
 }
 
 // Where appends a list predicates to the {{ $builder }} builder.
