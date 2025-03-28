@@ -347,7 +347,7 @@ func (Node) Edges() []ent.Edge {
 -		edge.To("next", Node.Type).
 -			Unique(),
 -		edge.From("prev", Node.Type).
--			Ref("next).
+-			Ref("next").
 -			Unique(),
 	}
 }
