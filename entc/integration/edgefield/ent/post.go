@@ -130,6 +130,11 @@ func (_m *Post) Unwrap() *Post {
 	return _m
 }
 
+// TableName returns the table name of the Post in the database.
+func (po *Post) TableName() string {
+	return post.Table
+}
+
 // String implements the fmt.Stringer.
 func (_m *Post) String() string {
 	var builder strings.Builder
