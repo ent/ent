@@ -209,14 +209,20 @@ func snake(s string) string {
 		j int
 		b strings.Builder
 	)
-	for i := 0; i < len(s); i++ {
-		r := rune(s[i])
-		// Put '_' if it is not a start or end of a word, current letter is uppercase,
+	// Split a string on Unicode code point boundaries
+	// e.g. "Beløb" => [B e l ø b]
+	// This method works on non-ASCII characters such as 'ø'
+	codePoints := strings.Split(s, "")
+	for i := 0; i < len(codePoints); i++ {
+		r := []rune(codePoints[i])[0]
+		// Put '_' if it is not the start or end of a word, the current letter is uppercase,
 		// and previous is lowercase (cases like: "UserInfo"), or next letter is also
-		// a lowercase and previous letter is not "_".
-		if i > 0 && i < len(s)-1 && unicode.IsUpper(r) {
-			if unicode.IsLower(rune(s[i-1])) ||
-				j != i-1 && unicode.IsLower(rune(s[i+1])) && unicode.IsLetter(rune(s[i-1])) {
+		// lowercase and previous letter is not "_".
+		if i > 0 && i < len(codePoints)-1 && unicode.IsUpper(r) {
+			nextRune := []rune(codePoints[i+1])[0]
+			prevRune := []rune(codePoints[i-1])[0]
+			if unicode.IsLower(prevRune) ||
+				j != i-1 && unicode.IsLower(nextRune) && unicode.IsLetter(prevRune) {
 				j = i
 				b.WriteString("_")
 			}
