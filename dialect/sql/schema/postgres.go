@@ -132,7 +132,7 @@ func (d *Postgres) atTypeC(c1 *Column, c2 *schema.Column) error {
 	case field.TypeJSON:
 		t = &schema.JSONType{T: postgres.TypeJSONB}
 	case field.TypeString:
-		t = &schema.StringType{T: postgres.TypeVarChar}
+		t = &schema.StringType{T: postgres.TypeVarChar, Size: int(c1.Size)}
 		if c1.Size > maxCharSize {
 			t = &schema.StringType{T: postgres.TypeText}
 		}
