@@ -261,6 +261,11 @@ func TableHasSuffix(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldHasSuffix(FieldTable, v))
 }
 
+// TableRegex applies the Regex predicate on the "table" field.
+func TableRegex(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldRegex(FieldTable, v))
+}
+
 // TableIsNil applies the IsNil predicate on the "table" field.
 func TableIsNil() predicate.Comment {
 	return predicate.Comment(sql.FieldIsNull(FieldTable))
@@ -344,6 +349,11 @@ func ClientHasPrefix(v string) predicate.Comment {
 // ClientHasSuffix applies the HasSuffix predicate on the "client" field.
 func ClientHasSuffix(v string) predicate.Comment {
 	return predicate.Comment(sql.FieldHasSuffix(FieldClient, v))
+}
+
+// ClientRegex applies the Regex predicate on the "client" field.
+func ClientRegex(v string) predicate.Comment {
+	return predicate.Comment(sql.FieldRegex(FieldClient, v))
 }
 
 // ClientIsNil applies the IsNil predicate on the "client" field.
