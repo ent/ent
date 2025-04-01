@@ -198,6 +198,7 @@ if err != nil {
 if _, err := ac.SchemaApply(ctx, &atlasexec.SchemaApplyParams{
 	Env: "local",
 	URL: "postgres://postgres:pass@localhost:5432/database?search_path=public&sslmode=disable",
+	AutoApprove: true,
 }); err != nil {
     log.Fatalf("failed to apply schema changes: %w", err)
 }
