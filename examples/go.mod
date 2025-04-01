@@ -6,7 +6,7 @@ replace entgo.io/ent => ../
 
 require (
 	ariga.io/atlas v0.32.1-0.20250325101103-175b25e1c1b9
-	ariga.io/atlas-go-sdk v0.5.6
+	ariga.io/atlas-go-sdk v0.6.9
 	entgo.io/ent v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.3.0
 	github.com/lib/pq v1.10.7

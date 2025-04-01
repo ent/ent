@@ -37,8 +37,9 @@ func TestViews(t *testing.T) {
 	_, err = ac.SchemaApply(ctx, &atlasexec.SchemaApplyParams{
 		// URL to your database. For example:
 		// postgres://postgres:pass@localhost:5432/database?search_path=public&sslmode=disable
-		URL: os.Getenv("DB_URL"),
-		Env: "local",
+		URL:         os.Getenv("DB_URL"),
+		Env:         "local",
+		AutoApprove: true,
 	})
 	require.NoError(t, err)
 	t.Cleanup(func() {
