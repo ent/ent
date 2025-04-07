@@ -144,7 +144,10 @@ func (m *FriendshipMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, friendship.ID(id))
+			return m.Client().Friendship.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
@@ -765,7 +768,10 @@ func (m *GroupMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, group.ID(id))
+			return m.Client().Group.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
@@ -1183,7 +1189,10 @@ func (m *PetMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, pet.ID(id))
+			return m.Client().Pet.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
@@ -1652,7 +1661,10 @@ func (m *UserMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, user.ID(id))
+			return m.Client().User.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
