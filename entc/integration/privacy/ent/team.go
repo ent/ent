@@ -134,6 +134,11 @@ func (_m *Team) Unwrap() *Team {
 	return _m
 }
 
+// TableName returns the table name of the Team in the database.
+func (t *Team) TableName() string {
+	return team.Table
+}
+
 // String implements the fmt.Stringer.
 func (_m *Team) String() string {
 	var builder strings.Builder
