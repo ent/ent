@@ -21,6 +21,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/friendship"
 	"entgo.io/ent/entc/integration/multischema/ent/group"
+	"entgo.io/ent/entc/integration/multischema/ent/parent"
 	"entgo.io/ent/entc/integration/multischema/ent/pet"
 	"entgo.io/ent/entc/integration/multischema/ent/user"
 
@@ -38,6 +39,8 @@ type Client struct {
 	Friendship *FriendshipClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
+	// Parent is the client for interacting with the Parent builders.
+	Parent *ParentClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
 	// User is the client for interacting with the User builders.
@@ -56,6 +59,7 @@ func (c *Client) init() {
 	c.CleanUser = NewCleanUserClient(c.config)
 	c.Friendship = NewFriendshipClient(c.config)
 	c.Group = NewGroupClient(c.config)
+	c.Parent = NewParentClient(c.config)
 	c.Pet = NewPetClient(c.config)
 	c.User = NewUserClient(c.config)
 }
@@ -156,6 +160,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		CleanUser:  NewCleanUserClient(cfg),
 		Friendship: NewFriendshipClient(cfg),
 		Group:      NewGroupClient(cfg),
+		Parent:     NewParentClient(cfg),
 		Pet:        NewPetClient(cfg),
 		User:       NewUserClient(cfg),
 	}, nil
@@ -180,6 +185,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		CleanUser:  NewCleanUserClient(cfg),
 		Friendship: NewFriendshipClient(cfg),
 		Group:      NewGroupClient(cfg),
+		Parent:     NewParentClient(cfg),
 		Pet:        NewPetClient(cfg),
 		User:       NewUserClient(cfg),
 	}, nil
@@ -210,20 +216,21 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Friendship.Use(hooks...)
-	c.Group.Use(hooks...)
-	c.Pet.Use(hooks...)
-	c.User.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.Friendship, c.Group, c.Parent, c.Pet, c.User,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.CleanUser.Intercept(interceptors...)
-	c.Friendship.Intercept(interceptors...)
-	c.Group.Intercept(interceptors...)
-	c.Pet.Intercept(interceptors...)
-	c.User.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.CleanUser, c.Friendship, c.Group, c.Parent, c.Pet, c.User,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -233,6 +240,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Friendship.mutate(ctx, m)
 	case *GroupMutation:
 		return c.Group.mutate(ctx, m)
+	case *ParentMutation:
+		return c.Parent.mutate(ctx, m)
 	case *PetMutation:
 		return c.Pet.mutate(ctx, m)
 	case *UserMutation:
@@ -595,6 +604,177 @@ func (c *GroupClient) mutate(ctx context.Context, m *GroupMutation) (Value, erro
 	}
 }
 
+// ParentClient is a client for the Parent schema.
+type ParentClient struct {
+	config
+}
+
+// NewParentClient returns a client for the Parent from the given config.
+func NewParentClient(c config) *ParentClient {
+	return &ParentClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `parent.Hooks(f(g(h())))`.
+func (c *ParentClient) Use(hooks ...Hook) {
+	c.hooks.Parent = append(c.hooks.Parent, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `parent.Intercept(f(g(h())))`.
+func (c *ParentClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Parent = append(c.inters.Parent, interceptors...)
+}
+
+// Create returns a builder for creating a Parent entity.
+func (c *ParentClient) Create() *ParentCreate {
+	mutation := newParentMutation(c.config, OpCreate)
+	return &ParentCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Parent entities.
+func (c *ParentClient) CreateBulk(builders ...*ParentCreate) *ParentCreateBulk {
+	return &ParentCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ParentClient) MapCreateBulk(slice any, setFunc func(*ParentCreate, int)) *ParentCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ParentCreateBulk{err: fmt.Errorf("calling to ParentClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ParentCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ParentCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Parent.
+func (c *ParentClient) Update() *ParentUpdate {
+	mutation := newParentMutation(c.config, OpUpdate)
+	return &ParentUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ParentClient) UpdateOne(_m *Parent) *ParentUpdateOne {
+	mutation := newParentMutation(c.config, OpUpdateOne, withParent(_m))
+	return &ParentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ParentClient) UpdateOneID(id int) *ParentUpdateOne {
+	mutation := newParentMutation(c.config, OpUpdateOne, withParentID(id))
+	return &ParentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Parent.
+func (c *ParentClient) Delete() *ParentDelete {
+	mutation := newParentMutation(c.config, OpDelete)
+	return &ParentDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ParentClient) DeleteOne(_m *Parent) *ParentDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ParentClient) DeleteOneID(id int) *ParentDeleteOne {
+	builder := c.Delete().Where(parent.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ParentDeleteOne{builder}
+}
+
+// Query returns a query builder for Parent.
+func (c *ParentClient) Query() *ParentQuery {
+	return &ParentQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeParent},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Parent entity by its id.
+func (c *ParentClient) Get(ctx context.Context, id int) (*Parent, error) {
+	return c.Query().Where(parent.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ParentClient) GetX(ctx context.Context, id int) *Parent {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryChild queries the child edge of a Parent.
+func (c *ParentClient) QueryChild(_m *Parent) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(parent.Table, parent.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, parent.ChildTable, parent.ChildColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Parent
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryParent queries the parent edge of a Parent.
+func (c *ParentClient) QueryParent(_m *Parent) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(parent.Table, parent.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, parent.ParentTable, parent.ParentColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Parent
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ParentClient) Hooks() []Hook {
+	return c.hooks.Parent
+}
+
+// Interceptors returns the client interceptors.
+func (c *ParentClient) Interceptors() []Interceptor {
+	return c.inters.Parent
+}
+
+func (c *ParentClient) mutate(ctx context.Context, m *ParentMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ParentCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ParentUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ParentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ParentDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Parent mutation op: %q", m.Op())
+	}
+}
+
 // PetClient is a client for the Pet schema.
 type PetClient struct {
 	config
@@ -912,6 +1092,44 @@ func (c *UserClient) QueryFriends(_m *User) *UserQuery {
 	return query
 }
 
+// QueryParents queries the parents edge of a User.
+func (c *UserClient) QueryParents(_m *User) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.ParentsTable, user.ParentsPrimaryKey...),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.UserChildren
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryChildren queries the children edge of a User.
+func (c *UserClient) QueryChildren(_m *User) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.ChildrenTable, user.ChildrenPrimaryKey...),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Parent
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryFriendships queries the friendships edge of a User.
 func (c *UserClient) QueryFriendships(_m *User) *FriendshipQuery {
 	query := (&FriendshipClient{config: c.config}).Query()
@@ -925,6 +1143,25 @@ func (c *UserClient) QueryFriendships(_m *User) *FriendshipQuery {
 		schemaConfig := _m.schemaConfig
 		step.To.Schema = schemaConfig.Friendship
 		step.Edge.Schema = schemaConfig.Friendship
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryParentHood queries the parent_hood edge of a User.
+func (c *UserClient) QueryParentHood(_m *User) *ParentQuery {
+	query := (&ParentClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := _m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(parent.Table, parent.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.ParentHoodTable, user.ParentHoodColumn),
+		)
+		schemaConfig := _m.schemaConfig
+		step.To.Schema = schemaConfig.Parent
+		step.Edge.Schema = schemaConfig.Parent
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
@@ -959,10 +1196,10 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Friendship, Group, Pet, User []ent.Hook
+		Friendship, Group, Parent, Pet, User []ent.Hook
 	}
 	inters struct {
-		CleanUser, Friendship, Group, Pet, User []ent.Interceptor
+		CleanUser, Friendship, Group, Parent, Pet, User []ent.Interceptor
 	}
 )
 
@@ -979,6 +1216,7 @@ var (
 		Friendship: tableSchemas[1],
 		Group:      tableSchemas[1],
 		GroupUsers: tableSchemas[1],
+		Parent:     tableSchemas[0],
 		Pet:        tableSchemas[0],
 		User:       tableSchemas[0],
 	}

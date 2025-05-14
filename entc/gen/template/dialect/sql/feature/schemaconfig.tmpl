@@ -19,7 +19,7 @@ type SchemaConfig struct {
 		{{ $n.Name }} string // {{ $n.Name }} table.
 		{{- range $e := $n.Edges }}
 			{{- /* Skip adding join-table in case the edge is inverse or already defined as an edge-schema. */}}
-			{{- if and $e.M2M (not $e.Inverse) (not $e.Through) }}
+			{{- if and $e.M2M (not $e.Inverse) }}
 				{{ $n.Name }}{{ $e.StructField }} string // {{ $n.Name }}-{{ $e.Name }}->{{ $e.Type.Name }} table.
 			{{- end }}
 		{{- end }}

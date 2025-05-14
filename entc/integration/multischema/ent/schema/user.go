@@ -33,6 +33,9 @@ func (User) Edges() []ent.Edge {
 			Ref("users"),
 		edge.To("friends", User.Type).
 			Through("friendships", Friendship.Type),
+		edge.To("children", User.Type).
+			Through("parent_hood", Parent.Type).
+			From("parents"),
 	}
 }
 
