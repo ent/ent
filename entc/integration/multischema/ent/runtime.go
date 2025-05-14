@@ -11,6 +11,7 @@ import (
 
 	"entgo.io/ent/entc/integration/multischema/ent/friendship"
 	"entgo.io/ent/entc/integration/multischema/ent/group"
+	"entgo.io/ent/entc/integration/multischema/ent/parent"
 	"entgo.io/ent/entc/integration/multischema/ent/pet"
 	"entgo.io/ent/entc/integration/multischema/ent/schema"
 	"entgo.io/ent/entc/integration/multischema/ent/user"
@@ -36,6 +37,12 @@ func init() {
 	groupDescName := groupFields[0].Descriptor()
 	// group.DefaultName holds the default value on creation for the name field.
 	group.DefaultName = groupDescName.Default.(string)
+	parentFields := schema.Parent{}.Fields()
+	_ = parentFields
+	// parentDescByAdoption is the schema descriptor for by_adoption field.
+	parentDescByAdoption := parentFields[0].Descriptor()
+	// parent.DefaultByAdoption holds the default value on creation for the by_adoption field.
+	parent.DefaultByAdoption = parentDescByAdoption.Default.(bool)
 	petFields := schema.Pet{}.Fields()
 	_ = petFields
 	// petDescName is the schema descriptor for name field.

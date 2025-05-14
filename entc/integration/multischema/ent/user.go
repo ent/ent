@@ -36,11 +36,17 @@ type UserEdges struct {
 	Groups []*Group `json:"groups,omitempty"`
 	// Friends holds the value of the friends edge.
 	Friends []*User `json:"friends,omitempty"`
+	// Parents holds the value of the parents edge.
+	Parents []*User `json:"parents,omitempty"`
+	// Children holds the value of the children edge.
+	Children []*User `json:"children,omitempty"`
 	// Friendships holds the value of the friendships edge.
 	Friendships []*Friendship `json:"friendships,omitempty"`
+	// ParentHood holds the value of the parent_hood edge.
+	ParentHood []*Parent `json:"parent_hood,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [7]bool
 }
 
 // PetsOrErr returns the Pets value or an error if the edge
@@ -70,13 +76,40 @@ func (e UserEdges) FriendsOrErr() ([]*User, error) {
 	return nil, &NotLoadedError{edge: "friends"}
 }
 
+// ParentsOrErr returns the Parents value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ParentsOrErr() ([]*User, error) {
+	if e.loadedTypes[3] {
+		return e.Parents, nil
+	}
+	return nil, &NotLoadedError{edge: "parents"}
+}
+
+// ChildrenOrErr returns the Children value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ChildrenOrErr() ([]*User, error) {
+	if e.loadedTypes[4] {
+		return e.Children, nil
+	}
+	return nil, &NotLoadedError{edge: "children"}
+}
+
 // FriendshipsOrErr returns the Friendships value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) FriendshipsOrErr() ([]*Friendship, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[5] {
 		return e.Friendships, nil
 	}
 	return nil, &NotLoadedError{edge: "friendships"}
+}
+
+// ParentHoodOrErr returns the ParentHood value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ParentHoodOrErr() ([]*Parent, error) {
+	if e.loadedTypes[6] {
+		return e.ParentHood, nil
+	}
+	return nil, &NotLoadedError{edge: "parent_hood"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -143,9 +176,24 @@ func (_m *User) QueryFriends() *UserQuery {
 	return NewUserClient(_m.config).QueryFriends(_m)
 }
 
+// QueryParents queries the "parents" edge of the User entity.
+func (_m *User) QueryParents() *UserQuery {
+	return NewUserClient(_m.config).QueryParents(_m)
+}
+
+// QueryChildren queries the "children" edge of the User entity.
+func (_m *User) QueryChildren() *UserQuery {
+	return NewUserClient(_m.config).QueryChildren(_m)
+}
+
 // QueryFriendships queries the "friendships" edge of the User entity.
 func (_m *User) QueryFriendships() *FriendshipQuery {
 	return NewUserClient(_m.config).QueryFriendships(_m)
+}
+
+// QueryParentHood queries the "parent_hood" edge of the User entity.
+func (_m *User) QueryParentHood() *ParentQuery {
+	return NewUserClient(_m.config).QueryParentHood(_m)
 }
 
 // Update returns a builder for updating this User.

@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/entc/integration/multischema/ent/friendship"
 	"entgo.io/ent/entc/integration/multischema/ent/group"
 	"entgo.io/ent/entc/integration/multischema/ent/internal"
+	"entgo.io/ent/entc/integration/multischema/ent/parent"
 	"entgo.io/ent/entc/integration/multischema/ent/pet"
 	"entgo.io/ent/entc/integration/multischema/ent/predicate"
 	"entgo.io/ent/entc/integration/multischema/ent/user"
@@ -95,6 +96,36 @@ func (_u *UserUpdate) AddFriends(v ...*User) *UserUpdate {
 	return _u.AddFriendIDs(ids...)
 }
 
+// AddParentIDs adds the "parents" edge to the User entity by IDs.
+func (_u *UserUpdate) AddParentIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddParentIDs(ids...)
+	return _u
+}
+
+// AddParents adds the "parents" edges to the User entity.
+func (_u *UserUpdate) AddParents(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddParentIDs(ids...)
+}
+
+// AddChildIDs adds the "children" edge to the User entity by IDs.
+func (_u *UserUpdate) AddChildIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddChildIDs(ids...)
+	return _u
+}
+
+// AddChildren adds the "children" edges to the User entity.
+func (_u *UserUpdate) AddChildren(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddChildIDs(ids...)
+}
+
 // AddFriendshipIDs adds the "friendships" edge to the Friendship entity by IDs.
 func (_u *UserUpdate) AddFriendshipIDs(ids ...int) *UserUpdate {
 	_u.mutation.AddFriendshipIDs(ids...)
@@ -108,6 +139,21 @@ func (_u *UserUpdate) AddFriendships(v ...*Friendship) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.AddFriendshipIDs(ids...)
+}
+
+// AddParentHoodIDs adds the "parent_hood" edge to the Parent entity by IDs.
+func (_u *UserUpdate) AddParentHoodIDs(ids ...int) *UserUpdate {
+	_u.mutation.AddParentHoodIDs(ids...)
+	return _u
+}
+
+// AddParentHood adds the "parent_hood" edges to the Parent entity.
+func (_u *UserUpdate) AddParentHood(v ...*Parent) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddParentHoodIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -178,6 +224,48 @@ func (_u *UserUpdate) RemoveFriends(v ...*User) *UserUpdate {
 	return _u.RemoveFriendIDs(ids...)
 }
 
+// ClearParents clears all "parents" edges to the User entity.
+func (_u *UserUpdate) ClearParents() *UserUpdate {
+	_u.mutation.ClearParents()
+	return _u
+}
+
+// RemoveParentIDs removes the "parents" edge to User entities by IDs.
+func (_u *UserUpdate) RemoveParentIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveParentIDs(ids...)
+	return _u
+}
+
+// RemoveParents removes "parents" edges to User entities.
+func (_u *UserUpdate) RemoveParents(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveParentIDs(ids...)
+}
+
+// ClearChildren clears all "children" edges to the User entity.
+func (_u *UserUpdate) ClearChildren() *UserUpdate {
+	_u.mutation.ClearChildren()
+	return _u
+}
+
+// RemoveChildIDs removes the "children" edge to User entities by IDs.
+func (_u *UserUpdate) RemoveChildIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveChildIDs(ids...)
+	return _u
+}
+
+// RemoveChildren removes "children" edges to User entities.
+func (_u *UserUpdate) RemoveChildren(v ...*User) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveChildIDs(ids...)
+}
+
 // ClearFriendships clears all "friendships" edges to the Friendship entity.
 func (_u *UserUpdate) ClearFriendships() *UserUpdate {
 	_u.mutation.ClearFriendships()
@@ -197,6 +285,27 @@ func (_u *UserUpdate) RemoveFriendships(v ...*Friendship) *UserUpdate {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveFriendshipIDs(ids...)
+}
+
+// ClearParentHood clears all "parent_hood" edges to the Parent entity.
+func (_u *UserUpdate) ClearParentHood() *UserUpdate {
+	_u.mutation.ClearParentHood()
+	return _u
+}
+
+// RemoveParentHoodIDs removes the "parent_hood" edge to Parent entities by IDs.
+func (_u *UserUpdate) RemoveParentHoodIDs(ids ...int) *UserUpdate {
+	_u.mutation.RemoveParentHoodIDs(ids...)
+	return _u
+}
+
+// RemoveParentHood removes "parent_hood" edges to Parent entities.
+func (_u *UserUpdate) RemoveParentHood(v ...*Parent) *UserUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveParentHoodIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -400,6 +509,114 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.ParentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.ParentsTable,
+			Columns: user.ParentsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.UserChildren
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedParentsIDs(); len(nodes) > 0 && !_u.mutation.ParentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.ParentsTable,
+			Columns: user.ParentsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.UserChildren
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ParentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.ParentsTable,
+			Columns: user.ParentsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.UserChildren
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ChildrenCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.ChildrenTable,
+			Columns: user.ChildrenPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Parent
+		createE := &ParentCreate{config: _u.config, mutation: newParentMutation(_u.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !_u.mutation.ChildrenCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.ChildrenTable,
+			Columns: user.ChildrenPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Parent
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &ParentCreate{config: _u.config, mutation: newParentMutation(_u.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ChildrenIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.ChildrenTable,
+			Columns: user.ChildrenPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Parent
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &ParentCreate{config: _u.config, mutation: newParentMutation(_u.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _u.mutation.FriendshipsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -443,6 +660,54 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 			},
 		}
 		edge.Schema = _u.schemaConfig.Friendship
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ParentHoodCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ParentHoodTable,
+			Columns: []string{user.ParentHoodColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(parent.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Parent
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedParentHoodIDs(); len(nodes) > 0 && !_u.mutation.ParentHoodCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ParentHoodTable,
+			Columns: []string{user.ParentHoodColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(parent.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Parent
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ParentHoodIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ParentHoodTable,
+			Columns: []string{user.ParentHoodColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(parent.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Parent
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
@@ -531,6 +796,36 @@ func (_u *UserUpdateOne) AddFriends(v ...*User) *UserUpdateOne {
 	return _u.AddFriendIDs(ids...)
 }
 
+// AddParentIDs adds the "parents" edge to the User entity by IDs.
+func (_u *UserUpdateOne) AddParentIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddParentIDs(ids...)
+	return _u
+}
+
+// AddParents adds the "parents" edges to the User entity.
+func (_u *UserUpdateOne) AddParents(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddParentIDs(ids...)
+}
+
+// AddChildIDs adds the "children" edge to the User entity by IDs.
+func (_u *UserUpdateOne) AddChildIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddChildIDs(ids...)
+	return _u
+}
+
+// AddChildren adds the "children" edges to the User entity.
+func (_u *UserUpdateOne) AddChildren(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddChildIDs(ids...)
+}
+
 // AddFriendshipIDs adds the "friendships" edge to the Friendship entity by IDs.
 func (_u *UserUpdateOne) AddFriendshipIDs(ids ...int) *UserUpdateOne {
 	_u.mutation.AddFriendshipIDs(ids...)
@@ -544,6 +839,21 @@ func (_u *UserUpdateOne) AddFriendships(v ...*Friendship) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.AddFriendshipIDs(ids...)
+}
+
+// AddParentHoodIDs adds the "parent_hood" edge to the Parent entity by IDs.
+func (_u *UserUpdateOne) AddParentHoodIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.AddParentHoodIDs(ids...)
+	return _u
+}
+
+// AddParentHood adds the "parent_hood" edges to the Parent entity.
+func (_u *UserUpdateOne) AddParentHood(v ...*Parent) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.AddParentHoodIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -614,6 +924,48 @@ func (_u *UserUpdateOne) RemoveFriends(v ...*User) *UserUpdateOne {
 	return _u.RemoveFriendIDs(ids...)
 }
 
+// ClearParents clears all "parents" edges to the User entity.
+func (_u *UserUpdateOne) ClearParents() *UserUpdateOne {
+	_u.mutation.ClearParents()
+	return _u
+}
+
+// RemoveParentIDs removes the "parents" edge to User entities by IDs.
+func (_u *UserUpdateOne) RemoveParentIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveParentIDs(ids...)
+	return _u
+}
+
+// RemoveParents removes "parents" edges to User entities.
+func (_u *UserUpdateOne) RemoveParents(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveParentIDs(ids...)
+}
+
+// ClearChildren clears all "children" edges to the User entity.
+func (_u *UserUpdateOne) ClearChildren() *UserUpdateOne {
+	_u.mutation.ClearChildren()
+	return _u
+}
+
+// RemoveChildIDs removes the "children" edge to User entities by IDs.
+func (_u *UserUpdateOne) RemoveChildIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveChildIDs(ids...)
+	return _u
+}
+
+// RemoveChildren removes "children" edges to User entities.
+func (_u *UserUpdateOne) RemoveChildren(v ...*User) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveChildIDs(ids...)
+}
+
 // ClearFriendships clears all "friendships" edges to the Friendship entity.
 func (_u *UserUpdateOne) ClearFriendships() *UserUpdateOne {
 	_u.mutation.ClearFriendships()
@@ -633,6 +985,27 @@ func (_u *UserUpdateOne) RemoveFriendships(v ...*Friendship) *UserUpdateOne {
 		ids[i] = v[i].ID
 	}
 	return _u.RemoveFriendshipIDs(ids...)
+}
+
+// ClearParentHood clears all "parent_hood" edges to the Parent entity.
+func (_u *UserUpdateOne) ClearParentHood() *UserUpdateOne {
+	_u.mutation.ClearParentHood()
+	return _u
+}
+
+// RemoveParentHoodIDs removes the "parent_hood" edge to Parent entities by IDs.
+func (_u *UserUpdateOne) RemoveParentHoodIDs(ids ...int) *UserUpdateOne {
+	_u.mutation.RemoveParentHoodIDs(ids...)
+	return _u
+}
+
+// RemoveParentHood removes "parent_hood" edges to Parent entities.
+func (_u *UserUpdateOne) RemoveParentHood(v ...*Parent) *UserUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _u.RemoveParentHoodIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -866,6 +1239,114 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if _u.mutation.ParentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.ParentsTable,
+			Columns: user.ParentsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.UserChildren
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedParentsIDs(); len(nodes) > 0 && !_u.mutation.ParentsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.ParentsTable,
+			Columns: user.ParentsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.UserChildren
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ParentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.ParentsTable,
+			Columns: user.ParentsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.UserChildren
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ChildrenCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.ChildrenTable,
+			Columns: user.ChildrenPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Parent
+		createE := &ParentCreate{config: _u.config, mutation: newParentMutation(_u.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !_u.mutation.ChildrenCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.ChildrenTable,
+			Columns: user.ChildrenPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Parent
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &ParentCreate{config: _u.config, mutation: newParentMutation(_u.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ChildrenIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.ChildrenTable,
+			Columns: user.ChildrenPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Parent
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &ParentCreate{config: _u.config, mutation: newParentMutation(_u.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if _u.mutation.FriendshipsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -909,6 +1390,54 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 			},
 		}
 		edge.Schema = _u.schemaConfig.Friendship
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if _u.mutation.ParentHoodCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ParentHoodTable,
+			Columns: []string{user.ParentHoodColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(parent.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Parent
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.RemovedParentHoodIDs(); len(nodes) > 0 && !_u.mutation.ParentHoodCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ParentHoodTable,
+			Columns: []string{user.ParentHoodColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(parent.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Parent
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := _u.mutation.ParentHoodIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ParentHoodTable,
+			Columns: []string{user.ParentHoodColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(parent.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _u.schemaConfig.Parent
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}

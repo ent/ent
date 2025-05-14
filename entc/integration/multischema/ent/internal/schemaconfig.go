@@ -11,12 +11,15 @@ import "context"
 // SchemaConfig represents alternative schema names for all tables
 // that can be passed at runtime.
 type SchemaConfig struct {
-	CleanUser  string // CleanUser table.
-	Friendship string // Friendship table.
-	Group      string // Group table.
-	GroupUsers string // Group-users->User table.
-	Pet        string // Pet table.
-	User       string // User table.
+	CleanUser    string // CleanUser table.
+	Friendship   string // Friendship table.
+	Group        string // Group table.
+	GroupUsers   string // Group-users->User table.
+	Parent       string // Parent table.
+	Pet          string // Pet table.
+	User         string // User table.
+	UserFriends  string // User-friends->User table.
+	UserChildren string // User-children->User table.
 }
 
 type schemaCtxKey struct{}

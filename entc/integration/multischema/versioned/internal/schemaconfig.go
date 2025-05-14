@@ -16,6 +16,7 @@ type SchemaConfig struct {
 	GroupUsers    string // Group-users->User table.
 	Pet           string // Pet table.
 	User          string // User table.
+	UserFriends   string // User-friends->User table.
 	UserFollowing string // User-following->User table.
 }
 

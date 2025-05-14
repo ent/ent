@@ -24,8 +24,14 @@ const (
 	EdgeGroups = "groups"
 	// EdgeFriends holds the string denoting the friends edge name in mutations.
 	EdgeFriends = "friends"
+	// EdgeParents holds the string denoting the parents edge name in mutations.
+	EdgeParents = "parents"
+	// EdgeChildren holds the string denoting the children edge name in mutations.
+	EdgeChildren = "children"
 	// EdgeFriendships holds the string denoting the friendships edge name in mutations.
 	EdgeFriendships = "friendships"
+	// EdgeParentHood holds the string denoting the parent_hood edge name in mutations.
+	EdgeParentHood = "parent_hood"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// PetsTable is the table that holds the pets relation/edge.
@@ -42,6 +48,10 @@ const (
 	GroupsInverseTable = "groups"
 	// FriendsTable is the table that holds the friends relation/edge. The primary key declared below.
 	FriendsTable = "friendships"
+	// ParentsTable is the table that holds the parents relation/edge. The primary key declared below.
+	ParentsTable = "parents"
+	// ChildrenTable is the table that holds the children relation/edge. The primary key declared below.
+	ChildrenTable = "parents"
 	// FriendshipsTable is the table that holds the friendships relation/edge.
 	FriendshipsTable = "friendships"
 	// FriendshipsInverseTable is the table name for the Friendship entity.
@@ -49,6 +59,13 @@ const (
 	FriendshipsInverseTable = "friendships"
 	// FriendshipsColumn is the table column denoting the friendships relation/edge.
 	FriendshipsColumn = "user_id"
+	// ParentHoodTable is the table that holds the parent_hood relation/edge.
+	ParentHoodTable = "parents"
+	// ParentHoodInverseTable is the table name for the Parent entity.
+	// It exists in this package in order to avoid circular dependency with the "parent" package.
+	ParentHoodInverseTable = "parents"
+	// ParentHoodColumn is the table column denoting the parent_hood relation/edge.
+	ParentHoodColumn = "user_id"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -64,6 +81,12 @@ var (
 	// FriendsPrimaryKey and FriendsColumn2 are the table columns denoting the
 	// primary key for the friends relation (M2M).
 	FriendsPrimaryKey = []string{"user_id", "friend_id"}
+	// ParentsPrimaryKey and ParentsColumn2 are the table columns denoting the
+	// primary key for the parents relation (M2M).
+	ParentsPrimaryKey = []string{"user_id", "parent_id"}
+	// ChildrenPrimaryKey and ChildrenColumn2 are the table columns denoting the
+	// primary key for the children relation (M2M).
+	ChildrenPrimaryKey = []string{"user_id", "parent_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -136,6 +159,34 @@ func ByFriends(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
+// ByParentsCount orders the results by parents count.
+func ByParentsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newParentsStep(), opts...)
+	}
+}
+
+// ByParents orders the results by parents terms.
+func ByParents(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newParentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByChildrenCount orders the results by children count.
+func ByChildrenCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newChildrenStep(), opts...)
+	}
+}
+
+// ByChildren orders the results by children terms.
+func ByChildren(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newChildrenStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByFriendshipsCount orders the results by friendships count.
 func ByFriendshipsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -147,6 +198,20 @@ func ByFriendshipsCount(opts ...sql.OrderTermOption) OrderOption {
 func ByFriendships(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newFriendshipsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByParentHoodCount orders the results by parent_hood count.
+func ByParentHoodCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newParentHoodStep(), opts...)
+	}
+}
+
+// ByParentHood orders the results by parent_hood terms.
+func ByParentHood(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newParentHoodStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newPetsStep() *sqlgraph.Step {
@@ -170,10 +235,31 @@ func newFriendsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2M, false, FriendsTable, FriendsPrimaryKey...),
 	)
 }
+func newParentsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(Table, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, ParentsTable, ParentsPrimaryKey...),
+	)
+}
+func newChildrenStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(Table, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, ChildrenTable, ChildrenPrimaryKey...),
+	)
+}
 func newFriendshipsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(FriendshipsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, true, FriendshipsTable, FriendshipsColumn),
+	)
+}
+func newParentHoodStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ParentHoodInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, true, ParentHoodTable, ParentHoodColumn),
 	)
 }

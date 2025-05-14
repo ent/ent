@@ -63,6 +63,40 @@ var (
 		Columns:    GroupsColumns,
 		PrimaryKey: []*schema.Column{GroupsColumns[0]},
 	}
+	// ParentsColumns holds the columns for the "parents" table.
+	ParentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "by_adoption", Type: field.TypeBool, Default: false},
+		{Name: "user_id", Type: field.TypeInt},
+		{Name: "parent_id", Type: field.TypeInt},
+	}
+	// ParentsTable holds the schema information for the "parents" table.
+	ParentsTable = &schema.Table{
+		Name:       "parents",
+		Columns:    ParentsColumns,
+		PrimaryKey: []*schema.Column{ParentsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "parents_users_child",
+				Columns:    []*schema.Column{ParentsColumns[2]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "parents_users_parent",
+				Columns:    []*schema.Column{ParentsColumns[3]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "parent_user_id_parent_id",
+				Unique:  true,
+				Columns: []*schema.Column{ParentsColumns[2], ParentsColumns[3]},
+			},
+		},
+	}
 	// PetsColumns holds the columns for the "pets" table.
 	PetsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -123,6 +157,7 @@ var (
 	Tables = []*schema.Table{
 		FriendshipsTable,
 		GroupsTable,
+		ParentsTable,
 		PetsTable,
 		UsersTable,
 		GroupUsersTable,
@@ -132,6 +167,8 @@ var (
 func init() {
 	FriendshipsTable.ForeignKeys[0].RefTable = UsersTable
 	FriendshipsTable.ForeignKeys[1].RefTable = UsersTable
+	ParentsTable.ForeignKeys[0].RefTable = UsersTable
+	ParentsTable.ForeignKeys[1].RefTable = UsersTable
 	PetsTable.ForeignKeys[0].RefTable = UsersTable
 	GroupUsersTable.ForeignKeys[0].RefTable = GroupsTable
 	GroupUsersTable.ForeignKeys[1].RefTable = UsersTable

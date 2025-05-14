@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 	"testing"
 
 	"ariga.io/atlas-go-sdk/atlasexec"
@@ -41,6 +42,7 @@ func TestMySQL(t *testing.T) {
 		db.Close()
 	})
 
+	migrate.ParentsTable.Schema = "db1"
 	migrate.PetsTable.Schema = "db1"
 	migrate.UsersTable.Schema = "db1"
 	migrate.GroupsTable.Schema = "db2"
@@ -150,6 +152,18 @@ func TestMySQL(t *testing.T) {
 	require.Len(t, users[1].Edges.Friends, 1)
 	require.Len(t, users[0].Edges.Friendships, 1)
 	require.Len(t, users[1].Edges.Friendships, 1)
+
+	ta := client.User.Create().SetName("ta").AddParents(a8m, nat).SaveX(ctx)
+	el := client.User.Create().SetName("el").AddParents(a8m, nat).SaveX(ctx)
+	jo := client.User.Create().SetName("be").AddParents(a8m, nat).SaveX(ctx)
+
+	require.Equal(t, 3, client.User.Query().Where(user.HasParents()).CountX(ctx))
+	require.Equal(t, 3, a8m.QueryChildren().CountX(ctx))
+
+	sib := ta.QueryParents().QueryChildren().Where(user.NameNEQ(ta.Name)).AllX(ctx)
+	require.Len(t, sib, 2)
+	require.True(t, slices.ContainsFunc(sib, func(u *ent.User) bool { return u.Name == el.Name }))
+	require.True(t, slices.ContainsFunc(sib, func(u *ent.User) bool { return u.Name == jo.Name }))
 }
 
 func TestVersionedMigration(t *testing.T) {

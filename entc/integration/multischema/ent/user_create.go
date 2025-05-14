@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/multischema/ent/friendship"
 	"entgo.io/ent/entc/integration/multischema/ent/group"
+	"entgo.io/ent/entc/integration/multischema/ent/parent"
 	"entgo.io/ent/entc/integration/multischema/ent/pet"
 	"entgo.io/ent/entc/integration/multischema/ent/user"
 	"entgo.io/ent/schema/field"
@@ -85,6 +86,36 @@ func (_c *UserCreate) AddFriends(v ...*User) *UserCreate {
 	return _c.AddFriendIDs(ids...)
 }
 
+// AddParentIDs adds the "parents" edge to the User entity by IDs.
+func (_c *UserCreate) AddParentIDs(ids ...int) *UserCreate {
+	_c.mutation.AddParentIDs(ids...)
+	return _c
+}
+
+// AddParents adds the "parents" edges to the User entity.
+func (_c *UserCreate) AddParents(v ...*User) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddParentIDs(ids...)
+}
+
+// AddChildIDs adds the "children" edge to the User entity by IDs.
+func (_c *UserCreate) AddChildIDs(ids ...int) *UserCreate {
+	_c.mutation.AddChildIDs(ids...)
+	return _c
+}
+
+// AddChildren adds the "children" edges to the User entity.
+func (_c *UserCreate) AddChildren(v ...*User) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddChildIDs(ids...)
+}
+
 // AddFriendshipIDs adds the "friendships" edge to the Friendship entity by IDs.
 func (_c *UserCreate) AddFriendshipIDs(ids ...int) *UserCreate {
 	_c.mutation.AddFriendshipIDs(ids...)
@@ -98,6 +129,21 @@ func (_c *UserCreate) AddFriendships(v ...*Friendship) *UserCreate {
 		ids[i] = v[i].ID
 	}
 	return _c.AddFriendshipIDs(ids...)
+}
+
+// AddParentHoodIDs adds the "parent_hood" edge to the Parent entity by IDs.
+func (_c *UserCreate) AddParentHoodIDs(ids ...int) *UserCreate {
+	_c.mutation.AddParentHoodIDs(ids...)
+	return _c
+}
+
+// AddParentHood adds the "parent_hood" edges to the Parent entity.
+func (_c *UserCreate) AddParentHood(v ...*Parent) *UserCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return _c.AddParentHoodIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -232,6 +278,44 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		edge.Target.Fields = specE.Fields
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := _c.mutation.ParentsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   user.ParentsTable,
+			Columns: user.ParentsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _c.schemaConfig.UserChildren
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ChildrenIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.ChildrenTable,
+			Columns: user.ChildrenPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _c.schemaConfig.Parent
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		createE := &ParentCreate{config: _c.config, mutation: newParentMutation(_c.config, OpCreate)}
+		createE.defaults()
+		_, specE := createE.createSpec()
+		edge.Target.Fields = specE.Fields
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := _c.mutation.FriendshipsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -244,6 +328,23 @@ func (_c *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			},
 		}
 		edge.Schema = _c.schemaConfig.Friendship
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := _c.mutation.ParentHoodIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   user.ParentHoodTable,
+			Columns: []string{user.ParentHoodColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(parent.FieldID, field.TypeInt),
+			},
+		}
+		edge.Schema = _c.schemaConfig.Parent
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}

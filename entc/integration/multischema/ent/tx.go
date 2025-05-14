@@ -22,6 +22,8 @@ type Tx struct {
 	Friendship *FriendshipClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
+	// Parent is the client for interacting with the Parent builders.
+	Parent *ParentClient
 	// Pet is the client for interacting with the Pet builders.
 	Pet *PetClient
 	// User is the client for interacting with the User builders.
@@ -160,6 +162,7 @@ func (tx *Tx) init() {
 	tx.CleanUser = NewCleanUserClient(tx.config)
 	tx.Friendship = NewFriendshipClient(tx.config)
 	tx.Group = NewGroupClient(tx.config)
+	tx.Parent = NewParentClient(tx.config)
 	tx.Pet = NewPetClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
