@@ -649,11 +649,12 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 		default:
 			table.SetAnnotation(ant).SetSchema(ant.Schema)
 		}
+		nAnt := n.EntSQL()
 		for _, f := range n.Fields {
 			if a := f.EntSQL(); a != nil && a.Skip {
 				continue
 			}
-			if !f.IsEdgeField() {
+			if (nAnt != nil && nAnt.TableFieldOrder) || !f.IsEdgeField() {
 				table.AddColumn(f.Column())
 			}
 		}
