@@ -371,6 +371,13 @@ func TableHasSuffix(v string) predicate.Comment {
 	})
 }
 
+// TableRegex applies the Regex predicate on the "table" field.
+func TableRegex(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldTable, p.Regex(v))
+	})
+}
+
 // TableIsNil applies the IsNil predicate on the "table" field.
 func TableIsNil() predicate.Comment {
 	return predicate.Comment(func(t *dsl.Traversal) {
@@ -473,6 +480,13 @@ func ClientHasPrefix(v string) predicate.Comment {
 func ClientHasSuffix(v string) predicate.Comment {
 	return predicate.Comment(func(t *dsl.Traversal) {
 		t.Has(Label, FieldClient, p.EndingWith(v))
+	})
+}
+
+// ClientRegex applies the Regex predicate on the "client" field.
+func ClientRegex(v string) predicate.Comment {
+	return predicate.Comment(func(t *dsl.Traversal) {
+		t.Has(Label, FieldClient, p.Regex(v))
 	})
 }
 
