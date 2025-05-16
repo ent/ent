@@ -135,7 +135,10 @@ func (m *CityMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, city.ID(id))
+			return m.Client().City.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
@@ -553,7 +556,10 @@ func (m *StreetMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, street.ID(id))
+			return m.Client().Street.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
