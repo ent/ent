@@ -19,6 +19,7 @@ import (
 // Schema represents an ent.Schema that was loaded from a complied user package.
 type Schema struct {
 	Name         string         `json:"name,omitempty"`
+	Pos          string         `json:"-"`
 	View         bool           `json:"view,omitempty"`
 	Config       ent.Config     `json:"config,omitempty"`
 	Edges        []*Edge        `json:"edges,omitempty"`
