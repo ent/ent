@@ -45,7 +45,8 @@ type Table struct {
 	ForeignKeys []*ForeignKey
 	Annotation  *entsql.Annotation
 	Comment     string
-	View        bool // Indicate the table is a view.
+	View        bool   // Indicate the table is a view.
+	Pos         string // filename:line of the ent schema definition.
 }
 
 // NewTable returns a new table with the given name.
@@ -72,6 +73,12 @@ func (t *Table) SetComment(c string) *Table {
 // SetSchema sets the table schema.
 func (t *Table) SetSchema(s string) *Table {
 	t.Schema = s
+	return t
+}
+
+// SetPos sets the table position.
+func (t *Table) SetPos(p string) *Table {
+	t.Pos = p
 	return t
 }
 
@@ -630,6 +637,27 @@ func Dump(ctx context.Context, dialect, version string, tables []*Table, opts ..
 			Cmd:     q,
 			Comment: fmt.Sprintf("Add %q view", v.Name),
 		})
+	}
+	for _, t := range tables {
+		p.Directives = append(p.Directives, fmt.Sprintf(
+			"-- atlas:pos %s%s[type=%s] %s",
+			func() string {
+				if t.Schema != "" {
+					return t.Schema + "[type=schema]."
+				}
+				return ""
+			}(),
+			func() string {
+				return t.Name
+			}(),
+			func() string {
+				if t.View {
+					return "view"
+				}
+				return "table"
+			}(),
+			t.Pos,
+		))
 	}
 	f, err := migrate.DefaultFormatter.FormatFile(p)
 	if err != nil {

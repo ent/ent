@@ -339,6 +339,11 @@ func (t Type) Receiver() string {
 	return "_m"
 }
 
+// Pos returns the filename:line position information of this type in the schema.
+func (t Type) Pos() string {
+	return t.schema.Pos
+}
+
 // hasEdge returns true if this type as an edge (reverse or assoc)
 // with the given name.
 func (t Type) hasEdge(name string) bool {

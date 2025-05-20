@@ -158,6 +158,7 @@ func TestCopyTables(t *testing.T) {
 func TestDump(t *testing.T) {
 	users := &Table{
 		Name: "users",
+		Pos:  "users.go:15",
 		Columns: []*Column{
 			{Name: "id", Type: field.TypeInt},
 			{Name: "name", Type: field.TypeString},
@@ -178,6 +179,7 @@ func TestDump(t *testing.T) {
 	users.SetAnnotation(&entsql.Annotation{Table: "Users"})
 	pets := &Table{
 		Name: "pets",
+		Pos:  "pets.go:15",
 		Columns: []*Column{
 			{Name: "id", Type: field.TypeInt},
 			{Name: "name", Type: field.TypeString},
@@ -199,12 +201,14 @@ func TestDump(t *testing.T) {
 	})
 	petsWithoutFur := &Table{
 		Name:       "pets_without_fur",
+		Pos:        "pets.go:30",
 		View:       true,
 		Columns:    append(pets.Columns[:2], pets.Columns[3]),
 		Annotation: entsql.View("SELECT id, name, owner_id FROM pets"),
 	}
 	petNames := &Table{
 		Name:    "pet_names",
+		Pos:     "pets.go:45",
 		View:    true,
 		Columns: pets.Columns[1:1],
 		Annotation: entsql.ViewFor(dialect.Postgres, func(s *sql.Selector) {
@@ -213,8 +217,7 @@ func TestDump(t *testing.T) {
 	}
 	tables = []*Table{users, pets, petsWithoutFur, petNames}
 
-	my := func(length int) string {
-		return fmt.Sprintf(strings.ReplaceAll(`-- Add new schema named "s1"
+	my := fmt.Sprintf(strings.ReplaceAll(`-- Add new schema named "s1"
 CREATE DATABASE $s1$;
 -- Add new schema named "s2"
 CREATE DATABASE $s2$;
@@ -223,7 +226,7 @@ CREATE DATABASE $s3$;
 -- Create "users" table
 CREATE TABLE $s1$.$users$ (
   $id$ bigint NOT NULL,
-  $name$ varchar(%d) NOT NULL,
+  $name$ varchar(255) NOT NULL,
   $spouse_id$ bigint NOT NULL,
   PRIMARY KEY ($id$),
   INDEX $name$ ($name$),
@@ -232,7 +235,7 @@ CREATE TABLE $s1$.$users$ (
 -- Create "pets" table
 CREATE TABLE $s2$.$pets$ (
   $id$ bigint NOT NULL,
-  $name$ varchar(%d) NOT NULL,
+  $name$ varchar(255) NOT NULL,
   $owner_id$ bigint NOT NULL,
   $owner_id$ bigint NOT NULL,
   UNIQUE INDEX $name$ ($name$ DESC),
@@ -240,8 +243,7 @@ CREATE TABLE $s2$.$pets$ (
 ) CHARSET utf8mb4 COLLATE utf8mb4_bin;
 -- Add "pets_without_fur" view
 CREATE VIEW $s3$.$pets_without_fur$ ($id$, $name$, $owner_id$) AS SELECT id, name, owner_id FROM pets;
-`, "$", "`"), length, length)
-	}
+`, "$", "`"))
 
 	pg := `-- Add new schema named "s1"
 CREATE SCHEMA "s1";
@@ -302,9 +304,9 @@ CREATE UNIQUE INDEX $name$ ON $pets$ ($name$ DESC);
 CREATE VIEW $pets_without_fur$ ($id$, $name$, $owner_id$) AS SELECT id, name, owner_id FROM pets;
 `, "$", "`"),
 		},
-		{dialect.MySQL, "5.6", my(255)},
-		{dialect.MySQL, "5.7", my(255)},
-		{dialect.MySQL, "8", my(255)},
+		{dialect.MySQL, "5.6", my},
+		{dialect.MySQL, "5.7", my},
+		{dialect.MySQL, "8", my},
 		{dialect.Postgres, "12", pg},
 		{dialect.Postgres, "13", pg},
 		{dialect.Postgres, "14", pg},
@@ -314,23 +316,44 @@ CREATE VIEW $pets_without_fur$ ($id$, $name$, $owner_id$) AS SELECT id, name, ow
 		if tt.version != "" {
 			n += ":" + tt.version
 		}
+		pos := `-- atlas:pos users[type=table] users.go:15
+-- atlas:pos pets[type=table] pets.go:15
+-- atlas:pos pets_without_fur[type=view] pets.go:30
+-- atlas:pos pet_names[type=view] pets.go:45
+
+`
 		if tt.dialect != dialect.SQLite {
 			tables[0].Schema = "s1"
 			tables[1].Schema = "s2"
 			tables[2].Schema = "s3"
 			tables[3].Schema = "s3"
+			pos = `-- atlas:pos s1[type=schema].users[type=table] users.go:15
+-- atlas:pos s2[type=schema].pets[type=table] pets.go:15
+-- atlas:pos s3[type=schema].pets_without_fur[type=view] pets.go:30
+-- atlas:pos s3[type=schema].pet_names[type=view] pets.go:45
+
+`
 		}
 		t.Run(n, func(t *testing.T) {
 			ac, err := Dump(context.Background(), tt.dialect, tt.version, tables)
 			require.NoError(t, err)
-			require.Equal(t, tt.expected, ac)
+			require.Equal(t, pos+tt.expected, ac)
 		})
 		t.Run(n+" single schema", func(t *testing.T) {
 			ac, err := Dump(context.Background(), tt.dialect, tt.version, tables[0:1])
 			require.NoError(t, err)
 			if tt.dialect != dialect.SQLite {
-				require.True(t, strings.HasPrefix(ac, "-- Add new schema named \"s1\""), strings.Split(ac, "\n")[0])
+				require.Contains(t, ac, "s1[type=schema].")
+				require.NotContains(t, ac, "s2[type=schema].")
+				require.Contains(t, ac, "-- Add new schema named \"s1\"")
 			}
+		})
+		t.Run(n+" no schema", func(t *testing.T) {
+			tables[0].Schema = ""
+			ac, err := Dump(context.Background(), tt.dialect, tt.version, tables[0:1])
+			require.NoError(t, err)
+			require.NotContains(t, ac, "[type=schema].")
+			require.Contains(t, ac, "[type=table]")
 		})
 	}
 }
