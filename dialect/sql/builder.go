@@ -1205,9 +1205,10 @@ func (u *UpdateBuilder) writeSetter(b *Builder) {
 // DeleteBuilder is a builder for `DELETE` statement.
 type DeleteBuilder struct {
 	Builder
-	table  string
-	schema string
-	where  *Predicate
+	table     string
+	schema    string
+	where     *Predicate
+	returning []string
 }
 
 // Delete creates a builder for the `DELETE` statement.
@@ -1250,16 +1251,25 @@ func (d *DeleteBuilder) FromSelect(s *Selector) *DeleteBuilder {
 	return d
 }
 
+// Returning adds the `RETURNING` clause to the delete statement.
+// Supported by SQLite and PostgreSQL.
+func (d *DeleteBuilder) Returning(columns ...string) *DeleteBuilder {
+	d.returning = columns
+	return d
+}
+
 // Query returns query representation of a `DELETE` statement.
 func (d *DeleteBuilder) Query() (string, []any) {
-	d.WriteString("DELETE FROM ")
-	d.writeSchema(d.schema)
-	d.Ident(d.table)
+	b := d.Builder.clone()
+	b.WriteString("DELETE FROM ")
+	b.writeSchema(d.schema)
+	b.Ident(d.table)
 	if d.where != nil {
-		d.WriteString(" WHERE ")
-		d.Join(d.where)
+		b.WriteString(" WHERE ")
+		b.Join(d.where)
 	}
-	return d.String(), d.args
+	joinReturning(d.returning, &b)
+	return b.String(), b.args
 }
 
 // Predicate is a where predicate.
