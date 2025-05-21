@@ -77,7 +77,7 @@ type (
 		// driver used for executing database requests.
 		driver dialect.Driver
 		// debug enable a debug logging.
-		debug func(dialect.Driver, func(...any)) dialect.Driver
+		debug func(dialect.Driver, ...func(...any)) dialect.Driver
 		// log used for logging on debug mode.
 		log func(...any)
 		// hooks to execute on mutations.
@@ -131,7 +131,7 @@ func Debug() Option {
 }
 
 // WithDebug configures the debug function.
-func WithDebug(fn func(dialect.Driver, func(...any)) dialect.Driver) Option {
+func WithDebug(fn func(dialect.Driver, ...func(...any)) dialect.Driver) Option {
 	return func(c *config) {
 		c.debug = fn
 	}
