@@ -6,7 +6,6 @@ package schema
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"testing"
 
@@ -217,7 +216,7 @@ func TestDump(t *testing.T) {
 	}
 	tables = []*Table{users, pets, petsWithoutFur, petNames}
 
-	my := fmt.Sprintf(strings.ReplaceAll(`-- Add new schema named "s1"
+	my := strings.ReplaceAll(`-- Add new schema named "s1"
 CREATE DATABASE $s1$;
 -- Add new schema named "s2"
 CREATE DATABASE $s2$;
@@ -243,7 +242,7 @@ CREATE TABLE $s2$.$pets$ (
 ) CHARSET utf8mb4 COLLATE utf8mb4_bin;
 -- Add "pets_without_fur" view
 CREATE VIEW $s3$.$pets_without_fur$ ($id$, $name$, $owner_id$) AS SELECT id, name, owner_id FROM pets;
-`, "$", "`"))
+`, "$", "`")
 
 	pg := `-- Add new schema named "s1"
 CREATE SCHEMA "s1";

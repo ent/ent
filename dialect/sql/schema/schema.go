@@ -647,9 +647,7 @@ func Dump(ctx context.Context, dialect, version string, tables []*Table, opts ..
 				}
 				return ""
 			}(),
-			func() string {
-				return t.Name
-			}(),
+			t.Name,
 			func() string {
 				if t.View {
 					return "view"
