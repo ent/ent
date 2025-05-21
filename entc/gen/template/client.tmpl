@@ -131,7 +131,7 @@ func Debug() Option {
 }
 
 // WithDebug configures the debug function.
-func WithDebug(fn func(dialect.Driver, func(...any))) Option {
+func WithDebug(fn func(dialect.Driver, func(...any)) dialect.Driver) Option {
 	return func(c *config) {
 		c.debug = fn
 	}
