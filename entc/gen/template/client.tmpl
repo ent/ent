@@ -77,7 +77,7 @@ type (
 		// driver used for executing database requests.
 		driver dialect.Driver
 		// debug enable a debug logging.
-		debug func(dialect.Driver, func(...any))
+		debug func(dialect.Driver, func(...any)) dialect.Driver
 		// log used for logging on debug mode.
 		log func(...any)
 		// hooks to execute on mutations.
