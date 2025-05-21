@@ -1146,7 +1146,7 @@ func (u *UpdateBuilder) Prefix(stmts ...Querier) *UpdateBuilder {
 	return u
 }
 
-// Returning adds the `RETURNING` clause to the insert statement.
+// Returning adds the `RETURNING` clause to the update statement.
 // Supported by SQLite and PostgreSQL.
 func (u *UpdateBuilder) Returning(columns ...string) *UpdateBuilder {
 	u.returning = columns
