@@ -602,41 +602,41 @@ type TweetTagGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ttgb *TweetTagGroupBy) Aggregate(fns ...AggregateFunc) *TweetTagGroupBy {
-	ttgb.fns = append(ttgb.fns, fns...)
-	return ttgb
+func (_g *TweetTagGroupBy) Aggregate(fns ...AggregateFunc) *TweetTagGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ttgb *TweetTagGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ttgb.build.ctx, ent.OpQueryGroupBy)
-	if err := ttgb.build.prepareQuery(ctx); err != nil {
+func (_g *TweetTagGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*TweetTagQuery, *TweetTagGroupBy](ctx, ttgb.build, ttgb, ttgb.build.inters, v)
+	return scanWithInterceptors[*TweetTagQuery, *TweetTagGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (ttgb *TweetTagGroupBy) sqlScan(ctx context.Context, root *TweetTagQuery, v any) error {
+func (_g *TweetTagGroupBy) sqlScan(ctx context.Context, root *TweetTagQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(ttgb.fns))
-	for _, fn := range ttgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*ttgb.flds)+len(ttgb.fns))
-		for _, f := range *ttgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*ttgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ttgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -650,27 +650,27 @@ type TweetTagSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (tts *TweetTagSelect) Aggregate(fns ...AggregateFunc) *TweetTagSelect {
-	tts.fns = append(tts.fns, fns...)
-	return tts
+func (_s *TweetTagSelect) Aggregate(fns ...AggregateFunc) *TweetTagSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (tts *TweetTagSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, tts.ctx, ent.OpQuerySelect)
-	if err := tts.prepareQuery(ctx); err != nil {
+func (_s *TweetTagSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*TweetTagQuery, *TweetTagSelect](ctx, tts.TweetTagQuery, tts, tts.inters, v)
+	return scanWithInterceptors[*TweetTagQuery, *TweetTagSelect](ctx, _s.TweetTagQuery, _s, _s.inters, v)
 }
 
-func (tts *TweetTagSelect) sqlScan(ctx context.Context, root *TweetTagQuery, v any) error {
+func (_s *TweetTagSelect) sqlScan(ctx context.Context, root *TweetTagQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(tts.fns))
-	for _, fn := range tts.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*tts.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -678,7 +678,7 @@ func (tts *TweetTagSelect) sqlScan(ctx context.Context, root *TweetTagQuery, v a
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := tts.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

@@ -530,41 +530,41 @@ type TweetLikeGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (tlgb *TweetLikeGroupBy) Aggregate(fns ...AggregateFunc) *TweetLikeGroupBy {
-	tlgb.fns = append(tlgb.fns, fns...)
-	return tlgb
+func (_g *TweetLikeGroupBy) Aggregate(fns ...AggregateFunc) *TweetLikeGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (tlgb *TweetLikeGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, tlgb.build.ctx, ent.OpQueryGroupBy)
-	if err := tlgb.build.prepareQuery(ctx); err != nil {
+func (_g *TweetLikeGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*TweetLikeQuery, *TweetLikeGroupBy](ctx, tlgb.build, tlgb, tlgb.build.inters, v)
+	return scanWithInterceptors[*TweetLikeQuery, *TweetLikeGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (tlgb *TweetLikeGroupBy) sqlScan(ctx context.Context, root *TweetLikeQuery, v any) error {
+func (_g *TweetLikeGroupBy) sqlScan(ctx context.Context, root *TweetLikeQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(tlgb.fns))
-	for _, fn := range tlgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*tlgb.flds)+len(tlgb.fns))
-		for _, f := range *tlgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*tlgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := tlgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -578,27 +578,27 @@ type TweetLikeSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (tls *TweetLikeSelect) Aggregate(fns ...AggregateFunc) *TweetLikeSelect {
-	tls.fns = append(tls.fns, fns...)
-	return tls
+func (_s *TweetLikeSelect) Aggregate(fns ...AggregateFunc) *TweetLikeSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (tls *TweetLikeSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, tls.ctx, ent.OpQuerySelect)
-	if err := tls.prepareQuery(ctx); err != nil {
+func (_s *TweetLikeSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*TweetLikeQuery, *TweetLikeSelect](ctx, tls.TweetLikeQuery, tls, tls.inters, v)
+	return scanWithInterceptors[*TweetLikeQuery, *TweetLikeSelect](ctx, _s.TweetLikeQuery, _s, _s.inters, v)
 }
 
-func (tls *TweetLikeSelect) sqlScan(ctx context.Context, root *TweetLikeQuery, v any) error {
+func (_s *TweetLikeSelect) sqlScan(ctx context.Context, root *TweetLikeQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(tls.fns))
-	for _, fn := range tls.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*tls.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -606,7 +606,7 @@ func (tls *TweetLikeSelect) sqlScan(ctx context.Context, root *TweetLikeQuery, v
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := tls.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

@@ -400,45 +400,45 @@ type FieldTypeGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ftgb *FieldTypeGroupBy) Aggregate(fns ...AggregateFunc) *FieldTypeGroupBy {
-	ftgb.fns = append(ftgb.fns, fns...)
-	return ftgb
+func (_g *FieldTypeGroupBy) Aggregate(fns ...AggregateFunc) *FieldTypeGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ftgb *FieldTypeGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ftgb.build.ctx, ent.OpQueryGroupBy)
-	if err := ftgb.build.prepareQuery(ctx); err != nil {
+func (_g *FieldTypeGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*FieldTypeQuery, *FieldTypeGroupBy](ctx, ftgb.build, ftgb, ftgb.build.inters, v)
+	return scanWithInterceptors[*FieldTypeQuery, *FieldTypeGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (ftgb *FieldTypeGroupBy) gremlinScan(ctx context.Context, root *FieldTypeQuery, v any) error {
+func (_g *FieldTypeGroupBy) gremlinScan(ctx context.Context, root *FieldTypeQuery, v any) error {
 	var (
 		trs   []any
 		names []any
 	)
-	for _, fn := range ftgb.fns {
+	for _, fn := range _g.fns {
 		name, tr := fn("p", "")
 		trs = append(trs, tr)
 		names = append(names, name)
 	}
-	for _, f := range *ftgb.flds {
+	for _, f := range *_g.flds {
 		names = append(names, f)
 		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
 	}
 	query, bindings := root.gremlinQuery(ctx).Group().
-		By(__.Values(*ftgb.flds...).Fold()).
+		By(__.Values(*_g.flds...).Fold()).
 		By(__.Fold().Match(trs...).Select(names...)).
 		Select(dsl.Values).
 		Next().
 		Query()
 	res := &gremlin.Response{}
-	if err := ftgb.build.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _g.build.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(*ftgb.flds)+len(ftgb.fns) == 1 {
+	if len(*_g.flds)+len(_g.fns) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()
@@ -455,40 +455,40 @@ type FieldTypeSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (fts *FieldTypeSelect) Aggregate(fns ...AggregateFunc) *FieldTypeSelect {
-	fts.fns = append(fts.fns, fns...)
-	return fts
+func (_s *FieldTypeSelect) Aggregate(fns ...AggregateFunc) *FieldTypeSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (fts *FieldTypeSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, fts.ctx, ent.OpQuerySelect)
-	if err := fts.prepareQuery(ctx); err != nil {
+func (_s *FieldTypeSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*FieldTypeQuery, *FieldTypeSelect](ctx, fts.FieldTypeQuery, fts, fts.inters, v)
+	return scanWithInterceptors[*FieldTypeQuery, *FieldTypeSelect](ctx, _s.FieldTypeQuery, _s, _s.inters, v)
 }
 
-func (fts *FieldTypeSelect) gremlinScan(ctx context.Context, root *FieldTypeQuery, v any) error {
+func (_s *FieldTypeSelect) gremlinScan(ctx context.Context, root *FieldTypeQuery, v any) error {
 	var (
 		res       = &gremlin.Response{}
 		traversal = root.gremlinQuery(ctx)
 	)
-	if fields := fts.ctx.Fields; len(fields) == 1 {
+	if fields := _s.ctx.Fields; len(fields) == 1 {
 		if fields[0] != fieldtype.FieldID {
 			traversal = traversal.Values(fields...)
 		} else {
 			traversal = traversal.ID()
 		}
 	} else {
-		fields := make([]any, len(fts.ctx.Fields))
-		for i, f := range fts.ctx.Fields {
+		fields := make([]any, len(_s.ctx.Fields))
+		for i, f := range _s.ctx.Fields {
 			fields[i] = f
 		}
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := fts.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _s.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {

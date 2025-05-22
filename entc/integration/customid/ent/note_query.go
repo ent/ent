@@ -609,41 +609,41 @@ type NoteGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ngb *NoteGroupBy) Aggregate(fns ...AggregateFunc) *NoteGroupBy {
-	ngb.fns = append(ngb.fns, fns...)
-	return ngb
+func (_g *NoteGroupBy) Aggregate(fns ...AggregateFunc) *NoteGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ngb *NoteGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ngb.build.ctx, ent.OpQueryGroupBy)
-	if err := ngb.build.prepareQuery(ctx); err != nil {
+func (_g *NoteGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*NoteQuery, *NoteGroupBy](ctx, ngb.build, ngb, ngb.build.inters, v)
+	return scanWithInterceptors[*NoteQuery, *NoteGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (ngb *NoteGroupBy) sqlScan(ctx context.Context, root *NoteQuery, v any) error {
+func (_g *NoteGroupBy) sqlScan(ctx context.Context, root *NoteQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(ngb.fns))
-	for _, fn := range ngb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*ngb.flds)+len(ngb.fns))
-		for _, f := range *ngb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*ngb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ngb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -657,27 +657,27 @@ type NoteSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (ns *NoteSelect) Aggregate(fns ...AggregateFunc) *NoteSelect {
-	ns.fns = append(ns.fns, fns...)
-	return ns
+func (_s *NoteSelect) Aggregate(fns ...AggregateFunc) *NoteSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ns *NoteSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ns.ctx, ent.OpQuerySelect)
-	if err := ns.prepareQuery(ctx); err != nil {
+func (_s *NoteSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*NoteQuery, *NoteSelect](ctx, ns.NoteQuery, ns, ns.inters, v)
+	return scanWithInterceptors[*NoteQuery, *NoteSelect](ctx, _s.NoteQuery, _s, _s.inters, v)
 }
 
-func (ns *NoteSelect) sqlScan(ctx context.Context, root *NoteQuery, v any) error {
+func (_s *NoteSelect) sqlScan(ctx context.Context, root *NoteQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(ns.fns))
-	for _, fn := range ns.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*ns.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -685,7 +685,7 @@ func (ns *NoteSelect) sqlScan(ctx context.Context, root *NoteQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ns.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

@@ -601,41 +601,41 @@ type GroupTagGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (gtgb *GroupTagGroupBy) Aggregate(fns ...AggregateFunc) *GroupTagGroupBy {
-	gtgb.fns = append(gtgb.fns, fns...)
-	return gtgb
+func (_g *GroupTagGroupBy) Aggregate(fns ...AggregateFunc) *GroupTagGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (gtgb *GroupTagGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, gtgb.build.ctx, ent.OpQueryGroupBy)
-	if err := gtgb.build.prepareQuery(ctx); err != nil {
+func (_g *GroupTagGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*GroupTagQuery, *GroupTagGroupBy](ctx, gtgb.build, gtgb, gtgb.build.inters, v)
+	return scanWithInterceptors[*GroupTagQuery, *GroupTagGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (gtgb *GroupTagGroupBy) sqlScan(ctx context.Context, root *GroupTagQuery, v any) error {
+func (_g *GroupTagGroupBy) sqlScan(ctx context.Context, root *GroupTagQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(gtgb.fns))
-	for _, fn := range gtgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*gtgb.flds)+len(gtgb.fns))
-		for _, f := range *gtgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*gtgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := gtgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -649,27 +649,27 @@ type GroupTagSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (gts *GroupTagSelect) Aggregate(fns ...AggregateFunc) *GroupTagSelect {
-	gts.fns = append(gts.fns, fns...)
-	return gts
+func (_s *GroupTagSelect) Aggregate(fns ...AggregateFunc) *GroupTagSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (gts *GroupTagSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, gts.ctx, ent.OpQuerySelect)
-	if err := gts.prepareQuery(ctx); err != nil {
+func (_s *GroupTagSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*GroupTagQuery, *GroupTagSelect](ctx, gts.GroupTagQuery, gts, gts.inters, v)
+	return scanWithInterceptors[*GroupTagQuery, *GroupTagSelect](ctx, _s.GroupTagQuery, _s, _s.inters, v)
 }
 
-func (gts *GroupTagSelect) sqlScan(ctx context.Context, root *GroupTagQuery, v any) error {
+func (_s *GroupTagSelect) sqlScan(ctx context.Context, root *GroupTagQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(gts.fns))
-	for _, fn := range gts.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*gts.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -677,7 +677,7 @@ func (gts *GroupTagSelect) sqlScan(ctx context.Context, root *GroupTagQuery, v a
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := gts.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

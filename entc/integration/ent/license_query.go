@@ -491,41 +491,41 @@ type LicenseGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (lgb *LicenseGroupBy) Aggregate(fns ...AggregateFunc) *LicenseGroupBy {
-	lgb.fns = append(lgb.fns, fns...)
-	return lgb
+func (_g *LicenseGroupBy) Aggregate(fns ...AggregateFunc) *LicenseGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (lgb *LicenseGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, lgb.build.ctx, ent.OpQueryGroupBy)
-	if err := lgb.build.prepareQuery(ctx); err != nil {
+func (_g *LicenseGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*LicenseQuery, *LicenseGroupBy](ctx, lgb.build, lgb, lgb.build.inters, v)
+	return scanWithInterceptors[*LicenseQuery, *LicenseGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (lgb *LicenseGroupBy) sqlScan(ctx context.Context, root *LicenseQuery, v any) error {
+func (_g *LicenseGroupBy) sqlScan(ctx context.Context, root *LicenseQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(lgb.fns))
-	for _, fn := range lgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*lgb.flds)+len(lgb.fns))
-		for _, f := range *lgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*lgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := lgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -539,27 +539,27 @@ type LicenseSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (ls *LicenseSelect) Aggregate(fns ...AggregateFunc) *LicenseSelect {
-	ls.fns = append(ls.fns, fns...)
-	return ls
+func (_s *LicenseSelect) Aggregate(fns ...AggregateFunc) *LicenseSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ls *LicenseSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ls.ctx, ent.OpQuerySelect)
-	if err := ls.prepareQuery(ctx); err != nil {
+func (_s *LicenseSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*LicenseQuery, *LicenseSelect](ctx, ls.LicenseQuery, ls, ls.inters, v)
+	return scanWithInterceptors[*LicenseQuery, *LicenseSelect](ctx, _s.LicenseQuery, _s, _s.inters, v)
 }
 
-func (ls *LicenseSelect) sqlScan(ctx context.Context, root *LicenseQuery, v any) error {
+func (_s *LicenseSelect) sqlScan(ctx context.Context, root *LicenseQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(ls.fns))
-	for _, fn := range ls.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*ls.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -567,7 +567,7 @@ func (ls *LicenseSelect) sqlScan(ctx context.Context, root *LicenseQuery, v any)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ls.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -575,7 +575,7 @@ func (ls *LicenseSelect) sqlScan(ctx context.Context, root *LicenseQuery, v any)
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (ls *LicenseSelect) Modify(modifiers ...func(s *sql.Selector)) *LicenseSelect {
-	ls.modifiers = append(ls.modifiers, modifiers...)
-	return ls
+func (_s *LicenseSelect) Modify(modifiers ...func(s *sql.Selector)) *LicenseSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

@@ -693,41 +693,41 @@ type MetadataGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (mgb *MetadataGroupBy) Aggregate(fns ...AggregateFunc) *MetadataGroupBy {
-	mgb.fns = append(mgb.fns, fns...)
-	return mgb
+func (_g *MetadataGroupBy) Aggregate(fns ...AggregateFunc) *MetadataGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (mgb *MetadataGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, mgb.build.ctx, ent.OpQueryGroupBy)
-	if err := mgb.build.prepareQuery(ctx); err != nil {
+func (_g *MetadataGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*MetadataQuery, *MetadataGroupBy](ctx, mgb.build, mgb, mgb.build.inters, v)
+	return scanWithInterceptors[*MetadataQuery, *MetadataGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (mgb *MetadataGroupBy) sqlScan(ctx context.Context, root *MetadataQuery, v any) error {
+func (_g *MetadataGroupBy) sqlScan(ctx context.Context, root *MetadataQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(mgb.fns))
-	for _, fn := range mgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*mgb.flds)+len(mgb.fns))
-		for _, f := range *mgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*mgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := mgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -741,27 +741,27 @@ type MetadataSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (ms *MetadataSelect) Aggregate(fns ...AggregateFunc) *MetadataSelect {
-	ms.fns = append(ms.fns, fns...)
-	return ms
+func (_s *MetadataSelect) Aggregate(fns ...AggregateFunc) *MetadataSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ms *MetadataSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ms.ctx, ent.OpQuerySelect)
-	if err := ms.prepareQuery(ctx); err != nil {
+func (_s *MetadataSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*MetadataQuery, *MetadataSelect](ctx, ms.MetadataQuery, ms, ms.inters, v)
+	return scanWithInterceptors[*MetadataQuery, *MetadataSelect](ctx, _s.MetadataQuery, _s, _s.inters, v)
 }
 
-func (ms *MetadataSelect) sqlScan(ctx context.Context, root *MetadataQuery, v any) error {
+func (_s *MetadataSelect) sqlScan(ctx context.Context, root *MetadataQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(ms.fns))
-	for _, fn := range ms.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*ms.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -769,7 +769,7 @@ func (ms *MetadataSelect) sqlScan(ctx context.Context, root *MetadataQuery, v an
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ms.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

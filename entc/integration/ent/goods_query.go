@@ -469,41 +469,41 @@ type GoodsGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ggb *GoodsGroupBy) Aggregate(fns ...AggregateFunc) *GoodsGroupBy {
-	ggb.fns = append(ggb.fns, fns...)
-	return ggb
+func (_g *GoodsGroupBy) Aggregate(fns ...AggregateFunc) *GoodsGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ggb *GoodsGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ggb.build.ctx, ent.OpQueryGroupBy)
-	if err := ggb.build.prepareQuery(ctx); err != nil {
+func (_g *GoodsGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*GoodsQuery, *GoodsGroupBy](ctx, ggb.build, ggb, ggb.build.inters, v)
+	return scanWithInterceptors[*GoodsQuery, *GoodsGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (ggb *GoodsGroupBy) sqlScan(ctx context.Context, root *GoodsQuery, v any) error {
+func (_g *GoodsGroupBy) sqlScan(ctx context.Context, root *GoodsQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(ggb.fns))
-	for _, fn := range ggb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*ggb.flds)+len(ggb.fns))
-		for _, f := range *ggb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*ggb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ggb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -517,27 +517,27 @@ type GoodsSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (gs *GoodsSelect) Aggregate(fns ...AggregateFunc) *GoodsSelect {
-	gs.fns = append(gs.fns, fns...)
-	return gs
+func (_s *GoodsSelect) Aggregate(fns ...AggregateFunc) *GoodsSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (gs *GoodsSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, gs.ctx, ent.OpQuerySelect)
-	if err := gs.prepareQuery(ctx); err != nil {
+func (_s *GoodsSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*GoodsQuery, *GoodsSelect](ctx, gs.GoodsQuery, gs, gs.inters, v)
+	return scanWithInterceptors[*GoodsQuery, *GoodsSelect](ctx, _s.GoodsQuery, _s, _s.inters, v)
 }
 
-func (gs *GoodsSelect) sqlScan(ctx context.Context, root *GoodsQuery, v any) error {
+func (_s *GoodsSelect) sqlScan(ctx context.Context, root *GoodsQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(gs.fns))
-	for _, fn := range gs.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*gs.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -545,7 +545,7 @@ func (gs *GoodsSelect) sqlScan(ctx context.Context, root *GoodsQuery, v any) err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := gs.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -553,7 +553,7 @@ func (gs *GoodsSelect) sqlScan(ctx context.Context, root *GoodsQuery, v any) err
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (gs *GoodsSelect) Modify(modifiers ...func(s *sql.Selector)) *GoodsSelect {
-	gs.modifiers = append(gs.modifiers, modifiers...)
-	return gs
+func (_s *GoodsSelect) Modify(modifiers ...func(s *sql.Selector)) *GoodsSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

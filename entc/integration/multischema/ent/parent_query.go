@@ -631,41 +631,41 @@ type ParentGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (pgb *ParentGroupBy) Aggregate(fns ...AggregateFunc) *ParentGroupBy {
-	pgb.fns = append(pgb.fns, fns...)
-	return pgb
+func (_g *ParentGroupBy) Aggregate(fns ...AggregateFunc) *ParentGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (pgb *ParentGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, pgb.build.ctx, ent.OpQueryGroupBy)
-	if err := pgb.build.prepareQuery(ctx); err != nil {
+func (_g *ParentGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ParentQuery, *ParentGroupBy](ctx, pgb.build, pgb, pgb.build.inters, v)
+	return scanWithInterceptors[*ParentQuery, *ParentGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (pgb *ParentGroupBy) sqlScan(ctx context.Context, root *ParentQuery, v any) error {
+func (_g *ParentGroupBy) sqlScan(ctx context.Context, root *ParentQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(pgb.fns))
-	for _, fn := range pgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*pgb.flds)+len(pgb.fns))
-		for _, f := range *pgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*pgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := pgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -679,27 +679,27 @@ type ParentSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (ps *ParentSelect) Aggregate(fns ...AggregateFunc) *ParentSelect {
-	ps.fns = append(ps.fns, fns...)
-	return ps
+func (_s *ParentSelect) Aggregate(fns ...AggregateFunc) *ParentSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ps *ParentSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ps.ctx, ent.OpQuerySelect)
-	if err := ps.prepareQuery(ctx); err != nil {
+func (_s *ParentSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ParentQuery, *ParentSelect](ctx, ps.ParentQuery, ps, ps.inters, v)
+	return scanWithInterceptors[*ParentQuery, *ParentSelect](ctx, _s.ParentQuery, _s, _s.inters, v)
 }
 
-func (ps *ParentSelect) sqlScan(ctx context.Context, root *ParentQuery, v any) error {
+func (_s *ParentSelect) sqlScan(ctx context.Context, root *ParentQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(ps.fns))
-	for _, fn := range ps.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*ps.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -707,7 +707,7 @@ func (ps *ParentSelect) sqlScan(ctx context.Context, root *ParentQuery, v any) e
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ps.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -715,7 +715,7 @@ func (ps *ParentSelect) sqlScan(ctx context.Context, root *ParentQuery, v any) e
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (ps *ParentSelect) Modify(modifiers ...func(s *sql.Selector)) *ParentSelect {
-	ps.modifiers = append(ps.modifiers, modifiers...)
-	return ps
+func (_s *ParentSelect) Modify(modifiers ...func(s *sql.Selector)) *ParentSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

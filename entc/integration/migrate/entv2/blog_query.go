@@ -527,41 +527,41 @@ type BlogGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (bgb *BlogGroupBy) Aggregate(fns ...AggregateFunc) *BlogGroupBy {
-	bgb.fns = append(bgb.fns, fns...)
-	return bgb
+func (_g *BlogGroupBy) Aggregate(fns ...AggregateFunc) *BlogGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (bgb *BlogGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, bgb.build.ctx, ent.OpQueryGroupBy)
-	if err := bgb.build.prepareQuery(ctx); err != nil {
+func (_g *BlogGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*BlogQuery, *BlogGroupBy](ctx, bgb.build, bgb, bgb.build.inters, v)
+	return scanWithInterceptors[*BlogQuery, *BlogGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (bgb *BlogGroupBy) sqlScan(ctx context.Context, root *BlogQuery, v any) error {
+func (_g *BlogGroupBy) sqlScan(ctx context.Context, root *BlogQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(bgb.fns))
-	for _, fn := range bgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*bgb.flds)+len(bgb.fns))
-		for _, f := range *bgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*bgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := bgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -575,27 +575,27 @@ type BlogSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (bs *BlogSelect) Aggregate(fns ...AggregateFunc) *BlogSelect {
-	bs.fns = append(bs.fns, fns...)
-	return bs
+func (_s *BlogSelect) Aggregate(fns ...AggregateFunc) *BlogSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (bs *BlogSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, bs.ctx, ent.OpQuerySelect)
-	if err := bs.prepareQuery(ctx); err != nil {
+func (_s *BlogSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*BlogQuery, *BlogSelect](ctx, bs.BlogQuery, bs, bs.inters, v)
+	return scanWithInterceptors[*BlogQuery, *BlogSelect](ctx, _s.BlogQuery, _s, _s.inters, v)
 }
 
-func (bs *BlogSelect) sqlScan(ctx context.Context, root *BlogQuery, v any) error {
+func (_s *BlogSelect) sqlScan(ctx context.Context, root *BlogQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(bs.fns))
-	for _, fn := range bs.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*bs.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -603,7 +603,7 @@ func (bs *BlogSelect) sqlScan(ctx context.Context, root *BlogQuery, v any) error
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := bs.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

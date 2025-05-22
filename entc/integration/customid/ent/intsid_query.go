@@ -587,41 +587,41 @@ type IntSIDGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (isgb *IntSIDGroupBy) Aggregate(fns ...AggregateFunc) *IntSIDGroupBy {
-	isgb.fns = append(isgb.fns, fns...)
-	return isgb
+func (_g *IntSIDGroupBy) Aggregate(fns ...AggregateFunc) *IntSIDGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (isgb *IntSIDGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, isgb.build.ctx, ent.OpQueryGroupBy)
-	if err := isgb.build.prepareQuery(ctx); err != nil {
+func (_g *IntSIDGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*IntSIDQuery, *IntSIDGroupBy](ctx, isgb.build, isgb, isgb.build.inters, v)
+	return scanWithInterceptors[*IntSIDQuery, *IntSIDGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (isgb *IntSIDGroupBy) sqlScan(ctx context.Context, root *IntSIDQuery, v any) error {
+func (_g *IntSIDGroupBy) sqlScan(ctx context.Context, root *IntSIDQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(isgb.fns))
-	for _, fn := range isgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*isgb.flds)+len(isgb.fns))
-		for _, f := range *isgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*isgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := isgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -635,27 +635,27 @@ type IntSIDSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (iss *IntSIDSelect) Aggregate(fns ...AggregateFunc) *IntSIDSelect {
-	iss.fns = append(iss.fns, fns...)
-	return iss
+func (_s *IntSIDSelect) Aggregate(fns ...AggregateFunc) *IntSIDSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (iss *IntSIDSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, iss.ctx, ent.OpQuerySelect)
-	if err := iss.prepareQuery(ctx); err != nil {
+func (_s *IntSIDSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*IntSIDQuery, *IntSIDSelect](ctx, iss.IntSIDQuery, iss, iss.inters, v)
+	return scanWithInterceptors[*IntSIDQuery, *IntSIDSelect](ctx, _s.IntSIDQuery, _s, _s.inters, v)
 }
 
-func (iss *IntSIDSelect) sqlScan(ctx context.Context, root *IntSIDQuery, v any) error {
+func (_s *IntSIDSelect) sqlScan(ctx context.Context, root *IntSIDQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(iss.fns))
-	for _, fn := range iss.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*iss.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -663,7 +663,7 @@ func (iss *IntSIDSelect) sqlScan(ctx context.Context, root *IntSIDQuery, v any) 
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := iss.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
