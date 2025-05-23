@@ -454,45 +454,45 @@ type NodeGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ngb *NodeGroupBy) Aggregate(fns ...AggregateFunc) *NodeGroupBy {
-	ngb.fns = append(ngb.fns, fns...)
-	return ngb
+func (_g *NodeGroupBy) Aggregate(fns ...AggregateFunc) *NodeGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ngb *NodeGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ngb.build.ctx, ent.OpQueryGroupBy)
-	if err := ngb.build.prepareQuery(ctx); err != nil {
+func (_g *NodeGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*NodeQuery, *NodeGroupBy](ctx, ngb.build, ngb, ngb.build.inters, v)
+	return scanWithInterceptors[*NodeQuery, *NodeGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (ngb *NodeGroupBy) gremlinScan(ctx context.Context, root *NodeQuery, v any) error {
+func (_g *NodeGroupBy) gremlinScan(ctx context.Context, root *NodeQuery, v any) error {
 	var (
 		trs   []any
 		names []any
 	)
-	for _, fn := range ngb.fns {
+	for _, fn := range _g.fns {
 		name, tr := fn("p", "")
 		trs = append(trs, tr)
 		names = append(names, name)
 	}
-	for _, f := range *ngb.flds {
+	for _, f := range *_g.flds {
 		names = append(names, f)
 		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
 	}
 	query, bindings := root.gremlinQuery(ctx).Group().
-		By(__.Values(*ngb.flds...).Fold()).
+		By(__.Values(*_g.flds...).Fold()).
 		By(__.Fold().Match(trs...).Select(names...)).
 		Select(dsl.Values).
 		Next().
 		Query()
 	res := &gremlin.Response{}
-	if err := ngb.build.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _g.build.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(*ngb.flds)+len(ngb.fns) == 1 {
+	if len(*_g.flds)+len(_g.fns) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()
@@ -509,40 +509,40 @@ type NodeSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (ns *NodeSelect) Aggregate(fns ...AggregateFunc) *NodeSelect {
-	ns.fns = append(ns.fns, fns...)
-	return ns
+func (_s *NodeSelect) Aggregate(fns ...AggregateFunc) *NodeSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ns *NodeSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ns.ctx, ent.OpQuerySelect)
-	if err := ns.prepareQuery(ctx); err != nil {
+func (_s *NodeSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*NodeQuery, *NodeSelect](ctx, ns.NodeQuery, ns, ns.inters, v)
+	return scanWithInterceptors[*NodeQuery, *NodeSelect](ctx, _s.NodeQuery, _s, _s.inters, v)
 }
 
-func (ns *NodeSelect) gremlinScan(ctx context.Context, root *NodeQuery, v any) error {
+func (_s *NodeSelect) gremlinScan(ctx context.Context, root *NodeQuery, v any) error {
 	var (
 		res       = &gremlin.Response{}
 		traversal = root.gremlinQuery(ctx)
 	)
-	if fields := ns.ctx.Fields; len(fields) == 1 {
+	if fields := _s.ctx.Fields; len(fields) == 1 {
 		if fields[0] != node.FieldID {
 			traversal = traversal.Values(fields...)
 		} else {
 			traversal = traversal.ID()
 		}
 	} else {
-		fields := make([]any, len(ns.ctx.Fields))
-		for i, f := range ns.ctx.Fields {
+		fields := make([]any, len(_s.ctx.Fields))
+		for i, f := range _s.ctx.Fields {
 			fields[i] = f
 		}
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := ns.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _s.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {

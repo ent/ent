@@ -448,41 +448,41 @@ type MixinIDGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (migb *MixinIDGroupBy) Aggregate(fns ...AggregateFunc) *MixinIDGroupBy {
-	migb.fns = append(migb.fns, fns...)
-	return migb
+func (_g *MixinIDGroupBy) Aggregate(fns ...AggregateFunc) *MixinIDGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (migb *MixinIDGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, migb.build.ctx, ent.OpQueryGroupBy)
-	if err := migb.build.prepareQuery(ctx); err != nil {
+func (_g *MixinIDGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*MixinIDQuery, *MixinIDGroupBy](ctx, migb.build, migb, migb.build.inters, v)
+	return scanWithInterceptors[*MixinIDQuery, *MixinIDGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (migb *MixinIDGroupBy) sqlScan(ctx context.Context, root *MixinIDQuery, v any) error {
+func (_g *MixinIDGroupBy) sqlScan(ctx context.Context, root *MixinIDQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(migb.fns))
-	for _, fn := range migb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*migb.flds)+len(migb.fns))
-		for _, f := range *migb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*migb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := migb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -496,27 +496,27 @@ type MixinIDSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (mis *MixinIDSelect) Aggregate(fns ...AggregateFunc) *MixinIDSelect {
-	mis.fns = append(mis.fns, fns...)
-	return mis
+func (_s *MixinIDSelect) Aggregate(fns ...AggregateFunc) *MixinIDSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (mis *MixinIDSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, mis.ctx, ent.OpQuerySelect)
-	if err := mis.prepareQuery(ctx); err != nil {
+func (_s *MixinIDSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*MixinIDQuery, *MixinIDSelect](ctx, mis.MixinIDQuery, mis, mis.inters, v)
+	return scanWithInterceptors[*MixinIDQuery, *MixinIDSelect](ctx, _s.MixinIDQuery, _s, _s.inters, v)
 }
 
-func (mis *MixinIDSelect) sqlScan(ctx context.Context, root *MixinIDQuery, v any) error {
+func (_s *MixinIDSelect) sqlScan(ctx context.Context, root *MixinIDQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(mis.fns))
-	for _, fn := range mis.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*mis.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -524,7 +524,7 @@ func (mis *MixinIDSelect) sqlScan(ctx context.Context, root *MixinIDQuery, v any
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := mis.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

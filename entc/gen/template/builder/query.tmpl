@@ -428,7 +428,7 @@ func ({{ $receiver }} *{{ $builder }}) prepareQuery(ctx context.Context) error {
 
 {{/* groupby builder */}}
 
-{{ $groupReceiver := receiver $groupBuilder }}
+{{ $groupReceiver := $.GroupReceiver }}
 
 // {{ $groupBuilder }} is the group-by builder for {{ $.Name }} entities.
 type {{ $groupBuilder }} struct {
@@ -458,7 +458,7 @@ func ({{ $groupReceiver }} *{{ $groupBuilder }}) Scan(ctx context.Context, v any
 
 {{/* select builder */}}
 
-{{ $selectReceiver := receiver $selectBuilder }}
+{{ $selectReceiver := $.SelectReceiver }}
 
 // {{ $selectBuilder }} is the builder for selecting fields of {{ pascal $.Name }} entities.
 type {{ $selectBuilder }} struct {

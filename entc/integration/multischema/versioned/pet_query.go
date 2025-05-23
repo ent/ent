@@ -554,41 +554,41 @@ type PetGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (pgb *PetGroupBy) Aggregate(fns ...AggregateFunc) *PetGroupBy {
-	pgb.fns = append(pgb.fns, fns...)
-	return pgb
+func (_g *PetGroupBy) Aggregate(fns ...AggregateFunc) *PetGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (pgb *PetGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, pgb.build.ctx, ent.OpQueryGroupBy)
-	if err := pgb.build.prepareQuery(ctx); err != nil {
+func (_g *PetGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*PetQuery, *PetGroupBy](ctx, pgb.build, pgb, pgb.build.inters, v)
+	return scanWithInterceptors[*PetQuery, *PetGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (pgb *PetGroupBy) sqlScan(ctx context.Context, root *PetQuery, v any) error {
+func (_g *PetGroupBy) sqlScan(ctx context.Context, root *PetQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(pgb.fns))
-	for _, fn := range pgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*pgb.flds)+len(pgb.fns))
-		for _, f := range *pgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*pgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := pgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -602,27 +602,27 @@ type PetSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (ps *PetSelect) Aggregate(fns ...AggregateFunc) *PetSelect {
-	ps.fns = append(ps.fns, fns...)
-	return ps
+func (_s *PetSelect) Aggregate(fns ...AggregateFunc) *PetSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ps *PetSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ps.ctx, ent.OpQuerySelect)
-	if err := ps.prepareQuery(ctx); err != nil {
+func (_s *PetSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*PetQuery, *PetSelect](ctx, ps.PetQuery, ps, ps.inters, v)
+	return scanWithInterceptors[*PetQuery, *PetSelect](ctx, _s.PetQuery, _s, _s.inters, v)
 }
 
-func (ps *PetSelect) sqlScan(ctx context.Context, root *PetQuery, v any) error {
+func (_s *PetSelect) sqlScan(ctx context.Context, root *PetQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(ps.fns))
-	for _, fn := range ps.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*ps.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -630,7 +630,7 @@ func (ps *PetSelect) sqlScan(ctx context.Context, root *PetQuery, v any) error {
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ps.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -638,7 +638,7 @@ func (ps *PetSelect) sqlScan(ctx context.Context, root *PetQuery, v any) error {
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (ps *PetSelect) Modify(modifiers ...func(s *sql.Selector)) *PetSelect {
-	ps.modifiers = append(ps.modifiers, modifiers...)
-	return ps
+func (_s *PetSelect) Modify(modifiers ...func(s *sql.Selector)) *PetSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

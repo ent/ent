@@ -603,41 +603,41 @@ type GroupInfoGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (gigb *GroupInfoGroupBy) Aggregate(fns ...AggregateFunc) *GroupInfoGroupBy {
-	gigb.fns = append(gigb.fns, fns...)
-	return gigb
+func (_g *GroupInfoGroupBy) Aggregate(fns ...AggregateFunc) *GroupInfoGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (gigb *GroupInfoGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, gigb.build.ctx, ent.OpQueryGroupBy)
-	if err := gigb.build.prepareQuery(ctx); err != nil {
+func (_g *GroupInfoGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*GroupInfoQuery, *GroupInfoGroupBy](ctx, gigb.build, gigb, gigb.build.inters, v)
+	return scanWithInterceptors[*GroupInfoQuery, *GroupInfoGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (gigb *GroupInfoGroupBy) sqlScan(ctx context.Context, root *GroupInfoQuery, v any) error {
+func (_g *GroupInfoGroupBy) sqlScan(ctx context.Context, root *GroupInfoQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(gigb.fns))
-	for _, fn := range gigb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*gigb.flds)+len(gigb.fns))
-		for _, f := range *gigb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*gigb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := gigb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -651,27 +651,27 @@ type GroupInfoSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (gis *GroupInfoSelect) Aggregate(fns ...AggregateFunc) *GroupInfoSelect {
-	gis.fns = append(gis.fns, fns...)
-	return gis
+func (_s *GroupInfoSelect) Aggregate(fns ...AggregateFunc) *GroupInfoSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (gis *GroupInfoSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, gis.ctx, ent.OpQuerySelect)
-	if err := gis.prepareQuery(ctx); err != nil {
+func (_s *GroupInfoSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*GroupInfoQuery, *GroupInfoSelect](ctx, gis.GroupInfoQuery, gis, gis.inters, v)
+	return scanWithInterceptors[*GroupInfoQuery, *GroupInfoSelect](ctx, _s.GroupInfoQuery, _s, _s.inters, v)
 }
 
-func (gis *GroupInfoSelect) sqlScan(ctx context.Context, root *GroupInfoQuery, v any) error {
+func (_s *GroupInfoSelect) sqlScan(ctx context.Context, root *GroupInfoQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(gis.fns))
-	for _, fn := range gis.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*gis.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -679,7 +679,7 @@ func (gis *GroupInfoSelect) sqlScan(ctx context.Context, root *GroupInfoQuery, v
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := gis.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -687,7 +687,7 @@ func (gis *GroupInfoSelect) sqlScan(ctx context.Context, root *GroupInfoQuery, v
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (gis *GroupInfoSelect) Modify(modifiers ...func(s *sql.Selector)) *GroupInfoSelect {
-	gis.modifiers = append(gis.modifiers, modifiers...)
-	return gis
+func (_s *GroupInfoSelect) Modify(modifiers ...func(s *sql.Selector)) *GroupInfoSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

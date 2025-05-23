@@ -713,41 +713,41 @@ type DocGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (dgb *DocGroupBy) Aggregate(fns ...AggregateFunc) *DocGroupBy {
-	dgb.fns = append(dgb.fns, fns...)
-	return dgb
+func (_g *DocGroupBy) Aggregate(fns ...AggregateFunc) *DocGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (dgb *DocGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, dgb.build.ctx, ent.OpQueryGroupBy)
-	if err := dgb.build.prepareQuery(ctx); err != nil {
+func (_g *DocGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*DocQuery, *DocGroupBy](ctx, dgb.build, dgb, dgb.build.inters, v)
+	return scanWithInterceptors[*DocQuery, *DocGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (dgb *DocGroupBy) sqlScan(ctx context.Context, root *DocQuery, v any) error {
+func (_g *DocGroupBy) sqlScan(ctx context.Context, root *DocQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(dgb.fns))
-	for _, fn := range dgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*dgb.flds)+len(dgb.fns))
-		for _, f := range *dgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*dgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := dgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -761,27 +761,27 @@ type DocSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (ds *DocSelect) Aggregate(fns ...AggregateFunc) *DocSelect {
-	ds.fns = append(ds.fns, fns...)
-	return ds
+func (_s *DocSelect) Aggregate(fns ...AggregateFunc) *DocSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ds *DocSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ds.ctx, ent.OpQuerySelect)
-	if err := ds.prepareQuery(ctx); err != nil {
+func (_s *DocSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*DocQuery, *DocSelect](ctx, ds.DocQuery, ds, ds.inters, v)
+	return scanWithInterceptors[*DocQuery, *DocSelect](ctx, _s.DocQuery, _s, _s.inters, v)
 }
 
-func (ds *DocSelect) sqlScan(ctx context.Context, root *DocQuery, v any) error {
+func (_s *DocSelect) sqlScan(ctx context.Context, root *DocQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(ds.fns))
-	for _, fn := range ds.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*ds.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -789,7 +789,7 @@ func (ds *DocSelect) sqlScan(ctx context.Context, root *DocQuery, v any) error {
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ds.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

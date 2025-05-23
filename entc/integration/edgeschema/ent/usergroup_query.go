@@ -601,41 +601,41 @@ type UserGroupGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (uggb *UserGroupGroupBy) Aggregate(fns ...AggregateFunc) *UserGroupGroupBy {
-	uggb.fns = append(uggb.fns, fns...)
-	return uggb
+func (_g *UserGroupGroupBy) Aggregate(fns ...AggregateFunc) *UserGroupGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (uggb *UserGroupGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, uggb.build.ctx, ent.OpQueryGroupBy)
-	if err := uggb.build.prepareQuery(ctx); err != nil {
+func (_g *UserGroupGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*UserGroupQuery, *UserGroupGroupBy](ctx, uggb.build, uggb, uggb.build.inters, v)
+	return scanWithInterceptors[*UserGroupQuery, *UserGroupGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (uggb *UserGroupGroupBy) sqlScan(ctx context.Context, root *UserGroupQuery, v any) error {
+func (_g *UserGroupGroupBy) sqlScan(ctx context.Context, root *UserGroupQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(uggb.fns))
-	for _, fn := range uggb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*uggb.flds)+len(uggb.fns))
-		for _, f := range *uggb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*uggb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := uggb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -649,27 +649,27 @@ type UserGroupSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (ugs *UserGroupSelect) Aggregate(fns ...AggregateFunc) *UserGroupSelect {
-	ugs.fns = append(ugs.fns, fns...)
-	return ugs
+func (_s *UserGroupSelect) Aggregate(fns ...AggregateFunc) *UserGroupSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ugs *UserGroupSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ugs.ctx, ent.OpQuerySelect)
-	if err := ugs.prepareQuery(ctx); err != nil {
+func (_s *UserGroupSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*UserGroupQuery, *UserGroupSelect](ctx, ugs.UserGroupQuery, ugs, ugs.inters, v)
+	return scanWithInterceptors[*UserGroupQuery, *UserGroupSelect](ctx, _s.UserGroupQuery, _s, _s.inters, v)
 }
 
-func (ugs *UserGroupSelect) sqlScan(ctx context.Context, root *UserGroupQuery, v any) error {
+func (_s *UserGroupSelect) sqlScan(ctx context.Context, root *UserGroupQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(ugs.fns))
-	for _, fn := range ugs.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*ugs.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -677,7 +677,7 @@ func (ugs *UserGroupSelect) sqlScan(ctx context.Context, root *UserGroupQuery, v
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ugs.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

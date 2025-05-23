@@ -523,41 +523,41 @@ type RoleUserGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (rugb *RoleUserGroupBy) Aggregate(fns ...AggregateFunc) *RoleUserGroupBy {
-	rugb.fns = append(rugb.fns, fns...)
-	return rugb
+func (_g *RoleUserGroupBy) Aggregate(fns ...AggregateFunc) *RoleUserGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (rugb *RoleUserGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, rugb.build.ctx, ent.OpQueryGroupBy)
-	if err := rugb.build.prepareQuery(ctx); err != nil {
+func (_g *RoleUserGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*RoleUserQuery, *RoleUserGroupBy](ctx, rugb.build, rugb, rugb.build.inters, v)
+	return scanWithInterceptors[*RoleUserQuery, *RoleUserGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (rugb *RoleUserGroupBy) sqlScan(ctx context.Context, root *RoleUserQuery, v any) error {
+func (_g *RoleUserGroupBy) sqlScan(ctx context.Context, root *RoleUserQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(rugb.fns))
-	for _, fn := range rugb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*rugb.flds)+len(rugb.fns))
-		for _, f := range *rugb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*rugb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := rugb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -571,27 +571,27 @@ type RoleUserSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (rus *RoleUserSelect) Aggregate(fns ...AggregateFunc) *RoleUserSelect {
-	rus.fns = append(rus.fns, fns...)
-	return rus
+func (_s *RoleUserSelect) Aggregate(fns ...AggregateFunc) *RoleUserSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (rus *RoleUserSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, rus.ctx, ent.OpQuerySelect)
-	if err := rus.prepareQuery(ctx); err != nil {
+func (_s *RoleUserSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*RoleUserQuery, *RoleUserSelect](ctx, rus.RoleUserQuery, rus, rus.inters, v)
+	return scanWithInterceptors[*RoleUserQuery, *RoleUserSelect](ctx, _s.RoleUserQuery, _s, _s.inters, v)
 }
 
-func (rus *RoleUserSelect) sqlScan(ctx context.Context, root *RoleUserQuery, v any) error {
+func (_s *RoleUserSelect) sqlScan(ctx context.Context, root *RoleUserQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(rus.fns))
-	for _, fn := range rus.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*rus.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -599,7 +599,7 @@ func (rus *RoleUserSelect) sqlScan(ctx context.Context, root *RoleUserQuery, v a
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := rus.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

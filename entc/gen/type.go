@@ -899,6 +899,16 @@ func (t Type) MutationName() string {
 	return pascal(t.Name) + "Mutation"
 }
 
+// GroupReceiver returns the receiver name of the group-by builder for this type.
+func (t Type) GroupReceiver() string {
+	return "_g"
+}
+
+// SelectReceiver returns the receiver name of the selector builder for this type.
+func (t Type) SelectReceiver() string {
+	return "_s"
+}
+
 // TypeName returns the constant name of the type defined in mutation.go.
 func (t Type) TypeName() string {
 	return "Type" + pascal(t.Name)

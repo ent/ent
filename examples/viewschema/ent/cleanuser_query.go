@@ -367,41 +367,41 @@ type CleanUserGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (cugb *CleanUserGroupBy) Aggregate(fns ...AggregateFunc) *CleanUserGroupBy {
-	cugb.fns = append(cugb.fns, fns...)
-	return cugb
+func (_g *CleanUserGroupBy) Aggregate(fns ...AggregateFunc) *CleanUserGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (cugb *CleanUserGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cugb.build.ctx, ent.OpQueryGroupBy)
-	if err := cugb.build.prepareQuery(ctx); err != nil {
+func (_g *CleanUserGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*CleanUserQuery, *CleanUserGroupBy](ctx, cugb.build, cugb, cugb.build.inters, v)
+	return scanWithInterceptors[*CleanUserQuery, *CleanUserGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (cugb *CleanUserGroupBy) sqlScan(ctx context.Context, root *CleanUserQuery, v any) error {
+func (_g *CleanUserGroupBy) sqlScan(ctx context.Context, root *CleanUserQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(cugb.fns))
-	for _, fn := range cugb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*cugb.flds)+len(cugb.fns))
-		for _, f := range *cugb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*cugb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := cugb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -415,27 +415,27 @@ type CleanUserSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (cus *CleanUserSelect) Aggregate(fns ...AggregateFunc) *CleanUserSelect {
-	cus.fns = append(cus.fns, fns...)
-	return cus
+func (_s *CleanUserSelect) Aggregate(fns ...AggregateFunc) *CleanUserSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (cus *CleanUserSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cus.ctx, ent.OpQuerySelect)
-	if err := cus.prepareQuery(ctx); err != nil {
+func (_s *CleanUserSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*CleanUserQuery, *CleanUserSelect](ctx, cus.CleanUserQuery, cus, cus.inters, v)
+	return scanWithInterceptors[*CleanUserQuery, *CleanUserSelect](ctx, _s.CleanUserQuery, _s, _s.inters, v)
 }
 
-func (cus *CleanUserSelect) sqlScan(ctx context.Context, root *CleanUserQuery, v any) error {
+func (_s *CleanUserSelect) sqlScan(ctx context.Context, root *CleanUserQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(cus.fns))
-	for _, fn := range cus.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*cus.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -443,7 +443,7 @@ func (cus *CleanUserSelect) sqlScan(ctx context.Context, root *CleanUserQuery, v
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := cus.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

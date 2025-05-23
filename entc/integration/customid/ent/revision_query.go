@@ -425,41 +425,41 @@ type RevisionGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (rgb *RevisionGroupBy) Aggregate(fns ...AggregateFunc) *RevisionGroupBy {
-	rgb.fns = append(rgb.fns, fns...)
-	return rgb
+func (_g *RevisionGroupBy) Aggregate(fns ...AggregateFunc) *RevisionGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (rgb *RevisionGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, rgb.build.ctx, ent.OpQueryGroupBy)
-	if err := rgb.build.prepareQuery(ctx); err != nil {
+func (_g *RevisionGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*RevisionQuery, *RevisionGroupBy](ctx, rgb.build, rgb, rgb.build.inters, v)
+	return scanWithInterceptors[*RevisionQuery, *RevisionGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (rgb *RevisionGroupBy) sqlScan(ctx context.Context, root *RevisionQuery, v any) error {
+func (_g *RevisionGroupBy) sqlScan(ctx context.Context, root *RevisionQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(rgb.fns))
-	for _, fn := range rgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*rgb.flds)+len(rgb.fns))
-		for _, f := range *rgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*rgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := rgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -473,27 +473,27 @@ type RevisionSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (rs *RevisionSelect) Aggregate(fns ...AggregateFunc) *RevisionSelect {
-	rs.fns = append(rs.fns, fns...)
-	return rs
+func (_s *RevisionSelect) Aggregate(fns ...AggregateFunc) *RevisionSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (rs *RevisionSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, rs.ctx, ent.OpQuerySelect)
-	if err := rs.prepareQuery(ctx); err != nil {
+func (_s *RevisionSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*RevisionQuery, *RevisionSelect](ctx, rs.RevisionQuery, rs, rs.inters, v)
+	return scanWithInterceptors[*RevisionQuery, *RevisionSelect](ctx, _s.RevisionQuery, _s, _s.inters, v)
 }
 
-func (rs *RevisionSelect) sqlScan(ctx context.Context, root *RevisionQuery, v any) error {
+func (_s *RevisionSelect) sqlScan(ctx context.Context, root *RevisionQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(rs.fns))
-	for _, fn := range rs.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*rs.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -501,7 +501,7 @@ func (rs *RevisionSelect) sqlScan(ctx context.Context, root *RevisionQuery, v an
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := rs.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

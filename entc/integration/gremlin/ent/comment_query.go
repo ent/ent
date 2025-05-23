@@ -400,45 +400,45 @@ type CommentGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (cgb *CommentGroupBy) Aggregate(fns ...AggregateFunc) *CommentGroupBy {
-	cgb.fns = append(cgb.fns, fns...)
-	return cgb
+func (_g *CommentGroupBy) Aggregate(fns ...AggregateFunc) *CommentGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (cgb *CommentGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cgb.build.ctx, ent.OpQueryGroupBy)
-	if err := cgb.build.prepareQuery(ctx); err != nil {
+func (_g *CommentGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*CommentQuery, *CommentGroupBy](ctx, cgb.build, cgb, cgb.build.inters, v)
+	return scanWithInterceptors[*CommentQuery, *CommentGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (cgb *CommentGroupBy) gremlinScan(ctx context.Context, root *CommentQuery, v any) error {
+func (_g *CommentGroupBy) gremlinScan(ctx context.Context, root *CommentQuery, v any) error {
 	var (
 		trs   []any
 		names []any
 	)
-	for _, fn := range cgb.fns {
+	for _, fn := range _g.fns {
 		name, tr := fn("p", "")
 		trs = append(trs, tr)
 		names = append(names, name)
 	}
-	for _, f := range *cgb.flds {
+	for _, f := range *_g.flds {
 		names = append(names, f)
 		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
 	}
 	query, bindings := root.gremlinQuery(ctx).Group().
-		By(__.Values(*cgb.flds...).Fold()).
+		By(__.Values(*_g.flds...).Fold()).
 		By(__.Fold().Match(trs...).Select(names...)).
 		Select(dsl.Values).
 		Next().
 		Query()
 	res := &gremlin.Response{}
-	if err := cgb.build.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _g.build.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(*cgb.flds)+len(cgb.fns) == 1 {
+	if len(*_g.flds)+len(_g.fns) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()
@@ -455,40 +455,40 @@ type CommentSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (cs *CommentSelect) Aggregate(fns ...AggregateFunc) *CommentSelect {
-	cs.fns = append(cs.fns, fns...)
-	return cs
+func (_s *CommentSelect) Aggregate(fns ...AggregateFunc) *CommentSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (cs *CommentSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cs.ctx, ent.OpQuerySelect)
-	if err := cs.prepareQuery(ctx); err != nil {
+func (_s *CommentSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*CommentQuery, *CommentSelect](ctx, cs.CommentQuery, cs, cs.inters, v)
+	return scanWithInterceptors[*CommentQuery, *CommentSelect](ctx, _s.CommentQuery, _s, _s.inters, v)
 }
 
-func (cs *CommentSelect) gremlinScan(ctx context.Context, root *CommentQuery, v any) error {
+func (_s *CommentSelect) gremlinScan(ctx context.Context, root *CommentQuery, v any) error {
 	var (
 		res       = &gremlin.Response{}
 		traversal = root.gremlinQuery(ctx)
 	)
-	if fields := cs.ctx.Fields; len(fields) == 1 {
+	if fields := _s.ctx.Fields; len(fields) == 1 {
 		if fields[0] != comment.FieldID {
 			traversal = traversal.Values(fields...)
 		} else {
 			traversal = traversal.ID()
 		}
 	} else {
-		fields := make([]any, len(cs.ctx.Fields))
-		for i, f := range cs.ctx.Fields {
+		fields := make([]any, len(_s.ctx.Fields))
+		for i, f := range _s.ctx.Fields {
 			fields[i] = f
 		}
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := cs.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _s.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {
