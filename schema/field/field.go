@@ -15,6 +15,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"entgo.io/ent/schema"
 )
@@ -222,6 +223,18 @@ func (b *stringBuilder) MinLen(i int) *stringBuilder {
 	return b
 }
 
+// MinRuneLen adds a rune length validator for this field.
+// Operation fails if the rune count of the string is less than the given value.
+func (b *stringBuilder) MinRuneLen(i int) *stringBuilder {
+	b.desc.Validators = append(b.desc.Validators, func(v string) error {
+		if utf8.RuneCountInString(v) < i {
+			return errors.New("value is less than the required rune length")
+		}
+		return nil
+	})
+	return b
+}
+
 // NotEmpty adds a length validator for this field.
 // Operation fails if the length of the string is zero.
 func (b *stringBuilder) NotEmpty() *stringBuilder {
@@ -235,6 +248,19 @@ func (b *stringBuilder) MaxLen(i int) *stringBuilder {
 	b.desc.Validators = append(b.desc.Validators, func(v string) error {
 		if len(v) > i {
 			return errors.New("value is greater than the required length")
+		}
+		return nil
+	})
+	return b
+}
+
+// MaxRuneLen adds a rune length validator for this field.
+// Operation fails if the rune count of the string is greater than the given value.
+func (b *stringBuilder) MaxRuneLen(i int) *stringBuilder {
+	b.desc.Size = i
+	b.desc.Validators = append(b.desc.Validators, func(v string) error {
+		if utf8.RuneCountInString(v) > i {
+			return errors.New("value is greater than the required rune length")
 		}
 		return nil
 	})
