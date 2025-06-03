@@ -793,7 +793,8 @@ func (g *Graph) Views() (views []*schema.Table, err error) {
 			continue
 		}
 		view := schema.NewView(n.Table()).
-			SetComment(n.sqlComment())
+			SetComment(n.sqlComment()).
+			SetPos(n.Pos())
 		switch ant := n.EntSQL(); {
 		case ant == nil:
 		case ant.Skip:
