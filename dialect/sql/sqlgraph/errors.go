@@ -12,7 +12,10 @@ import (
 // IsConstraintError returns true if the error resulted from a database constraint violation.
 func IsConstraintError(err error) bool {
 	var e *ConstraintError
-	return errors.As(err, &e) || IsUniqueConstraintError(err) || IsForeignKeyConstraintError(err)
+	return errors.As(err, &e) ||
+		IsUniqueConstraintError(err) ||
+		IsForeignKeyConstraintError(err) ||
+		IsCheckConstraintError(err)
 }
 
 // IsUniqueConstraintError reports if the error resulted from a DB uniqueness constraint violation.
@@ -44,6 +47,24 @@ func IsForeignKeyConstraintError(err error) bool {
 		"Error 1452",                      // MySQL (Cannot add or update a child row).
 		"violates foreign key constraint", // Postgres
 		"FOREIGN KEY constraint failed",   // SQLite
+	} {
+		if strings.Contains(err.Error(), s) {
+			return true
+		}
+	}
+	return false
+}
+
+// IsCheckConstraintError reports if the error resulted from a database check constraint violation.
+// e.g. a value does not satisfy a check condition.
+func IsCheckConstraintError(err error) bool {
+	if err == nil {
+		return false
+	}
+	for _, s := range []string{
+		"Error 3819",                // MySQL
+		"violates check constraint", // Postgres
+		"CHECK constraint failed",   // SQLite
 	} {
 		if strings.Contains(err.Error(), s) {
 			return true
