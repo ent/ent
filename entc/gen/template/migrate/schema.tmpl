@@ -182,6 +182,9 @@ var (
 									{{- with $ant.Where }}
 										Where: {{ quote . }},
 									{{- end }}
+									{{- with $ant.Comment }}
+										Comment: {{ quote . }},
+									{{- end }}
 								},
 							{{- end }}
 						},
