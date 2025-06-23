@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/entc/gen"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/tw"
 )
 
 // A Config controls the output of Fprint.
@@ -43,12 +44,10 @@ func (p Config) node(t *gen.Type) {
 	var (
 		b      strings.Builder
 		id     []*gen.Field
-		table  = tablewriter.NewWriter(&b)
 		header = []string{"Field", "Type", "Unique", "Optional", "Nillable", "Default", "UpdateDefault", "Immutable", "StructTag", "Validators", "Comment"}
+		table  = tablewriter.NewTable(&b, tablewriter.WithHeaderAutoFormat(tw.Off), tablewriter.WithHeader(header))
 	)
 	b.WriteString(t.Name + ":\n")
-	table.SetAutoFormatHeaders(false)
-	table.SetHeader(header)
 	if t.ID != nil {
 		id = append(id, t.ID)
 	}
@@ -63,14 +62,13 @@ func (p Config) node(t *gen.Type) {
 			row[i] = fmt.Sprint(field.Interface())
 		}
 		row[len(row)-1] = f.Comment()
-		table.Append(row)
+		_ = table.Append(row)
 	}
-	table.Render()
-	table = tablewriter.NewWriter(&b)
-	table.SetAutoFormatHeaders(false)
-	table.SetHeader([]string{"Edge", "Type", "Inverse", "BackRef", "Relation", "Unique", "Optional", "Comment"})
+	_ = table.Render()
+	table = tablewriter.NewTable(&b, tablewriter.WithHeaderAutoFormat(tw.Off),
+		tablewriter.WithHeader([]string{"Edge", "Type", "Inverse", "BackRef", "Relation", "Unique", "Optional", "Comment"}))
 	for _, e := range t.Edges {
-		table.Append([]string{
+		_ = table.Append([]string{
 			e.Name,
 			e.Type.Name,
 			strconv.FormatBool(e.IsInverse()),
@@ -81,8 +79,9 @@ func (p Config) node(t *gen.Type) {
 			e.Comment(),
 		})
 	}
-	if table.NumLines() > 0 {
-		table.Render()
+
+	if len(t.Edges) > 0 {
+		_ = table.Render()
 	}
 	io.WriteString(p, strings.ReplaceAll(b.String(), "\n", "\n\t")+"\n")
 }
