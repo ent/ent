@@ -136,7 +136,10 @@ func (m *CommentMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, comment.ID(id))
+			return m.Client().Comment.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
@@ -576,7 +579,10 @@ func (m *PostMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, post.ID(id))
+			return m.Client().Post.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
@@ -1118,7 +1124,10 @@ func (m *UserMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, user.ID(id))
+			return m.Client().User.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
