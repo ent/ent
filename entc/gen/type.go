@@ -14,8 +14,10 @@ import (
 	"path"
 	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"ariga.io/atlas/sql/postgres"
 	"entgo.io/ent"
@@ -1060,6 +1062,35 @@ func (t Type) UnexportedForeignKeys() []*ForeignKey {
 	return fks
 }
 
+// notIdentifier reports whether ch is an invalid identifier character.
+func notIdentifier(ch rune) bool {
+	return !('a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' ||
+		'0' <= ch && ch <= '9' ||
+		ch == '_' ||
+		ch >= utf8.RuneSelf && (unicode.IsLetter(ch) || unicode.IsDigit(ch)))
+}
+
+// importPathToAssumedName returns the assumed package name of an import path.
+// It does this using only string parsing of the import path.
+// It picks the last element of the path that does not look like a major
+// version, and then picks the valid identifier off the start of that element.
+func importPathToAssumedName(importPath string) string {
+	base := path.Base(importPath)
+	if strings.HasPrefix(base, "v") {
+		if _, err := strconv.Atoi(base[1:]); err == nil {
+			dir := path.Dir(importPath)
+			if dir != "." {
+				base = path.Base(dir)
+			}
+		}
+	}
+	base = strings.TrimPrefix(base, "go-")
+	if i := strings.IndexFunc(base, notIdentifier); i >= 0 {
+		base = base[:i]
+	}
+	return base
+}
+
 // aliases adds package aliases (local names) for all type-packages that
 // their import identifier conflicts with user-defined packages (i.e. GoType).
 func aliases(g *Graph) {
@@ -1079,7 +1110,7 @@ func aliases(g *Graph) {
 			}
 			name := f.Type.PkgName
 			if name == "" && f.Type.PkgPath != "" {
-				name = path.Base(f.Type.PkgPath)
+				name = importPathToAssumedName(f.Type.PkgPath)
 			}
 			// A user-defined type already uses the
 			// package local name.
