@@ -148,7 +148,8 @@ func Enum(name string) *enumBuilder {
 
 // UUID returns a new Field with type UUID. An example for defining UUID field is as follows:
 //
-//	field.UUID("id", uuid.New())
+//	field.UUID("id", uuid.UUID{}).
+//		Default(uuid.New)
 func UUID(name string, typ driver.Valuer) *uuidBuilder {
 	rt := reflect.TypeOf(typ)
 	b := &uuidBuilder{&Descriptor{
