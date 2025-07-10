@@ -587,17 +587,45 @@ var drivers = func(v string) map[string]driver {
 	}
 }
 
+type DDLArgs struct {
+	// Dialect and Version of the target database.
+	Dialect, Version string
+	// HashSymbols indicates whether to hash long symbols in the DDL.
+	HashSymbols bool
+	// Tables to dump.
+	Tables []*Table
+	// Options to pass to the migration plan engine.
+	Options []migrate.PlanOption
+}
+
 // Dump the schema DDL for the given tables.
+//
+// Deprecated: use DDL instead.
 func Dump(ctx context.Context, dialect, version string, tables []*Table, opts ...migrate.PlanOption) (string, error) {
-	opts = append([]migrate.PlanOption{func(o *migrate.PlanOptions) {
+	return DDL(ctx, DDLArgs{
+		Dialect: dialect,
+		Version: version,
+		Tables:  tables,
+		Options: opts,
+	})
+}
+
+// DDL the schema DDL for the given tables.
+func DDL(ctx context.Context, args DDLArgs) (string, error) {
+	args.Options = append([]migrate.PlanOption{func(o *migrate.PlanOptions) {
 		o.Mode = migrate.PlanModeDump
 		o.Indent = "  "
-	}}, opts...)
-	d, ok := drivers(version)[dialect]
+	}}, args.Options...)
+	d, ok := drivers(args.Version)[args.Dialect]
 	if !ok {
-		return "", fmt.Errorf("unsupported dialect %q", dialect)
+		return "", fmt.Errorf("unsupported dialect %q", args.Dialect)
 	}
-	r, err := (&Atlas{sqlDialect: d, dialect: dialect}).StateReader(tables...).ReadState(ctx)
+	a := &Atlas{
+		sqlDialect:  d,
+		dialect:     args.Dialect,
+		hashSymbols: args.HashSymbols,
+	}
+	r, err := a.StateReader(args.Tables...).ReadState(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -609,7 +637,7 @@ func Dump(ctx context.Context, dialect, version string, tables []*Table, opts ..
 		s.Views = nil
 	}
 	var c schema.Changes
-	if slices.ContainsFunc(tables, func(t *Table) bool { return t.Schema != "" }) {
+	if slices.ContainsFunc(args.Tables, func(t *Table) bool { return t.Schema != "" }) {
 		c, err = d.RealmDiff(&schema.Realm{}, r)
 	} else {
 		c, err = d.SchemaDiff(&schema.Schema{}, r.Schemas[0])
@@ -617,17 +645,17 @@ func Dump(ctx context.Context, dialect, version string, tables []*Table, opts ..
 	if err != nil {
 		return "", err
 	}
-	p, err := d.PlanChanges(ctx, "dump", c, opts...)
+	p, err := d.PlanChanges(ctx, "dump", c, args.Options...)
 	if err != nil {
 		return "", err
 	}
 	for _, v := range vs {
-		q, _ := sql.Dialect(dialect).
+		q, _ := sql.Dialect(args.Dialect).
 			CreateView(v.Name).
 			Schema(v.Schema.Name).
 			Columns(func(cols []*schema.Column) (bs []*sql.ColumnBuilder) {
 				for _, c := range cols {
-					bs = append(bs, sql.Dialect(dialect).Column(c.Name).Type(c.Type.Raw))
+					bs = append(bs, sql.Dialect(args.Dialect).Column(c.Name).Type(c.Type.Raw))
 				}
 				return
 			}(v.Columns)...).
@@ -638,7 +666,7 @@ func Dump(ctx context.Context, dialect, version string, tables []*Table, opts ..
 			Comment: fmt.Sprintf("Add %q view", v.Name),
 		})
 	}
-	for _, t := range tables {
+	for _, t := range args.Tables {
 		p.Directives = append(p.Directives, fmt.Sprintf(
 			"-- atlas:pos %s%s[type=%s] %s",
 			func() string {

@@ -215,6 +215,7 @@ func SchemaCmd() *cobra.Command {
 		cfg                 gen.Config
 		dlct, version       string
 		features, buildTags []string
+		hashSymbols         bool
 		cmd                 = &cobra.Command{
 			Use:   "schema [flags] path",
 			Short: "dump the DDL for the schema directory",
@@ -254,7 +255,12 @@ func SchemaCmd() *cobra.Command {
 				if err != nil {
 					log.Fatalln(err)
 				}
-				ddl, err := schema.Dump(cmd.Context(), dlct, version, append(t, v...))
+				ddl, err := schema.DDL(cmd.Context(), schema.DDLArgs{
+					Dialect:     dlct,
+					Version:     version,
+					HashSymbols: hashSymbols,
+					Tables:      append(t, v...),
+				})
 				if err != nil {
 					log.Fatalln(err)
 				}
@@ -266,6 +272,7 @@ func SchemaCmd() *cobra.Command {
 	cmd.Flags().StringVar(&version, "version", "", "database version to assume")
 	cmd.Flags().StringSliceVarP(&features, "feature", "", nil, "extend codegen with additional features")
 	cmd.Flags().StringSliceVarP(&buildTags, "build-tags", "", nil, "go build tags to use when loading the schema graph")
+	cmd.Flags().BoolVar(&hashSymbols, "hash-symbols", false, "whether to hash long symbols")
 	cobra.CheckErr(cmd.MarkFlagRequired("dialect"))
 	return cmd
 }

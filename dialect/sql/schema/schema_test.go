@@ -6,6 +6,7 @@ package schema
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -154,69 +155,77 @@ func TestCopyTables(t *testing.T) {
 	require.Equal(t, tables, copyT)
 }
 
-func TestDump(t *testing.T) {
-	users := &Table{
-		Name: "users",
-		Pos:  "users.go:15",
-		Columns: []*Column{
-			{Name: "id", Type: field.TypeInt},
-			{Name: "name", Type: field.TypeString},
-			{Name: "spouse_id", Type: field.TypeInt},
-		},
+func TestDDL(t *testing.T) {
+	const (
+		hash   = "249590215c5bc8be0106146e65d7fa7f"
+		idx    = "super_duper_mega_ultra_hyper_giga_colossal_unbelievably_long_index_name"
+		hashMY = "super_duper_mega_ultra_hyper_gi_249590215c5bc8be0106146e65d7fa7f"
+		hashPG = "super_duper_mega_ultra_hyper_g_249590215c5bc8be0106146e65d7fa7f"
+	)
+	tbls := func() []*Table {
+		users := &Table{
+			Name: "users",
+			Pos:  "users.go:15",
+			Columns: []*Column{
+				{Name: "id", Type: field.TypeInt},
+				{Name: "name", Type: field.TypeString},
+				{Name: "spouse_id", Type: field.TypeInt},
+			},
+		}
+		users.PrimaryKey = users.Columns[:1]
+		users.Indexes = append(users.Indexes, &Index{
+			Name:    "name",
+			Columns: users.Columns[1:2],
+		})
+		users.AddForeignKey(&ForeignKey{
+			Columns:    users.Columns[2:],
+			RefTable:   users,
+			RefColumns: users.Columns[:1],
+			OnUpdate:   SetDefault,
+		})
+		users.SetAnnotation(&entsql.Annotation{Table: "Users"})
+		pets := &Table{
+			Name: "pets",
+			Pos:  "pets.go:15",
+			Columns: []*Column{
+				{Name: "id", Type: field.TypeInt},
+				{Name: "name", Type: field.TypeString},
+				{Name: "fur_color", Type: field.TypeEnum, Enums: []string{"black", "white"}},
+				{Name: "owner_id", Type: field.TypeInt},
+			},
+		}
+		pets.Indexes = append(pets.Indexes, &Index{
+			Name:       idx,
+			Unique:     true,
+			Columns:    pets.Columns[1:2],
+			Annotation: entsql.Desc(),
+		})
+		pets.AddForeignKey(&ForeignKey{
+			Columns:    pets.Columns[3:],
+			RefTable:   users,
+			RefColumns: users.Columns[:1],
+			OnDelete:   SetDefault,
+		})
+		petsWithoutFur := &Table{
+			Name:       "pets_without_fur",
+			Pos:        "pets.go:30",
+			View:       true,
+			Columns:    append(pets.Columns[:2], pets.Columns[3]),
+			Annotation: entsql.View("SELECT id, name, owner_id FROM pets"),
+		}
+		petNames := &Table{
+			Name:    "pet_names",
+			Pos:     "pets.go:45",
+			View:    true,
+			Columns: pets.Columns[1:1],
+			Annotation: entsql.ViewFor(dialect.Postgres, func(s *sql.Selector) {
+				s.Select("name").From(sql.Table("pets"))
+			}),
+		}
+		return []*Table{users, pets, petsWithoutFur, petNames}
 	}
-	users.PrimaryKey = users.Columns[:1]
-	users.Indexes = append(users.Indexes, &Index{
-		Name:    "name",
-		Columns: users.Columns[1:2],
-	})
-	users.AddForeignKey(&ForeignKey{
-		Columns:    users.Columns[2:],
-		RefTable:   users,
-		RefColumns: users.Columns[:1],
-		OnUpdate:   SetDefault,
-	})
-	users.SetAnnotation(&entsql.Annotation{Table: "Users"})
-	pets := &Table{
-		Name: "pets",
-		Pos:  "pets.go:15",
-		Columns: []*Column{
-			{Name: "id", Type: field.TypeInt},
-			{Name: "name", Type: field.TypeString},
-			{Name: "fur_color", Type: field.TypeEnum, Enums: []string{"black", "white"}},
-			{Name: "owner_id", Type: field.TypeInt},
-		},
-	}
-	pets.Indexes = append(pets.Indexes, &Index{
-		Name:       "name",
-		Unique:     true,
-		Columns:    pets.Columns[1:2],
-		Annotation: entsql.Desc(),
-	})
-	pets.AddForeignKey(&ForeignKey{
-		Columns:    pets.Columns[3:],
-		RefTable:   users,
-		RefColumns: users.Columns[:1],
-		OnDelete:   SetDefault,
-	})
-	petsWithoutFur := &Table{
-		Name:       "pets_without_fur",
-		Pos:        "pets.go:30",
-		View:       true,
-		Columns:    append(pets.Columns[:2], pets.Columns[3]),
-		Annotation: entsql.View("SELECT id, name, owner_id FROM pets"),
-	}
-	petNames := &Table{
-		Name:    "pet_names",
-		Pos:     "pets.go:45",
-		View:    true,
-		Columns: pets.Columns[1:1],
-		Annotation: entsql.ViewFor(dialect.Postgres, func(s *sql.Selector) {
-			s.Select("name").From(sql.Table("pets"))
-		}),
-	}
-	tables = []*Table{users, pets, petsWithoutFur, petNames}
-
-	my := strings.ReplaceAll(`-- Add new schema named "s1"
+	my := func(length int, idx string) string {
+		return fmt.Sprintf(strings.ReplaceAll(`-- Add new schema named "s1"
 CREATE DATABASE $s1$;
 -- Add new schema named "s2"
 CREATE DATABASE $s2$;
@@ -225,7 +234,7 @@ CREATE DATABASE $s3$;
 -- Create "users" table
 CREATE TABLE $s1$.$users$ (
   $id$ bigint NOT NULL,
-  $name$ varchar(255) NOT NULL,
+  $name$ varchar(%d) NOT NULL,
   $spouse_id$ bigint NOT NULL,
   PRIMARY KEY ($id$),
   INDEX $name$ ($name$),
@@ -234,17 +243,19 @@ CREATE TABLE $s1$.$users$ (
 -- Create "pets" table
 CREATE TABLE $s2$.$pets$ (
   $id$ bigint NOT NULL,
-  $name$ varchar(255) NOT NULL,
+  $name$ varchar(%d) NOT NULL,
   $owner_id$ bigint NOT NULL,
   $owner_id$ bigint NOT NULL,
-  UNIQUE INDEX $name$ ($name$ DESC),
+  UNIQUE INDEX $%s$ ($name$ DESC),
   FOREIGN KEY ($owner_id$) REFERENCES $s1$.$users$ ($id$) ON DELETE SET DEFAULT
 ) CHARSET utf8mb4 COLLATE utf8mb4_bin;
 -- Add "pets_without_fur" view
 CREATE VIEW $s3$.$pets_without_fur$ ($id$, $name$, $owner_id$) AS SELECT id, name, owner_id FROM pets;
-`, "$", "`")
+`, "$", "`"), length, length, idx)
+	}
 
-	pg := `-- Add new schema named "s1"
+	pg := func(idx string) string {
+		return fmt.Sprintf(`-- Add new schema named "s1"
 CREATE SCHEMA "s1";
 -- Add new schema named "s2"
 CREATE SCHEMA "s2";
@@ -268,18 +279,22 @@ CREATE TABLE "s2"."pets" (
   "owner_id" bigint NOT NULL,
   FOREIGN KEY ("owner_id") REFERENCES "s1"."users" ("id") ON DELETE SET DEFAULT
 );
--- Create index "name" to table: "pets"
-CREATE UNIQUE INDEX "name" ON "s2"."pets" ("name" DESC);
+-- Create index "%s" to table: "pets"
+CREATE UNIQUE INDEX "%s" ON "s2"."pets" ("name" DESC);
 -- Add "pets_without_fur" view
 CREATE VIEW "s3"."pets_without_fur" ("id", "name", "owner_id") AS SELECT id, name, owner_id FROM pets;
 -- Add "pet_names" view
 CREATE VIEW "s3"."pet_names" AS SELECT "name" FROM "pets";
-`
+`, idx, idx)
+	}
 
-	for _, tt := range []struct{ dialect, version, expected string }{
+	for _, tt := range []struct {
+		dialect, version, expected string
+		hash                       bool
+	}{
 		{
 			dialect.SQLite, "",
-			strings.ReplaceAll(`-- Create "users" table
+			fmt.Sprintf(strings.ReplaceAll(`-- Create "users" table
 CREATE TABLE $users$ (
   $id$ integer NOT NULL,
   $name$ text NOT NULL,
@@ -297,19 +312,20 @@ CREATE TABLE $pets$ (
   $owner_id$ integer NOT NULL,
   FOREIGN KEY ($owner_id$) REFERENCES $users$ ($id$) ON DELETE SET DEFAULT
 );
--- Create index "name" to table: "pets"
-CREATE UNIQUE INDEX $name$ ON $pets$ ($name$ DESC);
+-- Create index "%s" to table: "pets"
+CREATE UNIQUE INDEX $%s$ ON $pets$ ($name$ DESC);
 -- Add "pets_without_fur" view
 CREATE VIEW $pets_without_fur$ ($id$, $name$, $owner_id$) AS SELECT id, name, owner_id FROM pets;
-`, "$", "`"),
+`, "$", "`"), idx, idx), false,
 		},
-		{dialect.MySQL, "5.6", my},
-		{dialect.MySQL, "5.7", my},
-		{dialect.MySQL, "8", my},
-		{dialect.Postgres, "12", pg},
-		{dialect.Postgres, "13", pg},
-		{dialect.Postgres, "14", pg},
-		{dialect.Postgres, "15", pg},
+		{dialect.MySQL, "5.6", my(255, idx), false},
+		{dialect.MySQL, "5.6", my(191, hashMY), true},
+		{dialect.MySQL, "5.7", my(255, idx), false},
+		{dialect.MySQL, "8", my(255, hashMY), true},
+		{dialect.Postgres, "12", pg(idx), false},
+		{dialect.Postgres, "13", pg(idx), false},
+		{dialect.Postgres, "14", pg(hashPG), true},
+		{dialect.Postgres, "15", pg(hashPG), true},
 	} {
 		n := tt.dialect
 		if tt.version != "" {
@@ -321,6 +337,7 @@ CREATE VIEW $pets_without_fur$ ($id$, $name$, $owner_id$) AS SELECT id, name, ow
 -- atlas:pos pet_names[type=view] pets.go:45
 
 `
+		tables := tbls()
 		if tt.dialect != dialect.SQLite {
 			tables[0].Schema = "s1"
 			tables[1].Schema = "s2"
@@ -334,12 +351,22 @@ CREATE VIEW $pets_without_fur$ ($id$, $name$, $owner_id$) AS SELECT id, name, ow
 `
 		}
 		t.Run(n, func(t *testing.T) {
-			ac, err := Dump(context.Background(), tt.dialect, tt.version, tables)
+			ac, err := DDL(context.Background(), DDLArgs{
+				Dialect:     tt.dialect,
+				Version:     tt.version,
+				Tables:      tables,
+				HashSymbols: tt.hash,
+			})
 			require.NoError(t, err)
 			require.Equal(t, pos+tt.expected, ac)
 		})
 		t.Run(n+" single schema", func(t *testing.T) {
-			ac, err := Dump(context.Background(), tt.dialect, tt.version, tables[0:1])
+			ac, err := DDL(context.Background(), DDLArgs{
+				Dialect:     tt.dialect,
+				Version:     tt.version,
+				Tables:      tables[0:1],
+				HashSymbols: tt.hash,
+			})
 			require.NoError(t, err)
 			if tt.dialect != dialect.SQLite {
 				require.Contains(t, ac, "s1[type=schema].")
@@ -349,7 +376,12 @@ CREATE VIEW $pets_without_fur$ ($id$, $name$, $owner_id$) AS SELECT id, name, ow
 		})
 		t.Run(n+" no schema", func(t *testing.T) {
 			tables[0].Schema = ""
-			ac, err := Dump(context.Background(), tt.dialect, tt.version, tables[0:1])
+			ac, err := DDL(context.Background(), DDLArgs{
+				Dialect:     tt.dialect,
+				Version:     tt.version,
+				Tables:      tables[0:1],
+				HashSymbols: tt.hash,
+			})
 			require.NoError(t, err)
 			require.NotContains(t, ac, "[type=schema].")
 			require.Contains(t, ac, "[type=table]")
