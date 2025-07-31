@@ -1,17 +1,19 @@
 module entgo.io/ent/entc/integration
 
-go 1.23
+go 1.24
+
+toolchain go1.24.0
 
 replace entgo.io/ent => ../../
 
 require (
-	ariga.io/atlas v0.32.1-0.20250325101103-175b25e1c1b9
+	ariga.io/atlas v0.36.2-0.20250730182955-2c6300d0a3e1
 	ariga.io/atlas-go-sdk v0.6.9
 	entgo.io/ent v0.0.0-00010101000000-000000000000
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/google/uuid v1.3.0
 	github.com/lib/pq v1.10.7
-	github.com/mattn/go-sqlite3 v1.14.17
+	github.com/mattn/go-sqlite3 v1.14.28
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/sync v0.11.0
 )
@@ -34,7 +36,7 @@ require (
 	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/zclconf/go-cty v1.14.4 // indirect
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
-	golang.org/x/mod v0.23.0 // indirect
+	golang.org/x/mod v0.24.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

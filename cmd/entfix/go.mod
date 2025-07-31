@@ -1,6 +1,6 @@
 module entgo.io/ent/cmd/entfix
 
-go 1.23.4
+go 1.23
 
 require (
 	entgo.io/ent v0.14.2-0.20250119141711-a0182c96ebb6
