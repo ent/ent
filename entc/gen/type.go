@@ -474,7 +474,7 @@ func (t Type) MixedInFields() []int {
 		fields = append(fields, t.ID)
 	}
 	for _, f := range fields {
-		if f.Position != nil && f.Position.MixedIn && (f.Default || f.UpdateDefault || f.Validators > 0) {
+		if f.Position != nil && f.Position.MixedIn && (f.Default || f.UpdateDefault || f.Validators > 0 || f.HasValueScanner()) {
 			idx[f.Position.MixinIndex] = struct{}{}
 		}
 	}
