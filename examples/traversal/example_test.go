@@ -22,34 +22,42 @@ func Example_traversal() {
 	if err != nil {
 		log.Fatalf("failed opening connection to sqlite: %v", err)
 	}
-	defer client.Close()
+	defer func() {
+		if err != nil {
+			er := client.Close()
+			err = fmt.Errorf("%w; %v", err, er)
+			log.Fatal(err)
+		}
+	}()
+
 	ctx := context.Background()
 	// Run the auto migration tool.
-	if err := client.Schema.Create(ctx); err != nil {
-		log.Fatalf("failed creating schema resources: %v", err)
+	if err = client.Schema.Create(ctx); err != nil {
+		err = fmt.Errorf("failed creating schema resources: %v", err)
+		return
 	}
-	if err := Gen(ctx, client); err != nil {
-		log.Fatal(err)
+	if err = Gen(ctx, client); err != nil {
+		return
 	}
-	if err := Traverse(ctx, client); err != nil {
-		log.Fatal(err)
+	if err = Traverse(ctx, client); err != nil {
+		return
 	}
-	if err := Traverse2(ctx, client); err != nil {
-		log.Fatal(err)
+	if err = Traverse2(ctx, client); err != nil {
+		return
 	}
 	// Generate a group of entities in a transaction.
-	if err := GenTx(ctx, client); err != nil {
-		log.Fatal(err)
+	if err = GenTx(ctx, client); err != nil {
+		return
 	}
 	// Wrap an existing function ("Gen") in a transaction.
-	if err := WrapGen(ctx, client); err != nil {
-		log.Fatal(err)
+	if err = WrapGen(ctx, client); err != nil {
+		return
 	}
 	// WithTx helper.
-	if err := WithTx(ctx, client, func(tx *ent.Tx) error {
+	if err = WithTx(ctx, client, func(tx *ent.Tx) error {
 		return Gen(ctx, tx.Client())
 	}); err != nil {
-		log.Fatal(err)
+		return
 	}
 	// Output:
 	// Pets created: Pet(id=1, name=Pedro) Pet(id=2, name=Xabi) Pet(id=3, name=Coco)
@@ -217,7 +225,9 @@ func WithTx(ctx context.Context, client *ent.Client, fn func(tx *ent.Tx) error) 
 	}
 	defer func() {
 		if v := recover(); v != nil {
-			tx.Rollback()
+			if err = tx.Rollback(); err != nil {
+				log.Fatal(err)
+			}
 			panic(v)
 		}
 	}()
