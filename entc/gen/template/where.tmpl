@@ -75,7 +75,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ range $f := $.Fields }}
 	{{ range $op := $f.Ops }}
 		{{ $arg := "v" }}{{ if $op.Variadic }}{{ $arg = "vs" }}{{ end }}
-		{{ $stringOp := eq $op.Name "EqualFold" "Contains" "ContainsFold" "HasPrefix" "HasSuffix" }}
+		{{ $stringOp := eq $op.Name "EqualFold" "Contains" "ContainsFold" "HasPrefix" "HasSuffix" "Regex" }}
 		{{ $func := print $f.StructField $op.Name }}
 		{{ $type := $f.Type.String }}{{ if $f.IsEnum }}{{ $type = trimPackage $type $.Package }}{{ end }}
 		// {{ $func }} applies the {{ $op.Name }} predicate on the {{ quote $f.Name }} field.

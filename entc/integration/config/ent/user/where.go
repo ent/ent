@@ -116,6 +116,11 @@ func NameHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldName, v))
 }
 
+// NameRegex applies the Regex predicate on the "name" field.
+func NameRegex(v string) predicate.User {
+	return predicate.User(sql.FieldRegex(FieldName, v))
+}
+
 // NameIsNil applies the IsNil predicate on the "name" field.
 func NameIsNil() predicate.User {
 	return predicate.User(sql.FieldIsNull(FieldName))
@@ -189,6 +194,11 @@ func LabelHasPrefix(v string) predicate.User {
 // LabelHasSuffix applies the HasSuffix predicate on the "label" field.
 func LabelHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldLabel, v))
+}
+
+// LabelRegex applies the Regex predicate on the "label" field.
+func LabelRegex(v string) predicate.User {
+	return predicate.User(sql.FieldRegex(FieldLabel, v))
 }
 
 // LabelIsNil applies the IsNil predicate on the "label" field.

@@ -357,6 +357,13 @@ func NameHasSuffix(v string) predicate.User {
 	})
 }
 
+// NameRegex applies the Regex predicate on the "name" field.
+func NameRegex(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.Regex(v))
+	})
+}
+
 // LastEQ applies the EQ predicate on the "last" field.
 func LastEQ(v string) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
@@ -434,6 +441,13 @@ func LastHasSuffix(v string) predicate.User {
 	})
 }
 
+// LastRegex applies the Regex predicate on the "last" field.
+func LastRegex(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldLast, p.Regex(v))
+	})
+}
+
 // NicknameEQ applies the EQ predicate on the "nickname" field.
 func NicknameEQ(v string) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
@@ -508,6 +522,13 @@ func NicknameHasPrefix(v string) predicate.User {
 func NicknameHasSuffix(v string) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNickname, p.EndingWith(v))
+	})
+}
+
+// NicknameRegex applies the Regex predicate on the "nickname" field.
+func NicknameRegex(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNickname, p.Regex(v))
 	})
 }
 
@@ -602,6 +623,13 @@ func AddressHasSuffix(v string) predicate.User {
 	})
 }
 
+// AddressRegex applies the Regex predicate on the "address" field.
+func AddressRegex(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldAddress, p.Regex(v))
+	})
+}
+
 // AddressIsNil applies the IsNil predicate on the "address" field.
 func AddressIsNil() predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
@@ -693,6 +721,13 @@ func PhoneHasSuffix(v string) predicate.User {
 	})
 }
 
+// PhoneRegex applies the Regex predicate on the "phone" field.
+func PhoneRegex(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldPhone, p.Regex(v))
+	})
+}
+
 // PhoneIsNil applies the IsNil predicate on the "phone" field.
 func PhoneIsNil() predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
@@ -781,6 +816,13 @@ func PasswordHasPrefix(v string) predicate.User {
 func PasswordHasSuffix(v string) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldPassword, p.EndingWith(v))
+	})
+}
+
+// PasswordRegex applies the Regex predicate on the "password" field.
+func PasswordRegex(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldPassword, p.Regex(v))
 	})
 }
 
@@ -928,6 +970,13 @@ func SSOCertHasPrefix(v string) predicate.User {
 func SSOCertHasSuffix(v string) predicate.User {
 	return predicate.User(func(t *dsl.Traversal) {
 		t.Has(Label, FieldSSOCert, p.EndingWith(v))
+	})
+}
+
+// SSOCertRegex applies the Regex predicate on the "SSOCert" field.
+func SSOCertRegex(v string) predicate.User {
+	return predicate.User(func(t *dsl.Traversal) {
+		t.Has(Label, FieldSSOCert, p.Regex(v))
 	})
 }
 
