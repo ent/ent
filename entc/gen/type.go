@@ -309,7 +309,13 @@ func (t Type) Table() string {
 	if t.schema != nil && t.schema.Config.Table != "" {
 		return t.schema.Config.Table
 	}
-	return snake(rules.Pluralize(t.Name))
+	return toTableName(t.Name)
+}
+
+func toTableName(name string) string {
+	s := strings.Split(snake(name), "_")
+	l := rules.Pluralize(s[len(s)-1])
+	return strings.Join(append(s[:len(s)-1], l), "_")
 }
 
 // EntSQL returns the EntSQL annotation if exists.
