@@ -118,6 +118,11 @@ func (_m *User) Unwrap() *User {
 	return _m
 }
 
+// TableName returns the table name of the User in the database.
+func (u *User) TableName() string {
+	return user.Table
+}
+
 // String implements the fmt.Stringer.
 func (_m *User) String() string {
 	var builder strings.Builder
