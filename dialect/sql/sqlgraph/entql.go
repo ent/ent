@@ -223,15 +223,28 @@ func (e *state) evalBinary(expr *entql.BinaryExpr) *sql.Predicate {
 		if !ok {
 			_, ok = expr.Y.(*entql.Value)
 		}
-		expect(ok, "expr.Y to be *entql.Field or *entql.Value (got %T)", expr.X)
+		expect(ok, "expr.Y to be *entql.Field or *entql.Value (got %T)", expr.Y)
 		switch x := expr.Y.(type) {
 		case *entql.Field:
 			return sql.ColumnsOp(e.field(field), e.field(x), binary[expr.Op])
 		case *entql.Value:
 			c := e.field(field)
+
+			vs, ok := x.V.([]any)
+			if !ok {
+				return sql.P(func(b *sql.Builder) {
+					b.Ident(c).WriteOp(binary[expr.Op]).Arg(x.V)
+				})
+			}
+
+			// if no arguments were provided, append the FALSE constants,
+			// since we can't apply "IN ()". This will make this predicate falsy.
+			if len(vs) == 0 {
+				return sql.False()
+			}
+
 			return sql.P(func(b *sql.Builder) {
-				b.Ident(c).WriteOp(binary[expr.Op])
-				args(b, x)
+				b.Ident(c).WriteOp(binary[expr.Op]).WriteByte('(').Args(vs...).WriteByte(')')
 			})
 		default:
 			panic("unreachable")
@@ -297,15 +310,6 @@ func (e *state) field(f *entql.Field) string {
 	_, ok := e.context.Fields[f.Name]
 	expect(ok || e.context.ID.Column == f.Name, "field %q was not found for node %q", f.Name, e.context.Type)
 	return e.selector.C(f.Name)
-}
-
-func args(b *sql.Builder, v *entql.Value) {
-	vs, ok := v.V.([]any)
-	if !ok {
-		b.Arg(v.V)
-		return
-	}
-	b.WriteByte('(').Args(vs...).WriteByte(')')
 }
 
 // expect panics if the condition is false.
