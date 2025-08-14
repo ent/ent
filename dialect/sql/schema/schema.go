@@ -6,14 +6,22 @@
 package schema
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strconv"
 	"strings"
 
+	"ariga.io/atlas/sql/migrate"
+	"ariga.io/atlas/sql/mysql"
+	"ariga.io/atlas/sql/postgres"
+	"ariga.io/atlas/sql/schema"
+	"ariga.io/atlas/sql/sqlite"
+	entdialect "entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema/field"
+	"golang.org/x/exp/slices"
 )
 
 const (
@@ -694,4 +702,101 @@ func checkExpr(expr string) string {
 		expr = "(" + expr + ")"
 	}
 	return expr
+}
+
+type driver struct {
+	sqlDialect
+	schema.Differ
+	migrate.PlanApplier
+}
+
+var drivers = func(v string) map[string]driver {
+	return map[string]driver{
+		entdialect.SQLite: {
+			&SQLite{
+				WithForeignKeys: true,
+				Driver:          nopDriver{dialect: entdialect.SQLite},
+			},
+			sqlite.DefaultDiff,
+			sqlite.DefaultPlan,
+		},
+		entdialect.MySQL: {
+			&MySQL{
+				version: v,
+				Driver:  nopDriver{dialect: entdialect.MySQL},
+			},
+			mysql.DefaultDiff,
+			mysql.DefaultPlan,
+		},
+		entdialect.Postgres: {
+			&Postgres{
+				version: v,
+				Driver:  nopDriver{dialect: entdialect.Postgres},
+			},
+			postgres.DefaultDiff,
+			postgres.DefaultPlan,
+		},
+	}
+}
+
+type DDLArgs struct {
+	// Dialect and Version of the target database.
+	Dialect, Version string
+	// HashSymbols indicates whether to hash long symbols in the DDL.
+	HashSymbols bool
+	// Tables to dump.
+	Tables []*Table
+	// Options to pass to the migration plan engine.
+	Options []migrate.PlanOption
+}
+
+// Dump the schema DDL for the given tables.
+//
+// Deprecated: use DDL instead.
+func Dump(ctx context.Context, dialect, version string, tables []*Table, opts ...migrate.PlanOption) (string, error) {
+	return DDL(ctx, DDLArgs{
+		Dialect: dialect,
+		Version: version,
+		Tables:  tables,
+		Options: opts,
+	})
+}
+
+// DDL the schema DDL for the given tables.
+func DDL(ctx context.Context, args DDLArgs) (string, error) {
+	args.Options = append([]migrate.PlanOption{func(o *migrate.PlanOptions) {
+		o.Mode = migrate.PlanModeDump
+		o.Indent = "  "
+	}}, args.Options...)
+	d, ok := drivers(args.Version)[args.Dialect]
+	if !ok {
+		return "", fmt.Errorf("unsupported dialect %q", args.Dialect)
+	}
+	a := &Atlas{
+		sqlDialect:  d,
+		dialect:     args.Dialect,
+		hashSymbols: args.HashSymbols,
+	}
+	r, err := a.StateReader(args.Tables...).ReadState(ctx)
+	if err != nil {
+		return "", err
+	}
+	var c schema.Changes
+	if slices.ContainsFunc(args.Tables, func(t *Table) bool { return t.Schema != "" }) {
+		c, err = d.RealmDiff(&schema.Realm{}, r)
+	} else {
+		c, err = d.SchemaDiff(&schema.Schema{}, r.Schemas[0])
+	}
+	if err != nil {
+		return "", err
+	}
+	p, err := d.PlanChanges(ctx, "dump", c, args.Options...)
+	if err != nil {
+		return "", err
+	}
+	f, err := migrate.DefaultFormatter.Format(p)
+	if err != nil {
+		return "", err
+	}
+	return string(f[0].Bytes()), nil
 }
