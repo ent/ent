@@ -2043,16 +2043,16 @@ func (b *uint64Builder) Descriptor() *Descriptor {
 }
 
 var (
-	intType    = reflect.TypeOf(int(0))
-	uintType   = reflect.TypeOf(uint(0))
-	int8Type   = reflect.TypeOf(int8(0))
-	int16Type  = reflect.TypeOf(int16(0))
-	int32Type  = reflect.TypeOf(int32(0))
-	int64Type  = reflect.TypeOf(int64(0))
-	uint8Type  = reflect.TypeOf(uint8(0))
-	uint16Type = reflect.TypeOf(uint16(0))
-	uint32Type = reflect.TypeOf(uint32(0))
-	uint64Type = reflect.TypeOf(uint64(0))
+	intType    = reflect.TypeFor[int]()
+	uintType   = reflect.TypeFor[uint]()
+	int8Type   = reflect.TypeFor[int8]()
+	int16Type  = reflect.TypeFor[int16]()
+	int32Type  = reflect.TypeFor[int32]()
+	int64Type  = reflect.TypeFor[int64]()
+	uint8Type  = reflect.TypeFor[uint8]()
+	uint16Type = reflect.TypeFor[uint16]()
+	uint32Type = reflect.TypeFor[uint32]()
+	uint64Type = reflect.TypeFor[uint64]()
 )
 
 // float64Builder is the builder for float fields.

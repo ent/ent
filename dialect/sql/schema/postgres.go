@@ -180,7 +180,7 @@ func (d *Postgres) atIncrementC(t *schema.Table, c *schema.Column) {
 	// Skip marking this column as an identity in case it is
 	// serial type or a default was already defined for it.
 	if _, ok := c.Type.Type.(*postgres.SerialType); ok || c.Default != nil {
-		t.Attrs = removeAttr(t.Attrs, reflect.TypeOf(&postgres.Identity{}))
+		t.Attrs = removeAttr(t.Attrs, reflect.TypeFor[*postgres.Identity]())
 		return
 	}
 	id := &postgres.Identity{}

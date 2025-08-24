@@ -234,7 +234,7 @@ func (d *MySQL) atUniqueC(t1 *Table, c1 *Column, t2 *schema.Table, c2 *schema.Co
 
 func (d *MySQL) atIncrementC(t *schema.Table, c *schema.Column) {
 	if c.Default != nil {
-		t.Attrs = removeAttr(t.Attrs, reflect.TypeOf(&mysql.AutoIncrement{}))
+		t.Attrs = removeAttr(t.Attrs, reflect.TypeFor[*mysql.AutoIncrement]())
 	} else {
 		c.AddAttrs(&mysql.AutoIncrement{})
 	}
