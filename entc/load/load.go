@@ -111,7 +111,7 @@ func (c *Config) Load() (*SchemaSpec, error) {
 }
 
 // entInterface holds the reflect.Type of ent.Interface.
-var entInterface = reflect.TypeOf(struct{ ent.Interface }{}).Field(0).Type
+var entInterface = reflect.TypeFor[ent.Interface]()
 
 // load the ent/schema info.
 func (c *Config) load() (*SchemaSpec, map[string]string, error) {

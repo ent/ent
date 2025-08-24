@@ -173,7 +173,7 @@ func (d *SQLite) atImplicitIndexName(idx *Index, t1 *Table, c1 *Column) bool {
 
 func (d *SQLite) atIncrementC(t *schema.Table, c *schema.Column) {
 	if c.Default != nil {
-		t.Attrs = removeAttr(t.Attrs, reflect.TypeOf(&sqlite.AutoIncrement{}))
+		t.Attrs = removeAttr(t.Attrs, reflect.TypeFor[*sqlite.AutoIncrement]())
 	} else {
 		c.AddAttrs(&sqlite.AutoIncrement{})
 	}
