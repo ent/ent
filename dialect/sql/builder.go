@@ -2903,11 +2903,47 @@ func (r *raw) Query() (string, []any) { return r.s, nil }
 func Expr(exr string, args ...any) Querier { return &expr{s: exr, args: args} }
 
 type expr struct {
-	s    string
-	args []any
+	s       string
+	args    []any
+	dialect string
+	total   int // total arguments seen so far in the query
 }
 
-func (e *expr) Query() (string, []any) { return e.s, e.args }
+func (e *expr) Query() (string, []any) {
+	if e.dialect == dialect.Postgres {
+		// Convert '?' placeholders to PostgreSQL-style '$1', '$2', etc.
+		// starting from the correct offset
+		query := e.s
+		argOffset := e.total
+		for i := 0; i < len(e.args); i++ {
+			// Find the next placeholder in the string
+			pos := strings.Index(query, "?")
+			if pos == -1 {
+				break
+			}
+			placeholder := "$" + strconv.Itoa(argOffset + i + 1)
+			query = query[:pos] + placeholder + query[pos+1:]
+		}
+		return query, e.args
+	}
+	return e.s, e.args
+}
+
+func (e *expr) SetDialect(dialect string) {
+	e.dialect = dialect
+}
+
+func (e *expr) Dialect() string {
+	return e.dialect
+}
+
+func (e *expr) Total() int {
+	return e.total
+}
+
+func (e *expr) SetTotal(total int) {
+	e.total = total
+}
 
 // ExprFunc returns an expression function that implements the Querier interface.
 //
