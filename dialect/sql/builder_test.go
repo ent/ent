@@ -1525,6 +1525,20 @@ func TestSelector_OrderByExpr(t *testing.T) {
 	require.Equal(t, []any{28, 1, 2}, args)
 }
 
+func TestSelector_OrderExpr_PostgresPlaceholders(t *testing.T) {
+	query, args := Dialect(dialect.Postgres).
+		Select("*").
+		From(Table("users")).
+		Where(EQ("status", "active")).
+		OrderExpr(
+			Expr("CASE WHEN ? THEN ? ELSE ? END DESC", true, "A", "B"),
+		).
+		Query()
+
+	require.Equal(t, `SELECT * FROM "users" WHERE "status" = $1 ORDER BY CASE WHEN $2 THEN $3 ELSE $4 END DESC`, query)
+	require.Equal(t, []any{"active", true, "A", "B"}, args)
+}
+
 func TestSelector_ClearOrder(t *testing.T) {
 	query, args := Select("*").
 		From(Table("users")).
@@ -1568,6 +1582,21 @@ func TestSelector_SelectExpr(t *testing.T) {
 		Query()
 	require.Equal(t, `SELECT "name", age + $1, (similarity("name", $2) + similarity("desc", $3)) AS s, rank + $4 FROM "users"`, query)
 	require.Equal(t, []any{1, "A", "D", 10}, args)
+}
+
+func TestSelector_AppendSelectExprAs_PostgresPlaceholders(t *testing.T) {
+	query, args := Dialect(dialect.Postgres).
+		Select("name").
+		AppendSelectExprAs(
+			Expr("COALESCE(?, ?)", "foo", "bar"),
+			"coalesced",
+		).
+		From(Table("users")).
+		Where(EQ("status", "active")).
+		Query()
+
+	require.Equal(t, `SELECT "name", (COALESCE($1, $2)) AS "coalesced" FROM "users" WHERE "status" = $3`, query)
+	require.Equal(t, []any{"foo", "bar", "active"}, args)
 }
 
 func TestSelector_Union(t *testing.T) {
