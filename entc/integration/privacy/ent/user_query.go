@@ -315,7 +315,10 @@ func (_q *UserQuery) Clone() *UserQuery {
 // WithTeams tells the query-builder to eager-load the nodes that are connected to
 // the "teams" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithTeams(opts ...func(*TeamQuery)) *UserQuery {
-	query := (&TeamClient{config: _q.config}).Query()
+	query := _q.withTeams
+	if query == nil {
+		query = (&TeamClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -326,7 +329,10 @@ func (_q *UserQuery) WithTeams(opts ...func(*TeamQuery)) *UserQuery {
 // WithTasks tells the query-builder to eager-load the nodes that are connected to
 // the "tasks" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithTasks(opts ...func(*TaskQuery)) *UserQuery {
-	query := (&TaskClient{config: _q.config}).Query()
+	query := _q.withTasks
+	if query == nil {
+		query = (&TaskClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

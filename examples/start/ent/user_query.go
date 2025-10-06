@@ -314,7 +314,10 @@ func (_q *UserQuery) Clone() *UserQuery {
 // WithCars tells the query-builder to eager-load the nodes that are connected to
 // the "cars" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithCars(opts ...func(*CarQuery)) *UserQuery {
-	query := (&CarClient{config: _q.config}).Query()
+	query := _q.withCars
+	if query == nil {
+		query = (&CarClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -325,7 +328,10 @@ func (_q *UserQuery) WithCars(opts ...func(*CarQuery)) *UserQuery {
 // WithGroups tells the query-builder to eager-load the nodes that are connected to
 // the "groups" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithGroups(opts ...func(*GroupQuery)) *UserQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := _q.withGroups
+	if query == nil {
+		query = (&GroupClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

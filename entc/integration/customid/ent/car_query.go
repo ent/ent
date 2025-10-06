@@ -289,7 +289,10 @@ func (_q *CarQuery) Clone() *CarQuery {
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *CarQuery) WithOwner(opts ...func(*PetQuery)) *CarQuery {
-	query := (&PetClient{config: _q.config}).Query()
+	query := _q.withOwner
+	if query == nil {
+		query = (&PetClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

@@ -543,7 +543,10 @@ func (_q *UserQuery) Clone() *UserQuery {
 // WithCard tells the query-builder to eager-load the nodes that are connected to
 // the "card" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithCard(opts ...func(*CardQuery)) *UserQuery {
-	query := (&CardClient{config: _q.config}).Query()
+	query := _q.withCard
+	if query == nil {
+		query = (&CardClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -554,7 +557,10 @@ func (_q *UserQuery) WithCard(opts ...func(*CardQuery)) *UserQuery {
 // WithPets tells the query-builder to eager-load the nodes that are connected to
 // the "pets" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithPets(opts ...func(*PetQuery)) *UserQuery {
-	query := (&PetClient{config: _q.config}).Query()
+	query := _q.withPets
+	if query == nil {
+		query = (&PetClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -565,7 +571,10 @@ func (_q *UserQuery) WithPets(opts ...func(*PetQuery)) *UserQuery {
 // WithFiles tells the query-builder to eager-load the nodes that are connected to
 // the "files" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithFiles(opts ...func(*FileQuery)) *UserQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := _q.withFiles
+	if query == nil {
+		query = (&FileClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -576,7 +585,10 @@ func (_q *UserQuery) WithFiles(opts ...func(*FileQuery)) *UserQuery {
 // WithGroups tells the query-builder to eager-load the nodes that are connected to
 // the "groups" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithGroups(opts ...func(*GroupQuery)) *UserQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := _q.withGroups
+	if query == nil {
+		query = (&GroupClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -587,7 +599,10 @@ func (_q *UserQuery) WithGroups(opts ...func(*GroupQuery)) *UserQuery {
 // WithFriends tells the query-builder to eager-load the nodes that are connected to
 // the "friends" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithFriends(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withFriends
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -598,7 +613,10 @@ func (_q *UserQuery) WithFriends(opts ...func(*UserQuery)) *UserQuery {
 // WithFollowers tells the query-builder to eager-load the nodes that are connected to
 // the "followers" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithFollowers(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withFollowers
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -609,7 +627,10 @@ func (_q *UserQuery) WithFollowers(opts ...func(*UserQuery)) *UserQuery {
 // WithFollowing tells the query-builder to eager-load the nodes that are connected to
 // the "following" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithFollowing(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withFollowing
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -620,7 +641,10 @@ func (_q *UserQuery) WithFollowing(opts ...func(*UserQuery)) *UserQuery {
 // WithTeam tells the query-builder to eager-load the nodes that are connected to
 // the "team" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithTeam(opts ...func(*PetQuery)) *UserQuery {
-	query := (&PetClient{config: _q.config}).Query()
+	query := _q.withTeam
+	if query == nil {
+		query = (&PetClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -631,7 +655,10 @@ func (_q *UserQuery) WithTeam(opts ...func(*PetQuery)) *UserQuery {
 // WithSpouse tells the query-builder to eager-load the nodes that are connected to
 // the "spouse" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithSpouse(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withSpouse
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -642,7 +669,10 @@ func (_q *UserQuery) WithSpouse(opts ...func(*UserQuery)) *UserQuery {
 // WithChildren tells the query-builder to eager-load the nodes that are connected to
 // the "children" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithChildren(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withChildren
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -653,7 +683,10 @@ func (_q *UserQuery) WithChildren(opts ...func(*UserQuery)) *UserQuery {
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithParent(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withParent
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

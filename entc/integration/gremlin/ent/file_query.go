@@ -314,7 +314,10 @@ func (_q *FileQuery) Clone() *FileQuery {
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *FileQuery) WithOwner(opts ...func(*UserQuery)) *FileQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withOwner
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -325,7 +328,10 @@ func (_q *FileQuery) WithOwner(opts ...func(*UserQuery)) *FileQuery {
 // WithType tells the query-builder to eager-load the nodes that are connected to
 // the "type" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *FileQuery) WithType(opts ...func(*FileTypeQuery)) *FileQuery {
-	query := (&FileTypeClient{config: _q.config}).Query()
+	query := _q.withType
+	if query == nil {
+		query = (&FileTypeClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -336,7 +342,10 @@ func (_q *FileQuery) WithType(opts ...func(*FileTypeQuery)) *FileQuery {
 // WithField tells the query-builder to eager-load the nodes that are connected to
 // the "field" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *FileQuery) WithField(opts ...func(*FieldTypeQuery)) *FileQuery {
-	query := (&FieldTypeClient{config: _q.config}).Query()
+	query := _q.withField
+	if query == nil {
+		query = (&FieldTypeClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

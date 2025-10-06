@@ -307,7 +307,10 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 	// {{ $func }} tells the query-builder to eager-load the nodes that are connected to
 	// the "{{ $e.Name }}" edge. The optional arguments are used to configure the query builder of the edge.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}(opts ...func(*{{ $ebuilder }})) *{{ $builder }} {
-		query := (&{{ $e.Type.ClientName }}{config: {{ $receiver }}.config}).Query()
+		query := {{ $receiver }}.{{ $e.EagerLoadField }}
+		if query == nil {
+			query = (&{{ $e.Type.ClientName }}{config: {{ $receiver }}.config}).Query()
+		}
 		for _, opt := range opts {
 			opt(query)
 		}
