@@ -1555,15 +1555,15 @@ func (d *Descriptor) checkDefaultFunc(expectType reflect.Type) {
 }
 
 var (
-	boolType         = reflect.TypeOf(false)
-	bytesType        = reflect.TypeOf([]byte(nil))
-	timeType         = reflect.TypeOf(time.Time{})
-	stringType       = reflect.TypeOf("")
-	valueType        = reflect.TypeOf((*driver.Value)(nil)).Elem()
-	valuerType       = reflect.TypeOf((*driver.Valuer)(nil)).Elem()
-	errorType        = reflect.TypeOf((*error)(nil)).Elem()
-	valueScannerType = reflect.TypeOf((*ValueScanner)(nil)).Elem()
-	validatorType    = reflect.TypeOf((*Validator)(nil)).Elem()
+	boolType         = reflect.TypeFor[bool]()
+	bytesType        = reflect.TypeFor[[]byte]()
+	timeType         = reflect.TypeFor[time.Time]()
+	stringType       = reflect.TypeFor[string]()
+	valueType        = reflect.TypeFor[driver.Value]()
+	valuerType       = reflect.TypeFor[driver.Valuer]()
+	errorType        = reflect.TypeFor[error]()
+	valueScannerType = reflect.TypeFor[ValueScanner]()
+	validatorType    = reflect.TypeFor[Validator]()
 )
 
 // ValueScanner is the interface that groups the Value

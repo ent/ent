@@ -161,9 +161,9 @@ func scanType(typ reflect.Type, columns []string) (*rowScan, error) {
 }
 
 var (
-	timeType     = reflect.TypeOf(time.Time{})
-	scannerType  = reflect.TypeOf((*sql.Scanner)(nil)).Elem()
-	nullJSONType = reflect.TypeOf((*nullJSON)(nil)).Elem()
+	timeType     = reflect.TypeFor[time.Time]()
+	scannerType  = reflect.TypeFor[sql.Scanner]()
+	nullJSONType = reflect.TypeFor[nullJSON]()
 )
 
 // nullJSON represents a json.RawMessage that may be NULL.
@@ -329,11 +329,11 @@ func supportsScan(t reflect.Type) bool {
 		reflect.Float32, reflect.Float64, reflect.Pointer, reflect.String:
 		return true
 	case reflect.Slice:
-		return t == reflect.TypeOf(sql.RawBytes(nil)) || t == reflect.TypeOf([]byte(nil))
+		return t == reflect.TypeFor[sql.RawBytes]() || t == reflect.TypeFor[[]byte]()
 	case reflect.Interface:
-		return t == reflect.TypeOf((*any)(nil)).Elem()
+		return t == reflect.TypeFor[any]()
 	default:
-		return t == reflect.TypeOf(time.Time{}) || t.Implements(scannerType)
+		return t == reflect.TypeFor[time.Time]() || t.Implements(scannerType)
 	}
 }
 
@@ -355,17 +355,17 @@ func ScanTypeOf(rows *Rows, i int) any {
 	// Handle NULL values.
 	switch k := rt.Kind(); k {
 	case reflect.Bool:
-		rt = reflect.TypeOf(sql.NullBool{})
+		rt = reflect.TypeFor[sql.NullBool]()
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		rt = reflect.TypeOf(sql.NullInt64{})
+		rt = reflect.TypeFor[sql.NullInt64]()
 	case reflect.Float32, reflect.Float64:
-		rt = reflect.TypeOf(sql.NullFloat64{})
+		rt = reflect.TypeFor[sql.NullFloat64]()
 	case reflect.String:
-		rt = reflect.TypeOf(sql.NullString{})
+		rt = reflect.TypeFor[sql.NullString]()
 	default:
 		if k == reflect.Struct && rt == timeType {
-			rt = reflect.TypeOf(sql.NullTime{})
+			rt = reflect.TypeFor[sql.NullTime]()
 		}
 	}
 	return reflect.New(rt).Interface()

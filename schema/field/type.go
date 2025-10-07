@@ -148,7 +148,7 @@ func (t TypeInfo) Comparable() bool {
 	}
 }
 
-var stringerType = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
+var stringerType = reflect.TypeFor[fmt.Stringer]()
 
 // Stringer indicates if this type implements the Stringer interface.
 func (t TypeInfo) Stringer() bool {

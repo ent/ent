@@ -1195,7 +1195,7 @@ func (f Field) EntSQL() *entsql.Annotation {
 // mutMethods returns the method names of mutation interface.
 var mutMethods = func() map[string]bool {
 	names := map[string]bool{"Client": true, "Tx": true, "Where": true, "SetOp": true}
-	t := reflect.TypeOf(new(ent.Mutation)).Elem()
+	t := reflect.TypeFor[ent.Mutation]()
 	for i := 0; i < t.NumMethod(); i++ {
 		names[t.Method(i).Name] = true
 	}
@@ -1768,18 +1768,18 @@ func (f Field) SupportsMutationAppend() bool {
 }
 
 var (
-	nullBoolType    = reflect.TypeOf(sql.NullBool{})
-	nullBoolPType   = reflect.TypeOf((*sql.NullBool)(nil))
-	nullFloatType   = reflect.TypeOf(sql.NullFloat64{})
-	nullFloatPType  = reflect.TypeOf((*sql.NullFloat64)(nil))
-	nullInt32Type   = reflect.TypeOf(sql.NullInt32{})
-	nullInt32PType  = reflect.TypeOf((*sql.NullInt32)(nil))
-	nullInt64Type   = reflect.TypeOf(sql.NullInt64{})
-	nullInt64PType  = reflect.TypeOf((*sql.NullInt64)(nil))
-	nullTimeType    = reflect.TypeOf(sql.NullTime{})
-	nullTimePType   = reflect.TypeOf((*sql.NullTime)(nil))
-	nullStringType  = reflect.TypeOf(sql.NullString{})
-	nullStringPType = reflect.TypeOf((*sql.NullString)(nil))
+	nullBoolType    = reflect.TypeFor[sql.NullBool]()
+	nullBoolPType   = reflect.TypeFor[*sql.NullBool]()
+	nullFloatType   = reflect.TypeFor[sql.NullFloat64]()
+	nullFloatPType  = reflect.TypeFor[*sql.NullFloat64]()
+	nullInt32Type   = reflect.TypeFor[sql.NullInt32]()
+	nullInt32PType  = reflect.TypeFor[*sql.NullInt32]()
+	nullInt64Type   = reflect.TypeFor[sql.NullInt64]()
+	nullInt64PType  = reflect.TypeFor[*sql.NullInt64]()
+	nullTimeType    = reflect.TypeFor[sql.NullTime]()
+	nullTimePType   = reflect.TypeFor[*sql.NullTime]()
+	nullStringType  = reflect.TypeFor[sql.NullString]()
+	nullStringPType = reflect.TypeFor[*sql.NullString]()
 )
 
 // BasicType returns a Go expression for the given identifier
