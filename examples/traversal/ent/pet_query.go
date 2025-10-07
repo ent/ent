@@ -314,7 +314,10 @@ func (_q *PetQuery) Clone() *PetQuery {
 // WithFriends tells the query-builder to eager-load the nodes that are connected to
 // the "friends" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *PetQuery) WithFriends(opts ...func(*PetQuery)) *PetQuery {
-	query := (&PetClient{config: _q.config}).Query()
+	query := _q.withFriends
+	if query == nil {
+		query = (&PetClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -325,7 +328,10 @@ func (_q *PetQuery) WithFriends(opts ...func(*PetQuery)) *PetQuery {
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *PetQuery) WithOwner(opts ...func(*UserQuery)) *PetQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withOwner
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

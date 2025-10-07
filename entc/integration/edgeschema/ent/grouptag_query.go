@@ -313,7 +313,10 @@ func (_q *GroupTagQuery) Clone() *GroupTagQuery {
 // WithTag tells the query-builder to eager-load the nodes that are connected to
 // the "tag" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupTagQuery) WithTag(opts ...func(*TagQuery)) *GroupTagQuery {
-	query := (&TagClient{config: _q.config}).Query()
+	query := _q.withTag
+	if query == nil {
+		query = (&TagClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -324,7 +327,10 @@ func (_q *GroupTagQuery) WithTag(opts ...func(*TagQuery)) *GroupTagQuery {
 // WithGroup tells the query-builder to eager-load the nodes that are connected to
 // the "group" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupTagQuery) WithGroup(opts ...func(*GroupQuery)) *GroupTagQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := _q.withGroup
+	if query == nil {
+		query = (&GroupClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
