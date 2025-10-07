@@ -156,3 +156,25 @@ atlas migrate diff \
   --format "{{ sql . \"  \" }}"
 ```
 :::
+
+## Controlling the Ent Client
+
+When the `sql/schemaconfig` feature flag is enabled, Ent automatically uses the schema names defined in your `ent/schema` as the default runtime configuration.
+This means that any `entsql.Schema("db_name")` annotation is applied by default, and you can optionally override it at runtime if needed.
+
+To enable the feature for your project, use the `--feature` flag:
+
+```shell
+--feature sql/schemaconfig
+```
+
+Once enabled, you can also override the schema configuration at runtime using the `ent.AlternateSchema` option:
+
+```go
+c, err := ent.Open(dialect, conn, ent.AlternateSchema(ent.SchemaConfig{
+	User: "usersdb",
+	Car:  "carsdb",
+}))
+c.User.Query().All(ctx) // SELECT * FROM `usersdb`.`users`
+c.Car.Query().All(ctx)  // SELECT * FROM `carsdb`.`cars`
+```
