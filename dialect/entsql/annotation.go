@@ -625,6 +625,28 @@ type IndexAnnotation struct {
 	//		)
 	//	CREATE INDEX "table_a" ON "table"("a") WHERE (b AND c > 0)
 	Where string
+
+	// Comment defines the comment for the index.
+	//
+	// MySQL read more: https://dev.mysql.com/doc/refman/8.4/en/create-index.html
+	// PostgreSQL read more: https://www.postgresql.org/docs/current/sql-comment.html
+	//
+	// In MySQL, the following annotation maps to:
+	//
+	//	index.Fields("c1").
+	//		Annotation(
+	//			entsql.IndexComment("Comment string"),
+	//		)
+	//	CREATE INDEX `table_c1` ON `table`(`c1`) COMMENT 'Comment string'
+	//
+	// In PostgreSQL, the following annotation maps to:
+	//
+	//	index.Fields("c1").
+	//		Annotation(
+	//			entsql.IndexComment("Comment string"),
+	//		)
+	//	COMMENT ON INDEX "table_c1" IS 'Comment string'
+	Comment string
 }
 
 // Prefix returns a new index annotation with a single string column index.
@@ -780,6 +802,30 @@ func IndexWhere(pred string) *IndexAnnotation {
 	return &IndexAnnotation{Where: pred}
 }
 
+// IndexComment defines the comment for the index.
+//
+// MySQL read more: https://dev.mysql.com/doc/refman/8.4/en/create-index.html
+// PostgreSQL read more: https://www.postgresql.org/docs/current/sql-comment.html
+//
+// In MySQL, the following annotation maps to:
+//
+//	index.Fields("c1").
+//		Annotation(
+//			entsql.IndexComment("Comment string"),
+//		)
+//	CREATE INDEX `table_c1` ON `table`(`c1`) COMMENT 'Comment string'
+//
+// In PostgreSQL, the following annotation maps to:
+//
+//	index.Fields("c1").
+//		Annotation(
+//			entsql.IndexComment("Comment string"),
+//		)
+//	COMMENT ON INDEX "table_c1" IS 'Comment string'
+func IndexComment(comment string) *IndexAnnotation {
+	return &IndexAnnotation{Comment: comment}
+}
+
 // Name describes the annotation name.
 func (IndexAnnotation) Name() string {
 	return "EntSQLIndexes"
@@ -847,6 +893,9 @@ func (a IndexAnnotation) Merge(other schema.Annotation) schema.Annotation {
 	}
 	if ant.Where != "" {
 		a.Where = ant.Where
+	}
+	if ant.Comment != "" {
+		a.Comment = ant.Comment
 	}
 	return a
 }
