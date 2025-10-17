@@ -446,9 +446,11 @@ func (i *InsertBuilder) QueryErr() (string, []any, error) {
 	b.writeSchema(i.schema)
 	b.Ident(i.table).Pad()
 	if i.defaults && len(i.columns) == 0 {
+		i.buildOutputs(&b)
 		i.writeDefault(&b)
 	} else {
 		b.WriteByte('(').IdentComma(i.columns...).WriteByte(')')
+		i.buildOutputs(&b)
 		b.WriteString(" VALUES ")
 		for j, v := range i.values {
 			if j > 0 {
@@ -464,11 +466,25 @@ func (i *InsertBuilder) QueryErr() (string, []any, error) {
 	return b.String(), b.args, b.Err()
 }
 
+func (i *InsertBuilder) buildOutputs(b *Builder) {
+	if len(i.returning) > 0 && i.sqlserver() {
+		b.WriteString(" OUTPUT ")
+		for idx, r := range i.returning {
+			if idx > 0 {
+				b.Comma()
+			}
+			b.WriteString("INSERTED.")
+			b.Ident(r)
+		}
+		b.Pad()
+	}
+}
+
 func (i *InsertBuilder) writeDefault(b *Builder) {
 	switch i.Dialect() {
 	case dialect.MySQL:
 		b.WriteString("VALUES ()")
-	case dialect.SQLite, dialect.Postgres:
+	case dialect.SQLite, dialect.Postgres, dialect.SQLServer:
 		b.WriteString("DEFAULT VALUES")
 	}
 }
@@ -482,7 +498,7 @@ func (i *InsertBuilder) writeConflict(b *Builder) {
 		if i.conflict.action.nothing {
 			i.OnConflict(ResolveWithIgnore())
 		}
-	case dialect.SQLite, dialect.Postgres:
+	case dialect.SQLite, dialect.Postgres, dialect.SQLServer:
 		b.WriteString(" ON CONFLICT")
 		switch t := i.conflict.target; {
 		case t.constraint != "" && len(t.columns) != 0:
@@ -1214,7 +1230,7 @@ func (p *Predicate) escapedLikeFold(col, left, substr, right string) *Predicate 
 		case dialect.Postgres:
 			b.Ident(col).WriteString(" ILIKE ")
 			b.Arg(left + strings.ToLower(w) + right)
-		default: // SQLite.
+		default: // SQLite, SQLServer.
 			var f Func
 			f.SetDialect(b.dialect)
 			f.Lower(col)
@@ -1267,6 +1283,10 @@ func (p *Predicate) ColumnsHasPrefix(col, prefixC string) *Predicate {
 			if p.dialect == dialect.SQLite {
 				p.WriteString(" ESCAPE ").Arg("\\")
 			}
+		case dialect.SQLServer:
+			b.Ident(col)
+			b.WriteOp(OpLike)
+			b.S("(REPLACE(REPLACE(").Ident(prefixC).S(", '_', '\\_'), '%', '\\%') + '%')")
 		default:
 			b.AddError(fmt.Errorf("ColumnsHasPrefix: unsupported dialect: %q", p.dialect))
 		}
@@ -1307,7 +1327,7 @@ func (p *Predicate) EqualFold(col, sub string) *Predicate {
 			b.Ident(col).WriteString(" ILIKE ")
 			w, _ := escape(sub)
 			b.Arg(strings.ToLower(w))
-		default: // SQLite.
+		default: // SQLite, SQLServer.
 			f.Lower(col)
 			b.WriteString(f.String())
 			b.WriteOp(OpEQ)
@@ -2569,13 +2589,37 @@ func (s *Selector) Query() (string, []any) {
 		s.joinSetOps(&b)
 	}
 	joinOrder(s.order, &b)
-	if s.limit != nil {
-		b.WriteString(" LIMIT ")
-		b.WriteString(strconv.Itoa(*s.limit))
-	}
-	if s.offset != nil {
-		b.WriteString(" OFFSET ")
-		b.WriteString(strconv.Itoa(*s.offset))
+	// Pagination
+	switch b.dialect {
+	case dialect.SQLServer:
+		if s.offset != nil || s.limit != nil {
+			// SQL Server requires ORDER BY for OFFSET/FETCH
+			if len(s.order) == 0 {
+				b.AddError(errors.New("SQL Server OFFSET/FETCH requires ORDER BY clause"))
+			} else {
+				if s.offset != nil {
+					b.WriteString(" OFFSET ")
+					b.WriteString(strconv.Itoa(*s.offset))
+					b.WriteString(" ROWS")
+				} else {
+					b.WriteString(" OFFSET 0 ROWS")
+				}
+				if s.limit != nil {
+					b.WriteString(" FETCH NEXT ")
+					b.WriteString(strconv.Itoa(*s.limit))
+					b.WriteString(" ROWS ONLY")
+				}
+			}
+		}
+	default:
+		if s.limit != nil {
+			b.WriteString(" LIMIT ")
+			b.WriteString(strconv.Itoa(*s.limit))
+		}
+		if s.offset != nil {
+			b.WriteString(" OFFSET ")
+			b.WriteString(strconv.Itoa(*s.offset))
+		}
 	}
 	s.joinLock(&b)
 	s.total = b.total
@@ -2971,8 +3015,14 @@ func (b *Builder) Quote(ident string) string {
 			return strings.ReplaceAll(ident, "`", `"`)
 		}
 		quote = `"`
+	case b.sqlserver():
+		// SQL Server uses square brackets for identifiers
+		if strings.Contains(ident, "`") {
+			return "[" + strings.ReplaceAll(ident, "`", "") + "]"
+		}
+		return "[" + ident + "]"
 	// An identifier for unknown dialect.
-	case b.dialect == "" && strings.ContainsAny(ident, "`\""):
+	case b.dialect == "" && strings.ContainsAny(ident, "`\"[]"):
 		return ident
 	}
 	return quote + ident + quote
@@ -2991,6 +3041,11 @@ func (b *Builder) Ident(s string) *Builder {
 		// Modifiers and aggregation functions that
 		// were called without dialect information.
 		b.WriteString(strings.ReplaceAll(s, "`", `"`))
+	case (isFunc(s) || isModifier(s) || isAlias(s)) && b.sqlserver():
+		// Modifiers and aggregation functions that
+		// were called without dialect information.
+		// Replace backticks with square brackets
+		b.WriteString(replaceBackticksWithBrackets(s))
 	default:
 		b.WriteString(s)
 	}
@@ -3177,6 +3232,9 @@ func (b *Builder) Arg(a any) *Builder {
 		// Postgres' arguments are referenced using the syntax $n.
 		// $1 refers to the 1st argument, $2 to the 2nd, and so on.
 		format = "$" + strconv.Itoa(b.total+1)
+	} else if b.sqlserver() {
+		// SQL Server uses @p1, @p2, etc.
+		format = "@p" + strconv.Itoa(b.total+1)
 	}
 	if f, ok := a.(ParamFormatter); ok {
 		format = f.FormatParam(format, &StmtInfo{
@@ -3326,6 +3384,11 @@ func (b Builder) postgres() bool {
 	return b.Dialect() == dialect.Postgres
 }
 
+// sqlserver reports if the builder dialect is SQL Server.
+func (b Builder) sqlserver() bool {
+	return b.Dialect() == dialect.SQLServer
+}
+
 // sqlite reports if the builder dialect is SQLite.
 func (b Builder) sqlite() bool {
 	return b.Dialect() == dialect.SQLite
@@ -3344,6 +3407,8 @@ func (b *Builder) isIdent(s string) bool {
 	switch {
 	case b.postgres():
 		return strings.Contains(s, `"`)
+	case b.sqlserver():
+		return strings.Contains(s, "[") || strings.Contains(s, "]")
 	default:
 		return strings.Contains(s, "`")
 	}
@@ -3351,14 +3416,42 @@ func (b *Builder) isIdent(s string) bool {
 
 // unquote database identifiers.
 func (b *Builder) unquote(s string) string {
-	switch pg := b.postgres(); {
+	switch {
 	case len(s) < 2:
-	case !pg && s[0] == '`' && s[len(s)-1] == '`', pg && s[0] == '"' && s[len(s)-1] == '"':
+	case b.sqlserver() && s[0] == '[' && s[len(s)-1] == ']':
+		return s[1 : len(s)-1]
+	case !b.postgres() && s[0] == '`' && s[len(s)-1] == '`':
+		if u, err := strconv.Unquote(s); err == nil {
+			return u
+		}
+	case b.postgres() && s[0] == '"' && s[len(s)-1] == '"':
 		if u, err := strconv.Unquote(s); err == nil {
 			return u
 		}
 	}
 	return s
+}
+
+// replaceBackticksWithBrackets replaces backtick pairs with square brackets.
+// For example: `table`.`column` becomes [table].[column]
+func replaceBackticksWithBrackets(s string) string {
+	if !strings.Contains(s, "`") {
+		return s
+	}
+	parts := strings.Split(s, "`")
+	var result strings.Builder
+	for i, part := range parts {
+		result.WriteString(part)
+		if i < len(parts)-1 {
+			// Alternate between [ and ]
+			if i%2 == 0 {
+				result.WriteByte('[')
+			} else {
+				result.WriteByte(']')
+			}
+		}
+	}
+	return result.String()
 }
 
 // isQualified reports if the given string is a qualified identifier.

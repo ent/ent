@@ -1126,6 +1126,11 @@ func (a *Atlas) entDialect(ctx context.Context, drv dialect.Driver) (sqlDialect,
 		d = &SQLite{Driver: drv, WithForeignKeys: a.withForeignKeys}
 	case dialect.Postgres:
 		d = &Postgres{Driver: drv}
+	case dialect.SQLServer:
+		// Note: SQL Server support is experimental. Atlas migration engine does not yet
+		// have native SQL Server support, so automatic migrations are not available.
+		// Users should use manual migrations or alternative migration tools.
+		d = &SQLServer{Driver: drv, schema: a.schema}
 	default:
 		return nil, fmt.Errorf("sql/schema: unsupported dialect %q", a.dialect)
 	}
