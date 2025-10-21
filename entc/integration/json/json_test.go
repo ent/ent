@@ -297,6 +297,17 @@ func Strings(t *testing.T, client *ent.Client) {
 		require.Empty(t, usr.Strings)
 		require.Equal(t, []http.Dir{"/etc", "/dev"}, usr.Dirs)
 	})
+
+	t.Run("value equality", func(t *testing.T) {
+		j, err := json.Marshal(str)
+		require.NoError(t, err)
+		client.User.Create().SetStrings(str).SaveX(ctx)
+		require.True(t,
+			client.User.Query().Where(func(s *sql.Selector) {
+				s.Where(sqljson.ValueEQ(user.FieldStrings, j))
+			}).ExistX(ctx),
+		)
+	})
 }
 
 func StringsValidate(t *testing.T, client *ent.Client) {
