@@ -446,11 +446,12 @@ func (i *InsertBuilder) QueryErr() (string, []any, error) {
 	b.writeSchema(i.schema)
 	b.Ident(i.table).Pad()
 	if i.defaults && len(i.columns) == 0 {
-		i.buildOutputs(&b)
 		i.writeDefault(&b)
 	} else {
 		b.WriteByte('(').IdentComma(i.columns...).WriteByte(')')
-		i.buildOutputs(&b)
+		if b.sqlserver() {
+			joinReturning(i.returning, &b)
+		}
 		b.WriteString(" VALUES ")
 		for j, v := range i.values {
 			if j > 0 {
@@ -458,26 +459,14 @@ func (i *InsertBuilder) QueryErr() (string, []any, error) {
 			}
 			b.WriteByte('(').Args(v...).WriteByte(')')
 		}
+		if !b.sqlserver() {
+			joinReturning(i.returning, &b)
+		}
 	}
 	if i.conflict != nil {
 		i.writeConflict(&b)
 	}
-	joinReturning(i.returning, &b)
 	return b.String(), b.args, b.Err()
-}
-
-func (i *InsertBuilder) buildOutputs(b *Builder) {
-	if len(i.returning) > 0 && i.sqlserver() {
-		b.WriteString(" OUTPUT ")
-		for idx, r := range i.returning {
-			if idx > 0 {
-				b.Comma()
-			}
-			b.WriteString("INSERTED.")
-			b.Ident(r)
-		}
-		b.Pad()
-	}
 }
 
 func (i *InsertBuilder) writeDefault(b *Builder) {
@@ -2692,11 +2681,24 @@ func joinOrder(order []any, b *Builder) {
 }
 
 func joinReturning(columns []string, b *Builder) {
-	if len(columns) == 0 || (!b.postgres() && !b.sqlite()) {
+	if len(columns) == 0 {
 		return
 	}
-	b.WriteString(" RETURNING ")
-	b.IdentComma(columns...)
+	if b.sqlserver() {
+		b.WriteString(" OUTPUT ")
+		for idx, col := range columns {
+			if idx > 0 {
+				b.Comma()
+			}
+			b.WriteString("INSERTED.")
+			b.Ident(col)
+		}
+		return
+	}
+	if b.postgres() || b.sqlite() {
+		b.WriteString(" RETURNING ")
+		b.IdentComma(columns...)
+	}
 }
 
 func (s *Selector) joinSelect(b *Builder) {

@@ -23,6 +23,31 @@ func TestBuilder(t *testing.T) {
 		wantArgs  []any
 	}{
 		{
+			input:     Dialect(dialect.SQLServer).Insert("users").Columns("age").Values(1).Returning("id"),
+			wantQuery: "INSERT INTO [users] ([age]) OUTPUT INSERTED.[id] VALUES (@p1)",
+			wantArgs:  []any{1},
+		},
+		{
+			input:     Dialect(dialect.SQLServer).Update("users").Set("name", "foo").Returning("id", "name"),
+			wantQuery: "UPDATE [users] SET [name] = @p1 OUTPUT INSERTED.[id], INSERTED.[name]",
+			wantArgs:  []any{"foo"},
+		},
+		{
+			input:     Dialect(dialect.SQLServer).Insert("userd").Columns("name", "age").Values("s11i", 10).Returning("id", "name"),
+			wantQuery: "INSERT INTO [userd] ([name], [age]) OUTPUT INSERTED.[id], INSERTED.[name] VALUES (@p1, @p2)",
+			wantArgs:  []any{"s11i", 10},
+		},
+		{
+			input:     Dialect(dialect.SQLServer).Insert("users").Columns("id", "name", "age").Values(60, "machship-user", 13).Returning("id", "name", "age"),
+			wantQuery: "INSERT INTO [users] ([id], [name], [age]) OUTPUT INSERTED.[id], INSERTED.[name], INSERTED.[age] VALUES (@p1, @p2, @p3)",
+			wantArgs:  []any{60, "machship-user", 13},
+		},
+		{
+			input:     Dialect(dialect.SQLServer).Update("users").Set("name", "machship-admin").Set("age", 10).Returning("id", "name", "age"),
+			wantQuery: "UPDATE [users] SET [name] = @p1, [age] = @p2 OUTPUT INSERTED.[id], INSERTED.[name], INSERTED.[age]",
+			wantArgs:  []any{"machship-admin", 10},
+		},
+		{
 			input: CreateView("clean_users").
 				Columns(
 					Column("id").Type("int"),
