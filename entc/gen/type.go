@@ -1643,7 +1643,8 @@ func (f Field) PK() *schema.Column {
 	}
 	// Override the default-value defined in the
 	// schema if it was provided by an annotation.
-	switch ant := f.EntSQL(); {
+	ant := f.EntSQL()
+	switch {
 	case ant == nil:
 	case ant.Default != "":
 		c.Default = ant.Default
@@ -1656,9 +1657,16 @@ func (f Field) PK() *schema.Column {
 		}
 		c.Default = x
 	}
+
+	// Override collation with annotation value
+	if ant != nil && ant.Collation != "" {
+		c.Collation = ant.Collation
+	}
+
 	if f.def != nil {
 		c.SchemaType = f.def.SchemaType
 	}
+
 	return c
 }
 
