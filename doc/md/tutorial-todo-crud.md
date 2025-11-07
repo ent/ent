@@ -11,15 +11,24 @@ After setting up our project, we're ready to create our Todo list and query it.
 Let's create a Todo in our testable example. We do it by adding the following code to `example_test.go`:
 
 ```go
-func Example_Todo() {
-	// ...
-	task1, err := client.Todo.Create().Save(ctx)
+func TestExampleTodo(t *testing.T) {
+	// Create an ent.Client with in-memory SQLite database.
+	client, err := ent.Open(dialect.SQLite, "file:ent?mode=memory&cache=shared&_fk=1")
+	if err != nil {
+		log.Fatalf("failed opening connection to sqlite: %v", err)
+	}
+	defer client.Close()
+	ctx := context.Background()
+	// Run the automatic migration tool to create all schema resources.
+	if err := client.Schema.Create(ctx); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+	task1, err := client.Todo.Create().SetText("some").Save(ctx)
 	if err != nil {
 		log.Fatalf("failed creating a todo: %v", err)
 	}
 	fmt.Println(task1)
 	// Output:
-	// Todo(id=1)
 }
 ```
 
