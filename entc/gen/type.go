@@ -1666,7 +1666,6 @@ func (f Field) PK() *schema.Column {
 	if f.def != nil {
 		c.SchemaType = f.def.SchemaType
 	}
-
 	return c
 }
 
