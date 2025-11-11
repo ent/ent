@@ -1801,6 +1801,7 @@ func (g *graph) clearFKEdges(ctx context.Context, ids []driver.Value, edges []*E
 			pred = matchIDs(edge.Target.IDSpec.Column, edge.Target.Nodes, edge.Columns[0], ids)
 		}
 		query, args := g.builder.Update(edge.Table).
+			Schema(edge.Schema).
 			SetNull(edge.Columns[0]).
 			Where(pred).
 			Query()
