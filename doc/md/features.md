@@ -426,7 +426,7 @@ To enable the Universal-IDs support for your project, simply use the `--feature 
 
 :::warning Note
 If you have used the `migrate.WithGlobalUniqueID(true)` migration option in the past, please read 
-[this guide](globalid-migrate) before you switch your project to use the new globalid feature.
+[this guide](globalid.mdx) before you switch your project to use the new globalid feature.
 :::
 
 **How does it work?** `ent` migration allocates a 1<<32 range for the IDs of each entity (table),
