@@ -400,45 +400,45 @@ type ExValueScanGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (evsgb *ExValueScanGroupBy) Aggregate(fns ...AggregateFunc) *ExValueScanGroupBy {
-	evsgb.fns = append(evsgb.fns, fns...)
-	return evsgb
+func (_g *ExValueScanGroupBy) Aggregate(fns ...AggregateFunc) *ExValueScanGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (evsgb *ExValueScanGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, evsgb.build.ctx, ent.OpQueryGroupBy)
-	if err := evsgb.build.prepareQuery(ctx); err != nil {
+func (_g *ExValueScanGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ExValueScanQuery, *ExValueScanGroupBy](ctx, evsgb.build, evsgb, evsgb.build.inters, v)
+	return scanWithInterceptors[*ExValueScanQuery, *ExValueScanGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (evsgb *ExValueScanGroupBy) gremlinScan(ctx context.Context, root *ExValueScanQuery, v any) error {
+func (_g *ExValueScanGroupBy) gremlinScan(ctx context.Context, root *ExValueScanQuery, v any) error {
 	var (
 		trs   []any
 		names []any
 	)
-	for _, fn := range evsgb.fns {
+	for _, fn := range _g.fns {
 		name, tr := fn("p", "")
 		trs = append(trs, tr)
 		names = append(names, name)
 	}
-	for _, f := range *evsgb.flds {
+	for _, f := range *_g.flds {
 		names = append(names, f)
 		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
 	}
 	query, bindings := root.gremlinQuery(ctx).Group().
-		By(__.Values(*evsgb.flds...).Fold()).
+		By(__.Values(*_g.flds...).Fold()).
 		By(__.Fold().Match(trs...).Select(names...)).
 		Select(dsl.Values).
 		Next().
 		Query()
 	res := &gremlin.Response{}
-	if err := evsgb.build.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _g.build.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(*evsgb.flds)+len(evsgb.fns) == 1 {
+	if len(*_g.flds)+len(_g.fns) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()
@@ -455,40 +455,40 @@ type ExValueScanSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (evss *ExValueScanSelect) Aggregate(fns ...AggregateFunc) *ExValueScanSelect {
-	evss.fns = append(evss.fns, fns...)
-	return evss
+func (_s *ExValueScanSelect) Aggregate(fns ...AggregateFunc) *ExValueScanSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (evss *ExValueScanSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, evss.ctx, ent.OpQuerySelect)
-	if err := evss.prepareQuery(ctx); err != nil {
+func (_s *ExValueScanSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ExValueScanQuery, *ExValueScanSelect](ctx, evss.ExValueScanQuery, evss, evss.inters, v)
+	return scanWithInterceptors[*ExValueScanQuery, *ExValueScanSelect](ctx, _s.ExValueScanQuery, _s, _s.inters, v)
 }
 
-func (evss *ExValueScanSelect) gremlinScan(ctx context.Context, root *ExValueScanQuery, v any) error {
+func (_s *ExValueScanSelect) gremlinScan(ctx context.Context, root *ExValueScanQuery, v any) error {
 	var (
 		res       = &gremlin.Response{}
 		traversal = root.gremlinQuery(ctx)
 	)
-	if fields := evss.ctx.Fields; len(fields) == 1 {
+	if fields := _s.ctx.Fields; len(fields) == 1 {
 		if fields[0] != exvaluescan.FieldID {
 			traversal = traversal.Values(fields...)
 		} else {
 			traversal = traversal.ID()
 		}
 	} else {
-		fields := make([]any, len(evss.ctx.Fields))
-		for i, f := range evss.ctx.Fields {
+		fields := make([]any, len(_s.ctx.Fields))
+		for i, f := range _s.ctx.Fields {
 			fields[i] = f
 		}
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := evss.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _s.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {

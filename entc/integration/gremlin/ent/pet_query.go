@@ -455,45 +455,45 @@ type PetGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (pgb *PetGroupBy) Aggregate(fns ...AggregateFunc) *PetGroupBy {
-	pgb.fns = append(pgb.fns, fns...)
-	return pgb
+func (_g *PetGroupBy) Aggregate(fns ...AggregateFunc) *PetGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (pgb *PetGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, pgb.build.ctx, ent.OpQueryGroupBy)
-	if err := pgb.build.prepareQuery(ctx); err != nil {
+func (_g *PetGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*PetQuery, *PetGroupBy](ctx, pgb.build, pgb, pgb.build.inters, v)
+	return scanWithInterceptors[*PetQuery, *PetGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (pgb *PetGroupBy) gremlinScan(ctx context.Context, root *PetQuery, v any) error {
+func (_g *PetGroupBy) gremlinScan(ctx context.Context, root *PetQuery, v any) error {
 	var (
 		trs   []any
 		names []any
 	)
-	for _, fn := range pgb.fns {
+	for _, fn := range _g.fns {
 		name, tr := fn("p", "")
 		trs = append(trs, tr)
 		names = append(names, name)
 	}
-	for _, f := range *pgb.flds {
+	for _, f := range *_g.flds {
 		names = append(names, f)
 		trs = append(trs, __.As("p").Unfold().Values(f).As(f))
 	}
 	query, bindings := root.gremlinQuery(ctx).Group().
-		By(__.Values(*pgb.flds...).Fold()).
+		By(__.Values(*_g.flds...).Fold()).
 		By(__.Fold().Match(trs...).Select(names...)).
 		Select(dsl.Values).
 		Next().
 		Query()
 	res := &gremlin.Response{}
-	if err := pgb.build.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _g.build.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
-	if len(*pgb.flds)+len(pgb.fns) == 1 {
+	if len(*_g.flds)+len(_g.fns) == 1 {
 		return res.ReadVal(v)
 	}
 	vm, err := res.ReadValueMap()
@@ -510,40 +510,40 @@ type PetSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (ps *PetSelect) Aggregate(fns ...AggregateFunc) *PetSelect {
-	ps.fns = append(ps.fns, fns...)
-	return ps
+func (_s *PetSelect) Aggregate(fns ...AggregateFunc) *PetSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ps *PetSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ps.ctx, ent.OpQuerySelect)
-	if err := ps.prepareQuery(ctx); err != nil {
+func (_s *PetSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*PetQuery, *PetSelect](ctx, ps.PetQuery, ps, ps.inters, v)
+	return scanWithInterceptors[*PetQuery, *PetSelect](ctx, _s.PetQuery, _s, _s.inters, v)
 }
 
-func (ps *PetSelect) gremlinScan(ctx context.Context, root *PetQuery, v any) error {
+func (_s *PetSelect) gremlinScan(ctx context.Context, root *PetQuery, v any) error {
 	var (
 		res       = &gremlin.Response{}
 		traversal = root.gremlinQuery(ctx)
 	)
-	if fields := ps.ctx.Fields; len(fields) == 1 {
+	if fields := _s.ctx.Fields; len(fields) == 1 {
 		if fields[0] != pet.FieldID {
 			traversal = traversal.Values(fields...)
 		} else {
 			traversal = traversal.ID()
 		}
 	} else {
-		fields := make([]any, len(ps.ctx.Fields))
-		for i, f := range ps.ctx.Fields {
+		fields := make([]any, len(_s.ctx.Fields))
+		for i, f := range _s.ctx.Fields {
 			fields[i] = f
 		}
 		traversal = traversal.ValueMap(fields...)
 	}
 	query, bindings := traversal.Query()
-	if err := ps.driver.Exec(ctx, query, bindings, res); err != nil {
+	if err := _s.driver.Exec(ctx, query, bindings, res); err != nil {
 		return err
 	}
 	if len(root.ctx.Fields) == 1 {

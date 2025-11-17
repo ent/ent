@@ -339,6 +339,11 @@ func (t Type) Receiver() string {
 	return "_m"
 }
 
+// Pos returns the filename:line position information of this type in the schema.
+func (t Type) Pos() string {
+	return t.schema.Pos
+}
+
 // hasEdge returns true if this type as an edge (reverse or assoc)
 // with the given name.
 func (t Type) hasEdge(name string) bool {
@@ -892,6 +897,16 @@ func (t Type) DeleteOneReceiver() string {
 // MutationName returns the struct name of the mutation builder for this type.
 func (t Type) MutationName() string {
 	return pascal(t.Name) + "Mutation"
+}
+
+// GroupReceiver returns the receiver name of the group-by builder for this type.
+func (t Type) GroupReceiver() string {
+	return "_g"
+}
+
+// SelectReceiver returns the receiver name of the selector builder for this type.
+func (t Type) SelectReceiver() string {
+	return "_s"
 }
 
 // TypeName returns the constant name of the type defined in mutation.go.
@@ -1628,7 +1643,8 @@ func (f Field) PK() *schema.Column {
 	}
 	// Override the default-value defined in the
 	// schema if it was provided by an annotation.
-	switch ant := f.EntSQL(); {
+	ant := f.EntSQL()
+	switch {
 	case ant == nil:
 	case ant.Default != "":
 		c.Default = ant.Default
@@ -1641,6 +1657,12 @@ func (f Field) PK() *schema.Column {
 		}
 		c.Default = x
 	}
+
+	// Override collation with annotation value
+	if ant != nil && ant.Collation != "" {
+		c.Collation = ant.Collation
+	}
+
 	if f.def != nil {
 		c.SchemaType = f.def.SchemaType
 	}

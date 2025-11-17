@@ -526,41 +526,41 @@ type PaymentGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (pgb *PaymentGroupBy) Aggregate(fns ...AggregateFunc) *PaymentGroupBy {
-	pgb.fns = append(pgb.fns, fns...)
-	return pgb
+func (_g *PaymentGroupBy) Aggregate(fns ...AggregateFunc) *PaymentGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (pgb *PaymentGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, pgb.build.ctx, ent.OpQueryGroupBy)
-	if err := pgb.build.prepareQuery(ctx); err != nil {
+func (_g *PaymentGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*PaymentQuery, *PaymentGroupBy](ctx, pgb.build, pgb, pgb.build.inters, v)
+	return scanWithInterceptors[*PaymentQuery, *PaymentGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (pgb *PaymentGroupBy) sqlScan(ctx context.Context, root *PaymentQuery, v any) error {
+func (_g *PaymentGroupBy) sqlScan(ctx context.Context, root *PaymentQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(pgb.fns))
-	for _, fn := range pgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*pgb.flds)+len(pgb.fns))
-		for _, f := range *pgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*pgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := pgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -574,27 +574,27 @@ type PaymentSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (ps *PaymentSelect) Aggregate(fns ...AggregateFunc) *PaymentSelect {
-	ps.fns = append(ps.fns, fns...)
-	return ps
+func (_s *PaymentSelect) Aggregate(fns ...AggregateFunc) *PaymentSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ps *PaymentSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ps.ctx, ent.OpQuerySelect)
-	if err := ps.prepareQuery(ctx); err != nil {
+func (_s *PaymentSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*PaymentQuery, *PaymentSelect](ctx, ps.PaymentQuery, ps, ps.inters, v)
+	return scanWithInterceptors[*PaymentQuery, *PaymentSelect](ctx, _s.PaymentQuery, _s, _s.inters, v)
 }
 
-func (ps *PaymentSelect) sqlScan(ctx context.Context, root *PaymentQuery, v any) error {
+func (_s *PaymentSelect) sqlScan(ctx context.Context, root *PaymentQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(ps.fns))
-	for _, fn := range ps.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*ps.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -602,7 +602,7 @@ func (ps *PaymentSelect) sqlScan(ctx context.Context, root *PaymentQuery, v any)
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ps.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

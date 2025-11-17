@@ -603,41 +603,41 @@ type FileTypeGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ftgb *FileTypeGroupBy) Aggregate(fns ...AggregateFunc) *FileTypeGroupBy {
-	ftgb.fns = append(ftgb.fns, fns...)
-	return ftgb
+func (_g *FileTypeGroupBy) Aggregate(fns ...AggregateFunc) *FileTypeGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ftgb *FileTypeGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ftgb.build.ctx, ent.OpQueryGroupBy)
-	if err := ftgb.build.prepareQuery(ctx); err != nil {
+func (_g *FileTypeGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*FileTypeQuery, *FileTypeGroupBy](ctx, ftgb.build, ftgb, ftgb.build.inters, v)
+	return scanWithInterceptors[*FileTypeQuery, *FileTypeGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (ftgb *FileTypeGroupBy) sqlScan(ctx context.Context, root *FileTypeQuery, v any) error {
+func (_g *FileTypeGroupBy) sqlScan(ctx context.Context, root *FileTypeQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(ftgb.fns))
-	for _, fn := range ftgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*ftgb.flds)+len(ftgb.fns))
-		for _, f := range *ftgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*ftgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ftgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -651,27 +651,27 @@ type FileTypeSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (fts *FileTypeSelect) Aggregate(fns ...AggregateFunc) *FileTypeSelect {
-	fts.fns = append(fts.fns, fns...)
-	return fts
+func (_s *FileTypeSelect) Aggregate(fns ...AggregateFunc) *FileTypeSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (fts *FileTypeSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, fts.ctx, ent.OpQuerySelect)
-	if err := fts.prepareQuery(ctx); err != nil {
+func (_s *FileTypeSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*FileTypeQuery, *FileTypeSelect](ctx, fts.FileTypeQuery, fts, fts.inters, v)
+	return scanWithInterceptors[*FileTypeQuery, *FileTypeSelect](ctx, _s.FileTypeQuery, _s, _s.inters, v)
 }
 
-func (fts *FileTypeSelect) sqlScan(ctx context.Context, root *FileTypeQuery, v any) error {
+func (_s *FileTypeSelect) sqlScan(ctx context.Context, root *FileTypeQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(fts.fns))
-	for _, fn := range fts.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*fts.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -679,7 +679,7 @@ func (fts *FileTypeSelect) sqlScan(ctx context.Context, root *FileTypeQuery, v a
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := fts.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -687,7 +687,7 @@ func (fts *FileTypeSelect) sqlScan(ctx context.Context, root *FileTypeQuery, v a
 }
 
 // Modify adds a query modifier for attaching custom logic to queries.
-func (fts *FileTypeSelect) Modify(modifiers ...func(s *sql.Selector)) *FileTypeSelect {
-	fts.modifiers = append(fts.modifiers, modifiers...)
-	return fts
+func (_s *FileTypeSelect) Modify(modifiers ...func(s *sql.Selector)) *FileTypeSelect {
+	_s.modifiers = append(_s.modifiers, modifiers...)
+	return _s
 }

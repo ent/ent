@@ -638,7 +638,8 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 	tables := make(map[string]*schema.Table)
 	for _, n := range g.MutableNodes() {
 		table := schema.NewTable(n.Table()).
-			SetComment(n.sqlComment())
+			SetComment(n.sqlComment()).
+			SetPos(n.Pos())
 		if n.HasOneFieldID() {
 			table.AddPrimary(n.ID.PK())
 		}
@@ -728,6 +729,8 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 				s1, s2 := fkSymbols(e, c1, c2)
 				all = append(all, &schema.Table{
 					Name: e.Rel.Table,
+					// Join tables get the position of the edge owner.
+					Pos: n.Pos(),
 					// Search for edge annotation, or
 					// default to edge owner annotation.
 					Schema: func() string {
@@ -790,7 +793,8 @@ func (g *Graph) Views() (views []*schema.Table, err error) {
 			continue
 		}
 		view := schema.NewView(n.Table()).
-			SetComment(n.sqlComment())
+			SetComment(n.sqlComment()).
+			SetPos(n.Pos())
 		switch ant := n.EntSQL(); {
 		case ant == nil:
 		case ant.Skip:

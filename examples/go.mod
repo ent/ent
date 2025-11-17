@@ -1,16 +1,18 @@
 module entgo.io/ent/examples
 
-go 1.23
+go 1.24
+
+toolchain go1.24.0
 
 replace entgo.io/ent => ../
 
 require (
-	ariga.io/atlas v0.32.1-0.20250325101103-175b25e1c1b9
+	ariga.io/atlas v0.36.2-0.20250730182955-2c6300d0a3e1
 	ariga.io/atlas-go-sdk v0.6.9
 	entgo.io/ent v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.3.0
 	github.com/lib/pq v1.10.7
-	github.com/mattn/go-sqlite3 v1.14.17
+	github.com/mattn/go-sqlite3 v1.14.28
 	github.com/stretchr/testify v1.8.4
 	gocloud.dev v0.28.0
 )
@@ -32,7 +34,7 @@ require (
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/crypto v0.3.0 // indirect
-	golang.org/x/mod v0.23.0 // indirect
+	golang.org/x/mod v0.24.0 // indirect
 	golang.org/x/net v0.6.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/text v0.21.0 // indirect

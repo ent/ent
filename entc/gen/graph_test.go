@@ -379,6 +379,72 @@ func TestAbortDuplicateFK(t *testing.T) {
 	require.EqualError(t, err, `duplicate foreign-key symbol "owner_id" found in tables "cars" and "pets"`)
 }
 
+func TestPosition(t *testing.T) {
+	antFn := func(s string) map[string]any {
+		return map[string]any{entsql.Annotation{}.Name(): map[string]string{"schema": s}}
+	}
+	var (
+		user = &load.Schema{
+			Name: "User",
+			Pos:  "user.go:1",
+			Edges: []*load.Edge{
+				{Name: "pets", Type: "Pet"},
+				{Name: "cars", Type: "Car", Through: &struct{ N, T string }{N: "car_edge", T: "CarOwner"}},
+			},
+			Annotations: antFn("one"),
+		}
+		pet = &load.Schema{
+			Name: "Pet",
+			Pos:  "pet.go:10",
+			Edges: []*load.Edge{
+				{Name: "owner", Type: "User", RefName: "pets", Inverse: true},
+			},
+			Annotations: antFn("two"),
+		}
+		petView = &load.Schema{
+			View:        true,
+			Name:        "PetView",
+			Pos:         "pet_view.go:10",
+			Annotations: antFn("two"),
+		}
+		car = &load.Schema{
+			Name: "Car",
+			Pos:  "car.go:100",
+			Edges: []*load.Edge{
+				{Name: "owners", Type: "User", RefName: "cars", Inverse: true},
+			},
+			Annotations: antFn("two"),
+		}
+		carOwner = &load.Schema{
+			Name: "CarOwner",
+			Pos:  "car_owner.go:1000",
+			Fields: []*load.Field{
+				{Name: "user_id", Info: &field.TypeInfo{Type: field.TypeInt}},
+				{Name: "car_id", Info: &field.TypeInfo{Type: field.TypeInt}},
+			},
+			Edges: []*load.Edge{
+				{Name: "owner", Type: "User", Field: "user_id", Unique: true, Required: true},
+				{Name: "car", Type: "User", Field: "car_id", Unique: true, Required: true},
+			},
+			Annotations: antFn("two"),
+		}
+	)
+	g, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, user, pet, petView, car, carOwner)
+	require.NoError(t, err)
+	ts, err := g.Tables()
+	require.NoError(t, err)
+	require.Len(t, ts, 5)
+	require.Equal(t, ts[0].Pos, "user.go:1")
+	require.Equal(t, ts[1].Pos, "pet.go:10")
+	require.Equal(t, ts[2].Pos, "car.go:100")
+	require.Equal(t, ts[3].Pos, "car_owner.go:1000") // edge schema has its own position
+	require.Equal(t, ts[4].Pos, "user.go:1")         // user owns the pet edge -> user position
+	vs, err := g.Views()
+	require.NoError(t, err)
+	require.Len(t, vs, 1)
+	require.Equal(t, vs[0].Pos, "pet_view.go:10")
+}
+
 func TestMultiSchemaAnnotation(t *testing.T) {
 	antFn := func(s string) map[string]any {
 		return map[string]any{entsql.Annotation{}.Name(): map[string]string{"schema": s}}

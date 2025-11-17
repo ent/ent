@@ -425,41 +425,41 @@ type ZooGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (zgb *ZooGroupBy) Aggregate(fns ...AggregateFunc) *ZooGroupBy {
-	zgb.fns = append(zgb.fns, fns...)
-	return zgb
+func (_g *ZooGroupBy) Aggregate(fns ...AggregateFunc) *ZooGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (zgb *ZooGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, zgb.build.ctx, ent.OpQueryGroupBy)
-	if err := zgb.build.prepareQuery(ctx); err != nil {
+func (_g *ZooGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ZooQuery, *ZooGroupBy](ctx, zgb.build, zgb, zgb.build.inters, v)
+	return scanWithInterceptors[*ZooQuery, *ZooGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (zgb *ZooGroupBy) sqlScan(ctx context.Context, root *ZooQuery, v any) error {
+func (_g *ZooGroupBy) sqlScan(ctx context.Context, root *ZooQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(zgb.fns))
-	for _, fn := range zgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*zgb.flds)+len(zgb.fns))
-		for _, f := range *zgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*zgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := zgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -473,27 +473,27 @@ type ZooSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (zs *ZooSelect) Aggregate(fns ...AggregateFunc) *ZooSelect {
-	zs.fns = append(zs.fns, fns...)
-	return zs
+func (_s *ZooSelect) Aggregate(fns ...AggregateFunc) *ZooSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (zs *ZooSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, zs.ctx, ent.OpQuerySelect)
-	if err := zs.prepareQuery(ctx); err != nil {
+func (_s *ZooSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*ZooQuery, *ZooSelect](ctx, zs.ZooQuery, zs, zs.inters, v)
+	return scanWithInterceptors[*ZooQuery, *ZooSelect](ctx, _s.ZooQuery, _s, _s.inters, v)
 }
 
-func (zs *ZooSelect) sqlScan(ctx context.Context, root *ZooQuery, v any) error {
+func (_s *ZooSelect) sqlScan(ctx context.Context, root *ZooQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(zs.fns))
-	for _, fn := range zs.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*zs.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -501,7 +501,7 @@ func (zs *ZooSelect) sqlScan(ctx context.Context, root *ZooQuery, v any) error {
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := zs.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

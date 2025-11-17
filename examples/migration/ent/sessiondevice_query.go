@@ -527,41 +527,41 @@ type SessionDeviceGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (sdgb *SessionDeviceGroupBy) Aggregate(fns ...AggregateFunc) *SessionDeviceGroupBy {
-	sdgb.fns = append(sdgb.fns, fns...)
-	return sdgb
+func (_g *SessionDeviceGroupBy) Aggregate(fns ...AggregateFunc) *SessionDeviceGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (sdgb *SessionDeviceGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, sdgb.build.ctx, ent.OpQueryGroupBy)
-	if err := sdgb.build.prepareQuery(ctx); err != nil {
+func (_g *SessionDeviceGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*SessionDeviceQuery, *SessionDeviceGroupBy](ctx, sdgb.build, sdgb, sdgb.build.inters, v)
+	return scanWithInterceptors[*SessionDeviceQuery, *SessionDeviceGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (sdgb *SessionDeviceGroupBy) sqlScan(ctx context.Context, root *SessionDeviceQuery, v any) error {
+func (_g *SessionDeviceGroupBy) sqlScan(ctx context.Context, root *SessionDeviceQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(sdgb.fns))
-	for _, fn := range sdgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*sdgb.flds)+len(sdgb.fns))
-		for _, f := range *sdgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*sdgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := sdgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -575,27 +575,27 @@ type SessionDeviceSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (sds *SessionDeviceSelect) Aggregate(fns ...AggregateFunc) *SessionDeviceSelect {
-	sds.fns = append(sds.fns, fns...)
-	return sds
+func (_s *SessionDeviceSelect) Aggregate(fns ...AggregateFunc) *SessionDeviceSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (sds *SessionDeviceSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, sds.ctx, ent.OpQuerySelect)
-	if err := sds.prepareQuery(ctx); err != nil {
+func (_s *SessionDeviceSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*SessionDeviceQuery, *SessionDeviceSelect](ctx, sds.SessionDeviceQuery, sds, sds.inters, v)
+	return scanWithInterceptors[*SessionDeviceQuery, *SessionDeviceSelect](ctx, _s.SessionDeviceQuery, _s, _s.inters, v)
 }
 
-func (sds *SessionDeviceSelect) sqlScan(ctx context.Context, root *SessionDeviceQuery, v any) error {
+func (_s *SessionDeviceSelect) sqlScan(ctx context.Context, root *SessionDeviceQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(sds.fns))
-	for _, fn := range sds.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*sds.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -603,7 +603,7 @@ func (sds *SessionDeviceSelect) sqlScan(ctx context.Context, root *SessionDevice
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := sds.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

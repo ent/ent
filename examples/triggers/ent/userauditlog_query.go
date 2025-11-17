@@ -443,41 +443,41 @@ type UserAuditLogGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ualgb *UserAuditLogGroupBy) Aggregate(fns ...AggregateFunc) *UserAuditLogGroupBy {
-	ualgb.fns = append(ualgb.fns, fns...)
-	return ualgb
+func (_g *UserAuditLogGroupBy) Aggregate(fns ...AggregateFunc) *UserAuditLogGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ualgb *UserAuditLogGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ualgb.build.ctx, ent.OpQueryGroupBy)
-	if err := ualgb.build.prepareQuery(ctx); err != nil {
+func (_g *UserAuditLogGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*UserAuditLogQuery, *UserAuditLogGroupBy](ctx, ualgb.build, ualgb, ualgb.build.inters, v)
+	return scanWithInterceptors[*UserAuditLogQuery, *UserAuditLogGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (ualgb *UserAuditLogGroupBy) sqlScan(ctx context.Context, root *UserAuditLogQuery, v any) error {
+func (_g *UserAuditLogGroupBy) sqlScan(ctx context.Context, root *UserAuditLogQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(ualgb.fns))
-	for _, fn := range ualgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*ualgb.flds)+len(ualgb.fns))
-		for _, f := range *ualgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*ualgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ualgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -491,27 +491,27 @@ type UserAuditLogSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (uals *UserAuditLogSelect) Aggregate(fns ...AggregateFunc) *UserAuditLogSelect {
-	uals.fns = append(uals.fns, fns...)
-	return uals
+func (_s *UserAuditLogSelect) Aggregate(fns ...AggregateFunc) *UserAuditLogSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (uals *UserAuditLogSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, uals.ctx, ent.OpQuerySelect)
-	if err := uals.prepareQuery(ctx); err != nil {
+func (_s *UserAuditLogSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*UserAuditLogQuery, *UserAuditLogSelect](ctx, uals.UserAuditLogQuery, uals, uals.inters, v)
+	return scanWithInterceptors[*UserAuditLogQuery, *UserAuditLogSelect](ctx, _s.UserAuditLogQuery, _s, _s.inters, v)
 }
 
-func (uals *UserAuditLogSelect) sqlScan(ctx context.Context, root *UserAuditLogQuery, v any) error {
+func (_s *UserAuditLogSelect) sqlScan(ctx context.Context, root *UserAuditLogQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(uals.fns))
-	for _, fn := range uals.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*uals.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -519,7 +519,7 @@ func (uals *UserAuditLogSelect) sqlScan(ctx context.Context, root *UserAuditLogQ
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := uals.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

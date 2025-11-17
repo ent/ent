@@ -601,41 +601,41 @@ type AttachedFileGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (afgb *AttachedFileGroupBy) Aggregate(fns ...AggregateFunc) *AttachedFileGroupBy {
-	afgb.fns = append(afgb.fns, fns...)
-	return afgb
+func (_g *AttachedFileGroupBy) Aggregate(fns ...AggregateFunc) *AttachedFileGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (afgb *AttachedFileGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, afgb.build.ctx, ent.OpQueryGroupBy)
-	if err := afgb.build.prepareQuery(ctx); err != nil {
+func (_g *AttachedFileGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*AttachedFileQuery, *AttachedFileGroupBy](ctx, afgb.build, afgb, afgb.build.inters, v)
+	return scanWithInterceptors[*AttachedFileQuery, *AttachedFileGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (afgb *AttachedFileGroupBy) sqlScan(ctx context.Context, root *AttachedFileQuery, v any) error {
+func (_g *AttachedFileGroupBy) sqlScan(ctx context.Context, root *AttachedFileQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(afgb.fns))
-	for _, fn := range afgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*afgb.flds)+len(afgb.fns))
-		for _, f := range *afgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*afgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := afgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -649,27 +649,27 @@ type AttachedFileSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (afs *AttachedFileSelect) Aggregate(fns ...AggregateFunc) *AttachedFileSelect {
-	afs.fns = append(afs.fns, fns...)
-	return afs
+func (_s *AttachedFileSelect) Aggregate(fns ...AggregateFunc) *AttachedFileSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (afs *AttachedFileSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, afs.ctx, ent.OpQuerySelect)
-	if err := afs.prepareQuery(ctx); err != nil {
+func (_s *AttachedFileSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*AttachedFileQuery, *AttachedFileSelect](ctx, afs.AttachedFileQuery, afs, afs.inters, v)
+	return scanWithInterceptors[*AttachedFileQuery, *AttachedFileSelect](ctx, _s.AttachedFileQuery, _s, _s.inters, v)
 }
 
-func (afs *AttachedFileSelect) sqlScan(ctx context.Context, root *AttachedFileQuery, v any) error {
+func (_s *AttachedFileSelect) sqlScan(ctx context.Context, root *AttachedFileQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(afs.fns))
-	for _, fn := range afs.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*afs.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -677,7 +677,7 @@ func (afs *AttachedFileSelect) sqlScan(ctx context.Context, root *AttachedFileQu
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := afs.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

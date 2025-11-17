@@ -15,10 +15,12 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
+	"maps"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -61,7 +63,7 @@ type (
 
 // Load loads the schemas package and build the Go plugin with this info.
 func (c *Config) Load() (*SchemaSpec, error) {
-	spec, err := c.load()
+	spec, pos, err := c.load()
 	if err != nil {
 		return nil, fmt.Errorf("entc/load: parse schema dir: %w", err)
 	}
@@ -102,6 +104,9 @@ func (c *Config) Load() (*SchemaSpec, error) {
 		}
 		spec.Schemas = append(spec.Schemas, schema)
 	}
+	for _, s := range spec.Schemas {
+		s.Pos = pos[s.Name]
+	}
 	return spec, nil
 }
 
@@ -109,33 +114,33 @@ func (c *Config) Load() (*SchemaSpec, error) {
 var entInterface = reflect.TypeOf(struct{ ent.Interface }{}).Field(0).Type
 
 // load the ent/schema info.
-func (c *Config) load() (*SchemaSpec, error) {
+func (c *Config) load() (*SchemaSpec, map[string]string, error) {
 	pkgs, err := packages.Load(&packages.Config{
 		BuildFlags: c.BuildFlags,
 		Mode:       packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedModule,
 	}, c.Path, entInterface.PkgPath())
 	if err != nil {
-		return nil, fmt.Errorf("loading package: %w", err)
+		return nil, nil, fmt.Errorf("loading package: %w", err)
 	}
 	if len(pkgs) < 2 {
 		// Check if the package loading failed due to Go-related
 		// errors, such as 'missing go.sum entry'.
 		if err := golist(c.Path, c.BuildFlags); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
-		return nil, fmt.Errorf("missing package information for: %s", c.Path)
+		return nil, nil, fmt.Errorf("missing package information for: %s", c.Path)
 	}
 	entPkg, pkg := pkgs[0], pkgs[1]
 	if len(pkg.Errors) != 0 {
-		return nil, c.loadError(pkg.Errors[0])
+		return nil, nil, c.loadError(pkg.Errors[0])
 	}
 	if len(entPkg.Errors) != 0 {
-		return nil, entPkg.Errors[0]
+		return nil, nil, entPkg.Errors[0]
 	}
 	if pkgs[0].PkgPath != entInterface.PkgPath() {
 		entPkg, pkg = pkgs[1], pkgs[0]
 	}
-	var names []string
+	names := make(map[string]string)
 	iface := entPkg.Types.Scope().Lookup(entInterface.Name()).Type().Underlying().(*types.Interface)
 	for k, v := range pkg.TypesInfo.Defs {
 		typ, ok := v.(*types.TypeName)
@@ -144,18 +149,20 @@ func (c *Config) load() (*SchemaSpec, error) {
 		}
 		spec, ok := k.Obj.Decl.(*ast.TypeSpec)
 		if !ok {
-			return nil, fmt.Errorf("invalid declaration %T for %s", k.Obj.Decl, k.Name)
+			return nil, nil, fmt.Errorf("invalid declaration %T for %s", k.Obj.Decl, k.Name)
 		}
 		if _, ok := spec.Type.(*ast.StructType); !ok {
-			return nil, fmt.Errorf("invalid spec type %T for %s", spec.Type, k.Name)
+			return nil, nil, fmt.Errorf("invalid spec type %T for %s", spec.Type, k.Name)
 		}
-		names = append(names, k.Name)
+		p := pkg.Fset.Position(spec.Pos())
+		names[k.Name] = fmt.Sprintf("%s:%d", p.Filename, p.Line)
 	}
 	if len(c.Names) == 0 {
-		c.Names = names
+		c.Names = slices.Sorted(maps.Keys(names))
+	} else {
+		sort.Strings(c.Names)
 	}
-	sort.Strings(c.Names)
-	return &SchemaSpec{PkgPath: pkg.PkgPath, Module: pkg.Module}, nil
+	return &SchemaSpec{PkgPath: pkg.PkgPath, Module: pkg.Module}, names, nil
 }
 
 func (c *Config) loadError(perr packages.Error) (err error) {

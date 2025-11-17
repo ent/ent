@@ -447,41 +447,41 @@ type CustomTypeGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (ctgb *CustomTypeGroupBy) Aggregate(fns ...AggregateFunc) *CustomTypeGroupBy {
-	ctgb.fns = append(ctgb.fns, fns...)
-	return ctgb
+func (_g *CustomTypeGroupBy) Aggregate(fns ...AggregateFunc) *CustomTypeGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (ctgb *CustomTypeGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, ctgb.build.ctx, ent.OpQueryGroupBy)
-	if err := ctgb.build.prepareQuery(ctx); err != nil {
+func (_g *CustomTypeGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*CustomTypeQuery, *CustomTypeGroupBy](ctx, ctgb.build, ctgb, ctgb.build.inters, v)
+	return scanWithInterceptors[*CustomTypeQuery, *CustomTypeGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (ctgb *CustomTypeGroupBy) sqlScan(ctx context.Context, root *CustomTypeQuery, v any) error {
+func (_g *CustomTypeGroupBy) sqlScan(ctx context.Context, root *CustomTypeQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(ctgb.fns))
-	for _, fn := range ctgb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*ctgb.flds)+len(ctgb.fns))
-		for _, f := range *ctgb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*ctgb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := ctgb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -495,27 +495,27 @@ type CustomTypeSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (cts *CustomTypeSelect) Aggregate(fns ...AggregateFunc) *CustomTypeSelect {
-	cts.fns = append(cts.fns, fns...)
-	return cts
+func (_s *CustomTypeSelect) Aggregate(fns ...AggregateFunc) *CustomTypeSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (cts *CustomTypeSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, cts.ctx, ent.OpQuerySelect)
-	if err := cts.prepareQuery(ctx); err != nil {
+func (_s *CustomTypeSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*CustomTypeQuery, *CustomTypeSelect](ctx, cts.CustomTypeQuery, cts, cts.inters, v)
+	return scanWithInterceptors[*CustomTypeQuery, *CustomTypeSelect](ctx, _s.CustomTypeQuery, _s, _s.inters, v)
 }
 
-func (cts *CustomTypeSelect) sqlScan(ctx context.Context, root *CustomTypeQuery, v any) error {
+func (_s *CustomTypeSelect) sqlScan(ctx context.Context, root *CustomTypeQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(cts.fns))
-	for _, fn := range cts.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*cts.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -523,7 +523,7 @@ func (cts *CustomTypeSelect) sqlScan(ctx context.Context, root *CustomTypeQuery,
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := cts.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

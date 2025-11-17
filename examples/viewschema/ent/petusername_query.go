@@ -367,41 +367,41 @@ type PetUserNameGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (pungb *PetUserNameGroupBy) Aggregate(fns ...AggregateFunc) *PetUserNameGroupBy {
-	pungb.fns = append(pungb.fns, fns...)
-	return pungb
+func (_g *PetUserNameGroupBy) Aggregate(fns ...AggregateFunc) *PetUserNameGroupBy {
+	_g.fns = append(_g.fns, fns...)
+	return _g
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (pungb *PetUserNameGroupBy) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, pungb.build.ctx, ent.OpQueryGroupBy)
-	if err := pungb.build.prepareQuery(ctx); err != nil {
+func (_g *PetUserNameGroupBy) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _g.build.ctx, ent.OpQueryGroupBy)
+	if err := _g.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*PetUserNameQuery, *PetUserNameGroupBy](ctx, pungb.build, pungb, pungb.build.inters, v)
+	return scanWithInterceptors[*PetUserNameQuery, *PetUserNameGroupBy](ctx, _g.build, _g, _g.build.inters, v)
 }
 
-func (pungb *PetUserNameGroupBy) sqlScan(ctx context.Context, root *PetUserNameQuery, v any) error {
+func (_g *PetUserNameGroupBy) sqlScan(ctx context.Context, root *PetUserNameQuery, v any) error {
 	selector := root.sqlQuery(ctx).Select()
-	aggregation := make([]string, 0, len(pungb.fns))
-	for _, fn := range pungb.fns {
+	aggregation := make([]string, 0, len(_g.fns))
+	for _, fn := range _g.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
 	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(*pungb.flds)+len(pungb.fns))
-		for _, f := range *pungb.flds {
+		columns := make([]string, 0, len(*_g.flds)+len(_g.fns))
+		for _, f := range *_g.flds {
 			columns = append(columns, selector.C(f))
 		}
 		columns = append(columns, aggregation...)
 		selector.Select(columns...)
 	}
-	selector.GroupBy(selector.Columns(*pungb.flds...)...)
+	selector.GroupBy(selector.Columns(*_g.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := pungb.build.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _g.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
@@ -415,27 +415,27 @@ type PetUserNameSelect struct {
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
-func (puns *PetUserNameSelect) Aggregate(fns ...AggregateFunc) *PetUserNameSelect {
-	puns.fns = append(puns.fns, fns...)
-	return puns
+func (_s *PetUserNameSelect) Aggregate(fns ...AggregateFunc) *PetUserNameSelect {
+	_s.fns = append(_s.fns, fns...)
+	return _s
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (puns *PetUserNameSelect) Scan(ctx context.Context, v any) error {
-	ctx = setContextOp(ctx, puns.ctx, ent.OpQuerySelect)
-	if err := puns.prepareQuery(ctx); err != nil {
+func (_s *PetUserNameSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, _s.ctx, ent.OpQuerySelect)
+	if err := _s.prepareQuery(ctx); err != nil {
 		return err
 	}
-	return scanWithInterceptors[*PetUserNameQuery, *PetUserNameSelect](ctx, puns.PetUserNameQuery, puns, puns.inters, v)
+	return scanWithInterceptors[*PetUserNameQuery, *PetUserNameSelect](ctx, _s.PetUserNameQuery, _s, _s.inters, v)
 }
 
-func (puns *PetUserNameSelect) sqlScan(ctx context.Context, root *PetUserNameQuery, v any) error {
+func (_s *PetUserNameSelect) sqlScan(ctx context.Context, root *PetUserNameQuery, v any) error {
 	selector := root.sqlQuery(ctx)
-	aggregation := make([]string, 0, len(puns.fns))
-	for _, fn := range puns.fns {
+	aggregation := make([]string, 0, len(_s.fns))
+	for _, fn := range _s.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	switch n := len(*puns.selector.flds); {
+	switch n := len(*_s.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
 		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
@@ -443,7 +443,7 @@ func (puns *PetUserNameSelect) sqlScan(ctx context.Context, root *PetUserNameQue
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := puns.driver.Query(ctx, query, args, rows); err != nil {
+	if err := _s.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()

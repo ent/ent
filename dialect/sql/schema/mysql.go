@@ -241,7 +241,9 @@ func (d *MySQL) atIncrementC(t *schema.Table, c *schema.Column) {
 }
 
 func (d *MySQL) atIncrementT(t *schema.Table, v int64) {
-	t.AddAttrs(&mysql.AutoIncrement{V: v})
+	if v >= 0 {
+		t.AddAttrs(mysql.NewAutoIncrement(uint64(v)))
+	}
 }
 
 func (d *MySQL) atImplicitIndexName(idx *Index, c1 *Column) bool {
