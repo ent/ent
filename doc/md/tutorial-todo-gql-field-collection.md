@@ -170,6 +170,25 @@ field.Int("category_id").
 	)
 ```
 
+#### Collected For Resolver Fields
+
+The `entgql.CollectedFor` annotation allows you to specify that a field should be automatically collected when certain
+GraphQL resolver fields (extended fields) are queried. This is useful when you have resolver fields that depend on
+underlying Ent field values.
+
+```go
+field.String("name").
+	Optional().
+	Annotations(
+		entgql.CollectedFor("uppercaseName"),
+	)
+```
+
+:::note
+If Ent does not know about the mapping between a resolver field and its underlying Ent field, and it encounters an unknown
+field in the query, it will query all fields from the database to ensure the resolver has the data it needs.
+:::
+
 ---
 
 Well done! By using automatic field collection for our Ent schema definition, we were able to greatly improve the
