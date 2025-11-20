@@ -274,7 +274,7 @@ func (b *stringBuilder) Validate(fn func(string) error) *stringBuilder {
 }
 
 // Default sets the default value of the field.
-func (b *stringBuilder) Default(s string) *stringBuilder {
+func (b *stringBuilder) Default(s any) *stringBuilder {
 	b.desc.Default = s
 	return b
 }
@@ -1067,7 +1067,7 @@ func (b *enumBuilder) NamedValues(namevalue ...string) *enumBuilder {
 }
 
 // Default sets the default value of the field.
-func (b *enumBuilder) Default(value string) *enumBuilder {
+func (b *enumBuilder) Default(value any) *enumBuilder {
 	b.desc.Default = value
 	return b
 }
