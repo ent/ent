@@ -56,6 +56,7 @@ func (p Config) node(t *gen.Type) {
 					Right: tw.Space,
 				},
 			},
+			Alignment: tw.CellAlignment{Global: tw.AlignCenter},
 			Formatting: tw.CellFormatting{
 				AutoFormat: tw.Off,
 			},
@@ -102,6 +103,7 @@ func (p Config) node(t *gen.Type) {
 	table.Options(
 		tablewriter.WithHeaderConfig(tw.CellConfig{
 			Formatting: tw.CellFormatting{AutoFormat: tw.Off},
+			Alignment:  tw.CellAlignment{Global: tw.AlignCenter},
 			Padding: tw.CellPadding{
 				Global: tw.Padding{
 					Left:  tw.Space,
