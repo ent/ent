@@ -314,7 +314,10 @@ func (_q *RentalQuery) Clone() *RentalQuery {
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *RentalQuery) WithUser(opts ...func(*UserQuery)) *RentalQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withUser
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -325,7 +328,10 @@ func (_q *RentalQuery) WithUser(opts ...func(*UserQuery)) *RentalQuery {
 // WithCar tells the query-builder to eager-load the nodes that are connected to
 // the "car" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *RentalQuery) WithCar(opts ...func(*CarQuery)) *RentalQuery {
-	query := (&CarClient{config: _q.config}).Query()
+	query := _q.withCar
+	if query == nil {
+		query = (&CarClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

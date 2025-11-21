@@ -314,7 +314,10 @@ func (_q *RoleQuery) Clone() *RoleQuery {
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *RoleQuery) WithUser(opts ...func(*UserQuery)) *RoleQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withUser
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -325,7 +328,10 @@ func (_q *RoleQuery) WithUser(opts ...func(*UserQuery)) *RoleQuery {
 // WithRolesUsers tells the query-builder to eager-load the nodes that are connected to
 // the "roles_users" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *RoleQuery) WithRolesUsers(opts ...func(*RoleUserQuery)) *RoleQuery {
-	query := (&RoleUserClient{config: _q.config}).Query()
+	query := _q.withRolesUsers
+	if query == nil {
+		query = (&RoleUserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
