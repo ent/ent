@@ -273,6 +273,9 @@ func (d *MySQL) atIndex(idx1 *Index, t2 *schema.Table, idx2 *schema.Index) error
 	if t, ok := indexType(idx1, dialect.MySQL); ok {
 		idx2.AddAttrs(&mysql.IndexType{T: t})
 	}
+	if idx1.Annotation != nil && idx1.Annotation.Comment != "" {
+		idx2.SetComment(idx1.Annotation.Comment)
+	}
 	return nil
 }
 
