@@ -223,6 +223,20 @@ func (w *WriteDriver) scanPlaceholder() func(string) (int, int) {
 			// Placeholders are 1-based.
 			return int(idx) - 1, i
 		}
+	case dialect.SQLServer:
+		return func(s string) (int, int) {
+			// SQL Server uses @p1, @p2, etc. The '@p' prefix is already consumed.
+			var i int
+			for i < len(s) && unicode.IsDigit(rune(s[i])) {
+				i++
+			}
+			idx, err := strconv.ParseInt(s[:i], 10, 64)
+			if err != nil {
+				return -1, 0
+			}
+			// Placeholders are 1-based.
+			return int(idx) - 1, i
+		}
 	default:
 		idx := -1
 		return func(string) (int, int) {
@@ -233,10 +247,14 @@ func (w *WriteDriver) scanPlaceholder() func(string) (int, int) {
 }
 
 func (w *WriteDriver) placeholder() byte {
-	if w.Dialect() == dialect.Postgres {
+	switch w.Dialect() {
+	case dialect.Postgres:
 		return '$'
+	case dialect.SQLServer:
+		return '@'
+	default:
+		return '?'
 	}
-	return '?'
 }
 
 func (w *WriteDriver) formatArg(v any) (string, error) {

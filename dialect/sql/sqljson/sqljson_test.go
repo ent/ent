@@ -399,6 +399,86 @@ func TestWritePath(t *testing.T) {
 				),
 			wantQuery: "SELECT * FROM `users` ORDER BY JSON_LENGTH(`a`, '$.b')",
 		},
+		// SQL Server tests
+		{
+			input: sql.Dialect(dialect.SQLServer).
+				Select("*").
+				From(sql.Table("test")).
+				Where(sqljson.HasKey("j", sqljson.DotPath("a.b"))),
+			wantQuery: "SELECT * FROM [test] WHERE JSON_VALUE([j], '$.a.b') IS NOT NULL",
+		},
+		{
+			input: sql.Dialect(dialect.SQLServer).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueEQ("a", "foo", sqljson.Path("b"))),
+			wantQuery: "SELECT * FROM [users] WHERE JSON_VALUE([a], '$.b') = @p1",
+			wantArgs:  []any{"foo"},
+		},
+		{
+			input: sql.Dialect(dialect.SQLServer).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueEQ("a", 42, sqljson.Path("b", "c"))),
+			wantQuery: "SELECT * FROM [users] WHERE JSON_VALUE([a], '$.b.c') = @p1",
+			wantArgs:  []any{42},
+		},
+		{
+			input: sql.Dialect(dialect.SQLServer).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueNEQ("a", "bar", sqljson.Path("b"))),
+			wantQuery: "SELECT * FROM [users] WHERE JSON_VALUE([a], '$.b') <> @p1",
+			wantArgs:  []any{"bar"},
+		},
+		{
+			input: sql.Dialect(dialect.SQLServer).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueGT("a", 10, sqljson.Path("count"))),
+			wantQuery: "SELECT * FROM [users] WHERE JSON_VALUE([a], '$.count') > @p1",
+			wantArgs:  []any{10},
+		},
+		{
+			input: sql.Dialect(dialect.SQLServer).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueLT("a", 100, sqljson.Path("count"))),
+			wantQuery: "SELECT * FROM [users] WHERE JSON_VALUE([a], '$.count') < @p1",
+			wantArgs:  []any{100},
+		},
+		{
+			input: sql.Dialect(dialect.SQLServer).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.LenEQ("tags", 5)),
+			wantQuery: "SELECT * FROM [users] WHERE (SELECT COUNT(*) FROM OPENJSON([tags])) = @p1",
+			wantArgs:  []any{5},
+		},
+		{
+			input: sql.Dialect(dialect.SQLServer).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.LenGT("data", 0, sqljson.Path("items"))),
+			wantQuery: "SELECT * FROM [users] WHERE (SELECT COUNT(*) FROM OPENJSON([data], '$.items')) > @p1",
+			wantArgs:  []any{0},
+		},
+		{
+			input: sql.Dialect(dialect.SQLServer).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueEQ("config", "value", sqljson.DotPath("settings.option"))),
+			wantQuery: "SELECT * FROM [users] WHERE JSON_VALUE([config], '$.settings.option') = @p1",
+			wantArgs:  []any{"value"},
+		},
+		{
+			input: sql.Dialect(dialect.SQLServer).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.ValueEQ("data", "item", sqljson.DotPath("list[0].name"))),
+			wantQuery: "SELECT * FROM [users] WHERE JSON_VALUE([data], '$.list[0].name') = @p1",
+			wantArgs:  []any{"item"},
+		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
@@ -523,6 +603,25 @@ func TestAppend(t *testing.T) {
 			}(),
 			wantQuery: "UPDATE `t` SET `c` = CASE WHEN (JSON_TYPE(JSON_EXTRACT(`c`, '$.a')) IS NULL OR JSON_TYPE(JSON_EXTRACT(`c`, '$.a')) = 'NULL') THEN JSON_SET(`c`, '$.a', JSON_ARRAY(?)) ELSE JSON_ARRAY_APPEND(`c`, '$.a', ?) END",
 			wantArgs:  []any{"a", "a"},
+		},
+		// SQL Server Append tests
+		{
+			input: func() sql.Querier {
+				u := sql.Dialect(dialect.SQLServer).Update("t")
+				sqljson.Append(u, "c", []string{"a"})
+				return u
+			}(),
+			wantQuery: "UPDATE [t] SET [c] = CASE WHEN (JSON_VALUE([c], '$') IS NULL OR JSON_VALUE([c], '$') = 'null') THEN @p1 ELSE [c] END",
+			wantArgs:  []any{`["a"]`},
+		},
+		{
+			input: func() sql.Querier {
+				u := sql.Dialect(dialect.SQLServer).Update("t")
+				sqljson.Append(u, "c", []string{"a"}, sqljson.Path("a"))
+				return u
+			}(),
+			wantQuery: "UPDATE [t] SET [c] = CASE WHEN (JSON_VALUE([c], '$.a') IS NULL OR JSON_VALUE([c], '$.a') = 'null') THEN JSON_MODIFY([c], '$.a', JSON_QUERY(?)) ELSE JSON_MODIFY([c], '$.a', JSON_QUERY((SELECT [c] FOR JSON PATH))) END",
+			wantArgs:  []any{`["a"]`},
 		},
 	}
 	for i, tt := range tests {

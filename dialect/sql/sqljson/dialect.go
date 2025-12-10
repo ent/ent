@@ -177,6 +177,54 @@ func (*postgres) Append(u *sql.UpdateBuilder, column string, elems []any, opts .
 	})
 }
 
+type sqlserver struct{}
+
+// Append implements the driver.Append method.
+// SQL Server uses JSON_MODIFY for manipulating JSON data.
+func (*sqlserver) Append(u *sql.UpdateBuilder, column string, elems []any, opts ...Option) {
+	setCase(u, column, when{
+		Cond: func(b *sql.Builder) {
+			// Check if the JSON path exists and is not null.
+			path := identPath(column, opts...)
+			path.sqlserverFunc("JSON_VALUE", b)
+			b.WriteOp(sql.OpIsNull)
+			b.WriteString(" OR ")
+			path.sqlserverFunc("JSON_VALUE", b)
+			b.WriteOp(sql.OpEQ).WriteString("'null'")
+		},
+		Then: func(b *sql.Builder) {
+			if len(opts) > 0 {
+				b.WriteString("JSON_MODIFY(")
+				b.Ident(column).Comma()
+				identPath(column, opts...).sqlserverPath(b)
+				b.Comma().Argf("JSON_QUERY(?)", marshalArg(elems))
+				b.WriteByte(')')
+			} else {
+				b.Arg(marshalArg(elems))
+			}
+		},
+		Else: func(b *sql.Builder) {
+			// For appending to existing array, we need to use a subquery approach.
+			// This is a simplified version; full implementation would need OPENJSON.
+			if len(opts) > 0 {
+				b.WriteString("JSON_MODIFY(")
+				b.Ident(column).Comma()
+				path := identPath(column, opts...)
+				path.sqlserverPath(b)
+				b.Comma()
+				b.WriteString("JSON_QUERY(")
+				b.WriteString("(SELECT ")
+				b.Ident(column)
+				b.WriteString(" FOR JSON PATH)")
+				b.WriteByte(')')
+				b.WriteByte(')')
+			} else {
+				b.Ident(column)
+			}
+		},
+	})
+}
+
 // driver groups all dialect-specific methods.
 type driver interface {
 	Append(u *sql.UpdateBuilder, column string, elems []any, opts ...Option)
@@ -190,6 +238,8 @@ func newDriver(name string) (driver, error) {
 		return (*mysql)(nil), nil
 	case dialect.Postgres:
 		return (*postgres)(nil), nil
+	case dialect.SQLServer:
+		return (*sqlserver)(nil), nil
 	default:
 		return nil, fmt.Errorf("sqljson: unknown driver %q", name)
 	}

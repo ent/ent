@@ -1107,8 +1107,11 @@ func (a *Atlas) setupTables(tables []*Table) {
 // symbol makes sure the symbol length is not longer than the maxlength in the dialect.
 func (a *Atlas) symbol(name string) string {
 	size := 64
-	if a.dialect == dialect.Postgres {
+	switch a.dialect {
+	case dialect.Postgres:
 		size = 63
+	case dialect.SQLServer:
+		size = 128 // SQL Server supports up to 128 characters for identifiers
 	}
 	if len(name) <= size {
 		return name
@@ -1126,6 +1129,8 @@ func (a *Atlas) entDialect(ctx context.Context, drv dialect.Driver) (sqlDialect,
 		d = &SQLite{Driver: drv, WithForeignKeys: a.withForeignKeys}
 	case dialect.Postgres:
 		d = &Postgres{Driver: drv}
+	case dialect.SQLServer:
+		d = &SQLServer{Driver: drv, schema: a.schema}
 	default:
 		return nil, fmt.Errorf("sql/schema: unsupported dialect %q", a.dialect)
 	}

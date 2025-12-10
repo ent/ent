@@ -87,7 +87,7 @@ func (_c *BlogCreate) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func (_c *BlogCreate) check() error {
 	switch _c.driver.Dialect() {
-	case dialect.MySQL, dialect.SQLite:
+	case dialect.MySQL, dialect.SQLServer, dialect.SQLite:
 		if _, ok := _c.mutation.Oid(); !ok {
 			return &ValidationError{Name: "oid", err: errors.New(`entv2: missing required field "Blog.oid"`)}
 		}

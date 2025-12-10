@@ -2335,3 +2335,216 @@ func TestColumnsHasPrefix(t *testing.T) {
 		require.Equal(t, []any{`\`}, args)
 	})
 }
+
+func TestSQLServerDialect(t *testing.T) {
+	t.Run("IdentifierQuoting", func(t *testing.T) {
+		// Basic identifier quoting with brackets
+		query, _ := Dialect(dialect.SQLServer).
+			Select("id", "name").From(Table("users")).Query()
+		require.Equal(t, `SELECT [id], [name] FROM [users]`, query)
+
+		// Quoting with special characters - ] is escaped by doubling
+		query, _ = Dialect(dialect.SQLServer).
+			Select("col]name").From(Table("table]name")).Query()
+		require.Equal(t, `SELECT [col]]name] FROM [table]]name]`, query)
+
+		// Schema-qualified table name
+		query, _ = Dialect(dialect.SQLServer).
+			Select("*").From(Table("users").Schema("dbo")).Query()
+		require.Equal(t, `SELECT * FROM [dbo].[users]`, query)
+	})
+
+	t.Run("ParameterPlaceholders", func(t *testing.T) {
+		// @p1, @p2 style placeholders
+		query, args := Dialect(dialect.SQLServer).
+			Select("*").From(Table("users")).Where(EQ("name", "foo")).Query()
+		require.Equal(t, `SELECT * FROM [users] WHERE [name] = @p1`, query)
+		require.Equal(t, []any{"foo"}, args)
+
+		// Multiple parameters
+		query, args = Dialect(dialect.SQLServer).
+			Select("*").From(Table("users")).
+			Where(And(EQ("name", "foo"), EQ("age", 30))).Query()
+		require.Equal(t, `SELECT * FROM [users] WHERE [name] = @p1 AND [age] = @p2`, query)
+		require.Equal(t, []any{"foo", 30}, args)
+	})
+
+	t.Run("Pagination", func(t *testing.T) {
+		// OFFSET with no ORDER BY - should add ORDER BY (SELECT NULL)
+		query, _ := Dialect(dialect.SQLServer).
+			Select("*").From(Table("users")).Offset(10).Query()
+		require.Equal(t, `SELECT * FROM [users] ORDER BY (SELECT NULL) OFFSET 10 ROWS`, query)
+
+		// LIMIT only - needs ORDER BY (SELECT NULL) for OFFSET 0
+		query, _ = Dialect(dialect.SQLServer).
+			Select("*").From(Table("users")).Limit(10).Query()
+		require.Equal(t, `SELECT * FROM [users] ORDER BY (SELECT NULL) OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY`, query)
+
+		// Both LIMIT and OFFSET
+		query, _ = Dialect(dialect.SQLServer).
+			Select("*").From(Table("users")).Limit(10).Offset(20).Query()
+		require.Equal(t, `SELECT * FROM [users] ORDER BY (SELECT NULL) OFFSET 20 ROWS FETCH NEXT 10 ROWS ONLY`, query)
+
+		// With explicit ORDER BY - should not add dummy ORDER BY
+		query, _ = Dialect(dialect.SQLServer).
+			Select("*").From(Table("users")).OrderBy("name").Limit(10).Offset(20).Query()
+		require.Equal(t, `SELECT * FROM [users] ORDER BY [name] OFFSET 20 ROWS FETCH NEXT 10 ROWS ONLY`, query)
+	})
+
+	t.Run("Insert", func(t *testing.T) {
+		// Basic insert
+		query, args := Dialect(dialect.SQLServer).
+			Insert("users").Columns("name", "age").Values("foo", 30).Query()
+		require.Equal(t, `INSERT INTO [users] ([name], [age]) VALUES (@p1, @p2)`, query)
+		require.Equal(t, []any{"foo", 30}, args)
+
+		// Insert with schema
+		query, args = Dialect(dialect.SQLServer).
+			Insert("users").Schema("dbo").Columns("name").Values("foo").Query()
+		require.Equal(t, `INSERT INTO [dbo].[users] ([name]) VALUES (@p1)`, query)
+		require.Equal(t, []any{"foo"}, args)
+
+		// Insert default values
+		query, _ = Dialect(dialect.SQLServer).
+			Insert("users").Default().Query()
+		require.Equal(t, `INSERT INTO [users] DEFAULT VALUES`, query)
+	})
+
+	t.Run("Update", func(t *testing.T) {
+		// Basic update
+		query, args := Dialect(dialect.SQLServer).
+			Update("users").Set("name", "bar").Where(EQ("id", 1)).Query()
+		require.Equal(t, `UPDATE [users] SET [name] = @p1 WHERE [id] = @p2`, query)
+		require.Equal(t, []any{"bar", 1}, args)
+
+		// Update with schema
+		query, args = Dialect(dialect.SQLServer).
+			Update("users").Schema("dbo").Set("name", "bar").Query()
+		require.Equal(t, `UPDATE [dbo].[users] SET [name] = @p1`, query)
+		require.Equal(t, []any{"bar"}, args)
+
+		// SetNull
+		query, _ = Dialect(dialect.SQLServer).
+			Update("users").SetNull("deleted_at").Query()
+		require.Equal(t, `UPDATE [users] SET [deleted_at] = NULL`, query)
+	})
+
+	t.Run("Delete", func(t *testing.T) {
+		// Basic delete
+		query, args := Dialect(dialect.SQLServer).
+			Delete("users").Where(EQ("id", 1)).Query()
+		require.Equal(t, `DELETE FROM [users] WHERE [id] = @p1`, query)
+		require.Equal(t, []any{1}, args)
+
+		// Delete with schema
+		query, args = Dialect(dialect.SQLServer).
+			Delete("users").Schema("dbo").Where(EQ("id", 1)).Query()
+		require.Equal(t, `DELETE FROM [dbo].[users] WHERE [id] = @p1`, query)
+		require.Equal(t, []any{1}, args)
+	})
+
+	t.Run("Select", func(t *testing.T) {
+		// Select with alias
+		t1 := Dialect(dialect.SQLServer).Table("users").As("u")
+		query, _ := Dialect(dialect.SQLServer).
+			Select(t1.C("id"), t1.C("name")).From(t1).Query()
+		require.Equal(t, `SELECT [u].[id], [u].[name] FROM [users] AS [u]`, query)
+
+		// Select with join
+		t1 = Dialect(dialect.SQLServer).Table("users").As("u")
+		t2 := Dialect(dialect.SQLServer).Table("orders").As("o")
+		query, _ = Dialect(dialect.SQLServer).
+			Select(t1.C("name"), t2.C("total")).
+			From(t1).
+			Join(t2).On(t1.C("id"), t2.C("user_id")).Query()
+		require.Equal(t, `SELECT [u].[name], [o].[total] FROM [users] AS [u] JOIN [orders] AS [o] ON [u].[id] = [o].[user_id]`, query)
+
+		// Distinct
+		query, _ = Dialect(dialect.SQLServer).
+			Select("name").Distinct().From(Table("users")).Query()
+		require.Equal(t, `SELECT DISTINCT [name] FROM [users]`, query)
+
+		// Count
+		query, _ = Dialect(dialect.SQLServer).
+			Select(Count("*")).From(Table("users")).Query()
+		require.Equal(t, "SELECT COUNT(*) FROM [users]", query)
+
+		// Group By with Having
+		query, args := Dialect(dialect.SQLServer).
+			Select("department", Count("*")).
+			From(Table("employees")).
+			GroupBy("department").
+			Having(GT(Count("*"), 5)).Query()
+		require.Equal(t, `SELECT [department], COUNT(*) FROM [employees] GROUP BY [department] HAVING COUNT(*) > @p1`, query)
+		require.Equal(t, []any{5}, args)
+	})
+
+	t.Run("Predicates", func(t *testing.T) {
+		// IN predicate
+		query, args := Dialect(dialect.SQLServer).
+			Select("*").From(Table("users")).Where(In("id", 1, 2, 3)).Query()
+		require.Equal(t, `SELECT * FROM [users] WHERE [id] IN (@p1, @p2, @p3)`, query)
+		require.Equal(t, []any{1, 2, 3}, args)
+
+		// NOT IN predicate
+		query, args = Dialect(dialect.SQLServer).
+			Select("*").From(Table("users")).Where(NotIn("id", 1, 2)).Query()
+		require.Equal(t, `SELECT * FROM [users] WHERE [id] NOT IN (@p1, @p2)`, query)
+		require.Equal(t, []any{1, 2}, args)
+
+		// LIKE predicate
+		query, args = Dialect(dialect.SQLServer).
+			Select("*").From(Table("users")).Where(Like("name", "%foo%")).Query()
+		require.Equal(t, `SELECT * FROM [users] WHERE [name] LIKE @p1`, query)
+		require.Equal(t, []any{"%foo%"}, args)
+
+		// IS NULL
+		query, _ = Dialect(dialect.SQLServer).
+			Select("*").From(Table("users")).Where(IsNull("deleted_at")).Query()
+		require.Equal(t, `SELECT * FROM [users] WHERE [deleted_at] IS NULL`, query)
+
+		// IS NOT NULL
+		query, _ = Dialect(dialect.SQLServer).
+			Select("*").From(Table("users")).Where(NotNull("deleted_at")).Query()
+		require.Equal(t, `SELECT * FROM [users] WHERE [deleted_at] IS NOT NULL`, query)
+
+		// GTE and LTE (simulating range)
+		query, args = Dialect(dialect.SQLServer).
+			Select("*").From(Table("users")).Where(And(GTE("age", 18), LTE("age", 65))).Query()
+		require.Equal(t, `SELECT * FROM [users] WHERE [age] >= @p1 AND [age] <= @p2`, query)
+		require.Equal(t, []any{18, 65}, args)
+
+		// Compound predicates
+		query, args = Dialect(dialect.SQLServer).
+			Select("*").From(Table("users")).
+			Where(Or(
+				And(EQ("name", "foo"), GT("age", 18)),
+				EQ("status", "active"),
+			)).Query()
+		require.Equal(t, `SELECT * FROM [users] WHERE ([name] = @p1 AND [age] > @p2) OR [status] = @p3`, query)
+		require.Equal(t, []any{"foo", 18, "active"}, args)
+	})
+
+	t.Run("Subqueries", func(t *testing.T) {
+		// Subquery in WHERE
+		subq := Dialect(dialect.SQLServer).
+			Select("user_id").From(Table("orders")).Where(GT("total", 100))
+		query, args := Dialect(dialect.SQLServer).
+			Select("*").From(Table("users")).Where(In("id", subq)).Query()
+		require.Equal(t, `SELECT * FROM [users] WHERE [id] IN (SELECT [user_id] FROM [orders] WHERE [total] > @p1)`, query)
+		require.Equal(t, []any{100}, args)
+	})
+
+	t.Run("CreateView", func(t *testing.T) {
+		query, args := Dialect(dialect.SQLServer).
+			CreateView("active_users").
+			Columns(
+				Column("id").Type("int"),
+				Column("name").Type("nvarchar(255)"),
+			).
+			As(Dialect(dialect.SQLServer).Select("id", "name").From(Table("users")).Where(EQ("status", "active"))).
+			Query()
+		require.Equal(t, `CREATE VIEW [active_users] ([id] int, [name] nvarchar(255)) AS SELECT [id], [name] FROM [users] WHERE [status] = @p1`, query)
+		require.Equal(t, []any{"active"}, args)
+	})
+}

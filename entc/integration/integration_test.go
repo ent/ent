@@ -52,6 +52,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/microsoft/go-mssqldb"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -120,6 +121,28 @@ func TestPostgres(t *testing.T) {
 		t.Run(version, func(t *testing.T) {
 			t.Parallel()
 			client := enttest.Open(t, dialect.Postgres, addr, opts)
+			defer client.Close()
+			for _, tt := range tests {
+				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
+				t.Run(name[strings.LastIndex(name, ".")+1:], func(t *testing.T) {
+					drop(t, client)
+					tt(t, client)
+				})
+			}
+		})
+	}
+}
+
+func TestSQLServer(t *testing.T) {
+	for version, port := range map[string]int{
+		"2019": 1433,
+		"2022": 1434,
+		"2025": 1435,
+	} {
+		connStr := fmt.Sprintf("sqlserver://sa:P@ssw0rd!@localhost:%d?database=master&encrypt=disable", port)
+		t.Run(version, func(t *testing.T) {
+			t.Parallel()
+			client := enttest.Open(t, dialect.SQLServer, connStr, opts)
 			defer client.Close()
 			for _, tt := range tests {
 				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()

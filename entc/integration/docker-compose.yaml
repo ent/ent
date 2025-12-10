@@ -167,3 +167,51 @@ services:
     restart: on-failure
     ports:
       - 8182:8182
+
+  mssql2019:
+    platform: linux/amd64
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: P@ssw0rd!
+      MSSQL_PID: Developer
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'P@ssw0rd!' -C -Q 'SELECT 1' || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'P@ssw0rd!' -Q 'SELECT 1'
+      interval: 10s
+      start_period: 30s
+      timeout: 5s
+      retries: 10
+    ports:
+      - 1433:1433
+
+  mssql2022:
+    platform: linux/amd64
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: P@ssw0rd!
+      MSSQL_PID: Developer
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'P@ssw0rd!' -C -Q 'SELECT 1' || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'P@ssw0rd!' -Q 'SELECT 1'
+      interval: 10s
+      start_period: 30s
+      timeout: 5s
+      retries: 10
+    ports:
+      - 1434:1433
+
+  mssql2025:
+    platform: linux/amd64
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: P@ssw0rd!
+      MSSQL_PID: Developer
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'P@ssw0rd!' -C -Q 'SELECT 1' || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'P@ssw0rd!' -Q 'SELECT 1'
+      interval: 10s
+      start_period: 30s
+      timeout: 5s
+      retries: 10
+    ports:
+      - 1435:1433

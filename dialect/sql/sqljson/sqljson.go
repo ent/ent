@@ -28,6 +28,11 @@ func HasKey(column string, opts ...Option) *sql.Predicate {
 			path := identPath(column, opts...)
 			path.mysqlFunc("JSON_TYPE", b)
 			b.WriteOp(sql.OpNotNull)
+		case dialect.SQLServer:
+			// SQL Server uses JSON_VALUE which returns NULL if path doesn't exist.
+			path := identPath(column, opts...)
+			path.sqlserverFunc("JSON_VALUE", b)
+			b.WriteOp(sql.OpNotNull)
 		default:
 			valuePath(b, column, opts...)
 			b.WriteOp(sql.OpNotNull)
@@ -520,6 +525,9 @@ func (p *PathOptions) value(b *sql.Builder) {
 			defer b.WriteString(")::" + p.Cast)
 		}
 		p.pgTextPath(b)
+	case b.Dialect() == dialect.SQLServer:
+		// SQL Server uses JSON_VALUE for scalar values and JSON_QUERY for objects/arrays.
+		p.sqlserverFunc("JSON_VALUE", b)
 	default:
 		if p.Unquote && b.Dialect() == dialect.MySQL {
 			b.WriteString("JSON_UNQUOTE(")
@@ -538,6 +546,16 @@ func (p *PathOptions) length(b *sql.Builder) {
 		b.WriteByte(')')
 	case b.Dialect() == dialect.MySQL:
 		p.mysqlFunc("JSON_LENGTH", b)
+	case b.Dialect() == dialect.SQLServer:
+		// SQL Server doesn't have a direct JSON array length function.
+		// We use OPENJSON to count array elements.
+		b.WriteString("(SELECT COUNT(*) FROM OPENJSON(")
+		b.Ident(p.Ident)
+		if len(p.Path) > 0 {
+			b.Comma()
+			p.sqlserverPath(b)
+		}
+		b.WriteString("))")
 	default:
 		p.mysqlFunc("JSON_ARRAY_LENGTH", b)
 	}
@@ -550,6 +568,32 @@ func (p *PathOptions) mysqlFunc(fn string, b *sql.Builder) {
 	b.Ident(p.Ident).Comma()
 	p.mysqlPath(b)
 	b.WriteByte(')')
+}
+
+// sqlserverFunc writes the JSON path in SQL Server format for the
+// given function. `JSON_VALUE([a], '$.b.c')`.
+func (p *PathOptions) sqlserverFunc(fn string, b *sql.Builder) {
+	b.WriteString(fn).WriteByte('(')
+	b.Ident(p.Ident).Comma()
+	p.sqlserverPath(b)
+	b.WriteByte(')')
+}
+
+// sqlserverPath writes the JSON path in SQL Server format.
+// SQL Server uses the same path syntax as MySQL: '$.a.b[1].c'
+func (p *PathOptions) sqlserverPath(b *sql.Builder) {
+	b.WriteString(`'$`)
+	for _, s := range p.Path {
+		switch _, isIndex := isJSONIdx(s); {
+		case isIndex:
+			b.WriteString(s)
+		case s == "*" || isQuoted(s) || isIdentifier(s):
+			b.WriteString("." + s)
+		default:
+			b.WriteString(`."` + s + `"`)
+		}
+	}
+	b.WriteByte('\'')
 }
 
 // mysqlPath writes the JSON path in MySQL (or SQLite) format.
