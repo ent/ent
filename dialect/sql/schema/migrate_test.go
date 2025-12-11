@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 	"testing"
 	"text/template"
 	"time"
@@ -443,4 +444,21 @@ func TestAtlas_StateReader(t *testing.T) {
 			schema.NewBoolColumn("active", "bool"),
 		},
 	)
+}
+
+func TestAtlas_ParallelCreate(t *testing.T) {
+	var wg sync.WaitGroup
+	wg.Add(10)
+	for i := 0; i < 10; i++ {
+		db, err := sql.Open(dialect.SQLite, fmt.Sprintf("file:test-%d?mode=memory&_fk=1", i))
+		require.NoError(t, err)
+		m, err := NewMigrate(db)
+		require.NoError(t, err)
+		go func() {
+			defer wg.Done()
+			require.NoError(t, m.Create(context.Background(), petsTable))
+			require.NoError(t, db.Close())
+		}()
+	}
+	wg.Wait()
 }
