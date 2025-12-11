@@ -48,7 +48,7 @@ func TestWithVars(t *testing.T) {
 	require.NoError(t, mock.ExpectationsWereMet())
 
 	mock.ExpectBegin()
-	mock.ExpectExec("SET foo = 'bar'").WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec("SET LOCAL foo = 'bar'").WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectQuery("SELECT 1").WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
 	mock.ExpectCommit()
 	tx, err := drv.Tx(context.Background())
