@@ -11,6 +11,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 
 	"ariga.io/atlas/sql/migrate"
 	"ariga.io/atlas/sql/mysql"
@@ -36,6 +37,7 @@ const (
 
 // Table schema definition for SQL dialects.
 type Table struct {
+	mu          sync.Mutex
 	Name        string
 	Schema      string
 	Columns     []*Column
