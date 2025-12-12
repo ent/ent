@@ -338,7 +338,10 @@ func (_q *DocQuery) Clone() *DocQuery {
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *DocQuery) WithParent(opts ...func(*DocQuery)) *DocQuery {
-	query := (&DocClient{config: _q.config}).Query()
+	query := _q.withParent
+	if query == nil {
+		query = (&DocClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -349,7 +352,10 @@ func (_q *DocQuery) WithParent(opts ...func(*DocQuery)) *DocQuery {
 // WithChildren tells the query-builder to eager-load the nodes that are connected to
 // the "children" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *DocQuery) WithChildren(opts ...func(*DocQuery)) *DocQuery {
-	query := (&DocClient{config: _q.config}).Query()
+	query := _q.withChildren
+	if query == nil {
+		query = (&DocClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -360,7 +366,10 @@ func (_q *DocQuery) WithChildren(opts ...func(*DocQuery)) *DocQuery {
 // WithRelated tells the query-builder to eager-load the nodes that are connected to
 // the "related" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *DocQuery) WithRelated(opts ...func(*DocQuery)) *DocQuery {
-	query := (&DocClient{config: _q.config}).Query()
+	query := _q.withRelated
+	if query == nil {
+		query = (&DocClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

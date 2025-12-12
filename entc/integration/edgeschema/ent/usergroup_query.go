@@ -313,7 +313,10 @@ func (_q *UserGroupQuery) Clone() *UserGroupQuery {
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserGroupQuery) WithUser(opts ...func(*UserQuery)) *UserGroupQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withUser
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -324,7 +327,10 @@ func (_q *UserGroupQuery) WithUser(opts ...func(*UserQuery)) *UserGroupQuery {
 // WithGroup tells the query-builder to eager-load the nodes that are connected to
 // the "group" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserGroupQuery) WithGroup(opts ...func(*GroupQuery)) *UserGroupQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := _q.withGroup
+	if query == nil {
+		query = (&GroupClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

@@ -289,7 +289,10 @@ func (_q *BlogQuery) Clone() *BlogQuery {
 // WithAdmins tells the query-builder to eager-load the nodes that are connected to
 // the "admins" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *BlogQuery) WithAdmins(opts ...func(*UserQuery)) *BlogQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withAdmins
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

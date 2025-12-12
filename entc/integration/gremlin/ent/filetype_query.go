@@ -280,7 +280,10 @@ func (_q *FileTypeQuery) Clone() *FileTypeQuery {
 // WithFiles tells the query-builder to eager-load the nodes that are connected to
 // the "files" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *FileTypeQuery) WithFiles(opts ...func(*FileQuery)) *FileTypeQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := _q.withFiles
+	if query == nil {
+		query = (&FileClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

@@ -338,7 +338,10 @@ func (_q *MetadataQuery) Clone() *MetadataQuery {
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *MetadataQuery) WithUser(opts ...func(*UserQuery)) *MetadataQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withUser
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -349,7 +352,10 @@ func (_q *MetadataQuery) WithUser(opts ...func(*UserQuery)) *MetadataQuery {
 // WithChildren tells the query-builder to eager-load the nodes that are connected to
 // the "children" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *MetadataQuery) WithChildren(opts ...func(*MetadataQuery)) *MetadataQuery {
-	query := (&MetadataClient{config: _q.config}).Query()
+	query := _q.withChildren
+	if query == nil {
+		query = (&MetadataClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -360,7 +366,10 @@ func (_q *MetadataQuery) WithChildren(opts ...func(*MetadataQuery)) *MetadataQue
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *MetadataQuery) WithParent(opts ...func(*MetadataQuery)) *MetadataQuery {
-	query := (&MetadataClient{config: _q.config}).Query()
+	query := _q.withParent
+	if query == nil {
+		query = (&MetadataClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

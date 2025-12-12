@@ -413,7 +413,10 @@ func (_q *TweetQuery) Clone() *TweetQuery {
 // WithLikedUsers tells the query-builder to eager-load the nodes that are connected to
 // the "liked_users" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TweetQuery) WithLikedUsers(opts ...func(*UserQuery)) *TweetQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withLikedUsers
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -424,7 +427,10 @@ func (_q *TweetQuery) WithLikedUsers(opts ...func(*UserQuery)) *TweetQuery {
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TweetQuery) WithUser(opts ...func(*UserQuery)) *TweetQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withUser
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -435,7 +441,10 @@ func (_q *TweetQuery) WithUser(opts ...func(*UserQuery)) *TweetQuery {
 // WithTags tells the query-builder to eager-load the nodes that are connected to
 // the "tags" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TweetQuery) WithTags(opts ...func(*TagQuery)) *TweetQuery {
-	query := (&TagClient{config: _q.config}).Query()
+	query := _q.withTags
+	if query == nil {
+		query = (&TagClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -446,7 +455,10 @@ func (_q *TweetQuery) WithTags(opts ...func(*TagQuery)) *TweetQuery {
 // WithLikes tells the query-builder to eager-load the nodes that are connected to
 // the "likes" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TweetQuery) WithLikes(opts ...func(*TweetLikeQuery)) *TweetQuery {
-	query := (&TweetLikeClient{config: _q.config}).Query()
+	query := _q.withLikes
+	if query == nil {
+		query = (&TweetLikeClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -457,7 +469,10 @@ func (_q *TweetQuery) WithLikes(opts ...func(*TweetLikeQuery)) *TweetQuery {
 // WithTweetUser tells the query-builder to eager-load the nodes that are connected to
 // the "tweet_user" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TweetQuery) WithTweetUser(opts ...func(*UserTweetQuery)) *TweetQuery {
-	query := (&UserTweetClient{config: _q.config}).Query()
+	query := _q.withTweetUser
+	if query == nil {
+		query = (&UserTweetClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -468,7 +483,10 @@ func (_q *TweetQuery) WithTweetUser(opts ...func(*UserTweetQuery)) *TweetQuery {
 // WithTweetTags tells the query-builder to eager-load the nodes that are connected to
 // the "tweet_tags" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TweetQuery) WithTweetTags(opts ...func(*TweetTagQuery)) *TweetQuery {
-	query := (&TweetTagClient{config: _q.config}).Query()
+	query := _q.withTweetTags
+	if query == nil {
+		query = (&TweetTagClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

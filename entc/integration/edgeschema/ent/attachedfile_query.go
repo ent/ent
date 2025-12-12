@@ -313,7 +313,10 @@ func (_q *AttachedFileQuery) Clone() *AttachedFileQuery {
 // WithFi tells the query-builder to eager-load the nodes that are connected to
 // the "fi" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *AttachedFileQuery) WithFi(opts ...func(*FileQuery)) *AttachedFileQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := _q.withFi
+	if query == nil {
+		query = (&FileClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -324,7 +327,10 @@ func (_q *AttachedFileQuery) WithFi(opts ...func(*FileQuery)) *AttachedFileQuery
 // WithProc tells the query-builder to eager-load the nodes that are connected to
 // the "proc" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *AttachedFileQuery) WithProc(opts ...func(*ProcessQuery)) *AttachedFileQuery {
-	query := (&ProcessClient{config: _q.config}).Query()
+	query := _q.withProc
+	if query == nil {
+		query = (&ProcessClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

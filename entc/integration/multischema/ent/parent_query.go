@@ -321,7 +321,10 @@ func (_q *ParentQuery) Clone() *ParentQuery {
 // WithChild tells the query-builder to eager-load the nodes that are connected to
 // the "child" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *ParentQuery) WithChild(opts ...func(*UserQuery)) *ParentQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withChild
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -332,7 +335,10 @@ func (_q *ParentQuery) WithChild(opts ...func(*UserQuery)) *ParentQuery {
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *ParentQuery) WithParent(opts ...func(*UserQuery)) *ParentQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withParent
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
