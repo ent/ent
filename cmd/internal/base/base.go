@@ -222,6 +222,7 @@ func SchemaCmd() *cobra.Command {
 			Example: examples(
 				"ent schema ./ent/schema --dialect mysql --version 5.6",
 				"ent schema ./ent/schema --dialect sqlite3",
+				"ent schema ./my/schema --dialect sqlite3 --target ./internal/ent/schema",
 				"ent schema github.com/a8m/x --dialect postgres --version 15",
 			),
 			Args: cobra.ExactArgs(1),
@@ -270,6 +271,7 @@ func SchemaCmd() *cobra.Command {
 	)
 	cmd.Flags().StringVar(&dlct, "dialect", "", "database dialect to use")
 	cmd.Flags().StringVar(&version, "version", "", "database version to assume")
+	cmd.Flags().StringVar(&cfg.Target, "target", "", "target directory of ent schema")
 	cmd.Flags().StringSliceVarP(&features, "feature", "", nil, "extend codegen with additional features")
 	cmd.Flags().StringSliceVarP(&buildTags, "build-tags", "", nil, "go build tags to use when loading the schema graph")
 	cmd.Flags().BoolVar(&hashSymbols, "hash-symbols", false, "whether to hash long symbols")
