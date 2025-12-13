@@ -22,6 +22,7 @@ in the LICENSE file in the root directory of this source tree.
 type {{ $builder }} struct {
 	config
 	ctx			*QueryContext
+	newTable    string // New table name, if not set, the default table name is used
 	order		[]{{ $.Package }}.OrderOption
 	inters		[]Interceptor
 	predicates 	[]predicate.{{ $.Name }}
@@ -42,6 +43,12 @@ type {{ $builder }} struct {
 // Where adds a new predicate for the {{ $builder }} builder.
 func ({{ $receiver }} *{{ $builder }}) Where(ps ...predicate.{{ $.Name }}) *{{ $builder }} {
 	{{ $receiver}}.predicates = append({{ $receiver }}.predicates, ps...)
+	return {{ $receiver }}
+}
+
+// SetTable Set the table name. If not, the default table name is used
+func ({{ $receiver }} *{{ $builder }}) SetTable(table string) *{{ $builder }} {
+	{{ $receiver }}.newTable = table
 	return {{ $receiver }}
 }
 
@@ -285,6 +292,7 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 	}
 	return &{{ $builder }}{
 		config: 	{{ $receiver }}.config,
+		newTable: 	{{ $receiver }}.newTable,
 		ctx: 		{{ $receiver }}.ctx.Clone(),
 		order: 		append([]{{ $.Package }}.OrderOption{}, {{ $receiver }}.order...),
 		inters: 	append([]Interceptor{}, {{ $receiver }}.inters...),
@@ -295,6 +303,7 @@ func ({{ $receiver }} *{{ $builder }}) Clone() *{{ $builder }} {
 		// clone intermediate query.
 		{{ $.Storage }}: {{ $receiver }}.{{ $.Storage }}.Clone(),
 		path: {{ $receiver }}.path,
+		modifiers: {{ $receiver }}.modifiers,
 		{{- if $.FeatureEnabled "sql/modifier" }}
 			modifiers: append([]func(*sql.Selector){}, {{ $receiver }}.modifiers...),
 		{{- end }}
