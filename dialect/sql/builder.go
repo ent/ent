@@ -848,6 +848,11 @@ func IsTrue(col string) *Predicate {
 func (p *Predicate) IsTrue(col string) *Predicate {
 	return p.Append(func(b *Builder) {
 		b.Ident(col)
+		// SQL Server bit columns require explicit comparison
+		if b.sqlserver() {
+			b.WriteOp(OpEQ)
+			b.Arg(1)
+		}
 	})
 }
 
@@ -859,7 +864,14 @@ func IsFalse(col string) *Predicate {
 // IsFalse appends a predicate that checks if the column value is falsey.
 func (p *Predicate) IsFalse(col string) *Predicate {
 	return p.Append(func(b *Builder) {
-		b.WriteString("NOT ").Ident(col)
+		// SQL Server bit columns require explicit comparison
+		if b.sqlserver() {
+			b.Ident(col)
+			b.WriteOp(OpEQ)
+			b.Arg(0)
+		} else {
+			b.WriteString("NOT ").Ident(col)
+		}
 	})
 }
 
