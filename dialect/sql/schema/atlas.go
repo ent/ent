@@ -1044,6 +1044,12 @@ func (a *Atlas) atDefault(c1 *Column, c2 *schema.Column) error {
 	return nil
 }
 
+// primaryKeyCustomizer is an optional interface that dialects can implement
+// to customize the primary key index attributes.
+type primaryKeyCustomizer interface {
+	atPrimaryKey(*schema.Index)
+}
+
 func (a *Atlas) aIndexes(et *Table, at *schema.Table) error {
 	// Primary-key index.
 	pk := make([]*schema.Column, 0, len(et.PrimaryKey))
@@ -1056,7 +1062,12 @@ func (a *Atlas) aIndexes(et *Table, at *schema.Table) error {
 	}
 	// CreateFunc might clear the primary keys.
 	if len(pk) > 0 {
-		at.SetPrimaryKey(schema.NewPrimaryKey(pk...))
+		pkIdx := schema.NewPrimaryKey(pk...)
+		// Allow dialects to customize the primary key attributes.
+		if c, ok := a.sqlDialect.(primaryKeyCustomizer); ok {
+			c.atPrimaryKey(pkIdx)
+		}
+		at.SetPrimaryKey(pkIdx)
 	}
 	// Rest of indexes.
 	for _, idx1 := range et.Indexes {

@@ -845,7 +845,12 @@ func IsTrue(col string) *Predicate {
 // IsTrue appends a predicate that checks if the column value is truthy.
 func (p *Predicate) IsTrue(col string) *Predicate {
 	return p.Append(func(b *Builder) {
-		b.Ident(col)
+		// SQL Server doesn't support bare column name as boolean expression.
+		if b.sqlserver() {
+			b.Ident(col).WriteString(" = 1")
+		} else {
+			b.Ident(col)
+		}
 	})
 }
 
@@ -857,7 +862,12 @@ func IsFalse(col string) *Predicate {
 // IsFalse appends a predicate that checks if the column value is falsey.
 func (p *Predicate) IsFalse(col string) *Predicate {
 	return p.Append(func(b *Builder) {
-		b.WriteString("NOT ").Ident(col)
+		// SQL Server doesn't support bare column name as boolean expression.
+		if b.sqlserver() {
+			b.Ident(col).WriteString(" = 0")
+		} else {
+			b.WriteString("NOT ").Ident(col)
+		}
 	})
 }
 
@@ -2288,7 +2298,7 @@ func (s *Selector) As(alias string) *Selector {
 func (s *Selector) Count(columns ...string) *Selector {
 	column := "*"
 	if len(columns) > 0 {
-		b := &Builder{}
+		b := &Builder{dialect: s.dialect}
 		b.IdentComma(columns...)
 		column = b.String()
 	}
@@ -2579,7 +2589,14 @@ func (s *Selector) Query() (string, []any) {
 			// SQL Server requires ORDER BY for OFFSET/FETCH.
 			// If no ORDER BY is specified, we add a dummy one.
 			if len(s.order) == 0 {
-				b.WriteString(" ORDER BY (SELECT NULL)")
+				// When using DISTINCT, ORDER BY columns must appear in the SELECT list.
+				// Use the first column from the selection, or fall back to (SELECT NULL).
+				if s.distinct && len(s.selection) > 0 && s.selection[0].c != "" {
+					b.WriteString(" ORDER BY ")
+					b.WriteString(s.selection[0].c)
+				} else {
+					b.WriteString(" ORDER BY (SELECT NULL)")
+				}
 			}
 			offset := 0
 			if s.offset != nil {
@@ -3391,6 +3408,11 @@ func (b *Builder) isIdent(s string) bool {
 		return strings.Contains(s, `"`)
 	case b.sqlserver():
 		return strings.Contains(s, "[") && strings.Contains(s, "]")
+	case b.dialect == "":
+		// Unknown dialect: check for any quoting style.
+		return strings.Contains(s, "`") ||
+			strings.Contains(s, `"`) ||
+			(strings.Contains(s, "[") && strings.Contains(s, "]"))
 	default:
 		return strings.Contains(s, "`")
 	}

@@ -138,10 +138,10 @@ var (
 		{Name: "text", Type: field.TypeString, Nullable: true, Size: 2147483647, SchemaType: map[string]string{"mysql": "mediumtext"}},
 		{Name: "datetime", Type: field.TypeTime, Nullable: true, SchemaType: map[string]string{"mysql": "datetime", "postgres": "date"}},
 		{Name: "decimal", Type: field.TypeFloat64, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(6,2)", "postgres": "numeric"}},
-		{Name: "link_other", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(255)", "postgres": "varchar", "sqlite3": "varchar(255)"}},
-		{Name: "link_other_func", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(255)", "postgres": "varchar", "sqlite3": "varchar(255)"}},
+		{Name: "link_other", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(255)", "postgres": "varchar", "sqlite3": "varchar(255)", "sqlserver": "varchar(255)"}},
+		{Name: "link_other_func", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"mysql": "varchar(255)", "postgres": "varchar", "sqlite3": "varchar(255)", "sqlserver": "varchar(255)"}},
 		{Name: "mac", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"postgres": "macaddr"}},
-		{Name: "string_array", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"mysql": "blob", "postgres": "text[]", "sqlite3": "json"}},
+		{Name: "string_array", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"mysql": "blob", "postgres": "text[]", "sqlite3": "json", "sqlserver": "nvarchar(max)"}},
 		{Name: "password", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"mysql": "char(32)"}},
 		{Name: "string_scanner", Type: field.TypeString, Nullable: true},
 		{Name: "duration", Type: field.TypeInt64, Nullable: true},
@@ -175,7 +175,7 @@ var (
 		{Name: "vstring", Type: field.TypeString},
 		{Name: "triple", Type: field.TypeString},
 		{Name: "big_int", Type: field.TypeInt, Nullable: true},
-		{Name: "password_other", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"mysql": "char(32)", "postgres": "varchar", "sqlite3": "char(32)"}},
+		{Name: "password_other", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"mysql": "char(32)", "postgres": "varchar", "sqlite3": "char(32)", "sqlserver": "char(32)"}},
 		{Name: "file_field", Type: field.TypeInt, Nullable: true},
 	}
 	// FieldTypesTable holds the schema information for the "field_types" table.

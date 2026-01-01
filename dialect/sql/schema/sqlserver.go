@@ -164,7 +164,11 @@ func (d *SQLServer) atUniqueC(t1 *Table, c1 *Column, t2 *schema.Table, c2 *schem
 			return
 		}
 	}
-	t2.AddIndexes(schema.NewUniqueIndex(fmt.Sprintf("%s_%s_key", t1.Name, c1.Name)).AddColumns(c2))
+	idx := schema.NewUniqueIndex(fmt.Sprintf("%s_%s_key", t1.Name, c1.Name)).AddColumns(c2)
+	// Note: For nullable columns, SQL Server unique constraints by default don't allow
+	// duplicate NULLs. A WHERE predicate would be needed but atlas/schema doesn't expose
+	// a generic IndexPredicate - this is handled by the Atlas CLI instead.
+	t2.AddIndexes(idx)
 }
 
 func (d *SQLServer) atImplicitIndexName(idx *Index, t1 *Table, c1 *Column) bool {
@@ -174,15 +178,20 @@ func (d *SQLServer) atImplicitIndexName(idx *Index, t1 *Table, c1 *Column) bool 
 
 func (d *SQLServer) atIncrementC(t *schema.Table, c *schema.Column) {
 	// SQL Server uses IDENTITY for auto-increment columns.
-	// Since atlas doesn't have SQL Server support, this is a no-op.
-	// The actual IDENTITY column handling will be done by WriteDriver
-	// when generating SQL statements directly.
+	// Note: The Atlas sqlserver package is not available in the open-source version,
+	// so we cannot add the Identity attribute here. Migrations are handled via Atlas CLI.
+}
+
+func (d *SQLServer) atPrimaryKey(pk *schema.Index) {
+	// SQL Server primary keys are CLUSTERED by default.
+	// Note: The Atlas sqlserver package is not available in the open-source version,
+	// so we cannot add the IndexType attribute here. Migrations are handled via Atlas CLI.
 }
 
 func (d *SQLServer) atIncrementT(t *schema.Table, v int64) {
 	// SQL Server uses IDENTITY(start, increment) for auto-increment columns.
-	// Since atlas doesn't have SQL Server support, this is a no-op.
-	// The actual IDENTITY seeding will be done via verifyRange.
+	// Note: The Atlas sqlserver package is not available in the open-source version,
+	// so we cannot update the Identity seed here. Migrations are handled via Atlas CLI.
 }
 
 func (d *SQLServer) atIndex(idx1 *Index, t2 *schema.Table, idx2 *schema.Index) error {
@@ -194,9 +203,8 @@ func (d *SQLServer) atIndex(idx1 *Index, t2 *schema.Table, idx2 *schema.Index) e
 		part := &schema.IndexPart{C: c2}
 		idx2.AddParts(part)
 	}
-	// Note: Since atlas doesn't have SQL Server support, we skip adding
-	// index type and WHERE clause attributes. These would require proper
-	// atlas SQL Server types to implement the Attr interface.
+	// Note: The Atlas sqlserver package is not available in the open-source version,
+	// so we cannot add IndexType attributes here. Migrations are handled via Atlas CLI.
 	return nil
 }
 

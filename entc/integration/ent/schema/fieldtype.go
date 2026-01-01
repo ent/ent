@@ -113,17 +113,19 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 			}),
 		field.Other("link_other", &Link{}).
 			SchemaType(map[string]string{
-				dialect.Postgres: "varchar",
-				dialect.MySQL:    "varchar(255)",
-				dialect.SQLite:   "varchar(255)",
+				dialect.Postgres:  "varchar",
+				dialect.MySQL:     "varchar(255)",
+				dialect.SQLite:    "varchar(255)",
+				dialect.SQLServer: "varchar(255)",
 			}).
 			Optional().
 			Default(DefaultLink()),
 		field.Other("link_other_func", &Link{}).
 			SchemaType(map[string]string{
-				dialect.Postgres: "varchar",
-				dialect.MySQL:    "varchar(255)",
-				dialect.SQLite:   "varchar(255)",
+				dialect.Postgres:  "varchar",
+				dialect.MySQL:     "varchar(255)",
+				dialect.SQLite:    "varchar(255)",
+				dialect.SQLServer: "varchar(255)",
 			}).
 			Optional().
 			Default(DefaultLink),
@@ -140,9 +142,10 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 		field.Other("string_array", Strings{}).
 			Optional().
 			SchemaType(map[string]string{
-				dialect.Postgres: "text[]",
-				dialect.SQLite:   "json",
-				dialect.MySQL:    "blob",
+				dialect.Postgres:  "text[]",
+				dialect.SQLite:    "json",
+				dialect.MySQL:     "blob",
+				dialect.SQLServer: "nvarchar(max)",
 			}),
 		field.String("password").
 			Optional().
@@ -294,9 +297,10 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 			Optional().
 			Sensitive().
 			SchemaType(map[string]string{
-				dialect.MySQL:    "char(32)",
-				dialect.SQLite:   "char(32)",
-				dialect.Postgres: "varchar",
+				dialect.MySQL:     "char(32)",
+				dialect.SQLite:    "char(32)",
+				dialect.Postgres:  "varchar",
+				dialect.SQLServer: "char(32)",
 			}),
 	}
 }

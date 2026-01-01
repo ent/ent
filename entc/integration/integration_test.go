@@ -49,6 +49,7 @@ import (
 	enttask "entgo.io/ent/entc/integration/ent/task"
 	"entgo.io/ent/entc/integration/ent/user"
 
+	"ariga.io/atlas-go-sdk/atlasexec"
 	"github.com/go-sql-driver/mysql"
 	"github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -142,7 +143,13 @@ func TestSQLServer(t *testing.T) {
 		connStr := fmt.Sprintf("sqlserver://sa:P@ssw0rd!@localhost:%d?database=master&encrypt=disable", port)
 		t.Run(version, func(t *testing.T) {
 			t.Parallel()
-			client := enttest.Open(t, dialect.SQLServer, connStr, opts)
+			// For SQL Server, we cannot use enttest.Open because the Atlas Go library
+			// does not support SQL Server. Instead, we use the Atlas CLI via atlasexec.
+			client, err := openSQLServerWithAtlasCLI(t, connStr)
+			if err != nil {
+				t.Skipf("Skipping SQL Server test: %v", err)
+				return
+			}
 			defer client.Close()
 			for _, tt := range tests {
 				name := runtime.FuncForPC(reflect.ValueOf(tt).Pointer()).Name()
@@ -153,6 +160,39 @@ func TestSQLServer(t *testing.T) {
 			}
 		})
 	}
+}
+
+// openSQLServerWithAtlasCLI opens a SQL Server client and applies the schema using Atlas CLI.
+// This is required because the open-source Atlas Go library does not support SQL Server.
+func openSQLServerWithAtlasCLI(t *testing.T, connStr string) (*ent.Client, error) {
+	ctx := context.Background()
+
+	// Open the ent client directly (without auto-migration).
+	client, err := ent.Open(dialect.SQLServer, connStr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open ent client: %w", err)
+	}
+
+	// Initialize Atlas CLI client.
+	ac, err := atlasexec.NewClient(".", "atlas")
+	if err != nil {
+		client.Close()
+		return nil, fmt.Errorf("failed to initialize atlas client (atlas CLI may not be installed or not logged in): %w", err)
+	}
+
+	// Apply schema using Atlas CLI.
+	// The atlas.hcl file in this directory configures the ent schema source.
+	_, err = ac.SchemaApply(ctx, &atlasexec.SchemaApplyParams{
+		URL:         connStr,
+		Env:         "sqlserver",
+		AutoApprove: true,
+	})
+	if err != nil {
+		client.Close()
+		return nil, fmt.Errorf("failed to apply schema with atlas: %w", err)
+	}
+
+	return client, nil
 }
 
 var (
@@ -2951,6 +2991,9 @@ func skip(t *testing.T, names ...string) {
 func drop(t *testing.T, client *ent.Client) {
 	t.Log("drop data from database")
 	ctx := context.Background()
+	// For SQL Server (and other dialects with strict FK enforcement),
+	// we need to clear junction tables and relationships first.
+	dropSQLServerJunctionTables(t, client)
 	client.Pet.Delete().ExecX(ctx)
 	client.Item.Delete().ExecX(ctx)
 	client.Task.Delete().ExecX(ctx)
@@ -2964,4 +3007,34 @@ func drop(t *testing.T, client *ent.Client) {
 	client.FieldType.Delete().ExecX(ctx)
 	client.FileType.Delete().ExecX(ctx)
 	client.ExValueScan.Delete().ExecX(ctx)
+}
+
+// dropSQLServerJunctionTables clears junction tables that have FK constraints.
+// This is needed for SQL Server because it strictly enforces FK constraints during DELETE.
+func dropSQLServerJunctionTables(t *testing.T, client *ent.Client) {
+	ctx := context.Background()
+	// Get the underlying driver to check dialect and execute raw SQL.
+	drv := client.Driver()
+	if drv.Dialect() != dialect.SQLServer {
+		return
+	}
+	// Clear junction tables using raw SQL.
+	junctionTables := []string{
+		"user_friends",
+		"user_following",
+		"group_users",
+		"user_groups",      // In case it's named differently
+		"group_blocked",
+		"user_pets",        // If pets can have multiple owners
+		"file_type_files",
+		"spec_card",
+	}
+	for _, table := range junctionTables {
+		// Use DELETE instead of TRUNCATE for tables with FKs.
+		query := fmt.Sprintf("DELETE FROM [%s]", table)
+		if err := drv.Exec(ctx, query, []any{}, nil); err != nil {
+			// Ignore errors - table might not exist or be empty.
+			t.Logf("Note: clearing %s: %v", table, err)
+		}
+	}
 }

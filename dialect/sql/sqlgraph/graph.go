@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"math"
 	"sort"
+	"strings"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -1924,22 +1925,36 @@ func (c *creator) insertLastID(ctx context.Context, insert *sql.InsertBuilder) e
 		}
 		return nil
 	case dialect.SQLServer:
-		// SQL Server uses SCOPE_IDENTITY() to get last inserted ID.
-		// We execute the insert and then query for SCOPE_IDENTITY().
-		if err := c.tx.Exec(ctx, query, args, nil); err != nil {
-			return err
-		}
+		// SQL Server uses OUTPUT INSERTED.id to return the inserted ID.
+		// We need to inject OUTPUT clause into the INSERT query.
 		if c.ID.Type.Numeric() {
+			// Inject OUTPUT INSERTED.[id_column] into the query.
+			// INSERT INTO [table] ([cols]) VALUES (...) becomes
+			// INSERT INTO [table] ([cols]) OUTPUT INSERTED.[id_column] VALUES (...)
+			idCol := c.ID.Column
+			outputQuery := injectSQLServerOutput(query, idCol)
 			rows := &sql.Rows{}
-			if err := c.tx.Query(ctx, "SELECT SCOPE_IDENTITY()", []any{}, rows); err != nil {
+			if err := c.tx.Query(ctx, outputQuery, args, rows); err != nil {
 				return err
 			}
 			defer rows.Close()
-			id, err := sql.ScanInt64(rows)
-			if err != nil {
+			if rows.Next() {
+				var id int64
+				if err := rows.Scan(&id); err != nil {
+					return fmt.Errorf("scan OUTPUT INSERTED: %w", err)
+				}
+				c.ID.Value = id
+			} else {
+				// Check if there's an error from the query.
+				if err := rows.Err(); err != nil {
+					return err
+				}
+				return fmt.Errorf("no rows returned from INSERT OUTPUT - table may not have IDENTITY column")
+			}
+		} else {
+			if err := c.tx.Exec(ctx, query, args, nil); err != nil {
 				return err
 			}
-			c.ID.Value = id
 		}
 		return nil
 	default:
@@ -2120,4 +2135,24 @@ func product(a, b []driver.Value) [][2]driver.Value {
 		}
 	}
 	return c
+}
+
+// injectSQLServerOutput injects OUTPUT INSERTED.[column] clause into an INSERT query.
+// SQL Server's OUTPUT clause must be placed between the column list and VALUES clause.
+// INSERT INTO [table] ([cols]) VALUES (...) becomes
+// INSERT INTO [table] ([cols]) OUTPUT INSERTED.[column] VALUES (...)
+func injectSQLServerOutput(query, idColumn string) string {
+	// Find the position of VALUES or DEFAULT VALUES
+	upperQuery := strings.ToUpper(query)
+	valuesIdx := strings.Index(upperQuery, " VALUES ")
+	if valuesIdx == -1 {
+		valuesIdx = strings.Index(upperQuery, " DEFAULT VALUES")
+	}
+	if valuesIdx == -1 {
+		// Can't find VALUES, return original query
+		return query
+	}
+	// Insert OUTPUT clause before VALUES
+	output := fmt.Sprintf(" OUTPUT INSERTED.[%s]", idColumn)
+	return query[:valuesIdx] + output + query[valuesIdx:]
 }

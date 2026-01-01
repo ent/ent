@@ -35,7 +35,6 @@ type Builder struct {
 //			Unique(),
 //
 //	}
-//
 func Fields(fields ...string) *Builder {
 	return &Builder{desc: &Descriptor{Fields: fields}}
 }
@@ -51,7 +50,6 @@ func Fields(fields ...string) *Builder {
 //			Unique(),
 //
 //	}
-//
 func Edges(edges ...string) *Builder {
 	return &Builder{desc: &Descriptor{Edges: edges}}
 }
@@ -80,7 +78,6 @@ func (b *Builder) Fields(fields ...string) *Builder {
 //			Edges("parent").
 //			Unique(),
 //	}
-//
 func (b *Builder) Edges(edges ...string) *Builder {
 	b.desc.Edges = edges
 	return b
@@ -109,7 +106,6 @@ func (b *Builder) StorageKey(key string) *Builder {
 //			Annotations(entsql.Prefix(100))
 //
 //	}
-//
 func (b *Builder) Annotations(annotations ...schema.Annotation) *Builder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
