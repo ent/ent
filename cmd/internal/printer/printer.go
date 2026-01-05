@@ -48,6 +48,24 @@ func (p Config) node(t *gen.Type) {
 		table  = tablewriter.NewTable(&b, tablewriter.WithHeaderAutoFormat(tw.Off), tablewriter.WithHeader(header))
 	)
 	b.WriteString(t.Name + ":\n")
+	table.Options(
+		tablewriter.WithHeaderConfig(tw.CellConfig{
+			Padding: tw.CellPadding{
+				Global: tw.Padding{
+					Left:  tw.Space,
+					Right: tw.Space,
+				},
+			},
+			Formatting: tw.CellFormatting{
+				AutoFormat: tw.Off,
+			},
+		}),
+		tablewriter.WithRendition(tw.Rendition{
+			Symbols: tw.NewSymbols(tw.StyleASCII),
+		}),
+	)
+	table.Header(header)
+	var alignment = make([]tw.Align, 0)
 	if t.ID != nil {
 		id = append(id, t.ID)
 	}
@@ -60,15 +78,46 @@ func (p Config) node(t *gen.Type) {
 				return name == "Name" && i == 0 || name == header[i]
 			})
 			row[i] = fmt.Sprint(field.Interface())
+			_, err := strconv.Atoi(row[i])
+			if err == nil {
+				alignment = append(alignment, tw.AlignRight)
+			} else {
+				alignment = append(alignment, tw.AlignLeft)
+			}
 		}
 		row[len(row)-1] = f.Comment()
 		_ = table.Append(row)
+		table.Options(
+			tablewriter.WithRowAlignmentConfig(
+				tw.CellAlignment{PerColumn: alignment},
+			),
+		)
 	}
-	_ = table.Render()
-	table = tablewriter.NewTable(&b, tablewriter.WithHeaderAutoFormat(tw.Off),
-		tablewriter.WithHeader([]string{"Edge", "Type", "Inverse", "BackRef", "Relation", "Unique", "Optional", "Comment"}))
+	err := table.Render()
+	if err != nil {
+		return
+	}
+	// Create new table for edges
+	table = tablewriter.NewWriter(&b)
+	table.Options(
+		tablewriter.WithHeaderConfig(tw.CellConfig{
+			Formatting: tw.CellFormatting{AutoFormat: tw.Off},
+			Padding: tw.CellPadding{
+				Global: tw.Padding{
+					Left:  tw.Space,
+					Right: tw.Space,
+				},
+			},
+		}),
+		tablewriter.WithRendition(tw.Rendition{
+			Symbols: tw.NewSymbols(tw.StyleASCII),
+		}),
+	)
+	table.Header([]string{"Edge", "Type", "Inverse", "BackRef", "Relation", "Unique", "Optional", "Comment"})
+	hasEdges := false
 	for _, e := range t.Edges {
-		_ = table.Append([]string{
+		hasEdges = true
+		err := table.Append([]string{
 			e.Name,
 			e.Type.Name,
 			strconv.FormatBool(e.IsInverse()),
@@ -78,10 +127,15 @@ func (p Config) node(t *gen.Type) {
 			strconv.FormatBool(e.Optional),
 			e.Comment(),
 		})
+		if err != nil {
+			return
+		}
 	}
-
-	if len(t.Edges) > 0 {
-		_ = table.Render()
+	if hasEdges {
+		err := table.Render()
+		if err != nil {
+			return
+		}
 	}
 	io.WriteString(p, strings.ReplaceAll(b.String(), "\n", "\n\t")+"\n")
 }

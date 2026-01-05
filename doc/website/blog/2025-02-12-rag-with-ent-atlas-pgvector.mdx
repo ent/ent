@@ -182,7 +182,18 @@ using the statements in [this file](https://github.com/rotemtam/entrag/blob/e917
 
 :::
 
-Now, let's create our Atlas configuration which composes the `base.pg.hcl` file with the Ent schema:
+Now, let's create our base configuration `base.pg.hcl` which provides the vector extension for the public schema:
+
+```hcl title="base.pg.hcl"
+schema "public" {
+}
+
+extension "vector" {
+  schema = schema.public
+}
+```
+
+Now, let's create our Atlas configuration which composes the base.pg.hcl file with the Ent schema:
 
 ```hcl title="atlas.hcl"
 data "composite_schema" "schema" {

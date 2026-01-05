@@ -38,6 +38,7 @@ type Atlas struct {
 	dropColumns     bool   // drop deleted columns
 	dropIndexes     bool   // drop deleted indexes
 	withForeignKeys bool   // with foreign keys
+	hashSymbols     bool   // whether to use a hash for too long symbols, only for StateReader
 	mode            Mode
 	hooks           []Hook              // hooks to apply before creation
 	diffHooks       []DiffHook          // diff hooks to run when diffing current and desired
@@ -527,6 +528,9 @@ func (a *Atlas) StateReader(tables ...*Table) migrate.StateReaderFunc {
 				return nil, err
 			}
 			a.sqlDialect = drv
+		}
+		if a.hashSymbols {
+			a.setupTables(tables)
 		}
 		return a.realm(tables)
 	}
@@ -1074,6 +1078,7 @@ func (a *Atlas) aIndexes(et *Table, at *schema.Table) error {
 // are linked to their indexes, and PKs columns are defined.
 func (a *Atlas) setupTables(tables []*Table) {
 	for _, t := range tables {
+		t.mu.Lock()
 		if t.columns == nil {
 			t.columns = make(map[string]*Column, len(t.Columns))
 		}
@@ -1097,6 +1102,7 @@ func (a *Atlas) setupTables(tables []*Table) {
 				fk.Columns[i].foreign = fk
 			}
 		}
+		t.mu.Unlock()
 	}
 }
 
