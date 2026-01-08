@@ -9,9 +9,11 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"testing"
 
 	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/load"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -692,4 +694,38 @@ func TestDependencyAnnotation_Build(t *testing.T) {
 		require.NoError(t, d.Build())
 		require.Equal(t, tt.field, d.Field)
 	}
+}
+
+func TestEdgeFieldCollation(t *testing.T) {
+	var (
+		user = &load.Schema{
+			Name: "User",
+			Fields: []*load.Field{
+				{Name: "id", Info: &field.TypeInfo{Type: field.TypeString}, Annotations: dict("EntSQL", dict("collation", "utf8mb4_bin"))},
+			},
+		}
+		post = &load.Schema{
+			Name: "Post",
+			Fields: []*load.Field{
+				{Name: "author_id", Info: &field.TypeInfo{Type: field.TypeString}, Annotations: dict("EntSQL", dict("collation", "utf8mb4_bin"))},
+			},
+			Edges: []*load.Edge{
+				{Name: "author", Type: "User", Field: "author_id", Unique: true, Required: true},
+			},
+		}
+	)
+	g, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, user, post)
+	require.NoError(t, err)
+	tables, err := g.Tables()
+	require.NoError(t, err)
+
+	// Find the post table
+	idx := slices.IndexFunc(tables, func(t *schema.Table) bool { return t.Name == "posts" })
+	require.NotEqual(t, -1, idx, "posts table should exist")
+	postTable := tables[idx]
+
+	// Verify author_id column preserves collation from field annotation
+	col, ok := postTable.Column("author_id")
+	require.True(t, ok)
+	require.Equal(t, "utf8mb4_bin", col.Collation)
 }
