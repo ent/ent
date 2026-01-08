@@ -27,7 +27,7 @@ var (
 		{{- /* find type node in the graph of this table, if exists */}}
 		{{- $node := index $.Nodes 0 }}
 		{{- range $n := $.Nodes }}{{ if eq $t.Name $n.Table }}{{ $node = $n }}{{ end }}{{ end }}
-		{{- $columns := pascal $t.Name | printf "%sColumns" }}
+		{{- $columns := replace $t.Name "$" "_" | pascal | printf "%sColumns" }}
 		// {{ $columns }} holds the columns for the "{{ $t.Name }}" table.
 		{{ $columns }} = []*schema.Column{
 			{{- range $c := $t.Columns }}
@@ -53,7 +53,7 @@ var (
 				{{- with $c.SchemaType }} SchemaType: map[string]string{ {{ range $k := keys . }}"{{ $k }}": "{{ index $c.SchemaType $k }}",{{ end }}}{{ end }}},
 			{{- end }}
 		}
-		{{- $table := pascal $t.Name | printf "%sTable" }}
+		{{- $table := replace $t.Name "$" "_" | pascal | printf "%sTable" }}
 		// {{ $table }} holds the schema information for the "{{ $t.Name }}" table.
 		{{ $table }} = &schema.Table{
 			Name: "{{ $t.Name }}",
@@ -84,7 +84,7 @@ var (
 							RefColumns: []*schema.Column{
 								{{- range $c1 := $fk.RefColumns }}
 									{{- range $i, $c2 := $fk.RefTable.Columns }}
-										{{- if eq $c1.Name $c2.Name }}{{ pascal $fk.RefTable.Name | printf "%sColumns" }}[{{ $i }}],{{ end }}
+										{{- if eq $c1.Name $c2.Name }}{{ replace $fk.RefTable.Name "$" "_" | pascal | printf "%sColumns" }}[{{ $i }}],{{ end }}
 									{{- end }}
 								{{- end }}
 							},
@@ -193,16 +193,16 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		{{- range $t := $.Tables }}
-			{{ pascal $t.Name | printf "%sTable" }},
+			{{ replace $t.Name "$" "_" | pascal | printf "%sTable" }},
 		{{- end }}
 	}
 )
 
 func init() {
 	{{- range $t := $.Tables }}
-		{{- $table := pascal $t.Name | printf "%sTable" }}
+		{{- $table := replace $t.Name "$" "_" | pascal | printf "%sTable" }}
 		{{- range $i, $fk := $t.ForeignKeys }}
-			{{ $table }}.ForeignKeys[{{ $i }}].RefTable = {{ pascal $fk.RefTable.Name | printf "%sTable" }}
+			{{ $table }}.ForeignKeys[{{ $i }}].RefTable = {{ replace $fk.RefTable.Name "$" "_" | pascal | printf "%sTable" }}
 		{{- end }}
 		{{- with $ant := $t.Annotation }}
 			{{- if not (allZero $ant.Table $ant.Charset $ant.Collation $ant.Options $ant.Check $ant.IncrementStart $ant.Incremental $ant.Checks) }}
