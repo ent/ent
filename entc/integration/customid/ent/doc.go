@@ -163,6 +163,11 @@ func (_m *Doc) Unwrap() *Doc {
 	return _m
 }
 
+// TableName returns the table name of the Doc in the database.
+func (d *Doc) TableName() string {
+	return doc.Table
+}
+
 // String implements the fmt.Stringer.
 func (_m *Doc) String() string {
 	var builder strings.Builder

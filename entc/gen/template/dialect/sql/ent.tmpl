@@ -20,3 +20,13 @@ in the LICENSE file in the root directory of this source tree.
 		{{- end }}
 	{{- end }}
 {{ end }}
+
+{{/* extra helpers for for sql dialects. */}}
+{{ define "dialect/sql/ent/helpers" }}
+{{ $receiver := $.Receiver }}
+
+// TableName returns the table name of the {{ $.Name }} in the database.
+func ({{ $receiver }} *{{ $.Name }}) TableName() string {
+	return {{ $.Package }}.Table
+}
+{{ end }}

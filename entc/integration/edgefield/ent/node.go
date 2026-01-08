@@ -144,6 +144,11 @@ func (_m *Node) Unwrap() *Node {
 	return _m
 }
 
+// TableName returns the table name of the Node in the database.
+func (n *Node) TableName() string {
+	return node.Table
+}
+
 // String implements the fmt.Stringer.
 func (_m *Node) String() string {
 	var builder strings.Builder

@@ -171,6 +171,11 @@ func (_m *Blob) Unwrap() *Blob {
 	return _m
 }
 
+// TableName returns the table name of the Blob in the database.
+func (b *Blob) TableName() string {
+	return blob.Table
+}
+
 // String implements the fmt.Stringer.
 func (_m *Blob) String() string {
 	var builder strings.Builder

@@ -141,6 +141,11 @@ func (_m *Comment) Unwrap() *Comment {
 	return _m
 }
 
+// TableName returns the table name of the Comment in the database.
+func (c *Comment) TableName() string {
+	return comment.Table
+}
+
 // String implements the fmt.Stringer.
 func (_m *Comment) String() string {
 	var builder strings.Builder
