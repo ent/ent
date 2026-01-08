@@ -168,6 +168,13 @@ func NameHasSuffix(v string) predicate.FileType {
 	})
 }
 
+// NameRegex applies the Regex predicate on the "name" field.
+func NameRegex(v string) predicate.FileType {
+	return predicate.FileType(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.Regex(v))
+	})
+}
+
 // TypeEQ applies the EQ predicate on the "type" field.
 func TypeEQ(v Type) predicate.FileType {
 	return predicate.FileType(func(t *dsl.Traversal) {

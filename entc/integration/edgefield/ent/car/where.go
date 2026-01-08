@@ -118,6 +118,11 @@ func NumberHasSuffix(v string) predicate.Car {
 	return predicate.Car(sql.FieldHasSuffix(FieldNumber, v))
 }
 
+// NumberRegex applies the Regex predicate on the "number" field.
+func NumberRegex(v string) predicate.Car {
+	return predicate.Car(sql.FieldRegex(FieldNumber, v))
+}
+
 // NumberIsNil applies the IsNil predicate on the "number" field.
 func NumberIsNil() predicate.Car {
 	return predicate.Car(sql.FieldIsNull(FieldNumber))
