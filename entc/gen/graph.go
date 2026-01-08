@@ -830,7 +830,7 @@ func fkColumn(e *Edge, owner *schema.Table, refPK *schema.Column) *schema.Column
 	// Foreign key was defined as an edge field.
 	if e.Rel.fk != nil && e.Rel.fk.Field != nil {
 		fc := e.Rel.fk.Field.Column()
-		column.Comment, column.Default = fc.Comment, fc.Default
+		column.Comment, column.Default, column.Collation, column.Attr, column.Enums = fc.Comment, fc.Default, fc.Collation, fc.Attr, fc.Enums
 	}
 	return column
 }
