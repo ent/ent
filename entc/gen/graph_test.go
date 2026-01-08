@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"testing"
 
 	"entgo.io/ent/dialect/entsql"
@@ -719,14 +720,9 @@ func TestEdgeFieldCollation(t *testing.T) {
 	require.NoError(t, err)
 
 	// Find the post table
-	var postTable *schema.Table
-	for _, tbl := range tables {
-		if tbl.Name == "posts" {
-			postTable = tbl
-			break
-		}
-	}
-	require.NotNil(t, postTable)
+	idx := slices.IndexFunc(tables, func(t *schema.Table) bool { return t.Name == "posts" })
+	require.NotEqual(t, -1, idx, "posts table should exist")
+	postTable := tables[idx]
 
 	// Verify author_id column preserves collation from field annotation
 	col, ok := postTable.Column("author_id")
