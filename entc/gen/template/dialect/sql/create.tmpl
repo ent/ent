@@ -15,7 +15,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 	if err := {{ $receiver }}.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec {{ if $.HasValueScanner }}, err {{ end }} := {{ $receiver }}.createSpec()
+	_node, _spec {{ if $.HasValueScanner }}, err {{ end }} := {{ $receiver }}.createSpec(ctx)
 	{{- if $.HasValueScanner }}
 		if err != nil {
 			return nil, err
@@ -64,7 +64,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 	return _node, nil
 }
 
-func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.CreateSpec{{ if $.HasValueScanner }}, error{{ end }}) {
+func ({{ $receiver }} *{{ $builder }}) createSpec(ctx context.Context) (*{{ $.Name }}, *sqlgraph.CreateSpec{{ if $.HasValueScanner }}, error{{ end }}) {
 	var (
 		_node = &{{ $.Name }}{config: {{ $receiver }}.config}
 		_spec = sqlgraph.NewCreateSpec({{ $.Package }}.Table, {{ if $.HasOneFieldID }}sqlgraph.NewFieldSpec({{ $.Package }}.{{ $.ID.Constant }}, field.{{ $.ID.Type.ConstName }}){{ else }}nil{{ end }})
@@ -166,7 +166,7 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 				}
 				builder.mutation = mutation
 				var err error
-				nodes[i], specs[i] {{ if $.HasValueScanner }}, err {{ end }}= builder.createSpec()
+				nodes[i], specs[i] {{ if $.HasValueScanner }}, err {{ end }}= builder.createSpec(ctx)
 				{{- if $.HasValueScanner }}
 					if err != nil {
 						return nil, err
