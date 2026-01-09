@@ -144,6 +144,14 @@ type (
 
 {{ $udfID := false }}{{ if $.HasOneFieldID }}{{ $udfID = $.ID.UserDefined }}{{ end }}
 
+{{- /* Check if entity has any fields with Default (excluding UpdateDefault) */}}
+{{- $hasDefaults := false }}
+{{- range $f := $.MutableFields }}
+	{{- if and $f.Default (not $f.UpdateDefault) }}
+		{{- $hasDefaults = true }}
+	{{- end }}
+{{- end }}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create{{ if $udfID }} except the ID field{{ end }}.
 // Using this option is equivalent to using:
 //
@@ -159,8 +167,28 @@ type (
 //		Exec(ctx)
 //
 func (u *{{ $upsertOne }}) UpdateNewValues() *{{ $upsertOne }} {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	{{- if or $udfID $.ImmutableFields }}
+	{{- if not $hasDefaults }}
+		u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+		{{- if or $udfID $.ImmutableFields }}
+			u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+				{{- if $udfID }}
+					if _, exists := u.create.mutation.ID(); exists {
+						s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
+					}
+				{{- end }}
+				{{- range $f := $.ImmutableFields }}
+					if _, exists := u.create.mutation.{{ $f.MutationGet }}(); exists {
+						s.SetIgnore({{ $.Package }}.{{ $f.Constant }})
+					}
+				{{- end }}
+			}))
+		{{- end }}
+	{{- else }}
+		{{- range $f := $.MutableFields }}
+			{{- if and $f.Default (not $f.UpdateDefault) }}
+				_, {{ $f.Name }}Set := u.create.mutation.{{ $f.MutationGet }}()
+			{{- end }}
+		{{- end }}
 		u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 			{{- if $udfID }}
 				if _, exists := u.create.mutation.ID(); exists {
@@ -171,6 +199,19 @@ func (u *{{ $upsertOne }}) UpdateNewValues() *{{ $upsertOne }} {
 				if _, exists := u.create.mutation.{{ $f.MutationGet }}(); exists {
 					s.SetIgnore({{ $.Package }}.{{ $f.Constant }})
 				}
+			{{- end }}
+			{{- range $f := $.MutableFields }}
+				{{- if $f.UpdateDefault }}
+					s.SetExcluded({{ $.Package }}.{{ $f.Constant }})
+				{{- else if $f.Default }}
+					if {{ $f.Name }}Set {
+						s.SetExcluded({{ $.Package }}.{{ $f.Constant }})
+					}
+				{{- else }}
+					if _, exists := u.create.mutation.{{ $f.MutationGet }}(); exists {
+						s.SetExcluded({{ $.Package }}.{{ $f.Constant }})
+					}
+				{{- end }}
 			{{- end }}
 		}))
 	{{- end }}
@@ -269,6 +310,14 @@ func (u *{{ $upsertOne }}) ExecX(ctx context.Context) {
 {{ $upsertSet := print $.Name "Upsert" }}
 {{ $udfID := false }}{{ if $.HasOneFieldID }}{{ $udfID = $.ID.UserDefined }}{{ end }}
 
+{{- /* Check if entity has any fields with Default (excluding UpdateDefault) */}}
+{{- $hasDefaults := false }}
+{{- range $f := $.MutableFields }}
+	{{- if and $f.Default (not $f.UpdateDefault) }}
+		{{- $hasDefaults = true }}
+	{{- end }}
+{{- end }}
+
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
@@ -331,21 +380,73 @@ type {{ $upsertBulk }} struct {
 //		Exec(ctx)
 //
 func (u *{{ $upsertBulk }}) UpdateNewValues() *{{ $upsertBulk }} {
-	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	{{- if or $udfID $.ImmutableFields }}
-		u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-			for _, b := range u.create.builders {
+	{{- if not $hasDefaults }}
+		u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+		{{- if or $udfID $.ImmutableFields }}
+			u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 				{{- if $udfID }}
-					if _, exists := b.mutation.ID(); exists {
-						s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
+					for _, b := range u.create.builders {
+						if _, exists := b.mutation.ID(); exists {
+							s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
+							break
+						}
 					}
 				{{- end }}
 				{{- range $f := $.ImmutableFields }}
-					if _, exists := b.mutation.{{ $f.MutationGet }}(); exists {
-						s.SetIgnore({{ $.Package }}.{{ $f.Constant }})
+					for _, b := range u.create.builders {
+						if _, exists := b.mutation.{{ $f.MutationGet }}(); exists {
+							s.SetIgnore({{ $.Package }}.{{ $f.Constant }})
+							break
+						}
 					}
 				{{- end }}
-			}
+			}))
+		{{- end }}
+	{{- else }}
+		{{- range $f := $.MutableFields }}
+			{{- if and $f.Default (not $f.UpdateDefault) }}
+				{{ $f.Name }}SetAny := false
+				for _, b := range u.create.builders {
+					if _, exists := b.mutation.{{ $f.MutationGet }}(); exists {
+						{{ $f.Name }}SetAny = true
+						break
+					}
+				}
+			{{- end }}
+		{{- end }}
+		u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+			{{- if $udfID }}
+				for _, b := range u.create.builders {
+					if _, exists := b.mutation.ID(); exists {
+						s.SetIgnore({{ $.Package }}.{{ $.ID.Constant }})
+						break
+					}
+				}
+			{{- end }}
+			{{- range $f := $.ImmutableFields }}
+				for _, b := range u.create.builders {
+					if _, exists := b.mutation.{{ $f.MutationGet }}(); exists {
+						s.SetIgnore({{ $.Package }}.{{ $f.Constant }})
+						break
+					}
+				}
+			{{- end }}
+			{{- range $f := $.MutableFields }}
+				{{- if $f.UpdateDefault }}
+					s.SetExcluded({{ $.Package }}.{{ $f.Constant }})
+				{{- else if $f.Default }}
+					if {{ $f.Name }}SetAny {
+						s.SetExcluded({{ $.Package }}.{{ $f.Constant }})
+					}
+				{{- else }}
+					for _, b := range u.create.builders {
+						if _, exists := b.mutation.{{ $f.MutationGet }}(); exists {
+							s.SetExcluded({{ $.Package }}.{{ $f.Constant }})
+							break
+						}
+					}
+				{{- end }}
+			{{- end }}
 		}))
 	{{- end }}
 	return u
