@@ -225,49 +225,13 @@ func main() {
 }
 ```
 
-## Atlas Integration
+### `Diff` and `Apply` Hooks
 
-Starting with v0.10, Ent supports running migration with [Atlas](https://atlasgo.io), which is a more robust
-migration framework that covers many features that are not supported by current Ent migrate package. In order
-to execute a migration with the Atlas engine, use the `WithAtlas(true)` option.
-
-```go {21}
-package main
-
-import (
-    "context"
-    "log"
-
-    "<project>/ent"
-    "<project>/ent/migrate"
-
-    "entgo.io/ent/dialect/sql/schema"
-)
-
-func main() {
-    client, err := ent.Open("mysql", "root:pass@tcp(localhost:3306)/test")
-    if err != nil {
-        log.Fatalf("failed connecting to mysql: %v", err)
-    }
-    defer client.Close()
-    ctx := context.Background()
-    // Run migration.
-    err = client.Schema.Create(ctx, schema.WithAtlas(true))
-    if err != nil {
-        log.Fatalf("failed creating schema resources: %v", err)
-    }
-}
-```
-
-In addition to the standard options (e.g. `WithDropColumn`, `WithGlobalUniqueID`), the Atlas integration provides additional
-options for hooking into schema migration steps.
+Ent also provides hooks to intercept and modify the `Diff` and `Apply` steps of the migration process.
 
 ![atlas-migration-process](https://entgo.io/images/assets/migrate-atlas-process.png)
 
-
-#### Atlas `Diff` and `Apply` Hooks
-
-Here are two examples that show how to hook into the Atlas `Diff` and `Apply` steps.
+Here are two examples that show how to hook into the `Diff` and `Apply` steps.
 
 ```go
 package main
@@ -331,7 +295,7 @@ func main() {
 }
 ```
 
-#### `Diff` Hook Example
+### `Diff` Hook Example
 
 In case a field was renamed in the `ent/schema`, Ent won't detect this change as renaming and will propose `DropColumn`
 and `AddColumn` changes in the diff stage. One way to get over this is to use the
@@ -384,7 +348,7 @@ func renameColumnHook(next schema.Differ) schema.Differ {
 }
 ```
 
-#### `Apply` Hook Example
+### `Apply` Hook Example
 
 The `Apply` hook allows accessing and mutating the migration plan and its raw changes (SQL statements), but in addition
 to that it is also useful for executing custom SQL statements before or after the plan is applied. For example, changing
