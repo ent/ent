@@ -484,19 +484,14 @@ type (
 	{{- $hooks := slist }}
 	{{- $inters := slist }}
 	{{- range $i, $n := $.Nodes }}
-		{{- if eq $i $leni }}
-			{{ if not $n.IsView }}{{- $hooks = append $hooks (printf "%s []ent.Hook" $n.Name) }}{{ end }}
-			{{- $inters = append $inters (printf "%s []ent.Interceptor" $n.Name) }}
-		{{- else }}
-			{{ if not $n.IsView }}{{- $hooks = append $hooks (print $n.Name ",") }}{{ end }}
-			{{- $inters = append $inters (print $n.Name ",") }}
-		{{- end }}
+		{{- if not $n.IsView }}{{- $hooks = append $hooks $n.Name }}{{ end }}
+		{{- $inters = append $inters $n.Name }}
 	{{- end }}
 	hooks struct {
-		{{ joinWords $hooks 80 }}
+		{{ if $hooks }}{{ joinWordsDelim $hooks ", " 80 }} []ent.Hook{{ end }}
 	}
 	inters struct {
-		{{ joinWords $inters 80 }}
+		{{ if $inters }}{{ joinWordsDelim $inters ", " 80 }} []ent.Interceptor{{ end }}
 	}
 )
 
