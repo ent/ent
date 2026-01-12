@@ -381,6 +381,10 @@ html {
   padding: 0 15%;
 }
 
+.video h2 {
+  color: white;
+}
+
 .navigationSlider .slidingNav {
   position: relative;
 }
