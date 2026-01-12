@@ -9,7 +9,7 @@ The following examples show how to pass a custom `sql.DB` object to `ent.Client`
 
 First option:
 
-```go
+```go title="cmd/main.go"
 package main
 
 import (
@@ -35,7 +35,7 @@ func Open() (*ent.Client, error) {
 
 Second option:
 
-```go
+```go title="cmd/main.go"
 package main
 
 import (
@@ -62,7 +62,7 @@ func Open() (*ent.Client, error) {
 
 ## Use Opencensus With MySQL
 
-```go
+```go title="cmd/main.go"
 package main
 
 import (
@@ -108,7 +108,7 @@ func Open(dsn string) *ent.Client {
 
 ## Use pgx with PostgreSQL
 
-```go
+```go title="cmd/main.go"
 package main
 
 import (
