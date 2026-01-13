@@ -650,6 +650,34 @@ func TestBuilder(t *testing.T) {
 			wantArgs:  []any{"foo", 10, "bar", 20, "admin"},
 		},
 		{
+			input: Dialect(dialect.Postgres).
+				Delete("users").
+				Where(NotNull("parent_id")).
+				Returning("*"),
+			wantQuery: `DELETE FROM "users" WHERE "parent_id" IS NOT NULL RETURNING *`,
+		},
+		{
+			input: Dialect(dialect.Postgres).
+				Delete("users").
+				Where(NotNull("parent_id")).
+				Returning("id", "name"),
+			wantQuery: `DELETE FROM "users" WHERE "parent_id" IS NOT NULL RETURNING "id", "name"`,
+		},
+		{
+			input: Dialect(dialect.SQLite).
+				Delete("users").
+				Where(NotNull("parent_id")).
+				Returning("*"),
+			wantQuery: "DELETE FROM `users` WHERE `parent_id` IS NOT NULL RETURNING *",
+		},
+		{
+			input: Dialect(dialect.SQLite).
+				Delete("users").
+				Where(NotNull("parent_id")).
+				Returning("id", "name"),
+			wantQuery: "DELETE FROM `users` WHERE `parent_id` IS NOT NULL RETURNING `id`, `name`",
+		},
+		{
 			input:     Select().From(Table("users")),
 			wantQuery: "SELECT * FROM `users`",
 		},
