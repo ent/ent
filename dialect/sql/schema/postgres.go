@@ -247,6 +247,9 @@ func (d *Postgres) atIndex(idx1 *Index, t2 *schema.Table, idx2 *schema.Index) er
 	if idx1.Annotation != nil && idx1.Annotation.Where != "" {
 		idx2.AddAttrs(&postgres.IndexPredicate{P: idx1.Annotation.Where})
 	}
+	if idx1.Annotation != nil && idx1.Annotation.Comment != "" {
+		idx2.SetComment(idx1.Annotation.Comment)
+	}
 	return nil
 }
 
