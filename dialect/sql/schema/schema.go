@@ -214,6 +214,10 @@ func CopyTables(tables []*Table) ([]*Table, error) {
 	for i, t := range tables {
 		copyT[i] = &Table{
 			Name:        t.Name,
+			Schema:      t.Schema,
+			Comment:     t.Comment,
+			View:        t.View,
+			Pos:         t.Pos,
 			Columns:     make([]*Column, len(t.Columns)),
 			Indexes:     make([]*Index, len(t.Indexes)),
 			ForeignKeys: make([]*ForeignKey, len(t.ForeignKeys)),
@@ -229,7 +233,7 @@ func CopyTables(tables []*Table) ([]*Table, error) {
 			cat := *at
 			copyT[i].Annotation = &cat
 		}
-		byName[t.Name] = copyT[i]
+		byName[t.Schema+"."+t.Name] = copyT[i]
 	}
 	for i, t := range tables {
 		ct := copyT[i]
@@ -274,7 +278,7 @@ func CopyTables(tables []*Table) ([]*Table, error) {
 				}
 				cfk.Columns[k] = cc
 			}
-			cref, ok := byName[fk.RefTable.Name]
+			cref, ok := byName[fk.RefTable.Schema+"."+fk.RefTable.Name]
 			if !ok {
 				return nil, fmt.Errorf("sql/schema: missing foreign-key ref-table %q", fk.RefTable.Name)
 			}
