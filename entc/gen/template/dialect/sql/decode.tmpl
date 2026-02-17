@@ -11,8 +11,10 @@ in the LICENSE file in the root directory of this source tree.
 
 {{ $ctypes := dict }}
 {{ if $.HasOneFieldID }}
-	{{ $idscantype := $.ID.NewScanType }}
-	{{ $ctypes = set $ctypes $idscantype (list $.ID.Constant) }}
+	{{- if not $.ID.HasValueScanner }}
+		{{ $idscantype := $.ID.NewScanType }}
+		{{ $ctypes = set $ctypes $idscantype (list $.ID.Constant) }}
+	{{- end }}
 {{ end }}
 {{ range $f := $.Fields }}
 	{{- if $f.HasValueScanner }}
@@ -31,6 +33,10 @@ func (*{{ $.Name }}) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+			{{- if and $.HasOneFieldID $.ID.HasValueScanner }}
+				case {{ $.Package }}.{{ $.ID.Constant }}:
+					values[i] = {{ $.ID.ScanValueFunc }}()
+			{{- end }}
 			{{- range $type, $columns := $ctypes }}
 				case {{ range $i, $c := $columns }}{{ if ne $i 0 }},{{ end }}{{ $.Package }}.{{ $c }}{{ end }}:
 					values[i] = {{ $type }}
@@ -64,7 +70,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []any
 		switch columns[i] {
 		{{- if $.HasOneFieldID }}
 			case {{ $.Package }}.{{ $.ID.Constant }}:
-				{{- if or $.ID.IsString $.ID.IsBytes $.ID.HasGoType }}
+				{{- if or $.ID.IsString $.ID.IsBytes $.ID.HasGoType $.ID.HasValueScanner }}
 					{{- with extend $ "Idx" "i" "Field" $.ID "Rec" $receiver }}
 						{{ template "dialect/sql/decode/field" . }}
 					{{- end }}

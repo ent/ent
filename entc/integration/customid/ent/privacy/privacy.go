@@ -523,6 +523,30 @@ func (f UserMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) 
 	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.UserMutation", m)
 }
 
+// The ValueScanQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type ValueScanQueryRuleFunc func(context.Context, *ent.ValueScanQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f ValueScanQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.ValueScanQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("ent/privacy: unexpected query type %T, expect *ent.ValueScanQuery", q)
+}
+
+// The ValueScanMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type ValueScanMutationRuleFunc func(context.Context, *ent.ValueScanMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f ValueScanMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.ValueScanMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.ValueScanMutation", m)
+}
+
 type (
 	// Filter is the interface that wraps the Where function
 	// for filtering nodes in queries and mutations.
@@ -592,6 +616,8 @@ func queryFilter(q ent.Query) (Filter, error) {
 		return q.Filter(), nil
 	case *ent.UserQuery:
 		return q.Filter(), nil
+	case *ent.ValueScanQuery:
+		return q.Filter(), nil
 	default:
 		return nil, Denyf("ent/privacy: unexpected query type %T for query filter", q)
 	}
@@ -632,6 +658,8 @@ func mutationFilter(m ent.Mutation) (Filter, error) {
 	case *ent.TokenMutation:
 		return m.Filter(), nil
 	case *ent.UserMutation:
+		return m.Filter(), nil
+	case *ent.ValueScanMutation:
 		return m.Filter(), nil
 	default:
 		return nil, Denyf("ent/privacy: unexpected mutation type %T for mutation filter", m)

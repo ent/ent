@@ -40,6 +40,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/session"
 	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/ent/user"
+	"entgo.io/ent/entc/integration/customid/ent/valuescan"
 )
 
 // Client is the client that holds all ent builders.
@@ -81,6 +82,8 @@ type Client struct {
 	Token *TokenClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// ValueScan is the client for interacting with the ValueScan builders.
+	ValueScan *ValueScanClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -109,6 +112,7 @@ func (c *Client) init() {
 	c.Session = NewSessionClient(c.config)
 	c.Token = NewTokenClient(c.config)
 	c.User = NewUserClient(c.config)
+	c.ValueScan = NewValueScanClient(c.config)
 }
 
 type (
@@ -199,25 +203,26 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:      ctx,
-		config:   cfg,
-		Account:  NewAccountClient(cfg),
-		Blob:     NewBlobClient(cfg),
-		BlobLink: NewBlobLinkClient(cfg),
-		Car:      NewCarClient(cfg),
-		Device:   NewDeviceClient(cfg),
-		Doc:      NewDocClient(cfg),
-		Group:    NewGroupClient(cfg),
-		IntSID:   NewIntSIDClient(cfg),
-		Link:     NewLinkClient(cfg),
-		MixinID:  NewMixinIDClient(cfg),
-		Note:     NewNoteClient(cfg),
-		Other:    NewOtherClient(cfg),
-		Pet:      NewPetClient(cfg),
-		Revision: NewRevisionClient(cfg),
-		Session:  NewSessionClient(cfg),
-		Token:    NewTokenClient(cfg),
-		User:     NewUserClient(cfg),
+		ctx:       ctx,
+		config:    cfg,
+		Account:   NewAccountClient(cfg),
+		Blob:      NewBlobClient(cfg),
+		BlobLink:  NewBlobLinkClient(cfg),
+		Car:       NewCarClient(cfg),
+		Device:    NewDeviceClient(cfg),
+		Doc:       NewDocClient(cfg),
+		Group:     NewGroupClient(cfg),
+		IntSID:    NewIntSIDClient(cfg),
+		Link:      NewLinkClient(cfg),
+		MixinID:   NewMixinIDClient(cfg),
+		Note:      NewNoteClient(cfg),
+		Other:     NewOtherClient(cfg),
+		Pet:       NewPetClient(cfg),
+		Revision:  NewRevisionClient(cfg),
+		Session:   NewSessionClient(cfg),
+		Token:     NewTokenClient(cfg),
+		User:      NewUserClient(cfg),
+		ValueScan: NewValueScanClient(cfg),
 	}, nil
 }
 
@@ -235,25 +240,26 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:      ctx,
-		config:   cfg,
-		Account:  NewAccountClient(cfg),
-		Blob:     NewBlobClient(cfg),
-		BlobLink: NewBlobLinkClient(cfg),
-		Car:      NewCarClient(cfg),
-		Device:   NewDeviceClient(cfg),
-		Doc:      NewDocClient(cfg),
-		Group:    NewGroupClient(cfg),
-		IntSID:   NewIntSIDClient(cfg),
-		Link:     NewLinkClient(cfg),
-		MixinID:  NewMixinIDClient(cfg),
-		Note:     NewNoteClient(cfg),
-		Other:    NewOtherClient(cfg),
-		Pet:      NewPetClient(cfg),
-		Revision: NewRevisionClient(cfg),
-		Session:  NewSessionClient(cfg),
-		Token:    NewTokenClient(cfg),
-		User:     NewUserClient(cfg),
+		ctx:       ctx,
+		config:    cfg,
+		Account:   NewAccountClient(cfg),
+		Blob:      NewBlobClient(cfg),
+		BlobLink:  NewBlobLinkClient(cfg),
+		Car:       NewCarClient(cfg),
+		Device:    NewDeviceClient(cfg),
+		Doc:       NewDocClient(cfg),
+		Group:     NewGroupClient(cfg),
+		IntSID:    NewIntSIDClient(cfg),
+		Link:      NewLinkClient(cfg),
+		MixinID:   NewMixinIDClient(cfg),
+		Note:      NewNoteClient(cfg),
+		Other:     NewOtherClient(cfg),
+		Pet:       NewPetClient(cfg),
+		Revision:  NewRevisionClient(cfg),
+		Session:   NewSessionClient(cfg),
+		Token:     NewTokenClient(cfg),
+		User:      NewUserClient(cfg),
+		ValueScan: NewValueScanClient(cfg),
 	}, nil
 }
 
@@ -285,7 +291,7 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Account, c.Blob, c.BlobLink, c.Car, c.Device, c.Doc, c.Group, c.IntSID,
 		c.Link, c.MixinID, c.Note, c.Other, c.Pet, c.Revision, c.Session, c.Token,
-		c.User,
+		c.User, c.ValueScan,
 	} {
 		n.Use(hooks...)
 	}
@@ -297,7 +303,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Account, c.Blob, c.BlobLink, c.Car, c.Device, c.Doc, c.Group, c.IntSID,
 		c.Link, c.MixinID, c.Note, c.Other, c.Pet, c.Revision, c.Session, c.Token,
-		c.User,
+		c.User, c.ValueScan,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -340,6 +346,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Token.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
+	case *ValueScanMutation:
+		return c.ValueScan.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -2989,14 +2997,147 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 	}
 }
 
+// ValueScanClient is a client for the ValueScan schema.
+type ValueScanClient struct {
+	config
+}
+
+// NewValueScanClient returns a client for the ValueScan from the given config.
+func NewValueScanClient(c config) *ValueScanClient {
+	return &ValueScanClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `valuescan.Hooks(f(g(h())))`.
+func (c *ValueScanClient) Use(hooks ...Hook) {
+	c.hooks.ValueScan = append(c.hooks.ValueScan, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `valuescan.Intercept(f(g(h())))`.
+func (c *ValueScanClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ValueScan = append(c.inters.ValueScan, interceptors...)
+}
+
+// Create returns a builder for creating a ValueScan entity.
+func (c *ValueScanClient) Create() *ValueScanCreate {
+	mutation := newValueScanMutation(c.config, OpCreate)
+	return &ValueScanCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ValueScan entities.
+func (c *ValueScanClient) CreateBulk(builders ...*ValueScanCreate) *ValueScanCreateBulk {
+	return &ValueScanCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ValueScanClient) MapCreateBulk(slice any, setFunc func(*ValueScanCreate, int)) *ValueScanCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ValueScanCreateBulk{err: fmt.Errorf("calling to ValueScanClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ValueScanCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ValueScanCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ValueScan.
+func (c *ValueScanClient) Update() *ValueScanUpdate {
+	mutation := newValueScanMutation(c.config, OpUpdate)
+	return &ValueScanUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ValueScanClient) UpdateOne(_m *ValueScan) *ValueScanUpdateOne {
+	mutation := newValueScanMutation(c.config, OpUpdateOne, withValueScan(_m))
+	return &ValueScanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ValueScanClient) UpdateOneID(id schema.ValueScanID) *ValueScanUpdateOne {
+	mutation := newValueScanMutation(c.config, OpUpdateOne, withValueScanID(id))
+	return &ValueScanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ValueScan.
+func (c *ValueScanClient) Delete() *ValueScanDelete {
+	mutation := newValueScanMutation(c.config, OpDelete)
+	return &ValueScanDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ValueScanClient) DeleteOne(_m *ValueScan) *ValueScanDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ValueScanClient) DeleteOneID(id schema.ValueScanID) *ValueScanDeleteOne {
+	builder := c.Delete().Where(valuescan.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ValueScanDeleteOne{builder}
+}
+
+// Query returns a query builder for ValueScan.
+func (c *ValueScanClient) Query() *ValueScanQuery {
+	return &ValueScanQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeValueScan},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ValueScan entity by its id.
+func (c *ValueScanClient) Get(ctx context.Context, id schema.ValueScanID) (*ValueScan, error) {
+	return c.Query().Where(valuescan.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ValueScanClient) GetX(ctx context.Context, id schema.ValueScanID) *ValueScan {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ValueScanClient) Hooks() []Hook {
+	return c.hooks.ValueScan
+}
+
+// Interceptors returns the client interceptors.
+func (c *ValueScanClient) Interceptors() []Interceptor {
+	return c.inters.ValueScan
+}
+
+func (c *ValueScanClient) mutate(ctx context.Context, m *ValueScanMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ValueScanCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ValueScanUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ValueScanUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ValueScanDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ValueScan mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		Account, Blob, BlobLink, Car, Device, Doc, Group, IntSID, Link, MixinID, Note,
-		Other, Pet, Revision, Session, Token, User []ent.Hook
+		Other, Pet, Revision, Session, Token, User, ValueScan []ent.Hook
 	}
 	inters struct {
 		Account, Blob, BlobLink, Car, Device, Doc, Group, IntSID, Link, MixinID, Note,
-		Other, Pet, Revision, Session, Token, User []ent.Interceptor
+		Other, Pet, Revision, Session, Token, User, ValueScan []ent.Interceptor
 	}
 )

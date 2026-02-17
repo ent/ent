@@ -23,9 +23,12 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/entc/integration/customid/ent/session"
 	"entgo.io/ent/entc/integration/customid/ent/token"
+	"entgo.io/ent/entc/integration/customid/ent/valuescan"
 	"entgo.io/ent/entc/integration/customid/sid"
 	uuidc "entgo.io/ent/entc/integration/customid/uuidcompatible"
 	"github.com/google/uuid"
+
+	"entgo.io/ent/schema/field"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -196,4 +199,9 @@ func init() {
 	tokenDescID := tokenFields[0].Descriptor()
 	// token.DefaultID holds the default value on creation for the id field.
 	token.DefaultID = tokenDescID.Default.(func() sid.ID)
+	valuescanFields := schema.ValueScan{}.Fields()
+	_ = valuescanFields
+	// valuescanDescID is the schema descriptor for id field.
+	valuescanDescID := valuescanFields[0].Descriptor()
+	valuescan.ValueScanner.ID = valuescanDescID.ValueScanner.(field.TypeValueScanner[schema.ValueScanID])
 }

@@ -50,6 +50,8 @@ type Tx struct {
 	Token *TokenClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// ValueScan is the client for interacting with the ValueScan builders.
+	ValueScan *ValueScanClient
 
 	// lazily loaded.
 	client     *Client
@@ -198,6 +200,7 @@ func (tx *Tx) init() {
 	tx.Session = NewSessionClient(tx.config)
 	tx.Token = NewTokenClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.ValueScan = NewValueScanClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

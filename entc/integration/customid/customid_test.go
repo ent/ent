@@ -20,8 +20,10 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/doc"
 	"entgo.io/ent/entc/integration/customid/ent/intsid"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
+	entschema "entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/ent/user"
+	"entgo.io/ent/entc/integration/customid/ent/valuescan"
 	"entgo.io/ent/entc/integration/customid/sid"
 	"entgo.io/ent/schema/field"
 
@@ -177,6 +179,39 @@ func CustomID(t *testing.T, client *ent.Client) {
 	require.NotEmpty(t, parent.Text)
 	child := client.Note.Create().SetText("child").SetParent(parent).SaveX(ctx)
 	require.NotEmpty(t, child.QueryParent().OnlyIDX(ctx))
+
+	t.Run("ValueScanner ID", func(t *testing.T) {
+		id1 := entschema.ValueScanID{V: 10}
+		id2 := entschema.ValueScanID{V: 20}
+		id3 := entschema.ValueScanID{V: 30}
+		id4 := entschema.ValueScanID{V: 40}
+
+		client.ValueScan.Create().SetID(id1).SetName("first").SaveX(ctx)
+		client.ValueScan.Create().SetID(id2).SetName("second").SaveX(ctx)
+		require.Equal(t, id1, client.ValueScan.GetX(ctx, id1).ID)
+		require.Equal(t, id2, client.ValueScan.Query().Where(valuescan.ID(id2)).OnlyX(ctx).ID)
+		require.True(t, client.ValueScan.Query().Where(valuescan.ID(id1)).ExistX(ctx))
+		require.False(t, client.ValueScan.Query().Where(valuescan.ID(entschema.ValueScanID{V: 999})).ExistX(ctx))
+
+		client.ValueScan.CreateBulk(
+			client.ValueScan.Create().SetID(id3).SetName("third"),
+			client.ValueScan.Create().SetID(id4).SetName("fourth"),
+		).SaveX(ctx)
+		require.ElementsMatch(t, []entschema.ValueScanID{id1, id2, id3, id4}, client.ValueScan.Query().IDsX(ctx))
+
+		client.ValueScan.UpdateOneID(id2).SetName("updated").ExecX(ctx)
+		require.Equal(t, "updated", client.ValueScan.GetX(ctx, id2).Name)
+
+		var raw []struct {
+			ID int
+		}
+		client.ValueScan.Query().
+			Where(valuescan.Name("updated")).
+			Select(valuescan.FieldID).
+			ScanX(ctx, &raw)
+		require.Len(t, raw, 1)
+		require.Equal(t, 20, raw[0].ID)
+	})
 
 	pdoc := client.Doc.Create().SetText("parent").SaveX(ctx)
 	require.NotEmpty(t, pdoc.ID)

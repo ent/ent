@@ -7,13 +7,22 @@ in the LICENSE file in the root directory of this source tree.
 {{/* gotype: entgo.io/ent/entc/gen.typeScope */}}
 
 {{ define "dialect/sql/predicate/id" -}}
-	sql.FieldEQ({{ $.ID.Constant }}, id)
+	{{- $arg := "id" }}
+	{{- with $.Scope.Arg }}
+		{{- $arg = . }}
+	{{- end -}}
+	sql.FieldEQ({{ $.ID.Constant }}, {{ $arg }})
 {{- end }}
 
 {{ define "dialect/sql/predicate/id/ops" -}}
 	{{- $op := $.Scope.Op -}}
 	{{- $storage := $.Scope.Storage -}}
-	sql.Field{{ call $storage.OpCode $op }}({{ $.ID.Constant }}{{ if not $op.Niladic }},{{ if $op.Variadic }}ids...{{ else }}id{{ end }}{{ end }})
+	{{- $arg := "id" -}}
+	{{- if $op.Variadic }}{{ $arg = "ids" }}{{ end -}}
+	{{- with $.Scope.Arg -}}
+		{{- $arg = . -}}
+	{{- end -}}
+	sql.Field{{ call $storage.OpCode $op }}({{ $.ID.Constant }}{{ if not $op.Niladic }}, {{ $arg }}{{ if $op.Variadic }}...{{ end }}{{ end }})
 {{- end }}
 
 {{ define "dialect/sql/predicate/field" -}}

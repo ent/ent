@@ -28,24 +28,39 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 		return nil, err
 	}
 	{{- if $.HasCompositeID }}
-	{{- else if or $.ID.Type.ValueScanner (not $.ID.Type.Numeric) }}
+	{{- else if or $.ID.HasValueScanner $.ID.Type.ValueScanner (not $.ID.Type.Numeric) }}
 		if _spec.ID.Value != nil {
-			{{- /* If the ID type is not a pointer, but implements the ValueScanner interface (e.g. UUID fields). */}}
-			{{- if and $.ID.Type.ValueScanner (not $.ID.Type.RType.IsPtr) }}
-				if id, ok := _spec.ID.Value.(*{{ $.ID.Type }}); ok {
-					_node.ID = *id
-			{{- else }}
-				if id, ok := _spec.ID.Value.({{ $.ID.Type }}); ok {
-					_node.ID = id
-			{{- end }}
-			{{- if $.ID.Type.ValueScanner }}
-				} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-					return nil, err
-			{{- else  }}
-				} else {
-					return nil, fmt.Errorf("unexpected {{ $.Name }}.ID type: %T", _spec.ID.Value)
-			{{- end }}
+			{{- if $.ID.HasValueScanner }}
+				sv, ok := _spec.ID.Value.(field.ValueScanner)
+				if !ok {
+					sv = {{ $.ID.ScanValueFunc }}()
+					if err := sv.Scan(_spec.ID.Value); err != nil {
+						return nil, err
+					}
 				}
+				if value, err := {{ $.ID.FromValueFunc }}(sv); err != nil {
+					return nil, err
+				} else {
+					_node.ID = value
+				}
+			{{- else }}
+				{{- /* If the ID type is not a pointer, but implements the ValueScanner interface (e.g. UUID fields). */}}
+				{{- if and $.ID.Type.ValueScanner (not $.ID.Type.RType.IsPtr) }}
+					if id, ok := _spec.ID.Value.(*{{ $.ID.Type }}); ok {
+						_node.ID = *id
+				{{- else }}
+					if id, ok := _spec.ID.Value.({{ $.ID.Type }}); ok {
+						_node.ID = id
+				{{- end }}
+				{{- if $.ID.Type.ValueScanner }}
+					} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+						return nil, err
+				{{- else  }}
+					} else {
+						return nil, fmt.Errorf("unexpected {{ $.Name }}.ID type: %T", _spec.ID.Value)
+				{{- end }}
+				}
+			{{- end }}
 		}
 	{{- else }}
 		{{- if $.ID.UserDefined }}
@@ -78,7 +93,15 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 	{{- if and (not $.HasCompositeID) $.ID.UserDefined }}
 		if id, ok := {{ $mutation }}.{{ $.ID.MutationGet }}(); ok {
 			_node.ID = id
-			_spec.ID.Value = {{ if and $.ID.Type.ValueScanner (not $.ID.Type.RType.IsPtr) }}&{{ end }}id
+			{{- if $.ID.HasValueScanner }}
+				vv, err := {{ $.ID.ValueFunc }}(id)
+				if err != nil {
+					return nil, nil, err
+				}
+				_spec.ID.Value = vv
+			{{- else }}
+				_spec.ID.Value = {{ if and $.ID.Type.ValueScanner (not $.ID.Type.RType.IsPtr) }}&{{ end }}id
+			{{- end }}
 		}
 	{{- end }}
 	{{- range $f := $.MutationFields }}
@@ -194,8 +217,23 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 				}
 				{{- if $.HasOneFieldID }}
 					mutation.{{ $.ID.BuilderField }} = &nodes[i].{{ $.ID.StructField }}
-					{{- if or $.ID.IsString $.ID.IsUUID $.ID.IsBytes $.ID.IsOther }}
+					{{- if and (or $.ID.IsString $.ID.IsUUID $.ID.IsBytes $.ID.IsOther) (not $.ID.HasValueScanner) }}
 						{{- /* Do nothing, because these 4 types must be supplied by the user. */ -}}
+					{{- else if $.ID.HasValueScanner }}
+						if specs[i].ID.Value != nil {
+							sv, ok := specs[i].ID.Value.(field.ValueScanner)
+							if !ok {
+								sv = {{ $.ID.ScanValueFunc }}()
+								if err := sv.Scan(specs[i].ID.Value); err != nil {
+									return nil, err
+								}
+							}
+							if id, err := {{ $.ID.FromValueFunc }}(sv); err != nil {
+								return nil, err
+							} else {
+								nodes[i].ID = id
+							}
+						}
 					{{- else if or $.ID.Type.ValueScanner }}
 						if specs[i].ID.Value != nil {
 							if err := nodes[i].ID.Scan(specs[i].ID.Value); err != nil {

@@ -60,3 +60,17 @@ type Token func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
+
+// ValueScan is the predicate function for valuescan builders.
+type ValueScan func(*sql.Selector)
+
+// ValueScanOrErr calls the predicate only if the error is not nit.
+func ValueScanOrErr(p ValueScan, err error) ValueScan {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}

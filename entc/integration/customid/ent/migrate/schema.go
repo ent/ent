@@ -329,6 +329,17 @@ var (
 			},
 		},
 	}
+	// ValueScansColumns holds the columns for the "value_scans" table.
+	ValueScansColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+	}
+	// ValueScansTable holds the schema information for the "value_scans" table.
+	ValueScansTable = &schema.Table{
+		Name:       "value_scans",
+		Columns:    ValueScansColumns,
+		PrimaryKey: []*schema.Column{ValueScansColumns[0]},
+	}
 	// DocRelatedColumns holds the columns for the "doc_related" table.
 	DocRelatedColumns = []*schema.Column{
 		{Name: "doc_id", Type: field.TypeString, Size: 36, SchemaType: map[string]string{"postgres": "uuid"}},
@@ -423,6 +434,7 @@ var (
 		SessionsTable,
 		TokensTable,
 		UsersTable,
+		ValueScansTable,
 		DocRelatedTable,
 		GroupUsersTable,
 		PetFriendsTable,

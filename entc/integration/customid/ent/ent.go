@@ -33,6 +33,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/session"
 	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/ent/user"
+	"entgo.io/ent/entc/integration/customid/ent/valuescan"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -93,23 +94,24 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			account.Table:  account.ValidColumn,
-			blob.Table:     blob.ValidColumn,
-			bloblink.Table: bloblink.ValidColumn,
-			car.Table:      car.ValidColumn,
-			device.Table:   device.ValidColumn,
-			doc.Table:      doc.ValidColumn,
-			group.Table:    group.ValidColumn,
-			intsid.Table:   intsid.ValidColumn,
-			link.Table:     link.ValidColumn,
-			mixinid.Table:  mixinid.ValidColumn,
-			note.Table:     note.ValidColumn,
-			other.Table:    other.ValidColumn,
-			pet.Table:      pet.ValidColumn,
-			revision.Table: revision.ValidColumn,
-			session.Table:  session.ValidColumn,
-			token.Table:    token.ValidColumn,
-			user.Table:     user.ValidColumn,
+			account.Table:   account.ValidColumn,
+			blob.Table:      blob.ValidColumn,
+			bloblink.Table:  bloblink.ValidColumn,
+			car.Table:       car.ValidColumn,
+			device.Table:    device.ValidColumn,
+			doc.Table:       doc.ValidColumn,
+			group.Table:     group.ValidColumn,
+			intsid.Table:    intsid.ValidColumn,
+			link.Table:      link.ValidColumn,
+			mixinid.Table:   mixinid.ValidColumn,
+			note.Table:      note.ValidColumn,
+			other.Table:     other.ValidColumn,
+			pet.Table:       pet.ValidColumn,
+			revision.Table:  revision.ValidColumn,
+			session.Table:   session.ValidColumn,
+			token.Table:     token.ValidColumn,
+			user.Table:      user.ValidColumn,
+			valuescan.Table: valuescan.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

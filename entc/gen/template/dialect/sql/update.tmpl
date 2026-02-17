@@ -50,7 +50,15 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			if !ok {
 				return {{ $zero }}, &ValidationError{Name: "{{ $.ID.Name }}", err: errors.New(`{{ $pkg }}: missing "{{ $.Name }}.{{ $.ID.Name }}" for update`)}
 			}
-			_spec.Node.ID.Value = id
+			{{- if $.ID.HasValueScanner }}
+				vv, err := {{ $.ID.ValueFunc }}(id)
+				if err != nil {
+					return {{ $zero }}, err
+				}
+				_spec.Node.ID.Value = vv
+			{{- else }}
+				_spec.Node.ID.Value = id
+			{{- end }}
 			if fields := {{ $receiver }}.fields; len(fields) > 0 {
 				_spec.Node.Columns = make([]string, 0, len(fields))
 				_spec.Node.Columns = append(_spec.Node.Columns, {{ $.Package }}.{{ $.ID.Constant }})

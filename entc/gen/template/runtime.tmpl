@@ -165,8 +165,9 @@ func init() {
 		{{- end }}
 		{{- range $i, $f := $fields }}
 			{{- $desc := print $pkg "Desc" $f.StructField }}
+			{{- $idscan := and $n.HasOneFieldID (eq $f.Name $n.ID.Name) }}
 			{{- /* enum default values handled near their declarations (in type package). */}}
-			{{- if or (and $f.Default (not $f.IsEnum)) $f.UpdateDefault $f.Validators $f.HasValueScanner }}
+			{{- if or (and $f.Default (not $f.IsEnum)) $f.UpdateDefault $f.Validators (and $f.HasValueScanner (or (not $idscan) (eq $n.Storage.Name "sql"))) }}
 				// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
 				{{- if $f.Position.MixedIn }}
 					{{ $desc }} := {{ print $pkg "MixinFields" $f.Position.MixinIndex }}[{{ $f.Position.Index }}].Descriptor()
@@ -193,7 +194,7 @@ func init() {
 				// {{ $default }} holds the default value on update for the {{ $f.Name }} field.
 				{{ $default }} = {{ $desc }}.UpdateDefault.(func() {{ $f.Type }})
 			{{- end }}
-			{{- with $f.HasValueScanner }}
+			{{- if and $f.HasValueScanner (or (not $idscan) (eq $n.Storage.Name "sql")) }}
 				{{- $valuescan := print $pkg ".ValueScanner." $f.StructField }}
 				{{ $valuescan }} = {{ $desc }}.ValueScanner.(field.TypeValueScanner[{{ $f.Type }}])
 			{{- end }}

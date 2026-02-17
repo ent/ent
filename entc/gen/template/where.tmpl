@@ -17,23 +17,65 @@ in the LICENSE file in the root directory of this source tree.
 {{ if .HasOneFieldID }}
 	// ID filters vertices based on their ID field.
 	func ID(id {{ $.ID.Type }}) predicate.{{ $.Name }} {
-		return predicate.{{ $.Name }}(
-			{{- $tmpl := printf "dialect/%s/predicate/id" $.Storage }}
-			{{- xtemplate $tmpl $ -}}
-		)
+		{{- if and $.ID.HasValueScanner (eq $.Storage.Name "sql") }}
+			vc, err := ValueScanner.{{ $.ID.StructField }}.Value(id)
+			return predicate.{{ $.Name }}OrErr(
+				{{- with extend $ "Arg" "vc" -}}
+					{{- $tmpl := printf "dialect/%s/predicate/id" $.Storage }}
+					{{- xtemplate $tmpl . -}}
+				{{- end -}}, err)
+		{{- else }}
+			return predicate.{{ $.Name }}(
+				{{- with extend $ "Arg" "id" -}}
+					{{- $tmpl := printf "dialect/%s/predicate/id" $.Storage }}
+					{{- xtemplate $tmpl . -}}
+				{{- end -}}
+			)
+		{{- end }}
 	}
 
 	{{ range $op := $.ID.Ops }}
 		{{ $arg := "id" }}{{ if $op.Variadic }}{{ $arg = "ids" }}{{ end }}
+		{{ $stringOp := eq $op.Name "EqualFold" "Contains" "ContainsFold" "HasPrefix" "HasSuffix" }}
 		{{ $func := printf "ID%s" $op.Name }}
 		// {{ $func }} applies the {{ $op.Name }} predicate on the ID field.
 		func {{ $func }}({{ $arg }} {{ if $op.Variadic }}...{{ end }}{{ $.ID.Type }}) predicate.{{ $.Name }} {
-			return predicate.{{ $.Name }}(
-				{{- with extend $ "Arg" $arg "Op" $op "Storage" $.Storage -}}
-					{{ $tmpl := printf "dialect/%s/predicate/id/ops" $.Storage }}
-					{{- xtemplate $tmpl . }}
-				{{- end -}}
-			)
+			{{- if and (eq $.Storage.Name "sql") $.ID.HasValueScanner (or $op.Variadic (not $op.Niladic)) }}
+				{{- if $op.Variadic }}
+					var (
+						err error
+						vcs = make([]any, len({{ $arg }}))
+					)
+					for i := range vcs {
+						if vcs[i], err = ValueScanner.{{ $.ID.StructField }}.Value({{ print $arg "[i]" }}); err != nil {
+							break
+						}
+					}
+					{{- $arg = "vcs" }}
+				{{- else }}
+					vc, err := ValueScanner.{{ $.ID.StructField }}.Value({{ $arg }})
+					{{- $arg = "vc" }}
+					{{- if $stringOp }}
+						{{- $arg = "vcs" }}
+						vcs, ok := vc.(string)
+						if err == nil && !ok {
+							err = fmt.Errorf("{{ $.ID.Name }} value is not a string: %T", vc)
+						}
+					{{- end }}
+				{{- end }}
+				return predicate.{{ $.Name }}OrErr(
+					{{- with extend $ "Arg" $arg "Op" $op "Storage" $.Storage -}}
+						{{ $tmpl := printf "dialect/%s/predicate/id/ops" $.Storage }}
+						{{- xtemplate $tmpl . }}
+					{{- end }}, err)
+			{{- else }}
+				return predicate.{{ $.Name }}(
+					{{- with extend $ "Arg" $arg "Op" $op "Storage" $.Storage -}}
+						{{ $tmpl := printf "dialect/%s/predicate/id/ops" $.Storage }}
+						{{- xtemplate $tmpl . }}
+					{{- end -}}
+				)
+			{{- end }}
 		}
 	{{ end }}
 {{ end }}
@@ -84,7 +126,7 @@ in the LICENSE file in the root directory of this source tree.
 				{{- if $op.Variadic }}
 					var (
 						err error
-						v = make([]any, len({{ $arg }}))
+						v   = make([]any, len({{ $arg }}))
 					)
 					for i := range v {
 						if v[i], err = ValueScanner.{{ $f.StructField }}.Value({{ print $arg "[i]" }}); err != nil {

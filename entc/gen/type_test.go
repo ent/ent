@@ -90,6 +90,15 @@ func TestType(t *testing.T) {
 	})
 	require.EqualError(err, "id field cannot be optional", "id field cannot be optional")
 
+	typ, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{
+		Name: "T",
+		Fields: []*load.Field{
+			{Name: "id", Info: &field.TypeInfo{Type: field.TypeString}, ValueScanner: true},
+		},
+	})
+	require.NoError(err)
+	require.True(typ.HasValueScanner())
+
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{Name: "Type"})
 	require.EqualError(err, "schema lowercase name conflicts with Go keyword \"type\"")
 	_, err = NewType(&Config{Package: "entc/gen"}, &load.Schema{Name: "Int"})

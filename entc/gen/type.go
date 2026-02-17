@@ -260,11 +260,8 @@ func NewType(c *Config, schema *load.Schema) (*Type, error) {
 		}
 		// User defined id field.
 		if typ.ID != nil && tf.Name == typ.ID.Name {
-			switch {
-			case tf.Optional:
+			if tf.Optional {
 				return nil, errors.New("id field cannot be optional")
-			case f.ValueScanner:
-				return nil, errors.New("id field cannot have an external ValueScanner")
 			}
 			typ.ID = tf
 		} else {
@@ -1427,6 +1424,10 @@ func (f Field) ScanType() string {
 
 // HasValueScanner reports if any of the fields has (an external) ValueScanner.
 func (t Type) HasValueScanner() bool {
+	sqlStorage := t.Config == nil || t.Storage == nil || t.Storage.Name == "sql"
+	if sqlStorage && t.ID != nil && t.ID.HasValueScanner() {
+		return true
+	}
 	for _, f := range t.Fields {
 		if f.HasValueScanner() {
 			return true

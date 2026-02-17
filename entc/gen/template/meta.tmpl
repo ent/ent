@@ -98,8 +98,10 @@ const (
 		{{- if $.HasValueScanner }}
 		// ValueScanner of all {{ $.Name }} fields.
 		ValueScanner struct {
-			{{- range $f := $.Fields }}
-				{{- if $f.HasValueScanner }}
+			{{- $fields := $.Fields }}{{ if $.HasOneFieldID }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}{{ end }}
+			{{- range $f := $fields }}
+				{{- $idscan := and $.HasOneFieldID (eq $f.Name $.ID.Name) }}
+				{{- if and $f.HasValueScanner (or (not $idscan) (eq $.Storage.Name "sql")) }}
 					{{ $f.StructField }} field.TypeValueScanner[{{ $f.Type }}]
 				{{- end }}
 			{{- end }}

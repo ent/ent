@@ -25,6 +25,7 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/session"
 	"entgo.io/ent/entc/integration/customid/ent/token"
 	"entgo.io/ent/entc/integration/customid/ent/user"
+	"entgo.io/ent/entc/integration/customid/ent/valuescan"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -34,7 +35,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 17)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 18)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   account.Table,
@@ -268,6 +269,20 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type:   "User",
 		Fields: map[string]*sqlgraph.FieldSpec{},
+	}
+	graph.Nodes[17] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
+			Table:   valuescan.Table,
+			Columns: valuescan.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeInt,
+				Column: valuescan.FieldID,
+			},
+		},
+		Type: "ValueScan",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			valuescan.FieldName: {Type: field.TypeString, Column: valuescan.FieldName},
+		},
 	}
 	graph.MustAddE(
 		"token",
@@ -1728,4 +1743,49 @@ func (f *UserFilter) WhereHasPetsWith(preds ...predicate.Pet) {
 			p(s)
 		}
 	})))
+}
+
+// addPredicate implements the predicateAdder interface.
+func (_q *ValueScanQuery) addPredicate(pred func(s *sql.Selector)) {
+	_q.predicates = append(_q.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the ValueScanQuery builder.
+func (_q *ValueScanQuery) Filter() *ValueScanFilter {
+	return &ValueScanFilter{config: _q.config, predicateAdder: _q}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *ValueScanMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the ValueScanMutation builder.
+func (m *ValueScanMutation) Filter() *ValueScanFilter {
+	return &ValueScanFilter{config: m.config, predicateAdder: m}
+}
+
+// ValueScanFilter provides a generic filtering capability at runtime for ValueScanQuery.
+type ValueScanFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *ValueScanFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[17].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql int predicate on the id field.
+func (f *ValueScanFilter) WhereID(p entql.IntP) {
+	f.Where(p.Field(valuescan.FieldID))
+}
+
+// WhereName applies the entql string predicate on the name field.
+func (f *ValueScanFilter) WhereName(p entql.StringP) {
+	f.Where(p.Field(valuescan.FieldName))
 }

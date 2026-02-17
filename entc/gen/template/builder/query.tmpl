@@ -221,9 +221,20 @@ func ({{ $receiver }} *{{ $builder }}) AllX(ctx context.Context) []*{{ $.Name }}
 			{{ $receiver }}.Unique(true)
 		}
 		ctx = setContextOp(ctx, {{ $receiver }}.ctx, ent.OpQueryIDs)
-		if err = {{ $receiver }}.Select({{ $.Package }}.FieldID).Scan(ctx, &ids); err != nil {
-			return nil, err
-		}
+		{{- if and $.ID.HasValueScanner (eq $.Storage.Name "sql") }}
+			var nodes []*{{ $.Name }}
+			if nodes, err = {{ $receiver }}.Select({{ $.Package }}.FieldID).All(ctx); err != nil {
+				return nil, err
+			}
+			ids = make([]{{ $.ID.Type }}, len(nodes))
+			for i := range nodes {
+				ids[i] = nodes[i].ID
+			}
+		{{- else }}
+			if err = {{ $receiver }}.Select({{ $.Package }}.FieldID).Scan(ctx, &ids); err != nil {
+				return nil, err
+			}
+		{{- end }}
 		return ids, nil
 	}
 
