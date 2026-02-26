@@ -29,7 +29,14 @@ import (
 	{{- end }}
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
+	{{- /* Import schema/field: always for Graph context, conditionally for Type context (only if HasValueScanner) */}}
+	{{- if eq $.Config.Package $.Package }}
 	"entgo.io/ent/schema/field"
+	{{- else }}
+		{{- if $.HasValueScanner }}
+	"entgo.io/ent/schema/field"
+		{{- end }}
+	{{- end }}
 	{{- with $.Storage }}
 		{{- range $import := .Imports }}
 			"{{ $import }}"

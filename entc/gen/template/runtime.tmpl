@@ -82,7 +82,15 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/privacy"
+	{{- $needsField := false }}
+	{{- range $n := $.Nodes }}
+		{{- if $n.HasValueScanner }}
+			{{- $needsField = true }}
+		{{- end }}
+	{{- end }}
+	{{- if $needsField }}
 	"entgo.io/ent/schema/field"
+	{{- end }}
 )
 
 
