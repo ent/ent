@@ -26,8 +26,10 @@ import (
 	"entgo.io/ent/entc/integration/customid/ent/link"
 	"entgo.io/ent/entc/integration/customid/ent/mixinid"
 	"entgo.io/ent/entc/integration/customid/ent/note"
+	"entgo.io/ent/entc/integration/customid/ent/other"
 	"entgo.io/ent/entc/integration/customid/ent/pet"
 	"entgo.io/ent/entc/integration/customid/ent/predicate"
+	"entgo.io/ent/entc/integration/customid/ent/revision"
 	"entgo.io/ent/entc/integration/customid/ent/schema"
 	"entgo.io/ent/entc/integration/customid/ent/session"
 	"entgo.io/ent/entc/integration/customid/ent/token"
@@ -176,7 +178,10 @@ func (m *AccountMutation) IDs(ctx context.Context) ([]sid.ID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, account.ID(id))
+			return m.Client().Account.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []sid.ID{id}, nil
 		}
 		fallthrough
@@ -605,7 +610,10 @@ func (m *BlobMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, blob.ID(id))
+			return m.Client().Blob.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []uuid.UUID{id}, nil
 		}
 		fallthrough
@@ -1592,7 +1600,10 @@ func (m *CarMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, car.ID(id))
+			return m.Client().Car.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
@@ -2209,7 +2220,10 @@ func (m *DeviceMutation) IDs(ctx context.Context) ([]schema.ID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, device.ID(id))
+			return m.Client().Device.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []schema.ID{id}, nil
 		}
 		fallthrough
@@ -2635,7 +2649,10 @@ func (m *DocMutation) IDs(ctx context.Context) ([]schema.DocID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, doc.ID(id))
+			return m.Client().Doc.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []schema.DocID{id}, nil
 		}
 		fallthrough
@@ -3218,7 +3235,10 @@ func (m *GroupMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, group.ID(id))
+			return m.Client().Group.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
@@ -3583,7 +3603,10 @@ func (m *IntSIDMutation) IDs(ctx context.Context) ([]sid.ID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, intsid.ID(id))
+			return m.Client().IntSID.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []sid.ID{id}, nil
 		}
 		fallthrough
@@ -4001,7 +4024,10 @@ func (m *LinkMutation) IDs(ctx context.Context) ([]uuidc.UUIDC, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, link.ID(id))
+			return m.Client().Link.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []uuidc.UUIDC{id}, nil
 		}
 		fallthrough
@@ -4334,7 +4360,10 @@ func (m *MixinIDMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, mixinid.ID(id))
+			return m.Client().MixinID.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []uuid.UUID{id}, nil
 		}
 		fallthrough
@@ -4724,7 +4753,10 @@ func (m *NoteMutation) IDs(ctx context.Context) ([]schema.NoteID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, note.ID(id))
+			return m.Client().Note.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []schema.NoteID{id}, nil
 		}
 		fallthrough
@@ -5224,7 +5256,10 @@ func (m *OtherMutation) IDs(ctx context.Context) ([]sid.ID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, other.ID(id))
+			return m.Client().Other.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []sid.ID{id}, nil
 		}
 		fallthrough
@@ -5504,7 +5539,10 @@ func (m *PetMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, pet.ID(id))
+			return m.Client().Pet.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
@@ -6058,7 +6096,10 @@ func (m *RevisionMutation) IDs(ctx context.Context) ([]string, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, revision.ID(id))
+			return m.Client().Revision.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []string{id}, nil
 		}
 		fallthrough
@@ -6330,7 +6371,10 @@ func (m *SessionMutation) IDs(ctx context.Context) ([]schema.ID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, session.ID(id))
+			return m.Client().Session.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []schema.ID{id}, nil
 		}
 		fallthrough
@@ -6668,7 +6712,10 @@ func (m *TokenMutation) IDs(ctx context.Context) ([]sid.ID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, token.ID(id))
+			return m.Client().Token.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []sid.ID{id}, nil
 		}
 		fallthrough
@@ -7075,7 +7122,10 @@ func (m *UserMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
-		if exists {
+		if exists && len(m.predicates) > 0 {
+			m.predicates = append(m.predicates, user.ID(id))
+			return m.Client().User.Query().Where(m.predicates...).IDs(ctx)
+		} else if exists {
 			return []int{id}, nil
 		}
 		fallthrough
