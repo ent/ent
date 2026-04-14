@@ -312,7 +312,7 @@ func (c *TaskClient) DeleteOne(_m *Task) *TaskDeleteOne {
 func (c *TaskClient) DeleteOneID(id int) *TaskDeleteOne {
 	builder := c.Delete().Where(task.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &TaskDeleteOne{builder}
 }
 
@@ -478,7 +478,7 @@ func (c *TeamClient) DeleteOne(_m *Team) *TeamDeleteOne {
 func (c *TeamClient) DeleteOneID(id int) *TeamDeleteOne {
 	builder := c.Delete().Where(team.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &TeamDeleteOne{builder}
 }
 
@@ -644,7 +644,7 @@ func (c *UserClient) DeleteOne(_m *User) *UserDeleteOne {
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &UserDeleteOne{builder}
 }
 

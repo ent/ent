@@ -287,7 +287,7 @@ func (c *UserClient) DeleteOne(_m *User) *UserDeleteOne {
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &UserDeleteOne{builder}
 }
 
@@ -420,7 +420,7 @@ func (c *UserAuditLogClient) DeleteOne(_m *UserAuditLog) *UserAuditLogDeleteOne 
 func (c *UserAuditLogClient) DeleteOneID(id int) *UserAuditLogDeleteOne {
 	builder := c.Delete().Where(userauditlog.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &UserAuditLogDeleteOne{builder}
 }
 

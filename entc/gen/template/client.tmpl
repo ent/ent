@@ -346,7 +346,7 @@ func (c *{{ $client }}) UpdateOne({{ $rec }} *{{ $n.Name }}) *{{ $n.UpdateOneNam
 	{{- else }}
 		mutation := new{{ $n.MutationName }}(c.config, OpUpdateOne)
 		{{- range $id := $n.EdgeSchema.ID }}
-			mutation.{{ $id.BuilderField }} = &{{ $rec }}.{{ $id.StructField }}
+			mutation.{{ $id.MutationSet }}({{ $rec }}.{{ $id.StructField }})
 		{{- end }}
 	{{- end }}
 	return &{{ $n.UpdateOneName }}{config: c.config, hooks: c.Hooks(), mutation: mutation}
@@ -376,8 +376,8 @@ func (c *{{ $client }}) Delete() *{{ $n.DeleteName }} {
 	func (c *{{ $client }}) DeleteOneID(id {{ $n.ID.Type }}) *{{ $n.DeleteOneName }} {
 		{{- $builder := "builder" }}{{ if eq $n.Package $builder }}{{ $builder = "builderC" }}{{ end }}
 		{{ $builder }} := c.Delete().Where({{ $n.Package }}.ID(id))
-		{{ $builder }}.mutation.id = &id
-		{{ $builder }}.mutation.op = OpDeleteOne
+		{{ $builder }}.mutation.{{ $n.ID.BuilderField }} = &id
+		{{ $builder }}.mutation.SetOp(OpDeleteOne)
 		return &{{ $n.DeleteOneName }}{ {{ $builder }} }
 	}
 {{ end }}

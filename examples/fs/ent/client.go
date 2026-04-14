@@ -282,7 +282,7 @@ func (c *FileClient) DeleteOne(_m *File) *FileDeleteOne {
 func (c *FileClient) DeleteOneID(id int) *FileDeleteOne {
 	builder := c.Delete().Where(file.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &FileDeleteOne{builder}
 }
 

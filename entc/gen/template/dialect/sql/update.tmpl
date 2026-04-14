@@ -90,7 +90,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			}
 		{{- end }}
 	{{- end }}
-	if ps := {{ $mutation }}.predicates; len(ps) > 0 {
+	if ps := {{ $mutation }}.Predicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

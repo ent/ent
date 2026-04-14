@@ -183,7 +183,7 @@ func (_u *NodeUpdate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 2)
 	v := g.V().HasLabel(node.Label)
-	for _, p := range _u.mutation.predicates {
+	for _, p := range _u.mutation.Predicates() {
 		p(v)
 	}
 	var (

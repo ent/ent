@@ -292,7 +292,7 @@ func (c *CityClient) DeleteOne(_m *City) *CityDeleteOne {
 func (c *CityClient) DeleteOneID(id int) *CityDeleteOne {
 	builder := c.Delete().Where(city.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &CityDeleteOne{builder}
 }
 
@@ -441,7 +441,7 @@ func (c *StreetClient) DeleteOne(_m *Street) *StreetDeleteOne {
 func (c *StreetClient) DeleteOneID(id int) *StreetDeleteOne {
 	builder := c.Delete().Where(street.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &StreetDeleteOne{builder}
 }
 

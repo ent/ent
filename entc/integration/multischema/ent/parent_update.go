@@ -101,7 +101,7 @@ func (_u *ParentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(parent.Table, parent.Columns, sqlgraph.NewFieldSpec(parent.FieldID, field.TypeInt))
-	if ps := _u.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.Predicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -233,7 +233,7 @@ func (_u *ParentUpdateOne) sqlSave(ctx context.Context) (_node *Parent, err erro
 			}
 		}
 	}
-	if ps := _u.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.Predicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

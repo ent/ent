@@ -102,7 +102,7 @@ type predicateAdder interface {
 	{{- if not $n.IsView }}
 			// addPredicate implements the predicateAdder interface.
 			func (m *{{ $mutation }}) addPredicate(pred func(s *sql.Selector)) {
-				m.predicates = append(m.predicates, pred)
+				m.Where(pred)
 			}
 
 			// Filter returns an entql.Where implementation to apply filters on the {{ $mutation }} builder.

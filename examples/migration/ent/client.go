@@ -331,7 +331,7 @@ func (c *CardClient) DeleteOne(_m *Card) *CardDeleteOne {
 func (c *CardClient) DeleteOneID(id int) *CardDeleteOne {
 	builder := c.Delete().Where(card.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &CardDeleteOne{builder}
 }
 
@@ -496,7 +496,7 @@ func (c *PaymentClient) DeleteOne(_m *Payment) *PaymentDeleteOne {
 func (c *PaymentClient) DeleteOneID(id int) *PaymentDeleteOne {
 	builder := c.Delete().Where(payment.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &PaymentDeleteOne{builder}
 }
 
@@ -645,7 +645,7 @@ func (c *PetClient) DeleteOne(_m *Pet) *PetDeleteOne {
 func (c *PetClient) DeleteOneID(id uuid.UUID) *PetDeleteOne {
 	builder := c.Delete().Where(pet.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &PetDeleteOne{builder}
 }
 
@@ -810,7 +810,7 @@ func (c *SessionClient) DeleteOne(_m *Session) *SessionDeleteOne {
 func (c *SessionClient) DeleteOneID(id uuid.UUID) *SessionDeleteOne {
 	builder := c.Delete().Where(session.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &SessionDeleteOne{builder}
 }
 
@@ -959,7 +959,7 @@ func (c *SessionDeviceClient) DeleteOne(_m *SessionDevice) *SessionDeviceDeleteO
 func (c *SessionDeviceClient) DeleteOneID(id uuid.UUID) *SessionDeviceDeleteOne {
 	builder := c.Delete().Where(sessiondevice.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &SessionDeviceDeleteOne{builder}
 }
 
@@ -1108,7 +1108,7 @@ func (c *UserClient) DeleteOne(_m *User) *UserDeleteOne {
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &UserDeleteOne{builder}
 }
 

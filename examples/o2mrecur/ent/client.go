@@ -282,7 +282,7 @@ func (c *NodeClient) DeleteOne(_m *Node) *NodeDeleteOne {
 func (c *NodeClient) DeleteOneID(id int) *NodeDeleteOne {
 	builder := c.Delete().Where(node.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &NodeDeleteOne{builder}
 }
 

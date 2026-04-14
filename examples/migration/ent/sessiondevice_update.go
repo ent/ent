@@ -203,7 +203,7 @@ func (_u *SessionDeviceUpdate) sqlSave(ctx context.Context) (_node int, err erro
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(sessiondevice.Table, sessiondevice.Columns, sqlgraph.NewFieldSpec(sessiondevice.FieldID, field.TypeUUID))
-	if ps := _u.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.Predicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -492,7 +492,7 @@ func (_u *SessionDeviceUpdateOne) sqlSave(ctx context.Context) (_node *SessionDe
 			}
 		}
 	}
-	if ps := _u.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.Predicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

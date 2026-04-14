@@ -56,7 +56,7 @@ func (_d *GoodsDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (_d *GoodsDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(goods.Label)
-	for _, p := range _d.mutation.predicates {
+	for _, p := range _d.mutation.Predicates() {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

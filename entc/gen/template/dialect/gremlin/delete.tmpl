@@ -24,7 +24,7 @@ func ({{ $receiver}} *{{ $builder }}) gremlinExec(ctx context.Context) (int, err
 
 func ({{ $receiver }} *{{ $builder }}) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel({{ $.Package }}.Label)
-	for _, p := range {{ $mutation }}.predicates {
+	for _, p := range {{ $mutation }}.Predicates() {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

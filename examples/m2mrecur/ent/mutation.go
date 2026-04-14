@@ -13,8 +13,6 @@ import (
 	"sync"
 
 	"entgo.io/ent"
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/examples/m2mrecur/ent/predicate"
 	"entgo.io/ent/examples/m2mrecur/ent/user"
 )
 
@@ -32,23 +30,11 @@ const (
 
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
+	user.Mutation
 	config
-	op               Op
-	typ              string
-	id               *int
-	age              *int
-	addage           *int
-	name             *string
-	clearedFields    map[string]struct{}
-	followers        map[int]struct{}
-	removedfollowers map[int]struct{}
-	clearedfollowers bool
-	following        map[int]struct{}
-	removedfollowing map[int]struct{}
-	clearedfollowing bool
-	done             bool
-	oldValue         func(context.Context) (*User, error)
-	predicates       []predicate.User
+	id       *int
+	done     bool
+	oldValue func(context.Context) (*User, error)
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -59,15 +45,22 @@ type userOption func(*UserMutation)
 // newUserMutation creates new mutation for the User entity.
 func newUserMutation(c config, op Op, opts ...userOption) *UserMutation {
 	m := &UserMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeUser,
-		clearedFields: make(map[string]struct{}),
+		Mutation: *user.NewMutation(op),
+		config:   c,
 	}
 	for _, opt := range opts {
 		opt(m)
 	}
 	return m
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *UserMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
 }
 
 // withUserID sets the ID field of the mutation.
@@ -121,57 +114,33 @@ func (m UserMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *UserMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
 // IDs queries the database and returns the entity ids that match the mutation's predicate.
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
 func (m *UserMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
+	case m.Op().Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
 			return []int{id}, nil
 		}
 		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().User.Query().Where(m.predicates...).IDs(ctx)
+	case m.Op().Is(OpUpdate | OpDelete):
+		return m.Client().User.Query().Where(m.Predicates()...).IDs(ctx)
 	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.Op())
 	}
-}
-
-// SetAge sets the "age" field.
-func (m *UserMutation) SetAge(i int) {
-	m.age = &i
-	m.addage = nil
-}
-
-// Age returns the value of the "age" field in the mutation.
-func (m *UserMutation) Age() (r int, exists bool) {
-	v := m.age
-	if v == nil {
-		return
-	}
-	return *v, true
 }
 
 // OldAge returns the old "age" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldAge(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
+	if !m.Op().Is(OpUpdateOne) {
 		return v, errors.New("OldAge is only allowed on UpdateOne operations")
 	}
-	if m.id == nil || m.oldValue == nil {
+	if _, exists := m.ID(); !exists || m.oldValue == nil {
 		return v, errors.New("OldAge requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
@@ -181,52 +150,14 @@ func (m *UserMutation) OldAge(ctx context.Context) (v int, err error) {
 	return oldValue.Age, nil
 }
 
-// AddAge adds i to the "age" field.
-func (m *UserMutation) AddAge(i int) {
-	if m.addage != nil {
-		*m.addage += i
-	} else {
-		m.addage = &i
-	}
-}
-
-// AddedAge returns the value that was added to the "age" field in this mutation.
-func (m *UserMutation) AddedAge() (r int, exists bool) {
-	v := m.addage
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetAge resets all changes to the "age" field.
-func (m *UserMutation) ResetAge() {
-	m.age = nil
-	m.addage = nil
-}
-
-// SetName sets the "name" field.
-func (m *UserMutation) SetName(s string) {
-	m.name = &s
-}
-
-// Name returns the value of the "name" field in the mutation.
-func (m *UserMutation) Name() (r string, exists bool) {
-	v := m.name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // OldName returns the old "name" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldName(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
+	if !m.Op().Is(OpUpdateOne) {
 		return v, errors.New("OldName is only allowed on UpdateOne operations")
 	}
-	if m.id == nil || m.oldValue == nil {
+	if _, exists := m.ID(); !exists || m.oldValue == nil {
 		return v, errors.New("OldName requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
@@ -234,176 +165,6 @@ func (m *UserMutation) OldName(ctx context.Context) (v string, err error) {
 		return v, fmt.Errorf("querying old value for OldName: %w", err)
 	}
 	return oldValue.Name, nil
-}
-
-// ResetName resets all changes to the "name" field.
-func (m *UserMutation) ResetName() {
-	m.name = nil
-}
-
-// AddFollowerIDs adds the "followers" edge to the User entity by ids.
-func (m *UserMutation) AddFollowerIDs(ids ...int) {
-	if m.followers == nil {
-		m.followers = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.followers[ids[i]] = struct{}{}
-	}
-}
-
-// ClearFollowers clears the "followers" edge to the User entity.
-func (m *UserMutation) ClearFollowers() {
-	m.clearedfollowers = true
-}
-
-// FollowersCleared reports if the "followers" edge to the User entity was cleared.
-func (m *UserMutation) FollowersCleared() bool {
-	return m.clearedfollowers
-}
-
-// RemoveFollowerIDs removes the "followers" edge to the User entity by IDs.
-func (m *UserMutation) RemoveFollowerIDs(ids ...int) {
-	if m.removedfollowers == nil {
-		m.removedfollowers = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.followers, ids[i])
-		m.removedfollowers[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedFollowers returns the removed IDs of the "followers" edge to the User entity.
-func (m *UserMutation) RemovedFollowersIDs() (ids []int) {
-	for id := range m.removedfollowers {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// FollowersIDs returns the "followers" edge IDs in the mutation.
-func (m *UserMutation) FollowersIDs() (ids []int) {
-	for id := range m.followers {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetFollowers resets all changes to the "followers" edge.
-func (m *UserMutation) ResetFollowers() {
-	m.followers = nil
-	m.clearedfollowers = false
-	m.removedfollowers = nil
-}
-
-// AddFollowingIDs adds the "following" edge to the User entity by ids.
-func (m *UserMutation) AddFollowingIDs(ids ...int) {
-	if m.following == nil {
-		m.following = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.following[ids[i]] = struct{}{}
-	}
-}
-
-// ClearFollowing clears the "following" edge to the User entity.
-func (m *UserMutation) ClearFollowing() {
-	m.clearedfollowing = true
-}
-
-// FollowingCleared reports if the "following" edge to the User entity was cleared.
-func (m *UserMutation) FollowingCleared() bool {
-	return m.clearedfollowing
-}
-
-// RemoveFollowingIDs removes the "following" edge to the User entity by IDs.
-func (m *UserMutation) RemoveFollowingIDs(ids ...int) {
-	if m.removedfollowing == nil {
-		m.removedfollowing = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.following, ids[i])
-		m.removedfollowing[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedFollowing returns the removed IDs of the "following" edge to the User entity.
-func (m *UserMutation) RemovedFollowingIDs() (ids []int) {
-	for id := range m.removedfollowing {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// FollowingIDs returns the "following" edge IDs in the mutation.
-func (m *UserMutation) FollowingIDs() (ids []int) {
-	for id := range m.following {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetFollowing resets all changes to the "following" edge.
-func (m *UserMutation) ResetFollowing() {
-	m.following = nil
-	m.clearedfollowing = false
-	m.removedfollowing = nil
-}
-
-// Where appends a list predicates to the UserMutation builder.
-func (m *UserMutation) Where(ps ...predicate.User) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the UserMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *UserMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.User, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *UserMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *UserMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (User).
-func (m *UserMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 2)
-	if m.age != nil {
-		fields = append(fields, user.FieldAge)
-	}
-	if m.name != nil {
-		fields = append(fields, user.FieldName)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *UserMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case user.FieldAge:
-		return m.Age()
-	case user.FieldName:
-		return m.Name()
-	}
-	return nil, false
 }
 
 // OldField returns the old value of the field from the database. An error is
@@ -417,207 +178,4 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldName(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *UserMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case user.FieldAge:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAge(v)
-		return nil
-	case user.FieldName:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetName(v)
-		return nil
-	}
-	return fmt.Errorf("unknown User field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *UserMutation) AddedFields() []string {
-	var fields []string
-	if m.addage != nil {
-		fields = append(fields, user.FieldAge)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case user.FieldAge:
-		return m.AddedAge()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *UserMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case user.FieldAge:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddAge(v)
-		return nil
-	}
-	return fmt.Errorf("unknown User numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *UserMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *UserMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *UserMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown User nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *UserMutation) ResetField(name string) error {
-	switch name {
-	case user.FieldAge:
-		m.ResetAge()
-		return nil
-	case user.FieldName:
-		m.ResetName()
-		return nil
-	}
-	return fmt.Errorf("unknown User field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.followers != nil {
-		edges = append(edges, user.EdgeFollowers)
-	}
-	if m.following != nil {
-		edges = append(edges, user.EdgeFollowing)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *UserMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case user.EdgeFollowers:
-		ids := make([]ent.Value, 0, len(m.followers))
-		for id := range m.followers {
-			ids = append(ids, id)
-		}
-		return ids
-	case user.EdgeFollowing:
-		ids := make([]ent.Value, 0, len(m.following))
-		for id := range m.following {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedfollowers != nil {
-		edges = append(edges, user.EdgeFollowers)
-	}
-	if m.removedfollowing != nil {
-		edges = append(edges, user.EdgeFollowing)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *UserMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case user.EdgeFollowers:
-		ids := make([]ent.Value, 0, len(m.removedfollowers))
-		for id := range m.removedfollowers {
-			ids = append(ids, id)
-		}
-		return ids
-	case user.EdgeFollowing:
-		ids := make([]ent.Value, 0, len(m.removedfollowing))
-		for id := range m.removedfollowing {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedfollowers {
-		edges = append(edges, user.EdgeFollowers)
-	}
-	if m.clearedfollowing {
-		edges = append(edges, user.EdgeFollowing)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *UserMutation) EdgeCleared(name string) bool {
-	switch name {
-	case user.EdgeFollowers:
-		return m.clearedfollowers
-	case user.EdgeFollowing:
-		return m.clearedfollowing
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *UserMutation) ClearEdge(name string) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown User unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *UserMutation) ResetEdge(name string) error {
-	switch name {
-	case user.EdgeFollowers:
-		m.ResetFollowers()
-		return nil
-	case user.EdgeFollowing:
-		m.ResetFollowing()
-		return nil
-	}
-	return fmt.Errorf("unknown User edge %s", name)
 }

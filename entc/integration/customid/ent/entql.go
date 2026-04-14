@@ -629,7 +629,7 @@ func (_q *AccountQuery) Filter() *AccountFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *AccountMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the AccountMutation builder.
@@ -688,7 +688,7 @@ func (_q *BlobQuery) Filter() *BlobFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *BlobMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the BlobMutation builder.
@@ -780,7 +780,7 @@ func (_q *BlobLinkQuery) Filter() *BlobLinkFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *BlobLinkMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the BlobLinkMutation builder.
@@ -858,7 +858,7 @@ func (_q *CarQuery) Filter() *CarFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *CarMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the CarMutation builder.
@@ -927,7 +927,7 @@ func (_q *DeviceQuery) Filter() *DeviceFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *DeviceMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the DeviceMutation builder.
@@ -995,7 +995,7 @@ func (_q *DocQuery) Filter() *DocFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *DocMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the DocMutation builder.
@@ -1082,7 +1082,7 @@ func (_q *GroupQuery) Filter() *GroupFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *GroupMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the GroupMutation builder.
@@ -1136,7 +1136,7 @@ func (_q *IntSIDQuery) Filter() *IntSIDFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *IntSIDMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the IntSIDMutation builder.
@@ -1204,7 +1204,7 @@ func (_q *LinkQuery) Filter() *LinkFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *LinkMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the LinkMutation builder.
@@ -1249,7 +1249,7 @@ func (_q *MixinIDQuery) Filter() *MixinIDFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *MixinIDMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the MixinIDMutation builder.
@@ -1299,7 +1299,7 @@ func (_q *NoteQuery) Filter() *NoteFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *NoteMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the NoteMutation builder.
@@ -1372,7 +1372,7 @@ func (_q *OtherQuery) Filter() *OtherFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *OtherMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the OtherMutation builder.
@@ -1412,7 +1412,7 @@ func (_q *PetQuery) Filter() *PetFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *PetMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the PetMutation builder.
@@ -1508,7 +1508,7 @@ func (_q *RevisionQuery) Filter() *RevisionFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *RevisionMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the RevisionMutation builder.
@@ -1548,7 +1548,7 @@ func (_q *SessionQuery) Filter() *SessionFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *SessionMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the SessionMutation builder.
@@ -1602,7 +1602,7 @@ func (_q *TokenQuery) Filter() *TokenFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *TokenMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the TokenMutation builder.
@@ -1661,7 +1661,7 @@ func (_q *UserQuery) Filter() *UserFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *UserMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the UserMutation builder.
@@ -1757,7 +1757,7 @@ func (_q *ValueScanQuery) Filter() *ValueScanFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *ValueScanMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the ValueScanMutation builder.

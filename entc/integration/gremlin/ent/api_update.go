@@ -77,7 +77,7 @@ func (_u *APIUpdate) gremlinSave(ctx context.Context) (int, error) {
 
 func (_u *APIUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(api.Label)
-	for _, p := range _u.mutation.predicates {
+	for _, p := range _u.mutation.Predicates() {
 		p(v)
 	}
 	var (

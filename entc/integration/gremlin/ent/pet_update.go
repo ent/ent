@@ -246,7 +246,7 @@ func (_u *PetUpdate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 1)
 	v := g.V().HasLabel(pet.Label)
-	for _, p := range _u.mutation.predicates {
+	for _, p := range _u.mutation.Predicates() {
 		p(v)
 	}
 	var (

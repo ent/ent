@@ -355,7 +355,7 @@ func (c *CarClient) DeleteOne(_m *Car) *CarDeleteOne {
 func (c *CarClient) DeleteOneID(id uuid.UUID) *CarDeleteOne {
 	builder := c.Delete().Where(car.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &CarDeleteOne{builder}
 }
 
@@ -504,7 +504,7 @@ func (c *CardClient) DeleteOne(_m *Card) *CardDeleteOne {
 func (c *CardClient) DeleteOneID(id int) *CardDeleteOne {
 	builder := c.Delete().Where(card.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &CardDeleteOne{builder}
 }
 
@@ -653,7 +653,7 @@ func (c *InfoClient) DeleteOne(_m *Info) *InfoDeleteOne {
 func (c *InfoClient) DeleteOneID(id int) *InfoDeleteOne {
 	builder := c.Delete().Where(info.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &InfoDeleteOne{builder}
 }
 
@@ -802,7 +802,7 @@ func (c *MetadataClient) DeleteOne(_m *Metadata) *MetadataDeleteOne {
 func (c *MetadataClient) DeleteOneID(id int) *MetadataDeleteOne {
 	builder := c.Delete().Where(metadata.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &MetadataDeleteOne{builder}
 }
 
@@ -983,7 +983,7 @@ func (c *NodeClient) DeleteOne(_m *Node) *NodeDeleteOne {
 func (c *NodeClient) DeleteOneID(id int) *NodeDeleteOne {
 	builder := c.Delete().Where(node.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &NodeDeleteOne{builder}
 }
 
@@ -1148,7 +1148,7 @@ func (c *PetClient) DeleteOne(_m *Pet) *PetDeleteOne {
 func (c *PetClient) DeleteOneID(id int) *PetDeleteOne {
 	builder := c.Delete().Where(pet.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &PetDeleteOne{builder}
 }
 
@@ -1297,7 +1297,7 @@ func (c *PostClient) DeleteOne(_m *Post) *PostDeleteOne {
 func (c *PostClient) DeleteOneID(id int) *PostDeleteOne {
 	builder := c.Delete().Where(post.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &PostDeleteOne{builder}
 }
 
@@ -1446,7 +1446,7 @@ func (c *RentalClient) DeleteOne(_m *Rental) *RentalDeleteOne {
 func (c *RentalClient) DeleteOneID(id int) *RentalDeleteOne {
 	builder := c.Delete().Where(rental.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &RentalDeleteOne{builder}
 }
 
@@ -1611,7 +1611,7 @@ func (c *UserClient) DeleteOne(_m *User) *UserDeleteOne {
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &UserDeleteOne{builder}
 }
 

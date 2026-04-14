@@ -135,7 +135,7 @@ func (_q *GroupQuery) Filter() *GroupFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *GroupMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the GroupMutation builder.
@@ -213,7 +213,7 @@ func (_q *TenantQuery) Filter() *TenantFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *TenantMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the TenantMutation builder.
@@ -258,7 +258,7 @@ func (_q *UserQuery) Filter() *UserFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *UserMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the UserMutation builder.
