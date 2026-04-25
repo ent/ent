@@ -92,6 +92,16 @@ var (
 				"meta/additional/*",
 			},
 		},
+		{
+			Name:   "mutation",
+			Cond:   notView,
+			Format: func(t *Type) string {
+				return fmt.Sprintf("%s/mutation.go", t.PackageDir())
+			},
+			ExtendPatterns: []string{
+				"mutation/fields/*",
+			},
+		},
 	}
 	// GraphTemplates holds the templates applied on the graph.
 	GraphTemplates = []GraphTemplate{
@@ -112,7 +122,7 @@ var (
 			Format: "tx.go",
 		},
 		{
-			Name:   "mutation",
+			Name:   "mutation_graph",
 			Format: "mutation.go",
 		},
 		{

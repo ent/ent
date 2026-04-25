@@ -1459,7 +1459,7 @@ func (_u *FieldTypeUpdate) gremlinSave(ctx context.Context) (int, error) {
 
 func (_u *FieldTypeUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(fieldtype.Label)
-	for _, p := range _u.mutation.predicates {
+	for _, p := range _u.mutation.Predicates() {
 		p(v)
 	}
 	var (

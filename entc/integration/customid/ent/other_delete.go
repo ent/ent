@@ -45,7 +45,7 @@ func (_d *OtherDelete) ExecX(ctx context.Context) int {
 
 func (_d *OtherDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(other.Table, sqlgraph.NewFieldSpec(other.FieldID, field.TypeOther))
-	if ps := _d.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.Predicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

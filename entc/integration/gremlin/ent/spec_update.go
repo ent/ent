@@ -114,7 +114,7 @@ func (_u *SpecUpdate) gremlinSave(ctx context.Context) (int, error) {
 
 func (_u *SpecUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(spec.Label)
-	for _, p := range _u.mutation.predicates {
+	for _, p := range _u.mutation.Predicates() {
 		p(v)
 	}
 	var (

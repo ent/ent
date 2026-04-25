@@ -56,7 +56,7 @@ func (_d *SpecDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (_d *SpecDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(spec.Label)
-	for _, p := range _d.mutation.predicates {
+	for _, p := range _d.mutation.Predicates() {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

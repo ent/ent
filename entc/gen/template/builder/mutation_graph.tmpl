@@ -1,0 +1,211 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
+{{ define "mutation_graph" }}
+
+{{ $pkg := base $.Config.Package }}
+{{ template "header" $ }}
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"sync"
+
+	{{- range $n := $.Nodes }}
+		{{ $n.PackageAlias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
+		{{- template "import/types" $n }}
+	{{- end }}
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
+)
+
+const (
+	// Operation types.
+	OpCreate	= ent.OpCreate
+	OpDelete	= ent.OpDelete
+	OpDeleteOne	= ent.OpDeleteOne
+	OpUpdate	= ent.OpUpdate
+	OpUpdateOne	= ent.OpUpdateOne
+
+	// Node types.
+	{{- range $n := $.Nodes }}
+		{{ $n.TypeName }} = "{{ $n.Name }}"
+	{{- end }}
+)
+
+{{ range $n := $.MutableNodes }}
+
+{{ $mutation := $n.MutationName }}
+{{ $baseMutation := print $n.Package ".Mutation" }}
+// {{ $mutation }} represents an operation that mutates the {{ $n.Name }} nodes in the graph.
+type {{ $mutation }} struct {
+	{{ $baseMutation }}
+	config
+	{{- with $n.HasOneFieldID }}
+		{{ $n.ID.BuilderField }} *{{ $n.ID.Type }}
+	{{- end }}
+	done bool
+	oldValue func(context.Context) (*{{ $n.Name }}, error)
+}
+
+var _ ent.Mutation = (*{{ $mutation }})(nil)
+
+{{ $mutationOption := print (camel $n.Name) "Option" }}
+// {{ $mutationOption }} allows management of the mutation configuration using functional options.
+type {{ $mutationOption }} func(*{{ $mutation }})
+
+// new{{ $mutation }} creates new mutation for the {{ $n.Name }} entity.
+func new{{ $mutation }}(c config, op Op, opts ...{{ $mutationOption }}) *{{ $mutation }} {
+	m := &{{ $mutation }}{
+		Mutation: *{{ $n.Package }}.NewMutation(op),
+		config: c,
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+{{ with $n.HasOneFieldID }}
+	{{ if $n.ID.UserDefined }}
+		// SetID sets the value of the id field. Note that this
+		// operation is only accepted on creation of {{ $n.Name }} entities.
+		func (m *{{ $mutation }}) SetID(id {{ $n.ID.Type }}) {
+			m.{{ $n.ID.BuilderField }} = &id
+		}
+	{{ end }}
+
+	// ID returns the ID value in the mutation. Note that the ID is only available
+	// if it was provided to the builder or after it was returned from the database.
+	func (m *{{ $mutation }}) ID() (id {{ $n.ID.Type }}, exists bool) {
+		if m.{{ $n.ID.BuilderField }} == nil {
+			return
+		}
+		return *m.{{ $n.ID.BuilderField }}, true
+	}
+
+	{{ $opt := print "with" $n.Name "ID" }}
+	// {{ $opt }} sets the ID field of the mutation.
+	func {{ $opt }}(id {{ $n.ID.Type }}) {{ $mutationOption }} {
+		return func(m *{{ $mutation }}) {
+			var (
+				err error
+				once sync.Once
+				value *{{ $n.Name }}
+			)
+			m.oldValue = func(ctx context.Context) (*{{ $n.Name }}, error) {
+				once.Do(func() {
+					if m.done {
+						err = errors.New("querying old values post mutation is not allowed")
+					} else {
+						value, err = m.Client().{{ $n.Name }}.Get(ctx, id)
+					}
+				})
+				return value, err
+			}
+			m.{{ $n.ID.BuilderField }} = &id
+		}
+	}
+
+	{{ $opt = print "with" $n.Name }}
+	// {{ $opt }} sets the old {{ $n.Name }} of the mutation.
+	func {{ $opt }}(node *{{ $n.Name }}) {{ $mutationOption }} {
+		return func(m *{{ $mutation }}) {
+			m.oldValue = func(context.Context) (*{{ $n.Name }}, error) {
+				return node, nil
+			}
+			m.{{ $n.ID.BuilderField }} = &node.ID
+		}
+	}
+{{ end }}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m {{ $mutation }}) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m {{ $mutation }}) Tx() (*Tx, error) {
+	if 	_, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("{{ $pkg }}: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+{{ with $n.HasOneFieldID }}
+	// IDs queries the database and returns the entity ids that match the mutation's predicate.
+	// That means, if the mutation is applied within a transaction with an isolation level such
+	// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+	// or updated by the mutation.
+	func (m *{{ $mutation }}) IDs(ctx context.Context) ([]{{ $n.ID.Type }}, error) {
+		switch {
+		case m.Op().Is(OpUpdateOne | OpDeleteOne):
+			id, exists := m.ID()
+			if exists {
+				return []{{ $n.ID.Type }}{id}, nil
+			}
+			fallthrough
+		case m.Op().Is(OpUpdate | OpDelete):
+			return m.Client().{{ $n.Name }}.Query().Where(m.Predicates()...).IDs(ctx)
+		default:
+			return nil, fmt.Errorf("IDs is not allowed on %s operations", m.Op())
+		}
+	}
+{{ end }}
+
+{{ range $f := $n.Fields }}
+	{{ if $n.HasOneFieldID }}
+		{{ $const := print $n.Package "." $f.Constant }}
+		// {{ $f.MutationGetOld }} returns the old "{{ $f.Name }}" field's value of the {{ $n.Name }} entity.
+		// If the {{ $n.Name }} object wasn't provided to the builder, the object is fetched from the database.
+		// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+		func (m *{{ $mutation }}) {{ $f.MutationGetOld }}(ctx context.Context) (v {{ if $f.NillableValue }}*{{ end }}{{ $f.Type }}, err error) {
+			if !m.Op().Is(OpUpdateOne) {
+				return v, errors.New("{{ $f.MutationGetOld }} is only allowed on UpdateOne operations")
+			}
+			if _, exists := m.ID(); !exists || m.oldValue == nil {
+				return v, errors.New("{{ $f.MutationGetOld }} requires an ID field in the mutation")
+			}
+			oldValue, err := m.oldValue(ctx)
+			if err != nil {
+				return v, fmt.Errorf("querying old value for {{ $f.MutationGetOld }}: %w", err)
+			}
+			return oldValue.{{ $f.StructField }}, nil
+		}
+	{{ end }}
+{{ end }}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *{{ $mutation }}) OldField(ctx context.Context, name string) (ent.Value, error) {
+	{{- if $n.HasCompositeID }}
+		return nil, errors.New("edge schema {{ $n.Name }} does not support getting old values")
+	{{- else }}
+		{{- with $n.Fields }}
+			switch name {
+			{{- range $f := . }}
+				{{- $const := print $n.Package "." $f.Constant }}
+				case {{ $const }}:
+					return m.{{ $f.MutationGetOld }}(ctx)
+			{{- end }}
+			}
+		{{- end }}
+		return nil, fmt.Errorf("unknown {{ $n.Name }} field %s", name)
+	{{- end }}
+}
+{{ end }}
+
+{{ end }}

@@ -434,7 +434,7 @@ func (c *AccountClient) DeleteOne(_m *Account) *AccountDeleteOne {
 func (c *AccountClient) DeleteOneID(id sid.ID) *AccountDeleteOne {
 	builder := c.Delete().Where(account.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &AccountDeleteOne{builder}
 }
 
@@ -583,7 +583,7 @@ func (c *BlobClient) DeleteOne(_m *Blob) *BlobDeleteOne {
 func (c *BlobClient) DeleteOneID(id uuid.UUID) *BlobDeleteOne {
 	builder := c.Delete().Where(blob.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &BlobDeleteOne{builder}
 }
 
@@ -740,8 +740,8 @@ func (c *BlobLinkClient) Update() *BlobLinkUpdate {
 // UpdateOne returns an update builder for the given entity.
 func (c *BlobLinkClient) UpdateOne(_m *BlobLink) *BlobLinkUpdateOne {
 	mutation := newBlobLinkMutation(c.config, OpUpdateOne)
-	mutation.blob = &_m.BlobID
-	mutation.link = &_m.LinkID
+	mutation.SetBlobID(_m.BlobID)
+	mutation.SetLinkID(_m.LinkID)
 	return &BlobLinkUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -880,7 +880,7 @@ func (c *CarClient) DeleteOne(_m *Car) *CarDeleteOne {
 func (c *CarClient) DeleteOneID(id int) *CarDeleteOne {
 	builder := c.Delete().Where(car.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &CarDeleteOne{builder}
 }
 
@@ -1029,7 +1029,7 @@ func (c *DeviceClient) DeleteOne(_m *Device) *DeviceDeleteOne {
 func (c *DeviceClient) DeleteOneID(id schema.ID) *DeviceDeleteOne {
 	builder := c.Delete().Where(device.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &DeviceDeleteOne{builder}
 }
 
@@ -1194,7 +1194,7 @@ func (c *DocClient) DeleteOne(_m *Doc) *DocDeleteOne {
 func (c *DocClient) DeleteOneID(id schema.DocID) *DocDeleteOne {
 	builder := c.Delete().Where(doc.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &DocDeleteOne{builder}
 }
 
@@ -1375,7 +1375,7 @@ func (c *GroupClient) DeleteOne(_m *Group) *GroupDeleteOne {
 func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 	builder := c.Delete().Where(group.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &GroupDeleteOne{builder}
 }
 
@@ -1524,7 +1524,7 @@ func (c *IntSIDClient) DeleteOne(_m *IntSID) *IntSIDDeleteOne {
 func (c *IntSIDClient) DeleteOneID(id sid.ID) *IntSIDDeleteOne {
 	builder := c.Delete().Where(intsid.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &IntSIDDeleteOne{builder}
 }
 
@@ -1689,7 +1689,7 @@ func (c *LinkClient) DeleteOne(_m *Link) *LinkDeleteOne {
 func (c *LinkClient) DeleteOneID(id uuidc.UUIDC) *LinkDeleteOne {
 	builder := c.Delete().Where(link.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &LinkDeleteOne{builder}
 }
 
@@ -1822,7 +1822,7 @@ func (c *MixinIDClient) DeleteOne(_m *MixinID) *MixinIDDeleteOne {
 func (c *MixinIDClient) DeleteOneID(id uuid.UUID) *MixinIDDeleteOne {
 	builder := c.Delete().Where(mixinid.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &MixinIDDeleteOne{builder}
 }
 
@@ -1955,7 +1955,7 @@ func (c *NoteClient) DeleteOne(_m *Note) *NoteDeleteOne {
 func (c *NoteClient) DeleteOneID(id schema.NoteID) *NoteDeleteOne {
 	builder := c.Delete().Where(note.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &NoteDeleteOne{builder}
 }
 
@@ -2120,7 +2120,7 @@ func (c *OtherClient) DeleteOne(_m *Other) *OtherDeleteOne {
 func (c *OtherClient) DeleteOneID(id sid.ID) *OtherDeleteOne {
 	builder := c.Delete().Where(other.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &OtherDeleteOne{builder}
 }
 
@@ -2253,7 +2253,7 @@ func (c *PetClient) DeleteOne(_m *Pet) *PetDeleteOne {
 func (c *PetClient) DeleteOneID(id string) *PetDeleteOne {
 	builder := c.Delete().Where(pet.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &PetDeleteOne{builder}
 }
 
@@ -2450,7 +2450,7 @@ func (c *RevisionClient) DeleteOne(_m *Revision) *RevisionDeleteOne {
 func (c *RevisionClient) DeleteOneID(id string) *RevisionDeleteOne {
 	builder := c.Delete().Where(revision.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &RevisionDeleteOne{builder}
 }
 
@@ -2583,7 +2583,7 @@ func (c *SessionClient) DeleteOne(_m *Session) *SessionDeleteOne {
 func (c *SessionClient) DeleteOneID(id schema.ID) *SessionDeleteOne {
 	builder := c.Delete().Where(session.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &SessionDeleteOne{builder}
 }
 
@@ -2732,7 +2732,7 @@ func (c *TokenClient) DeleteOne(_m *Token) *TokenDeleteOne {
 func (c *TokenClient) DeleteOneID(id sid.ID) *TokenDeleteOne {
 	builder := c.Delete().Where(token.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &TokenDeleteOne{builder}
 }
 
@@ -2881,7 +2881,7 @@ func (c *UserClient) DeleteOne(_m *User) *UserDeleteOne {
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &UserDeleteOne{builder}
 }
 
@@ -3078,7 +3078,7 @@ func (c *ValueScanClient) DeleteOne(_m *ValueScan) *ValueScanDeleteOne {
 func (c *ValueScanClient) DeleteOneID(id schema.ValueScanID) *ValueScanDeleteOne {
 	builder := c.Delete().Where(valuescan.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &ValueScanDeleteOne{builder}
 }
 

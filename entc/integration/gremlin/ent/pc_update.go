@@ -77,7 +77,7 @@ func (_u *PCUpdate) gremlinSave(ctx context.Context) (int, error) {
 
 func (_u *PCUpdate) gremlin() *dsl.Traversal {
 	v := g.V().HasLabel(pc.Label)
-	for _, p := range _u.mutation.predicates {
+	for _, p := range _u.mutation.Predicates() {
 		p(v)
 	}
 	var (

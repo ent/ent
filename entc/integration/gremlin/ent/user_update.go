@@ -691,7 +691,7 @@ func (_u *UserUpdate) gremlin() *dsl.Traversal {
 	}
 	constraints := make([]*constraint, 0, 8)
 	v := g.V().HasLabel(user.Label)
-	for _, p := range _u.mutation.predicates {
+	for _, p := range _u.mutation.Predicates() {
 		p(v)
 	}
 	var (

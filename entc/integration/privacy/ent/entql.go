@@ -160,7 +160,7 @@ func (_q *TaskQuery) Filter() *TaskFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *TaskMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the TaskMutation builder.
@@ -248,7 +248,7 @@ func (_q *TeamQuery) Filter() *TeamFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *TeamMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the TeamMutation builder.
@@ -321,7 +321,7 @@ func (_q *UserQuery) Filter() *UserFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *UserMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the UserMutation builder.

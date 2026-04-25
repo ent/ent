@@ -47,11 +47,21 @@ import (
 {{/* A template for importing fields with custom types */}}
 {{ define "import/types" -}}
 	{{- $seen := dict }}
+	{{- $selfPkg := "" }}{{ if ne $.Config.Package $.Package }}{{ $selfPkg = print $.Config.Package "/" $.PackageDir }}{{ end }}
 	{{- $fields := $.Fields }}{{ if $.HasOneFieldID }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}{{ end }}
 	{{- range $f := $fields }}
 		{{- $pkg := $f.Type.PkgPath }}
-		{{- if and $pkg (not (hasImport (base $pkg))) (not (hasKey $seen $pkg)) }}
+		{{- if and $pkg (not (hasImport (base $pkg))) (not (hasKey $seen $pkg)) (ne $pkg $selfPkg) }}
 			{{- $name := $f.Type.PkgName }}
+			{{ if ne $name (base $pkg) }}{{ $name }} {{ end}}"{{ $pkg }}"
+			{{- $seen = set $seen $pkg true }}
+		{{- end }}
+	{{- end }}
+	{{- /* Import packages for edge target ID types referenced in mutation fields. */}}
+	{{- range $e := $.EdgesWithID }}
+		{{- $pkg := $e.Type.ID.Type.PkgPath }}
+		{{- if and $pkg (not (hasImport (base $pkg))) (not (hasKey $seen $pkg)) (ne $pkg $selfPkg) }}
+			{{- $name := $e.Type.ID.Type.PkgName }}
 			{{ if ne $name (base $pkg) }}{{ $name }} {{ end}}"{{ $pkg }}"
 			{{- $seen = set $seen $pkg true }}
 		{{- end }}

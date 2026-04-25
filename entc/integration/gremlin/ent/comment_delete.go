@@ -56,7 +56,7 @@ func (_d *CommentDelete) gremlinExec(ctx context.Context) (int, error) {
 
 func (_d *CommentDelete) gremlin() *dsl.Traversal {
 	t := g.V().HasLabel(comment.Label)
-	for _, p := range _d.mutation.predicates {
+	for _, p := range _d.mutation.Predicates() {
 		p(t)
 	}
 	return t.SideEffect(__.Drop()).Count()

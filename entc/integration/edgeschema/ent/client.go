@@ -423,7 +423,7 @@ func (c *AttachedFileClient) DeleteOne(_m *AttachedFile) *AttachedFileDeleteOne 
 func (c *AttachedFileClient) DeleteOneID(id int) *AttachedFileDeleteOne {
 	builder := c.Delete().Where(attachedfile.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &AttachedFileDeleteOne{builder}
 }
 
@@ -588,7 +588,7 @@ func (c *FileClient) DeleteOne(_m *File) *FileDeleteOne {
 func (c *FileClient) DeleteOneID(id int) *FileDeleteOne {
 	builder := c.Delete().Where(file.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &FileDeleteOne{builder}
 }
 
@@ -737,7 +737,7 @@ func (c *FriendshipClient) DeleteOne(_m *Friendship) *FriendshipDeleteOne {
 func (c *FriendshipClient) DeleteOneID(id int) *FriendshipDeleteOne {
 	builder := c.Delete().Where(friendship.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &FriendshipDeleteOne{builder}
 }
 
@@ -902,7 +902,7 @@ func (c *GroupClient) DeleteOne(_m *Group) *GroupDeleteOne {
 func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
 	builder := c.Delete().Where(group.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &GroupDeleteOne{builder}
 }
 
@@ -1099,7 +1099,7 @@ func (c *GroupTagClient) DeleteOne(_m *GroupTag) *GroupTagDeleteOne {
 func (c *GroupTagClient) DeleteOneID(id int) *GroupTagDeleteOne {
 	builder := c.Delete().Where(grouptag.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &GroupTagDeleteOne{builder}
 }
 
@@ -1264,7 +1264,7 @@ func (c *ProcessClient) DeleteOne(_m *Process) *ProcessDeleteOne {
 func (c *ProcessClient) DeleteOneID(id int) *ProcessDeleteOne {
 	builder := c.Delete().Where(process.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &ProcessDeleteOne{builder}
 }
 
@@ -1405,8 +1405,8 @@ func (c *RelationshipClient) Update() *RelationshipUpdate {
 // UpdateOne returns an update builder for the given entity.
 func (c *RelationshipClient) UpdateOne(_m *Relationship) *RelationshipUpdateOne {
 	mutation := newRelationshipMutation(c.config, OpUpdateOne)
-	mutation.user = &_m.UserID
-	mutation.relative = &_m.RelativeID
+	mutation.SetUserID(_m.UserID)
+	mutation.SetRelativeID(_m.RelativeID)
 	return &RelationshipUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -1553,7 +1553,7 @@ func (c *RelationshipInfoClient) DeleteOne(_m *RelationshipInfo) *RelationshipIn
 func (c *RelationshipInfoClient) DeleteOneID(id int) *RelationshipInfoDeleteOne {
 	builder := c.Delete().Where(relationshipinfo.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &RelationshipInfoDeleteOne{builder}
 }
 
@@ -1686,7 +1686,7 @@ func (c *RoleClient) DeleteOne(_m *Role) *RoleDeleteOne {
 func (c *RoleClient) DeleteOneID(id int) *RoleDeleteOne {
 	builder := c.Delete().Where(role.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &RoleDeleteOne{builder}
 }
 
@@ -1827,8 +1827,8 @@ func (c *RoleUserClient) Update() *RoleUserUpdate {
 // UpdateOne returns an update builder for the given entity.
 func (c *RoleUserClient) UpdateOne(_m *RoleUser) *RoleUserUpdateOne {
 	mutation := newRoleUserMutation(c.config, OpUpdateOne)
-	mutation.user = &_m.UserID
-	mutation.role = &_m.RoleID
+	mutation.SetUserID(_m.UserID)
+	mutation.SetRoleID(_m.RoleID)
 	return &RoleUserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -1967,7 +1967,7 @@ func (c *TagClient) DeleteOne(_m *Tag) *TagDeleteOne {
 func (c *TagClient) DeleteOneID(id int) *TagDeleteOne {
 	builder := c.Delete().Where(tag.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &TagDeleteOne{builder}
 }
 
@@ -2164,7 +2164,7 @@ func (c *TweetClient) DeleteOne(_m *Tweet) *TweetDeleteOne {
 func (c *TweetClient) DeleteOneID(id int) *TweetDeleteOne {
 	builder := c.Delete().Where(tweet.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &TweetDeleteOne{builder}
 }
 
@@ -2369,8 +2369,8 @@ func (c *TweetLikeClient) Update() *TweetLikeUpdate {
 // UpdateOne returns an update builder for the given entity.
 func (c *TweetLikeClient) UpdateOne(_m *TweetLike) *TweetLikeUpdateOne {
 	mutation := newTweetLikeMutation(c.config, OpUpdateOne)
-	mutation.user = &_m.UserID
-	mutation.tweet = &_m.TweetID
+	mutation.SetUserID(_m.UserID)
+	mutation.SetTweetID(_m.TweetID)
 	return &TweetLikeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -2510,7 +2510,7 @@ func (c *TweetTagClient) DeleteOne(_m *TweetTag) *TweetTagDeleteOne {
 func (c *TweetTagClient) DeleteOneID(id uuid.UUID) *TweetTagDeleteOne {
 	builder := c.Delete().Where(tweettag.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &TweetTagDeleteOne{builder}
 }
 
@@ -2675,7 +2675,7 @@ func (c *UserClient) DeleteOne(_m *User) *UserDeleteOne {
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &UserDeleteOne{builder}
 }
 
@@ -3001,7 +3001,7 @@ func (c *UserGroupClient) DeleteOne(_m *UserGroup) *UserGroupDeleteOne {
 func (c *UserGroupClient) DeleteOneID(id int) *UserGroupDeleteOne {
 	builder := c.Delete().Where(usergroup.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &UserGroupDeleteOne{builder}
 }
 
@@ -3166,7 +3166,7 @@ func (c *UserTweetClient) DeleteOne(_m *UserTweet) *UserTweetDeleteOne {
 func (c *UserTweetClient) DeleteOneID(id int) *UserTweetDeleteOne {
 	builder := c.Delete().Where(usertweet.ID(id))
 	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
+	builder.mutation.SetOp(OpDeleteOne)
 	return &UserTweetDeleteOne{builder}
 }
 

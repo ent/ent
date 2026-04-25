@@ -152,7 +152,7 @@ func (_u *AttachedFileUpdate) sqlSave(ctx context.Context) (_node int, err error
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(attachedfile.Table, attachedfile.Columns, sqlgraph.NewFieldSpec(attachedfile.FieldID, field.TypeInt))
-	if ps := _u.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.Predicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
@@ -388,7 +388,7 @@ func (_u *AttachedFileUpdateOne) sqlSave(ctx context.Context) (_node *AttachedFi
 			}
 		}
 	}
-	if ps := _u.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.Predicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)

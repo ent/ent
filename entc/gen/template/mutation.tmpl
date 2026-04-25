@@ -1,0 +1,598 @@
+{{/*
+Copyright 2019-present Facebook Inc. All rights reserved.
+This source code is licensed under the Apache 2.0 license found
+in the LICENSE file in the root directory of this source tree.
+*/}}
+
+{{/* gotype: entgo.io/ent/entc/gen.Type */}}
+
+{{ define "mutation" }}
+
+{{- with extend $ "Package" $.Package -}}
+	{{ template "header" . }}
+{{ end }}
+
+{{ template "import" $ }}
+
+{{/* localType strips the current package prefix from type strings, so that
+     types defined in this package (e.g. enums) are referenced without the
+     package qualifier. */}}
+{{ $pkgPrefix := print $.Package "." }}
+
+// Mutation represents an operation that mutates the {{ $.Name }} nodes in the graph.
+type Mutation struct {
+	op ent.Op
+	typ string
+	{{- range $f := $.MutationFields }}
+		{{ $f.BuilderField }} *{{ replace $f.Type.String $pkgPrefix "" }}
+		{{- if $f.SupportsMutationAdd }}
+			add{{ $f.BuilderField }} *{{ replace (print $f.SignedType) $pkgPrefix "" }}
+		{{- end }}
+		{{- if $f.SupportsMutationAppend }}
+			append{{ $f.BuilderField }} {{ replace $f.Type.String $pkgPrefix "" }}
+		{{- end }}
+	{{- end }}
+	clearedFields map[string]struct{}
+	{{- range $e := $.EdgesWithID }}
+		{{- if $e.Unique }}
+			{{ $e.BuilderField }} *{{ $e.Type.ID.Type }}
+		{{- else }}
+			{{ $e.BuilderField }} map[{{ $e.Type.ID.Type }}]struct{}
+			removed{{ $e.BuilderField }} map[{{ $e.Type.ID.Type }}]struct{}
+		{{- end }}
+		cleared{{ $e.BuilderField }} bool
+	{{- end }}
+	predicates []predicate.{{ $.Name }}
+	{{- /* Additional fields can be added by user templates. */}}
+	{{- with $tmpls := matchTemplate "mutation/fields/*" }}
+		{{- range $tmpl := $tmpls }}
+			{{- xtemplate $tmpl $ }}
+		{{- end }}
+	{{- end }}
+}
+
+// NewMutation creates a new Mutation for the {{ $.Name }} entity.
+func NewMutation(op ent.Op) *Mutation {
+	return &Mutation{
+		op: op,
+		typ: "{{ $.Name }}",
+		clearedFields: make(map[string]struct{}),
+	}
+}
+
+// Predicates returns the list of predicates set on the mutation.
+func (m *Mutation) Predicates() []predicate.{{ $.Name }} {
+	return m.predicates
+}
+
+{{ range $f := $.Fields }}
+	{{ $const := $f.Constant }}
+	{{ $type := replace $f.Type.String $pkgPrefix "" }}
+	{{ $p := receiver $f.Type.String }}{{ if eq $p "m" }} {{ $p = "value" }} {{ end }}
+	{{ $func := $f.MutationSet }}
+	// {{ $func }} sets the "{{ $f.Name }}" field.
+	func (m *Mutation) {{ $func }}({{ $p }} {{ $type }}) {
+		m.{{ $f.BuilderField }} = &{{ $p }}
+		{{- /* Setting numeric type override previous calls to Add. */}}
+		{{- if $f.SupportsMutationAdd }}
+			m.add{{ $f.BuilderField }} = nil
+		{{- end }}
+		{{- /* Setting JSON type override previous calls to Append. */}}
+		{{- if $f.SupportsMutationAppend }}
+			m.append{{ $f.BuilderField }} = nil
+		{{- end }}
+	}
+
+	// {{ $f.MutationGet }} returns the value of the "{{ $f.Name }}" field in the mutation.
+	func (m *Mutation) {{ $f.MutationGet }}() (r {{ $type }}, exists bool) {
+		v := m.{{ $f.BuilderField }}
+		if v == nil {
+			return
+		}
+		return *v, true
+	}
+
+	{{ if $f.SupportsMutationAdd }}
+		{{ $signedType := replace (print $f.SignedType) $pkgPrefix "" }}
+		// {{ $f.MutationAdd }} adds {{ $p }} to the "{{ $f.Name }}" field.
+		func (m *Mutation) {{ $f.MutationAdd }}({{ $p }} {{ $signedType }}) {
+			{{- $structField := print "m.add" $f.BuilderField }}
+			if {{ $structField }} != nil {
+				{{ $f.MutationAddAssignExpr $structField $p }}
+			} else {
+				{{ $structField }} = &{{ $p }}
+			}
+		}
+
+		// {{ $f.MutationAdded }} returns the value that was added to the "{{ $f.Name }}" field in this mutation.
+		func (m *Mutation) {{ $f.MutationAdded }}() (r {{ $signedType }}, exists bool) {
+			v := m.add{{ $f.BuilderField }}
+			if v == nil {
+				return
+			}
+			return *v, true
+		}
+	{{ end }}
+
+	{{ if $f.SupportsMutationAppend }}
+		{{- $structField := print "m.append" $f.BuilderField }}
+		// {{ $f.MutationAppend }} adds {{ $p }} to the "{{ $f.Name }}" field.
+		func (m *Mutation) {{ $f.MutationAppend }}({{ $p }} {{ $type }}) {
+			{{ $structField }} = append({{ $structField }}, {{ $p }}...)
+		}
+
+		// {{ $f.MutationAppended }} returns the list of values that were appended to the "{{ $f.Name }}" field in this mutation.
+		func (m *Mutation) {{ $f.MutationAppended }}() ({{ $type }}, bool) {
+			if len({{ $structField }}) == 0 {
+				return nil, false
+			}
+			return {{ $structField }}, true
+		}
+	{{ end }}
+
+	{{ if $f.Optional }}
+		{{ $func := $f.MutationClear }}
+		// {{ $func }} clears the value of the "{{ $f.Name }}" field.
+		func (m *Mutation) {{ $func }}() {
+			m.{{ $f.BuilderField }} = nil
+			{{- if $f.SupportsMutationAdd }}
+				m.add{{ $f.BuilderField }} = nil
+			{{- end }}
+			{{- if $f.SupportsMutationAppend }}
+				m.append{{ $f.BuilderField }} = nil
+			{{- end }}
+			m.clearedFields[{{ $const }}] = struct{}{}
+		}
+
+		{{ $func = $f.MutationCleared }}
+		// {{ $func }} returns if the "{{ $f.Name }}" field was cleared in this mutation.
+		func (m *Mutation) {{ $func }}() bool {
+			_, ok := m.clearedFields[{{ $const }}]
+			return ok
+		}
+	{{ end }}
+
+	{{ $func = $f.MutationReset }}
+	// {{ $func }} resets all changes to the "{{ $f.Name }}" field.
+	func (m *Mutation) {{ $func }}() {
+		m.{{ $f.BuilderField }} = nil
+		{{- if $f.SupportsMutationAdd }}
+			m.add{{ $f.BuilderField }} = nil
+		{{- end }}
+		{{- if $f.SupportsMutationAppend }}
+			m.append{{ $f.BuilderField }} = nil
+		{{- end }}
+		{{- if $f.Optional }}
+			delete(m.clearedFields, {{ $const }})
+		{{- end }}
+	}
+{{ end }}
+
+
+{{ range $e := $.EdgesWithID }}
+	{{ $op := "add" }}{{ $idsFunc := $e.MutationAdd }}{{ if $e.Unique }}{{ $op = "set" }}{{ $idsFunc = $e.MutationSet }}{{ end }}
+	{{/* Check if this setter was already defined by the field-setters (e.g. edge-field with the same name). */}}
+	{{ $withSetGet := not $e.HasFieldSetter }}
+	{{ if $withSetGet }}
+		// {{ $idsFunc }} {{ $op }}s the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by id{{ if not $e.Unique }}s{{ end }}.
+		func (m *Mutation) {{ $idsFunc }}({{ if $e.Unique }}id{{ else }}ids ...{{ end }} {{ $e.Type.ID.Type }}) {
+			{{- if $e.Unique }}
+				m.{{ $e.BuilderField }} = &id
+			{{- else }}
+				if m.{{ $e.BuilderField }} == nil {
+					m.{{ $e.BuilderField }} = make(map[{{ $e.Type.ID.Type }}]struct{})
+				}
+				for i := range ids {
+					m.{{ $e.BuilderField }}[ids[i]] = struct{}{}
+				}
+			{{- end }}
+		}
+	{{ end }}
+
+	{{ $func := $e.MutationClear }}
+	// {{ $func }} clears the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity.
+	func (m *Mutation) {{ $func }}() {
+		m.cleared{{ $e.BuilderField }} = true
+		{{- if $e.Field }}
+			{{- $const := $e.Field.Constant }}
+			m.clearedFields[{{ $const }}] = struct{}{}
+		{{- end }}
+	}
+
+	{{ $func = $e.MutationCleared }}
+	// {{ $func }} reports if the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity was cleared.
+	func (m *Mutation) {{ $func }}() bool {
+		return {{ with $e.Field }}{{ if .Optional }}m.{{ .MutationCleared }}() || {{ end }}{{ end }}m.cleared{{ $e.BuilderField }}
+	}
+
+	{{ if not $e.Unique }}
+		{{ $p := lower (printf "%.1s" $e.Type.Name) }}
+		// {{ $e.MutationRemove }} removes the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity by IDs.
+		func (m *Mutation) {{ $e.MutationRemove }}(ids ...{{ $e.Type.ID.Type }}) {
+			if m.removed{{ $e.BuilderField }} == nil {
+				m.removed{{ $e.BuilderField }} = make(map[{{ $e.Type.ID.Type }}]struct{})
+			}
+			for i := range ids {
+				delete(m.{{ $e.BuilderField }}, ids[i])
+				m.removed{{ $e.BuilderField }}[ids[i]] = struct{}{}
+			}
+		}
+
+		{{ $func := print "Removed" $e.StructField }}
+		// {{ $func }} returns the removed IDs of the "{{ $e.Name }}" edge to the {{ $e.Type.Name }} entity.
+		func (m *Mutation) {{ $func }}IDs() (ids []{{ $e.Type.ID.Type }}) {
+			for id := range m.removed{{ $e.BuilderField }} {
+				ids = append(ids, id)
+			}
+			return
+		}
+	{{ else if and $e.Unique $withSetGet }}
+		// {{ $e.StructField }}ID returns the "{{ $e.Name }}" edge ID in the mutation.
+		func (m *Mutation) {{ $e.StructField }}ID() (id {{ $e.Type.ID.Type }}, exists bool) {
+			if m.{{ $e.BuilderField }} != nil {
+				return *m.{{ $e.BuilderField }}, true
+			}
+			return
+		}
+	{{ end }}
+
+	// {{ $e.StructField }}IDs returns the "{{ $e.Name }}" edge IDs in the mutation.
+	{{- if $e.Unique }}
+		// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+		// {{ $e.StructField }}ID instead. It exists only for internal usage by the builders.
+	{{- end }}
+	func (m *Mutation) {{ $e.StructField }}IDs() (ids []{{ $e.Type.ID.Type }}) {
+		{{- if $e.Unique }}
+			if id := m.{{ $e.BuilderField }}; id != nil {
+				ids = append(ids, *id)
+			}
+		{{- else }}
+			for id := range m.{{ $e.BuilderField }} {
+				ids = append(ids, id)
+			}
+		{{- end}}
+		return
+	}
+
+
+	{{ $func = $e.MutationReset }}
+	// {{ $func }} resets all changes to the "{{ $e.Name }}" edge.
+	func (m *Mutation) {{ $func }}() {
+		m.{{ $e.BuilderField }} = nil
+		m.cleared{{ $e.BuilderField }} = false
+		{{- if not $e.Unique }}
+			m.removed{{ $e.BuilderField }} = nil
+		{{- end }}
+	}
+{{ end }}
+
+
+// Where appends a list predicates to the Mutation builder.
+func (m *Mutation) Where(ps ...predicate.{{ $.Name }}) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the Mutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *Mutation) WhereP(ps ...func({{ $.Storage.Builder }})) {
+	p := make([]predicate.{{ $.Name }}, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *Mutation) Op() ent.Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *Mutation) SetOp(op ent.Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation ({{ $.Name }}).
+func (m *Mutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *Mutation) Fields() []string {
+	fields := make([]string, 0, {{ len $.Fields }})
+	{{- range $f := $.Fields }}
+		if m.{{ $f.BuilderField }} != nil {
+			fields = append(fields, {{ $f.Constant }})
+		}
+	{{- end }}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *Mutation) Field(name string) (ent.Value, bool) {
+	{{- with $.Fields }}
+		switch name {
+		{{- range $f := $.Fields }}
+			case {{ $f.Constant }}:
+				return m.{{ $f.MutationGet }}()
+		{{- end }}
+		}
+	{{- end }}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *Mutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	{{- if $.HasCompositeID }}
+		return nil, errors.New("edge schema {{ $.Name }} does not support getting old values")
+	{{- else }}
+		return nil, fmt.Errorf("unknown {{ $.Name }} field %s", name)
+	{{- end }}
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *Mutation) SetField(name string, value ent.Value) error {
+	switch name {
+	{{- range $f := $.Fields }}
+		{{- $type := replace $f.Type.String $pkgPrefix "" }}
+		case {{ $f.Constant }}:
+			v, ok := value.({{ $type }})
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field %s", value, name)
+			}
+			m.{{ $f.MutationSet }}(v)
+			return nil
+	{{- end }}
+	}
+	return fmt.Errorf("unknown {{ $.Name }} field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *Mutation) AddedFields() []string {
+	{{- if $.HasNumeric }}
+		var fields []string
+		{{- range $f := $.Fields }}
+			{{- if $f.SupportsMutationAdd }}
+				if m.add{{ $f.BuilderField }} != nil {
+					fields = append(fields, {{ $f.Constant }})
+				}
+			{{- end }}
+		{{- end }}
+		return fields
+	{{- else }}
+		return nil
+	{{- end }}
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *Mutation) AddedField(name string) (ent.Value, bool) {
+	{{- if $.HasNumeric }}
+		switch name {
+		{{- range $f := $.Fields }}
+			{{- if $f.SupportsMutationAdd }}
+				case {{ $f.Constant }}:
+					return m.Added{{ $f.StructField }}()
+			{{- end }}
+		{{- end }}
+		}
+	{{- end }}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *Mutation) AddField(name string, value ent.Value) error {
+	{{- with $.Fields }}
+		switch name {
+		{{- range $f := $.Fields }}
+			{{- if $f.SupportsMutationAdd }}
+				{{- $signedType := replace (print $f.SignedType) $pkgPrefix "" }}
+				case {{ $f.Constant }}:
+					v, ok := value.({{ $signedType }})
+					if !ok {
+						return fmt.Errorf("unexpected type %T for field %s", value, name)
+					}
+					m.Add{{ $f.StructField }}(v)
+					return nil
+			{{- end }}
+		{{- end }}
+		}
+	{{- end }}
+	return fmt.Errorf("unknown {{ $.Name }} numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *Mutation) ClearedFields() []string {
+	{{- if $.HasOptional }}
+		var fields []string
+		{{- range $f := $.Fields }}
+			{{- if $f.Optional }}
+				if m.FieldCleared({{ $f.Constant }}) {
+					fields = append(fields, {{ $f.Constant }})
+				}
+			{{- end }}
+		{{- end }}
+		return fields
+	{{- else }}
+		return nil
+	{{- end }}
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *Mutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *Mutation) ClearField(name string) error {
+	{{- if $.HasOptional }}
+		switch name {
+		{{- range $f := $.Fields }}
+			{{- if $f.Optional }}
+				case {{ $f.Constant }}:
+					m.Clear{{ $f.StructField }}()
+					return nil
+			{{- end }}
+		{{- end }}
+		}
+	{{- end }}
+	return fmt.Errorf("unknown {{ $.Name }} nullable field %s", name)
+}
+
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *Mutation) ResetField(name string) error {
+	{{- with $.Fields }}
+		switch name {
+		{{- range $f := $.Fields }}
+			case {{ $f.Constant }}:
+				m.{{ $f.MutationReset }}()
+				return nil
+		{{- end }}
+		}
+	{{- end }}
+	return fmt.Errorf("unknown {{ $.Name }} field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *Mutation) AddedEdges() []string {
+	edges := make([]string, 0, {{ len $.EdgesWithID }})
+	{{- range $e := $.EdgesWithID }}
+		if m.{{ $e.BuilderField }} != nil {
+			edges = append(edges, {{ $e.Constant }})
+		}
+	{{- end }}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *Mutation) AddedIDs(name string) []ent.Value {
+	{{- with $.EdgesWithID }}
+		switch name {
+		{{- range $e := $.EdgesWithID }}
+			case {{ $e.Constant }}:
+				{{- if $e.Unique }}
+					if id := m.{{ $e.BuilderField }}; id != nil {
+						return []ent.Value{*id}
+					}
+				{{- else }}
+					ids := make([]ent.Value, 0, len(m.{{ $e.BuilderField }}))
+					for id := range m.{{ $e.BuilderField }} {
+						ids = append(ids, id)
+					}
+					return ids
+				{{- end }}
+		{{- end }}
+		}
+	{{- end }}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *Mutation) RemovedEdges() []string {
+	edges := make([]string, 0, {{ len $.EdgesWithID }})
+	{{- range $e := $.EdgesWithID }}
+		{{- if not $e.Unique }}
+			if m.removed{{ $e.BuilderField }} != nil {
+				edges = append(edges, {{ $e.Constant }})
+			}
+		{{- end }}
+	{{- end }}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *Mutation) RemovedIDs(name string) []ent.Value {
+	{{- $edges := list }}{{ range $e := $.EdgesWithID }}{{ if not $e.Unique }}{{ $edges = append $edges $e }}{{ end }}{{ end }}
+	{{- with $edges }}
+		switch name {
+		{{- range $e := $edges }}
+			case {{ $e.Constant }}:
+				ids := make([]ent.Value, 0, len(m.removed{{ $e.BuilderField }}))
+				for id := range m.removed{{ $e.BuilderField }} {
+					ids = append(ids, id)
+				}
+				return ids
+		{{- end }}
+		}
+	{{- end }}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *Mutation) ClearedEdges() []string {
+	edges := make([]string, 0, {{ len $.EdgesWithID }})
+	{{- range $e := $.EdgesWithID }}
+		if m.cleared{{ $e.BuilderField }} {
+			edges = append(edges, {{ $e.Constant }})
+		}
+	{{- end }}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *Mutation) EdgeCleared(name string) bool {
+	{{- with $.EdgesWithID }}
+		switch name {
+		{{- range $e := $.EdgesWithID }}
+			case {{ $e.Constant }}:
+				return m.cleared{{ $e.BuilderField }}
+		{{- end }}
+		}
+	{{- end }}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *Mutation) ClearEdge(name string) error {
+	{{- with $.EdgesWithID }}
+		switch name {
+		{{- range $e := $.EdgesWithID }}
+			{{- if $e.Unique }}
+				case {{ $e.Constant }}:
+					m.{{ $e.MutationClear }}()
+					return nil
+			{{- end }}
+		{{- end }}
+		}
+	{{- end }}
+	return fmt.Errorf("unknown {{ $.Name }} unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *Mutation) ResetEdge(name string) error {
+	{{- with $.EdgesWithID }}
+		switch name {
+		{{- range $e := $.EdgesWithID }}
+			case {{ $e.Constant }}:
+				m.{{ $e.MutationReset }}()
+				return nil
+		{{- end }}
+		}
+	{{- end }}
+	return fmt.Errorf("unknown {{ $.Name }} edge %s", name)
+}
+
+{{ end }}

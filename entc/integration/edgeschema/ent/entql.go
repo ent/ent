@@ -930,7 +930,7 @@ func (_q *AttachedFileQuery) Filter() *AttachedFileFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *AttachedFileMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the AttachedFileMutation builder.
@@ -1013,7 +1013,7 @@ func (_q *FileQuery) Filter() *FileFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *FileMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the FileMutation builder.
@@ -1072,7 +1072,7 @@ func (_q *FriendshipQuery) Filter() *FriendshipFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *FriendshipMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the FriendshipMutation builder.
@@ -1160,7 +1160,7 @@ func (_q *GroupQuery) Filter() *GroupFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *GroupMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the GroupMutation builder.
@@ -1261,7 +1261,7 @@ func (_q *GroupTagQuery) Filter() *GroupTagFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *GroupTagMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the GroupTagMutation builder.
@@ -1339,7 +1339,7 @@ func (_q *ProcessQuery) Filter() *ProcessFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *ProcessMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the ProcessMutation builder.
@@ -1407,7 +1407,7 @@ func (_q *RelationshipQuery) Filter() *RelationshipFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *RelationshipMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the RelationshipMutation builder.
@@ -1504,7 +1504,7 @@ func (_q *RelationshipInfoQuery) Filter() *RelationshipInfoFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *RelationshipInfoMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the RelationshipInfoMutation builder.
@@ -1549,7 +1549,7 @@ func (_q *RoleQuery) Filter() *RoleFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *RoleMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the RoleMutation builder.
@@ -1627,7 +1627,7 @@ func (_q *RoleUserQuery) Filter() *RoleUserFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *RoleUserMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the RoleUserMutation builder.
@@ -1705,7 +1705,7 @@ func (_q *TagQuery) Filter() *TagFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *TagMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the TagMutation builder.
@@ -1806,7 +1806,7 @@ func (_q *TweetQuery) Filter() *TweetFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *TweetMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the TweetMutation builder.
@@ -1935,7 +1935,7 @@ func (_q *TweetLikeQuery) Filter() *TweetLikeFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *TweetLikeMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the TweetLikeMutation builder.
@@ -2013,7 +2013,7 @@ func (_q *TweetTagQuery) Filter() *TweetTagFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *TweetTagMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the TweetTagMutation builder.
@@ -2096,7 +2096,7 @@ func (_q *UserQuery) Filter() *UserFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *UserMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the UserMutation builder.
@@ -2309,7 +2309,7 @@ func (_q *UserGroupQuery) Filter() *UserGroupFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *UserGroupMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the UserGroupMutation builder.
@@ -2392,7 +2392,7 @@ func (_q *UserTweetQuery) Filter() *UserTweetFilter {
 
 // addPredicate implements the predicateAdder interface.
 func (m *UserTweetMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
+	m.Where(pred)
 }
 
 // Filter returns an entql.Where implementation to apply filters on the UserTweetMutation builder.
