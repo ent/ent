@@ -364,7 +364,10 @@ func (_q *GroupQuery) Clone() *GroupQuery {
 // WithUsers tells the query-builder to eager-load the nodes that are connected to
 // the "users" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withUsers
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -375,7 +378,10 @@ func (_q *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
 // WithTags tells the query-builder to eager-load the nodes that are connected to
 // the "tags" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithTags(opts ...func(*TagQuery)) *GroupQuery {
-	query := (&TagClient{config: _q.config}).Query()
+	query := _q.withTags
+	if query == nil {
+		query = (&TagClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -386,7 +392,10 @@ func (_q *GroupQuery) WithTags(opts ...func(*TagQuery)) *GroupQuery {
 // WithJoinedUsers tells the query-builder to eager-load the nodes that are connected to
 // the "joined_users" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithJoinedUsers(opts ...func(*UserGroupQuery)) *GroupQuery {
-	query := (&UserGroupClient{config: _q.config}).Query()
+	query := _q.withJoinedUsers
+	if query == nil {
+		query = (&UserGroupClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -397,7 +406,10 @@ func (_q *GroupQuery) WithJoinedUsers(opts ...func(*UserGroupQuery)) *GroupQuery
 // WithGroupTags tells the query-builder to eager-load the nodes that are connected to
 // the "group_tags" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithGroupTags(opts ...func(*GroupTagQuery)) *GroupQuery {
-	query := (&GroupTagClient{config: _q.config}).Query()
+	query := _q.withGroupTags
+	if query == nil {
+		query = (&GroupTagClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
