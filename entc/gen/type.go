@@ -1633,8 +1633,8 @@ func (f Field) PK() *schema.Column {
 		Comment:   f.sqlComment(),
 		Increment: f.incremental(f.Type.Type.Integer()),
 	}
-	// If the PK was defined by the user, and it is UUID or string.
-	if f.UserDefined && !f.Type.Numeric() {
+	// If the PK was defined by the user
+	if f.UserDefined {
 		c.Increment = false
 		c.Type = f.Type.Type
 		c.Unique = f.Unique
