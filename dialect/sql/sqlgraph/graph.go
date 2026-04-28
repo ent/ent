@@ -550,8 +550,10 @@ func OrderByNeighborTerms(q *sql.Selector, s *Step, opts ...sql.OrderTerm) {
 	case s.ToEdgeOwner():
 		toT := build.Table(s.Edge.Table).Schema(s.Edge.Schema)
 		join = build.Select(toT.C(s.Edge.Columns[0])).
-			From(toT).
-			GroupBy(toT.C(s.Edge.Columns[0]))
+			From(toT)
+		if s.Edge.Rel != O2O {
+			join = join.GroupBy(toT.C(s.Edge.Columns[0]))
+		}
 		selectTerms(join, opts)
 		q.LeftJoin(join).
 			On(q.C(s.From.Column), join.C(s.Edge.Columns[0]))
@@ -1191,8 +1193,8 @@ func (u *updater) nodes(ctx context.Context, drv dialect.Driver) (int, error) {
 		multiple   = hasExternalEdges(addEdges, clearEdges)
 		update     = u.builder.Update(u.Node.Table).Schema(u.Node.Schema)
 		selector   = u.builder.Select().
-				From(u.builder.Table(u.Node.Table).Schema(u.Node.Schema)).
-				WithContext(ctx)
+			From(u.builder.Table(u.Node.Table).Schema(u.Node.Schema)).
+			WithContext(ctx)
 	)
 	switch {
 	// In case it is not an edge schema, the id holds the PK of
