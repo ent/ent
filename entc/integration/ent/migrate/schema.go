@@ -90,6 +90,22 @@ var (
 		Columns:    CommentsColumns,
 		PrimaryKey: []*schema.Column{CommentsColumns[0]},
 	}
+	// DocumentsColumns holds the columns for the "documents" table.
+	DocumentsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "attachment", Type: field.TypeBytes},
+		{Name: "content_key", Type: field.TypeString},
+		{Name: "thumbnail_key", Type: field.TypeString},
+		{Name: "attachment_key", Type: field.TypeString},
+		{Name: "metadata_key", Type: field.TypeString, Nullable: true},
+	}
+	// DocumentsTable holds the schema information for the "documents" table.
+	DocumentsTable = &schema.Table{
+		Name:       "documents",
+		Columns:    DocumentsColumns,
+		PrimaryKey: []*schema.Column{DocumentsColumns[0]},
+	}
 	// ExValueScansColumns holds the columns for the "ex_value_scans" table.
 	ExValueScansColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -603,6 +619,7 @@ var (
 		BuildersTable,
 		CardsTable,
 		CommentsTable,
+		DocumentsTable,
 		ExValueScansTable,
 		FieldTypesTable,
 		FilesTable,
@@ -638,6 +655,9 @@ func init() {
 	}
 	CommentsTable.Annotation = &entsql.Annotation{
 		IncrementStart: func(i int) *int { return &i }(25769803776),
+	}
+	DocumentsTable.Annotation = &entsql.Annotation{
+		IncrementStart: func(i int) *int { return &i }(90194313216),
 	}
 	ExValueScansTable.Annotation = &entsql.Annotation{
 		IncrementStart: func(i int) *int { return &i }(30064771072),

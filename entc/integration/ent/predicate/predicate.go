@@ -22,6 +22,9 @@ type Card func(*sql.Selector)
 // Comment is the predicate function for comment builders.
 type Comment func(*sql.Selector)
 
+// Document is the predicate function for document builders.
+type Document func(*sql.Selector)
+
 // ExValueScan is the predicate function for exvaluescan builders.
 type ExValueScan func(*sql.Selector)
 

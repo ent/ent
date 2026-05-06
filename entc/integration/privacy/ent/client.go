@@ -16,8 +16,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/entc/integration/privacy/ent/migrate"
 
-	"net/http"
-
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -65,8 +63,7 @@ type (
 		// hooks to execute on mutations.
 		hooks *hooks
 		// interceptors to execute on queries.
-		inters     *inters
-		HTTPClient *http.Client
+		inters *inters
 	}
 	// Option function to configure the client.
 	Option func(*config)
@@ -107,13 +104,6 @@ func Log(fn func(...any)) Option {
 func Driver(driver dialect.Driver) Option {
 	return func(c *config) {
 		c.driver = driver
-	}
-}
-
-// HTTPClient configures the HTTPClient.
-func HTTPClient(v *http.Client) Option {
-	return func(c *config) {
-		c.HTTPClient = v
 	}
 }
 

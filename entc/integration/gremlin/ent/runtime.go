@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/schema"
 	"entgo.io/ent/entc/integration/ent/schema/task"
 	"entgo.io/ent/entc/integration/gremlin/ent/card"
+	"entgo.io/ent/entc/integration/gremlin/ent/document"
 	"entgo.io/ent/entc/integration/gremlin/ent/exvaluescan"
 	"entgo.io/ent/entc/integration/gremlin/ent/fieldtype"
 	"entgo.io/ent/entc/integration/gremlin/ent/file"
@@ -63,6 +64,12 @@ func init() {
 	cardDescName := cardFields[2].Descriptor()
 	// card.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	card.NameValidator = cardDescName.Validators[0].(func(string) error)
+	documentFields := schema.Document{}.Fields()
+	_ = documentFields
+	// documentBlobDescContent is the schema descriptor for content blob field.
+	documentBlobDescContent := documentFields[1].Descriptor()
+	// document.NewContentKey generates the blob storage key for the content field.
+	document.NewContentKey = documentBlobDescContent.BlobKey
 	exvaluescanFields := schema.ExValueScan{}.Fields()
 	_ = exvaluescanFields
 	// exvaluescanDescBinary is the schema descriptor for binary field.
