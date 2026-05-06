@@ -53,7 +53,9 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Type: "{{ $n.Name }}",
 			Fields: map[string]*sqlgraph.FieldSpec{
 				{{- range $f := $n.Fields }}
+					{{- if not $f.IsBlob }}
 					{{ $n.Package }}.{{ $f.Constant }}: {Type: field.{{ $f.Type.ConstName }}, Column: {{ $n.Package }}.{{ $f.Constant }}},
+					{{- end }}
 				{{- end }}
 			},
 		}
@@ -140,6 +142,7 @@ type predicateAdder interface {
 	{{- end }}
 
 	{{ range $f := $n.Fields }}
+	{{- if or $f.IsBlobNoColumn $f.IsBlobLazy }}{{ continue }}{{ end }}
 		{{ $type := $f.Type.Type.String }}
 		{{ $iface := print (pascal $type) "P" }}
 		{{- if $f.IsTime }}{{ $iface = "TimeP" }}

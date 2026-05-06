@@ -19,14 +19,19 @@ func ({{ $receiver }} *{{ $.Name }}) FromResponse(res *gremlin.Response) error {
 	var {{ $scan }} struct {
 		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
 		{{ range $f := $.Fields }}
+			{{- if $f.IsBlob }}{{ continue }}{{ end }}
 			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.NillableValue }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
 		{{ end }}
+		{{- range $bk := $.BlobKeys }}
+			{{ $bk.StructField }} *string `json:"{{ $bk.Field.StorageKey }},omitempty"`
+		{{- end }}
 	}
 	if err := vmap.Decode(&{{ $scan }}); err != nil {
 		return err
 	}
 	{{ $receiver }}.ID = {{ $scan }}.ID
 	{{- range $i, $f := $.Fields }}
+		{{- if $f.IsBlob }}{{ continue }}{{ end }}
 		{{- if and $f.IsTime (not $f.HasGoType) }}
 			{{- if $f.Nillable }}
 				v{{ $i }} := time.Unix(0, {{ $scan }}.{{ $f.StructField }})
@@ -37,6 +42,9 @@ func ({{ $receiver }} *{{ $.Name }}) FromResponse(res *gremlin.Response) error {
 		{{- else }}
 			{{ $receiver }}.{{ $f.StructField }} = {{ $scan }}.{{ $f.StructField }}
 		{{- end }}
+	{{- end }}
+	{{- range $bk := $.BlobKeys }}
+		{{ $receiver }}.{{ $bk.StructField }} = {{ $scan }}.{{ $bk.StructField }}
 	{{- end }}
 	return nil
 }
@@ -56,8 +64,12 @@ func ({{ $receiver }} *{{ $slice }}) FromResponse(res *gremlin.Response) error {
 	var {{ $scan }} []struct {
 		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
 		{{ range $f := $.Fields }}
+			{{- if $f.IsBlob }}{{ continue }}{{ end }}
 			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.NillableValue }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
 		{{ end }}
+		{{- range $bk := $.BlobKeys }}
+			{{ $bk.StructField }} *string `json:"{{ $bk.Field.StorageKey }},omitempty"`
+		{{- end }}
 	}
 	if err := vmap.Decode(&{{ $scan }}); err != nil {
 		return err
@@ -65,6 +77,7 @@ func ({{ $receiver }} *{{ $slice }}) FromResponse(res *gremlin.Response) error {
 	for _, v := range {{ $scan }} {
 		node := &{{ $.Name }}{ID: v.ID}
 		{{- range $i, $f := $.Fields }}
+			{{- if $f.IsBlob }}{{ continue }}{{ end }}
 			{{- if and $f.IsTime (not $f.HasGoType) }}
 				{{- if $f.Nillable }}
 					v{{ $i }} := time.Unix(0, v.{{ $f.StructField }})
@@ -75,6 +88,9 @@ func ({{ $receiver }} *{{ $slice }}) FromResponse(res *gremlin.Response) error {
 			{{- else }}
 				node.{{ $f.StructField }} = v.{{ $f.StructField }}
 			{{- end }}
+		{{- end }}
+		{{- range $bk := $.BlobKeys }}
+			node.{{ $bk.StructField }} = v.{{ $bk.StructField }}
 		{{- end }}
 		*{{ $receiver }} = append(*{{ $receiver }}, node)
 	}

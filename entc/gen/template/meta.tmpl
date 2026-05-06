@@ -50,7 +50,7 @@ const (
 {{ $hasDefault := false }}{{ range $f := $fields }}{{ if and $f.Default (not $f.IsEnum) }}{{ $hasDefault = true }}{{ end }}{{ end }}
 
 {{/* Generate global variables for hooks, validators and policy checkers */}}
-{{ if or $hasDefault $.HasUpdateDefault $.HasValidators $.NumHooks $.NumPolicy $.NumInterceptors $.HasValueScanner }}
+{{ if or $hasDefault $.HasUpdateDefault $.HasValidators $.NumHooks $.NumPolicy $.NumInterceptors $.HasValueScanner $.HasBlobFields }}
 	{{- $numHooks := $.NumHooks }}
 	{{- if $.NumPolicy }}
 		{{- $numHooks = add $numHooks 1 }}
@@ -75,6 +75,7 @@ const (
 		{{- end }}
 		{{- $fields := $.Fields }}{{ if $.HasOneFieldID }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}{{ end }}
 		{{- range $f := $fields }}
+			{{- if $f.IsBlobLazy }}{{ continue }}{{ end }}
 			{{- if and $f.Default (not $f.IsEnum) }}
 				{{- $default := $f.DefaultName }}
 				// {{ $default }} holds the default value on creation for the "{{ $f.Name }}" field.
@@ -93,6 +94,12 @@ const (
 				{{- end }}
 				// {{ $name }} is a validator for the "{{ $f.Name }}" field. It is called by the builders before save.
 				{{ $name }} {{ printf "func (%s) error" $type }}
+			{{- end }}
+		{{- end }}
+		{{- range $f := $.BlobFields }}
+			{{- if $f.HasBlobKey }}
+				// {{ $f.BlobKeyName }} generates the blob storage key for the "{{ $f.Name }}" field.
+				{{ $f.BlobKeyName }} func(context.Context) (string, error)
 			{{- end }}
 		{{- end }}
 		{{- if $.HasValueScanner }}

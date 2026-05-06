@@ -33,6 +33,7 @@ type {{ $.Name }} struct {
 		ID {{ $.ID.Type }} {{ with $.Annotations.Fields.StructTag.id }}`{{ . }}`{{ else }}`{{ $.ID.StructTag }}`{{ end }}
 	{{- end }}
 	{{- range $f := $.Fields }}
+		{{- if $f.IsBlobLazy }}{{ continue }}{{ end }}
 		{{- $tag := $f.StructTag }}{{ with $tags := $.Annotations.Fields.StructTag }}{{ with index $tags $f.Name }}{{ $tag = . }}{{ end }}{{ end }}
 		{{- template "model/fieldcomment" $f }}
 		{{ $f.StructField }} {{ if $f.NillableValue }}*{{ end }}{{ $f.Type }} {{ if not $f.Sensitive }}`{{ $tag }}`{{ else }}{{ template "model/omittags" $ }}{{ end }}
@@ -100,6 +101,36 @@ type {{ $edgesType }} struct {
 	}
 {{ end }}
 
+{{- range $f := $.BlobFields }}
+	// {{ $f.StructField }}Reader opens a reader for the "{{ $f.Name }}" field from blob storage.
+	// The caller must close the returned reader when done.
+	func ({{ $receiver }} *{{ $.Name }}) {{ $f.StructField }}Reader(ctx context.Context) (io.ReadCloser, error) {
+		if {{ $receiver }}.{{ $f.Name }}_key == nil || *{{ $receiver }}.{{ $f.Name }}_key == "" {
+			return nil, fmt.Errorf("{{ $pkg }}: {{ $.Name }}.{{ $f.Name }}_key is nil or empty")
+		}
+		b, err := {{ $receiver }}.blobOpeners.{{ $.Name }}(ctx, {{ $.Package }}.{{ $f.Constant }})
+		if err != nil {
+			return nil, err
+		}
+		return ent.BlobReader(ctx, b, *{{ $receiver }}.{{ $f.Name }}_key)
+	}
+
+	// {{ $f.StructField }}Writer opens a writer for the "{{ $f.Name }}" field in blob storage.
+	// The caller must close the returned writer when done. Closing the writer
+	// also releases the underlying bucket resources.
+	// Writing via this method does not go through the mutation pipeline.
+	func ({{ $receiver }} *{{ $.Name }}) {{ $f.StructField }}Writer(ctx context.Context) (io.WriteCloser, error) {
+		if {{ $receiver }}.{{ $f.Name }}_key == nil || *{{ $receiver }}.{{ $f.Name }}_key == "" {
+			return nil, fmt.Errorf("{{ $pkg }}: {{ $.Name }}.{{ $f.Name }}_key is nil or empty")
+		}
+		b, err := {{ $receiver }}.blobOpeners.{{ $.Name }}(ctx, {{ $.Package }}.{{ $f.Constant }})
+		if err != nil {
+			return nil, err
+		}
+		return ent.BlobWriter(ctx, b, *{{ $receiver }}.{{ $f.Name }}_key)
+	}
+{{- end }}
+
 {{- if not $.IsView }}
 // Update returns a builder for updating this {{ $.Name }}.
 // Note that you need to call {{ $.Name }}.Unwrap() before calling this method if this {{ $.Name }}
@@ -146,6 +177,7 @@ type {{ $slice }} []*{{ $.Name }}
 			builder.WriteString(fmt.Sprintf("id=%v{{ if $.Fields }}, {{ end }}", {{ $receiver }}.ID))
 		{{- end }}
 		{{- range $i, $f := $.Fields }}
+			{{- if $f.IsBlobLazy }}{{ continue }}{{ end }}
 			{{- if ne $i 0 }}
 				builder.WriteString(", ")
 			{{- end }}
