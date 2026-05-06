@@ -386,11 +386,20 @@ func TestField_Blob(t *testing.T) {
 	require.Equal("title", titleField.Name)
 	require.False(titleField.IsBlob())
 
-	// MutationFields should exclude blob-stored fields.
+	// MutationFields should exclude only lazy blob fields.
 	mutFields := typ.MutationFields()
 	for _, mf := range mutFields {
-		require.False(mf.IsBlob(), "blob-stored field %s should not be in MutationFields", mf.Name)
+		require.False(mf.IsBlobLazy(), "lazy blob field %s should not be in MutationFields", mf.Name)
 	}
+	// Non-lazy blob fields (content, thumbnail) should be in MutationFields
+	// because their mutation struct fields are used by the blob hook.
+	var blobInMut int
+	for _, mf := range mutFields {
+		if mf.IsBlob() {
+			blobInMut++
+		}
+	}
+	require.Equal(2, blobInMut)
 
 	// Type without blob fields.
 	typ2, err := NewType(&Config{Package: "entc/gen"}, &load.Schema{
@@ -419,6 +428,9 @@ func TestField_BlobScanType(t *testing.T) {
 	require.NoError(err)
 	f := typ.Fields[0]
 	require.True(f.IsBlob())
-	// Blob-stored fields should not appear in MutationFields.
-	require.Empty(typ.MutationFields())
+	require.True(f.IsBlobNoColumn())
+	require.False(f.IsBlobLazy())
+	// Non-lazy blob fields appear in MutationFields (for blob hook usage),
+	// but are excluded from SQL columns by IsBlobNoColumn.
+	require.NotEmpty(typ.MutationFields())
 }
