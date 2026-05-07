@@ -31,9 +31,11 @@ type BlobDeleteSpec struct {
 // and returns a cleanup function that deletes the blobs from storage.
 // The cleanup function should be called only after the SQL rows have been
 // successfully deleted to ensure keys are collected while rows still exist.
-func BlobDeletes(ctx context.Context, drv dialect.Driver, spec *BlobDeleteSpec) (func() error, error) {
+// It accepts its own context so callers can pass a valid context at execution
+// time (e.g., the commit context) rather than relying on the original query context.
+func BlobDeletes(ctx context.Context, drv dialect.Driver, spec *BlobDeleteSpec) (func(context.Context) error, error) {
 	if len(spec.Fields) == 0 {
-		return func() error { return nil }, nil
+		return func(context.Context) error { return nil }, nil
 	}
 	columns := make([]string, len(spec.Fields))
 	for i, f := range spec.Fields {
@@ -71,7 +73,7 @@ func BlobDeletes(ctx context.Context, drv dialect.Driver, spec *BlobDeleteSpec) 
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
-	return func() error {
+	return func(ctx context.Context) error {
 		if len(keys) == 0 {
 			return nil
 		}

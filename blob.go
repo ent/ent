@@ -14,6 +14,11 @@ import (
 // Blob defines the interface for blob storage operations.
 // Implementations should return [io/fs.ErrNotExist] (or an error wrapping it)
 // from NewReader when the requested key does not exist.
+//
+// Blob data is written to external storage before the database row is created.
+// If the row insertion fails (e.g. constraint violation, connectivity issue),
+// the already-written blob is not automatically cleaned up. This is by design—
+// users should implement their own garbage collection for orphaned blobs if needed.
 type Blob interface {
 	// NewReader opens a reader for the given key.
 	NewReader(ctx context.Context, key string) (io.ReadCloser, error)

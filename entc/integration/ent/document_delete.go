@@ -81,12 +81,12 @@ func (_d *DocumentDelete) sqlExec(ctx context.Context) (int, error) {
 					if err := n.Commit(ctx, t); err != nil {
 						return err
 					}
-					return _blobCleanup()
+					return _blobCleanup(ctx)
 				})
 			})
 			tx.mu.Unlock()
 		} else {
-			err = _blobCleanup()
+			err = _blobCleanup(ctx)
 		}
 	}
 	_d.mutation.done = true
