@@ -1907,7 +1907,7 @@ func (c *creator) insertLastID(ctx context.Context, insert *sql.InsertBuilder) e
 		return err
 	}
 	// MySQL does not support the "RETURNING" clause.
-	if insert.Dialect() != dialect.MySQL {
+	if insert.Dialect() != dialect.MySQL && insert.Dialect() != dialect.LibSQL {
 		rows := &sql.Rows{}
 		if err := c.tx.Query(ctx, query, args, rows); err != nil {
 			return err
