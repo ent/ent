@@ -124,6 +124,11 @@ func (_m *Info) Unwrap() *Info {
 	return _m
 }
 
+// TableName returns the table name of the Info in the database.
+func (i *Info) TableName() string {
+	return info.Table
+}
+
 // String implements the fmt.Stringer.
 func (_m *Info) String() string {
 	var builder strings.Builder

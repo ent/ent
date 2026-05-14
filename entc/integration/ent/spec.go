@@ -109,6 +109,11 @@ func (_m *Spec) Unwrap() *Spec {
 	return _m
 }
 
+// TableName returns the table name of the Spec in the database.
+func (s *Spec) TableName() string {
+	return spec.Table
+}
+
 // String implements the fmt.Stringer.
 func (_m *Spec) String() string {
 	var builder strings.Builder
