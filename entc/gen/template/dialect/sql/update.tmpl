@@ -36,7 +36,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			return _node, err
 		}
 	{{- end }}
-	_spec := sqlgraph.NewUpdateSpec({{ $.Package }}.Table, {{ $.Package }}.Columns,
+	_spec := sqlgraph.NewUpdateSpec({{ $.Package }}.GetTable({{ $receiver }}.newTable), {{ $.Package }}.Columns,
 		{{- if $.HasOneFieldID -}}
 			sqlgraph.NewFieldSpec({{ $.Package }}.{{ $.ID.Constant }}, field.{{ $.ID.Type.ConstName }})
 		{{- else -}}
