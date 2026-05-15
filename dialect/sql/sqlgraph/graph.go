@@ -1070,6 +1070,7 @@ func (q *query) selector(ctx context.Context) (*sql.Selector, error) {
 		WithContext(ctx)
 	if q.From != nil {
 		selector = q.From
+		selector.WithContext(ctx)
 	}
 	selector.Select(selector.Columns(q.Node.Columns...)...)
 	if order := q.Order; order != nil {
