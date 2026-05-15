@@ -164,6 +164,13 @@ func TestMySQL(t *testing.T) {
 	require.Len(t, sib, 2)
 	require.True(t, slices.ContainsFunc(sib, func(u *ent.User) bool { return u.Name == el.Name }))
 	require.True(t, slices.ContainsFunc(sib, func(u *ent.User) bool { return u.Name == jo.Name }))
+
+	// Cross-schema edge predicate: QueryGroups().Where(HasUsersWith(...))
+	// must qualify group_users with db2, since the connection defaults to db1.
+	got := a8m.QueryGroups().
+		Where(group.HasUsersWith(user.ID(a8m.ID))).
+		CountX(ctx)
+	require.Equal(t, 1, got) // a8m was removed from GitHub above; only GitLab remains
 }
 
 func TestVersionedMigration(t *testing.T) {
