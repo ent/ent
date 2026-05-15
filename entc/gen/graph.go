@@ -669,6 +669,10 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 		}
 	}
 	for _, n := range g.Nodes {
+		// Skip edge processing for schemas marked with Skip annotation.
+		if ant := n.EntSQL(); ant != nil && ant.Skip {
+			continue
+		}
 		// Foreign key and its reference, or a join table.
 		for _, e := range n.Edges {
 			if e.IsInverse() {
@@ -679,6 +683,10 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 				// The "owner" is the table that owns the relation (we set
 				// the foreign-key on) and "ref" is the referenced table.
 				owner, ref := tables[e.Rel.Table], tables[n.Table()]
+				// Skip if either table is nil (e.g., skipped from migration).
+				if owner == nil || ref == nil {
+					continue
+				}
 				column := fkColumn(e, owner, ref.PrimaryKey[0])
 				// If it's not a circular reference (self-referencing table),
 				// and the inverse edge is required, make it non-nullable.
@@ -695,6 +703,10 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 				})
 			case M2O:
 				ref, owner := tables[e.Type.Table()], tables[e.Rel.Table]
+				// Skip if either table is nil (e.g., skipped from migration).
+				if ref == nil || owner == nil {
+					continue
+				}
 				column := fkColumn(e, owner, ref.PrimaryKey[0])
 				// If it's not a circular reference (self-referencing table),
 				// and the edge is non-optional (required), make it non-nullable.
@@ -715,6 +727,10 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 					continue
 				}
 				t1, t2 := tables[n.Table()], tables[e.Type.Table()]
+				// Skip if either table is nil (e.g., skipped from migration).
+				if t1 == nil || t2 == nil {
+					continue
+				}
 				c1 := &schema.Column{Name: e.Rel.Columns[0], Type: field.TypeInt, SchemaType: n.ID.def.SchemaType}
 				if ref := n.ID; ref.UserDefined {
 					c1.Type = ref.Type.Type
