@@ -1453,3 +1453,16 @@ func TestBlobDualWritePayloadOptionalNil(t *testing.T) {
 	queried := client.Document.GetX(ctx, doc.ID)
 	require.Nil(t, queried.Payload)
 }
+
+func TestBlobCreateBulkEmpty(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+
+	// Empty bulk create should not panic and return nil.
+	docs, err := client.Document.CreateBulk().Save(ctx)
+	require.NoError(t, err)
+	require.Nil(t, docs)
+
+	// Verify no documents were created.
+	count := client.Document.Query().CountX(ctx)
+	require.Zero(t, count)
+}

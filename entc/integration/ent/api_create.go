@@ -218,6 +218,9 @@ func (_c *APICreateBulk) Save(ctx context.Context) ([]*Api, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
+	if len(_c.builders) == 0 {
+		return nil, nil
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
 	nodes := make([]*Api, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))

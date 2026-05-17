@@ -240,6 +240,9 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 	if {{ $receiver }}.err != nil {
 		return nil, {{ $receiver }}.err
 	}
+	if len({{ $receiver }}.builders) == 0 {
+		return nil, nil
+	}
 	specs := make([]*sqlgraph.CreateSpec, len({{ $receiver }}.builders))
 	nodes := make([]*{{ $.Name }}, len({{ $receiver }}.builders))
 	mutators := make([]Mutator, len({{ $receiver }}.builders))

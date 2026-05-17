@@ -570,6 +570,9 @@ func (_c *CommentCreateBulk) Save(ctx context.Context) ([]*Comment, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
+	if len(_c.builders) == 0 {
+		return nil, nil
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
 	nodes := make([]*Comment, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
