@@ -66,6 +66,9 @@ func init() {
 	card.NameValidator = cardDescName.Validators[0].(func(string) error)
 	documentFields := schema.Document{}.Fields()
 	_ = documentFields
+	// documentDescPayload is the schema descriptor for payload field.
+	documentDescPayload := documentFields[5].Descriptor()
+	document.ValueScanner.Payload = documentDescPayload.ValueScanner.(field.TypeValueScanner[*schema.DocPayload])
 	// documentBlobDescContent is the schema descriptor for content blob field.
 	documentBlobDescContent := documentFields[1].Descriptor()
 	// document.NewContentKey generates the blob storage key for the content field.

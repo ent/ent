@@ -95,10 +95,12 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "attachment", Type: field.TypeBytes},
+		{Name: "payload", Type: field.TypeBytes, Nullable: true, SchemaType: map[string]string{"mysql": "longblob", "postgres": "jsonb", "sqlite3": "json"}},
 		{Name: "content_key", Type: field.TypeString},
 		{Name: "thumbnail_key", Type: field.TypeString},
 		{Name: "attachment_key", Type: field.TypeString},
 		{Name: "metadata_key", Type: field.TypeString, Nullable: true},
+		{Name: "payload_key", Type: field.TypeString, Nullable: true},
 	}
 	// DocumentsTable holds the schema information for the "documents" table.
 	DocumentsTable = &schema.Table{

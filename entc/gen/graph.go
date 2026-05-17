@@ -180,7 +180,21 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 	for _, t := range g.Nodes {
 		for _, f := range t.Fields {
 			if f.IsBlob() && !f.IsBlobLazy() {
-				f.Type = &field.TypeInfo{Type: field.TypeBytes}
+				ti := &field.TypeInfo{Type: field.TypeBytes}
+				// Preserve custom GoType information if set.
+				if f.Type != nil && f.Type.RType != nil {
+					ti.RType = f.Type.RType
+					ti.Ident = f.Type.Ident
+					ti.PkgPath = f.Type.PkgPath
+					ti.PkgName = f.Type.PkgName
+					ti.Nillable = f.Type.Nillable
+				}
+				f.Type = ti
+				// Copy BlobDWSchemaType to SchemaType so it flows
+				// into the column definition for migration.
+				if f.def != nil && len(f.def.BlobDWSchemaType) > 0 {
+					f.def.SchemaType = f.def.BlobDWSchemaType
+				}
 			}
 		}
 	}

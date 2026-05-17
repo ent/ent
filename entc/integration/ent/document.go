@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/document"
+	"entgo.io/ent/entc/integration/ent/schema"
 )
 
 // Document is the model entity for the Document schema.
@@ -27,11 +28,14 @@ type Document struct {
 	// Attachment holds the value of the "attachment" field.
 	Attachment []byte `json:"attachment,omitempty"`
 	// Metadata holds the value of the "metadata" field.
-	Metadata       []byte `json:"metadata,omitempty"`
+	Metadata []byte `json:"metadata,omitempty"`
+	// Payload holds the value of the "payload" field.
+	Payload        *schema.DocPayload `json:"payload,omitempty"`
 	content_key    *string
 	thumbnail_key  *string
 	attachment_key *string
 	metadata_key   *string
+	payload_key    *string
 	selectValues   sql.SelectValues
 }
 
@@ -46,6 +50,8 @@ func (*Document) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case document.FieldName:
 			values[i] = new(sql.NullString)
+		case document.FieldPayload:
+			values[i] = document.ValueScanner.Payload.ScanValue()
 		case document.BlobKeys[0]: // content_key
 			values[i] = new(sql.NullString)
 		case document.BlobKeys[1]: // thumbnail_key
@@ -53,6 +59,8 @@ func (*Document) scanValues(columns []string) ([]any, error) {
 		case document.BlobKeys[2]: // attachment_key
 			values[i] = new(sql.NullString)
 		case document.BlobKeys[3]: // metadata_key
+			values[i] = new(sql.NullString)
+		case document.BlobKeys[4]: // payload_key
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -87,6 +95,12 @@ func (_m *Document) assignValues(columns []string, values []any) error {
 			} else if value != nil {
 				_m.Attachment = *value
 			}
+		case document.FieldPayload:
+			if value, err := document.ValueScanner.Payload.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				_m.Payload = value
+			}
 		case document.BlobKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field content_key", values[i])
@@ -110,6 +124,12 @@ func (_m *Document) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field metadata_key", values[i])
 			} else if value.Valid {
 				_m.metadata_key = &value.String
+			}
+		case document.BlobKeys[4]:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field payload_key", values[i])
+			} else if value.Valid {
+				_m.payload_key = &value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -236,6 +256,34 @@ func (_m *Document) MetadataWriter(ctx context.Context) (io.WriteCloser, error) 
 	return ent.BlobWriter(ctx, b, *_m.metadata_key)
 }
 
+// PayloadReader opens a reader for the "payload" field from blob storage.
+// The caller must close the returned reader when done.
+func (_m *Document) PayloadReader(ctx context.Context) (io.ReadCloser, error) {
+	if _m.payload_key == nil || *_m.payload_key == "" {
+		return nil, fmt.Errorf("ent: Document.payload_key is nil or empty")
+	}
+	b, err := _m.blobOpeners.Document(ctx, document.FieldPayload)
+	if err != nil {
+		return nil, err
+	}
+	return ent.BlobReader(ctx, b, *_m.payload_key)
+}
+
+// PayloadWriter opens a writer for the "payload" field in blob storage.
+// The caller must close the returned writer when done. Closing the writer
+// also releases the underlying bucket resources.
+// Writing via this method does not go through the mutation pipeline.
+func (_m *Document) PayloadWriter(ctx context.Context) (io.WriteCloser, error) {
+	if _m.payload_key == nil || *_m.payload_key == "" {
+		return nil, fmt.Errorf("ent: Document.payload_key is nil or empty")
+	}
+	b, err := _m.blobOpeners.Document(ctx, document.FieldPayload)
+	if err != nil {
+		return nil, err
+	}
+	return ent.BlobWriter(ctx, b, *_m.payload_key)
+}
+
 // Update returns a builder for updating this Document.
 // Note that you need to call Document.Unwrap() before calling this method if this Document
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -267,6 +315,9 @@ func (_m *Document) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("metadata=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))
+	builder.WriteString(", ")
+	builder.WriteString("payload=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Payload))
 	builder.WriteByte(')')
 	return builder.String()
 }

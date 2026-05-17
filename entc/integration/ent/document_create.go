@@ -17,6 +17,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/document"
+	"entgo.io/ent/entc/integration/ent/schema"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -52,6 +53,12 @@ func (_c *DocumentCreate) SetNillableMetadata(v *[]byte) *DocumentCreate {
 	if v != nil {
 		_c.SetMetadata(*v)
 	}
+	return _c
+}
+
+// SetPayload sets the "payload" field.
+func (_c *DocumentCreate) SetPayload(v *schema.DocPayload) *DocumentCreate {
+	_c.mutation.SetPayload(v)
 	return _c
 }
 
@@ -120,7 +127,10 @@ func (_c *DocumentCreate) sqlSave(ctx context.Context) (*Document, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := _c.createSpec()
+	_node, _spec, err := _c.createSpec()
+	if err != nil {
+		return nil, err
+	}
 	_blobs := ent.NewBlobBulkWriter(_c.mutation.blobOpeners.Document)
 	if r, ok := _c.mutation.Content(); ok {
 		key, err := document.NewContentKey(ctx)
@@ -159,6 +169,28 @@ func (_c *DocumentCreate) sqlSave(ctx context.Context) (*Document, error) {
 		_node.Metadata = value
 		_spec.SetField("metadata_key", field.TypeString, key)
 	}
+	if value, ok := _c.mutation.Payload(); ok {
+		key := uuid.NewString()
+		blobData, err := document.ValueScanner.Payload.Value(value)
+		if err != nil {
+			return nil, errors.Join(fmt.Errorf("ent: encoding payload: %w", err), _blobs.Close())
+		}
+		var blobBytes []byte
+		switch v := blobData.(type) {
+		case []byte:
+			blobBytes = v
+		case string:
+			blobBytes = []byte(v)
+		default:
+			return nil, errors.Join(fmt.Errorf("ent: expected []byte or string from ValueScanner for payload, got %T", blobData), _blobs.Close())
+		}
+		if err := _blobs.Write(ctx, document.FieldPayload, key, bytes.NewReader(blobBytes)); err != nil {
+			return nil, errors.Join(fmt.Errorf("ent: writing blob for payload: %w", err), _blobs.Close())
+		}
+		_node.payload_key = &key
+		_node.Payload = value
+		_spec.SetField("payload_key", field.TypeString, key)
+	}
 	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
@@ -175,7 +207,7 @@ func (_c *DocumentCreate) sqlSave(ctx context.Context) (*Document, error) {
 	return _node, nil
 }
 
-func (_c *DocumentCreate) createSpec() (*Document, *sqlgraph.CreateSpec) {
+func (_c *DocumentCreate) createSpec() (*Document, *sqlgraph.CreateSpec, error) {
 	var (
 		_node = &Document{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(document.Table, sqlgraph.NewFieldSpec(document.FieldID, field.TypeInt))
@@ -189,7 +221,15 @@ func (_c *DocumentCreate) createSpec() (*Document, *sqlgraph.CreateSpec) {
 		_spec.SetField(document.FieldAttachment, field.TypeBytes, value)
 		_node.Attachment = value
 	}
-	return _node, _spec
+	if value, ok := _c.mutation.Payload(); ok {
+		vv, err := document.ValueScanner.Payload.Value(value)
+		if err != nil {
+			return nil, nil, err
+		}
+		_spec.SetField(document.FieldPayload, field.TypeBytes, vv)
+		_node.Payload = value
+	}
+	return _node, _spec, nil
 }
 
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
@@ -283,6 +323,24 @@ func (u *DocumentUpsert) ClearMetadata() *DocumentUpsert {
 	return u
 }
 
+// SetPayload sets the "payload" field.
+func (u *DocumentUpsert) SetPayload(v *schema.DocPayload) *DocumentUpsert {
+	u.Set(document.FieldPayload, v)
+	return u
+}
+
+// UpdatePayload sets the "payload" field to the value that was provided on create.
+func (u *DocumentUpsert) UpdatePayload() *DocumentUpsert {
+	u.SetExcluded(document.FieldPayload)
+	return u
+}
+
+// ClearPayload clears the value of the "payload" field.
+func (u *DocumentUpsert) ClearPayload() *DocumentUpsert {
+	u.SetNull(document.FieldPayload)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -372,6 +430,27 @@ func (u *DocumentUpsertOne) ClearMetadata() *DocumentUpsertOne {
 	})
 }
 
+// SetPayload sets the "payload" field.
+func (u *DocumentUpsertOne) SetPayload(v *schema.DocPayload) *DocumentUpsertOne {
+	return u.Update(func(s *DocumentUpsert) {
+		s.SetPayload(v)
+	})
+}
+
+// UpdatePayload sets the "payload" field to the value that was provided on create.
+func (u *DocumentUpsertOne) UpdatePayload() *DocumentUpsertOne {
+	return u.Update(func(s *DocumentUpsert) {
+		s.UpdatePayload()
+	})
+}
+
+// ClearPayload clears the value of the "payload" field.
+func (u *DocumentUpsertOne) ClearPayload() *DocumentUpsertOne {
+	return u.Update(func(s *DocumentUpsert) {
+		s.ClearPayload()
+	})
+}
+
 // Exec executes the query.
 func (u *DocumentUpsertOne) Exec(ctx context.Context) error {
 	if len(u.create.conflict) == 0 {
@@ -435,7 +514,10 @@ func (_c *DocumentCreateBulk) Save(ctx context.Context) ([]*Document, error) {
 				}
 				builder.mutation = mutation
 				var err error
-				nodes[i], specs[i] = builder.createSpec()
+				nodes[i], specs[i], err = builder.createSpec()
+				if err != nil {
+					return nil, err
+				}
 				if r, ok := mutation.Content(); ok {
 					key, err := document.NewContentKey(ctx)
 					if err != nil {
@@ -472,6 +554,28 @@ func (_c *DocumentCreateBulk) Save(ctx context.Context) ([]*Document, error) {
 					nodes[i].metadata_key = &key
 					nodes[i].Metadata = value
 					specs[i].SetField("metadata_key", field.TypeString, key)
+				}
+				if value, ok := mutation.Payload(); ok {
+					key := uuid.NewString()
+					blobData, err := document.ValueScanner.Payload.Value(value)
+					if err != nil {
+						return nil, fmt.Errorf("ent: encoding payload: %w", err)
+					}
+					var blobBytes []byte
+					switch v := blobData.(type) {
+					case []byte:
+						blobBytes = v
+					case string:
+						blobBytes = []byte(v)
+					default:
+						return nil, fmt.Errorf("ent: expected []byte or string from ValueScanner for payload, got %T", blobData)
+					}
+					if err := _blobs.Write(ctx, document.FieldPayload, key, bytes.NewReader(blobBytes)); err != nil {
+						return nil, fmt.Errorf("ent: writing blob for payload: %w", err)
+					}
+					nodes[i].payload_key = &key
+					nodes[i].Payload = value
+					specs[i].SetField("payload_key", field.TypeString, key)
 				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
@@ -659,6 +763,27 @@ func (u *DocumentUpsertBulk) UpdateMetadata() *DocumentUpsertBulk {
 func (u *DocumentUpsertBulk) ClearMetadata() *DocumentUpsertBulk {
 	return u.Update(func(s *DocumentUpsert) {
 		s.ClearMetadata()
+	})
+}
+
+// SetPayload sets the "payload" field.
+func (u *DocumentUpsertBulk) SetPayload(v *schema.DocPayload) *DocumentUpsertBulk {
+	return u.Update(func(s *DocumentUpsert) {
+		s.SetPayload(v)
+	})
+}
+
+// UpdatePayload sets the "payload" field to the value that was provided on create.
+func (u *DocumentUpsertBulk) UpdatePayload() *DocumentUpsertBulk {
+	return u.Update(func(s *DocumentUpsert) {
+		s.UpdatePayload()
+	})
+}
+
+// ClearPayload clears the value of the "payload" field.
+func (u *DocumentUpsertBulk) ClearPayload() *DocumentUpsertBulk {
+	return u.Update(func(s *DocumentUpsert) {
+		s.ClearPayload()
 	})
 }
 

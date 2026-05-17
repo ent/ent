@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/document"
 	"entgo.io/ent/entc/integration/ent/enttest"
 	"entgo.io/ent/entc/integration/ent/migrate"
+	"entgo.io/ent/entc/integration/ent/schema"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/require"
@@ -54,6 +55,7 @@ func blobDir(t *testing.T) string {
 	require.NoError(t, os.MkdirAll(filepath.Join(dir, "thumbnails"), 0o755))
 	require.NoError(t, os.MkdirAll(filepath.Join(dir, "attachments"), 0o755))
 	require.NoError(t, os.MkdirAll(filepath.Join(dir, "metadata"), 0o755))
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, "payloads"), 0o755))
 	return dir
 }
 
@@ -71,6 +73,8 @@ func newBlobOpeners(dir string) ent.BlobOpeners {
 				return blob.OpenBucket(ctx, "file://"+filepath.Join(dir, "attachments"))
 			case document.FieldMetadata:
 				return blob.OpenBucket(ctx, "file://"+filepath.Join(dir, "metadata"))
+			case document.FieldPayload:
+				return blob.OpenBucket(ctx, "file://"+filepath.Join(dir, "payloads"))
 			default:
 				return nil, fmt.Errorf("unknown blob field: %s", field)
 			}
@@ -1089,6 +1093,8 @@ func TestBlobLoadOnScanWithPrefix(t *testing.T) {
 				subdir = "attachments"
 			case document.FieldMetadata:
 				subdir = "metadata"
+			case document.FieldPayload:
+				subdir = "payloads"
 			default:
 				return nil, fmt.Errorf("unknown blob field: %s", field)
 			}
@@ -1139,6 +1145,8 @@ func TestBlobLoadOnScanWithEncryption(t *testing.T) {
 				subdir = "attachments"
 			case document.FieldMetadata:
 				subdir = "metadata"
+			case document.FieldPayload:
+				subdir = "payloads"
 			default:
 				return nil, fmt.Errorf("unknown blob field: %s", field)
 			}
@@ -1350,4 +1358,98 @@ func TestBlobDeleteTxRollbackPreservesBlobs(t *testing.T) {
 	require.Equal(t, []byte("keep-thumb"), got, "thumbnail blob should be preserved after rollback")
 	got = blobContent(t, doc.AttachmentReader, ctx)
 	require.Equal(t, []byte("keep-att"), got, "attachment blob should be preserved after rollback")
+}
+
+func TestBlobDualWritePayloadCreate(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+
+	p := &schema.DocPayload{Title: "hello", Body: "world"}
+	doc := client.Document.Create().
+		SetName("payload-doc").
+		SetContent(bytes.NewReader([]byte("content"))).
+		SetThumbnail(bytes.NewReader([]byte("thumb"))).
+		SetAttachment([]byte("att")).
+		SetPayload(p).
+		SaveX(ctx)
+
+	// The struct field holds the custom GoType.
+	require.NotNil(t, doc.Payload)
+	require.Equal(t, "hello", doc.Payload.Title)
+	require.Equal(t, "world", doc.Payload.Body)
+
+	// PayloadReader reads the JSON bytes from blob storage.
+	got := blobContent(t, doc.PayloadReader, ctx)
+	require.Contains(t, string(got), `"title":"hello"`)
+	require.Contains(t, string(got), `"body":"world"`)
+}
+
+func TestBlobDualWritePayloadQuery(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+
+	p := &schema.DocPayload{Title: "query-title", Body: "query-body"}
+	created := client.Document.Create().
+		SetName("payload-query-doc").
+		SetContent(bytes.NewReader([]byte("content"))).
+		SetThumbnail(bytes.NewReader([]byte("thumb"))).
+		SetAttachment([]byte("att")).
+		SetPayload(p).
+		SaveX(ctx)
+
+	// Query back from the database.
+	queried := client.Document.GetX(ctx, created.ID)
+	require.NotNil(t, queried.Payload)
+	require.Equal(t, "query-title", queried.Payload.Title)
+	require.Equal(t, "query-body", queried.Payload.Body)
+
+	// PayloadReader also works on queried entity.
+	got := blobContent(t, queried.PayloadReader, ctx)
+	require.Contains(t, string(got), `"query-title"`)
+}
+
+func TestBlobDualWritePayloadUpdate(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+
+	v1 := &schema.DocPayload{Title: "v1", Body: "first"}
+	doc := client.Document.Create().
+		SetName("payload-update-doc").
+		SetContent(bytes.NewReader([]byte("content"))).
+		SetThumbnail(bytes.NewReader([]byte("thumb"))).
+		SetAttachment([]byte("att")).
+		SetPayload(v1).
+		SaveX(ctx)
+
+	// Update payload.
+	v2 := &schema.DocPayload{Title: "v2", Body: "updated"}
+	doc = doc.Update().SetPayload(v2).SaveX(ctx)
+
+	require.Equal(t, "v2", doc.Payload.Title)
+	require.Equal(t, "updated", doc.Payload.Body)
+
+	// Blob storage has the updated data.
+	got := blobContent(t, doc.PayloadReader, ctx)
+	require.Contains(t, string(got), `"v2"`)
+	require.Contains(t, string(got), `"updated"`)
+}
+
+func TestBlobDualWritePayloadOptionalNil(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+
+	// Create without setting payload (optional field).
+	doc := client.Document.Create().
+		SetName("payload-nil-doc").
+		SetContent(bytes.NewReader([]byte("content"))).
+		SetThumbnail(bytes.NewReader([]byte("thumb"))).
+		SetAttachment([]byte("att")).
+		SaveX(ctx)
+
+	require.Nil(t, doc.Payload)
+
+	// Set payload, then clear it.
+	p := &schema.DocPayload{Title: "temp", Body: "data"}
+	doc = doc.Update().SetPayload(p).SaveX(ctx)
+	require.NotNil(t, doc.Payload)
+
+	doc = doc.Update().ClearPayload().SaveX(ctx)
+	queried := client.Document.GetX(ctx, doc.ID)
+	require.Nil(t, queried.Payload)
 }

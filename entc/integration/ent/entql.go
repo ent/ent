@@ -1053,6 +1053,11 @@ func (f *DocumentFilter) WhereAttachment(p entql.BytesP) {
 	f.Where(p.Field(document.FieldAttachment))
 }
 
+// WherePayload applies the entql []byte predicate on the payload field.
+func (f *DocumentFilter) WherePayload(p entql.BytesP) {
+	f.Where(p.Field(document.FieldPayload))
+}
+
 // addPredicate implements the predicateAdder interface.
 func (_q *ExValueScanQuery) addPredicate(pred func(s *sql.Selector)) {
 	_q.predicates = append(_q.predicates, pred)

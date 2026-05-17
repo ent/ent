@@ -171,6 +171,16 @@ func AttachmentLTE(v []byte) predicate.Document {
 	return predicate.Document(sql.FieldLTE(FieldAttachment, v))
 }
 
+// PayloadIsNil applies the IsNil predicate on the "payload" field.
+func PayloadIsNil() predicate.Document {
+	return predicate.Document(sql.FieldIsNull(FieldPayload))
+}
+
+// PayloadNotNil applies the NotNil predicate on the "payload" field.
+func PayloadNotNil() predicate.Document {
+	return predicate.Document(sql.FieldNotNull(FieldPayload))
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Document) predicate.Document {
 	return predicate.Document(sql.AndPredicates(predicates...))

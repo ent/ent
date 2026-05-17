@@ -188,7 +188,16 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			if err != nil {
 				return nil, errors.Join(fmt.Errorf("{{ $pkg }}: encoding {{ $f.Name }}: %w", err), _blobs.Close())
 			}
-			if err := _blobs.Write(ctx, {{ $.Package }}.{{ $f.Constant }}, key, bytes.NewReader(blobData)); err != nil {
+			var blobBytes []byte
+			switch v := blobData.(type) {
+			case []byte:
+				blobBytes = v
+			case string:
+				blobBytes = []byte(v)
+			default:
+				return nil, errors.Join(fmt.Errorf("{{ $pkg }}: expected []byte or string from ValueScanner for {{ $f.Name }}, got %T", blobData), _blobs.Close())
+			}
+			if err := _blobs.Write(ctx, {{ $.Package }}.{{ $f.Constant }}, key, bytes.NewReader(blobBytes)); err != nil {
 				return nil, errors.Join(fmt.Errorf("{{ $pkg }}: writing blob for {{ $f.Name }}: %w", err), _blobs.Close())
 			}
 			{{- else }}

@@ -65,6 +65,7 @@ type Field struct {
 	DeprecatedReason string                  `json:"deprecated_reason,omitempty"`
 	BlobKey          bool                    `json:"blob_key,omitempty"`
 	BlobDualWrite    bool                    `json:"blob_dual_write,omitempty"`
+	BlobDWSchemaType map[string]string       `json:"blob_dw_schema_type,omitempty"`
 	BlobLazy         bool                    `json:"blob_lazy,omitempty"`
 }
 
@@ -150,6 +151,7 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 		BlobKey:          fd.BlobKey != nil,
 		BlobDualWrite:    fd.BlobDualWrite,
 		BlobLazy:         fd.BlobLazy,
+		BlobDWSchemaType: fd.BlobDWSchemaType,
 	}
 	for _, at := range fd.Annotations {
 		sf.addAnnotation(at)

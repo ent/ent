@@ -6,13 +6,23 @@ package schema
 
 import (
 	"context"
+	"database/sql"
+	"database/sql/driver"
+	"encoding/json"
 	"fmt"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/field"
 
 	"github.com/google/uuid"
 )
+
+// DocPayload is a custom type for blob fields.
+type DocPayload struct {
+	Title string `json:"title"`
+	Body  string `json:"body"`
+}
 
 // Document holds the schema definition for the Document entity.
 type Document struct {
@@ -33,6 +43,29 @@ func (Document) Fields() []ent.Field {
 		field.Blob("attachment").
 			DualWrite(),
 		field.Blob("metadata").
+			Optional(),
+		field.Blob("payload").
+			DualWrite(map[string]string{
+				dialect.MySQL:    "longblob",
+				dialect.Postgres: "jsonb",
+				dialect.SQLite:   "json",
+			}).
+			GoType(&DocPayload{}).
+			ValueScanner(field.ValueScannerFunc[*DocPayload, *sql.NullString]{
+				V: func(v *DocPayload) (driver.Value, error) {
+					return json.Marshal(v)
+				},
+				S: func(s *sql.NullString) (*DocPayload, error) {
+					if !s.Valid {
+						return nil, nil
+					}
+					var p DocPayload
+					if err := json.Unmarshal([]byte(s.String), &p); err != nil {
+						return nil, err
+					}
+					return &p, nil
+				},
+			}).
 			Optional(),
 	}
 }

@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/entc/integration/ent/schema"
 )
 
 // Mutation represents an operation that mutates the Document nodes in the graph.
@@ -23,6 +24,7 @@ type Mutation struct {
 	name          *string
 	attachment    *[]byte
 	metadata      *[]byte
+	payload       **schema.DocPayload
 	content       io.Reader
 	thumbnail     io.Reader
 	clearedFields map[string]struct{}
@@ -113,6 +115,38 @@ func (m *Mutation) ResetMetadata() {
 	delete(m.clearedFields, FieldMetadata)
 }
 
+// SetPayload sets the "payload" field.
+func (m *Mutation) SetPayload(sp *schema.DocPayload) {
+	m.payload = &sp
+}
+
+// Payload returns the value of the "payload" field in the mutation.
+func (m *Mutation) Payload() (r *schema.DocPayload, exists bool) {
+	v := m.payload
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearPayload clears the value of the "payload" field.
+func (m *Mutation) ClearPayload() {
+	m.payload = nil
+	m.clearedFields[FieldPayload] = struct{}{}
+}
+
+// PayloadCleared returns if the "payload" field was cleared in this mutation.
+func (m *Mutation) PayloadCleared() bool {
+	_, ok := m.clearedFields[FieldPayload]
+	return ok
+}
+
+// ResetPayload resets all changes to the "payload" field.
+func (m *Mutation) ResetPayload() {
+	m.payload = nil
+	delete(m.clearedFields, FieldPayload)
+}
+
 // SetContent sets the "content" field.
 func (m *Mutation) SetContent(r io.Reader) {
 	m.content = r
@@ -185,7 +219,7 @@ func (m *Mutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *Mutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.name != nil {
 		fields = append(fields, FieldName)
 	}
@@ -255,6 +289,9 @@ func (m *Mutation) ClearedFields() []string {
 	if m.FieldCleared(FieldMetadata) {
 		fields = append(fields, FieldMetadata)
 	}
+	if m.FieldCleared(FieldPayload) {
+		fields = append(fields, FieldPayload)
+	}
 	return fields
 }
 
@@ -271,6 +308,9 @@ func (m *Mutation) ClearField(name string) error {
 	switch name {
 	case FieldMetadata:
 		m.ClearMetadata()
+		return nil
+	case FieldPayload:
+		m.ClearPayload()
 		return nil
 	}
 	return fmt.Errorf("unknown Document nullable field %s", name)
@@ -294,6 +334,9 @@ func (m *Mutation) ResetField(name string) error {
 		return nil
 	case FieldMetadata:
 		m.ResetMetadata()
+		return nil
+	case FieldPayload:
+		m.ResetPayload()
 		return nil
 	}
 	return fmt.Errorf("unknown Document field %s", name)

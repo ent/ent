@@ -25,6 +25,17 @@ type Comment func(*sql.Selector)
 // Document is the predicate function for document builders.
 type Document func(*sql.Selector)
 
+// DocumentOrErr calls the predicate only if the error is not nit.
+func DocumentOrErr(p Document, err error) Document {
+	return func(s *sql.Selector) {
+		if err != nil {
+			s.AddError(err)
+			return
+		}
+		p(s)
+	}
+}
+
 // ExValueScan is the predicate function for exvaluescan builders.
 type ExValueScan func(*sql.Selector)
 

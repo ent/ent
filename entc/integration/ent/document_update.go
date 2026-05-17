@@ -18,6 +18,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/entc/integration/ent/document"
 	"entgo.io/ent/entc/integration/ent/predicate"
+	"entgo.io/ent/entc/integration/ent/schema"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
@@ -81,6 +82,18 @@ func (_u *DocumentUpdate) SetNillableMetadata(v *[]byte) *DocumentUpdate {
 // ClearMetadata clears the value of the "metadata" field.
 func (_u *DocumentUpdate) ClearMetadata() *DocumentUpdate {
 	_u.mutation.ClearMetadata()
+	return _u
+}
+
+// SetPayload sets the "payload" field.
+func (_u *DocumentUpdate) SetPayload(v *schema.DocPayload) *DocumentUpdate {
+	_u.mutation.SetPayload(v)
+	return _u
+}
+
+// ClearPayload clears the value of the "payload" field.
+func (_u *DocumentUpdate) ClearPayload() *DocumentUpdate {
+	_u.mutation.ClearPayload()
 	return _u
 }
 
@@ -149,6 +162,16 @@ func (_u *DocumentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Attachment(); ok {
 		_spec.SetField(document.FieldAttachment, field.TypeBytes, value)
 	}
+	if value, ok := _u.mutation.Payload(); ok {
+		vv, err := document.ValueScanner.Payload.Value(value)
+		if err != nil {
+			return 0, err
+		}
+		_spec.SetField(document.FieldPayload, field.TypeBytes, vv)
+	}
+	if _u.mutation.PayloadCleared() {
+		_spec.ClearField(document.FieldPayload, field.TypeBytes)
+	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -216,6 +239,18 @@ func (_u *DocumentUpdateOne) SetNillableMetadata(v *[]byte) *DocumentUpdateOne {
 // ClearMetadata clears the value of the "metadata" field.
 func (_u *DocumentUpdateOne) ClearMetadata() *DocumentUpdateOne {
 	_u.mutation.ClearMetadata()
+	return _u
+}
+
+// SetPayload sets the "payload" field.
+func (_u *DocumentUpdateOne) SetPayload(v *schema.DocPayload) *DocumentUpdateOne {
+	_u.mutation.SetPayload(v)
+	return _u
+}
+
+// ClearPayload clears the value of the "payload" field.
+func (_u *DocumentUpdateOne) ClearPayload() *DocumentUpdateOne {
+	_u.mutation.ClearPayload()
 	return _u
 }
 
@@ -314,6 +349,16 @@ func (_u *DocumentUpdateOne) sqlSave(ctx context.Context) (_node *Document, err 
 	if value, ok := _u.mutation.Attachment(); ok {
 		_spec.SetField(document.FieldAttachment, field.TypeBytes, value)
 	}
+	if value, ok := _u.mutation.Payload(); ok {
+		vv, err := document.ValueScanner.Payload.Value(value)
+		if err != nil {
+			return nil, err
+		}
+		_spec.SetField(document.FieldPayload, field.TypeBytes, vv)
+	}
+	if _u.mutation.PayloadCleared() {
+		_spec.ClearField(document.FieldPayload, field.TypeBytes)
+	}
 	_spec.AddModifiers(_u.modifiers...)
 	_blobs := ent.NewBlobBulkWriter(_u.mutation.blobOpeners.Document)
 	if r, ok := _u.mutation.Content(); ok {
@@ -349,6 +394,29 @@ func (_u *DocumentUpdateOne) sqlSave(ctx context.Context) (_node *Document, err 
 	}
 	if _u.mutation.MetadataCleared() {
 		_spec.ClearField("metadata_key", field.TypeString)
+	}
+	if value, ok := _u.mutation.Payload(); ok {
+		key := uuid.NewString()
+		blobData, err := document.ValueScanner.Payload.Value(value)
+		if err != nil {
+			return nil, errors.Join(fmt.Errorf("ent: encoding payload: %w", err), _blobs.Close())
+		}
+		var blobBytes []byte
+		switch v := blobData.(type) {
+		case []byte:
+			blobBytes = v
+		case string:
+			blobBytes = []byte(v)
+		default:
+			return nil, errors.Join(fmt.Errorf("ent: expected []byte or string from ValueScanner for payload, got %T", blobData), _blobs.Close())
+		}
+		if err := _blobs.Write(ctx, document.FieldPayload, key, bytes.NewReader(blobBytes)); err != nil {
+			return nil, errors.Join(fmt.Errorf("ent: writing blob for payload: %w", err), _blobs.Close())
+		}
+		_spec.SetField("payload_key", field.TypeString, key)
+	}
+	if _u.mutation.PayloadCleared() {
+		_spec.ClearField("payload_key", field.TypeString)
 	}
 	_node = &Document{config: _u.config}
 	_spec.Assign = _node.assignValues

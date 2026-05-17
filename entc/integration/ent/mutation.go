@@ -894,6 +894,23 @@ func (m *DocumentMutation) OldMetadata(ctx context.Context) (v []byte, err error
 	return oldValue.Metadata, nil
 }
 
+// OldPayload returns the old "payload" field's value of the Document entity.
+// If the Document object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DocumentMutation) OldPayload(ctx context.Context) (v *schema.DocPayload, err error) {
+	if !m.Op().Is(OpUpdateOne) {
+		return v, errors.New("OldPayload is only allowed on UpdateOne operations")
+	}
+	if _, exists := m.ID(); !exists || m.oldValue == nil {
+		return v, errors.New("OldPayload requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPayload: %w", err)
+	}
+	return oldValue.Payload, nil
+}
+
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
@@ -905,6 +922,8 @@ func (m *DocumentMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldAttachment(ctx)
 	case document.FieldMetadata:
 		return m.OldMetadata(ctx)
+	case document.FieldPayload:
+		return m.OldPayload(ctx)
 	}
 	return nil, fmt.Errorf("unknown Document field %s", name)
 }

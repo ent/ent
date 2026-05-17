@@ -1502,8 +1502,22 @@ func (b *blobBuilder) Key(fn func(context.Context) (string, error)) *blobBuilder
 // original bytes column is preserved alongside the blob key column. Writes
 // go to both blob storage and the bytes column, while reads prefer blob
 // storage (if a key exists) and fall back to the bytes column.
-func (b *blobBuilder) DualWrite() *blobBuilder {
+//
+// The optional columnType argument overrides the default database column type
+// (per dialect) to avoid schema drift when migrating from an existing column.
+// For example, when migrating a JSON column to blob storage:
+//
+//	field.Blob("payload").
+//		DualWrite(map[string]string{
+//			dialect.MySQL:    "json",
+//			dialect.Postgres: "jsonb",
+//			dialect.SQLite:   "json",
+//		})
+func (b *blobBuilder) DualWrite(columnType ...map[string]string) *blobBuilder {
 	b.desc.BlobDualWrite = true
+	if len(columnType) > 0 {
+		b.desc.BlobDWSchemaType = columnType[0]
+	}
 	return b
 }
 
@@ -1570,6 +1584,7 @@ type Descriptor struct {
 	BlobKey          func(context.Context) (string, error) // blob key generation function: func(context.Context) (string, error).
 	BlobDualWrite    bool                                  // dual-write mode: write to both blob storage and bytes column.
 	BlobLazy         bool                                  // lazy loading: don't auto-load blob data on scan.
+	BlobDWSchemaType map[string]string                     // override the schema type for the dual-write column.
 	Err              error
 }
 

@@ -10,6 +10,8 @@ import (
 	"context"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/entc/integration/ent/schema"
+	"entgo.io/ent/schema/field"
 )
 
 const (
@@ -27,6 +29,8 @@ const (
 	FieldAttachment = "attachment"
 	// FieldMetadata holds the string denoting the metadata field in the database.
 	FieldMetadata = "metadata"
+	// FieldPayload holds the string denoting the payload field in the database.
+	FieldPayload = "payload"
 	// Table holds the table name of the document in the database.
 	Table = "documents"
 )
@@ -36,10 +40,12 @@ var Columns = []string{
 	FieldID,
 	FieldName,
 	FieldAttachment,
+	FieldPayload,
 	"content_key",
 	"thumbnail_key",
 	"attachment_key",
 	"metadata_key",
+	"payload_key",
 }
 
 // BlobKeys holds the SQL columns for blob storage keys.
@@ -48,6 +54,7 @@ var BlobKeys = []string{
 	"thumbnail_key",
 	"attachment_key",
 	"metadata_key",
+	"payload_key",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -68,6 +75,10 @@ func ValidColumn(column string) bool {
 var (
 	// NewContentKey generates the blob storage key for the "content" field.
 	NewContentKey func(context.Context) (string, error)
+	// ValueScanner of all Document fields.
+	ValueScanner struct {
+		Payload field.TypeValueScanner[*schema.DocPayload]
+	}
 )
 
 // OrderOption defines the ordering options for the Document queries.

@@ -62,6 +62,7 @@ func (_d *DocumentDelete) sqlExec(ctx context.Context) (int, error) {
 			document.FieldThumbnail,
 			document.FieldAttachment,
 			document.FieldMetadata,
+			document.FieldPayload,
 		},
 	})
 	if _blobErr != nil {
