@@ -63,6 +63,7 @@ import (
 		{{ $dep.Type.PkgName }} "{{ $dep.Type.PkgPath }}"
 	{{- end }}
 	"entgo.io/ent/dialect"
+	{{- $hasBlobNodes := false }}{{ range $n := $.Nodes }}{{ if $n.HasBlobFields }}{{ $hasBlobNodes = true }}{{ end }}{{ end }}
 	{{ range $import := $.Storage.Imports -}}
 		"{{ $import }}"
 	{{ end -}}
@@ -84,6 +85,10 @@ type (
 		hooks *hooks
 		// interceptors to execute on queries.
 		inters *inters
+		{{- if $hasBlobNodes }}
+		// blobOpeners configures how blob buckets are opened for each entity type.
+		blobOpeners BlobOpeners
+		{{- end }}
 		{{- /* Additional dependency fields. */}}
 		{{- range $dep := $deps }}
 			{{ $dep.Field }} {{ $dep.Type }}
@@ -152,6 +157,28 @@ func Driver(driver dialect.Driver) Option {
 			c.{{ $dep.Field }} = v
 		}
 	}
+{{- end }}
+
+{{- if $hasBlobNodes }}
+// Blob is an alias for the [ent.Blob] interface defined in the entgo.io/ent package.
+type Blob = ent.Blob
+
+// BlobOpeners configures how blob buckets are opened for each entity type.
+// Each field is a function that opens a blob bucket for the given field name.
+type BlobOpeners struct {
+	{{- range $n := $.Nodes }}
+	{{- if $n.HasBlobFields }}
+	{{ $n.Name }} func(context.Context, string) (Blob, error)
+	{{- end }}
+	{{- end }}
+}
+
+// WithBlobOpeners configures the blob bucket openers.
+func WithBlobOpeners(openers BlobOpeners) Option {
+	return func(c *config) {
+		c.blobOpeners = openers
+	}
+}
 {{- end }}
 
 // Open opens a database/sql.DB specified by the driver name and

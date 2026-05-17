@@ -20,6 +20,9 @@ in the LICENSE file in the root directory of this source tree.
 	{{- if $f.HasValueScanner }}
 		{{- continue }}
 	{{- end }}
+	{{- if or $f.IsBlobNoColumn $f.IsBlobLazy }}
+		{{- continue }}
+	{{- end }}
 	{{ $names := list }}
 	{{ if hasKey $ctypes $f.NewScanType }}
 		{{ $names = get $ctypes $f.NewScanType }}
@@ -42,6 +45,7 @@ func (*{{ $.Name }}) scanValues(columns []string) ([]any, error) {
 					values[i] = {{ $type }}
 			{{- end }}
 			{{- range $f := $.Fields }}
+				{{- if $f.IsBlobNoColumn }}{{ continue }}{{ end }}
 				{{- if $f.HasValueScanner }}
 					case {{ $.Package }}.{{ $f.Constant }}:
 						values[i] = {{ $f.ScanValueFunc }}()
@@ -51,6 +55,10 @@ func (*{{ $.Name }}) scanValues(columns []string) ([]any, error) {
 				{{- $f := $fk.Field }}
 				case {{ $.Package }}.ForeignKeys[{{ $i }}]: // {{ $f.Name }}
 					values[i] = {{ if not $f.UserDefined }}new(sql.NullInt64){{ else }}{{ $f.NewScanType }}{{ end }}
+			{{- end }}
+			{{- range $i, $bk := $.BlobKeys }}
+				case {{ $.Package }}.BlobKeys[{{ $i }}]: // {{ $bk.Field.Name }}
+					values[i] = new(sql.NullString)
 			{{- end }}
 			default:
 				{{- /* In case of unknown column that was added by a modifier, predicate, etc., fallback to any. */}}
@@ -83,6 +91,9 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []any
 				{{- end }}
 		{{- end }}
 		{{- range  $f := $.Fields }}
+			{{- if or $f.IsBlobNoColumn $f.IsBlobLazy }}
+				{{- continue }}
+			{{- end }}
 			case {{ $.Package }}.{{ $f.Constant }}:
 				{{- with extend $ "Idx" "i" "Field" $f "Rec" $receiver }}
 					{{ template "dialect/sql/decode/field" . }}
@@ -103,6 +114,14 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []any
 						{{ if and $f.Nillable (not $f.Type.Nillable) }}*{{ end }}{{ $receiver }}.{{ $fk.StructField }} = {{ $f.Type }}(value.Int64)
 					}
 				{{- end }}
+		{{- end }}
+		{{- range $i, $bk := $.BlobKeys }}
+			case {{ $.Package }}.BlobKeys[{{ $i }}]:
+				if value, ok := values[i].(*sql.NullString); !ok {
+					return fmt.Errorf("unexpected type %T for field {{ $bk.Field.Name }}", values[i])
+				} else if value.Valid {
+					{{ $receiver }}.{{ $bk.StructField }} = &value.String
+				}
 		{{- end }}
 		default:
 			{{- /* In case of no match, allow getting this value by its name. */}}

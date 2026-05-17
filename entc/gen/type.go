@@ -53,6 +53,8 @@ type (
 		// ForeignKeys are the foreign-keys that resides in the type table.
 		ForeignKeys []*ForeignKey
 		foreignKeys map[string]struct{}
+		// BlobKeys are the implicit key columns for blob-stored fields.
+		BlobKeys []*BlobKey
 		// Annotations that were defined for the field in the schema.
 		// The mapping is from the Annotation.Name() to a JSON decoded object.
 		Annotations Annotations
@@ -196,6 +198,14 @@ type (
 		//		Field("owner_id")
 		//
 		UserDefined bool
+	}
+	// BlobKey holds the information for blob key columns. Similar to a foreign-key,
+	// it is an implicit string column that stores the storage key for a blob field.
+	BlobKey struct {
+		// Field is the implicit string column that stores the blob key.
+		Field *Field
+		// BlobField is the blob field this key belongs to.
+		BlobField *Field
 	}
 	// Enum holds the enum information for schema enums in codegen.
 	Enum struct {
@@ -551,7 +561,7 @@ func (t Type) NumConstraint() int {
 func (t Type) MutableFields() []*Field {
 	fields := make([]*Field, 0, len(t.Fields))
 	for _, f := range t.Fields {
-		if f.Immutable {
+		if f.Immutable || f.IsBlobLazy() {
 			continue
 		}
 		if e, err := f.Edge(); err == nil && e.Immutable {
@@ -566,7 +576,7 @@ func (t Type) MutableFields() []*Field {
 func (t Type) ImmutableFields() []*Field {
 	fields := make([]*Field, 0, len(t.Fields))
 	for _, f := range t.Fields {
-		if f.Immutable {
+		if f.Immutable && !f.IsBlob() {
 			fields = append(fields, f)
 		}
 	}
@@ -574,10 +584,11 @@ func (t Type) ImmutableFields() []*Field {
 }
 
 // MutationFields returns all the fields that are available on the typed-mutation.
+// Lazy blob fields are excluded since they use streaming only.
 func (t Type) MutationFields() []*Field {
 	fields := make([]*Field, 0, len(t.Fields))
 	for _, f := range t.Fields {
-		if !f.IsEdgeField() {
+		if !f.IsEdgeField() && !f.IsBlobLazy() {
 			fields = append(fields, f)
 		}
 	}
@@ -757,6 +768,25 @@ func (t *Type) setupFKs() error {
 		}
 	}
 	return nil
+}
+
+// setupBlobKeys creates implicit key columns for all blob-stored fields.
+func (t *Type) setupBlobKeys() {
+	for _, f := range t.Fields {
+		if !f.IsBlob() {
+			continue
+		}
+		t.BlobKeys = append(t.BlobKeys, &BlobKey{
+			Field: &Field{
+				typ:      t,
+				Name:     f.Name + "_key",
+				Type:     &field.TypeInfo{Type: field.TypeString},
+				Nillable: true,
+				Optional: f.Optional,
+			},
+			BlobField: f,
+		})
+	}
 }
 
 // setupFieldEdge check the field-edge validity and configures it and its foreign-key.
@@ -1353,6 +1383,30 @@ func (f Field) IsInt64() bool { return f.Type != nil && f.Type.Type == field.Typ
 // IsEnum returns true if the field is an enum field.
 func (f Field) IsEnum() bool { return f.Type != nil && f.Type.Type == field.TypeEnum }
 
+// IsBlob reports whether this field is stored in external blob storage.
+func (f Field) IsBlob() bool {
+	return f.def != nil && f.def.Info != nil && f.def.Info.Type == field.TypeBlob
+}
+
+// IsBlobLazy reports whether this is a lazy blob field (streaming-only, no struct field).
+func (f Field) IsBlobLazy() bool {
+	return f.IsBlob() && f.def.BlobLazy
+}
+
+// IsBlobNoColumn reports whether this blob field has no SQL data column.
+// True for all blob fields except DualWrite.
+func (f Field) IsBlobNoColumn() bool {
+	return f.IsBlob() && !f.def.BlobDualWrite
+}
+
+// HasBlobKey reports whether this blob field has a user-defined key function.
+func (f Field) HasBlobKey() bool {
+	return f.def != nil && f.def.BlobKey
+}
+
+// BlobKeyName returns the variable name of the key generator for this blob field.
+func (f Field) BlobKeyName() string { return "New" + pascal(f.Name) + "Key" }
+
 // IsEdgeField reports if the given field is an edge-field (i.e. a foreign-key)
 // that was referenced by one of the edges.
 func (f Field) IsEdgeField() bool { return f.fk != nil }
@@ -1445,6 +1499,48 @@ func (t Type) DeprecatedFields() []*Field {
 		}
 	}
 	return fs
+}
+
+// BlobFields returns all blob-stored fields of the type.
+func (t Type) BlobFields() []*Field {
+	var fs []*Field
+	for _, f := range t.Fields {
+		if f.IsBlob() {
+			fs = append(fs, f)
+		}
+	}
+	return fs
+}
+
+// HasBlobFields reports whether the type has any blob-stored fields.
+func (t Type) HasBlobFields() bool {
+	for _, f := range t.Fields {
+		if f.IsBlob() {
+			return true
+		}
+	}
+	return false
+}
+
+// LoadOnScanFields returns non-lazy blob fields without DualWrite (auto-load from blob on scan).
+func (t Type) LoadOnScanFields() []*Field {
+	var fs []*Field
+	for _, f := range t.Fields {
+		if f.IsBlobNoColumn() && !f.IsBlobLazy() {
+			fs = append(fs, f)
+		}
+	}
+	return fs
+}
+
+// HasLoadOnScanFields reports whether the type has any blob fields that auto-load on scan.
+func (t Type) HasLoadOnScanFields() bool {
+	for _, f := range t.Fields {
+		if f.IsBlobNoColumn() && !f.IsBlobLazy() {
+			return true
+		}
+	}
+	return false
 }
 
 // HasValueScanner indicates if the field has (an external) ValueScanner.
@@ -1561,9 +1657,10 @@ func (f Field) standardNullType() bool {
 // Column returns the table column. It sets it as a primary key (auto_increment)
 // in case of ID field, unless stated otherwise.
 func (f Field) Column() *schema.Column {
+	typ := f.Type.Type
 	c := &schema.Column{
 		Name:     f.StorageKey(),
-		Type:     f.Type.Type,
+		Type:     typ,
 		Unique:   f.Unique,
 		Nullable: f.Optional,
 		Size:     f.size(),
@@ -2181,6 +2278,11 @@ func (f ForeignKey) StructField() string {
 		return f.Field.StructField()
 	}
 	return f.Field.Name
+}
+
+// StructField returns the struct field name of the blob key.
+func (bk BlobKey) StructField() string {
+	return bk.Field.Name
 }
 
 // Rel is a relation type of an edge.

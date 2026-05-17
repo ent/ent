@@ -22,6 +22,9 @@ type Card func(*dsl.Traversal)
 // Comment is the predicate function for comment builders.
 type Comment func(*dsl.Traversal)
 
+// Document is the predicate function for document builders.
+type Document func(*dsl.Traversal)
+
 // ExValueScan is the predicate function for exvaluescan builders.
 type ExValueScan func(*dsl.Traversal)
 

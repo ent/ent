@@ -24,6 +24,7 @@ const (
 	TypeEnum
 	TypeString
 	TypeOther
+	TypeBlob
 	TypeInt8
 	TypeInt16
 	TypeInt32
@@ -166,6 +167,7 @@ var (
 		TypeEnum:    "string",
 		TypeString:  "string",
 		TypeOther:   "other",
+		TypeBlob:    "blob",
 		TypeInt:     "int",
 		TypeInt8:    "int8",
 		TypeInt16:   "int16",
@@ -186,6 +188,7 @@ var (
 		TypeEnum:  "TypeEnum",
 		TypeBytes: "TypeBytes",
 		TypeOther: "TypeOther",
+		TypeBlob:  "TypeBlob",
 	}
 )
 

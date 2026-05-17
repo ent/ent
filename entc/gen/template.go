@@ -93,8 +93,8 @@ var (
 			},
 		},
 		{
-			Name:   "mutation",
-			Cond:   notView,
+			Name: "mutation",
+			Cond: notView,
 			Format: func(t *Type) string {
 				return fmt.Sprintf("%s/mutation.go", t.PackageDir())
 			},

@@ -817,6 +817,9 @@ func (_c *FileCreateBulk) Save(ctx context.Context) ([]*File, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
+	if len(_c.builders) == 0 {
+		return nil, nil
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
 	nodes := make([]*File, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))

@@ -347,6 +347,45 @@ func TestFKColumns(t *testing.T) {
 	}
 }
 
+func TestBlobDualWriteGoType(t *testing.T) {
+	require := require.New(t)
+	doc := &load.Schema{
+		Name: "Doc",
+		Fields: []*load.Field{
+			{
+				Name: "config",
+				Info: &field.TypeInfo{
+					Type:    field.TypeBlob,
+					Ident:   "*Config",
+					PkgPath: "example.com/app",
+					PkgName: "app",
+					RType: &field.RType{
+						Name:    "Config",
+						Ident:   "Config",
+						Kind:    reflect.Struct,
+						PkgPath: "example.com/app",
+					},
+				},
+				ValueScanner:  true,
+				BlobDualWrite: true,
+			},
+		},
+	}
+	g, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, doc)
+	require.NoError(err)
+	require.Len(g.Nodes, 1)
+	f := g.Nodes[0].Fields[0]
+	require.True(f.IsBlob())
+	require.False(f.IsBlobNoColumn())
+	// After graph initialization, the blob field should be TypeBytes but preserve GoType info.
+	require.Equal(field.TypeBytes, f.Type.Type)
+	require.True(f.HasGoType(), "GoType should be preserved for DualWrite blob fields")
+	require.Equal("*Config", f.Type.String(), "Type.String() should return the custom GoType")
+	require.Equal("example.com/app", f.Type.PkgPath)
+	require.NotNil(f.Type.RType)
+	require.Equal("Config", f.Type.RType.Name)
+}
+
 func TestAbortDuplicateFK(t *testing.T) {
 	var (
 		user = &load.Schema{

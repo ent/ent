@@ -26,10 +26,46 @@ func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) 
 			}
 		}
 	}
+	{{- if $.HasBlobFields }}
+	// Collect blob keys before deleting rows so we can remove blobs from storage afterward.
+	_blobCleanup, _blobErr := sqlgraph.BlobDeletes(ctx, {{ $receiver }}.driver, &sqlgraph.BlobDeleteSpec{
+		Opener:    {{ $mutation }}.blobOpeners.{{ $.Name }},
+		Predicate: _spec.Predicate,
+		Table:     {{ $.Package }}.Table,
+		Fields: []string{
+			{{- range $f := $.BlobFields }}
+			{{ $.Package }}.{{ $f.Constant }},
+			{{- end }}
+		},
+	})
+	if _blobErr != nil {
+		return 0, _blobErr
+	}
+	{{- end }}
 	affected, err := sqlgraph.DeleteNodes(ctx, {{ $receiver}}.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	{{- if $.HasBlobFields }}
+	if err == nil {
+		// If running inside a transaction, defer blob cleanup until commit succeeds.
+		// Otherwise, delete blobs immediately.
+		if tx, ok := {{ $receiver }}.driver.(*txDriver); ok {
+			tx.mu.Lock()
+			tx.onCommit = append(tx.onCommit, func(n Committer) Committer {
+				return CommitFunc(func(ctx context.Context, t *Tx) error {
+					if err := n.Commit(ctx, t); err != nil {
+						return err
+					}
+					return _blobCleanup(ctx)
+				})
+			})
+			tx.mu.Unlock()
+		} else {
+			err = _blobCleanup(ctx)
+		}
+	}
+	{{- end }}
 	{{ $mutation }}.done = true
 	return affected, err
 }

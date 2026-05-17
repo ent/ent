@@ -105,8 +105,40 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 			{{- xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
+	{{- if $.HasLoadOnScanFields }}
+	if err := {{ $receiver }}.loadBlobFields(ctx, nodes); err != nil {
+		return nil, err
+	}
+	{{- end }}
 	return nodes, nil
 }
+
+{{- if $.HasLoadOnScanFields }}
+
+func ({{ $receiver }} *{{ $builder }}) loadBlobFields(ctx context.Context, nodes []*{{ $.Name }}) error {
+	_blobs := ent.NewBlobBulkReader({{ $receiver }}.blobOpeners.{{ $.Name }})
+	for _, n := range nodes {
+		{{- range $f := $.LoadOnScanFields }}
+		if n.{{ $f.Name }}_key != nil && *n.{{ $f.Name }}_key != "" {
+			data, err := _blobs.Read(ctx, {{ $.Package }}.{{ $f.Constant }}, *n.{{ $f.Name }}_key)
+			if err != nil {
+				return errors.Join(fmt.Errorf("loading {{ $f.Name }}: %w", err), _blobs.Close())
+			}
+			{{- if $f.HasValueScanner }}
+			v, err := {{ $f.FromValueFunc }}(data)
+			if err != nil {
+				return errors.Join(fmt.Errorf("scanning {{ $f.Name }}: %w", err), _blobs.Close())
+			}
+			n.{{ $f.StructField }} = v
+			{{- else }}
+			n.{{ $f.StructField }} = data
+			{{- end }}
+		}
+		{{- end }}
+	}
+	return _blobs.Close()
+}
+{{- end }}
 
 {{/* Generate a method to eager-load each edge. */}}
 {{- range $e := $.Edges }}

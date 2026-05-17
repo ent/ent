@@ -39,7 +39,12 @@ func TestSnapshot_Restore(t *testing.T) {
 			`,
 		}}
 	require.NoError(t, snap.Restore())
-	err = exec.Command("go", "generate", testPackage).Run()
+	cmd := exec.Command("go", "generate", ".")
+	cmd.Dir = testPackage
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Logf("go generate output: %s", out)
+	}
 	require.NoError(t, err)
 }
 
@@ -51,7 +56,7 @@ func addConflicts(dir string) error {
 		return err
 	}
 	for _, info := range infos {
-		if info.IsDir() || info.Name() == "generate.go" {
+		if info.IsDir() || info.Name() == "generate.go" || info.Name() == "entc.go" {
 			continue
 		}
 		path := filepath.Join(dir, info.Name())

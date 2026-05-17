@@ -22,6 +22,7 @@ in the LICENSE file in the root directory of this source tree.
 {{- end }}
 
 {{ range $f := $fields }}
+	{{- if $f.IsBlobLazy }}{{ continue }}{{ end }}
 	{{ $func := print "Set" $f.StructField }}
 	// {{ $func }} sets the "{{ $f.Name }}" field.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}(v {{ $f.Type }}) *{{ $builder }} {
@@ -73,6 +74,25 @@ in the LICENSE file in the root directory of this source tree.
 		}
 	{{ end }}
 {{ end }}
+
+{{- range $f := $.BlobFields }}
+	{{- if not $f.IsBlobLazy }}{{ continue }}{{ end }}
+	{{ $func := print "Set" $f.StructField }}
+	// {{ $func }} sets the "{{ $f.Name }}" field.
+	func ({{ $receiver }} *{{ $builder }}) {{ $func }}(v io.Reader) *{{ $builder }} {
+		{{ $receiver }}.mutation.Set{{ $f.StructField }}(v)
+		return {{ $receiver }}
+	}
+
+	{{- if and $f.Optional $updater }}
+		{{ $clearFunc := print "Clear" $f.StructField }}
+		// {{ $clearFunc }} clears the value of the "{{ $f.Name }}" field.
+		func ({{ $receiver }} *{{ $builder }}) {{ $clearFunc }}() *{{ $builder }} {
+			{{ $receiver }}.mutation.{{ $clearFunc }}()
+			return {{ $receiver }}
+		}
+	{{- end }}
+{{- end }}
 
 {{ range $e := $.EdgesWithID }}
 	{{ if and $updater $e.Immutable }}

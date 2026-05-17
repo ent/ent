@@ -151,7 +151,7 @@ func init() {
 			{{- end }}
 		{{- end }}
 	{{- end }}
-	{{- if or $n.HasDefault $n.HasUpdateDefault $n.HasValidators $n.HasValueScanner }}
+	{{- if or $n.HasDefault $n.HasUpdateDefault $n.HasValidators $n.HasValueScanner $n.HasBlobFields }}
 		{{- with $idx := $n.MixedInFields }}
 			{{- range $i := $idx }}
 				{{ print $pkg "MixinFields" $i }} := {{ $pkg }}Mixin[{{ $i }}].Fields()
@@ -164,6 +164,7 @@ func init() {
 			_ = {{ $pkg }}Fields
 		{{- end }}
 		{{- range $i, $f := $fields }}
+			{{- if $f.IsBlobLazy }}{{ continue }}{{ end }}
 			{{- $desc := print $pkg "Desc" $f.StructField }}
 			{{- $idscan := and $n.HasOneFieldID (eq $f.Name $n.ID.Name) }}
 			{{- /* enum default values handled near their declarations (in type package). */}}
@@ -225,6 +226,20 @@ func init() {
 						}
 					}()
 				{{- end }}
+		{{- end }}
+	{{- end }}
+	{{- range $i, $f := $n.BlobFields }}
+		{{- if $f.HasBlobKey }}
+			{{- $bkName := print $pkg "." $f.BlobKeyName }}
+			{{- $desc := print $pkg "BlobDesc" $f.StructField }}
+			// {{ $desc }} is the schema descriptor for {{ $f.Name }} blob field.
+			{{- if $f.Position.MixedIn }}
+				{{ $desc }} := {{ print $pkg "MixinFields" $f.Position.MixinIndex }}[{{ $f.Position.Index }}].Descriptor()
+			{{- else }}
+				{{ $desc }} := {{ $pkg }}Fields[{{ $f.Position.Index }}].Descriptor()
+			{{- end }}
+			// {{ $bkName }} generates the blob storage key for the {{ $f.Name }} field.
+			{{ $bkName }} = {{ $desc }}.BlobKey
 		{{- end }}
 	{{- end }}
 {{- end }}

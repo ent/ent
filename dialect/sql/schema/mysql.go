@@ -135,6 +135,8 @@ func (d *MySQL) atTypeC(c1 *Column, c2 *schema.Column) error {
 	switch c1.Type {
 	case field.TypeBool:
 		t = &schema.BoolType{T: "boolean"}
+	case field.TypeBlob:
+		return fmt.Errorf("blob fields are not stored in the database")
 	case field.TypeInt8:
 		t = &schema.IntegerType{T: mysql.TypeTinyInt}
 	case field.TypeUint8:

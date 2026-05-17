@@ -10,6 +10,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := $.Scope.Receiver }}
 {{ $mutation := print $receiver ".mutation"  }}
+{{ $pkg := base $.Config.Package }}
 
 func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name }}, error) {
 	if err := {{ $receiver }}.check(); err != nil {
@@ -21,11 +22,73 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 			return nil, err
 		}
 	{{- end }}
+	{{- if $.HasBlobFields }}
+	_blobs := ent.NewBlobBulkWriter({{ $mutation }}.blobOpeners.{{ $.Name }})
+	{{- range $f := $.BlobFields }}
+		{{- if not $f.IsBlobLazy }}
+		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
+			{{- if $f.HasBlobKey }}
+			key, err := {{ $.Package }}.{{ $f.BlobKeyName }}(ctx)
+			if err != nil {
+				return nil, errors.Join(fmt.Errorf("{{ $pkg }}: generating blob key for {{ $f.Name }}: %w", err), _blobs.Close())
+			}
+			{{- else }}
+			key := uuid.NewString()
+			{{- end }}
+			{{- if $f.HasValueScanner }}
+			blobData, err := {{ $f.ValueFunc }}(value)
+			if err != nil {
+				return nil, errors.Join(fmt.Errorf("{{ $pkg }}: encoding {{ $f.Name }}: %w", err), _blobs.Close())
+			}
+			var blobBytes []byte
+			switch v := blobData.(type) {
+			case []byte:
+				blobBytes = v
+			case string:
+				blobBytes = []byte(v)
+			default:
+				return nil, errors.Join(fmt.Errorf("{{ $pkg }}: expected []byte or string from ValueScanner for {{ $f.Name }}, got %T", blobData), _blobs.Close())
+			}
+			if err := _blobs.Write(ctx, {{ $.Package }}.{{ $f.Constant }}, key, bytes.NewReader(blobBytes)); err != nil {
+				return nil, errors.Join(fmt.Errorf("{{ $pkg }}: writing blob for {{ $f.Name }}: %w", err), _blobs.Close())
+			}
+			{{- else }}
+			if err := _blobs.Write(ctx, {{ $.Package }}.{{ $f.Constant }}, key, bytes.NewReader(value)); err != nil {
+				return nil, errors.Join(fmt.Errorf("{{ $pkg }}: writing blob for {{ $f.Name }}: %w", err), _blobs.Close())
+			}
+			{{- end }}
+			_node.{{ $f.Name }}_key = &key
+			_node.{{ $f.StructField }} = value
+			_spec.SetField("{{ $f.Name }}_key", field.TypeString, key)
+		}
+		{{- else }}
+		if r, ok := {{ $mutation }}.{{ $f.StructField }}(); ok {
+			{{- if $f.HasBlobKey }}
+			key, err := {{ $.Package }}.{{ $f.BlobKeyName }}(ctx)
+			if err != nil {
+				return nil, errors.Join(fmt.Errorf("{{ $pkg }}: generating blob key for {{ $f.Name }}: %w", err), _blobs.Close())
+			}
+			{{- else }}
+			key := uuid.NewString()
+			{{- end }}
+			if err := _blobs.Write(ctx, {{ $.Package }}.{{ $f.Constant }}, key, r); err != nil {
+				return nil, errors.Join(fmt.Errorf("{{ $pkg }}: writing blob for {{ $f.Name }}: %w", err), _blobs.Close())
+			}
+			_node.{{ $f.Name }}_key = &key
+			_spec.SetField("{{ $f.Name }}_key", field.TypeString, key)
+		}
+		{{- end }}
+	{{- end }}
+	{{- end }}
 	if err := sqlgraph.CreateNode(ctx, {{ $receiver }}.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
+		{{- if $.HasBlobFields }}
+		return nil, errors.Join(err, _blobs.Close())
+		{{- else }}
 		return nil, err
+		{{- end }}
 	}
 	{{- if $.HasCompositeID }}
 	{{- else if or $.ID.HasValueScanner $.ID.Type.ValueScanner (not $.ID.Type.Numeric) }}
@@ -76,6 +139,11 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 		{{ $mutation }}.{{ $.ID.BuilderField }} = &_node.{{ $.ID.StructField }}
 		{{ $mutation }}.done = true
 	{{- end }}
+	{{- if $.HasBlobFields }}
+	if err := _blobs.Close(); err != nil {
+		return nil, err
+	}
+	{{- end }}
 	return _node, nil
 }
 
@@ -105,6 +173,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 		}
 	{{- end }}
 	{{- range $f := $.MutationFields }}
+		{{- if $f.IsBlobNoColumn }}{{ continue }}{{ end }}
 		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 			{{- if $f.HasValueScanner }}
 				vv, err := {{ $f.ValueFunc }}(value)
@@ -163,6 +232,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 {{ define "dialect/sql/create_bulk" }}
 {{ $builder := pascal $.Scope.Builder }}
 {{ $receiver := $.Scope.Receiver }}
+{{ $pkg := base $.Config.Package }}
 
 // Save creates the {{ $.Name }} entities in the database.
 func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }}, error) {
@@ -170,9 +240,15 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 	if {{ $receiver }}.err != nil {
 		return nil, {{ $receiver }}.err
 	}
+	if len({{ $receiver }}.builders) == 0 {
+		return nil, nil
+	}
 	specs := make([]*sqlgraph.CreateSpec, len({{ $receiver }}.builders))
 	nodes := make([]*{{ $.Name }}, len({{ $receiver }}.builders))
 	mutators := make([]Mutator, len({{ $receiver }}.builders))
+	{{- if $.HasBlobFields }}
+		_blobs := ent.NewBlobBulkWriter({{ $receiver }}.builders[0].mutation.blobOpeners.{{ $.Name }})
+	{{- end }}
 	for i := range {{ $receiver }}.builders {
 		func(i int, root context.Context) {
 			builder := {{ $receiver }}.builders[i]
@@ -194,6 +270,61 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 					if err != nil {
 						return nil, err
 					}
+				{{- end }}
+				{{- range $f := $.BlobFields }}
+					{{- if not $f.IsBlobLazy }}
+					if value, ok := mutation.{{ $f.MutationGet }}(); ok {
+						{{- if $f.HasBlobKey }}
+						key, err := {{ $.Package }}.{{ $f.BlobKeyName }}(ctx)
+						if err != nil {
+							return nil, fmt.Errorf("{{ $pkg }}: generating blob key for {{ $f.Name }}: %w", err)
+						}
+						{{- else }}
+						key := uuid.NewString()
+						{{- end }}
+						{{- if $f.HasValueScanner }}
+						blobData, err := {{ $f.ValueFunc }}(value)
+						if err != nil {
+							return nil, fmt.Errorf("{{ $pkg }}: encoding {{ $f.Name }}: %w", err)
+						}
+							var blobBytes []byte
+							switch v := blobData.(type) {
+							case []byte:
+								blobBytes = v
+							case string:
+								blobBytes = []byte(v)
+							default:
+								return nil, fmt.Errorf("{{ $pkg }}: expected []byte or string from ValueScanner for {{ $f.Name }}, got %T", blobData)
+						}
+						if err := _blobs.Write(ctx, {{ $.Package }}.{{ $f.Constant }}, key, bytes.NewReader(blobBytes)); err != nil {
+							return nil, fmt.Errorf("{{ $pkg }}: writing blob for {{ $f.Name }}: %w", err)
+						}
+						{{- else }}
+						if err := _blobs.Write(ctx, {{ $.Package }}.{{ $f.Constant }}, key, bytes.NewReader(value)); err != nil {
+							return nil, fmt.Errorf("{{ $pkg }}: writing blob for {{ $f.Name }}: %w", err)
+						}
+						{{- end }}
+						nodes[i].{{ $f.Name }}_key = &key
+						nodes[i].{{ $f.StructField }} = value
+						specs[i].SetField("{{ $f.Name }}_key", field.TypeString, key)
+					}
+					{{- else }}
+					if r, ok := mutation.{{ $f.StructField }}(); ok {
+						{{- if $f.HasBlobKey }}
+						key, err := {{ $.Package }}.{{ $f.BlobKeyName }}(ctx)
+						if err != nil {
+							return nil, fmt.Errorf("{{ $pkg }}: generating blob key for {{ $f.Name }}: %w", err)
+						}
+						{{- else }}
+						key := uuid.NewString()
+						{{- end }}
+						if err := _blobs.Write(ctx, {{ $.Package }}.{{ $f.Constant }}, key, r); err != nil {
+							return nil, fmt.Errorf("{{ $pkg }}: writing blob for {{ $f.Name }}: %w", err)
+						}
+						nodes[i].{{ $f.Name }}_key = &key
+						specs[i].SetField("{{ $f.Name }}_key", field.TypeString, key)
+					}
+					{{- end }}
 				{{- end }}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, {{ $receiver }}.builders[i+1].mutation)
@@ -258,10 +389,18 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 	}
 	if len(mutators) > 0 {
 		if _, err := mutators[0].Mutate(ctx, {{ $receiver }}.builders[0].mutation); err != nil {
+			{{- if $.HasBlobFields }}
+			return nil, errors.Join(err, _blobs.Close())
+			{{- else }}
 			return nil, err
+			{{- end }}
 		}
 	}
+	{{- if $.HasBlobFields }}
+	return nodes, _blobs.Close()
+	{{- else }}
 	return nodes, nil
+	{{- end }}
 }
 
 // SaveX is like Save, but panics if an error occurs.

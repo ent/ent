@@ -98,6 +98,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 		}
 	}
 	{{- range $f := $.MutationFields }}
+			{{- if $f.IsBlobNoColumn }}{{ continue }}{{ end }}
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}
 				if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 					{{- if $f.HasValueScanner }}
@@ -169,6 +170,66 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			{{- xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
+	{{- if and $one $.HasBlobFields }}
+	_blobs := ent.NewBlobBulkWriter({{ $mutation }}.blobOpeners.{{ $.Name }})
+	{{- range $f := $.BlobFields }}
+		{{- if not $f.IsBlobLazy }}
+		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
+			{{- if $f.HasBlobKey }}
+			key, err := {{ $.Package }}.{{ $f.BlobKeyName }}(ctx)
+			if err != nil {
+				return nil, errors.Join(fmt.Errorf("{{ $pkg }}: generating blob key for {{ $f.Name }}: %w", err), _blobs.Close())
+			}
+			{{- else }}
+			key := uuid.NewString()
+			{{- end }}
+			{{- if $f.HasValueScanner }}
+			blobData, err := {{ $f.ValueFunc }}(value)
+			if err != nil {
+				return nil, errors.Join(fmt.Errorf("{{ $pkg }}: encoding {{ $f.Name }}: %w", err), _blobs.Close())
+			}
+			var blobBytes []byte
+			switch v := blobData.(type) {
+			case []byte:
+				blobBytes = v
+			case string:
+				blobBytes = []byte(v)
+			default:
+				return nil, errors.Join(fmt.Errorf("{{ $pkg }}: expected []byte or string from ValueScanner for {{ $f.Name }}, got %T", blobData), _blobs.Close())
+			}
+			if err := _blobs.Write(ctx, {{ $.Package }}.{{ $f.Constant }}, key, bytes.NewReader(blobBytes)); err != nil {
+				return nil, errors.Join(fmt.Errorf("{{ $pkg }}: writing blob for {{ $f.Name }}: %w", err), _blobs.Close())
+			}
+			{{- else }}
+			if err := _blobs.Write(ctx, {{ $.Package }}.{{ $f.Constant }}, key, bytes.NewReader(value)); err != nil {
+				return nil, errors.Join(fmt.Errorf("{{ $pkg }}: writing blob for {{ $f.Name }}: %w", err), _blobs.Close())
+			}
+			{{- end }}
+			_spec.SetField("{{ $f.Name }}_key", field.TypeString, key)
+		}
+		{{- if $f.Optional }}
+		if {{ $mutation }}.{{ $f.StructField }}Cleared() {
+			_spec.ClearField("{{ $f.Name }}_key", field.TypeString)
+		}
+		{{- end }}
+		{{- else }}
+		if r, ok := {{ $mutation }}.{{ $f.StructField }}(); ok {
+			{{- if $f.HasBlobKey }}
+			key, err := {{ $.Package }}.{{ $f.BlobKeyName }}(ctx)
+			if err != nil {
+				return nil, errors.Join(fmt.Errorf("{{ $pkg }}: generating blob key for {{ $f.Name }}: %w", err), _blobs.Close())
+			}
+			{{- else }}
+			key := uuid.NewString()
+			{{- end }}
+			if err := _blobs.Write(ctx, {{ $.Package }}.{{ $f.Constant }}, key, r); err != nil {
+				return nil, errors.Join(fmt.Errorf("{{ $pkg }}: writing blob for {{ $f.Name }}: %w", err), _blobs.Close())
+			}
+			_spec.SetField("{{ $f.Name }}_key", field.TypeString, key)
+		}
+		{{- end }}
+	{{- end }}
+	{{- end }}
 	{{- if $one }}
 		_node = &{{ $.Name }}{config: {{ $receiver }}.config}
 		_spec.Assign = _node.assignValues
@@ -184,9 +245,43 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
+		{{- if and $one $.HasBlobFields }}
+		return {{ $zero }}, errors.Join(err, _blobs.Close())
+		{{- else }}
 		return {{ $zero }}, err
+		{{- end }}
 	}
 	{{ $mutation }}.done = true
+	{{- if and $one $.HasBlobFields }}
+	if err := _blobs.Close(); err != nil {
+		return nil, err
+	}
+	{{- end }}
+	{{- if and $one $.HasLoadOnScanFields }}
+	{
+		_blobReader := ent.NewBlobBulkReader({{ $mutation }}.blobOpeners.{{ $.Name }})
+		{{- range $f := $.LoadOnScanFields }}
+		if _node.{{ $f.Name }}_key != nil && *_node.{{ $f.Name }}_key != "" {
+			data, err := _blobReader.Read(ctx, {{ $.Package }}.{{ $f.Constant }}, *_node.{{ $f.Name }}_key)
+			if err != nil {
+				return nil, errors.Join(fmt.Errorf("loading {{ $f.Name }} after update: %w", err), _blobReader.Close())
+			}
+			{{- if $f.HasValueScanner }}
+			v, err := {{ $f.FromValueFunc }}(data)
+			if err != nil {
+				return nil, errors.Join(fmt.Errorf("scanning {{ $f.Name }} after update: %w", err), _blobReader.Close())
+			}
+			_node.{{ $f.StructField }} = v
+			{{- else }}
+			_node.{{ $f.StructField }} = data
+			{{- end }}
+		}
+		{{- end }}
+		if err := _blobReader.Close(); err != nil {
+			return nil, err
+		}
+	}
+	{{- end }}
 	return _node, nil
 }
 {{ end }}
