@@ -729,3 +729,72 @@ func TestEdgeFieldCollation(t *testing.T) {
 	require.True(t, ok)
 	require.Equal(t, "utf8mb4_bin", col.Collation)
 }
+
+func TestMultiSchemaSameTableName(t *testing.T) {
+	// Two types that map to the same SQL table name "templates" but in different schemas.
+	global := &load.Schema{
+		Name: "GlobalTemplate",
+		Fields: []*load.Field{
+			{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+		},
+		Annotations: dict("EntSQL", dict("table", "templates", "schema", "global")),
+	}
+	lead := &load.Schema{
+		Name: "LeadTemplate",
+		Fields: []*load.Field{
+			{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+		},
+		Annotations: dict("EntSQL", dict("table", "templates", "schema", "lead")),
+	}
+	g, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, global, lead)
+	require.NoError(t, err)
+	tables, err := g.Tables()
+	require.NoError(t, err)
+	require.Len(t, tables, 2)
+
+	// Verify both tables exist with correct schemas.
+	require.Equal(t, "templates", tables[0].Name)
+	require.Equal(t, "global", tables[0].Schema)
+	require.Equal(t, "templates", tables[1].Name)
+	require.Equal(t, "lead", tables[1].Schema)
+
+	// Verify Go identifiers are schema-prefixed due to collision.
+	require.Equal(t, "Global_Templates", g.TableIdent(tables[0]))
+	require.Equal(t, "Lead_Templates", g.TableIdent(tables[1]))
+}
+
+func TestSingleSchemaTableIdent(t *testing.T) {
+	// Single-schema tables should get plain pascal(Name) identifiers (backward compat).
+	g, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, T1, T2)
+	require.NoError(t, err)
+	tables, err := g.Tables()
+	require.NoError(t, err)
+
+	for _, table := range tables {
+		ident := g.TableIdent(table)
+		require.Equal(t, pascal(table.Name), ident, "table %q should get unprefixed identifier", table.Name)
+	}
+}
+
+func TestDuplicateTableNameSameSchema(t *testing.T) {
+	// Two types with the same table name in the same schema should still error.
+	s1 := &load.Schema{
+		Name: "Foo",
+		Fields: []*load.Field{
+			{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+		},
+		Annotations: dict("EntSQL", dict("table", "items", "schema", "db1")),
+	}
+	s2 := &load.Schema{
+		Name: "Bar",
+		Fields: []*load.Field{
+			{Name: "name", Info: &field.TypeInfo{Type: field.TypeString}},
+		},
+		Annotations: dict("EntSQL", dict("table", "items", "schema", "db1")),
+	}
+	g, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, s1, s2)
+	require.NoError(t, err)
+	_, err = g.Tables()
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "duplicate table name")
+}

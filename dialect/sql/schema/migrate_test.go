@@ -69,6 +69,32 @@ func TestMigrate_SchemaName(t *testing.T) {
 	require.NoError(t, m.Create(context.Background()))
 }
 
+func TestAtlas_DesiredSchema(t *testing.T) {
+	global := schema.New("global").AddTables(schema.NewTable("templates"))
+	lead := schema.New("lead").AddTables(schema.NewTable("templates"))
+	realm := &schema.Realm{Schemas: []*schema.Schema{global, lead}}
+
+	t.Run("current schema", func(t *testing.T) {
+		desired := (&Atlas{schema: "global"}).desiredSchema(schema.New("lead"), realm)
+		require.Same(t, lead, desired)
+	})
+	t.Run("configured schema", func(t *testing.T) {
+		desired := (&Atlas{schema: "lead"}).desiredSchema(schema.New("public"), realm)
+		require.Same(t, lead, desired)
+	})
+	t.Run("single schema", func(t *testing.T) {
+		desired := (&Atlas{}).desiredSchema(schema.New("public"), &schema.Realm{
+			Schemas: []*schema.Schema{global},
+		})
+		require.Same(t, global, desired)
+	})
+	t.Run("multiple schemas without match", func(t *testing.T) {
+		desired := (&Atlas{}).desiredSchema(schema.New("public"), realm)
+		require.Equal(t, "public", desired.Name)
+		require.Empty(t, desired.Tables)
+	})
+}
+
 func escape(query string) string {
 	rows := strings.Split(query, "\n")
 	for i := range rows {

@@ -693,15 +693,28 @@ func (a *Atlas) planInspect(ctx context.Context, conn dialect.ExecQuerier, name 
 	if err != nil {
 		return nil, err
 	}
-	var desired *schema.Schema
-	switch {
-	case realm != nil && len(realm.Schemas) > 0:
-		desired = realm.Schemas[0]
-	default:
-		desired = &schema.Schema{}
-	}
+	desired := a.desiredSchema(current, realm)
 	desired.Name, desired.Attrs = current.Name, current.Attrs
 	return a.diff(ctx, name, current, desired, a.types[len(types):], noQualifierOpt)
+}
+
+func (a *Atlas) desiredSchema(current *schema.Schema, realm *schema.Realm) *schema.Schema {
+	desired := schema.New(current.Name)
+	if realm == nil || len(realm.Schemas) == 0 {
+		return desired
+	}
+	if s, ok := realm.Schema(current.Name); ok {
+		return s
+	}
+	if a.schema != "" {
+		if s, ok := realm.Schema(a.schema); ok {
+			return s
+		}
+	}
+	if len(realm.Schemas) == 1 {
+		return realm.Schemas[0]
+	}
+	return desired
 }
 
 func (a *Atlas) planReplay(ctx context.Context, name string, tables []*Table) (*migrate.Plan, error) {
