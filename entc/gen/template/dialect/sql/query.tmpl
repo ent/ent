@@ -105,8 +105,74 @@ func ({{ $receiver }} *{{ $builder }}) sqlAll(ctx context.Context, hooks ...quer
 			{{- xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
+	{{- if $.HasLoadOnScanFields }}
+	if err := {{ $receiver }}.loadBlobFields(ctx, nodes); err != nil {
+		return nil, err
+	}
+	{{- end }}
 	return nodes, nil
 }
+
+{{- if $.HasLoadOnScanFields }}
+
+func ({{ $receiver }} *{{ $builder }}) loadBlobFields(ctx context.Context, nodes []*{{ $.Name }}) error {
+	_blobs := ent.NewBlobStore({{ $receiver }}.blobOpeners.{{ $.Name }})
+	for _, n := range nodes {
+		{{- range $f := $.LoadOnScanFields }}
+		if n.{{ $f.BlobKeyColumn }} != nil && *n.{{ $f.BlobKeyColumn }} != "" {
+			{{- if $f.IsBlobNoColumn }}
+			{{- /* Non-DualWrite: blob is the only source of data. */}}
+			data, err := _blobs.Read(ctx, {{ $.Package }}.{{ $f.Constant }}, *n.{{ $f.BlobKeyColumn }})
+			if err != nil {
+				return errors.Join(fmt.Errorf("loading {{ $f.Name }}: %w", err), _blobs.Close())
+			}
+			if data == nil {
+				return errors.Join(fmt.Errorf("loading {{ $f.Name }}: object %q not found in blob storage", *n.{{ $f.BlobKeyColumn }}), _blobs.Close())
+			}
+			{{- if $f.HasValueScanner }}
+			sv := {{ $f.ScanValueFunc }}()
+			if err := sv.Scan(data); err != nil {
+				return errors.Join(fmt.Errorf("scanning {{ $f.Name }}: %w", err), _blobs.Close())
+			}
+			v, err := {{ $f.FromValueFunc }}(sv)
+			if err != nil {
+				return errors.Join(fmt.Errorf("scanning {{ $f.Name }}: %w", err), _blobs.Close())
+			}
+			n.{{ $f.StructField }} = v
+			{{- else if $f.IsBlobGoString }}
+			n.{{ $f.StructField }} = {{ $f.Type }}(data)
+			{{- else }}
+			n.{{ $f.StructField }} = data
+			{{- end }}
+			{{- else }}
+			{{- /* DualWrite: prefer blob value, but preserve the column value when blob is missing. */}}
+			switch data, err := _blobs.Read(ctx, {{ $.Package }}.{{ $f.Constant }}, *n.{{ $f.BlobKeyColumn }}); {
+			case err != nil:
+				return errors.Join(fmt.Errorf("loading {{ $f.Name }}: %w", err), _blobs.Close())
+			case data != nil:
+				{{- if $f.HasValueScanner }}
+				sv := {{ $f.ScanValueFunc }}()
+				if err := sv.Scan(data); err != nil {
+					return errors.Join(fmt.Errorf("scanning {{ $f.Name }}: %w", err), _blobs.Close())
+				}
+				v, err := {{ $f.FromValueFunc }}(sv)
+				if err != nil {
+					return errors.Join(fmt.Errorf("scanning {{ $f.Name }}: %w", err), _blobs.Close())
+				}
+				n.{{ $f.StructField }} = v
+				{{- else if $f.IsBlobGoString }}
+				n.{{ $f.StructField }} = {{ $f.Type }}(data)
+				{{- else }}
+				n.{{ $f.StructField }} = data
+				{{- end }}
+			}
+			{{- end }}
+		}
+		{{- end }}
+	}
+	return _blobs.Close()
+}
+{{- end }}
 
 {{/* Generate a method to eager-load each edge. */}}
 {{- range $e := $.Edges }}

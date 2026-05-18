@@ -26,10 +26,44 @@ func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) 
 			}
 		}
 	}
+	{{- if $.HasBlobFields }}
+	// Collect blob keys before deleting rows so we can remove blobs from storage afterward.
+	_blobCleanup, _blobErr := ent.NewBlobs({{ $mutation }}.blobOpeners.{{ $.Name }}).Delete(ctx, &sqlgraph.BlobSpec{
+		Driver:    {{ $receiver }}.driver,
+		Predicate: _spec.Predicate,
+		Table:     {{ $.Package }}.Table,
+		Columns: map[string]string{
+			{{- range $f := $.BlobFields }}
+			{{ $.Package }}.{{ $f.Constant }}: "{{ $f.BlobKeyColumn }}",
+			{{- end }}
+		},
+	})
+	if _blobErr != nil {
+		return 0, _blobErr
+	}
+	{{- end }}
 	affected, err := sqlgraph.DeleteNodes(ctx, {{ $receiver}}.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	{{- if $.HasBlobFields }}
+	if err == nil {
+		if txd, ok := {{ $receiver }}.driver.(*txDriver); ok {
+			txd.mu.Lock()
+			txd.onCommit = append(txd.onCommit, func(next Committer) Committer {
+				return CommitFunc(func(ctx context.Context, tx *Tx) error {
+					if err := next.Commit(ctx, tx); err != nil {
+						return err
+					}
+					return _blobCleanup(ctx)
+				})
+			})
+			txd.mu.Unlock()
+		} else {
+			err = _blobCleanup(ctx)
+		}
+	}
+	{{- end }}
 	{{ $mutation }}.done = true
 	return affected, err
 }

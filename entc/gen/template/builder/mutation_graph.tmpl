@@ -166,6 +166,7 @@ func (m {{ $mutation }}) Tx() (*Tx, error) {
 {{ end }}
 
 {{ range $f := $n.Fields }}
+	{{- if $f.IsBlobLazy }}{{ continue }}{{ end }}
 	{{ if $n.HasOneFieldID }}
 		{{ $const := print $n.Package "." $f.Constant }}
 		// {{ $f.MutationGetOld }} returns the old "{{ $f.Name }}" field's value of the {{ $n.Name }} entity.
@@ -197,6 +198,7 @@ func (m *{{ $mutation }}) OldField(ctx context.Context, name string) (ent.Value,
 		{{- with $n.Fields }}
 			switch name {
 			{{- range $f := . }}
+				{{- if $f.IsBlobLazy }}{{ continue }}{{ end }}
 				{{- $const := print $n.Package "." $f.Constant }}
 				case {{ $const }}:
 					return m.{{ $f.MutationGetOld }}(ctx)

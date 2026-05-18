@@ -22,6 +22,9 @@ in the LICENSE file in the root directory of this source tree.
 {{- end }}
 
 {{ range $f := $fields }}
+	{{- if $f.IsBlobLazy }}{{ continue }}{{ end }}
+	{{- /* Skip all blob fields on multi-row Update (blob key updates require UpdateOne). */}}
+	{{- if and $f.IsBlob $updater (not (hasSuffix $builder "UpdateOne")) }}{{ continue }}{{ end }}
 	{{ $func := print "Set" $f.StructField }}
 	// {{ $func }} sets the "{{ $f.Name }}" field.
 	func ({{ $receiver }} *{{ $builder }}) {{ $func }}(v {{ $f.Type }}) *{{ $builder }} {
@@ -73,6 +76,31 @@ in the LICENSE file in the root directory of this source tree.
 		}
 	{{ end }}
 {{ end }}
+
+{{- /* Lazy blob setters only on Create and UpdateOne (blob writes require a single-row context). */}}
+{{- $updateOne := hasSuffix $builder "UpdateOne" }}
+{{- if or $creator $updateOne }}
+{{- if hasTemplate (printf "dialect/%s/model/fields" $.Storage) }}
+{{- range $f := $.BlobFields }}
+	{{- if not $f.IsBlobLazy }}{{ continue }}{{ end }}
+	{{ $func := print "Set" $f.StructField }}
+	// {{ $func }} sets the "{{ $f.Name }}" field.
+	func ({{ $receiver }} *{{ $builder }}) {{ $func }}(v io.Reader) *{{ $builder }} {
+		{{ $receiver }}.mutation.Set{{ $f.StructField }}(v)
+		return {{ $receiver }}
+	}
+
+	{{- if and $f.Optional $updateOne }}
+		{{ $clearFunc := print "Clear" $f.StructField }}
+		// {{ $clearFunc }} clears the value of the "{{ $f.Name }}" field.
+		func ({{ $receiver }} *{{ $builder }}) {{ $clearFunc }}() *{{ $builder }} {
+			{{ $receiver }}.mutation.{{ $clearFunc }}()
+			return {{ $receiver }}
+		}
+	{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
 
 {{ range $e := $.EdgesWithID }}
 	{{ if and $updater $e.Immutable }}

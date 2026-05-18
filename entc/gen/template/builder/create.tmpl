@@ -98,6 +98,7 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 // check runs all checks and user-defined validators on the builder.
 func ({{ $receiver }} *{{ $builder }}) check() error {
 	{{- range $f := $fields }}
+		{{- if and $f.IsBlobLazy (not (hasTemplate (printf "dialect/%s/model/fields" $.Storage))) }}{{ continue }}{{ end }}
 		{{- $skip := false }}{{ if $.HasOneFieldID }}{{ if eq $f.Name $.ID.Name }}{{ $skip = true }}{{ end }}{{ end }}
 		{{- if and (not $f.Optional) (not $skip) }}
 			{{- $dialects := $f.RequiredFor }}

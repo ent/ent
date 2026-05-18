@@ -19,6 +19,7 @@ func ({{ $receiver }} *{{ $.Name }}) FromResponse(res *gremlin.Response) error {
 	var {{ $scan }} struct {
 		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
 		{{ range $f := $.Fields }}
+			{{- if $f.IsBlob }}{{ continue }}{{ end }}
 			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.NillableValue }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
 		{{ end }}
 	}
@@ -27,6 +28,7 @@ func ({{ $receiver }} *{{ $.Name }}) FromResponse(res *gremlin.Response) error {
 	}
 	{{ $receiver }}.ID = {{ $scan }}.ID
 	{{- range $i, $f := $.Fields }}
+		{{- if $f.IsBlob }}{{ continue }}{{ end }}
 		{{- if and $f.IsTime (not $f.HasGoType) }}
 			{{- if $f.Nillable }}
 				v{{ $i }} := time.Unix(0, {{ $scan }}.{{ $f.StructField }})
@@ -56,6 +58,7 @@ func ({{ $receiver }} *{{ $slice }}) FromResponse(res *gremlin.Response) error {
 	var {{ $scan }} []struct {
 		ID   {{ $.ID.Type }}  `json:"id,omitempty"`
 		{{ range $f := $.Fields }}
+			{{- if $f.IsBlob }}{{ continue }}{{ end }}
 			{{- $f.StructField }} {{ if and $f.IsTime (not $f.HasGoType) }}int64{{ else }}{{ if $f.NillableValue }}*{{ end }}{{ $f.Type }}{{ end }} `json:"{{ $f.StorageKey }},omitempty"`
 		{{ end }}
 	}
@@ -65,6 +68,7 @@ func ({{ $receiver }} *{{ $slice }}) FromResponse(res *gremlin.Response) error {
 	for _, v := range {{ $scan }} {
 		node := &{{ $.Name }}{ID: v.ID}
 		{{- range $i, $f := $.Fields }}
+			{{- if $f.IsBlob }}{{ continue }}{{ end }}
 			{{- if and $f.IsTime (not $f.HasGoType) }}
 				{{- if $f.Nillable }}
 					v{{ $i }} := time.Unix(0, v.{{ $f.StructField }})

@@ -344,6 +344,52 @@ func TestMarshalDefaults(t *testing.T) {
 	require.Equal(t, schema.Fields[8].DefaultKind, reflect.Func)
 }
 
+// BlobDoc is a test schema with blob-stored fields.
+type BlobDoc struct {
+	ent.Schema
+}
+
+func (BlobDoc) Fields() []ent.Field {
+	return []ent.Field{
+		field.Blob("content").
+			Comment("blob content"),
+		field.Blob("thumbnail"),
+	}
+}
+
+func (BlobDoc) Edges() []ent.Edge { return nil }
+
+func TestMarshalBlobSchema(t *testing.T) {
+	d := BlobDoc{}
+	buf, err := MarshalSchema(d)
+	require.NoError(t, err)
+
+	s := &Schema{}
+	err = json.Unmarshal(buf, s)
+	require.NoError(t, err)
+
+	require.Equal(t, "BlobDoc", s.Name)
+	require.Len(t, s.Fields, 2)
+
+	// First blob field: content.
+	f0 := s.Fields[0]
+	require.Equal(t, "content", f0.Name)
+	require.Equal(t, field.TypeBlob, f0.Info.Type)
+	require.Equal(t, "blob content", f0.Comment)
+
+	// Second blob field: thumbnail.
+	f1 := s.Fields[1]
+	require.Equal(t, "thumbnail", f1.Name)
+	require.Equal(t, field.TypeBlob, f1.Info.Type)
+
+	// Verify JSON roundtrip preserves type.
+	buf2, err := json.Marshal(s)
+	require.NoError(t, err)
+	s2 := &Schema{}
+	require.NoError(t, json.Unmarshal(buf2, s2))
+	require.Equal(t, field.TypeBlob, s2.Fields[0].Info.Type)
+}
+
 type TimeMixin struct {
 	mixin.Schema
 }

@@ -75,6 +75,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 		trs []*dsl.Traversal
 	)
 	{{- range $f := $.MutationFields }}
+		{{- if $f.IsBlob }}{{ continue }}{{ end }}
 		{{- if or (not $f.Immutable) $f.UpdateDefault }}
 			if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 				{{- if $f.Unique }}
@@ -103,6 +104,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin({{ if $one }}id {{ $.ID.Type }}{{
 	{{- with $.HasOptional }}
 		var properties []any
 		{{- range $f := $.MutationFields }}
+			{{- if $f.IsBlob }}{{ continue }}{{ end }}
 			{{- if $f.Optional }}
 				if {{ $mutation }}.{{ $f.StructField }}Cleared() {
 					properties = append(properties, {{ $.Package }}.{{ $f.Constant }})

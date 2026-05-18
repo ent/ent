@@ -81,6 +81,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ end }}
 
 {{ range $f := $.Fields }}
+	{{ if or $f.IsBlobNoColumn $f.IsBlobLazy }}{{ continue }}{{ end }}
 	{{ $func := $f.StructField }}
 	{{/* JSON cannot be compared using "=" and Enum has a type defined with the field name */}}
 	{{ $hasP := not (or $f.IsJSON $f.IsEnum) }}
@@ -115,6 +116,7 @@ in the LICENSE file in the root directory of this source tree.
 {{ end }}
 
 {{ range $f := $.Fields }}
+	{{ if or $f.IsBlobNoColumn $f.IsBlobLazy }}{{ continue }}{{ end }}
 	{{ range $op := $f.Ops }}
 		{{ $arg := "v" }}{{ if $op.Variadic }}{{ $arg = "vs" }}{{ end }}
 		{{ $stringOp := eq $op.Name "EqualFold" "Contains" "ContainsFold" "HasPrefix" "HasSuffix" }}

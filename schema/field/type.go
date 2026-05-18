@@ -36,6 +36,7 @@ const (
 	TypeUint64
 	TypeFloat32
 	TypeFloat64
+	TypeBlob
 	endTypes
 )
 
@@ -49,7 +50,7 @@ func (t Type) String() string {
 
 // Numeric reports if the given type is a numeric type.
 func (t Type) Numeric() bool {
-	return t >= TypeInt8 && t < endTypes
+	return t >= TypeInt8 && t < TypeBlob
 }
 
 // Float reports if the given type is a float type.
@@ -166,6 +167,7 @@ var (
 		TypeEnum:    "string",
 		TypeString:  "string",
 		TypeOther:   "other",
+		TypeBlob:    "blob",
 		TypeInt:     "int",
 		TypeInt8:    "int8",
 		TypeInt16:   "int16",
@@ -186,6 +188,7 @@ var (
 		TypeEnum:  "TypeEnum",
 		TypeBytes: "TypeBytes",
 		TypeOther: "TypeOther",
+		TypeBlob:  "TypeBlob",
 	}
 )
 

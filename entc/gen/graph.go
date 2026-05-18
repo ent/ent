@@ -172,6 +172,32 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 	for _, t := range g.Nodes {
 		check(t.setupFKs(), "set %q foreign-keys", t.Name)
 	}
+	for _, t := range g.Nodes {
+		t.setupBlobKeys()
+	}
+	// Non-lazy blob fields act as regular TypeBytes in the mutation and entity layers.
+	// Their Type is changed here so they flow through all normal field paths (struct, mutation, hooks).
+	for _, t := range g.Nodes {
+		for _, f := range t.Fields {
+			if f.IsBlob() && !f.IsBlobLazy() {
+				ti := &field.TypeInfo{Type: field.TypeBytes}
+				// Preserve custom GoType information if set.
+				if f.Type != nil && f.Type.RType != nil {
+					ti.RType = f.Type.RType
+					ti.Ident = f.Type.Ident
+					ti.PkgPath = f.Type.PkgPath
+					ti.PkgName = f.Type.PkgName
+					ti.Nillable = f.Type.Nillable
+				}
+				f.Type = ti
+				// Copy BlobDWSchemaType to SchemaType so it flows
+				// into the column definition for migration.
+				if f.def != nil && len(f.def.BlobDWSchemaType) > 0 {
+					f.def.SchemaType = f.def.BlobDWSchemaType
+				}
+			}
+		}
+	}
 	for i := range schemas {
 		g.addIndexes(schemas[i])
 	}
@@ -654,9 +680,15 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 			if a := f.EntSQL(); a != nil && a.Skip {
 				continue
 			}
+			if f.IsBlobNoColumn() || f.IsBlobLazy() {
+				continue
+			}
 			if !f.IsEdgeField() {
 				table.AddColumn(f.Column())
 			}
+		}
+		for _, bk := range n.BlobKeys {
+			table.AddColumn(bk.Field.Column())
 		}
 		switch {
 		case tables[table.Name] == nil:

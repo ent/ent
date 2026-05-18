@@ -98,6 +98,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 		}
 	}
 	{{- range $f := $.MutationFields }}
+			{{- if $f.IsBlobNoColumn }}{{ continue }}{{ end }}
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}
 				if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 					{{- if $f.HasValueScanner }}
@@ -169,6 +170,92 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			{{- xtemplate $tmpl $ }}
 		{{- end }}
 	{{- end }}
+	{{- if and $one $.HasBlobFields }}
+	_blobs := ent.NewBlobs({{ $mutation }}.blobOpeners.{{ $.Name }})
+	{{- range $f := $.BlobFields }}
+		{{- if not $f.IsBlobLazy }}
+		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
+			{{- if $f.HasValueScanner }}
+			_blobDV, err := {{ $f.ValueFunc }}(value)
+			if err != nil {
+				return {{ $zero }}, fmt.Errorf("{{ $pkg }}: encoding {{ $f.Name }}: %w", err)
+			}
+			var _blobData []byte
+			switch v := _blobDV.(type) {
+			case []byte:
+				_blobData = v
+			case string:
+				_blobData = []byte(v)
+			default:
+				return {{ $zero }}, fmt.Errorf("{{ $pkg }}: encoding {{ $f.Name }}: expected []byte or string, got %T", _blobDV)
+			}
+			_blobs.Set({{ $.Package }}.{{ $f.Constant }}, _blobData,
+				{{ if $f.HasBlobKey }}{{ $.Package }}.{{ $f.BlobKeyName }}{{ else }}defaultBlobKey{{ end }},
+				func(k string) {
+					_spec.SetField("{{ $f.BlobKeyColumn }}", field.TypeString, k)
+				},
+			)
+			{{- else if $f.IsBlobGoString }}
+			_blobs.Set({{ $.Package }}.{{ $f.Constant }}, []byte(value),
+				{{ if $f.HasBlobKey }}{{ $.Package }}.{{ $f.BlobKeyName }}{{ else }}defaultBlobKey{{ end }},
+				func(k string) {
+					_spec.SetField("{{ $f.BlobKeyColumn }}", field.TypeString, k)
+				},
+			)
+			{{- else }}
+			_blobs.Set({{ $.Package }}.{{ $f.Constant }}, value,
+				{{ if $f.HasBlobKey }}{{ $.Package }}.{{ $f.BlobKeyName }}{{ else }}defaultBlobKey{{ end }},
+				func(k string) {
+					_spec.SetField("{{ $f.BlobKeyColumn }}", field.TypeString, k)
+				},
+			)
+			{{- end }}
+		}
+		{{- if $f.Optional }}
+		if {{ $mutation }}.{{ $f.StructField }}Cleared() {
+			_blobs.SetCleared({{ $.Package }}.{{ $f.Constant }}, func() {
+				_spec.ClearField("{{ $f.BlobKeyColumn }}", field.TypeString)
+			})
+		}
+		{{- end }}
+		{{- else }}
+		if r, ok := {{ $mutation }}.{{ $f.StructField }}(); ok {
+			_blobData, err := io.ReadAll(r)
+			if err != nil {
+				return {{ $zero }}, fmt.Errorf("{{ $pkg }}: reading {{ $f.Name }}: %w", err)
+			}
+			_blobs.Set({{ $.Package }}.{{ $f.Constant }}, _blobData,
+				{{ if $f.HasBlobKey }}{{ $.Package }}.{{ $f.BlobKeyName }}{{ else }}defaultBlobKey{{ end }},
+				func(k string) {
+					_spec.SetField("{{ $f.BlobKeyColumn }}", field.TypeString, k)
+				},
+			)
+		}
+		{{- if $f.Optional }}
+		if {{ $mutation }}.{{ $f.MutationCleared }}() {
+			_blobs.SetCleared({{ $.Package }}.{{ $f.Constant }}, func() {
+				_spec.ClearField("{{ $f.BlobKeyColumn }}", field.TypeString)
+			})
+		}
+		{{- end }}
+		{{- end }}
+	{{- end }}
+	_blobResult, err := _blobs.Update(ctx, &sqlgraph.BlobSpec{
+		Driver: {{ $receiver }}.driver,
+		Table:  {{ $.Package }}.Table,
+		Columns: map[string]string{
+			{{- range $f := $.BlobFields }}
+			{{ $.Package }}.{{ $f.Constant }}: "{{ $f.BlobKeyColumn }}",
+			{{- end }}
+		},
+		Predicate: func(s *sql.Selector) {
+			s.Where(sql.EQ({{ $.Package }}.{{ $.ID.Constant }}, _spec.Node.ID.Value))
+		},
+	})
+	if err != nil {
+		return {{ $zero }}, err
+	}
+	{{- end }}
 	{{- if $one }}
 		_node = &{{ $.Name }}{config: {{ $receiver }}.config}
 		_spec.Assign = _node.assignValues
@@ -184,9 +271,74 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
+		{{- if and $one $.HasBlobFields }}
+		return {{ $zero }}, errors.Join(err, _blobResult.Rollback(ctx))
+		{{- else }}
 		return {{ $zero }}, err
+		{{- end }}
 	}
 	{{ $mutation }}.done = true
+	{{- if and $one $.HasBlobFields }}
+	if txd, ok := {{ $receiver }}.driver.(*txDriver); ok {
+		txd.mu.Lock()
+		txd.onCommit = append(txd.onCommit, func(next Committer) Committer {
+			return CommitFunc(func(ctx context.Context, tx *Tx) error {
+				if err := next.Commit(ctx, tx); err != nil {
+					return err
+				}
+				return _blobResult.Commit(ctx)
+			})
+		})
+		txd.onRollback = append(txd.onRollback, func(next Rollbacker) Rollbacker {
+			return RollbackFunc(func(ctx context.Context, tx *Tx) error {
+				err := next.Rollback(ctx, tx)
+				return errors.Join(err, _blobResult.Rollback(ctx))
+			})
+		})
+		txd.mu.Unlock()
+	} else {
+		if err := _blobResult.Commit(ctx); err != nil {
+			return {{ $zero }}, err
+		}
+	}
+	{{- end }}
+	{{- if and $one $.HasLoadOnScanFields }}
+	{{- /* Blob values are consistent after write — use mutation value for mutated fields
+				instead of re-reading from storage. For DualWrite fields, assignValues already
+				populated the value from the SQL column. For non-DualWrite fields not mutated,
+				read from blob storage. */}}
+	_blobReader := ent.NewBlobStore({{ $mutation }}.blobOpeners.{{ $.Name }})
+	{{- range $f := $.LoadOnScanFields }}
+	if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
+		_node.{{ $f.StructField }} = value
+	}
+	{{- if $f.IsBlobNoColumn }} else if _node.{{ $f.BlobKeyColumn }} != nil && *_node.{{ $f.BlobKeyColumn }} != "" {
+		data, err := _blobReader.Read(ctx, {{ $.Package }}.{{ $f.Constant }}, *_node.{{ $f.BlobKeyColumn }})
+		if err != nil {
+			return nil, errors.Join(fmt.Errorf("loading {{ $f.Name }} after update: %w", err), _blobReader.Close())
+		}
+		{{- if $f.HasValueScanner }}
+		sv := {{ $f.ScanValueFunc }}()
+		if err := sv.Scan(data); err != nil {
+			return nil, errors.Join(fmt.Errorf("scanning {{ $f.Name }} after update: %w", err), _blobReader.Close())
+		}
+		v, err := {{ $f.FromValueFunc }}(sv)
+		if err != nil {
+			return nil, errors.Join(fmt.Errorf("scanning {{ $f.Name }} after update: %w", err), _blobReader.Close())
+		}
+		_node.{{ $f.StructField }} = v
+		{{- else if $f.IsBlobGoString }}
+		_node.{{ $f.StructField }} = {{ $f.Type }}(data)
+		{{- else }}
+		_node.{{ $f.StructField }} = data
+		{{- end }}
+	}
+	{{- end }}
+	{{- end }}
+	if err := _blobReader.Close(); err != nil {
+		return nil, err
+	}
+	{{- end }}
 	return _node, nil
 }
 {{ end }}

@@ -114,6 +114,8 @@ func (d *SQLite) atTypeC(c1 *Column, c2 *schema.Column) error {
 	}
 	var t schema.Type
 	switch c1.Type {
+	case field.TypeBlob:
+		return fmt.Errorf("blob fields are not stored in the database")
 	case field.TypeBool:
 		t = &schema.BoolType{T: "bool"}
 	case field.TypeInt8, field.TypeUint8, field.TypeInt16, field.TypeUint16, field.TypeInt32,

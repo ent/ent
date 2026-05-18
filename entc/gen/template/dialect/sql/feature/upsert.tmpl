@@ -108,7 +108,30 @@ type (
 	}
 )
 
-{{ range $f := $.MutableFields }}
+{{ range $f := $.UpsertFields }}
+	{{- if $f.IsBlob }}
+	{{ $func := print "Update" $f.StructField }}
+	// {{ $func }} sets the "{{ $f.Name }}" field to the value that was provided on create.
+	func (u *{{ $upsertSet }}) {{ $func }}() *{{ $upsertSet }} {
+		{{- if not $f.IsBlobNoColumn }}
+		u.SetExcluded({{ $.Package }}.{{ $f.Constant }})
+		{{- end }}
+		u.SetExcluded("{{ $f.BlobKeyColumn }}")
+		return u
+	}
+
+	{{ if $f.Optional }}
+		{{ $func := print "Clear" $f.StructField }}
+		// {{ $func }} clears the value of the "{{ $f.Name }}" field.
+		func (u *{{ $upsertSet }}) {{ $func }}() *{{ $upsertSet }} {
+			{{- if not $f.IsBlobNoColumn }}
+			u.SetNull({{ $.Package }}.{{ $f.Constant }})
+			{{- end }}
+			u.SetNull("{{ $f.BlobKeyColumn }}")
+			return u
+		}
+	{{ end }}
+	{{- continue }}{{ end }}
 	{{ $func := print "Set" $f.StructField }}
 	// {{ $func }} sets the "{{ $f.Name }}" field.
 	func (u *{{ $upsertSet }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsertSet }} {
@@ -411,7 +434,26 @@ func (u *{{ $upsertBulk }}) ExecX(ctx context.Context) {
 {{ $upsert := $.Scope.Upsert }}
 {{ $upsertSet := $.Scope.UpsertSet }}
 
-{{ range $f := $.MutableFields }}
+{{ range $f := $.UpsertFields }}
+	{{- if $f.IsBlob }}
+    {{ $func := print "Update" $f.StructField }}
+    // {{ $func }} sets the "{{ $f.Name }}" field to the value that was provided on create.
+    func (u *{{ $upsert }}) {{ $func }}() *{{ $upsert }} {
+        return u.Update(func(s *{{ $upsertSet }}) {
+            s.{{ $func }}()
+        })
+    }
+
+    {{ if $f.Optional }}
+        {{ $func := print "Clear" $f.StructField }}
+        // {{ $func }} clears the value of the "{{ $f.Name }}" field.
+        func (u *{{ $upsert }}) {{ $func }}() *{{ $upsert }} {
+            return u.Update(func(s *{{ $upsertSet }}) {
+                s.{{ $func }}()
+            })
+        }
+    {{ end }}
+	{{- continue }}{{ end }}
     {{ $func := print "Set" $f.StructField }}
     // {{ $func }} sets the "{{ $f.Name }}" field.
 	func (u *{{ $upsert }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsert }} {

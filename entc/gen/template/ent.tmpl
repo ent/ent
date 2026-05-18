@@ -33,6 +33,7 @@ type {{ $.Name }} struct {
 		ID {{ $.ID.Type }} {{ with $.Annotations.Fields.StructTag.id }}`{{ . }}`{{ else }}`{{ $.ID.StructTag }}`{{ end }}
 	{{- end }}
 	{{- range $f := $.Fields }}
+		{{- if $f.IsBlobLazy }}{{ continue }}{{ end }}
 		{{- $tag := $f.StructTag }}{{ with $tags := $.Annotations.Fields.StructTag }}{{ with index $tags $f.Name }}{{ $tag = . }}{{ end }}{{ end }}
 		{{- template "model/fieldcomment" $f }}
 		{{ $f.StructField }} {{ if $f.NillableValue }}*{{ end }}{{ $f.Type }} {{ if not $f.Sensitive }}`{{ $tag }}`{{ else }}{{ template "model/omittags" $ }}{{ end }}
@@ -100,6 +101,27 @@ type {{ $edgesType }} struct {
 	}
 {{ end }}
 
+{{- $blobModelTmpl := printf "dialect/%s/model/fields" $.Storage }}
+{{- if hasTemplate $blobModelTmpl }}
+{{- range $f := $.BlobFields }}
+	// {{ $f.StructField }}Reader opens a reader for the "{{ $f.Name }}" field from blob storage.
+	// The caller must close the returned reader when done.
+	func ({{ $receiver }} *{{ $.Name }}) {{ $f.StructField }}Reader(ctx context.Context) (io.ReadCloser, error) {
+		if {{ $receiver }}.{{ $f.BlobKeyColumn }} == nil || *{{ $receiver }}.{{ $f.BlobKeyColumn }} == "" {
+			return nil, fmt.Errorf("{{ $pkg }}: {{ $.Name }}.{{ $f.BlobKeyColumn }} is nil or empty")
+		}
+		if {{ $receiver }}.blobOpeners.{{ $.Name }} == nil {
+			return nil, fmt.Errorf("{{ $pkg }}: blob storage not configured (missing WithBlobOpeners)")
+		}
+		b, err := {{ $receiver }}.blobOpeners.{{ $.Name }}(ctx, {{ $.Package }}.{{ $f.Constant }})
+		if err != nil {
+			return nil, err
+		}
+		return ent.BlobReader(ctx, b, *{{ $receiver }}.{{ $f.BlobKeyColumn }})
+	}
+{{- end }}
+{{- end }}
+
 {{- if not $.IsView }}
 // Update returns a builder for updating this {{ $.Name }}.
 // Note that you need to call {{ $.Name }}.Unwrap() before calling this method if this {{ $.Name }}
@@ -146,6 +168,7 @@ type {{ $slice }} []*{{ $.Name }}
 			builder.WriteString(fmt.Sprintf("id=%v{{ if $.Fields }}, {{ end }}", {{ $receiver }}.ID))
 		{{- end }}
 		{{- range $i, $f := $.Fields }}
+			{{- if $f.IsBlobLazy }}{{ continue }}{{ end }}
 			{{- if ne $i 0 }}
 				builder.WriteString(", ")
 			{{- end }}

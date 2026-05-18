@@ -18,6 +18,7 @@ in the LICENSE file in the root directory of this source tree.
      types defined in this package (e.g. enums) are referenced without the
      package qualifier. */}}
 {{ $pkgPrefix := print $.Package "." }}
+{{ $blobSupported := hasTemplate (printf "dialect/%s/model/fields" $.Storage) }}
 
 // Mutation represents an operation that mutates the {{ $.Name }} nodes in the graph.
 type Mutation struct {
@@ -31,6 +32,12 @@ type Mutation struct {
 		{{- if $f.SupportsMutationAppend }}
 			append{{ $f.BuilderField }} {{ replace $f.Type.String $pkgPrefix "" }}
 		{{- end }}
+	{{- end }}
+	{{- if hasTemplate (printf "dialect/%s/model/fields" $.Storage) }}
+	{{- range $f := $.BlobFields }}
+		{{- if not $f.IsBlobLazy }}{{ continue }}{{ end }}
+		{{ $f.BuilderField }} io.Reader
+	{{- end }}
 	{{- end }}
 	clearedFields map[string]struct{}
 	{{- range $e := $.EdgesWithID }}
@@ -66,9 +73,11 @@ func (m *Mutation) Predicates() []predicate.{{ $.Name }} {
 }
 
 {{ range $f := $.Fields }}
+	{{- if $f.IsBlobLazy }}{{ continue }}{{ end }}
 	{{ $const := $f.Constant }}
 	{{ $type := replace $f.Type.String $pkgPrefix "" }}
 	{{ $p := receiver $f.Type.String }}{{ if eq $p "m" }} {{ $p = "value" }} {{ end }}
+
 	{{ $func := $f.MutationSet }}
 	// {{ $func }} sets the "{{ $f.Name }}" field.
 	func (m *Mutation) {{ $func }}({{ $p }} {{ $type }}) {
@@ -131,9 +140,8 @@ func (m *Mutation) Predicates() []predicate.{{ $.Name }} {
 	{{ end }}
 
 	{{ if $f.Optional }}
-		{{ $func := $f.MutationClear }}
-		// {{ $func }} clears the value of the "{{ $f.Name }}" field.
-		func (m *Mutation) {{ $func }}() {
+		// {{ $f.MutationClear }} clears the value of the "{{ $f.Name }}" field.
+		func (m *Mutation) {{ $f.MutationClear }}() {
 			m.{{ $f.BuilderField }} = nil
 			{{- if $f.SupportsMutationAdd }}
 				m.add{{ $f.BuilderField }} = nil
@@ -144,17 +152,15 @@ func (m *Mutation) Predicates() []predicate.{{ $.Name }} {
 			m.clearedFields[{{ $const }}] = struct{}{}
 		}
 
-		{{ $func = $f.MutationCleared }}
-		// {{ $func }} returns if the "{{ $f.Name }}" field was cleared in this mutation.
-		func (m *Mutation) {{ $func }}() bool {
+		// {{ $f.MutationCleared }} returns if the "{{ $f.Name }}" field was cleared in this mutation.
+		func (m *Mutation) {{ $f.MutationCleared }}() bool {
 			_, ok := m.clearedFields[{{ $const }}]
 			return ok
 		}
 	{{ end }}
 
-	{{ $func = $f.MutationReset }}
-	// {{ $func }} resets all changes to the "{{ $f.Name }}" field.
-	func (m *Mutation) {{ $func }}() {
+	// {{ $f.MutationReset }} resets all changes to the "{{ $f.Name }}" field.
+	func (m *Mutation) {{ $f.MutationReset }}() {
 		m.{{ $f.BuilderField }} = nil
 		{{- if $f.SupportsMutationAdd }}
 			m.add{{ $f.BuilderField }} = nil
@@ -168,6 +174,48 @@ func (m *Mutation) Predicates() []predicate.{{ $.Name }} {
 	}
 {{ end }}
 
+{{- if hasTemplate (printf "dialect/%s/model/fields" $.Storage) }}
+{{- range $f := $.BlobFields }}
+	{{- if not $f.IsBlobLazy }}{{ continue }}{{ end }}
+	{{ $const := $f.Constant }}
+	{{ $func := print "Set" $f.StructField }}
+	// {{ $func }} sets the "{{ $f.Name }}" field.
+	func (m *Mutation) {{ $func }}(r io.Reader) {
+		m.{{ $f.BuilderField }} = r
+	}
+
+	// {{ $f.StructField }} returns the value of the "{{ $f.Name }}" field in the mutation.
+	func (m *Mutation) {{ $f.StructField }}() (r io.Reader, exists bool) {
+		v := m.{{ $f.BuilderField }}
+		if v == nil {
+			return
+		}
+		return v, true
+	}
+
+	{{- if $f.Optional }}
+	// {{ $f.MutationClear }} clears the value of the "{{ $f.Name }}" field.
+	func (m *Mutation) {{ $f.MutationClear }}() {
+		m.{{ $f.BuilderField }} = nil
+		m.clearedFields[{{ $const }}] = struct{}{}
+	}
+
+	// {{ $f.MutationCleared }} returns if the "{{ $f.Name }}" field was cleared in this mutation.
+	func (m *Mutation) {{ $f.MutationCleared }}() bool {
+		_, ok := m.clearedFields[{{ $const }}]
+		return ok
+	}
+	{{- end }}
+
+	// {{ $f.MutationReset }} resets all changes to the "{{ $f.Name }}" field.
+	func (m *Mutation) {{ $f.MutationReset }}() {
+		m.{{ $f.BuilderField }} = nil
+		{{- if $f.Optional }}
+			delete(m.clearedFields, {{ $const }})
+		{{- end }}
+	}
+{{- end }}
+{{- end }}
 
 {{ range $e := $.EdgesWithID }}
 	{{ $op := "add" }}{{ $idsFunc := $e.MutationAdd }}{{ if $e.Unique }}{{ $op = "set" }}{{ $idsFunc = $e.MutationSet }}{{ end }}
@@ -303,9 +351,11 @@ func (m *Mutation) Type() string {
 func (m *Mutation) Fields() []string {
 	fields := make([]string, 0, {{ len $.Fields }})
 	{{- range $f := $.Fields }}
+		{{- if not $f.IsBlobLazy }}
 		if m.{{ $f.BuilderField }} != nil {
 			fields = append(fields, {{ $f.Constant }})
 		}
+		{{- end }}
 	{{- end }}
 	return fields
 }
@@ -317,8 +367,10 @@ func (m *Mutation) Field(name string) (ent.Value, bool) {
 	{{- with $.Fields }}
 		switch name {
 		{{- range $f := $.Fields }}
+			{{- if not $f.IsBlobLazy }}
 			case {{ $f.Constant }}:
 				return m.{{ $f.MutationGet }}()
+			{{- end }}
 		{{- end }}
 		}
 	{{- end }}
@@ -342,6 +394,7 @@ func (m *Mutation) OldField(ctx context.Context, name string) (ent.Value, error)
 func (m *Mutation) SetField(name string, value ent.Value) error {
 	switch name {
 	{{- range $f := $.Fields }}
+		{{- if not $f.IsBlobLazy }}
 		{{- $type := replace $f.Type.String $pkgPrefix "" }}
 		case {{ $f.Constant }}:
 			v, ok := value.({{ $type }})
@@ -350,6 +403,7 @@ func (m *Mutation) SetField(name string, value ent.Value) error {
 			}
 			m.{{ $f.MutationSet }}(v)
 			return nil
+		{{- end }}
 	{{- end }}
 	}
 	return fmt.Errorf("unknown {{ $.Name }} field %s", name)
@@ -444,6 +498,7 @@ func (m *Mutation) ClearField(name string) error {
 	{{- if $.HasOptional }}
 		switch name {
 		{{- range $f := $.Fields }}
+			{{- if and $f.IsBlobLazy (not $blobSupported) }}{{ continue }}{{ end }}
 			{{- if $f.Optional }}
 				case {{ $f.Constant }}:
 					m.Clear{{ $f.StructField }}()
@@ -462,6 +517,7 @@ func (m *Mutation) ResetField(name string) error {
 	{{- with $.Fields }}
 		switch name {
 		{{- range $f := $.Fields }}
+			{{- if and $f.IsBlobLazy (not $blobSupported) }}{{ continue }}{{ end }}
 			case {{ $f.Constant }}:
 				m.{{ $f.MutationReset }}()
 				return nil

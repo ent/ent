@@ -5,11 +5,14 @@
 package field
 
 import (
+	"context"
 	"database/sql"
 	"database/sql/driver"
 	"encoding"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"hash"
 	"math"
 	"reflect"
 	"regexp"
@@ -18,6 +21,8 @@ import (
 	"unicode/utf8"
 
 	"entgo.io/ent/schema"
+
+	"github.com/google/uuid"
 )
 
 // String returns a new Field with type string.
@@ -181,6 +186,24 @@ func Other(name string, typ driver.Valuer) *otherBuilder {
 	}}
 	ob.desc.goType(typ)
 	return ob
+}
+
+// Blob returns a new Field with type blob. Blob fields store their data in
+// external blob storage rather than in the database. By default, the mutation
+// accepts []byte (or a custom GoType) and the entity struct holds the loaded
+// value. Use Lazy() to accept an io.Reader in the mutation and omit the struct
+// field from the entity; reading requires explicit use of the Reader method.
+//
+//	field.Blob("content").
+//		Lazy()
+//
+//	field.Blob("avatar").
+//		Optional()
+func Blob(name string) *blobBuilder {
+	return &blobBuilder{&Descriptor{
+		Name: name,
+		Info: &TypeInfo{Type: TypeBlob},
+	}}
 }
 
 // stringBuilder is the builder for string fields.
@@ -1417,28 +1440,181 @@ func (b *otherBuilder) Descriptor() *Descriptor {
 	return b.desc
 }
 
+// blobBuilder is the builder for blob fields.
+type blobBuilder struct {
+	desc *Descriptor
+}
+
+// Optional indicates that this field is optional on create.
+// Unlike edges, fields are required by default.
+func (b *blobBuilder) Optional() *blobBuilder {
+	b.desc.Optional = true
+	return b
+}
+
+// Immutable indicates that this field cannot be updated.
+func (b *blobBuilder) Immutable() *blobBuilder {
+	b.desc.Immutable = true
+	return b
+}
+
+// Comment sets the comment of the field.
+func (b *blobBuilder) Comment(c string) *blobBuilder {
+	b.desc.Comment = c
+	return b
+}
+
+// StructTag sets the struct tag of the field.
+func (b *blobBuilder) StructTag(s string) *blobBuilder {
+	b.desc.Tag = s
+	return b
+}
+
+// StorageKey sets the storage key of the field.
+func (b *blobBuilder) StorageKey(key string) *blobBuilder {
+	b.desc.StorageKey = key
+	return b
+}
+
+// Annotations adds a list of annotations to the field object to be used by
+// codegen extensions.
+func (b *blobBuilder) Annotations(annotations ...schema.Annotation) *blobBuilder {
+	b.desc.Annotations = append(b.desc.Annotations, annotations...)
+	return b
+}
+
+// Deprecated marks the field as deprecated.
+func (b *blobBuilder) Deprecated(reason ...string) *blobBuilder {
+	b.desc.Deprecated = true
+	if len(reason) > 0 {
+		b.desc.DeprecatedReason = strings.Join(reason, " ")
+	}
+	return b
+}
+
+// UUIDKey configures the blob field to use random UUID keys.
+// Each write generates a new random UUID as the storage key.
+//
+//	field.Blob("content").UUIDKey()
+func (b *blobBuilder) UUIDKey() *blobBuilder {
+	b.desc.BlobKey = func(context.Context, []byte) (string, error) {
+		i, err := uuid.NewV7()
+		if err != nil {
+			return "", fmt.Errorf("generating uuid key: %w", err)
+		}
+		return i.String(), nil
+	}
+	return b
+}
+
+// HashKey configures the blob field to use content-addressable keys.
+// The blob data is hashed with the given hash function to produce the storage key.
+// This enables deduplication: identical content always maps to the same key.
+// The default key strategy (when neither UUIDKey nor HashKey is called) is HashKey(crypto.SHA256).
+//
+//	field.Blob("content").HashKey(crypto.SHA256)
+func (b *blobBuilder) HashKey(c interface{ New() hash.Hash }) *blobBuilder {
+	b.desc.BlobKey = func(_ context.Context, data []byte) (string, error) {
+		h := c.New()
+		h.Write(data)
+		return hex.EncodeToString(h.Sum(nil)), nil
+	}
+	return b
+}
+
+// Lazy disables automatic loading of blob data into the entity struct field
+// after scanning from the database. By default, blob fields auto-load their data
+// from storage on scan. When Lazy is set, the field accepts an io.Reader in the
+// mutation builder (which is fully read before writing to storage), and the field
+// does not appear as a struct field on the entity. Reading requires explicit use
+// of the generated Reader method (e.g., ContentReader).
+func (b *blobBuilder) Lazy() *blobBuilder {
+	b.desc.BlobLazy = true
+	return b
+}
+
+// DualWrite enables migration mode for the blob field. In this mode, the
+// original bytes column is preserved alongside the blob key column. Writes
+// go to both blob storage and the bytes column, while reads prefer blob
+// storage (if a key exists) and fall back to the bytes column.
+//
+// The optional columnType argument overrides the default database column type
+// (per dialect) to avoid schema drift when migrating from an existing column.
+// For example, when migrating a JSON column to blob storage:
+//
+//	field.Blob("payload").
+//		DualWrite(map[string]string{
+//			dialect.MySQL:    "json",
+//			dialect.Postgres: "jsonb",
+//			dialect.SQLite:   "json",
+//		})
+func (b *blobBuilder) DualWrite(columnType ...map[string]string) *blobBuilder {
+	b.desc.BlobDualWrite = true
+	if len(columnType) > 0 {
+		b.desc.BlobDWSchemaType = columnType[0]
+	}
+	return b
+}
+
+// GoType overrides the default Go type ([]byte) with a custom one.
+// For string, the conversion is handled automatically:
+//
+//	field.Blob("description").GoType("")
+//
+// For other types, a ValueScanner is required:
+//
+//	field.Blob("config").GoType(&MyConfig{}).ValueScanner(configScanner{})
+func (b *blobBuilder) GoType(typ any) *blobBuilder {
+	b.desc.goType(typ)
+	return b
+}
+
+// ValueScanner provides a custom codec for the blob field data.
+// The scanner converts between the Go type and the raw bytes stored in blob storage.
+// This is required when GoType is set to a type other than []byte or string.
+func (b *blobBuilder) ValueScanner(vs any) *blobBuilder {
+	b.desc.ValueScanner = vs
+	return b
+}
+
+// Nillable indicates that this field is a nillable.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
+func (b *blobBuilder) Nillable() *blobBuilder {
+	b.desc.Nillable = true
+	return b
+}
+
+// Descriptor implements the ent.Field interface by returning its descriptor.
+func (b *blobBuilder) Descriptor() *Descriptor {
+	return b.desc
+}
+
 // A Descriptor for field configuration.
 type Descriptor struct {
-	Tag              string                  // struct tag.
-	Size             int                     // varchar size.
-	Name             string                  // field name.
-	Info             *TypeInfo               // field type info.
-	ValueScanner     any                     // custom field codec.
-	Unique           bool                    // unique index of field.
-	Nillable         bool                    // nillable struct field.
-	Optional         bool                    // nullable field in database.
-	Immutable        bool                    // create only field.
-	Default          any                     // default value on create.
-	UpdateDefault    any                     // default value on update.
-	Validators       []any                   // validator functions.
-	StorageKey       string                  // sql column or gremlin property.
-	Enums            []struct{ N, V string } // enum values.
-	Sensitive        bool                    // sensitive info string field.
-	SchemaType       map[string]string       // override the schema type.
-	Annotations      []schema.Annotation     // field annotations.
-	Comment          string                  // field comment.
-	Deprecated       bool                    // mark the field as deprecated.
-	DeprecatedReason string                  // deprecation reason.
+	Tag              string                                        // struct tag.
+	Size             int                                           // varchar size.
+	Name             string                                        // field name.
+	Info             *TypeInfo                                     // field type info.
+	ValueScanner     any                                           // custom field codec.
+	Unique           bool                                          // unique index of field.
+	Nillable         bool                                          // nillable struct field.
+	Optional         bool                                          // nullable field in database.
+	Immutable        bool                                          // create only field.
+	Default          any                                           // default value on create.
+	UpdateDefault    any                                           // default value on update.
+	Validators       []any                                         // validator functions.
+	StorageKey       string                                        // sql column or gremlin property.
+	Enums            []struct{ N, V string }                       // enum values.
+	Sensitive        bool                                          // sensitive info string field.
+	SchemaType       map[string]string                             // override the schema type.
+	Annotations      []schema.Annotation                           // field annotations.
+	Comment          string                                        // field comment.
+	Deprecated       bool                                          // mark the field as deprecated.
+	DeprecatedReason string                                        // deprecation reason.
+	BlobKey          func(context.Context, []byte) (string, error) // blob key generation function.
+	BlobDualWrite    bool                                          // dual-write mode: write to both blob storage and bytes column.
+	BlobLazy         bool                                          // lazy loading: don't auto-load blob data on scan.
+	BlobDWSchemaType map[string]string                             // override the schema type for the dual-write column.
 	Err              error
 }
 

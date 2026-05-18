@@ -49,9 +49,12 @@ in the LICENSE file in the root directory of this source tree.
 			{{ $.ID.Constant }},
 		{{- end }}
 		{{- range $f := $.Fields }}
-			{{- if not $f.IsDeprecated }}
+			{{- if and (not $f.IsDeprecated) (not $f.IsBlobNoColumn) (not $f.IsBlobLazy) }}
 				{{ $f.Constant }},
 			{{- end }}
+		{{- end }}
+		{{- range $k := $.BlobKeys }}
+			"{{ $k.Field.Name }}",
 		{{- end }}
 	}
 	{{/* If any of the edges owns a foreign-key */}}
@@ -61,6 +64,15 @@ in the LICENSE file in the root directory of this source tree.
 		var ForeignKeys = []string{
 			{{- range $fk := . }}
 				"{{ $fk.Edge.Rel.Column }}",
+			{{- end }}
+		}
+	{{ end }}
+
+	{{ with $.BlobKeys }}
+		// BlobKeys holds the SQL columns for blob storage keys.
+		var BlobKeys = []string{
+			{{- range $bk := . }}
+				"{{ $bk.Field.Name }}",
 			{{- end }}
 		}
 	{{ end }}
@@ -90,6 +102,13 @@ func ValidColumn(column string) bool {
 	{{- with $.UnexportedForeignKeys }}
 		for i := range ForeignKeys {
 			if column == ForeignKeys[i] {
+				return true
+			}
+		}
+	{{- end }}
+	{{- with $.BlobKeys }}
+		for i := range BlobKeys {
+			if column == BlobKeys[i] {
 				return true
 			}
 		}

@@ -49,6 +49,7 @@ func ({{ $receiver }} *{{ $builder }}) gremlin() *dsl.Traversal {
 		}
 	{{- end }}
 	{{- range $f := $.MutationFields }}
+		{{- if $f.IsBlob }}{{ continue }}{{ end }}
 		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 			{{- if $f.Unique }}
 				constraints = append(constraints, &constraint{
