@@ -20,6 +20,7 @@ import (
 	"entgo.io/ent/entc/integration/ent/builder"
 	"entgo.io/ent/entc/integration/ent/card"
 	"entgo.io/ent/entc/integration/ent/comment"
+	"entgo.io/ent/entc/integration/ent/document"
 	"entgo.io/ent/entc/integration/ent/exvaluescan"
 	"entgo.io/ent/entc/integration/ent/fieldtype"
 	"entgo.io/ent/entc/integration/ent/file"
@@ -100,6 +101,7 @@ func checkColumn(t, c string) error {
 			builder.Table:     builder.ValidColumn,
 			card.Table:        card.ValidColumn,
 			comment.Table:     comment.ValidColumn,
+			document.Table:    document.ValidColumn,
 			exvaluescan.Table: exvaluescan.ValidColumn,
 			fieldtype.Table:   fieldtype.ValidColumn,
 			file.Table:        file.ValidColumn,

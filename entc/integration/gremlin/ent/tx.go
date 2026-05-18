@@ -24,6 +24,8 @@ type Tx struct {
 	Card *CardClient
 	// Comment is the client for interacting with the Comment builders.
 	Comment *CommentClient
+	// Document is the client for interacting with the Document builders.
+	Document *DocumentClient
 	// ExValueScan is the client for interacting with the ExValueScan builders.
 	ExValueScan *ExValueScanClient
 	// FieldType is the client for interacting with the FieldType builders.
@@ -189,6 +191,7 @@ func (tx *Tx) init() {
 	tx.Builder = NewBuilderClient(tx.config)
 	tx.Card = NewCardClient(tx.config)
 	tx.Comment = NewCommentClient(tx.config)
+	tx.Document = NewDocumentClient(tx.config)
 	tx.ExValueScan = NewExValueScanClient(tx.config)
 	tx.FieldType = NewFieldTypeClient(tx.config)
 	tx.File = NewFileClient(tx.config)
