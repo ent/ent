@@ -1795,10 +1795,13 @@ func TestSelector_UnionOrderBy(t *testing.T) {
 }
 
 // TestUnionAllFunc verifies the package-level UnionAll (and friends) wrap every
-// branch in parentheses, enabling per-branch ORDER BY / LIMIT and an optional
-// outer ORDER BY / LIMIT on the union result via a wrapping SELECT.
+// branch in parentheses on MySQL/Postgres, enabling per-branch ORDER BY / LIMIT
+// and an optional outer ORDER BY / LIMIT on the union result via a wrapping SELECT.
+// On SQLite the parentheses and per-branch ORDER BY / LIMIT / OFFSET are omitted
+// since SQLite does not support them inside a compound SELECT.
 func TestUnionAllFunc(t *testing.T) {
 	t.Run("BothBranchesParenthesized", func(t *testing.T) {
+		// Default dialect (MySQL) — parens required.
 		migSel := Select("id", "kind").
 			From(Table("migration_deployments")).
 			OrderBy(Desc("end_time"), Desc("id")).
@@ -1831,15 +1834,29 @@ func TestUnionAllFunc(t *testing.T) {
 		)
 	})
 
-	t.Run("DialectPropagation", func(t *testing.T) {
-		// Dialect must flow into branch selectors via state interface.
+	t.Run("Postgres", func(t *testing.T) {
+		// Postgres supports parenthesized branches (standard SQL) — same output shape
+		// as MySQL but with double-quoted identifiers and $N placeholders.
 		migSel := Dialect(dialect.Postgres).Select("id").From(Table("t1")).Limit(5)
 		schemaSel := Dialect(dialect.Postgres).Select("id").From(Table("t2")).Limit(5)
-		q := &setOpQuerier{op: "UNION ALL", selectors: []*Selector{migSel, schemaSel}}
-		q.SetDialect(dialect.Postgres)
+		q := UnionAll(migSel, schemaSel)
+		// Propagate dialect via SetDialect (mirrors what b.Join does internally).
+		q.(*setOpQuerier).SetDialect(dialect.Postgres)
 		query, _ := q.Query()
-		// Postgres uses $N placeholders; identifiers use double-quotes.
 		require.Equal(t, `(SELECT "id" FROM "t1" LIMIT 5) UNION ALL (SELECT "id" FROM "t2" LIMIT 5)`, query)
+	})
+
+	t.Run("SQLite", func(t *testing.T) {
+		// SQLite does not support parenthesized compound-select branches.
+		// Per-branch ORDER BY / LIMIT / OFFSET are silently dropped; branches
+		// are emitted without wrapping parens.
+		migSel := Dialect(dialect.SQLite).Select("id").From(Table("t1")).OrderBy(Desc("end_time")).Limit(20)
+		schemaSel := Dialect(dialect.SQLite).Select("id").From(Table("t2")).OrderBy(Desc("end_time")).Limit(20)
+		q := UnionAll(migSel, schemaSel)
+		q.(*setOpQuerier).SetDialect(dialect.SQLite)
+		query, _ := q.Query()
+		// No parens, no ORDER BY, no LIMIT on the branches.
+		require.Equal(t, "SELECT `id` FROM `t1` UNION ALL SELECT `id` FROM `t2`", query)
 	})
 
 	t.Run("Union", func(t *testing.T) {

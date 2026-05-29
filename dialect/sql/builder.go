@@ -2224,7 +2224,10 @@ func (s *Selector) IntersectAll(t TableView) *Selector {
 
 // setOpQuerier implements Querier for a compound set operation (UNION, EXCEPT,
 // INTERSECT) where every branch is wrapped in parentheses. This is required
-// when branches contain ORDER BY, LIMIT, or OFFSET (MySQL and SQL standard).
+// when branches contain ORDER BY, LIMIT, or OFFSET (MySQL, Postgres, and the
+// SQL standard). SQLite does not support parenthesized branches; on that
+// dialect the parentheses — and any per-branch ORDER BY / LIMIT / OFFSET,
+// which SQLite cannot honour inside a compound SELECT — are silently omitted.
 // Use the package-level Union / UnionAll / Except / ExceptAll / Intersect /
 // IntersectAll functions to build one.
 type setOpQuerier struct {
@@ -2235,18 +2238,25 @@ type setOpQuerier struct {
 
 func (q *setOpQuerier) Query() (string, []any) {
 	b := q.Builder.clone()
+	sqlite := b.sqlite()
 	for i, s := range q.selectors {
 		if i > 0 {
 			b.WriteString(" " + q.op + " ")
 		}
-		s.SetDialect(b.dialect)
-		s.SetTotal(b.total)
-		b.WriteString("(")
-		query, args := s.Query()
-		b.WriteString(query)
-		b.WriteString(")")
-		b.args = append(b.args, args...)
-		b.total += len(args)
+		if sqlite {
+			// SQLite does not allow parenthesized compound-select branches and
+			// cannot honour per-branch ORDER BY / LIMIT / OFFSET. Emit a plain
+			// branch with those clauses stripped; the push-down is a no-op here.
+			clone := *s
+			clone.order = nil
+			clone.limit = nil
+			clone.offset = nil
+			b.Join(&clone)
+		} else {
+			b.WriteString("(")
+			b.Join(s)
+			b.WriteString(")")
+		}
 	}
 	return b.String(), b.args
 }
