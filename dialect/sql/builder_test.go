@@ -1836,13 +1836,10 @@ func TestUnionAllFunc(t *testing.T) {
 
 	t.Run("Postgres", func(t *testing.T) {
 		// Postgres supports parenthesized branches (standard SQL) — same output shape
-		// as MySQL but with double-quoted identifiers and $N placeholders.
+		// as MySQL but with double-quoted identifiers. Dialect is inferred from selectors.
 		migSel := Dialect(dialect.Postgres).Select("id").From(Table("t1")).Limit(5)
 		schemaSel := Dialect(dialect.Postgres).Select("id").From(Table("t2")).Limit(5)
-		q := UnionAll(migSel, schemaSel)
-		// Propagate dialect via SetDialect (mirrors what b.Join does internally).
-		q.(*setOpQuerier).SetDialect(dialect.Postgres)
-		query, _ := q.Query()
+		query, _ := UnionAll(migSel, schemaSel).Query()
 		require.Equal(t, `(SELECT "id" FROM "t1" LIMIT 5) UNION ALL (SELECT "id" FROM "t2" LIMIT 5)`, query)
 	})
 
@@ -1850,11 +1847,10 @@ func TestUnionAllFunc(t *testing.T) {
 		// SQLite does not support parenthesized compound-select branches.
 		// Per-branch ORDER BY / LIMIT / OFFSET are silently dropped; branches
 		// are emitted without wrapping parens.
+		// The dialect is inferred from the selectors — no explicit SetDialect needed.
 		migSel := Dialect(dialect.SQLite).Select("id").From(Table("t1")).OrderBy(Desc("end_time")).Limit(20)
 		schemaSel := Dialect(dialect.SQLite).Select("id").From(Table("t2")).OrderBy(Desc("end_time")).Limit(20)
-		q := UnionAll(migSel, schemaSel)
-		q.(*setOpQuerier).SetDialect(dialect.SQLite)
-		query, _ := q.Query()
+		query, _ := UnionAll(migSel, schemaSel).Query()
 		// No parens, no ORDER BY, no LIMIT on the branches.
 		require.Equal(t, "SELECT `id` FROM `t1` UNION ALL SELECT `id` FROM `t2`", query)
 	})

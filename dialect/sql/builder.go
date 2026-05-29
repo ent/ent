@@ -2238,6 +2238,12 @@ type setOpQuerier struct {
 
 func (q *setOpQuerier) Query() (string, []any) {
 	b := q.Builder.clone()
+	// If no dialect was set explicitly on the querier (the common case — users
+	// call UnionAll(sel1, sel2) without a DialectBuilder), inherit it from the
+	// first selector so that b.sqlite() / b.postgres() return the right value.
+	if b.dialect == "" && len(q.selectors) > 0 {
+		b.SetDialect(q.selectors[0].dialect)
+	}
 	sqlite := b.sqlite()
 	for i, s := range q.selectors {
 		if i > 0 {
