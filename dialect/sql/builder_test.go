@@ -1794,6 +1794,64 @@ func TestSelector_UnionOrderBy(t *testing.T) {
 	require.Equal(t, `SELECT * FROM "users" WHERE "active" UNION SELECT * FROM "old_users1" ORDER BY "users"."whatever"`, query)
 }
 
+// TestUnionAllFunc verifies the package-level UnionAll (and friends) wrap every
+// branch in parentheses, enabling per-branch ORDER BY / LIMIT and an optional
+// outer ORDER BY / LIMIT on the union result via a wrapping SELECT.
+func TestUnionAllFunc(t *testing.T) {
+	t.Run("BothBranchesParenthesized", func(t *testing.T) {
+		migSel := Select("id", "kind").
+			From(Table("migration_deployments")).
+			OrderBy(Desc("end_time"), Desc("id")).
+			Limit(20)
+		schemaSel := Select("id", "kind").
+			From(Table("schema_deployments")).
+			OrderBy(Desc("end_time"), Desc("id")).
+			Limit(20)
+		query, args := UnionAll(migSel, schemaSel).Query()
+		require.Equal(t,
+			"(SELECT `id`, `kind` FROM `migration_deployments` ORDER BY `end_time` DESC, `id` DESC LIMIT 20) UNION ALL (SELECT `id`, `kind` FROM `schema_deployments` ORDER BY `end_time` DESC, `id` DESC LIMIT 20)",
+			query,
+		)
+		require.Nil(t, args)
+	})
+
+	t.Run("WithOuterOrderAndLimit", func(t *testing.T) {
+		// Per-branch LIMIT push-down + outer ORDER BY / LIMIT on the union result.
+		// Use sql.Queries to compose: WITH `all` AS (...) SELECT ... ORDER BY ... LIMIT ...
+		migSel := Select("id", "kind").From(Table("t1")).OrderBy(Desc("end_time")).Limit(20)
+		schemaSel := Select("id", "kind").From(Table("t2")).OrderBy(Desc("end_time")).Limit(20)
+		inner := UnionAll(migSel, schemaSel)
+		outer := Select("id", "kind").From(Table("all")).OrderBy(Desc("end_time")).Limit(10).Offset(0)
+		query, _ := Queries{
+			Raw("WITH `all` AS ("), inner, Raw(")"),
+			outer,
+		}.Query()
+		require.Equal(t,
+			"WITH `all` AS ( (SELECT `id`, `kind` FROM `t1` ORDER BY `end_time` DESC LIMIT 20) UNION ALL (SELECT `id`, `kind` FROM `t2` ORDER BY `end_time` DESC LIMIT 20) ) SELECT `id`, `kind` FROM `all` ORDER BY `end_time` DESC LIMIT 10 OFFSET 0",
+			query,
+		)
+	})
+
+	t.Run("DialectPropagation", func(t *testing.T) {
+		// Dialect must flow into branch selectors via state interface.
+		migSel := Dialect(dialect.Postgres).Select("id").From(Table("t1")).Limit(5)
+		schemaSel := Dialect(dialect.Postgres).Select("id").From(Table("t2")).Limit(5)
+		q := &setOpQuerier{op: "UNION ALL", selectors: []*Selector{migSel, schemaSel}}
+		q.SetDialect(dialect.Postgres)
+		query, _ := q.Query()
+		// Postgres uses $N placeholders; identifiers use double-quotes.
+		require.Equal(t, `(SELECT "id" FROM "t1" LIMIT 5) UNION ALL (SELECT "id" FROM "t2" LIMIT 5)`, query)
+	})
+
+	t.Run("Union", func(t *testing.T) {
+		query, _ := Union(
+			Select("*").From(Table("t1")).OrderBy("x"),
+			Select("*").From(Table("t2")).OrderBy("x"),
+		).Query()
+		require.Equal(t, "(SELECT * FROM `t1` ORDER BY `x`) UNION (SELECT * FROM `t2` ORDER BY `x`)", query)
+	})
+}
+
 func TestUpdateBuilder_SetExpr(t *testing.T) {
 	d := Dialect(dialect.Postgres)
 	excluded := d.Table("excluded")

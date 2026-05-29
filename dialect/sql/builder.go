@@ -2222,6 +2222,74 @@ func (s *Selector) IntersectAll(t TableView) *Selector {
 	return s
 }
 
+// setOpQuerier implements Querier for a compound set operation (UNION, EXCEPT,
+// INTERSECT) where every branch is wrapped in parentheses. This is required
+// when branches contain ORDER BY, LIMIT, or OFFSET (MySQL and SQL standard).
+// Use the package-level Union / UnionAll / Except / ExceptAll / Intersect /
+// IntersectAll functions to build one.
+type setOpQuerier struct {
+	Builder
+	op        string
+	selectors []*Selector
+}
+
+func (q *setOpQuerier) Query() (string, []any) {
+	b := q.Builder.clone()
+	for i, s := range q.selectors {
+		if i > 0 {
+			b.WriteString(" " + q.op + " ")
+		}
+		s.SetDialect(b.dialect)
+		s.SetTotal(b.total)
+		b.WriteString("(")
+		query, args := s.Query()
+		b.WriteString(query)
+		b.WriteString(")")
+		b.args = append(b.args, args...)
+		b.total += len(args)
+	}
+	return b.String(), b.args
+}
+
+// Union returns a Querier that combines selectors with UNION (DISTINCT),
+// wrapping every branch in parentheses. Use this instead of the chaining
+// method when branches carry their own ORDER BY, LIMIT, or OFFSET — MySQL
+// and the SQL standard require parentheses in that case.
+func Union(selectors ...*Selector) Querier {
+	return &setOpQuerier{op: string(setOpTypeUnion), selectors: selectors}
+}
+
+// UnionAll returns a Querier that combines selectors with UNION ALL, wrapping
+// every branch in parentheses. Use this instead of the chaining method when
+// branches carry their own ORDER BY, LIMIT, or OFFSET.
+func UnionAll(selectors ...*Selector) Querier {
+	return &setOpQuerier{op: string(setOpTypeUnion) + " ALL", selectors: selectors}
+}
+
+// Except returns a Querier that combines selectors with EXCEPT, wrapping every
+// branch in parentheses.
+func Except(selectors ...*Selector) Querier {
+	return &setOpQuerier{op: string(setOpTypeExcept), selectors: selectors}
+}
+
+// ExceptAll returns a Querier that combines selectors with EXCEPT ALL, wrapping
+// every branch in parentheses.
+func ExceptAll(selectors ...*Selector) Querier {
+	return &setOpQuerier{op: string(setOpTypeExcept) + " ALL", selectors: selectors}
+}
+
+// Intersect returns a Querier that combines selectors with INTERSECT, wrapping
+// every branch in parentheses.
+func Intersect(selectors ...*Selector) Querier {
+	return &setOpQuerier{op: string(setOpTypeIntersect), selectors: selectors}
+}
+
+// IntersectAll returns a Querier that combines selectors with INTERSECT ALL,
+// wrapping every branch in parentheses.
+func IntersectAll(selectors ...*Selector) Querier {
+	return &setOpQuerier{op: string(setOpTypeIntersect) + " ALL", selectors: selectors}
+}
+
 // Prefix prefixes the query with list of queries.
 func (s *Selector) Prefix(queries ...Querier) *Selector {
 	s.prefix = append(s.prefix, queries...)
