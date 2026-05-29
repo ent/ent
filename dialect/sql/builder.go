@@ -2751,7 +2751,7 @@ type WithBuilder struct {
 	ctes      []struct {
 		name    string
 		columns []string
-		s       *Selector
+		s       Querier
 	}
 }
 
@@ -2767,7 +2767,7 @@ func With(name string, columns ...string) *WithBuilder {
 		ctes: []struct {
 			name    string
 			columns []string
-			s       *Selector
+			s       Querier
 		}{
 			{name: name, columns: columns},
 		},
@@ -2792,8 +2792,9 @@ func (w *WithBuilder) Name() string {
 	return w.ctes[0].name
 }
 
-// As sets the view sub query.
-func (w *WithBuilder) As(s *Selector) *WithBuilder {
+// As sets the view sub-query. Accepts any Querier — including *Selector and
+// the set-operation builders returned by Union, UnionAll, Intersect, etc.
+func (w *WithBuilder) As(s Querier) *WithBuilder {
 	w.ctes[len(w.ctes)-1].s = s
 	return w
 }

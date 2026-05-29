@@ -1816,18 +1816,17 @@ func TestUnionAllFunc(t *testing.T) {
 	})
 
 	t.Run("WithOuterOrderAndLimit", func(t *testing.T) {
-		// Per-branch LIMIT push-down + outer ORDER BY / LIMIT on the union result.
-		// Use sql.Queries to compose: WITH `all` AS (...) SELECT ... ORDER BY ... LIMIT ...
+		// Per-branch LIMIT push-down + outer ORDER BY / LIMIT on the union result,
+		// composed idiomatically via With(...).As(UnionAll(...)).
 		migSel := Select("id", "kind").From(Table("t1")).OrderBy(Desc("end_time")).Limit(20)
 		schemaSel := Select("id", "kind").From(Table("t2")).OrderBy(Desc("end_time")).Limit(20)
-		inner := UnionAll(migSel, schemaSel)
 		outer := Select("id", "kind").From(Table("all")).OrderBy(Desc("end_time")).Limit(10).Offset(0)
 		query, _ := Queries{
-			Raw("WITH `all` AS ("), inner, Raw(")"),
+			With("all").As(UnionAll(migSel, schemaSel)),
 			outer,
 		}.Query()
 		require.Equal(t,
-			"WITH `all` AS ( (SELECT `id`, `kind` FROM `t1` ORDER BY `end_time` DESC LIMIT 20) UNION ALL (SELECT `id`, `kind` FROM `t2` ORDER BY `end_time` DESC LIMIT 20) ) SELECT `id`, `kind` FROM `all` ORDER BY `end_time` DESC LIMIT 10 OFFSET 0",
+			"WITH `all` AS ((SELECT `id`, `kind` FROM `t1` ORDER BY `end_time` DESC LIMIT 20) UNION ALL (SELECT `id`, `kind` FROM `t2` ORDER BY `end_time` DESC LIMIT 20)) SELECT `id`, `kind` FROM `all` ORDER BY `end_time` DESC LIMIT 10 OFFSET 0",
 			query,
 		)
 	})
