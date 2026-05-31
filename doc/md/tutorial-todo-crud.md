@@ -31,6 +31,13 @@ As you can see, our Todos are too boring as they contain only the `ID` field. Le
 multiple fields to the schema in `todo/ent/schema/todo.go`:
 
 ```go
+import (
+         "entgo.io/ent"
+	 "entgo.io/ent/schema/field"
+	 "time"
+)
+// ...
+
 func (Todo) Fields() []ent.Field {
 	return []ent.Field{
 		field.Text("text").
