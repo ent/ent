@@ -140,6 +140,11 @@ func (_m *Pet) Unwrap() *Pet {
 	return _m
 }
 
+// TableName returns the table name of the Pet in the database.
+func (pe *Pet) TableName() string {
+	return pet.Table
+}
+
 // custom stringer implementation (in this case none)
 
 // Pets is a parsable slice of Pet.

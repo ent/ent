@@ -92,6 +92,11 @@ func (_m *CustomType) Unwrap() *CustomType {
 	return _m
 }
 
+// TableName returns the table name of the CustomType in the database.
+func (ct *CustomType) TableName() string {
+	return customtype.Table
+}
+
 // String implements the fmt.Stringer.
 func (_m *CustomType) String() string {
 	var builder strings.Builder

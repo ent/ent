@@ -131,6 +131,11 @@ func (_m *Street) Unwrap() *Street {
 	return _m
 }
 
+// TableName returns the table name of the Street in the database.
+func (s *Street) TableName() string {
+	return street.Table
+}
+
 // String implements the fmt.Stringer.
 func (_m *Street) String() string {
 	var builder strings.Builder

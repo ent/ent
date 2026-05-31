@@ -92,6 +92,11 @@ func (_m *Tenant) Unwrap() *Tenant {
 	return _m
 }
 
+// TableName returns the table name of the Tenant in the database.
+func (t *Tenant) TableName() string {
+	return tenant.Table
+}
+
 // String implements the fmt.Stringer.
 func (_m *Tenant) String() string {
 	var builder strings.Builder

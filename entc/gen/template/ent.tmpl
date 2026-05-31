@@ -120,6 +120,9 @@ func ({{ $receiver }} *{{ $.Name }}) Unwrap() *{{ $.Name }} {
 	return {{ $receiver }}
 }
 
+{{ $tmpl = printf "dialect/%s/ent/helpers" $.Storage }}
+{{ xtemplate $tmpl . }}
+
 {{ template "model/stringer" $ }}
 
 {{ template "model/additional" $ }}
