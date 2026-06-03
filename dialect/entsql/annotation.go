@@ -193,6 +193,10 @@ type Annotation struct {
 	//	}
 	ViewFor map[string]string `json:"view_for,omitempty"`
 
+	// TableFieldOrder tells ent to use the user provided Field order for columns,
+	// and to not push all Edges till the end of the column list
+	TableFieldOrder bool `json:"table_field_order,omitempty"`
+
 	// error occurs during annotation build. This field is not
 	// serialized to JSON and used only by the codegen loader.
 	err error
@@ -297,6 +301,10 @@ func ViewFor(dialect string, as func(*sql.Selector)) *Annotation {
 			ViewFor: map[string]string{dialect: q},
 		}
 	}
+}
+
+func TableFieldOrder() *Annotation {
+	return &Annotation{TableFieldOrder: true}
 }
 
 // Default specifies a literal default value of a column. Note that using
