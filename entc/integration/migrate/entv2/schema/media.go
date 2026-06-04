@@ -28,7 +28,7 @@ func (Media) Fields() []ent.Field {
 			Annotations(entsql.WithComments(false)),
 		field.Text("text").
 			Optional().
-			Comment("media text"),
+			Comment("media text\nComment can span multiple lines"),
 	}
 }
 
@@ -47,7 +47,7 @@ func (Media) Indexes() []ent.Index {
 // Annotations of the Media.
 func (Media) Annotations() []schema.Annotation {
 	return []schema.Annotation{
-		schema.Comment("Comment that appears in both the schema and the generated code"),
+		schema.Comment("Comment that appears in both the schema and the generated code\nComment can span multiple lines"),
 		entsql.WithComments(true),
 		entsql.Check("text <> 'boring'"),
 		entsql.Checks(map[string]string{
