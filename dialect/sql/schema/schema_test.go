@@ -155,6 +155,52 @@ func TestCopyTables(t *testing.T) {
 	require.Equal(t, tables, copyT)
 }
 
+func TestCopyTablesMultiSchema(t *testing.T) {
+	// Two tables with the same name in different schemas.
+	t1 := &Table{
+		Name:   "templates",
+		Schema: "global",
+		Columns: []*Column{
+			{Name: "id", Type: field.TypeInt},
+			{Name: "name", Type: field.TypeString},
+		},
+	}
+	t1.PrimaryKey = t1.Columns[:1]
+	t2 := &Table{
+		Name:   "templates",
+		Schema: "lead",
+		Columns: []*Column{
+			{Name: "id", Type: field.TypeInt},
+			{Name: "title", Type: field.TypeString},
+			{Name: "ref_id", Type: field.TypeInt},
+		},
+	}
+	t2.PrimaryKey = t2.Columns[:1]
+	// FK from lead.templates to global.templates.
+	t2.AddForeignKey(&ForeignKey{
+		Columns:    t2.Columns[2:],
+		RefTable:   t1,
+		RefColumns: t1.Columns[:1],
+		OnDelete:   SetNull,
+	})
+	tables := []*Table{t1, t2}
+	copyT, err := CopyTables(tables)
+	require.NoError(t, err)
+	require.Len(t, copyT, 2)
+	// Verify schemas are preserved.
+	require.Equal(t, "global", copyT[0].Schema)
+	require.Equal(t, "lead", copyT[1].Schema)
+	// Verify names are preserved.
+	require.Equal(t, "templates", copyT[0].Name)
+	require.Equal(t, "templates", copyT[1].Name)
+	// Verify FK references the correct copied table (global.templates).
+	require.Len(t, copyT[1].ForeignKeys, 1)
+	require.Equal(t, copyT[0], copyT[1].ForeignKeys[0].RefTable)
+	// Verify the copy is independent from the original.
+	require.NotSame(t, t1, copyT[0])
+	require.NotSame(t, t2, copyT[1])
+}
+
 func TestDDL(t *testing.T) {
 	const (
 		hash   = "249590215c5bc8be0106146e65d7fa7f"

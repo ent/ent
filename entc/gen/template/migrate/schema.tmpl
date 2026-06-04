@@ -27,7 +27,7 @@ var (
 		{{- /* find type node in the graph of this table, if exists */}}
 		{{- $node := index $.Nodes 0 }}
 		{{- range $n := $.Nodes }}{{ if eq $t.Name $n.Table }}{{ $node = $n }}{{ end }}{{ end }}
-		{{- $columns := pascal $t.Name | printf "%sColumns" }}
+		{{- $columns := $.TableIdent $t | printf "%sColumns" }}
 		// {{ $columns }} holds the columns for the "{{ $t.Name }}" table.
 		{{ $columns }} = []*schema.Column{
 			{{- range $c := $t.Columns }}
@@ -53,10 +53,13 @@ var (
 				{{- with $c.SchemaType }} SchemaType: map[string]string{ {{ range $k := keys . }}"{{ $k }}": "{{ index $c.SchemaType $k }}",{{ end }}}{{ end }}},
 			{{- end }}
 		}
-		{{- $table := pascal $t.Name | printf "%sTable" }}
+		{{- $table := $.TableIdent $t | printf "%sTable" }}
 		// {{ $table }} holds the schema information for the "{{ $t.Name }}" table.
 		{{ $table }} = &schema.Table{
 			Name: "{{ $t.Name }}",
+			{{- with $t.Schema }}
+				Schema: "{{ . }}",
+			{{- end }}
 			{{- with $t.Comment }}
 				Comment: "{{ . }}",
 			{{- end }}
@@ -84,7 +87,7 @@ var (
 							RefColumns: []*schema.Column{
 								{{- range $c1 := $fk.RefColumns }}
 									{{- range $i, $c2 := $fk.RefTable.Columns }}
-										{{- if eq $c1.Name $c2.Name }}{{ pascal $fk.RefTable.Name | printf "%sColumns" }}[{{ $i }}],{{ end }}
+										{{- if eq $c1.Name $c2.Name }}{{ $.TableIdent $fk.RefTable | printf "%sColumns" }}[{{ $i }}],{{ end }}
 									{{- end }}
 								{{- end }}
 							},
@@ -193,16 +196,16 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		{{- range $t := $.Tables }}
-			{{ pascal $t.Name | printf "%sTable" }},
+			{{ $.TableIdent $t | printf "%sTable" }},
 		{{- end }}
 	}
 )
 
 func init() {
 	{{- range $t := $.Tables }}
-		{{- $table := pascal $t.Name | printf "%sTable" }}
+		{{- $table := $.TableIdent $t | printf "%sTable" }}
 		{{- range $i, $fk := $t.ForeignKeys }}
-			{{ $table }}.ForeignKeys[{{ $i }}].RefTable = {{ pascal $fk.RefTable.Name | printf "%sTable" }}
+			{{ $table }}.ForeignKeys[{{ $i }}].RefTable = {{ $.TableIdent $fk.RefTable | printf "%sTable" }}
 		{{- end }}
 		{{- with $ant := $t.Annotation }}
 			{{- if not (allZero $ant.Table $ant.Charset $ant.Collation $ant.Options $ant.Check $ant.IncrementStart $ant.Incremental $ant.Checks) }}

@@ -108,6 +108,8 @@ type (
 		nodes map[string]*Type
 		// Schemas holds the raw interfaces for the loaded schemas.
 		Schemas []*load.Schema
+		// tableIdents maps "schema.table" to a unique Go identifier (e.g. "GlobalTemplates").
+		tableIdents map[string]string
 	}
 
 	// Generator is the interface that wraps the Generate method.
@@ -633,9 +635,17 @@ func (g *Graph) edgeSchemas() error {
 	return nil
 }
 
+// tableKey returns the schema-qualified key for a table: "schema.name".
+func tableKey(s, name string) string {
+	return s + "." + name
+}
+
+
 // Tables returns the schema definitions of SQL tables for the graph.
 func (g *Graph) Tables() (all []*schema.Table, err error) {
 	tables := make(map[string]*schema.Table)
+	// nodeT maps each Type to its schema table for FK lookups.
+	nodeT := make(map[*Type]*schema.Table)
 	for _, n := range g.MutableNodes() {
 		table := schema.NewTable(n.Table()).
 			SetComment(n.sqlComment()).
@@ -658,12 +668,12 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 				table.AddColumn(f.Column())
 			}
 		}
+		key := tableKey(table.Schema, table.Name)
 		switch {
-		case tables[table.Name] == nil:
-			tables[table.Name] = table
+		case tables[key] == nil:
+			tables[key] = table
+			nodeT[n] = table
 			all = append(all, table)
-		case tables[table.Name].Schema != table.Schema:
-			return nil, fmt.Errorf("cannot use the same table name %q in different schemas: %q, %q", table.Name, tables[table.Name].Schema, table.Schema)
 		default:
 			return nil, fmt.Errorf("duplicate table name %q in schema %q", table.Name, table.Schema)
 		}
@@ -678,7 +688,13 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 			case O2O, O2M:
 				// The "owner" is the table that owns the relation (we set
 				// the foreign-key on) and "ref" is the referenced table.
-				owner, ref := tables[e.Rel.Table], tables[n.Table()]
+				// Determine the owner node by matching e.Rel.Table:
+				// For O2M the FK lives on e.Type's table, for O2O on n's table.
+				ownerNode := n
+				if e.Rel.Type == O2M && n != e.Type {
+					ownerNode = e.Type
+				}
+				owner, ref := nodeT[ownerNode], nodeT[n]
 				column := fkColumn(e, owner, ref.PrimaryKey[0])
 				// If it's not a circular reference (self-referencing table),
 				// and the inverse edge is required, make it non-nullable.
@@ -694,7 +710,7 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 					Symbol:     fkSymbol(e, owner, ref),
 				})
 			case M2O:
-				ref, owner := tables[e.Type.Table()], tables[e.Rel.Table]
+				ref, owner := nodeT[e.Type], nodeT[n]
 				column := fkColumn(e, owner, ref.PrimaryKey[0])
 				// If it's not a circular reference (self-referencing table),
 				// and the edge is non-optional (required), make it non-nullable.
@@ -714,7 +730,7 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 				if e.Through != nil || e.Ref != nil && e.Ref.Through != nil {
 					continue
 				}
-				t1, t2 := tables[n.Table()], tables[e.Type.Table()]
+				t1, t2 := nodeT[n], nodeT[e.Type]
 				c1 := &schema.Column{Name: e.Rel.Columns[0], Type: field.TypeInt, SchemaType: n.ID.def.SchemaType}
 				if ref := n.ID; ref.UserDefined {
 					c1.Type = ref.Type.Type
@@ -727,7 +743,7 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 				}
 				ant := e.EntSQL()
 				s1, s2 := fkSymbols(e, c1, c2)
-				all = append(all, &schema.Table{
+				joinTable := &schema.Table{
 					Name: e.Rel.Table,
 					// Join tables get the position of the edge owner.
 					Pos: n.Pos(),
@@ -761,18 +777,20 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 							Symbol:     s2,
 						},
 					},
-				})
+				}
+				tables[tableKey(joinTable.Schema, joinTable.Name)] = joinTable
+				all = append(all, joinTable)
 			}
 		}
 		if n.HasCompositeID() {
-			if err := addCompositePK(tables[n.Table()], n); err != nil {
+			if err := addCompositePK(nodeT[n], n); err != nil {
 				return nil, err
 			}
 		}
 	}
 	// Append indexes to tables after all columns were added (including relation columns).
 	for _, n := range g.Nodes {
-		table := tables[n.Table()]
+		table := nodeT[n]
 		for _, idx := range n.Indexes {
 			table.AddIndex(idx.Name, idx.Unique, idx.Columns)
 			// Set the entsql.IndexAnnotation from the schema if exists.
@@ -783,7 +801,53 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 	if err := ensureUniqueFKs(tables); err != nil {
 		return nil, err
 	}
+	// Compute unique Go identifiers for tables.
+	if err := g.computeTableIdents(all); err != nil {
+		return nil, err
+	}
 	return
+}
+
+// computeTableIdents computes unique Go identifiers for each table.
+// By default, the identifier is pascal(t.Name). On collision (same pascal name
+// for tables in different schemas), we prefix with pascal(t.Schema) + "_".
+func (g *Graph) computeTableIdents(tables []*schema.Table) error {
+	g.tableIdents = make(map[string]string, len(tables))
+	// First pass: compute default identifiers and detect collisions.
+	byIdent := make(map[string][]*schema.Table)
+	for _, t := range tables {
+		ident := pascal(t.Name)
+		byIdent[ident] = append(byIdent[ident], t)
+	}
+	// Second pass: assign identifiers, prefixing on collision.
+	usedIdents := make(map[string]string) // ident -> "schema.name" that claimed it
+	for ident, ts := range byIdent {
+		if len(ts) == 1 {
+			key := tableKey(ts[0].Schema, ts[0].Name)
+			if other, ok := usedIdents[ident]; ok {
+				return fmt.Errorf("table identifier %q collision between %q and %q", ident, other, key)
+			}
+			usedIdents[ident] = key
+			g.tableIdents[key] = ident
+		} else {
+			// Multiple tables share the same pascal(Name) — prefix with schema.
+			for _, t := range ts {
+				key := tableKey(t.Schema, t.Name)
+				prefixed := pascal(t.Schema) + "_" + pascal(t.Name)
+				if other, ok := usedIdents[prefixed]; ok {
+					return fmt.Errorf("table identifier %q collision between %q and %q", prefixed, other, key)
+				}
+				usedIdents[prefixed] = key
+				g.tableIdents[key] = prefixed
+			}
+		}
+	}
+	return nil
+}
+
+// TableIdent returns the unique Go identifier for the given table.
+func (g *Graph) TableIdent(t *schema.Table) string {
+	return g.tableIdents[tableKey(t.Schema, t.Name)]
 }
 
 // Views returns all schema views

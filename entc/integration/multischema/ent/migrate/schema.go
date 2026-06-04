@@ -23,6 +23,7 @@ var (
 	// FriendshipsTable holds the schema information for the "friendships" table.
 	FriendshipsTable = &schema.Table{
 		Name:       "friendships",
+		Schema:     "db2",
 		Columns:    FriendshipsColumns,
 		PrimaryKey: []*schema.Column{FriendshipsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
@@ -60,6 +61,7 @@ var (
 	// GroupsTable holds the schema information for the "groups" table.
 	GroupsTable = &schema.Table{
 		Name:       "groups",
+		Schema:     "db2",
 		Columns:    GroupsColumns,
 		PrimaryKey: []*schema.Column{GroupsColumns[0]},
 	}
@@ -73,6 +75,7 @@ var (
 	// ParentsTable holds the schema information for the "parents" table.
 	ParentsTable = &schema.Table{
 		Name:       "parents",
+		Schema:     "db1",
 		Columns:    ParentsColumns,
 		PrimaryKey: []*schema.Column{ParentsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
@@ -106,6 +109,7 @@ var (
 	// PetsTable holds the schema information for the "pets" table.
 	PetsTable = &schema.Table{
 		Name:       "pets",
+		Schema:     "db1",
 		Columns:    PetsColumns,
 		PrimaryKey: []*schema.Column{PetsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
@@ -125,6 +129,7 @@ var (
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
 		Name:       "users",
+		Schema:     "db1",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
@@ -136,6 +141,7 @@ var (
 	// GroupUsersTable holds the schema information for the "group_users" table.
 	GroupUsersTable = &schema.Table{
 		Name:       "group_users",
+		Schema:     "db2",
 		Columns:    GroupUsersColumns,
 		PrimaryKey: []*schema.Column{GroupUsersColumns[0], GroupUsersColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
