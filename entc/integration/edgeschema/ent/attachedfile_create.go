@@ -615,6 +615,9 @@ func (u *AttachedFileUpsertBulk) Exec(ctx context.Context) error {
 		return u.create.err
 	}
 	for i, b := range u.create.builders {
+		if b == nil {
+			return fmt.Errorf("ent: missing builder at index %d, unexpected nil builder passed to CreateBulk", i)
+		}
 		if len(b.conflict) != 0 {
 			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the AttachedFileCreateBulk instead", i)
 		}
