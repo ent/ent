@@ -830,6 +830,13 @@ func (b *jsonBuilder) Immutable() *jsonBuilder {
 	return b
 }
 
+// Nillable indicates that this field is a nillable.
+// Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
+func (b *jsonBuilder) Nillable() *jsonBuilder {
+	b.desc.Nillable = true
+	return b
+}
+
 // Comment sets the comment of the field.
 func (b *jsonBuilder) Comment(c string) *jsonBuilder {
 	b.desc.Comment = c
