@@ -21,8 +21,8 @@ import (
 )
 
 // String returns a new Field with type string.
-func String(name string) *stringBuilder {
-	return &stringBuilder{&Descriptor{
+func String(name string) *StringBuilder {
+	return &StringBuilder{&Descriptor{
 		Name: name,
 		Info: &TypeInfo{Type: TypeString},
 	}}
@@ -30,8 +30,8 @@ func String(name string) *stringBuilder {
 
 // Text returns a new string field without limitation on the size.
 // In MySQL, it is the "longtext" type, but in SQLite and Gremlin it has no effect.
-func Text(name string) *stringBuilder {
-	return &stringBuilder{&Descriptor{
+func Text(name string) *StringBuilder {
+	return &StringBuilder{&Descriptor{
 		Name: name,
 		Size: math.MaxInt32,
 		Info: &TypeInfo{Type: TypeString},
@@ -183,25 +183,25 @@ func Other(name string, typ driver.Valuer) *otherBuilder {
 	return ob
 }
 
-// stringBuilder is the builder for string fields.
-type stringBuilder struct {
+// StringBuilder is the builder for string fields.
+type StringBuilder struct {
 	desc *Descriptor
 }
 
 // Unique makes the field unique within all vertices of this type.
-func (b *stringBuilder) Unique() *stringBuilder {
+func (b *StringBuilder) Unique() *StringBuilder {
 	b.desc.Unique = true
 	return b
 }
 
 // Sensitive fields not printable and not serializable.
-func (b *stringBuilder) Sensitive() *stringBuilder {
+func (b *StringBuilder) Sensitive() *StringBuilder {
 	b.desc.Sensitive = true
 	return b
 }
 
 // Match adds a regex matcher for this field. Operation fails if the regex fails.
-func (b *stringBuilder) Match(re *regexp.Regexp) *stringBuilder {
+func (b *StringBuilder) Match(re *regexp.Regexp) *StringBuilder {
 	b.desc.Validators = append(b.desc.Validators, func(v string) error {
 		if !re.MatchString(v) {
 			return errors.New("value does not match validation")
@@ -213,7 +213,7 @@ func (b *stringBuilder) Match(re *regexp.Regexp) *stringBuilder {
 
 // MinLen adds a length validator for this field.
 // Operation fails if the length of the string is less than the given value.
-func (b *stringBuilder) MinLen(i int) *stringBuilder {
+func (b *StringBuilder) MinLen(i int) *StringBuilder {
 	b.desc.Validators = append(b.desc.Validators, func(v string) error {
 		if len(v) < i {
 			return errors.New("value is less than the required length")
@@ -225,7 +225,7 @@ func (b *stringBuilder) MinLen(i int) *stringBuilder {
 
 // MinRuneLen adds a rune length validator for this field.
 // Operation fails if the rune count of the string is less than the given value.
-func (b *stringBuilder) MinRuneLen(i int) *stringBuilder {
+func (b *StringBuilder) MinRuneLen(i int) *StringBuilder {
 	b.desc.Validators = append(b.desc.Validators, func(v string) error {
 		if utf8.RuneCountInString(v) < i {
 			return errors.New("value is less than the required rune length")
@@ -237,13 +237,13 @@ func (b *stringBuilder) MinRuneLen(i int) *stringBuilder {
 
 // NotEmpty adds a length validator for this field.
 // Operation fails if the length of the string is zero.
-func (b *stringBuilder) NotEmpty() *stringBuilder {
+func (b *StringBuilder) NotEmpty() *StringBuilder {
 	return b.MinLen(1)
 }
 
 // MaxLen adds a length validator for this field.
 // Operation fails if the length of the string is greater than the given value.
-func (b *stringBuilder) MaxLen(i int) *stringBuilder {
+func (b *StringBuilder) MaxLen(i int) *StringBuilder {
 	b.desc.Size = i
 	b.desc.Validators = append(b.desc.Validators, func(v string) error {
 		if len(v) > i {
@@ -256,7 +256,7 @@ func (b *stringBuilder) MaxLen(i int) *stringBuilder {
 
 // MaxRuneLen adds a rune length validator for this field.
 // Operation fails if the rune count of the string is greater than the given value.
-func (b *stringBuilder) MaxRuneLen(i int) *stringBuilder {
+func (b *StringBuilder) MaxRuneLen(i int) *StringBuilder {
 	b.desc.Size = i
 	b.desc.Validators = append(b.desc.Validators, func(v string) error {
 		if utf8.RuneCountInString(v) > i {
@@ -268,13 +268,13 @@ func (b *stringBuilder) MaxRuneLen(i int) *stringBuilder {
 }
 
 // Validate adds a validator for this field. Operation fails if the validation fails.
-func (b *stringBuilder) Validate(fn func(string) error) *stringBuilder {
+func (b *StringBuilder) Validate(fn func(string) error) *StringBuilder {
 	b.desc.Validators = append(b.desc.Validators, fn)
 	return b
 }
 
 // Default sets the default value of the field.
-func (b *stringBuilder) Default(s string) *stringBuilder {
+func (b *StringBuilder) Default(s string) *StringBuilder {
 	b.desc.Default = s
 	return b
 }
@@ -284,7 +284,7 @@ func (b *stringBuilder) Default(s string) *stringBuilder {
 //
 //	field.String("cuid").
 //		DefaultFunc(cuid.New)
-func (b *stringBuilder) DefaultFunc(fn any) *stringBuilder {
+func (b *StringBuilder) DefaultFunc(fn any) *StringBuilder {
 	if t := reflect.TypeOf(fn); t.Kind() != reflect.Func {
 		b.desc.Err = fmt.Errorf("field.String(%q).DefaultFunc expects func but got %s", b.desc.Name, t.Kind())
 	}
@@ -294,39 +294,39 @@ func (b *stringBuilder) DefaultFunc(fn any) *stringBuilder {
 
 // Nillable indicates that this field is a nillable.
 // Unlike "Optional" only fields, "Nillable" fields are pointers in the generated struct.
-func (b *stringBuilder) Nillable() *stringBuilder {
+func (b *StringBuilder) Nillable() *StringBuilder {
 	b.desc.Nillable = true
 	return b
 }
 
 // Optional indicates that this field is optional on create.
 // Unlike edges, fields are required by default.
-func (b *stringBuilder) Optional() *stringBuilder {
+func (b *StringBuilder) Optional() *StringBuilder {
 	b.desc.Optional = true
 	return b
 }
 
 // Immutable indicates that this field cannot be updated.
-func (b *stringBuilder) Immutable() *stringBuilder {
+func (b *StringBuilder) Immutable() *StringBuilder {
 	b.desc.Immutable = true
 	return b
 }
 
 // Comment sets the comment of the field.
-func (b *stringBuilder) Comment(c string) *stringBuilder {
+func (b *StringBuilder) Comment(c string) *StringBuilder {
 	b.desc.Comment = c
 	return b
 }
 
 // StructTag sets the struct tag of the field.
-func (b *stringBuilder) StructTag(s string) *stringBuilder {
+func (b *StringBuilder) StructTag(s string) *StringBuilder {
 	b.desc.Tag = s
 	return b
 }
 
 // StorageKey sets the storage key of the field.
 // In SQL dialects is the column name and Gremlin is the property.
-func (b *stringBuilder) StorageKey(key string) *stringBuilder {
+func (b *StringBuilder) StorageKey(key string) *StringBuilder {
 	b.desc.StorageKey = key
 	return b
 }
@@ -339,7 +339,7 @@ func (b *stringBuilder) StorageKey(key string) *stringBuilder {
 //			dialect.MySQL:    "text",
 //			dialect.Postgres: "varchar",
 //		})
-func (b *stringBuilder) SchemaType(types map[string]string) *stringBuilder {
+func (b *StringBuilder) SchemaType(types map[string]string) *StringBuilder {
 	b.desc.SchemaType = types
 	return b
 }
@@ -351,7 +351,7 @@ func (b *stringBuilder) SchemaType(types map[string]string) *stringBuilder {
 //
 //	field.String("dir").
 //		GoType(http.Dir("dir"))
-func (b *stringBuilder) GoType(typ any) *stringBuilder {
+func (b *StringBuilder) GoType(typ any) *StringBuilder {
 	b.desc.goType(typ)
 	return b
 }
@@ -360,7 +360,7 @@ func (b *stringBuilder) GoType(typ any) *stringBuilder {
 // Using this option allow users to use field types that do not implement
 // the sql.Scanner and driver.Valuer interfaces, such as slices and maps
 // or types exist in external packages (e.g., url.URL).
-func (b *stringBuilder) ValueScanner(vs any) *stringBuilder {
+func (b *StringBuilder) ValueScanner(vs any) *StringBuilder {
 	b.desc.ValueScanner = vs
 	return b
 }
@@ -372,7 +372,7 @@ func (b *stringBuilder) ValueScanner(vs any) *stringBuilder {
 //		Annotations(
 //			entgql.OrderField("DIR"),
 //		)
-func (b *stringBuilder) Annotations(annotations ...schema.Annotation) *stringBuilder {
+func (b *StringBuilder) Annotations(annotations ...schema.Annotation) *StringBuilder {
 	b.desc.Annotations = append(b.desc.Annotations, annotations...)
 	return b
 }
@@ -380,7 +380,7 @@ func (b *stringBuilder) Annotations(annotations ...schema.Annotation) *stringBui
 // Deprecated marks the field as deprecated. Deprecated fields are not
 // selected by default in queries, and their struct fields are annotated
 // with `deprecated` in the generated code.
-func (b *stringBuilder) Deprecated(reason ...string) *stringBuilder {
+func (b *StringBuilder) Deprecated(reason ...string) *StringBuilder {
 	b.desc.Deprecated = true
 	if len(reason) > 0 {
 		b.desc.DeprecatedReason = strings.Join(reason, " ")
@@ -389,7 +389,7 @@ func (b *stringBuilder) Deprecated(reason ...string) *stringBuilder {
 }
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
-func (b *stringBuilder) Descriptor() *Descriptor {
+func (b *StringBuilder) Descriptor() *Descriptor {
 	if b.desc.Default != nil {
 		b.desc.checkDefaultFunc(stringType)
 	}
