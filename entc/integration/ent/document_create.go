@@ -242,7 +242,19 @@ func (_c *DocumentCreate) sqlSave(ctx context.Context) (*Document, error) {
 			},
 		)
 	}
-	_blobCleanup, err := _blobs.Create(ctx)
+	_blobCleanup, err := _blobs.Create(ctx, &sqlgraph.BlobSpec{
+		Driver: _c.driver,
+		Table:  document.Table,
+		Columns: map[string]string{
+			document.FieldContent:     "content_key",
+			document.FieldThumbnail:   "thumbnail_key",
+			document.FieldAttachment:  "attachment_key",
+			document.FieldMetadata:    "metadata_key",
+			document.FieldPayload:     "payload_key",
+			document.FieldDescription: "description_key",
+			document.FieldArchive:     "archive_key",
+		},
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -666,7 +678,19 @@ func (_c *DocumentCreateBulk) Save(ctx context.Context) ([]*Document, error) {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					// Write blobs before creating SQL rows so insert failures can clean up written objects.
-					_blobCleanup, err := _blobs.Create(ctx)
+					_blobCleanup, err := _blobs.Create(ctx, &sqlgraph.BlobSpec{
+						Driver: _c.driver,
+						Table:  document.Table,
+						Columns: map[string]string{
+							document.FieldContent:     "content_key",
+							document.FieldThumbnail:   "thumbnail_key",
+							document.FieldAttachment:  "attachment_key",
+							document.FieldMetadata:    "metadata_key",
+							document.FieldPayload:     "payload_key",
+							document.FieldDescription: "description_key",
+							document.FieldArchive:     "archive_key",
+						},
+					})
 					if err != nil {
 						return nil, err
 					}

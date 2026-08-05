@@ -7,6 +7,7 @@ package integration
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"fmt"
 	"io"
 	"os"
@@ -1802,6 +1803,205 @@ func TestBlobBulkCreateCleansUpOnSQLFailure(t *testing.T) {
 		"thumbnail blob should be cleaned up after bulk SQL failure")
 	require.Equal(t, attAfterFirst, countBlobFiles(t, attDir),
 		"attachment blob should be cleaned up after bulk SQL failure")
+}
+
+// Hash keys are content-addressed, so identical content always lands on the same
+// key: the blob a failing insert writes can be the object an existing row already
+// points at. Cleanup must leave those alone. The tests below cover each path that
+// deletes from storage.
+
+// TestBlobCreateKeepsSharedBlobOnSQLFailure verifies that rolling back a failed
+// INSERT does not delete a blob an existing row references.
+func TestBlobCreateKeepsSharedBlobOnSQLFailure(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+
+	const (
+		shared      = "shared-content"
+		sharedThumb = "shared-thumb"
+		sharedAtt   = "shared-att"
+	)
+	doc := client.Document.Create().
+		SetName("shared-doc").
+		SetContent(strings.NewReader(shared)).
+		SetThumbnail(strings.NewReader(sharedThumb)).
+		SetAttachment([]byte(sharedAtt)).
+		SaveX(ctx)
+
+	// Duplicate name → the INSERT fails, but every blob hashes to the key the
+	// existing row already holds.
+	_, err := client.Document.Create().
+		SetName("shared-doc").
+		SetContent(strings.NewReader(shared)).
+		SetThumbnail(strings.NewReader(sharedThumb)).
+		SetAttachment([]byte(sharedAtt)).
+		Save(ctx)
+	require.Error(t, err, "create should fail due to UNIQUE constraint on name")
+
+	doc = client.Document.GetX(ctx, doc.ID)
+	require.Equal(t, []byte(shared), blobContent(t, doc.ContentReader, ctx))
+	require.Equal(t, []byte(sharedThumb), blobContent(t, doc.ThumbnailReader, ctx))
+	require.Equal(t, []byte(sharedAtt), doc.Attachment)
+}
+
+// TestBlobBulkCreateKeepsSharedBlobOnSQLFailure is the bulk counterpart of
+// TestBlobCreateKeepsSharedBlobOnSQLFailure.
+func TestBlobBulkCreateKeepsSharedBlobOnSQLFailure(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+
+	const shared = "bulk-shared-content"
+	doc := client.Document.Create().
+		SetName("bulk-shared").
+		SetContent(strings.NewReader(shared)).
+		SetThumbnail(strings.NewReader("thumb")).
+		SetAttachment([]byte("att")).
+		SaveX(ctx)
+
+	_, err := client.Document.CreateBulk(
+		client.Document.Create().
+			SetName("bulk-shared"). // duplicate → the batch fails
+			SetContent(strings.NewReader(shared)).
+			SetThumbnail(strings.NewReader("thumb")).
+			SetAttachment([]byte("att")),
+	).Save(ctx)
+	require.Error(t, err, "bulk create should fail due to UNIQUE constraint on name")
+
+	doc = client.Document.GetX(ctx, doc.ID)
+	require.Equal(t, []byte(shared), blobContent(t, doc.ContentReader, ctx))
+}
+
+// TestBlobOnConflictDoNothingKeepsSharedBlob verifies the upsert path: DO NOTHING
+// inserts no row, which surfaces as an error and triggers blob cleanup.
+func TestBlobOnConflictDoNothingKeepsSharedBlob(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+
+	const shared = "do-nothing-content"
+	doc := client.Document.Create().
+		SetName("do-nothing").
+		SetContent(strings.NewReader(shared)).
+		SetThumbnail(strings.NewReader("thumb")).
+		SetAttachment([]byte("att")).
+		SaveX(ctx)
+
+	err := client.Document.Create().
+		SetName("do-nothing").
+		SetContent(strings.NewReader(shared)).
+		SetThumbnail(strings.NewReader("thumb")).
+		SetAttachment([]byte("att")).
+		OnConflictColumns(document.FieldName).
+		DoNothing().
+		Exec(ctx)
+	require.ErrorIs(t, err, sql.ErrNoRows, "DO NOTHING inserts no row")
+
+	doc = client.Document.GetX(ctx, doc.ID)
+	require.Equal(t, []byte(shared), blobContent(t, doc.ContentReader, ctx))
+}
+
+// TestBlobCreateTxRollbackKeepsSharedBlob verifies that a transaction rollback
+// does not delete a blob a committed row references.
+func TestBlobCreateTxRollbackKeepsSharedBlob(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+
+	const shared = "tx-shared-content"
+	doc := client.Document.Create().
+		SetName("tx-committed").
+		SetContent(strings.NewReader(shared)).
+		SetThumbnail(strings.NewReader("thumb")).
+		SetAttachment([]byte("att")).
+		SaveX(ctx)
+
+	tx, err := client.Tx(ctx)
+	require.NoError(t, err)
+	tx.Document.Create().
+		SetName("tx-rolled-back").
+		SetContent(strings.NewReader(shared)). // same content → same key as the committed row
+		SetThumbnail(strings.NewReader("thumb2")).
+		SetAttachment([]byte("att2")).
+		SaveX(ctx)
+	require.NoError(t, tx.Rollback())
+
+	doc = client.Document.GetX(ctx, doc.ID)
+	require.Equal(t, []byte(shared), blobContent(t, doc.ContentReader, ctx))
+}
+
+// TestBlobUpdateKeepsSharedBlobOfOtherRow verifies that moving one row off a
+// shared blob does not delete it while another row still points at it.
+func TestBlobUpdateKeepsSharedBlobOfOtherRow(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+
+	const shared = "update-shared-content"
+	keep := client.Document.Create().
+		SetName("update-keep").
+		SetContent(strings.NewReader(shared)).
+		SetThumbnail(strings.NewReader("thumb1")).
+		SetAttachment([]byte("att1")).
+		SaveX(ctx)
+	move := client.Document.Create().
+		SetName("update-move").
+		SetContent(strings.NewReader(shared)). // same content → same key
+		SetThumbnail(strings.NewReader("thumb2")).
+		SetAttachment([]byte("att2")).
+		SaveX(ctx)
+
+	client.Document.UpdateOne(move).
+		SetContent(strings.NewReader("moved-content")).
+		ExecX(ctx)
+
+	keep = client.Document.GetX(ctx, keep.ID)
+	require.Equal(t, []byte(shared), blobContent(t, keep.ContentReader, ctx))
+	move = client.Document.GetX(ctx, move.ID)
+	require.Equal(t, []byte("moved-content"), blobContent(t, move.ContentReader, ctx))
+}
+
+// TestBlobDeleteKeepsSharedBlobOfOtherRow verifies that deleting one of two rows
+// sharing a blob leaves the object in place for the surviving row.
+func TestBlobDeleteKeepsSharedBlobOfOtherRow(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+
+	const shared = "delete-shared-content"
+	keep := client.Document.Create().
+		SetName("delete-keep").
+		SetContent(strings.NewReader(shared)).
+		SetThumbnail(strings.NewReader("thumb1")).
+		SetAttachment([]byte("att1")).
+		SaveX(ctx)
+	drop := client.Document.Create().
+		SetName("delete-drop").
+		SetContent(strings.NewReader(shared)). // same content → same key
+		SetThumbnail(strings.NewReader("thumb2")).
+		SetAttachment([]byte("att2")).
+		SaveX(ctx)
+
+	client.Document.DeleteOne(drop).ExecX(ctx)
+
+	keep = client.Document.GetX(ctx, keep.ID)
+	require.Equal(t, []byte(shared), blobContent(t, keep.ContentReader, ctx))
+}
+
+// TestBlobDeleteAllSharingRowsRemovesBlob is the other half of the reference
+// count: once the last row referencing a shared blob is gone, the object must be
+// removed rather than leaked.
+func TestBlobDeleteAllSharingRowsRemovesBlob(t *testing.T) {
+	client, ctx, dir := setupBlob(t)
+	contentDir := filepath.Join(dir, "documents")
+
+	const shared = "delete-all-shared-content"
+	before := countBlobFiles(t, contentDir)
+	for _, name := range []string{"delete-all-1", "delete-all-2", "delete-all-3"} {
+		client.Document.Create().
+			SetName(name).
+			SetContent(strings.NewReader(shared)). // one object, three rows
+			SetThumbnail(strings.NewReader(name)).
+			SetAttachment([]byte(name)).
+			SaveX(ctx)
+	}
+	require.Equal(t, before+1, countBlobFiles(t, contentDir), "identical content is deduplicated")
+
+	n := client.Document.Delete().
+		Where(document.NameHasPrefix("delete-all-")).
+		ExecX(ctx)
+	require.Equal(t, 3, n)
+	require.Equal(t, before, countBlobFiles(t, contentDir),
+		"the shared content blob should be removed once no row references it")
 }
 
 // TestBlobDualWriteFallbackOnMissingBlob verifies that when a DualWrite field has

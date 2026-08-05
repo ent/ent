@@ -220,25 +220,43 @@ for S3, GCS, Azure, and local filesystem that satisfy this interface via a thin 
 
 ## Lifecycle and Cleanup
 
+### Shared objects
+
+A blob key is not private to the row that wrote it. With `HashKey` (the default), the key
+*is* the content, so any two rows holding identical content point at one object in storage.
+That is what makes deduplication work — and it means an object may only be removed once
+the last row referencing it lets go.
+
+Every cleanup path therefore counts references before deleting: it queries the key columns
+for the keys it is about to remove, and skips the ones other rows still hold. A blob written
+ahead of a failed INSERT is left alone if it turns out to be the object an existing row
+already points at.
+
+The count is taken while the statement (or transaction) is still open, so a row inserted
+concurrently between the count and the delete is not seen. Closing that window entirely
+requires reference counting or a periodic sweep of the bucket against the key columns.
+
 ### Create
 
 Blobs are written **before** the database row is inserted. If the SQL INSERT fails
-(e.g., constraint violation), the generated code automatically deletes the just-written blobs.
+(e.g., constraint violation), the generated code deletes the just-written blobs — except
+any that rows in the database already reference.
 
 ### Update
 
 On update:
 1. New blob data is written to storage.
 2. The SQL UPDATE executes.
-3. On success, old (orphaned) blobs are deleted.
-4. On SQL failure, newly-written blobs are rolled back (deleted).
+3. On success, old blobs are deleted unless another row still references them.
+4. On SQL failure, newly-written blobs are rolled back (deleted) under the same rule.
 
 When using `HashKey`, if the content hasn't changed (same hash), the write is skipped entirely.
 
 ### Delete
 
 Generated delete builders query existing blob keys before deleting the row, then remove
-the blobs from storage after a successful SQL DELETE.
+the blobs from storage after a successful SQL DELETE — keeping any object that rows outside
+the deleted set still reference.
 
 ## OnConflict (Upsert)
 
@@ -271,13 +289,20 @@ at once.
 
 ### With HashKey (content-addressable)
 
-Since the key is derived from content, identical data always produces the same key.
-This makes all conflict actions safe:
+Since the key is derived from content, identical data always produces the same key:
 
-- **`Update<Field>()`** — The SQL updates the key column to the new key. Since the content
-  is the same, the key is the same, so it's effectively a no-op in storage.
-- **`Ignore()` / `DoNothing()`** — The SQL does nothing. The blob written to storage is
-  identical to what already exists at that key (same content = same key), so no orphan is created.
+- **`Update<Field>()`** — The SQL updates the key column to the new key. If the content
+  matches what the row already held, the key is unchanged and it is a no-op in storage.
+  If the content differs, the row moves to the new key and the old object is left behind —
+  `OnConflict` does not query old keys the way a regular Update does.
+- **`Ignore()`** — The SQL sets each column to itself. If the content differs from the
+  existing row's, the blob written to storage has no database reference.
+- **`DoNothing()`** — No row is inserted, which surfaces as `sql.ErrNoRows`. The blob
+  written to storage is deleted, unless the conflicting row already references that same
+  key — the common case when the content is identical.
+
+Upserting identical content is idempotent in storage: the write lands on the key that is
+already there, and cleanup leaves it in place because the existing row references it.
 
 ```go
 client.Document.Create().
@@ -296,8 +321,10 @@ at a **new** key that didn't previously exist:
 - **`Update<Field>()`** — The SQL updates the key column to the new UUID key. The old blob
   at the previous key becomes orphaned and is **not** automatically cleaned up (OnConflict
   does not query old keys like a regular Update does).
-- **`Ignore()` / `DoNothing()`** — The SQL does nothing; the row keeps its existing key.
-  The newly-written blob is orphaned in storage with no database reference.
+- **`Ignore()`** — The SQL succeeds without changing anything; the row keeps its existing
+  key. The newly-written blob is orphaned in storage with no database reference.
+- **`DoNothing()`** — No row is inserted, which surfaces as `sql.ErrNoRows`. Because a fresh
+  UUID is referenced by nobody, the newly-written blob is deleted.
 
 For these reasons, `UUIDKey` is **not recommended** with `OnConflict`. If you need upsert
 semantics, prefer `HashKey` which is inherently idempotent.

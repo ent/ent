@@ -18,7 +18,8 @@ import (
 //
 // Single-row SQL create builders write blob data to external storage before
 // inserting the database row. If the row insertion fails (for example, due to
-// a constraint violation), generated code attempts to delete the just-written blobs.
+// a constraint violation), generated code attempts to delete the just-written
+// blobs — but only those no database row references. See [BlobRefCounter].
 type Blob interface {
 	// NewReader opens a reader for the given key.
 	NewReader(ctx context.Context, key string) (io.ReadCloser, error)
@@ -40,10 +41,32 @@ type BlobKey struct {
 	Key   string
 }
 
+// BlobRefCounter reports how many rows hold each of the given blob keys.
+//
+// Every path that deletes from storage consults it first, because a blob key is
+// not private to the row that wrote it. With content-addressed keys — the default
+// — identical content always yields an identical key, so the object written ahead
+// of a failed insert may be the very object an existing row points at, and two
+// rows with the same content share one object. A key is safe to remove only once
+// the mutation holds its last reference.
+//
+// Counts are per field, which takes each blob field to have its own bucket: the
+// model [BlobOpener] describes. Fields pointing at one shared bucket also share
+// objects, and cleanup cannot see across them.
+//
+// Counts are read while the mutation's statement (or transaction) is still open,
+// since that is the view of the table that will settle. A row inserted
+// concurrently between that read and the delete is not observed; content-addressed
+// storage needs reference counting or a sweeper to close that window entirely.
+type BlobRefCounter interface {
+	CountBlobKeyRefs(ctx context.Context, keys []BlobKey) (map[BlobKey]int, error)
+}
+
 // BlobQuerier queries existing blob keys from the database.
 // [Blobs.Update] passes the mutated field names; [Blobs.Delete] passes nil
 // to indicate all fields should be queried.
 type BlobQuerier interface {
+	BlobRefCounter
 	QueryBlobKeys(ctx context.Context, fields []string) ([]BlobKey, error)
 }
 
@@ -65,6 +88,7 @@ type BlobKeyFunc func(context.Context, []byte) (string, error)
 type Blobs struct {
 	opener BlobOpener
 	inputs []blobInput
+	refs   BlobRefCounter
 }
 
 type blobInput struct {
@@ -94,7 +118,10 @@ func (b *Blobs) SetCleared(f string, clear func()) {
 }
 
 // Create prepares inputs, writes blobs, and returns a rollback [BlobOp].
-func (b *Blobs) Create(ctx context.Context) (BlobOp, error) {
+// refs keeps the rollback from deleting an object that rows in the database
+// already reference; a nil refs skips that check.
+func (b *Blobs) Create(ctx context.Context, refs BlobRefCounter) (BlobOp, error) {
+	b.refs = refs
 	writes, err := b.prepare(ctx)
 	if err != nil {
 		return nil, err
@@ -108,6 +135,7 @@ func (b *Blobs) Update(ctx context.Context, q BlobQuerier) (*BlobUpdateResult, e
 	if len(b.inputs) == 0 {
 		return noopBlobResult, nil
 	}
+	b.refs = q
 	writes, err := b.prepare(ctx)
 	if err != nil {
 		return nil, err
@@ -129,8 +157,9 @@ func (b *Blobs) Update(ctx context.Context, q BlobQuerier) (*BlobUpdateResult, e
 	for _, k := range keys {
 		oldKeys[k.Field] = k.Key
 	}
-	// Filter out writes where the key is unchanged (same content).
-	filtered := writes[:0]
+	// Filter out writes where the key is unchanged (same content). Keep this in
+	// its own slice — the orphan collection below reads the unfiltered writes.
+	filtered := make([]blobWrite, 0, len(writes))
 	for _, wr := range writes {
 		if oldKeys[wr.Field] == wr.Key {
 			continue
@@ -155,20 +184,29 @@ func (b *Blobs) Update(ctx context.Context, q BlobQuerier) (*BlobUpdateResult, e
 			}
 		}
 	}
+	// The mutated row holds one reference to each orphaned key until the UPDATE
+	// lands, so those references are this mutation's to release.
+	commit, err := b.deleteOp(ctx, orphaned, true)
+	if err != nil {
+		return nil, err
+	}
 	return &BlobUpdateResult{
 		Rollback: rollback,
-		Commit:   b.deleteOp(orphaned),
+		Commit:   commit,
 	}, nil
 }
 
 // Delete queries existing blob keys and returns a [BlobOp] that removes
 // them from storage. Use for delete mutations.
 func (b *Blobs) Delete(ctx context.Context, q BlobQuerier) (BlobOp, error) {
+	b.refs = q
 	keys, err := q.QueryBlobKeys(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
-	return b.deleteOp(keys), nil
+	// Each key belongs to a row this mutation is about to remove, so the rows
+	// matched here hold the references it releases.
+	return b.deleteOp(ctx, keys, true)
 }
 
 type blobWrite struct {
@@ -206,14 +244,16 @@ func (b *Blobs) write(ctx context.Context, writes []blobWrite) (BlobOp, error) {
 	var written []BlobKey
 	for _, wr := range writes {
 		if err := w.write(ctx, wr.Field, wr.Key, wr.data); err != nil {
-			var errs []error
-			errs = append(errs, fmt.Errorf("writing blob for %s: %w", wr.Field, err))
-			for _, k := range written {
-				if derr := w.delete(ctx, k.Field, k.Key); derr != nil {
-					errs = append(errs, derr)
-				}
+			// A failed write may still have left an object behind, so clean it up
+			// with the rest — under the same reference check.
+			written = append(written, wr.BlobKey)
+			errs := []error{fmt.Errorf("writing blob for %s: %w", wr.Field, err), w.Close()}
+			switch rollback, rerr := b.deleteOp(ctx, written, false); {
+			case rerr != nil:
+				errs = append(errs, rerr)
+			default:
+				errs = append(errs, rollback(ctx))
 			}
-			errs = append(errs, w.Close())
 			return nil, errors.Join(errs...)
 		}
 		written = append(written, wr.BlobKey)
@@ -221,12 +261,31 @@ func (b *Blobs) write(ctx context.Context, writes []blobWrite) (BlobOp, error) {
 	if err := w.Close(); err != nil {
 		return nil, err
 	}
-	return b.deleteOp(written), nil
+	// Nothing references these keys through this mutation yet: the row is not
+	// inserted, or the UPDATE that would point at them has not run.
+	return b.deleteOp(ctx, written, false)
 }
 
-func (b *Blobs) deleteOp(keys []BlobKey) BlobOp {
+// deleteOp returns a [BlobOp] that removes keys from storage, skipping any key
+// that rows in the database still reference once this mutation settles.
+//
+// The reference counts are read here rather than inside the returned op: the op
+// runs after the statement — or the whole transaction — has settled, when the
+// mutation's own view of the table is no longer reachable.
+//
+// held reports whether the keys stand for references this mutation is giving up
+// (old keys of updated rows, keys of deleted rows) rather than objects written
+// ahead of a row that does not reference them yet (create and update rollbacks).
+func (b *Blobs) deleteOp(ctx context.Context, keys []BlobKey, held bool) (BlobOp, error) {
 	if len(keys) == 0 {
-		return noOp
+		return noOp, nil
+	}
+	keys, err := b.unshared(ctx, keys, held)
+	if err != nil {
+		return nil, err
+	}
+	if len(keys) == 0 {
+		return noOp, nil
 	}
 	return func(ctx context.Context) error {
 		s := NewBlobStore(b.opener)
@@ -240,7 +299,47 @@ func (b *Blobs) deleteOp(keys []BlobKey) BlobOp {
 			errs = append(errs, err)
 		}
 		return errors.Join(errs...)
+	}, nil
+}
+
+// unshared returns the distinct keys that no other row references, dropping the
+// ones still in use. See [BlobRefCounter] for why a key can be shared at all.
+func (b *Blobs) unshared(ctx context.Context, keys []BlobKey, held bool) ([]BlobKey, error) {
+	if b.refs == nil {
+		return dedupBlobKeys(keys), nil
 	}
+	refs, err := b.refs.CountBlobKeyRefs(ctx, keys)
+	if err != nil {
+		return nil, fmt.Errorf("counting blob key references: %w", err)
+	}
+	// References this mutation accounts for — one per entry when the keys are
+	// its own to release, none otherwise.
+	mine := make(map[BlobKey]int, len(keys))
+	if held {
+		for _, k := range keys {
+			mine[k]++
+		}
+	}
+	unshared := make([]BlobKey, 0, len(keys))
+	for _, k := range dedupBlobKeys(keys) {
+		if refs[k] <= mine[k] {
+			unshared = append(unshared, k)
+		}
+	}
+	return unshared, nil
+}
+
+func dedupBlobKeys(keys []BlobKey) []BlobKey {
+	seen := make(map[BlobKey]bool, len(keys))
+	distinct := make([]BlobKey, 0, len(keys))
+	for _, k := range keys {
+		if seen[k] {
+			continue
+		}
+		seen[k] = true
+		distinct = append(distinct, k)
+	}
+	return distinct
 }
 
 var (
@@ -303,7 +402,9 @@ func (s *BlobStore) write(ctx context.Context, field, key string, data []byte) e
 		return err
 	}
 	if _, err := wr.Write(data); err != nil {
-		return errors.Join(err, wr.Close(), b.Delete(ctx, key))
+		// Leave the key alone — it may be an object other rows reference. The
+		// caller cleans up through [Blobs.deleteOp], which checks for references.
+		return errors.Join(err, wr.Close())
 	}
 	return wr.Close()
 }
