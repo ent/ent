@@ -20,15 +20,18 @@ type BlobSpec struct {
 	Predicate func(*sql.Selector)
 }
 
-// maxBlobKeysPerQuery bounds the keys per reference-count query, keeping the
+// maxBlobKeysPerQuery bounds the keys per reference lookup, keeping the
 // statement clear of driver placeholder limits on large deletes.
 const maxBlobKeysPerQuery = 500
 
-// CountBlobKeyRefs implements [ent.BlobRefCounter]. For each key it counts the
-// rows holding it in its field's key column, across the whole table — [BlobSpec.Predicate]
-// is deliberately not applied, since the question is who else refers to the key.
-// Keys absent from the result are held by no row.
-func (s *BlobSpec) CountBlobKeyRefs(ctx context.Context, keys []ent.BlobKey) (map[ent.BlobKey]int, error) {
+// ReferencedBlobKeys implements [ent.BlobRefChecker]. It returns the subset of keys
+// some row holds in its field's key column. [BlobSpec.Predicate] is deliberately not
+// applied: the question is which keys are in use anywhere, and callers time the lookup
+// so the mutation's own rows already read the way they will settle.
+//
+// The lookup only asks whether a key is used, never how often, so an index on each
+// blob key column lets it stop at the first match.
+func (s *BlobSpec) ReferencedBlobKeys(ctx context.Context, keys []ent.BlobKey) ([]ent.BlobKey, error) {
 	if len(keys) == 0 || len(s.Columns) == 0 {
 		return nil, nil
 	}
@@ -44,44 +47,46 @@ func (s *BlobSpec) CountBlobKeyRefs(ctx context.Context, keys []ent.BlobKey) (ma
 			lookup[col] = append(lookup[col], k.Key)
 		}
 	}
-	counts := make(map[ent.BlobKey]int)
+	var referenced []ent.BlobKey
 	for field, col := range s.Columns {
 		vals := lookup[col]
 		for len(vals) > 0 {
 			n := min(len(vals), maxBlobKeysPerQuery)
-			if err := s.countRefs(ctx, field, col, vals[:n], counts); err != nil {
+			found, err := s.selectReferenced(ctx, col, vals[:n])
+			if err != nil {
 				return nil, err
+			}
+			for _, key := range found {
+				referenced = append(referenced, ent.BlobKey{Field: field, Key: key})
 			}
 			vals = vals[n:]
 		}
 	}
-	return counts, nil
+	return referenced, nil
 }
 
-// countRefs accumulates the number of rows holding each of vals in col.
-func (s *BlobSpec) countRefs(ctx context.Context, field, col string, vals []any, counts map[ent.BlobKey]int) error {
+// selectReferenced returns which of vals appear in col.
+func (s *BlobSpec) selectReferenced(ctx context.Context, col string, vals []any) ([]string, error) {
 	query, args := sql.Dialect(s.Driver.Dialect()).
-		Select(col, sql.Count("*")).
+		Select(col).
+		Distinct().
 		From(sql.Table(s.Table)).
 		Where(sql.In(col, vals...)).
-		GroupBy(col).
 		Query()
 	rows := &sql.Rows{}
 	if err := s.Driver.Query(ctx, query, args, rows); err != nil {
-		return err
+		return nil, err
 	}
 	defer rows.Close()
+	var found []string
 	for rows.Next() {
-		var (
-			key string
-			n   int
-		)
-		if err := rows.Scan(&key, &n); err != nil {
-			return err
+		var key string
+		if err := rows.Scan(&key); err != nil {
+			return nil, err
 		}
-		counts[ent.BlobKey{Field: field, Key: key}] += n
+		found = append(found, key)
 	}
-	return rows.Err()
+	return found, rows.Err()
 }
 
 // QueryBlobKeys implements [ent.BlobQuerier].

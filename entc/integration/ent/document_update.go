@@ -465,6 +465,12 @@ func (_u *DocumentUpdateOne) sqlSave(ctx context.Context) (_node *Document, err 
 		return nil, errors.Join(err, _blobResult.Rollback(ctx))
 	}
 	_u.mutation.done = true
+	// Resolve which replaced blobs are unreferenced now that the row moved to its new
+	// keys, while the transaction is still open, and remove them once it commits.
+	_blobCleanup, err := _blobResult.Cleanup(ctx)
+	if err != nil {
+		return nil, err
+	}
 	if txd, ok := _u.driver.(*txDriver); ok {
 		txd.mu.Lock()
 		txd.onCommit = append(txd.onCommit, func(next Committer) Committer {
@@ -472,7 +478,7 @@ func (_u *DocumentUpdateOne) sqlSave(ctx context.Context) (_node *Document, err 
 				if err := next.Commit(ctx, tx); err != nil {
 					return err
 				}
-				return _blobResult.Commit(ctx)
+				return _blobCleanup(ctx)
 			})
 		})
 		txd.onRollback = append(txd.onRollback, func(next Rollbacker) Rollbacker {
@@ -482,10 +488,8 @@ func (_u *DocumentUpdateOne) sqlSave(ctx context.Context) (_node *Document, err 
 			})
 		})
 		txd.mu.Unlock()
-	} else {
-		if err := _blobResult.Commit(ctx); err != nil {
-			return nil, err
-		}
+	} else if err := _blobCleanup(ctx); err != nil {
+		return nil, err
 	}
 	_blobReader := ent.NewBlobStore(_u.mutation.blobOpeners.Document)
 	if value, ok := _u.mutation.Attachment(); ok {

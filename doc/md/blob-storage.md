@@ -227,14 +227,41 @@ A blob key is not private to the row that wrote it. With `HashKey` (the default)
 That is what makes deduplication work — and it means an object may only be removed once
 the last row referencing it lets go.
 
-Every cleanup path therefore counts references before deleting: it queries the key columns
-for the keys it is about to remove, and skips the ones other rows still hold. A blob written
+Every cleanup path therefore checks for references before deleting: it looks up the keys it
+is about to remove in their key columns and skips the ones a row still holds. A blob written
 ahead of a failed INSERT is left alone if it turns out to be the object an existing row
 already points at.
 
-The count is taken while the statement (or transaction) is still open, so a row inserted
-concurrently between the count and the delete is not seen. Closing that window entirely
+The lookup is timed so the table already reads the way the mutation will leave it — before
+the INSERT for blobs written ahead of a row, after the UPDATE or DELETE for keys the mutation
+gives up — and always while the statement and its transaction are still open. A row inserted
+concurrently between the lookup and the delete is not seen. Closing that window entirely
 requires reference counting or a periodic sweep of the bucket against the key columns.
+
+### Index the key columns
+
+**Add an index on every blob key column.** The lookup asks only *whether* a key is still in
+use, never how often, so an index lets it stop at the first matching row instead of scanning
+the table. Every create, update, and delete of a row with blob fields runs this query, so an
+unindexed key column turns each of those mutations into a full table scan.
+
+Declare them by **field** name — for a blob field, `index.Fields` targets the generated key
+column (`<field>_key` by default):
+
+```go
+func (Document) Indexes() []ent.Index {
+  return []ent.Index{
+    index.Fields("content"), // indexes content_key
+    index.Fields("avatar"),  // indexes avatar_key
+  }
+}
+```
+
+Leave them non-unique — rows sharing content share a key, which is the whole point.
+
+One exception: a `DualWrite` field that is not also `Lazy()` keeps a real data column, and
+`index.Fields` targets *that* column rather than the key column. For those fields, create the
+index on `<field>_key` outside the schema.
 
 ### Create
 

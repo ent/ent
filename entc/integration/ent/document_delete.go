@@ -54,7 +54,7 @@ func (_d *DocumentDelete) sqlExec(ctx context.Context) (int, error) {
 		}
 	}
 	// Collect blob keys before deleting rows so we can remove blobs from storage afterward.
-	_blobCleanup, _blobErr := ent.NewBlobs(_d.mutation.blobOpeners.Document).Delete(ctx, &sqlgraph.BlobSpec{
+	_blobKeys, _blobErr := ent.NewBlobs(_d.mutation.blobOpeners.Document).Delete(ctx, &sqlgraph.BlobSpec{
 		Driver:    _d.driver,
 		Predicate: _spec.Predicate,
 		Table:     document.Table,
@@ -76,6 +76,12 @@ func (_d *DocumentDelete) sqlExec(ctx context.Context) (int, error) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
 	if err == nil {
+		// Resolve which blobs are unreferenced now that the rows are gone, while the
+		// transaction is still open, and remove them from storage once it commits.
+		_blobCleanup, _blobErr := _blobKeys.Cleanup(ctx)
+		if _blobErr != nil {
+			return 0, _blobErr
+		}
 		if txd, ok := _d.driver.(*txDriver); ok {
 			txd.mu.Lock()
 			txd.onCommit = append(txd.onCommit, func(next Committer) Committer {

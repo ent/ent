@@ -279,6 +279,12 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 	}
 	{{ $mutation }}.done = true
 	{{- if and $one $.HasBlobFields }}
+	// Resolve which replaced blobs are unreferenced now that the row moved to its new
+	// keys, while the transaction is still open, and remove them once it commits.
+	_blobCleanup, err := _blobResult.Cleanup(ctx)
+	if err != nil {
+		return {{ $zero }}, err
+	}
 	if txd, ok := {{ $receiver }}.driver.(*txDriver); ok {
 		txd.mu.Lock()
 		txd.onCommit = append(txd.onCommit, func(next Committer) Committer {
@@ -286,7 +292,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 				if err := next.Commit(ctx, tx); err != nil {
 					return err
 				}
-				return _blobResult.Commit(ctx)
+				return _blobCleanup(ctx)
 			})
 		})
 		txd.onRollback = append(txd.onRollback, func(next Rollbacker) Rollbacker {
@@ -296,10 +302,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			})
 		})
 		txd.mu.Unlock()
-	} else {
-		if err := _blobResult.Commit(ctx); err != nil {
-			return {{ $zero }}, err
-		}
+	} else if err := _blobCleanup(ctx); err != nil {
+		return {{ $zero }}, err
 	}
 	{{- end }}
 	{{- if and $one $.HasLoadOnScanFields }}

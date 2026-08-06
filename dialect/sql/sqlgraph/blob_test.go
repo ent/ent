@@ -18,57 +18,65 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBlobSpecCountBlobKeyRefs(t *testing.T) {
+func TestBlobSpecReferencedBlobKeys(t *testing.T) {
 	tests := []struct {
 		name    string
 		dialect string
 		keys    []ent.BlobKey
 		expect  func(sqlmock.Sqlmock)
-		want    map[ent.BlobKey]int
+		want    []ent.BlobKey
 	}{
 		{
-			name:    "counts rows per key",
+			name:    "keys held by a row",
 			dialect: dialect.MySQL,
 			keys: []ent.BlobKey{
 				{Field: "content", Key: "k1"},
 				{Field: "content", Key: "k2"},
 			},
 			expect: func(m sqlmock.Sqlmock) {
-				m.ExpectQuery(escape("SELECT `content_key`, COUNT(*) FROM `documents` WHERE `content_key` IN (?, ?) GROUP BY `content_key`")).
+				m.ExpectQuery(escape("SELECT DISTINCT `content_key` FROM `documents` WHERE `content_key` IN (?, ?)")).
 					WithArgs("k1", "k2").
-					WillReturnRows(sqlmock.NewRows([]string{"content_key", "count"}).
-						AddRow("k1", 2).
-						AddRow("k2", 1))
+					WillReturnRows(sqlmock.NewRows([]string{"content_key"}).AddRow("k1"))
 			},
-			want: map[ent.BlobKey]int{
-				{Field: "content", Key: "k1"}: 2,
-				{Field: "content", Key: "k2"}: 1,
-			},
+			want: []ent.BlobKey{{Field: "content", Key: "k1"}},
 		},
 		{
-			name:    "keys held by no row are absent",
+			name:    "keys held by no row",
 			dialect: dialect.SQLite,
 			keys:    []ent.BlobKey{{Field: "content", Key: "gone"}},
 			expect: func(m sqlmock.Sqlmock) {
-				m.ExpectQuery(escape("SELECT `content_key`, COUNT(*) FROM `documents` WHERE `content_key` IN (?) GROUP BY `content_key`")).
+				m.ExpectQuery(escape("SELECT DISTINCT `content_key` FROM `documents` WHERE `content_key` IN (?)")).
 					WithArgs("gone").
-					WillReturnRows(sqlmock.NewRows([]string{"content_key", "count"}))
+					WillReturnRows(sqlmock.NewRows([]string{"content_key"}))
 			},
-			want: map[ent.BlobKey]int{},
+			want: nil,
+		},
+		{
+			// The mutation's own rows are not filtered out here -- callers time the
+			// lookup so those rows already read the way they will settle.
+			name:    "the mutation's predicate is not applied",
+			dialect: dialect.Postgres,
+			keys:    []ent.BlobKey{{Field: "content", Key: "k1"}},
+			expect: func(m sqlmock.Sqlmock) {
+				m.ExpectQuery(escape(`SELECT DISTINCT "content_key" FROM "documents" WHERE "content_key" IN ($1)`)).
+					WithArgs("k1").
+					WillReturnRows(sqlmock.NewRows([]string{"content_key"}).AddRow("k1"))
+			},
+			want: []ent.BlobKey{{Field: "content", Key: "k1"}},
 		},
 		{
 			name:    "duplicate keys are looked up once",
-			dialect: dialect.Postgres,
+			dialect: dialect.MySQL,
 			keys: []ent.BlobKey{
 				{Field: "content", Key: "k1"},
 				{Field: "content", Key: "k1"},
 			},
 			expect: func(m sqlmock.Sqlmock) {
-				m.ExpectQuery(escape(`SELECT "content_key", COUNT(*) FROM "documents" WHERE "content_key" IN ($1) GROUP BY "content_key"`)).
+				m.ExpectQuery(escape("SELECT DISTINCT `content_key` FROM `documents` WHERE `content_key` IN (?)")).
 					WithArgs("k1").
-					WillReturnRows(sqlmock.NewRows([]string{"content_key", "count"}).AddRow("k1", 2))
+					WillReturnRows(sqlmock.NewRows([]string{"content_key"}).AddRow("k1"))
 			},
-			want: map[ent.BlobKey]int{{Field: "content", Key: "k1"}: 2},
+			want: []ent.BlobKey{{Field: "content", Key: "k1"}},
 		},
 		{
 			name:    "unknown fields and empty keys are skipped",
@@ -78,7 +86,7 @@ func TestBlobSpecCountBlobKeyRefs(t *testing.T) {
 				{Field: "content", Key: ""},
 			},
 			expect: func(sqlmock.Sqlmock) {},
-			want:   map[ent.BlobKey]int{},
+			want:   nil,
 		},
 	}
 	for _, tt := range tests {
@@ -87,13 +95,15 @@ func TestBlobSpecCountBlobKeyRefs(t *testing.T) {
 			require.NoError(t, err)
 			tt.expect(mock)
 			spec := &BlobSpec{
-				Driver:  sql.OpenDB(tt.dialect, db),
-				Table:   "documents",
-				Columns: map[string]string{"content": "content_key"},
+				Driver: sql.OpenDB(tt.dialect, db),
+				Table:  "documents",
+				// Set to prove ReferencedBlobKeys ignores it.
+				Predicate: func(s *sql.Selector) { s.Where(sql.EQ("id", 7)) },
+				Columns:   map[string]string{"content": "content_key"},
 			}
-			counts, err := spec.CountBlobKeyRefs(context.Background(), tt.keys)
+			referenced, err := spec.ReferencedBlobKeys(context.Background(), tt.keys)
 			require.NoError(t, err)
-			require.Equal(t, tt.want, counts)
+			require.Equal(t, tt.want, referenced)
 			require.NoError(t, mock.ExpectationsWereMet())
 		})
 	}
@@ -101,7 +111,7 @@ func TestBlobSpecCountBlobKeyRefs(t *testing.T) {
 
 // A key set larger than maxBlobKeysPerQuery is split across statements so the
 // query stays clear of driver placeholder limits.
-func TestBlobSpecCountBlobKeyRefsChunks(t *testing.T) {
+func TestBlobSpecReferencedBlobKeysChunks(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	require.NoError(t, err)
 	var (
@@ -117,26 +127,25 @@ func TestBlobSpecCountBlobKeyRefsChunks(t *testing.T) {
 	}
 	// The first statement carries a full chunk, the leftover key its own. Matched
 	// loosely — escape anchors the pattern, and the argument list asserts the size.
-	mock.ExpectQuery("COUNT").
+	mock.ExpectQuery("SELECT DISTINCT").
 		WithArgs(first...).
-		WillReturnRows(sqlmock.NewRows([]string{"content_key", "count"}).AddRow(keys[0].Key, 3))
-	mock.ExpectQuery(escape("SELECT `content_key`, COUNT(*) FROM `documents` WHERE `content_key` IN (?) GROUP BY `content_key`")).
+		WillReturnRows(sqlmock.NewRows([]string{"content_key"}).AddRow(keys[0].Key))
+	mock.ExpectQuery(escape("SELECT DISTINCT `content_key` FROM `documents` WHERE `content_key` IN (?)")).
 		WithArgs(keys[maxBlobKeysPerQuery].Key).
-		WillReturnRows(sqlmock.NewRows([]string{"content_key", "count"}).AddRow(keys[maxBlobKeysPerQuery].Key, 1))
+		WillReturnRows(sqlmock.NewRows([]string{"content_key"}).AddRow(keys[maxBlobKeysPerQuery].Key))
 	spec := &BlobSpec{
 		Driver:  sql.OpenDB(dialect.MySQL, db),
 		Table:   "documents",
 		Columns: map[string]string{"content": "content_key"},
 	}
-	counts, err := spec.CountBlobKeyRefs(context.Background(), keys)
+	referenced, err := spec.ReferencedBlobKeys(context.Background(), keys)
 	require.NoError(t, err)
-	require.Equal(t, 3, counts[keys[0]])
-	require.Equal(t, 1, counts[keys[maxBlobKeysPerQuery]])
+	require.Equal(t, []ent.BlobKey{keys[0], keys[maxBlobKeysPerQuery]}, referenced)
 	require.NoError(t, mock.ExpectationsWereMet())
 }
 
 // Empty input must not reach the database.
-func TestBlobSpecCountBlobKeyRefsNoop(t *testing.T) {
+func TestBlobSpecReferencedBlobKeysNoop(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	require.NoError(t, err)
 	spec := &BlobSpec{
@@ -144,13 +153,13 @@ func TestBlobSpecCountBlobKeyRefsNoop(t *testing.T) {
 		Table:   "documents",
 		Columns: map[string]string{"content": "content_key"},
 	}
-	counts, err := spec.CountBlobKeyRefs(context.Background(), nil)
+	referenced, err := spec.ReferencedBlobKeys(context.Background(), nil)
 	require.NoError(t, err)
-	require.Empty(t, counts)
+	require.Empty(t, referenced)
 
 	spec.Columns = nil
-	counts, err = spec.CountBlobKeyRefs(context.Background(), []ent.BlobKey{{Field: "content", Key: "k"}})
+	referenced, err = spec.ReferencedBlobKeys(context.Background(), []ent.BlobKey{{Field: "content", Key: "k"}})
 	require.NoError(t, err)
-	require.Empty(t, counts)
+	require.Empty(t, referenced)
 	require.NoError(t, mock.ExpectationsWereMet())
 }
