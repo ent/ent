@@ -8,7 +8,7 @@ package ent
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
 	"errors"
 	"fmt"
 	"net/http"
@@ -80,13 +80,13 @@ func (_u *UserUpdate) ClearURLs() *UserUpdate {
 }
 
 // SetRaw sets the "raw" field.
-func (_u *UserUpdate) SetRaw(v json.RawMessage) *UserUpdate {
+func (_u *UserUpdate) SetRaw(v jsontext.Value) *UserUpdate {
 	_u.mutation.SetRaw(v)
 	return _u
 }
 
 // AppendRaw appends value to the "raw" field.
-func (_u *UserUpdate) AppendRaw(v json.RawMessage) *UserUpdate {
+func (_u *UserUpdate) AppendRaw(v jsontext.Value) *UserUpdate {
 	_u.mutation.AppendRaw(v)
 	return _u
 }
@@ -504,13 +504,13 @@ func (_u *UserUpdateOne) ClearURLs() *UserUpdateOne {
 }
 
 // SetRaw sets the "raw" field.
-func (_u *UserUpdateOne) SetRaw(v json.RawMessage) *UserUpdateOne {
+func (_u *UserUpdateOne) SetRaw(v jsontext.Value) *UserUpdateOne {
 	_u.mutation.SetRaw(v)
 	return _u
 }
 
 // AppendRaw appends value to the "raw" field.
-func (_u *UserUpdateOne) AppendRaw(v json.RawMessage) *UserUpdateOne {
+func (_u *UserUpdateOne) AppendRaw(v jsontext.Value) *UserUpdateOne {
 	_u.mutation.AppendRaw(v)
 	return _u
 }

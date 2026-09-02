@@ -250,6 +250,8 @@ type (
 	Rows struct{ ColumnScanner }
 	// Result is an alias to sql.Result.
 	Result = sql.Result
+	// Null is an alias to sql.Null.
+	Null[T any] = sql.Null[T]
 	// NullBool is an alias to sql.NullBool.
 	NullBool = sql.NullBool
 	// NullInt64 is an alias to sql.NullInt64.

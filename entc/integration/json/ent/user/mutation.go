@@ -8,7 +8,7 @@ package user
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -27,8 +27,8 @@ type Mutation struct {
 	url                    **url.URL
 	_URLs                  *[]*url.URL
 	append_URLs            []*url.URL
-	raw                    *json.RawMessage
-	appendraw              json.RawMessage
+	raw                    *jsontext.Value
+	appendraw              jsontext.Value
 	dirs                   *[]http.Dir
 	appenddirs             []http.Dir
 	ints                   *[]int
@@ -176,13 +176,13 @@ func (m *Mutation) ResetURLs() {
 }
 
 // SetRaw sets the "raw" field.
-func (m *Mutation) SetRaw(jm json.RawMessage) {
-	m.raw = &jm
+func (m *Mutation) SetRaw(j jsontext.Value) {
+	m.raw = &j
 	m.appendraw = nil
 }
 
 // Raw returns the value of the "raw" field in the mutation.
-func (m *Mutation) Raw() (r json.RawMessage, exists bool) {
+func (m *Mutation) Raw() (r jsontext.Value, exists bool) {
 	v := m.raw
 	if v == nil {
 		return
@@ -190,13 +190,13 @@ func (m *Mutation) Raw() (r json.RawMessage, exists bool) {
 	return *v, true
 }
 
-// AppendRaw adds jm to the "raw" field.
-func (m *Mutation) AppendRaw(jm json.RawMessage) {
-	m.appendraw = append(m.appendraw, jm...)
+// AppendRaw adds j to the "raw" field.
+func (m *Mutation) AppendRaw(j jsontext.Value) {
+	m.appendraw = append(m.appendraw, j...)
 }
 
 // AppendedRaw returns the list of values that were appended to the "raw" field in this mutation.
-func (m *Mutation) AppendedRaw() (json.RawMessage, bool) {
+func (m *Mutation) AppendedRaw() (jsontext.Value, bool) {
 	if len(m.appendraw) == 0 {
 		return nil, false
 	}
@@ -755,7 +755,7 @@ func (m *Mutation) SetField(name string, value ent.Value) error {
 		m.SetURLs(v)
 		return nil
 	case FieldRaw:
-		v, ok := value.(json.RawMessage)
+		v, ok := value.(jsontext.Value)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
