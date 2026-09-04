@@ -129,7 +129,7 @@ func (d *mysql) marshalArgs(args []any) []any {
 func (d *mysql) appendArg(b *sql.Builder, v any) {
 	switch {
 	case !isPrimitive(v):
-		b.Argf("CAST(? AS JSON)", marshalArg(v))
+		b.Argf("JSON_EXTRACT(?, '$')", marshalArg(v))
 	default:
 		b.Arg(v)
 	}
