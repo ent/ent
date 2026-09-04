@@ -9,6 +9,7 @@ package parent
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/multischema/ent/internal"
 )
 
 const (
@@ -93,14 +94,22 @@ func ByParentID(opts ...sql.OrderTermOption) OrderOption {
 // ByChildField orders the results by child field.
 func ByChildField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newChildStep(), sql.OrderByField(field, opts...))
+		step := newChildStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Parent
+		sqlgraph.OrderByNeighborTerms(s, step, sql.OrderByField(field, opts...))
 	}
 }
 
 // ByParentField orders the results by parent field.
 func ByParentField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newParentStep(), sql.OrderByField(field, opts...))
+		step := newParentStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Parent
+		sqlgraph.OrderByNeighborTerms(s, step, sql.OrderByField(field, opts...))
 	}
 }
 func newChildStep() *sqlgraph.Step {

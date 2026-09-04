@@ -270,6 +270,10 @@ func (e *state) evalEdge(name string, exprs ...entql.Expr) *sql.Predicate {
 		To(edge.To.Table, toC),
 		Edge(edge.Spec.Rel, edge.Spec.Inverse, edge.Spec.Table, edge.Spec.Columns...),
 	)
+	// Propagate static schema info from the graph spec to the step so that
+	// HasNeighbors/HasNeighborsWith schema-qualify their generated tables.
+	step.To.Schema = edge.To.Schema
+	step.Edge.Schema = edge.Spec.Schema
 	selector := e.selector.Clone().SetP(nil)
 	selector.SetTotal(e.Total())
 	if len(exprs) == 0 {
