@@ -37,6 +37,13 @@ func ({{ $receiver}} *{{ $builder }}) sqlExec(ctx context.Context) (int, error) 
 			{{ $.Package }}.{{ $f.Constant }}: "{{ $f.BlobKeyColumn }}",
 			{{- end }}
 		},
+		{{- if $.HasBlobRefCheckedFields }}
+		CheckRefs: map[string]bool{
+			{{- range $f := $.BlobRefCheckedFields }}
+			{{ $.Package }}.{{ $f.Constant }}: true,
+			{{- end }}
+		},
+		{{- end }}
 	})
 	if _blobErr != nil {
 		return 0, _blobErr

@@ -99,7 +99,8 @@ func TestBlobSpecReferencedBlobKeys(t *testing.T) {
 				Table:  "documents",
 				// Set to prove ReferencedBlobKeys ignores it.
 				Predicate: func(s *sql.Selector) { s.Where(sql.EQ("id", 7)) },
-				Columns:   map[string]string{"content": "content_key"},
+				Columns:   map[string]string{"content": "content_key", "meta": "meta_key"},
+				CheckRefs: map[string]bool{"content": true},
 			}
 			referenced, err := spec.ReferencedBlobKeys(context.Background(), tt.keys)
 			require.NoError(t, err)
@@ -134,9 +135,10 @@ func TestBlobSpecReferencedBlobKeysChunks(t *testing.T) {
 		WithArgs(keys[maxBlobKeysPerQuery].Key).
 		WillReturnRows(sqlmock.NewRows([]string{"content_key"}).AddRow(keys[maxBlobKeysPerQuery].Key))
 	spec := &BlobSpec{
-		Driver:  sql.OpenDB(dialect.MySQL, db),
-		Table:   "documents",
-		Columns: map[string]string{"content": "content_key"},
+		Driver:    sql.OpenDB(dialect.MySQL, db),
+		Table:     "documents",
+		Columns:   map[string]string{"content": "content_key"},
+		CheckRefs: map[string]bool{"content": true},
 	}
 	referenced, err := spec.ReferencedBlobKeys(context.Background(), keys)
 	require.NoError(t, err)
@@ -144,21 +146,36 @@ func TestBlobSpecReferencedBlobKeysChunks(t *testing.T) {
 	require.NoError(t, mock.ExpectationsWereMet())
 }
 
-// Empty input must not reach the database.
+// Empty input, and fields that did not opt in, must not reach the database.
 func TestBlobSpecReferencedBlobKeysNoop(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	require.NoError(t, err)
 	spec := &BlobSpec{
-		Driver:  sql.OpenDB(dialect.MySQL, db),
-		Table:   "documents",
-		Columns: map[string]string{"content": "content_key"},
+		Driver:    sql.OpenDB(dialect.MySQL, db),
+		Table:     "documents",
+		Columns:   map[string]string{"content": "content_key"},
+		CheckRefs: map[string]bool{"content": true},
 	}
+	keys := []ent.BlobKey{{Field: "content", Key: "k"}}
 	referenced, err := spec.ReferencedBlobKeys(context.Background(), nil)
 	require.NoError(t, err)
 	require.Empty(t, referenced)
 
+	// No field opted in: the whole lookup is skipped.
+	spec.CheckRefs = nil
+	referenced, err = spec.ReferencedBlobKeys(context.Background(), keys)
+	require.NoError(t, err)
+	require.Empty(t, referenced)
+
+	// Some other field opted in, but not this one.
+	spec.CheckRefs = map[string]bool{"thumbnail": true}
+	referenced, err = spec.ReferencedBlobKeys(context.Background(), keys)
+	require.NoError(t, err)
+	require.Empty(t, referenced)
+
+	spec.CheckRefs = map[string]bool{"content": true}
 	spec.Columns = nil
-	referenced, err = spec.ReferencedBlobKeys(context.Background(), []ent.BlobKey{{Field: "content", Key: "k"}})
+	referenced, err = spec.ReferencedBlobKeys(context.Background(), keys)
 	require.NoError(t, err)
 	require.Empty(t, referenced)
 	require.NoError(t, mock.ExpectationsWereMet())

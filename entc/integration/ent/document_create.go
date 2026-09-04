@@ -246,13 +246,14 @@ func (_c *DocumentCreate) sqlSave(ctx context.Context) (*Document, error) {
 		Driver: _c.driver,
 		Table:  document.Table,
 		Columns: map[string]string{
-			document.FieldContent:     "content_key",
-			document.FieldThumbnail:   "thumbnail_key",
-			document.FieldAttachment:  "attachment_key",
-			document.FieldMetadata:    "metadata_key",
-			document.FieldPayload:     "payload_key",
-			document.FieldDescription: "description_key",
-			document.FieldArchive:     "archive_key",
+			document.FieldContent:    "content_key",
+			document.FieldThumbnail:  "thumbnail_key",
+			document.FieldAttachment: "attachment_key",
+		},
+		CheckRefs: map[string]bool{
+			document.FieldContent:    true,
+			document.FieldThumbnail:  true,
+			document.FieldAttachment: true,
 		},
 	})
 	if err != nil {
@@ -682,13 +683,14 @@ func (_c *DocumentCreateBulk) Save(ctx context.Context) ([]*Document, error) {
 						Driver: _c.driver,
 						Table:  document.Table,
 						Columns: map[string]string{
-							document.FieldContent:     "content_key",
-							document.FieldThumbnail:   "thumbnail_key",
-							document.FieldAttachment:  "attachment_key",
-							document.FieldMetadata:    "metadata_key",
-							document.FieldPayload:     "payload_key",
-							document.FieldDescription: "description_key",
-							document.FieldArchive:     "archive_key",
+							document.FieldContent:    "content_key",
+							document.FieldThumbnail:  "thumbnail_key",
+							document.FieldAttachment: "attachment_key",
+						},
+						CheckRefs: map[string]bool{
+							document.FieldContent:    true,
+							document.FieldThumbnail:  true,
+							document.FieldAttachment: true,
 						},
 					})
 					if err != nil {

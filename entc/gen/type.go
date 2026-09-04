@@ -1422,6 +1422,13 @@ func (f Field) IsBlobNoColumn() bool {
 	return f.IsBlob() && !f.def.BlobDualWrite
 }
 
+// IsBlobRefChecked reports whether cleanup must verify that no row still holds
+// this field's key before removing the object from storage. Set by CheckRefs on
+// the schema field; see [entgo.io/ent/schema/field.blobBuilder.CheckRefs].
+func (f Field) IsBlobRefChecked() bool {
+	return f.IsBlob() && f.def.BlobCheckRefs
+}
+
 // HasBlobKey reports whether this blob field has a user-defined key function.
 func (f Field) HasBlobKey() bool {
 	return f.def != nil && f.def.BlobKey
@@ -1550,6 +1557,27 @@ func (t Type) BlobFields() []*Field {
 func (t Type) HasBlobFields() bool {
 	for _, f := range t.Fields {
 		if f.IsBlob() {
+			return true
+		}
+	}
+	return false
+}
+
+// BlobRefCheckedFields returns the blob fields that opted into the reference check.
+func (t Type) BlobRefCheckedFields() []*Field {
+	var fs []*Field
+	for _, f := range t.Fields {
+		if f.IsBlobRefChecked() {
+			fs = append(fs, f)
+		}
+	}
+	return fs
+}
+
+// HasBlobRefCheckedFields reports whether any blob field opted into the reference check.
+func (t Type) HasBlobRefCheckedFields() bool {
+	for _, f := range t.Fields {
+		if f.IsBlobRefChecked() {
 			return true
 		}
 	}

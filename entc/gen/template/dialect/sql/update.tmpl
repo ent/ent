@@ -248,6 +248,13 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			{{ $.Package }}.{{ $f.Constant }}: "{{ $f.BlobKeyColumn }}",
 			{{- end }}
 		},
+		{{- if $.HasBlobRefCheckedFields }}
+		CheckRefs: map[string]bool{
+			{{- range $f := $.BlobRefCheckedFields }}
+			{{ $.Package }}.{{ $f.Constant }}: true,
+			{{- end }}
+		},
+		{{- end }}
 		Predicate: func(s *sql.Selector) {
 			s.Where(sql.EQ({{ $.Package }}.{{ $.ID.Constant }}, _spec.Node.ID.Value))
 		},

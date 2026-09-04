@@ -1522,6 +1522,28 @@ func (b *blobBuilder) HashKey(c interface{ New() hash.Hash }) *blobBuilder {
 	return b
 }
 
+// CheckRefs makes cleanup verify that no row still holds a blob key before
+// removing the object from storage.
+//
+// Turn it on for content-addressed keys. [blobBuilder.HashKey] derives the key
+// from the content, so rows holding identical content share one object: the blob
+// written ahead of a failed insert can be the object an existing row points at,
+// and a row moving off a key does not make that key free. Without this check,
+// cleanup removes objects other rows still reference.
+//
+//	field.Blob("content").HashKey(crypto.SHA256).CheckRefs()
+//
+// Leave it off for [blobBuilder.UUIDKey]. Those keys are generated fresh per write
+// and no two rows can hold the same one, so cleanup has nothing to look up and the
+// check is a query per mutation with a constant answer.
+//
+// The check costs one indexed lookup per blob field per mutation that deletes from
+// storage. Index the key column ("<field>_key") when enabling it.
+func (b *blobBuilder) CheckRefs() *blobBuilder {
+	b.desc.BlobCheckRefs = true
+	return b
+}
+
 // Lazy disables automatic loading of blob data into the entity struct field
 // after scanning from the database. By default, blob fields auto-load their data
 // from storage on scan. When Lazy is set, the field accepts an io.Reader in the
@@ -1614,6 +1636,7 @@ type Descriptor struct {
 	BlobKey          func(context.Context, []byte) (string, error) // blob key generation function.
 	BlobDualWrite    bool                                          // dual-write mode: write to both blob storage and bytes column.
 	BlobLazy         bool                                          // lazy loading: don't auto-load blob data on scan.
+	BlobCheckRefs    bool                                          // check for rows still holding a key before deleting the object.
 	BlobDWSchemaType map[string]string                             // override the schema type for the dual-write column.
 	Err              error
 }

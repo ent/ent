@@ -2364,3 +2364,70 @@ func TestBlobLazyDualWrite(t *testing.T) {
 	_, err := got3.ArchiveReader(ctx)
 	require.Error(t, err, "expected error reading cleared archive")
 }
+
+// TestBlobWithoutCheckRefsSkipsLookup covers the default for a field that did not
+// opt into CheckRefs: cleanup removes the object without asking whether another row
+// holds the key. "metadata" carries no CheckRefs, so the blob two rows share goes
+// away with the first of them — the behavior a per-write unique key makes safe.
+func TestBlobWithoutCheckRefsSkipsLookup(t *testing.T) {
+	client, ctx, dir := setupBlob(t)
+	metaDir := filepath.Join(dir, "metadata")
+
+	shared := []byte("unchecked-shared-metadata")
+	keep := client.Document.Create().
+		SetName("unchecked-keep").
+		SetContent(strings.NewReader("c1")).
+		SetThumbnail(strings.NewReader("t1")).
+		SetAttachment([]byte("a1")).
+		SetMetadata(shared).
+		SaveX(ctx)
+	drop := client.Document.Create().
+		SetName("unchecked-drop").
+		SetContent(strings.NewReader("c2")).
+		SetThumbnail(strings.NewReader("t2")).
+		SetAttachment([]byte("a2")).
+		SetMetadata(shared). // same content -> same key as "keep"
+		SaveX(ctx)
+	require.Equal(t, 1, countBlobFiles(t, metaDir), "identical content is deduplicated")
+
+	client.Document.DeleteOne(drop).ExecX(ctx)
+	require.Equal(t, 0, countBlobFiles(t, metaDir),
+		"a field without CheckRefs is cleaned up without a reference lookup")
+
+	// The surviving row still points at the key, whose object is now gone. That
+	// dangling reference is what CheckRefs prevents, and what a per-write unique
+	// key makes impossible in the first place.
+	_, err := client.Document.Get(ctx, keep.ID)
+	require.ErrorContains(t, err, "not found in blob storage")
+}
+
+// TestBlobCheckRefsIsPerField pins that opting one field in does not opt the others
+// in: the same delete keeps the shared "content" blob and drops the shared "metadata".
+func TestBlobCheckRefsIsPerField(t *testing.T) {
+	client, ctx, dir := setupBlob(t)
+	metaDir := filepath.Join(dir, "metadata")
+
+	const sharedContent = "per-field-shared-content"
+	sharedMeta := []byte("per-field-shared-metadata")
+	keep := client.Document.Create().
+		SetName("per-field-keep").
+		SetContent(strings.NewReader(sharedContent)).
+		SetThumbnail(strings.NewReader("t1")).
+		SetAttachment([]byte("a1")).
+		SetMetadata(sharedMeta).
+		SaveX(ctx)
+	drop := client.Document.Create().
+		SetName("per-field-drop").
+		SetContent(strings.NewReader(sharedContent)).
+		SetThumbnail(strings.NewReader("t2")).
+		SetAttachment([]byte("a2")).
+		SetMetadata(sharedMeta).
+		SaveX(ctx)
+
+	client.Document.DeleteOne(drop).ExecX(ctx)
+
+	// "content" opted in, so its shared object survives for the remaining row.
+	require.Equal(t, []byte(sharedContent), blobContent(t, keep.ContentReader, ctx))
+	// "metadata" did not, so its shared object is gone.
+	require.Equal(t, 0, countBlobFiles(t, metaDir))
+}

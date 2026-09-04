@@ -96,6 +96,7 @@ doc = doc.Update().
 | `Lazy()` | Mutation accepts `io.Reader`; struct field omitted; use Reader method to read. |
 | `HashKey(h)` | Content-addressable key via hash (default: `crypto.SHA256`). |
 | `UUIDKey()` | Random UUID v7 key per write. |
+| `CheckRefs()` | Verify no row still holds a key before deleting the object. Use with `HashKey`. |
 | `DualWrite(...)` | Migration mode: write to both blob storage and database column. |
 | `GoType(typ)` | Override the default `[]byte` Go type. |
 | `ValueScanner(vs)` | Custom codec between Go type and raw bytes (required for non-`[]byte`/`string` GoType). |
@@ -123,6 +124,10 @@ field.Blob("content").HashKey(crypto.SHA256)
 On update, if the new content produces the same hash as the existing key, the write to
 blob storage is skipped entirely.
 
+Because rows with identical content share one object, pair `HashKey` with
+[`CheckRefs`](#shared-objects-and-checkrefs) so cleanup does not remove an object another row
+still points at.
+
 ### UUIDKey
 
 Each write generates a new random UUID (v7) as the storage key. This guarantees uniqueness
@@ -131,6 +136,10 @@ but does not deduplicate.
 ```go
 field.Blob("content").UUIDKey()
 ```
+
+No two rows can hold the same key, so cleanup can remove an object as soon as its row lets go.
+Leave [`CheckRefs`](#shared-objects-and-checkrefs) off here — the lookup would run on every
+mutation to answer a question whose answer is fixed.
 
 ## Lazy Fields
 
@@ -220,17 +229,34 @@ for S3, GCS, Azure, and local filesystem that satisfy this interface via a thin 
 
 ## Lifecycle and Cleanup
 
-### Shared objects
+### Shared objects and `CheckRefs`
 
-A blob key is not private to the row that wrote it. With `HashKey` (the default), the key
-*is* the content, so any two rows holding identical content point at one object in storage.
-That is what makes deduplication work — and it means an object may only be removed once
-the last row referencing it lets go.
+By default, cleanup removes a blob object as soon as the row that wrote it goes away or moves
+off the key. That is correct exactly when no two rows can hold the same key — the guarantee
+[`UUIDKey`](#uuidkey) gives you, since every write generates a fresh key.
 
-Every cleanup path therefore checks for references before deleting: it looks up the keys it
-is about to remove in their key columns and skips the ones a row still holds. A blob written
-ahead of a failed INSERT is left alone if it turns out to be the object an existing row
-already points at.
+It is **not** correct for `HashKey`. There the key *is* the content, so any two rows holding
+identical content point at one object in storage. That is what makes deduplication work, and
+it means removing the object because one row let go can strand every other row still pointing
+at it. Concretely, without the check:
+
+- A failed INSERT rolls back "its" blob — which may be the object an existing row with the
+  same content already points at.
+- Deleting one of two rows with identical content removes the object the other still uses.
+- Updating a row off a shared key removes an object another row still holds.
+
+`CheckRefs` turns on the guard. Add it to every content-addressed blob field:
+
+```go
+field.Blob("content").
+  HashKey(crypto.SHA256).
+  CheckRefs()
+```
+
+It is opt-in and per field, so a schema can mix strategies: pay for the lookup on the
+content-addressed fields and skip it on the UUID-keyed ones, where the answer is always the
+same. With it on, every cleanup path looks up the keys it is about to remove in their key
+columns and skips the ones a row still holds.
 
 The lookup is timed so the table already reads the way the mutation will leave it — before
 the INSERT for blobs written ahead of a row, after the UPDATE or DELETE for keys the mutation
@@ -240,13 +266,13 @@ requires reference counting or a periodic sweep of the bucket against the key co
 
 ### Index the key columns
 
-**Add an index on every blob key column.** The lookup asks only *whether* a key is still in
-use, never how often, so an index lets it stop at the first matching row instead of scanning
-the table. Every create, update, and delete of a row with blob fields runs this query, so an
-unindexed key column turns each of those mutations into a full table scan.
+**Index the key column of every field using `CheckRefs`.** The lookup asks only *whether* a
+key is still in use, never how often, so an index lets it stop at the first matching row
+instead of scanning the table. Every create, update, and delete touching that field runs the
+query, so an unindexed key column turns each of those mutations into a full table scan.
 
-Declare them by **field** name — for a blob field, `index.Fields` targets the generated key
-column (`<field>_key` by default):
+Declare the index by **field** name — for a blob field, `index.Fields` targets the generated
+key column (`<field>_key` by default):
 
 ```go
 func (Document) Indexes() []ent.Index {
@@ -263,18 +289,21 @@ One exception: a `DualWrite` field that is not also `Lazy()` keeps a real data c
 `index.Fields` targets *that* column rather than the key column. For those fields, create the
 index on `<field>_key` outside the schema.
 
+Fields without `CheckRefs` need no such index — they never run the lookup.
+
 ### Create
 
 Blobs are written **before** the database row is inserted. If the SQL INSERT fails
-(e.g., constraint violation), the generated code deletes the just-written blobs — except
-any that rows in the database already reference.
+(e.g., constraint violation), the generated code deletes the just-written blobs — except,
+for `CheckRefs` fields, any that rows in the database already reference.
 
 ### Update
 
 On update:
 1. New blob data is written to storage.
 2. The SQL UPDATE executes.
-3. On success, old blobs are deleted unless another row still references them.
+3. On success, old blobs are deleted — for `CheckRefs` fields, unless another row still
+   references them.
 4. On SQL failure, newly-written blobs are rolled back (deleted) under the same rule.
 
 When using `HashKey`, if the content hasn't changed (same hash), the write is skipped entirely.
@@ -282,8 +311,8 @@ When using `HashKey`, if the content hasn't changed (same hash), the write is sk
 ### Delete
 
 Generated delete builders query existing blob keys before deleting the row, then remove
-the blobs from storage after a successful SQL DELETE — keeping any object that rows outside
-the deleted set still reference.
+the blobs from storage after a successful SQL DELETE — keeping, for `CheckRefs` fields, any
+object that rows outside the deleted set still reference.
 
 ## OnConflict (Upsert)
 

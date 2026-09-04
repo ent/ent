@@ -434,3 +434,33 @@ func TestField_BlobScanType(t *testing.T) {
 	// but are excluded from SQL columns by IsBlobNoColumn.
 	require.NotEmpty(typ.MutationFields())
 }
+
+func TestField_BlobCheckRefs(t *testing.T) {
+	require := require.New(t)
+	typ, err := NewType(&Config{Package: "entc/gen"}, &load.Schema{
+		Name: "Doc",
+		Fields: []*load.Field{
+			{Name: "checked", Info: &field.TypeInfo{Type: field.TypeBlob}, BlobCheckRefs: true},
+			{Name: "unchecked", Info: &field.TypeInfo{Type: field.TypeBlob}},
+			{Name: "title", Info: &field.TypeInfo{Type: field.TypeString}},
+		},
+	})
+	require.NoError(err)
+	require.True(typ.HasBlobRefCheckedFields())
+	checked := typ.BlobRefCheckedFields()
+	require.Len(checked, 1)
+	require.Equal("checked", checked[0].Name)
+	require.True(checked[0].IsBlobRefChecked())
+	require.False(typ.fields["unchecked"].IsBlobRefChecked())
+	// CheckRefs is meaningless on a non-blob field.
+	require.False(typ.fields["title"].IsBlobRefChecked())
+
+	// A type with no opted-in blob field reports none, so codegen can skip the lookup.
+	typ2, err := NewType(&Config{Package: "entc/gen"}, &load.Schema{
+		Name:   "Plain",
+		Fields: []*load.Field{{Name: "data", Info: &field.TypeInfo{Type: field.TypeBlob}}},
+	})
+	require.NoError(err)
+	require.False(typ2.HasBlobRefCheckedFields())
+	require.Empty(typ2.BlobRefCheckedFields())
+}

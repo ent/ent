@@ -67,6 +67,11 @@ func (_d *DocumentDelete) sqlExec(ctx context.Context) (int, error) {
 			document.FieldDescription: "description_key",
 			document.FieldArchive:     "archive_key",
 		},
+		CheckRefs: map[string]bool{
+			document.FieldContent:    true,
+			document.FieldThumbnail:  true,
+			document.FieldAttachment: true,
+		},
 	})
 	if _blobErr != nil {
 		return 0, _blobErr

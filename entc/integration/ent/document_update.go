@@ -446,6 +446,11 @@ func (_u *DocumentUpdateOne) sqlSave(ctx context.Context) (_node *Document, err 
 			document.FieldDescription: "description_key",
 			document.FieldArchive:     "archive_key",
 		},
+		CheckRefs: map[string]bool{
+			document.FieldContent:    true,
+			document.FieldThumbnail:  true,
+			document.FieldAttachment: true,
+		},
 		Predicate: func(s *sql.Selector) {
 			s.Where(sql.EQ(document.FieldID, _spec.Node.ID.Value))
 		},

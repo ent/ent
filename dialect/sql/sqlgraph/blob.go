@@ -14,9 +14,14 @@ import (
 
 // BlobSpec configures SQL-level blob key queries and implements [ent.BlobQuerier].
 type BlobSpec struct {
-	Driver    dialect.Driver
-	Table     string
-	Columns   map[string]string // field name -> key column name
+	Driver  dialect.Driver
+	Table   string
+	Columns map[string]string // field name -> key column name
+	// CheckRefs holds the fields whose keys more than one row can hold, the ones
+	// declaring CheckRefs on the schema. Only these are looked up before a delete;
+	// a key generated fresh per write has no other holder to find. An empty
+	// CheckRefs makes [BlobSpec.ReferencedBlobKeys] a no-op.
+	CheckRefs map[string]bool
 	Predicate func(*sql.Selector)
 }
 
@@ -29,17 +34,20 @@ const maxBlobKeysPerQuery = 500
 // applied: the question is which keys are in use anywhere, and callers time the lookup
 // so the mutation's own rows already read the way they will settle.
 //
+// Only fields listed in [BlobSpec.CheckRefs] are looked up. Keys of any other field are
+// reported as held by no row, which is what an unshared key strategy guarantees anyway.
+//
 // The lookup only asks whether a key is used, never how often, so an index on each
 // blob key column lets it stop at the first match.
 func (s *BlobSpec) ReferencedBlobKeys(ctx context.Context, keys []ent.BlobKey) ([]ent.BlobKey, error) {
-	if len(keys) == 0 || len(s.Columns) == 0 {
+	if len(keys) == 0 || len(s.CheckRefs) == 0 {
 		return nil, nil
 	}
 	// Group the distinct keys by the column they would be stored in.
 	lookup := make(map[string][]any)
 	seen := make(map[ent.BlobKey]bool, len(keys))
 	for _, k := range keys {
-		if k.Key == "" || seen[k] {
+		if k.Key == "" || seen[k] || !s.CheckRefs[k.Field] {
 			continue
 		}
 		seen[k] = true
@@ -48,7 +56,11 @@ func (s *BlobSpec) ReferencedBlobKeys(ctx context.Context, keys []ent.BlobKey) (
 		}
 	}
 	var referenced []ent.BlobKey
-	for field, col := range s.Columns {
+	for field := range s.CheckRefs {
+		col, ok := s.Columns[field]
+		if !ok {
+			continue
+		}
 		vals := lookup[col]
 		for len(vals) > 0 {
 			n := min(len(vals), maxBlobKeysPerQuery)

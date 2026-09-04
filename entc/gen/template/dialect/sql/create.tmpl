@@ -83,15 +83,20 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (*{{ $.Name 
 		}
 		{{- end }}
 	{{- end }}
-	_blobCleanup, err := _blobs.Create(ctx, &sqlgraph.BlobSpec{
-		Driver: {{ $receiver }}.driver,
-		Table:  {{ $.Package }}.Table,
-		Columns: map[string]string{
-			{{- range $f := $.BlobFields }}
-			{{ $.Package }}.{{ $f.Constant }}: "{{ $f.BlobKeyColumn }}",
-			{{- end }}
-		},
-	})
+	_blobCleanup, err := _blobs.Create(ctx, {{ if $.HasBlobRefCheckedFields }}&sqlgraph.BlobSpec{
+			Driver: {{ $receiver }}.driver,
+			Table:  {{ $.Package }}.Table,
+			Columns: map[string]string{
+				{{- range $f := $.BlobRefCheckedFields }}
+				{{ $.Package }}.{{ $f.Constant }}: "{{ $f.BlobKeyColumn }}",
+				{{- end }}
+			},
+			CheckRefs: map[string]bool{
+				{{- range $f := $.BlobRefCheckedFields }}
+				{{ $.Package }}.{{ $f.Constant }}: true,
+				{{- end }}
+			},
+		}{{ else }}nil{{ end }})
 	if err != nil {
 		return nil, err
 	}
@@ -357,15 +362,20 @@ func ({{ $receiver }} *{{ $builder }}) Save(ctx context.Context) ([]*{{ $.Name }
 				} else {
 					{{- if $.HasBlobFields }}
 					// Write blobs before creating SQL rows so insert failures can clean up written objects.
-					_blobCleanup, err := _blobs.Create(ctx, &sqlgraph.BlobSpec{
-						Driver: {{ $receiver }}.driver,
-						Table:  {{ $.Package }}.Table,
-						Columns: map[string]string{
-							{{- range $f := $.BlobFields }}
-							{{ $.Package }}.{{ $f.Constant }}: "{{ $f.BlobKeyColumn }}",
-							{{- end }}
-						},
-					})
+					_blobCleanup, err := _blobs.Create(ctx, {{ if $.HasBlobRefCheckedFields }}&sqlgraph.BlobSpec{
+							Driver: {{ $receiver }}.driver,
+							Table:  {{ $.Package }}.Table,
+							Columns: map[string]string{
+								{{- range $f := $.BlobRefCheckedFields }}
+								{{ $.Package }}.{{ $f.Constant }}: "{{ $f.BlobKeyColumn }}",
+								{{- end }}
+							},
+							CheckRefs: map[string]bool{
+								{{- range $f := $.BlobRefCheckedFields }}
+								{{ $.Package }}.{{ $f.Constant }}: true,
+								{{- end }}
+							},
+						}{{ else }}nil{{ end }})
 					if err != nil {
 						return nil, err
 					}

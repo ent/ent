@@ -33,11 +33,16 @@ func (Document) Fields() []ent.Field {
 			Unique(),
 		field.Blob("content").
 			Lazy().
-			HashKey(crypto.SHA256),
+			HashKey(crypto.SHA256).
+			CheckRefs(),
 		field.Blob("thumbnail").
-			Lazy(),
+			Lazy().
+			CheckRefs(),
 		field.Blob("attachment").
-			DualWrite(),
+			DualWrite().
+			CheckRefs(),
+		// "metadata" and the fields below deliberately skip CheckRefs, covering the
+		// default: cleanup removes the object without looking for other holders.
 		field.Blob("metadata").
 			Optional(),
 		field.Blob("payload").

@@ -67,6 +67,7 @@ type Field struct {
 	BlobDualWrite    bool                    `json:"blob_dual_write,omitempty"`
 	BlobDWSchemaType map[string]string       `json:"blob_dw_schema_type,omitempty"`
 	BlobLazy         bool                    `json:"blob_lazy,omitempty"`
+	BlobCheckRefs    bool                    `json:"blob_check_refs,omitempty"`
 }
 
 // Edge represents an ent.Edge that was loaded from a complied user package.
@@ -151,6 +152,7 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 		BlobKey:          fd.BlobKey != nil,
 		BlobDualWrite:    fd.BlobDualWrite,
 		BlobLazy:         fd.BlobLazy,
+		BlobCheckRefs:    fd.BlobCheckRefs,
 		BlobDWSchemaType: fd.BlobDWSchemaType,
 	}
 	for _, at := range fd.Annotations {
