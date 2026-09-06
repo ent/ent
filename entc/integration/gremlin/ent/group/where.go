@@ -268,6 +268,13 @@ func TypeHasSuffix(v string) predicate.Group {
 	})
 }
 
+// TypeRegex applies the Regex predicate on the "type" field.
+func TypeRegex(v string) predicate.Group {
+	return predicate.Group(func(t *dsl.Traversal) {
+		t.Has(Label, FieldType, p.Regex(v))
+	})
+}
+
 // TypeIsNil applies the IsNil predicate on the "type" field.
 func TypeIsNil() predicate.Group {
 	return predicate.Group(func(t *dsl.Traversal) {
@@ -426,6 +433,13 @@ func NameHasPrefix(v string) predicate.Group {
 func NameHasSuffix(v string) predicate.Group {
 	return predicate.Group(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.EndingWith(v))
+	})
+}
+
+// NameRegex applies the Regex predicate on the "name" field.
+func NameRegex(v string) predicate.Group {
+	return predicate.Group(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.Regex(v))
 	})
 }
 

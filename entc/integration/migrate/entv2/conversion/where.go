@@ -156,6 +156,11 @@ func NameHasSuffix(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldHasSuffix(FieldName, v))
 }
 
+// NameRegex applies the Regex predicate on the "name" field.
+func NameRegex(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldRegex(FieldName, v))
+}
+
 // NameIsNil applies the IsNil predicate on the "name" field.
 func NameIsNil() predicate.Conversion {
 	return predicate.Conversion(sql.FieldIsNull(FieldName))
@@ -229,6 +234,11 @@ func Int8ToStringHasPrefix(v string) predicate.Conversion {
 // Int8ToStringHasSuffix applies the HasSuffix predicate on the "int8_to_string" field.
 func Int8ToStringHasSuffix(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldHasSuffix(FieldInt8ToString, v))
+}
+
+// Int8ToStringRegex applies the Regex predicate on the "int8_to_string" field.
+func Int8ToStringRegex(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldRegex(FieldInt8ToString, v))
 }
 
 // Int8ToStringIsNil applies the IsNil predicate on the "int8_to_string" field.
@@ -306,6 +316,11 @@ func Uint8ToStringHasSuffix(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldHasSuffix(FieldUint8ToString, v))
 }
 
+// Uint8ToStringRegex applies the Regex predicate on the "uint8_to_string" field.
+func Uint8ToStringRegex(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldRegex(FieldUint8ToString, v))
+}
+
 // Uint8ToStringIsNil applies the IsNil predicate on the "uint8_to_string" field.
 func Uint8ToStringIsNil() predicate.Conversion {
 	return predicate.Conversion(sql.FieldIsNull(FieldUint8ToString))
@@ -379,6 +394,11 @@ func Int16ToStringHasPrefix(v string) predicate.Conversion {
 // Int16ToStringHasSuffix applies the HasSuffix predicate on the "int16_to_string" field.
 func Int16ToStringHasSuffix(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldHasSuffix(FieldInt16ToString, v))
+}
+
+// Int16ToStringRegex applies the Regex predicate on the "int16_to_string" field.
+func Int16ToStringRegex(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldRegex(FieldInt16ToString, v))
 }
 
 // Int16ToStringIsNil applies the IsNil predicate on the "int16_to_string" field.
@@ -456,6 +476,11 @@ func Uint16ToStringHasSuffix(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldHasSuffix(FieldUint16ToString, v))
 }
 
+// Uint16ToStringRegex applies the Regex predicate on the "uint16_to_string" field.
+func Uint16ToStringRegex(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldRegex(FieldUint16ToString, v))
+}
+
 // Uint16ToStringIsNil applies the IsNil predicate on the "uint16_to_string" field.
 func Uint16ToStringIsNil() predicate.Conversion {
 	return predicate.Conversion(sql.FieldIsNull(FieldUint16ToString))
@@ -529,6 +554,11 @@ func Int32ToStringHasPrefix(v string) predicate.Conversion {
 // Int32ToStringHasSuffix applies the HasSuffix predicate on the "int32_to_string" field.
 func Int32ToStringHasSuffix(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldHasSuffix(FieldInt32ToString, v))
+}
+
+// Int32ToStringRegex applies the Regex predicate on the "int32_to_string" field.
+func Int32ToStringRegex(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldRegex(FieldInt32ToString, v))
 }
 
 // Int32ToStringIsNil applies the IsNil predicate on the "int32_to_string" field.
@@ -606,6 +636,11 @@ func Uint32ToStringHasSuffix(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldHasSuffix(FieldUint32ToString, v))
 }
 
+// Uint32ToStringRegex applies the Regex predicate on the "uint32_to_string" field.
+func Uint32ToStringRegex(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldRegex(FieldUint32ToString, v))
+}
+
 // Uint32ToStringIsNil applies the IsNil predicate on the "uint32_to_string" field.
 func Uint32ToStringIsNil() predicate.Conversion {
 	return predicate.Conversion(sql.FieldIsNull(FieldUint32ToString))
@@ -681,6 +716,11 @@ func Int64ToStringHasSuffix(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldHasSuffix(FieldInt64ToString, v))
 }
 
+// Int64ToStringRegex applies the Regex predicate on the "int64_to_string" field.
+func Int64ToStringRegex(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldRegex(FieldInt64ToString, v))
+}
+
 // Int64ToStringIsNil applies the IsNil predicate on the "int64_to_string" field.
 func Int64ToStringIsNil() predicate.Conversion {
 	return predicate.Conversion(sql.FieldIsNull(FieldInt64ToString))
@@ -754,6 +794,11 @@ func Uint64ToStringHasPrefix(v string) predicate.Conversion {
 // Uint64ToStringHasSuffix applies the HasSuffix predicate on the "uint64_to_string" field.
 func Uint64ToStringHasSuffix(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldHasSuffix(FieldUint64ToString, v))
+}
+
+// Uint64ToStringRegex applies the Regex predicate on the "uint64_to_string" field.
+func Uint64ToStringRegex(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldRegex(FieldUint64ToString, v))
 }
 
 // Uint64ToStringIsNil applies the IsNil predicate on the "uint64_to_string" field.

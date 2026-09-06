@@ -116,6 +116,11 @@ func TextHasSuffix(v string) predicate.RelationshipInfo {
 	return predicate.RelationshipInfo(sql.FieldHasSuffix(FieldText, v))
 }
 
+// TextRegex applies the Regex predicate on the "text" field.
+func TextRegex(v string) predicate.RelationshipInfo {
+	return predicate.RelationshipInfo(sql.FieldRegex(FieldText, v))
+}
+
 // TextEqualFold applies the EqualFold predicate on the "text" field.
 func TextEqualFold(v string) predicate.RelationshipInfo {
 	return predicate.RelationshipInfo(sql.FieldEqualFold(FieldText, v))

@@ -156,6 +156,11 @@ func NameHasSuffix(v string) predicate.Conversion {
 	return predicate.Conversion(sql.FieldHasSuffix(FieldName, v))
 }
 
+// NameRegex applies the Regex predicate on the "name" field.
+func NameRegex(v string) predicate.Conversion {
+	return predicate.Conversion(sql.FieldRegex(FieldName, v))
+}
+
 // NameIsNil applies the IsNil predicate on the "name" field.
 func NameIsNil() predicate.Conversion {
 	return predicate.Conversion(sql.FieldIsNull(FieldName))

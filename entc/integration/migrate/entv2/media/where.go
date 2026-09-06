@@ -126,6 +126,11 @@ func SourceHasSuffix(v string) predicate.Media {
 	return predicate.Media(sql.FieldHasSuffix(FieldSource, v))
 }
 
+// SourceRegex applies the Regex predicate on the "source" field.
+func SourceRegex(v string) predicate.Media {
+	return predicate.Media(sql.FieldRegex(FieldSource, v))
+}
+
 // SourceIsNil applies the IsNil predicate on the "source" field.
 func SourceIsNil() predicate.Media {
 	return predicate.Media(sql.FieldIsNull(FieldSource))
@@ -201,6 +206,11 @@ func SourceURIHasSuffix(v string) predicate.Media {
 	return predicate.Media(sql.FieldHasSuffix(FieldSourceURI, v))
 }
 
+// SourceURIRegex applies the Regex predicate on the "source_uri" field.
+func SourceURIRegex(v string) predicate.Media {
+	return predicate.Media(sql.FieldRegex(FieldSourceURI, v))
+}
+
 // SourceURIIsNil applies the IsNil predicate on the "source_uri" field.
 func SourceURIIsNil() predicate.Media {
 	return predicate.Media(sql.FieldIsNull(FieldSourceURI))
@@ -274,6 +284,11 @@ func TextHasPrefix(v string) predicate.Media {
 // TextHasSuffix applies the HasSuffix predicate on the "text" field.
 func TextHasSuffix(v string) predicate.Media {
 	return predicate.Media(sql.FieldHasSuffix(FieldText, v))
+}
+
+// TextRegex applies the Regex predicate on the "text" field.
+func TextRegex(v string) predicate.Media {
+	return predicate.Media(sql.FieldRegex(FieldText, v))
 }
 
 // TextIsNil applies the IsNil predicate on the "text" field.

@@ -117,6 +117,11 @@ func NameHasSuffix(v string) predicate.FileType {
 	return predicate.FileType(sql.FieldHasSuffix(FieldName, v))
 }
 
+// NameRegex applies the Regex predicate on the "name" field.
+func NameRegex(v string) predicate.FileType {
+	return predicate.FileType(sql.FieldRegex(FieldName, v))
+}
+
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.FileType {
 	return predicate.FileType(sql.FieldEqualFold(FieldName, v))

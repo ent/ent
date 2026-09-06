@@ -366,6 +366,13 @@ func NumberHasSuffix(v string) predicate.Card {
 	})
 }
 
+// NumberRegex applies the Regex predicate on the "number" field.
+func NumberRegex(v string) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNumber, p.Regex(v))
+	})
+}
+
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Card {
 	return predicate.Card(func(t *dsl.Traversal) {
@@ -440,6 +447,13 @@ func NameHasPrefix(v string) predicate.Card {
 func NameHasSuffix(v string) predicate.Card {
 	return predicate.Card(func(t *dsl.Traversal) {
 		t.Has(Label, FieldName, p.EndingWith(v))
+	})
+}
+
+// NameRegex applies the Regex predicate on the "name" field.
+func NameRegex(v string) predicate.Card {
+	return predicate.Card(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.Regex(v))
 	})
 }
 

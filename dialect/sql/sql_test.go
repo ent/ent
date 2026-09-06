@@ -469,3 +469,31 @@ func TestNotPredicates(t *testing.T) {
 	require.Equal(t, "SELECT * FROM `users` WHERE (`name` = ? AND (NOT (`users`.`a` = ? AND `users`.`b` = ?))) AND (NOT (`users`.`c` = ?))", query)
 	require.Equal(t, []any{"a8m", "a", "b", "c"}, args)
 }
+
+func TestFieldRegex(t *testing.T) {
+	p := FieldRegex("field_name", "pattern")
+
+	t.Run("MySQL", func(t *testing.T) {
+		s := Dialect(dialect.MySQL).Select("*").From(Table("users"))
+		p(s)
+		query, args := s.Query()
+		require.Equal(t, "SELECT * FROM `users` WHERE `users`.`field_name` REGEXP ?", query)
+		require.Equal(t, []any{"pattern"}, args)
+	})
+
+	t.Run("PostgreSQL", func(t *testing.T) {
+		s := Dialect(dialect.Postgres).Select("*").From(Table("users"))
+		p(s)
+		query, args := s.Query()
+		require.Equal(t, `SELECT * FROM "users" WHERE "users"."field_name" ~ $1`, query)
+		require.Equal(t, []any{"pattern"}, args)
+	})
+
+	t.Run("SQLite", func(t *testing.T) {
+		s := Dialect(dialect.SQLite).Select("*").From(Table("users"))
+		p(s)
+		query, args := s.Query()
+		require.Equal(t, "SELECT * FROM `users` WHERE `users`.`field_name` REGEXP ?", query)
+		require.Equal(t, []any{"pattern"}, args)
+	})
+}

@@ -116,6 +116,11 @@ func CustomHasSuffix(v string) predicate.CustomType {
 	return predicate.CustomType(sql.FieldHasSuffix(FieldCustom, v))
 }
 
+// CustomRegex applies the Regex predicate on the "custom" field.
+func CustomRegex(v string) predicate.CustomType {
+	return predicate.CustomType(sql.FieldRegex(FieldCustom, v))
+}
+
 // CustomIsNil applies the IsNil predicate on the "custom" field.
 func CustomIsNil() predicate.CustomType {
 	return predicate.CustomType(sql.FieldIsNull(FieldCustom))

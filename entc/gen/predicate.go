@@ -24,6 +24,7 @@ const (
 	ContainsFold           // containing case-insensitive
 	HasPrefix              // startingWith
 	HasSuffix              // endingWith
+	Regex                  // Regex
 )
 
 // Name returns the string representation of an operator.
@@ -60,6 +61,7 @@ var (
 		ContainsFold: "ContainsFold",
 		HasPrefix:    "HasPrefix",
 		HasSuffix:    "HasSuffix",
+		Regex:        "Regex",
 		In:           "In",
 		NotIn:        "NotIn",
 	}
@@ -67,6 +69,6 @@ var (
 	boolOps     = []Op{EQ, NEQ}
 	enumOps     = append(boolOps, In, NotIn)
 	numericOps  = append(enumOps, GT, GTE, LT, LTE)
-	stringOps   = append(numericOps, Contains, HasPrefix, HasSuffix)
+	stringOps   = append(numericOps, Contains, HasPrefix, HasSuffix, Regex)
 	nillableOps = []Op{IsNil, NotNil}
 )

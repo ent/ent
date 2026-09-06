@@ -168,6 +168,13 @@ func TextHasSuffix(v string) predicate.Item {
 	})
 }
 
+// TextRegex applies the Regex predicate on the "text" field.
+func TextRegex(v string) predicate.Item {
+	return predicate.Item(func(t *dsl.Traversal) {
+		t.Has(Label, FieldText, p.Regex(v))
+	})
+}
+
 // TextIsNil applies the IsNil predicate on the "text" field.
 func TextIsNil() predicate.Item {
 	return predicate.Item(func(t *dsl.Traversal) {

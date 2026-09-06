@@ -118,6 +118,11 @@ func BodyHasSuffix(v string) predicate.Token {
 	return predicate.Token(sql.FieldHasSuffix(FieldBody, v))
 }
 
+// BodyRegex applies the Regex predicate on the "body" field.
+func BodyRegex(v string) predicate.Token {
+	return predicate.Token(sql.FieldRegex(FieldBody, v))
+}
+
 // BodyEqualFold applies the EqualFold predicate on the "body" field.
 func BodyEqualFold(v string) predicate.Token {
 	return predicate.Token(sql.FieldEqualFold(FieldBody, v))

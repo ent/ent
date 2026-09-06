@@ -118,6 +118,11 @@ func TextHasSuffix(v string) predicate.Note {
 	return predicate.Note(sql.FieldHasSuffix(FieldText, v))
 }
 
+// TextRegex applies the Regex predicate on the "text" field.
+func TextRegex(v string) predicate.Note {
+	return predicate.Note(sql.FieldRegex(FieldText, v))
+}
+
 // TextIsNil applies the IsNil predicate on the "text" field.
 func TextIsNil() predicate.Note {
 	return predicate.Note(sql.FieldIsNull(FieldText))

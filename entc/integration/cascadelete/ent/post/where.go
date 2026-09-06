@@ -122,6 +122,11 @@ func TextHasSuffix(v string) predicate.Post {
 	return predicate.Post(sql.FieldHasSuffix(FieldText, v))
 }
 
+// TextRegex applies the Regex predicate on the "text" field.
+func TextRegex(v string) predicate.Post {
+	return predicate.Post(sql.FieldRegex(FieldText, v))
+}
+
 // TextEqualFold applies the EqualFold predicate on the "text" field.
 func TextEqualFold(v string) predicate.Post {
 	return predicate.Post(sql.FieldEqualFold(FieldText, v))
