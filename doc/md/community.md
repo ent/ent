@@ -1,6 +1,7 @@
 ---
 id: community
 title: Join our Community
+description: "Ent community channels on Discord and the Gophers Slack workspace."
 ---
 
 Ent maintainers, contributors and users hang out in our Discord server and the #ent channel in the Gophers Slack workspace.

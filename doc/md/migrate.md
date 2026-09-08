@@ -1,6 +1,7 @@
 ---
 id: migrate
 title: Automatic Migration
+description: "Automatic migration, drop options, offline output, foreign keys, migration hooks, Atlas integration, and diff/apply hooks."
 ---
 
 The migration support for `ent` provides the option for keeping the database schema

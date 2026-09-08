@@ -1,28 +1,29 @@
 ---
 id: predicates
 title: Predicates
+description: "Field, edge, boolean, custom SQL, JSON, and cross-field predicates in Ent queries."
 ---
 
 ## Field Predicates
 
 - **Bool**:
-  - =, !=
+  - `=, !=`
 - **Numeric**:
-  - =, !=, >, <, >=, <=,
+  - `=, !=, >, <, >=, <=`,
   - IN, NOT IN
 - **Time**:
-  - =, !=, >, <, >=, <=
+  - `=, !=, >, <, >=, <=`
   - IN, NOT IN
 - **String**:
-  - =, !=, >, <, >=, <=
+  - `=, !=, >, <, >=, <=`
   - IN, NOT IN
   - Contains, HasPrefix, HasSuffix
   - ContainsFold, EqualFold (**SQL** specific)
 - **JSON**
-  - =, !=
-  - =, !=, >, <, >=, <= on nested values (JSON path).
+  - `=, !=`
+  - `=, !=, >, <, >=, <=` on nested values (JSON path).
   - Contains on nested values (JSON path).
-  - HasKey, Len&lt;P>
+  - HasKey, `Len<P>`
   - `null` checks for nested values (JSON path).
 - **Optional** fields:
   - IsNil, NotNil

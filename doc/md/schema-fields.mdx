@@ -1,6 +1,7 @@
 ---
 id: schema-fields
 title: Fields
+description: "Ent fields, types, IDs, custom Go/database types, scanners, defaults, validators, optionality, and metadata."
 ---
 
 import Tabs from '@theme/Tabs';
@@ -149,7 +150,7 @@ func (Pet) Fields() []ent.Field {
 
 If you need to set a custom function to generate IDs, you can use `DefaultFunc`
 to specify a function which will always be ran when the resource is created.
-See the [related FAQ](faq.md#how-do-i-use-a-custom-generator-of-ids) for more information.
+See the [related FAQ](faq#how-to-use-a-custom-generator-of-ids) for more information.
 
 ```go
 // Fields of the User.
@@ -791,7 +792,7 @@ type User struct {
 ```
 
 In order to add additional fields to the generated struct **that are not stored in the database**,
-use [external templates](code-gen.md/#external-templates). For example:
+use [external templates](code-gen#external-templates). For example:
 
 ```gotemplate
 {{ define "model/fields/additional" }}

@@ -1,6 +1,7 @@
 ---
 id: graphql
 title: GraphQL Integration
+description: "Ent GraphQL integration with gqlgen, Node, pagination, ordering, field collection, filters, enums, and transactions."
 ---
 
 The Ent framework supports GraphQL using the [99designs/gqlgen](https://github.com/99designs/gqlgen) library and

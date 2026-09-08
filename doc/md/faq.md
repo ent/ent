@@ -1,6 +1,7 @@
 ---
 id: faq
 title: Frequently Asked Questions (FAQ)
+description: "Common Ent questions about schemas, validators, hooks, predicates, custom types, IDs, templates, storage, and drivers."
 sidebar_label: FAQ
 ---
 

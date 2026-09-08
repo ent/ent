@@ -1,6 +1,7 @@
 ---
 id: grpc-server-and-client
 title: Creating the Server and Client
+description: "Registering generated Ent gRPC services, running a server, and writing a client."
 sidebar_label: Server and Client
 ---
 

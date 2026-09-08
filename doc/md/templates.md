@@ -1,6 +1,7 @@
 ---
 id: templates
 title: External Templates
+description: "External Ent Go templates, overrides, helper templates, annotations, examples, and IDE autocompletion."
 ---
 
 `ent` accepts external [Go templates](https://golang.org/pkg/text/template) to execute using the `--template` flag.

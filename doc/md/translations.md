@@ -1,6 +1,7 @@
 ---
 id: translations
 title: Translations
+description: "Translating Ent website content through Crowdin, including workflow and translation guidelines."
 ---
 
 ## Introduction

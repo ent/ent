@@ -1,6 +1,7 @@
 ---
 id: traversals
 title: Graph Traversal
+description: "Building an Ent graph and querying it through multi-edge traversals and nested predicates."
 ---
 
 For the purpose of the example, we'll generate the following graph:
