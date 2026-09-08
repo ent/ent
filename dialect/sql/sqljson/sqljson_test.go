@@ -399,6 +399,78 @@ func TestWritePath(t *testing.T) {
 				),
 			wantQuery: "SELECT * FROM `users` ORDER BY JSON_LENGTH(`a`, '$.b')",
 		},
+		{
+			input: sql.Dialect(dialect.Postgres).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.StringEQFold("a", "A", sqljson.Path("b"))),
+			wantQuery: `SELECT * FROM "users" WHERE "a"->>'b' ILIKE $1`,
+			wantArgs:  []any{"a"},
+		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.StringEQFold("a", "A", sqljson.Path("b"))),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, '$.b')) COLLATE utf8mb4_general_ci = ?",
+			wantArgs:  []any{"a"},
+		},
+		{
+			input: sql.Dialect(dialect.Postgres).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.StringHasPrefixFold("a", "FOO", sqljson.Path("b"))),
+			wantQuery: `SELECT * FROM "users" WHERE "a"->>'b' ILIKE $1`,
+			wantArgs:  []any{"foo%"},
+		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.StringHasPrefixFold("a", "FOO", sqljson.Path("b"))),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, '$.b')) COLLATE utf8mb4_general_ci LIKE ?",
+			wantArgs:  []any{"foo%"},
+		},
+		{
+			input: sql.Dialect(dialect.Postgres).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.StringHasSuffixFold("a", "FOO", sqljson.Path("b"))),
+			wantQuery: `SELECT * FROM "users" WHERE "a"->>'b' ILIKE $1`,
+			wantArgs:  []any{"%foo"},
+		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.StringHasSuffixFold("a", "FOO", sqljson.Path("b"))),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, '$.b')) COLLATE utf8mb4_general_ci LIKE ?",
+			wantArgs:  []any{"%foo"},
+		},
+		{
+			input: sql.Dialect(dialect.Postgres).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.StringContainsFold("a", "FOO", sqljson.Path("b"))),
+			wantQuery: `SELECT * FROM "users" WHERE "a"->>'b' ILIKE $1`,
+			wantArgs:  []any{"%foo%"},
+		},
+		{
+			input: sql.Dialect(dialect.MySQL).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.StringContainsFold("a", "FOO", sqljson.Path("b"))),
+			wantQuery: "SELECT * FROM `users` WHERE JSON_UNQUOTE(JSON_EXTRACT(`a`, '$.b')) COLLATE utf8mb4_general_ci LIKE ?",
+			wantArgs:  []any{"%foo%"},
+		},
+		{
+			input: sql.Dialect(dialect.Postgres).
+				Select("*").
+				From(sql.Table("users")).
+				Where(sqljson.StringContainsFold("a", "%FOO%", sqljson.Path("b"))),
+			wantQuery: `SELECT * FROM "users" WHERE "a"->>'b' ILIKE $1`,
+			wantArgs:  []any{"%\\%foo\\%%"}, // just make sure % is escaped
+		},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
