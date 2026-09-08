@@ -240,7 +240,10 @@ func (_q *BlobLinkQuery) Clone() *BlobLinkQuery {
 // WithBlob tells the query-builder to eager-load the nodes that are connected to
 // the "blob" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *BlobLinkQuery) WithBlob(opts ...func(*BlobQuery)) *BlobLinkQuery {
-	query := (&BlobClient{config: _q.config}).Query()
+	query := _q.withBlob
+	if query == nil {
+		query = (&BlobClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -251,7 +254,10 @@ func (_q *BlobLinkQuery) WithBlob(opts ...func(*BlobQuery)) *BlobLinkQuery {
 // WithLink tells the query-builder to eager-load the nodes that are connected to
 // the "link" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *BlobLinkQuery) WithLink(opts ...func(*BlobQuery)) *BlobLinkQuery {
-	query := (&BlobClient{config: _q.config}).Query()
+	query := _q.withLink
+	if query == nil {
+		query = (&BlobClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

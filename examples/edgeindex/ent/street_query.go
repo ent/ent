@@ -289,7 +289,10 @@ func (_q *StreetQuery) Clone() *StreetQuery {
 // WithCity tells the query-builder to eager-load the nodes that are connected to
 // the "city" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *StreetQuery) WithCity(opts ...func(*CityQuery)) *StreetQuery {
-	query := (&CityClient{config: _q.config}).Query()
+	query := _q.withCity
+	if query == nil {
+		query = (&CityClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

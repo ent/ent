@@ -313,7 +313,10 @@ func (_q *UserTweetQuery) Clone() *UserTweetQuery {
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserTweetQuery) WithUser(opts ...func(*UserQuery)) *UserTweetQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withUser
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -324,7 +327,10 @@ func (_q *UserTweetQuery) WithUser(opts ...func(*UserQuery)) *UserTweetQuery {
 // WithTweet tells the query-builder to eager-load the nodes that are connected to
 // the "tweet" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserTweetQuery) WithTweet(opts ...func(*TweetQuery)) *UserTweetQuery {
-	query := (&TweetClient{config: _q.config}).Query()
+	query := _q.withTweet
+	if query == nil {
+		query = (&TweetClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

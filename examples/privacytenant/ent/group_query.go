@@ -315,7 +315,10 @@ func (_q *GroupQuery) Clone() *GroupQuery {
 // WithTenant tells the query-builder to eager-load the nodes that are connected to
 // the "tenant" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithTenant(opts ...func(*TenantQuery)) *GroupQuery {
-	query := (&TenantClient{config: _q.config}).Query()
+	query := _q.withTenant
+	if query == nil {
+		query = (&TenantClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -326,7 +329,10 @@ func (_q *GroupQuery) WithTenant(opts ...func(*TenantQuery)) *GroupQuery {
 // WithUsers tells the query-builder to eager-load the nodes that are connected to
 // the "users" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withUsers
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

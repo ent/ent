@@ -329,7 +329,10 @@ func (_q *GroupQuery) Clone() *GroupQuery {
 // WithFiles tells the query-builder to eager-load the nodes that are connected to
 // the "files" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithFiles(opts ...func(*FileQuery)) *GroupQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := _q.withFiles
+	if query == nil {
+		query = (&FileClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -340,7 +343,10 @@ func (_q *GroupQuery) WithFiles(opts ...func(*FileQuery)) *GroupQuery {
 // WithBlocked tells the query-builder to eager-load the nodes that are connected to
 // the "blocked" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithBlocked(opts ...func(*UserQuery)) *GroupQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withBlocked
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -351,7 +357,10 @@ func (_q *GroupQuery) WithBlocked(opts ...func(*UserQuery)) *GroupQuery {
 // WithUsers tells the query-builder to eager-load the nodes that are connected to
 // the "users" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withUsers
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -362,7 +371,10 @@ func (_q *GroupQuery) WithUsers(opts ...func(*UserQuery)) *GroupQuery {
 // WithInfo tells the query-builder to eager-load the nodes that are connected to
 // the "info" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *GroupQuery) WithInfo(opts ...func(*GroupInfoQuery)) *GroupQuery {
-	query := (&GroupInfoClient{config: _q.config}).Query()
+	query := _q.withInfo
+	if query == nil {
+		query = (&GroupInfoClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
