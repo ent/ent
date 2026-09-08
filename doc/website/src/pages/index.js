@@ -60,6 +60,29 @@ const Features = () => (
   </div>
 );
 
+const VideoContainer = () => {
+  return (
+    <div className="container video text--center margin-bottom--lg margin-top--lg">
+      <div className="row">
+        <div className="col" style={{textAlign: 'center'}}>
+          <h2>Check it out in the intro video</h2>
+          <div>
+            <iframe
+              width="560"
+              height="315"
+              src="https://www.youtube.com/embed/RCzeYg-_dbU"
+              title="Explain Like I'm 5: Ent"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 class HomeSplash extends React.Component {
   render() {
     const {siteConfig, language = ''} = this.props;
@@ -128,6 +151,7 @@ class HomeSplash extends React.Component {
           <div className="gopherGraph">
             <img src="https://entgo.io/images/assets/gopher_graph.png" />
           </div>
+          <VideoContainer />
           <Features />
         </div>
       </SplashContainer>
