@@ -1,6 +1,7 @@
 ---
 id: grpc-optional-fields
 title: Optional Fields
+description: "Mapping optional Ent fields to protobuf wrapper types and constructing them in clients."
 sidebar_label: Optional Fields
 ---
 A common issue with Protobufs is that the way that nil values are represented: a zero-valued primitive field isn't

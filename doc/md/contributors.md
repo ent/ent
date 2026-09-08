@@ -1,6 +1,7 @@
 ---
 id: contributors
 title: Contributors
+description: "Credits Ent contributors using the all-contributors format."
 ---
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):

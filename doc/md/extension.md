@@ -1,6 +1,7 @@
 ---
 id: extensions
 title: Extensions
+description: "Building Ent code-generation extensions with templates, annotations, hooks, options, and community examples."
 ---
 
 ### Introduction

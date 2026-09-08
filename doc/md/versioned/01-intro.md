@@ -1,6 +1,7 @@
 ---
 id: intro
 title: Introduction
+description: "Introduction to automatic versus versioned migrations and upgrading an existing Ent project."
 ---
 ## Schema Migration Flows
 

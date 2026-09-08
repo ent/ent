@@ -1,6 +1,7 @@
 ---
 id: tutorial-todo-gql-schema-generator
 title: Schema Generator
+description: "Generating type-safe GraphQL schemas from Ent annotations and extending generated types."
 sidebar_label: Schema Generator
 ---
 

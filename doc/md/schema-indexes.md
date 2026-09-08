@@ -1,6 +1,7 @@
 ---
 id: schema-indexes
 title: Indexes
+description: "Indexes across fields and edges, uniqueness, dialect annotations, Atlas options, functional indexes, and storage keys."
 ---
 
 ## Multiple Fields

@@ -1,6 +1,7 @@
 ---
 id: schema-mixin
 title: Mixin
+description: "Reusable Ent mixins for fields, edges, indexes, hooks, policies, annotations, and timestamps."
 ---
  
 A `Mixin` allows you to create reusable pieces of `ent.Schema` code that can be injected into other schemas

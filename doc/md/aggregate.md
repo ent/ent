@@ -1,6 +1,7 @@
 ---
 id: aggregate
 title: Aggregation
+description: "Ent aggregation, grouping, edge-based aggregation, HAVING clauses, and custom SQL modifiers."
 ---
 
 ## Aggregation

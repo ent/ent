@@ -1,6 +1,7 @@
 ---
 id: tutorial-todo-gql-field-collection
 title: GraphQL Field Collection
+description: "GraphQL field collection and eager loading to eliminate resolver N+1 queries."
 sidebar_label: Field Collection
 ---
 
