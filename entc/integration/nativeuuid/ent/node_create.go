@@ -8,66 +8,67 @@ package ent
 
 import (
 	"context"
-	"encoding/json/jsontext"
-	"errors"
 	"fmt"
+	"uuid"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/entc/integration/edgefield/ent/info"
-	"entgo.io/ent/entc/integration/edgefield/ent/user"
+	"entgo.io/ent/entc/integration/nativeuuid/ent/node"
 	"entgo.io/ent/schema/field"
 )
 
-// InfoCreate is the builder for creating a Info entity.
-type InfoCreate struct {
+// NodeCreate is the builder for creating a Node entity.
+type NodeCreate struct {
 	config
-	mutation *InfoMutation
+	mutation *NodeMutation
 	hooks    []Hook
 }
 
-// SetContent sets the "content" field.
-func (_c *InfoCreate) SetContent(v jsontext.Value) *InfoCreate {
-	_c.mutation.SetContent(v)
+// SetToken sets the "token" field.
+func (_c *NodeCreate) SetToken(v uuid.UUID) *NodeCreate {
+	_c.mutation.SetToken(v)
 	return _c
 }
 
-// SetID sets the "id" field.
-func (_c *InfoCreate) SetID(v int) *InfoCreate {
-	_c.mutation.SetID(v)
-	return _c
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (_c *InfoCreate) SetUserID(id int) *InfoCreate {
-	_c.mutation.SetUserID(id)
-	return _c
-}
-
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (_c *InfoCreate) SetNillableUserID(id *int) *InfoCreate {
-	if id != nil {
-		_c = _c.SetUserID(*id)
+// SetNillableToken sets the "token" field if the given value is not nil.
+func (_c *NodeCreate) SetNillableToken(v *uuid.UUID) *NodeCreate {
+	if v != nil {
+		_c.SetToken(*v)
 	}
 	return _c
 }
 
-// SetUser sets the "user" edge to the User entity.
-func (_c *InfoCreate) SetUser(v *User) *InfoCreate {
-	return _c.SetUserID(v.ID)
+// SetParent sets the "parent" field.
+func (_c *NodeCreate) SetParent(v uuid.UUID) *NodeCreate {
+	_c.mutation.SetParent(v)
+	return _c
 }
 
-// Mutation returns the InfoMutation object of the builder.
-func (_c *InfoCreate) Mutation() *InfoMutation {
+// SetNillableParent sets the "parent" field if the given value is not nil.
+func (_c *NodeCreate) SetNillableParent(v *uuid.UUID) *NodeCreate {
+	if v != nil {
+		_c.SetParent(*v)
+	}
+	return _c
+}
+
+// SetID sets the "id" field.
+func (_c *NodeCreate) SetID(v uuid.UUID) *NodeCreate {
+	_c.mutation.SetID(v)
+	return _c
+}
+
+// Mutation returns the NodeMutation object of the builder.
+func (_c *NodeCreate) Mutation() *NodeMutation {
 	return _c.mutation
 }
 
-// Save creates the Info in the database.
-func (_c *InfoCreate) Save(ctx context.Context) (*Info, error) {
+// Save creates the Node in the database.
+func (_c *NodeCreate) Save(ctx context.Context) (*Node, error) {
 	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (_c *InfoCreate) SaveX(ctx context.Context) *Info {
+func (_c *NodeCreate) SaveX(ctx context.Context) *Node {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -76,27 +77,24 @@ func (_c *InfoCreate) SaveX(ctx context.Context) *Info {
 }
 
 // Exec executes the query.
-func (_c *InfoCreate) Exec(ctx context.Context) error {
+func (_c *NodeCreate) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *InfoCreate) ExecX(ctx context.Context) {
+func (_c *NodeCreate) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (_c *InfoCreate) check() error {
-	if _, ok := _c.mutation.Content(); !ok {
-		return &ValidationError{Name: "content", err: errors.New(`ent: missing required field "Info.content"`)}
-	}
+func (_c *NodeCreate) check() error {
 	return nil
 }
 
-func (_c *InfoCreate) sqlSave(ctx context.Context) (*Info, error) {
+func (_c *NodeCreate) sqlSave(ctx context.Context) (*Node, error) {
 	if err := _c.check(); err != nil {
 		return nil, err
 	}
@@ -107,68 +105,58 @@ func (_c *InfoCreate) sqlSave(ctx context.Context) (*Info, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != _node.ID {
-		id := _spec.ID.Value.(int64)
-		_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(uuid.UUID); ok {
+			_node.ID = id
+		} else {
+			return nil, fmt.Errorf("unexpected Node.ID type: %T", _spec.ID.Value)
+		}
 	}
 	_c.mutation.id = &_node.ID
 	_c.mutation.done = true
 	return _node, nil
 }
 
-func (_c *InfoCreate) createSpec() (*Info, *sqlgraph.CreateSpec) {
+func (_c *NodeCreate) createSpec() (*Node, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Info{config: _c.config}
-		_spec = sqlgraph.NewCreateSpec(info.Table, sqlgraph.NewFieldSpec(info.FieldID, field.TypeInt))
+		_node = &Node{config: _c.config}
+		_spec = sqlgraph.NewCreateSpec(node.Table, sqlgraph.NewFieldSpec(node.FieldID, field.TypeUUID))
 	)
 	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := _c.mutation.Content(); ok {
-		_spec.SetField(info.FieldContent, field.TypeJSON, value)
-		_node.Content = value
+	if value, ok := _c.mutation.Token(); ok {
+		_spec.SetField(node.FieldToken, field.TypeUUID, value)
+		_node.Token = value
 	}
-	if nodes := _c.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   info.UserTable,
-			Columns: []string{info.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.ID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
+	if value, ok := _c.mutation.Parent(); ok {
+		_spec.SetField(node.FieldParent, field.TypeUUID, value)
+		_node.Parent = &value
 	}
 	return _node, _spec
 }
 
-// InfoCreateBulk is the builder for creating many Info entities in bulk.
-type InfoCreateBulk struct {
+// NodeCreateBulk is the builder for creating many Node entities in bulk.
+type NodeCreateBulk struct {
 	config
 	err      error
-	builders []*InfoCreate
+	builders []*NodeCreate
 }
 
-// Save creates the Info entities in the database.
-func (_c *InfoCreateBulk) Save(ctx context.Context) ([]*Info, error) {
+// Save creates the Node entities in the database.
+func (_c *NodeCreateBulk) Save(ctx context.Context) ([]*Node, error) {
 	if _c.err != nil {
 		return nil, _c.err
 	}
 	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
-	nodes := make([]*Info, len(_c.builders))
+	nodes := make([]*Node, len(_c.builders))
 	mutators := make([]Mutator, len(_c.builders))
 	for i := range _c.builders {
 		func(i int, root context.Context) {
 			builder := _c.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*InfoMutation)
+				mutation, ok := m.(*NodeMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -193,10 +181,6 @@ func (_c *InfoCreateBulk) Save(ctx context.Context) ([]*Info, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -215,7 +199,7 @@ func (_c *InfoCreateBulk) Save(ctx context.Context) ([]*Info, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (_c *InfoCreateBulk) SaveX(ctx context.Context) []*Info {
+func (_c *NodeCreateBulk) SaveX(ctx context.Context) []*Node {
 	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -224,13 +208,13 @@ func (_c *InfoCreateBulk) SaveX(ctx context.Context) []*Info {
 }
 
 // Exec executes the query.
-func (_c *InfoCreateBulk) Exec(ctx context.Context) error {
+func (_c *NodeCreateBulk) Exec(ctx context.Context) error {
 	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (_c *InfoCreateBulk) ExecX(ctx context.Context) {
+func (_c *NodeCreateBulk) ExecX(ctx context.Context) {
 	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}

@@ -8,7 +8,7 @@ package ent
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
 	"errors"
 	"fmt"
 	"net/http"
@@ -191,7 +191,7 @@ func (m *UserMutation) OldURLs(ctx context.Context) (v []*url.URL, err error) {
 // OldRaw returns the old "raw" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldRaw(ctx context.Context) (v json.RawMessage, err error) {
+func (m *UserMutation) OldRaw(ctx context.Context) (v jsontext.Value, err error) {
 	if !m.Op().Is(OpUpdateOne) {
 		return v, errors.New("OldRaw is only allowed on UpdateOne operations")
 	}
