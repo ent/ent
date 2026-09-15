@@ -312,7 +312,11 @@ func createDir(target string) error {
 	if target != defaultSchema {
 		return nil
 	}
-	if err := os.WriteFile("ent/generate.go", []byte(genFile), 0644); err != nil {
+	gf := genFile
+	if _, err := os.Stat("go.work"); err != nil {
+		gf = strings.ReplaceAll(gf, "-mod=mod ", "")
+	}
+	if err := os.WriteFile("ent/generate.go", []byte(gf), 0644); err != nil {
 		return fmt.Errorf("creating generate.go file: %w", err)
 	}
 	return nil
