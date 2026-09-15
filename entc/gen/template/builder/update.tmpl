@@ -23,7 +23,14 @@ in the LICENSE file in the root directory of this source tree.
 // {{ $builder }} is the builder for updating {{ $.Name }} entities.
 type {{ $builder }} struct {
 	config
+    newTable string // New table name, if not set, the default table name is used
 	{{- template "update/fields" $ -}}
+}
+
+// SetTable Set the table name. If not, the default table name is used
+func ({{ $receiver}} *{{ $builder }}) SetTable(table string) *{{ $builder }} {
+	{{ $receiver }}.newTable = table
+	return {{ $receiver }}
 }
 
 // Where appends a list predicates to the {{ $builder }} builder.
@@ -92,8 +99,15 @@ func ({{ $receiver }} *{{ $builder }}) ExecX(ctx context.Context) {
 // {{ $onebuilder }} is the builder for updating a single {{ $.Name }} entity.
 type {{ $onebuilder }} struct {
 	config
+	newTable string // New table name, if not set, the default table name is used
 	fields []string
 	{{- template "update/fields" $ }}
+}
+
+// SetTable Set the table name. If not, the default table name is used
+func ({{ $receiver}} *{{ $onebuilder }}) SetTable(table string) *{{ $onebuilder }} {
+    {{ $receiver }}.newTable = table
+    return {{ $receiver }}
 }
 
 {{ with extend $ "Receiver" $receiver "Builder" $onebuilder }}

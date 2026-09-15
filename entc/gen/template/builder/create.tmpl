@@ -23,6 +23,7 @@ in the LICENSE file in the root directory of this source tree.
 // {{ $builder }} is the builder for creating a {{ $.Name }} entity.
 type {{ $builder }} struct {
 	config
+	newTable string // New table name, if not set, the default table name is used
 	mutation *{{  $.MutationName }}
 	hooks []Hook
 	{{- /* Additional fields to add to the builder. */}}
@@ -30,6 +31,12 @@ type {{ $builder }} struct {
 	{{- if hasTemplate $tmpl }}
 		{{- xtemplate $tmpl . }}
 	{{- end }}
+}
+
+// SetTable Set the table name. If not, the default table name is used
+func ({{ $receiver }} *{{ $builder }}) SetTable(table string) *{{ $builder }} {
+	{{ $receiver }}.newTable = table
+	return {{ $receiver }}
 }
 
 {{ with extend $ "Receiver" $receiver "Builder" $builder }}
