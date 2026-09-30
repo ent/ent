@@ -1,6 +1,7 @@
 ---
 id: tutorial-todo-gql-filter-input
 title: Filter Inputs
+description: "Generating GraphQL WhereInput filters, relation filters, custom filters, and Ent predicates."
 sidebar_label: Filter Inputs
 ---
 

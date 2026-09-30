@@ -1,6 +1,7 @@
 ---
 id: writing-docs
 title: Writing Docs
+description: "Contributor guide for the Docusaurus site, documentation format, frontmatter, and sidebar entries."
 ---
 
 This document contains guidelines for contributing changes to the Ent documentation website.
@@ -50,6 +51,7 @@ doc/md: adding a guide on contribution of docs to ent
 ---
 id: writing-docs
 title: Writing Docs
+description: "Brief description of the document, including any useful context/keywords."
 ---
 ...
 ```

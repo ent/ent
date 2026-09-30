@@ -1,6 +1,7 @@
 ---
 id: grpc-external-service
 title: Working with External gRPC Services
+description: "Adding hand-written protobuf services beside generated Ent gRPC services."
 sidebar_label: External gRPC Services
 ---
 Oftentimes, you will want to include in your gRPC server, methods that are not automatically generated from

@@ -1,6 +1,7 @@
 ---
 id: grpc-intro
 title: gRPC Introduction
+description: "Overview of Ent's entproto and protoc-gen-entgrpc integration for generating protobufs and gRPC services."
 sidebar_label: Introduction
 ---
 [gRPC](https://grpc.io) is a popular RPC framework open-sourced by Google, and based on an internal system developed

@@ -1,6 +1,7 @@
 ---
 id: grpc-edges
 title: Working with Edges
+description: "Protobuf and gRPC handling for Ent edges, relation creation, and partial edge-ID responses."
 sidebar_label: Working with Edges
 ---
 Edges enable us to express the relationship between different entities in our ent application. Let's see how they work

@@ -1,6 +1,7 @@
 ---
 id: grpc-setting-up
 title: Setting Up
+description: "Setting up a Go Ent project with a User schema and entproto."
 sidebar_label: Setting Up 
 ---
 

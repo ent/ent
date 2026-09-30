@@ -1,5 +1,6 @@
 ---
 title: Verifying migration safety
+description: "Using Atlas migration linting locally and in CI to detect unsafe changes."
 id: verifying-safety
 ---
 
@@ -148,7 +149,7 @@ that can later be reused by many projects.
 Teams using GitHub that wish to ensure all changes to their database schema are safe
 can use the [`atlas-action`](https://github.com/ariga/atlas-action) GitHub Action.
 
-This action is used for [linting migration directories](/versioned/lint)
+This action is used for [linting migration directories](https://atlasgo.io/versioned/lint)
 using the `atlas migrate lint` command. This command  validates and analyzes the contents
 of migration directories and generates insights and diagnostics on the selected changes:
 

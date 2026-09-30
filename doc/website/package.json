@@ -1,12 +1,10 @@
 {
   "scripts": {
-    "examples": "docusaurus-examples",
-    "start": "NODE_OPTIONS=--openssl-legacy-provider docusaurus start",
+    "start": "docusaurus start",
     "build": "docusaurus build",
-    "publish-gh-pages": "docusaurus-publish",
+    "publish-gh-pages": "docusaurus deploy",
     "write-translations": "docusaurus write-translations",
-    "version": "docusaurus-version",
-    "rename-version": "docusaurus-rename-version",
+    "version": "docusaurus docs:version",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "docusaurus": "docusaurus",
@@ -15,13 +13,14 @@
   },
   "dependencies": {
     "@crowdin/cli": "3",
-    "@docusaurus/core": "^2.4.3",
-    "@docusaurus/plugin-client-redirects": "^2.4.3",
-    "@docusaurus/preset-classic": "^2.4.3",
+    "@docusaurus/core": "^3.10.2",
+    "@docusaurus/plugin-client-redirects": "^3.10.2",
+    "@docusaurus/preset-classic": "^3.10.2",
+    "@mdx-js/react": "^3.1.1",
     "clsx": "^1.1.1",
-    "docusaurus": "^1.14.7",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
+    "docusaurus-plugin-llms": "^0.6.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-github-btn": "^1.2.0"
   },
   "resolutions": {

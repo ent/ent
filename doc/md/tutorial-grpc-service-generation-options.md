@@ -1,6 +1,7 @@
 ---
 id: grpc-service-generation-options
 title: Configuring Service Method Generation
+description: "Configuring generated gRPC methods with entproto bit flags."
 sidebar_label: Service Generation Options
 ---
 By default, entproto will generate a number of service methods for an `ent.Schema` annotated with `ent.Service()`. Method generation can be customized by including the argument `entproto.Methods()` in the `entproto.Service()` annotation. `entproto.Methods()` accepts bit flags to determine what service methods should be generated. The flags include:

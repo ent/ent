@@ -1,6 +1,7 @@
 ---
 id: schema-annotations
 title: Annotations
+description: "Schema annotations for table names, database schemas, foreign keys, comments, and SQL metadata."
 ---
 
 Schema annotations allow attaching metadata to schema objects like fields and edges and inject them to external templates.

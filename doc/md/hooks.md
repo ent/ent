@@ -1,6 +1,7 @@
 ---
 id: hooks
 title: Hooks
+description: "Ent mutation hooks, runtime and schema registration, ordering, helpers, transaction hooks, and code-generation hooks."
 ---
 
 The `Hooks` option allows adding custom logic before and after operations that mutate the graph.

@@ -1,6 +1,7 @@
 ---
 id: testing
 title: Testing
+description: "Using generated enttest clients in unit tests with automatic migrations and configurable options."
 ---
 
 If you're using `ent.Client` in your unit-tests, you can use the generated `enttest`

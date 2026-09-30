@@ -1,6 +1,7 @@
 ---
 id: tutorial-todo-gql-node
 title: Relay Node Interface
+description: "Adding Relay Node and Nodes support to an Ent GraphQL Todo app."
 sidebar_label: Relay Node Interface
 ---
 

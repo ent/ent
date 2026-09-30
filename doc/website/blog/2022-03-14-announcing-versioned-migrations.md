@@ -47,7 +47,7 @@ go get -u entgo.io/ent@master
 There are two ways to have Ent generate migration files for schema changes. The first one is to use an instantiated Ent
 client and the second one to generate the changes from a parsed schema graph. This post will take the second approach,
 if you want to learn how to use the first one you can have a look at
-the [documentation](./docs/versioned-migrations#from-client).
+the [documentation](/docs/versioned-migrations).
 
 ### Generating Versioned Migration Files
 

@@ -1,6 +1,7 @@
 ---
 id: transactions
 title: Transactions
+description: "Ent transactions, transactional clients, rollback patterns, commit/rollback hooks, and isolation levels."
 ---
 
 ## Starting A Transaction

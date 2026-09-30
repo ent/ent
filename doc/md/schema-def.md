@@ -1,6 +1,7 @@
 ---
 id: schema-def
 title: Introduction
+description: "Ent schema definitions for fields, edges, indexes, and database-specific options."
 ---
 
 ## Quick Summary

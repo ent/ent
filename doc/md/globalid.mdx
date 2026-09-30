@@ -1,6 +1,7 @@
 ---
 id: globalid-migrate
 title: Migrate Globally Unique ID
+description: "Migrating from ent_types-based global IDs to static global ID configuration."
 ---
 
 import Tabs from '@theme/Tabs';
@@ -163,7 +164,7 @@ func main() {
 }
 ```
 
-**How does it work?** `ent` migration allocates a 1<<32 range for the IDs of each entity (table),
+**How does it work?** `ent` migration allocates a `1<<32` range for the IDs of each entity (table),
 and store this information in a table named `ent_types`. For example, type `A` will have the range
 of `[1,4294967296)` for its IDs, and type `B` will have the range of `[4294967296,8589934592)`, etc.
 

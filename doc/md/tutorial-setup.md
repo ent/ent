@@ -1,6 +1,7 @@
 ---
 id: tutorial-setup
 title: Setting Up
+description: "Creating an Ent Go project, defining a Todo schema, generating code, and running a SQLite test."
 sidebar_label: Setting Up
 ---
 
