@@ -2076,6 +2076,37 @@ func TestUpdateNode(t *testing.T) {
 	}
 }
 
+func TestUpdateNodeLockedExists(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	require.NoError(t, err)
+	mock.ExpectBegin()
+	mock.ExpectExec(escape("UPDATE `users` SET `name` = ? WHERE `id` = ? AND `name` = ?")).
+		WithArgs("b", 1, "a").
+		WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectQuery(escape("SELECT EXISTS (SELECT * FROM `users` WHERE `id` = ? AND `name` = ? FOR UPDATE)")).
+		WithArgs(1, "a").
+		WillReturnRows(sqlmock.NewRows([]string{"exists"}).
+			AddRow(false))
+	mock.ExpectRollback()
+	err = UpdateNode(context.Background(), sql.OpenDB(dialect.MySQL, db), &UpdateSpec{
+		Node: &NodeSpec{
+			Table:   "users",
+			Columns: []string{"id", "name"},
+			ID:      &FieldSpec{Column: "id", Type: field.TypeInt, Value: 1},
+		},
+		Predicate: func(s *sql.Selector) {
+			s.Where(sql.EQ("name", "a"))
+		},
+		Fields: FieldMut{
+			Set: []*FieldSpec{
+				{Column: "name", Type: field.TypeString, Value: "b"},
+			},
+		},
+	})
+	require.EqualError(t, err, "record with id 1 not found in table users")
+	require.NoError(t, mock.ExpectationsWereMet())
+}
+
 func TestExecUpdateNode(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	require.NoError(t, err)
