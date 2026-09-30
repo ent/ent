@@ -1194,7 +1194,6 @@ func (a assets) format() error {
 	var wg errgroup.Group
 	wg.SetLimit(runtime.GOMAXPROCS(0))
 	for path, content := range a.files {
-		path, content := path, content
 		wg.Go(func() error {
 			src, err := imports.Process(path, content, nil)
 			if err != nil {

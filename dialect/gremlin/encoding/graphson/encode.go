@@ -84,7 +84,7 @@ func (ext encodeExtension) DecorateEncoder(typ reflect2.Type, enc jsoniter.ValEn
 		return enc
 	}
 	switch typ.Kind() {
-	case reflect.Ptr, reflect.Interface, reflect.Struct:
+	case reflect.Pointer, reflect.Interface, reflect.Struct:
 		return enc
 	case reflect.Array:
 		return ext.DecoratorOfArray(enc)

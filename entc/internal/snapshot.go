@@ -56,7 +56,7 @@ func (s *Snapshot) parseSnapshot(buf []byte) (*gen.Snapshot, error) {
 		matches  = make([][]byte, 0, 2)
 		lines    = bytes.Split(buf, []byte("\n"))
 	)
-	for i := 0; i < len(lines); i++ {
+	for i := range lines {
 		switch line := lines[i]; {
 		case bytes.HasPrefix(line, []byte(schemaIdent)):
 			matches = append(matches, line)

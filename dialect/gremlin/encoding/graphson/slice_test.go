@@ -81,7 +81,6 @@ func TestEncodeSlice(t *testing.T) {
 		},
 	}
 	for _, tc := range tests {
-		tc := tc
 		t.Run(fmt.Sprintf("%T", tc.in), func(t *testing.T) {
 			t.Parallel()
 			var got bytes.Buffer
@@ -154,7 +153,6 @@ func TestDecodeSlice(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(fmt.Sprintf("%T", tc.want), func(t *testing.T) {
 			t.Parallel()
 			typ := reflect2.TypeOf(tc.want)
@@ -209,7 +207,6 @@ func TestDecodeBadSlice(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			err := NewDecoder(strings.NewReader(tc.in)).Decode(tc.new())

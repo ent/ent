@@ -334,7 +334,7 @@ func NetAddr(t *testing.T, client *ent.Client) {
 	require.Equal(t, "127.0.0.1:1812", client.User.GetX(ctx, usr.ID).Addr.String())
 
 	// Ensure sensitive fields are not marshalled.
-	f, ok := reflect.TypeOf(ent.User{}).FieldByName("Addr")
+	f, ok := reflect.TypeFor[ent.User]().FieldByName("Addr")
 	require.True(t, ok)
 	require.Equal(t, "-", f.Tag.Get("json"))
 }

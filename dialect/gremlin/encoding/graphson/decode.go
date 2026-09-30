@@ -93,7 +93,7 @@ func (ext decodeExtension) DecorateDecoder(typ reflect2.Type, dec jsoniter.ValDe
 		return dec
 	}
 	switch typ.Kind() {
-	case reflect.Ptr, reflect.Struct:
+	case reflect.Pointer, reflect.Struct:
 		return dec
 	case reflect.Interface:
 		return ext.DecoratorOfInterface(typ, dec)

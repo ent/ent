@@ -173,7 +173,7 @@ func (a *Atlas) NamedDiff(ctx context.Context, name string, tables ...*Table) er
 	case ModeReplay:
 		plan, err = a.planReplay(ctx, name, tables)
 	default:
-		return fmt.Errorf("unknown migration mode: %q", a.mode)
+		return fmt.Errorf("unknown migration mode: %d", a.mode)
 	}
 	switch {
 	case err != nil:
@@ -1183,9 +1183,7 @@ func descIndexes(idx *Index) map[string]bool {
 	if idx.Annotation.Desc && len(idx.Columns) == 1 {
 		descs[idx.Columns[0].Name] = idx.Annotation.Desc
 	}
-	for column, desc := range idx.Annotation.DescColumns {
-		descs[column] = desc
-	}
+	maps.Copy(descs, idx.Annotation.DescColumns)
 	return descs
 }
 

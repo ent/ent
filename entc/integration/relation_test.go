@@ -176,7 +176,7 @@ func O2OSameType(t *testing.T, client *ent.Client) {
 
 	t.Log("create a linked-list 1->2->3->4->5")
 	nodes := []*ent.Node{head}
-	for i := 0; i < 4; i++ {
+	for i := range 4 {
 		next := client.Node.Create().SetValue(nodes[i].Value + 1).SetPrev(nodes[i]).SaveX(ctx)
 		nodes = append(nodes, next)
 	}

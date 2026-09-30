@@ -81,7 +81,6 @@ func TestStatsCollection(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name[strings.Index(tt.name, "/")+1:], func(t *testing.T) {
 			v := view.Find(tt.name)
 			assert.NotNil(t, v)

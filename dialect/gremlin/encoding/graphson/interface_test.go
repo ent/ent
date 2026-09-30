@@ -152,7 +152,6 @@ func TestDecodeInterface(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			var got any
@@ -216,7 +215,6 @@ func TestDecodeInterfaceSlice(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(fmt.Sprintf("%T", tc.want), func(t *testing.T) {
 			t.Parallel()
 			var got any
@@ -311,7 +309,6 @@ func TestDecodeInterfaceMap(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(fmt.Sprintf("%T", tc.want), func(t *testing.T) {
 			t.Parallel()
 			var got any

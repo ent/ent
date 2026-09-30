@@ -143,7 +143,7 @@ func fieldOps(f *Field) (ops []Op) {
 
 // xrange generates a slice of len n.
 func xrange(n int) (a []int) {
-	for i := 0; i < n; i++ {
+	for i := range n {
 		a = append(a, i)
 	}
 	return
@@ -243,12 +243,13 @@ func receiver(s string) (r string) {
 		}
 	}
 	for i := 1; i < min; i++ {
-		r := parts[0][:i]
+		var r strings.Builder
+		r.WriteString(parts[0][:i])
 		for _, w := range parts[1:] {
-			r += w[:i]
+			r.WriteString(w[:i])
 		}
-		if _, ok := importPkg[r]; !ok {
-			s = r
+		if _, ok := importPkg[r.String()]; !ok {
+			s = r.String()
 			break
 		}
 	}
@@ -446,7 +447,7 @@ func isNil(v any) bool {
 	switch rv.Kind() {
 	case reflect.Invalid:
 		return true
-	case reflect.Chan, reflect.Func, reflect.Map, reflect.Ptr, reflect.UnsafePointer, reflect.Interface, reflect.Slice:
+	case reflect.Chan, reflect.Func, reflect.Map, reflect.Pointer, reflect.UnsafePointer, reflect.Interface, reflect.Slice:
 		return rv.IsNil()
 	default:
 		return false
@@ -455,7 +456,7 @@ func isNil(v any) bool {
 
 // indirect returns the item at the end of indirection.
 func indirect(v reflect.Value) reflect.Value {
-	for ; v.Kind() == reflect.Ptr || v.Kind() == reflect.Interface; v = v.Elem() {
+	for ; v.Kind() == reflect.Pointer || v.Kind() == reflect.Interface; v = v.Elem() {
 	}
 	return v
 }

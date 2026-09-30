@@ -94,7 +94,7 @@ func JSON(name string, typ any) *jsonBuilder {
 	b.desc.goType(typ)
 	b.desc.checkGoType(t)
 	switch t.Kind() {
-	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
+	case reflect.Slice, reflect.Array, reflect.Pointer, reflect.Map:
 		b.desc.Info.Nillable = true
 		b.desc.Info.PkgPath = pkgPath(t)
 	}
@@ -1033,7 +1033,7 @@ func sb[T sliceType](name string) *sliceBuilder[T] {
 			Type: TypeJSON,
 		},
 	}}
-	t := reflect.TypeOf(typ)
+	t := reflect.TypeFor[[]T]()
 	if t == nil {
 		b.desc.Err = errors.New("expect a Go value as JSON type but got nil")
 		return &sliceBuilder[T]{b}
@@ -1043,7 +1043,7 @@ func sb[T sliceType](name string) *sliceBuilder[T] {
 	b.desc.goType(typ)
 	b.desc.checkGoType(t)
 	switch t.Kind() {
-	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
+	case reflect.Slice, reflect.Array, reflect.Pointer, reflect.Map:
 		b.desc.Info.Nillable = true
 		b.desc.Info.PkgPath = pkgPath(t)
 	}
@@ -1660,7 +1660,7 @@ func (d *Descriptor) goType(typ any) {
 	}
 	methods(t, info.RType)
 	switch t.Kind() {
-	case reflect.Slice, reflect.Ptr, reflect.Map:
+	case reflect.Slice, reflect.Pointer, reflect.Map:
 		info.Nillable = true
 	}
 	d.Info = info
@@ -1671,7 +1671,7 @@ func (d *Descriptor) checkGoType(expectType reflect.Type) {
 	if d.Info.RType != nil && d.Info.RType.rtype != nil {
 		t = d.Info.RType.rtype
 	}
-	switch pt := reflect.PtrTo(t); {
+	switch pt := reflect.PointerTo(t); {
 	// An external ValueScanner.
 	case d.ValueScanner != nil:
 		vs := reflect.Indirect(reflect.ValueOf(d.ValueScanner)).Type()
@@ -1714,11 +1714,11 @@ func pkgName(ident string) string {
 func methods(t reflect.Type, rtype *RType) {
 	// For type T, add methods with
 	// pointer receiver as well (*T).
-	if t.Kind() != reflect.Ptr {
-		t = reflect.PtrTo(t)
+	if t.Kind() != reflect.Pointer {
+		t = reflect.PointerTo(t)
 	}
 	n := t.NumMethod()
-	for i := 0; i < n; i++ {
+	for i := range n {
 		m := t.Method(i)
 		in := make([]*RType, m.Type.NumIn()-1)
 		for j := range in {
@@ -1754,15 +1754,15 @@ func (d *Descriptor) checkDefaultFunc(expectType reflect.Type) {
 }
 
 var (
-	boolType         = reflect.TypeOf(false)
-	bytesType        = reflect.TypeOf([]byte(nil))
-	timeType         = reflect.TypeOf(time.Time{})
-	stringType       = reflect.TypeOf("")
-	valueType        = reflect.TypeOf((*driver.Value)(nil)).Elem()
-	valuerType       = reflect.TypeOf((*driver.Valuer)(nil)).Elem()
-	errorType        = reflect.TypeOf((*error)(nil)).Elem()
-	valueScannerType = reflect.TypeOf((*ValueScanner)(nil)).Elem()
-	validatorType    = reflect.TypeOf((*Validator)(nil)).Elem()
+	boolType         = reflect.TypeFor[bool]()
+	bytesType        = reflect.TypeFor[[]byte]()
+	timeType         = reflect.TypeFor[time.Time]()
+	stringType       = reflect.TypeFor[string]()
+	valueType        = reflect.TypeFor[driver.Value]()
+	valuerType       = reflect.TypeFor[driver.Valuer]()
+	errorType        = reflect.TypeFor[error]()
+	valueScannerType = reflect.TypeFor[ValueScanner]()
+	validatorType    = reflect.TypeFor[Validator]()
 )
 
 // ValueScanner is the interface that groups the Value
@@ -1876,7 +1876,7 @@ func (f ValueScannerFunc[T, S]) FromValue(v driver.Value) (tv T, err error) {
 
 // newT ensures the type is initialized.
 func newT(t any) any {
-	if rt := reflect.TypeOf(t); rt.Kind() == reflect.Ptr {
+	if rt := reflect.TypeOf(t); rt.Kind() == reflect.Pointer {
 		return reflect.New(rt.Elem()).Interface()
 	}
 	return t
@@ -1890,7 +1890,7 @@ type Validator interface {
 
 // indirect returns the type at the end of indirection.
 func indirect(t reflect.Type) reflect.Type {
-	for t.Kind() == reflect.Ptr {
+	for t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
 	return t
@@ -1902,7 +1902,7 @@ func pkgPath(t reflect.Type) string {
 		return pkg
 	}
 	switch t.Kind() {
-	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
+	case reflect.Slice, reflect.Array, reflect.Pointer, reflect.Map:
 		return pkgPath(t.Elem())
 	}
 	return pkg

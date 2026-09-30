@@ -175,7 +175,7 @@ func Clone(t *testing.T, client *ent.Client) {
 	require.Equal(t, f2.Size, base.Clone().Where(file.Size(f2.Size)).OnlyX(ctx).Size)
 	// ensure clone emits valid code.
 	query := client.Pet.Query().Where(pet.Name("unknown")).QueryTeam()
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		_, err := query.Clone().Where(user.Name("unknown")).First(ctx)
 		require.True(t, ent.IsNotFound(err), "should not return syntax error")
 	}
@@ -200,7 +200,7 @@ func Paging(t *testing.T, client *ent.Client) {
 			GroupBy(user.FieldAge).
 			IntsX(ctx),
 	)
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		require.Equal(i+1, client.User.Query().Order(ent.Asc(user.FieldAge)).Offset(i).Limit(1).AllX(ctx)[0].Age)
 	}
 }
@@ -385,7 +385,7 @@ func Delete(t *testing.T, client *ent.Client) {
 	err = client.Node.DeleteOneID(nd.ID).Exec(ctx)
 	require.True(ent.IsNotFound(err))
 
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		client.Node.Create().SetValue(i).SaveX(ctx)
 	}
 	affected, err := client.Node.Delete().Where(node.ValueGT(2)).Exec(ctx)
@@ -990,7 +990,7 @@ func O2OSameType(t *testing.T, client *ent.Client) {
 
 	t.Log("create a linked-list 1->2->3->4->5")
 	nodes := []*ent.Node{head}
-	for i := 0; i < 4; i++ {
+	for i := range 4 {
 		next := client.Node.Create().SetValue(nodes[i].Value + 1).SetPrev(nodes[i]).SaveX(ctx)
 		nodes = append(nodes, next)
 	}
@@ -1075,11 +1075,10 @@ func O2OSameType(t *testing.T, client *ent.Client) {
 // has the same name in both directions. A couple. User A has "spouse" B (and vice versa).
 // When setting B as a spouse of A, this sets A as spouse of B as well. In other words:
 //
-//		foo := client.User.Create().SetName("foo").SaveX(ctx)
-//		bar := client.User.Create().SetName("bar").SetSpouse(foo).SaveX(ctx)
-// 		count := client.User.Query.Where(user.HasSpouse()).CountX(ctx)
-// 		// count will be 2, even though we've created only one relation above.
-//
+//	foo := client.User.Create().SetName("foo").SaveX(ctx)
+//	bar := client.User.Create().SetName("bar").SetSpouse(foo).SaveX(ctx)
+//	count := client.User.Query.Where(user.HasSpouse()).CountX(ctx)
+//	// count will be 2, even though we've created only one relation above.
 func O2OSelfRef(t *testing.T, client *ent.Client) {
 	require := require.New(t)
 	ctx := context.Background()
@@ -1581,11 +1580,10 @@ func O2MSameType(t *testing.T, client *ent.Client) {
 // User A has "friend" B (and vice versa). When setting B as a friend of A, this sets A
 // as friend of B as well. In other words:
 //
-//		foo := client.User.Create().SetName("foo").SaveX(ctx)
-//		bar := client.User.Create().SetName("bar").AddFriends(foo).SaveX(ctx)
-// 		count := client.User.Query.Where(user.HasFriends()).CountX(ctx)
-// 		// count will be 2, even though we've created only one relation above.
-//
+//	foo := client.User.Create().SetName("foo").SaveX(ctx)
+//	bar := client.User.Create().SetName("bar").AddFriends(foo).SaveX(ctx)
+//	count := client.User.Query.Where(user.HasFriends()).CountX(ctx)
+//	// count will be 2, even though we've created only one relation above.
 func M2MSelfRef(t *testing.T, client *ent.Client) {
 	require := require.New(t)
 	ctx := context.Background()

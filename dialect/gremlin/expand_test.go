@@ -48,7 +48,6 @@ func TestExpandBindings(t *testing.T) {
 		},
 	}
 	for i, tt := range tests {
-		tt := tt
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			rt := ExpandBindings(RoundTripperFunc(func(ctx context.Context, r *Request) (*Response, error) {
 				assert.Equal(t, tt.wantQuery, r.Arguments[ArgsGremlin])

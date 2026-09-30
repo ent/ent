@@ -7,6 +7,7 @@ package schema
 import (
 	"context"
 	"fmt"
+	"maps"
 	"reflect"
 	"strconv"
 	"strings"
@@ -182,7 +183,7 @@ func (d *Postgres) atIncrementC(t *schema.Table, c *schema.Column) {
 	// Skip marking this column as an identity in case it is
 	// serial type or a default was already defined for it.
 	if _, ok := c.Type.Type.(*postgres.SerialType); ok || c.Default != nil {
-		t.Attrs = removeAttr(t.Attrs, reflect.TypeOf(&postgres.Identity{}))
+		t.Attrs = removeAttr(t.Attrs, reflect.TypeFor[*postgres.Identity]())
 		return
 	}
 	id := &postgres.Identity{}
@@ -209,9 +210,7 @@ func indexOpClass(idx *Index) map[string]string {
 	if idx.Annotation.OpClass != "" && len(idx.Columns) == 1 {
 		opc[idx.Columns[0].Name] = idx.Annotation.OpClass
 	}
-	for column, op := range idx.Annotation.OpClassColumns {
-		opc[column] = op
-	}
+	maps.Copy(opc, idx.Annotation.OpClassColumns)
 	return opc
 }
 

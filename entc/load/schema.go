@@ -21,7 +21,7 @@ type Schema struct {
 	Name         string         `json:"name,omitempty"`
 	Pos          string         `json:"-"`
 	View         bool           `json:"view,omitempty"`
-	Config       ent.Config     `json:"config,omitempty"`
+	Config       ent.Config     `json:"config"`
 	Edges        []*Edge        `json:"edges,omitempty"`
 	Fields       []*Field       `json:"fields,omitempty"`
 	Indexes      []*Index       `json:"indexes,omitempty"`
@@ -514,7 +514,7 @@ func safePolicy(schema interface{ Policy() ent.Policy }) (policy ent.Policy, err
 }
 
 func indirect(t reflect.Type) reflect.Type {
-	for t.Kind() == reflect.Ptr {
+	for t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
 	return t

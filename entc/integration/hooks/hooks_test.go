@@ -81,7 +81,7 @@ func TestRuntimeChain(t *testing.T) {
 		chain  hook.Chain
 		values []int
 	)
-	for value := 0; value < 5; value++ {
+	for value := range 5 {
 		chain = chain.Append(func(next ent.Mutator) ent.Mutator {
 			return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
 				values = append(values, value)
@@ -207,7 +207,7 @@ func TestDeletion(t *testing.T) {
 		})
 	})
 	a8m := client.User.Create().SetName("a8m").SaveX(ctx)
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		client.Card.Create().SetNumber(fmt.Sprintf("card-%d", i)).SetOwner(a8m).SaveX(ctx)
 	}
 	client.User.DeleteOne(a8m).ExecX(ctx)
@@ -235,11 +235,11 @@ func TestMutationIDs(t *testing.T) {
 			ent.OpCreate,
 		),
 	)
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		owner := client.User.Create().SetName(fmt.Sprintf("owner-%d", i)).SaveX(ctx)
 		client.Card.Create().SetNumber(fmt.Sprintf("card-%d", i)).SetOwner(owner).ExecX(ctx)
 	}
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		p := user.And(user.Name(fmt.Sprintf("owner-%d", i)), user.HasCardsWith(card.Number(fmt.Sprintf("card-%d", i))))
 		client.User.Update().AddVersion(1).Where(p).ExecX(ctx)
 		client.User.Delete().Where(p).ExecX(ctx)

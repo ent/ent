@@ -46,7 +46,6 @@ func TestTraceTransportRoundTrip(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			transport := &mockTransport{}
 			transport.On("RoundTrip", mock.Anything, mock.Anything).
@@ -177,7 +176,6 @@ func TestRequestAttributes(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			req := tt.makeReq()
 			attrs := requestAttrs(req, true)
@@ -221,7 +219,6 @@ func TestResponseAttributes(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			rsp := tt.makeRsp()
 			attrs := responseAttrs(rsp)

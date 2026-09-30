@@ -108,11 +108,11 @@ func TestEdgeField(t *testing.T) {
 	require.True(t, ent.IsConstraintError(err))
 
 	curr := client.Node.Create().SaveX(ctx)
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		curr = client.Node.Create().SetPrevID(curr.ID).SetValue(curr.Value + 1).SaveX(ctx)
 	}
 	head := client.Node.Query().Where(node.Not(node.HasPrev())).OnlyX(ctx)
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		curr = head.QueryNext().OnlyX(ctx)
 		require.Equal(t, head.Value+1, curr.Value)
 		head = curr

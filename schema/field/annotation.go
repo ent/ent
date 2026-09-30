@@ -4,6 +4,8 @@
 
 package field
 
+import "maps"
+
 import "entgo.io/ent/schema"
 
 // Annotation is a builtin schema annotation for
@@ -40,7 +42,6 @@ type Annotation struct {
 //			field.ID("user_id", "tweet_id"),
 //		}
 //	}
-//
 func ID(first, second string, fields ...string) *Annotation {
 	return &Annotation{ID: append([]string{first, second}, fields...)}
 }
@@ -66,9 +67,7 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 	if a.StructTag == nil && len(ant.StructTag) > 0 {
 		a.StructTag = make(map[string]string, len(ant.StructTag))
 	}
-	for k, v := range ant.StructTag {
-		a.StructTag[k] = v
-	}
+	maps.Copy(a.StructTag, ant.StructTag)
 	if len(ant.ID) > 0 {
 		a.ID = ant.ID
 	}
