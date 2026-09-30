@@ -407,7 +407,7 @@ func mayRecover(err error, schemaPath string, cfg *gen.Config) error {
 
 // indirect returns the type at the end of indirection.
 func indirect(t reflect.Type) reflect.Type {
-	for t.Kind() == reflect.Ptr {
+	for t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
 	return t

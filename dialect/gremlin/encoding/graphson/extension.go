@@ -34,7 +34,7 @@ func (encodeExtension) EncoderOfRegistered(typ reflect2.Type) jsoniter.ValEncode
 	if enc != nil {
 		return registeredEncoder{enc}
 	}
-	if typ.Kind() == reflect.Ptr {
+	if typ.Kind() == reflect.Pointer {
 		ptrType := typ.(reflect2.PtrType)
 		enc := typeEncoders[ptrType.Elem().String()]
 		if enc != nil {
@@ -64,7 +64,7 @@ func (decodeExtension) DecoderOfRegistered(typ reflect2.Type) jsoniter.ValDecode
 	if dec != nil {
 		return registeredDecoder{dec}
 	}
-	if typ.Kind() == reflect.Ptr {
+	if typ.Kind() == reflect.Pointer {
 		ptrType := typ.(reflect2.PtrType)
 		dec := typeDecoders[ptrType.Elem().String()]
 		if dec != nil {

@@ -7,6 +7,7 @@ package graphson
 import (
 	"fmt"
 	"reflect"
+	"slices"
 	"strings"
 	"unsafe"
 
@@ -55,12 +56,7 @@ type Types []Type
 
 // Contains reports whether a slice of types contains a particular type.
 func (types Types) Contains(typ Type) bool {
-	for i := range types {
-		if types[i] == typ {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(types, typ)
 }
 
 // String implements fmt.Stringer interface.

@@ -149,7 +149,7 @@ func (t TypeInfo) Comparable() bool {
 	}
 }
 
-var stringerType = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
+var stringerType = reflect.TypeFor[fmt.Stringer]()
 
 // Stringer indicates if this type implements the Stringer interface.
 func (t TypeInfo) Stringer() bool {
@@ -220,7 +220,7 @@ func (r *RType) String() string {
 
 // IsPtr reports if the reflect-type is a pointer type.
 func (r *RType) IsPtr() bool {
-	return r != nil && r.Kind == reflect.Ptr
+	return r != nil && r.Kind == reflect.Pointer
 }
 
 // Implements reports whether the RType ~implements the given interface type.
@@ -229,20 +229,20 @@ func (r *RType) Implements(typ reflect.Type) bool {
 		return false
 	}
 	n := typ.NumMethod()
-	for i := 0; i < n; i++ {
+	for i := range n {
 		m0 := typ.Method(i)
 		m1, ok := r.Methods[m0.Name]
 		if !ok || len(m1.In) != m0.Type.NumIn() || len(m1.Out) != m0.Type.NumOut() {
 			return false
 		}
 		in := m0.Type.NumIn()
-		for j := 0; j < in; j++ {
+		for j := range in {
 			if !m1.In[j].TypeEqual(m0.Type.In(j)) {
 				return false
 			}
 		}
 		out := m0.Type.NumOut()
-		for j := 0; j < out; j++ {
+		for j := range out {
 			if !m1.Out[j].TypeEqual(m0.Type.Out(j)) {
 				return false
 			}

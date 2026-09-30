@@ -228,7 +228,6 @@ func TestTraverse(t *testing.T) {
 		},
 	}
 	for i, tt := range tests {
-		tt := tt
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			query, bindings := tt.input.Query()
 			require.Equal(t, tt.wantQuery, query)

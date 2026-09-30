@@ -18,7 +18,7 @@ type ValueMap []map[string]any
 // Decode decodes a value map into v.
 func (m ValueMap) Decode(v any) error {
 	rv := reflect.ValueOf(v)
-	if rv.Kind() != reflect.Ptr {
+	if rv.Kind() != reflect.Pointer {
 		return errors.New("cannot unmarshal into a non pointer")
 	}
 	if rv.IsNil() {

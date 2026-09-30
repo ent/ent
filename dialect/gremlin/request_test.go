@@ -125,7 +125,6 @@ func TestCredentialsBadEncodingMarshaling(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			var creds Credentials
 			err := creds.UnmarshalText(tc.text)

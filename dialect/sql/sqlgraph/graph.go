@@ -13,6 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"slices"
 	"sort"
 
 	"entgo.io/ent/dialect"
@@ -437,7 +438,6 @@ func OrderByNeighborsCount(q *sql.Selector, s *Step, opts ...sql.OrderTermOption
 
 func orderTerms(q, join *sql.Selector, ts []sql.OrderTerm) {
 	for _, t := range ts {
-		t := t
 		var (
 			// Order by column or expression.
 			orderC string
@@ -673,10 +673,8 @@ func NewFieldSpec(column string, typ field.Type) *FieldSpec {
 
 // AddColumnOnce adds the given column to the spec if it is not already present.
 func (n *NodeSpec) AddColumnOnce(column string) *NodeSpec {
-	for _, c := range n.Columns {
-		if c == column {
-			return n
-		}
+	if slices.Contains(n.Columns, column) {
+		return n
 	}
 	n.Columns = append(n.Columns, column)
 	return n
@@ -1497,10 +1495,8 @@ func (c *creator) ensureLastInsertID(insert *sql.InsertBuilder) {
 		return
 	}
 	insert.OnConflict(sql.ResolveWith(func(s *sql.UpdateSet) {
-		for _, column := range s.UpdateColumns() {
-			if column == c.ID.Column {
-				return
-			}
+		if slices.Contains(s.UpdateColumns(), c.ID.Column) {
+			return
 		}
 		s.Set(c.ID.Column, sql.Expr(fmt.Sprintf("LAST_INSERT_ID(%s)", s.Table().C(c.ID.Column))))
 	}))
@@ -1595,10 +1591,8 @@ func (c *batchCreator) nodes(ctx context.Context, drv dialect.Driver) error {
 // mayTx opens a new transaction if the create operation spans across multiple statements.
 func (c *batchCreator) mayTx(ctx context.Context, drv dialect.Driver) (dialect.Tx, error) {
 	for _, node := range c.Nodes {
-		for _, edge := range node.Edges {
-			if isExternalEdge(edge) {
-				return drv.Tx(ctx)
-			}
+		if slices.ContainsFunc(node.Edges, isExternalEdge) {
+			return drv.Tx(ctx)
 		}
 	}
 	return dialect.NopTx(drv), nil

@@ -46,7 +46,7 @@ func IncrementStartAnnotation(g *Graph) error {
 			matches = make([][]byte, 0, 2)
 			lines   = bytes.Split(buf, []byte("\n"))
 		)
-		for i := 0; i < len(lines); i++ {
+		for i := range lines {
 			if l := lines[i]; bytes.HasPrefix(l, []byte(incrementIdent)) {
 				matches = append(matches, l)
 			}

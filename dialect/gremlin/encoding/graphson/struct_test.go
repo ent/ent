@@ -69,7 +69,6 @@ func TestEncodeStruct(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			data, err := MarshalToString(tc.in)
@@ -166,7 +165,6 @@ func TestDecodeStruct(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			typ := reflect2.TypeOf(tc.want)

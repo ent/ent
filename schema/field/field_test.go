@@ -522,7 +522,7 @@ func TestString(t *testing.T) {
 	assert.True(t, fd.Info.Nillable)
 	assert.True(t, fd.Info.ValueScanner())
 	assert.False(t, fd.Info.Stringer())
-	assert.True(t, fd.Info.RType.TypeEqual(reflect.TypeOf(&sql.NullString{})))
+	assert.True(t, fd.Info.RType.TypeEqual(reflect.TypeFor[*sql.NullString]()))
 
 	fd = field.String("nullable_name").GoType(VString("")).Descriptor()
 	assert.True(t, fd.Info.Valuer())
@@ -922,9 +922,9 @@ func TestRType_Implements(t *testing.T) {
 		}
 	)
 	var (
-		codecType     = reflect.TypeOf((*codec)(nil)).Elem()
-		marshalType   = reflect.TypeOf((*marshaler)(nil)).Elem()
-		unmarshalType = reflect.TypeOf((*unmarshaler)(nil)).Elem()
+		codecType     = reflect.TypeFor[codec]()
+		marshalType   = reflect.TypeFor[marshaler]()
+		unmarshalType = reflect.TypeFor[unmarshaler]()
 	)
 	for _, f := range []ent.Field{
 		field.Enum("role").GoType(Admin),

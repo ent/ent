@@ -215,7 +215,7 @@ func setCase(u *sql.UpdateBuilder, column string, w when) {
 
 func isPrimitive(v any) bool {
 	switch reflect.TypeOf(v).Kind() {
-	case reflect.Array, reflect.Slice, reflect.Map, reflect.Struct, reflect.Ptr, reflect.Interface:
+	case reflect.Array, reflect.Slice, reflect.Map, reflect.Struct, reflect.Pointer, reflect.Interface:
 		return false
 	}
 	return true

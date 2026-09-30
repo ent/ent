@@ -53,7 +53,7 @@ var drivers = []*Storage{
 	{
 		Name:      "sql",
 		IdentName: "SQL",
-		Builder:   reflect.TypeOf(&sql.Selector{}),
+		Builder:   reflect.TypeFor[*sql.Selector](),
 		Dialects:  []string{"dialect.SQLite", "dialect.MySQL", "dialect.Postgres"},
 		Imports: []string{
 			"database/sql/driver",
@@ -98,7 +98,7 @@ var drivers = []*Storage{
 	{
 		Name:      "gremlin",
 		IdentName: "Gremlin",
-		Builder:   reflect.TypeOf(&dsl.Traversal{}),
+		Builder:   reflect.TypeFor[*dsl.Traversal](),
 		Dialects:  []string{"dialect.Gremlin"},
 		Imports: []string{
 			"entgo.io/ent/dialect/gremlin",

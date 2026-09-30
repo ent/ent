@@ -449,7 +449,7 @@ func TestAtlas_StateReader(t *testing.T) {
 func TestAtlas_ParallelCreate(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(10)
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		db, err := sql.Open(dialect.SQLite, fmt.Sprintf("file:test-%d?mode=memory&_fk=1", i))
 		require.NoError(t, err)
 		m, err := NewMigrate(db)

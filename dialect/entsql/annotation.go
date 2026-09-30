@@ -7,6 +7,7 @@ package entsql
 import (
 	"errors"
 	"fmt"
+	"maps"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/schema"
@@ -425,9 +426,7 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 		if a.DefaultExprs == nil {
 			a.DefaultExprs = make(map[string]string)
 		}
-		for dialect, x := range d {
-			a.DefaultExprs[dialect] = x
-		}
+		maps.Copy(a.DefaultExprs, d)
 	}
 	if o := ant.Options; o != "" {
 		a.Options = o
@@ -454,9 +453,7 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 		if a.Checks == nil {
 			a.Checks = make(map[string]string)
 		}
-		for name, check := range checks {
-			a.Checks[name] = check
-		}
+		maps.Copy(a.Checks, checks)
 	}
 	if ant.Skip {
 		a.Skip = true
@@ -468,9 +465,7 @@ func (a Annotation) Merge(other schema.Annotation) schema.Annotation {
 		if a.ViewFor == nil {
 			a.ViewFor = make(map[string]string)
 		}
-		for dialect, view := range vf {
-			a.ViewFor[dialect] = view
-		}
+		maps.Copy(a.ViewFor, vf)
 	}
 	if ant.err != nil {
 		a.err = errors.Join(a.err, ant.err)
@@ -805,9 +800,7 @@ func (a IndexAnnotation) Merge(other schema.Annotation) schema.Annotation {
 		if a.PrefixColumns == nil {
 			a.PrefixColumns = make(map[string]uint)
 		}
-		for column, prefix := range ant.PrefixColumns {
-			a.PrefixColumns[column] = prefix
-		}
+		maps.Copy(a.PrefixColumns, ant.PrefixColumns)
 	}
 	if ant.OpClass != "" {
 		a.OpClass = ant.OpClass
@@ -816,9 +809,7 @@ func (a IndexAnnotation) Merge(other schema.Annotation) schema.Annotation {
 		if a.OpClassColumns == nil {
 			a.OpClassColumns = make(map[string]string)
 		}
-		for column, op := range ant.OpClassColumns {
-			a.OpClassColumns[column] = op
-		}
+		maps.Copy(a.OpClassColumns, ant.OpClassColumns)
 	}
 	if ant.Desc {
 		a.Desc = ant.Desc
@@ -827,9 +818,7 @@ func (a IndexAnnotation) Merge(other schema.Annotation) schema.Annotation {
 		if a.DescColumns == nil {
 			a.DescColumns = make(map[string]bool)
 		}
-		for column, desc := range ant.DescColumns {
-			a.DescColumns[column] = desc
-		}
+		maps.Copy(a.DescColumns, ant.DescColumns)
 	}
 	if ant.IncludeColumns != nil {
 		a.IncludeColumns = append(a.IncludeColumns, ant.IncludeColumns...)
@@ -841,9 +830,7 @@ func (a IndexAnnotation) Merge(other schema.Annotation) schema.Annotation {
 		if a.Types == nil {
 			a.Types = make(map[string]string)
 		}
-		for dialect, t := range ant.Types {
-			a.Types[dialect] = t
-		}
+		maps.Copy(a.Types, ant.Types)
 	}
 	if ant.Where != "" {
 		a.Where = ant.Where

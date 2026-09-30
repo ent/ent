@@ -27,7 +27,6 @@ func TestMarshalerEncode(t *testing.T) {
 	call.Times(len(tests) - 1)
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(fmt.Sprintf("%T", tc), func(t *testing.T) {
 			got, err := Marshal(tc)
 			assert.NoError(t, err)
@@ -88,7 +87,7 @@ func TestUnmarshalerError(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(),
 		fmt.Sprintf("graphson: error calling UnmarshalGraphson for type %s: %s",
-			reflect.TypeOf(m), errStr,
+			reflect.TypeFor[*mocker](), errStr,
 		),
 	)
 }

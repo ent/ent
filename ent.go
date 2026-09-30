@@ -7,6 +7,7 @@ package ent
 
 import (
 	"context"
+	"slices"
 
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
@@ -570,10 +571,8 @@ func (q *QueryContext) Clone() *QueryContext {
 
 // AppendFieldOnce adds the given field to the spec if it is not already present.
 func (q *QueryContext) AppendFieldOnce(f string) *QueryContext {
-	for _, f1 := range q.Fields {
-		if f == f1 {
-			return q
-		}
+	if slices.Contains(q.Fields, f) {
+		return q
 	}
 	q.Fields = append(q.Fields, f)
 	return q

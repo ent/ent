@@ -36,7 +36,7 @@ type Address struct {
 var _ field.ValueScanner = (*Address)(nil)
 
 // Scan implements the database/sql.Scanner interface.
-func (a *Address) Scan(v interface{}) (err error) {
+func (a *Address) Scan(v any) (err error) {
 	switch v := v.(type) {
 	case nil:
 	case string:

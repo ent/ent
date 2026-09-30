@@ -283,13 +283,13 @@ func Sanity(t *testing.T, client *ent.Client) {
 	// Nop.
 	client.User.Delete().Where(user.IDIn(ids...)).ExecX(ctx)
 	// Check the struct-tag annotation.
-	fi, ok := reflect.TypeOf(ent.Card{}).FieldByName("Edges")
+	fi, ok := reflect.TypeFor[ent.Card]().FieldByName("Edges")
 	require.True(ok)
 	require.NotEmpty(fi.Tag.Get("mashraki"))
-	fi, ok = reflect.TypeOf(ent.Card{}).FieldByName("ID")
+	fi, ok = reflect.TypeFor[ent.Card]().FieldByName("ID")
 	require.True(ok)
 	require.Equal("-", fi.Tag.Get("json"))
-	fi, ok = reflect.TypeOf(ent.Card{}).FieldByName("Number")
+	fi, ok = reflect.TypeFor[ent.Card]().FieldByName("Number")
 	require.True(ok)
 	require.Equal("-", fi.Tag.Get("json"))
 	client.User.Create().SetName("tarrence").SetAge(30).ExecX(ctx)
@@ -521,7 +521,7 @@ func Clone(t *testing.T, client *ent.Client) {
 	require.Equal(t, f2.Size, base.Clone().Where(file.Size(f2.Size)).OnlyX(ctx).Size)
 	// ensure clone emits valid code.
 	query := client.Pet.Query().Where(pet.Name("unknown")).QueryTeam()
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		_, err := query.Clone().Where(user.Name("unknown")).First(ctx)
 		require.True(t, ent.IsNotFound(err), "should not return syntax error")
 	}
@@ -546,7 +546,7 @@ func Paging(t *testing.T, client *ent.Client) {
 			GroupBy(user.FieldAge).
 			IntsX(ctx),
 	)
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		require.Equal(i+1, client.User.Query().Order(ent.Asc(user.FieldAge)).Offset(i).Limit(1).AllX(ctx)[0].Age)
 	}
 }
@@ -1056,7 +1056,7 @@ func Delete(t *testing.T, client *ent.Client) {
 	err = client.Node.DeleteOneID(nd.ID).Exec(ctx)
 	require.True(ent.IsNotFound(err))
 
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		client.Node.Create().SetValue(i).ExecX(ctx)
 	}
 	affected, err := client.Node.Delete().Where(node.ValueGT(2)).Exec(ctx)

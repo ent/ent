@@ -40,7 +40,7 @@ func TestLazyDecode(t *testing.T) {
 		return &m
 	}}
 
-	for i := 0; i < 3; i++ {
+	for range 3 {
 		dec.Decode(nil, nil)
 	}
 }

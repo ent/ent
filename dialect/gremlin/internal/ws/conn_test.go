@@ -229,7 +229,6 @@ func TestBadResponse(t *testing.T) {
 
 	ctx := context.Background()
 	for i, tc := range tests {
-		i, tc := i, tc
 		t.Run(tc.name, func(t *testing.T) {
 			defer wg.Done()
 			rsp, err := conn.Execute(ctx, gremlin.NewEvalRequest(strconv.FormatInt(int64(i), 10)))
@@ -261,7 +260,7 @@ func TestCanceledLongRequest(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	srv := serve(func(conn conn) {
 		var responses [3]*gremlin.Response
-		for i := 0; i < len(responses); i++ {
+		for i := range len(responses) {
 			req, err := conn.ReadRequest()
 			require.NoError(t, err)
 
@@ -274,7 +273,7 @@ func TestCanceledLongRequest(t *testing.T) {
 		cancel()
 
 		responses[0], responses[2] = responses[2], responses[0]
-		for i := 0; i < len(responses); i++ {
+		for i := range len(responses) {
 			err := conn.WriteResponse(responses[i])
 			require.NoError(t, err)
 		}
@@ -289,7 +288,7 @@ func TestCanceledLongRequest(t *testing.T) {
 	wg.Add(3)
 	defer wg.Wait()
 
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		go func(ctx context.Context, idx int) {
 			defer wg.Done()
 			rsp, err := conn.Execute(ctx, gremlin.NewEvalRequest("g.V()"))

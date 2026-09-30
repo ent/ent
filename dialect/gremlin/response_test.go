@@ -323,7 +323,6 @@ func TestResponseReadGraphElements(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.method, func(t *testing.T) {
 			t.Parallel()
 			var rsp Response
@@ -418,7 +417,6 @@ func TestResponseReadBool(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			var rsp Response
@@ -493,7 +491,6 @@ func TestResponseReadInt(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			var rsp Response
@@ -546,7 +543,6 @@ func TestResponseReadString(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			var rsp Response

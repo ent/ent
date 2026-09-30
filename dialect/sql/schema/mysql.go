@@ -7,6 +7,7 @@ package schema
 import (
 	"context"
 	"fmt"
+	"maps"
 	"math"
 	"reflect"
 	"strconv"
@@ -236,7 +237,7 @@ func (d *MySQL) atUniqueC(t1 *Table, c1 *Column, t2 *schema.Table, c2 *schema.Co
 
 func (d *MySQL) atIncrementC(t *schema.Table, c *schema.Column) {
 	if c.Default != nil {
-		t.Attrs = removeAttr(t.Attrs, reflect.TypeOf(&mysql.AutoIncrement{}))
+		t.Attrs = removeAttr(t.Attrs, reflect.TypeFor[*mysql.AutoIncrement]())
 	} else {
 		c.AddAttrs(&mysql.AutoIncrement{})
 	}
@@ -326,8 +327,6 @@ func indexParts(idx *Index) map[string]uint {
 	if idx.Annotation.Prefix > 0 && len(idx.Columns) == 1 {
 		parts[idx.Columns[0].Name] = idx.Annotation.Prefix
 	}
-	for column, part := range idx.Annotation.PrefixColumns {
-		parts[column] = part
-	}
+	maps.Copy(parts, idx.Annotation.PrefixColumns)
 	return parts
 }

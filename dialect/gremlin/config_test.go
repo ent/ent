@@ -100,7 +100,6 @@ func TestConfigBuild(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			client, err := tc.cfg.Build(tc.opts...)
 			if !tc.wantErr {

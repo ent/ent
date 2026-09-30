@@ -97,7 +97,7 @@ func (c *Config) Load() (*SchemaSpec, error) {
 	if err != nil {
 		return nil, err
 	}
-	for _, line := range strings.Split(out, "\n") {
+	for line := range strings.SplitSeq(out, "\n") {
 		schema, err := UnmarshalSchema([]byte(line))
 		if err != nil {
 			return nil, fmt.Errorf("entc/load: unmarshal schema %s: %w", line, err)
@@ -111,7 +111,7 @@ func (c *Config) Load() (*SchemaSpec, error) {
 }
 
 // entInterface holds the reflect.Type of ent.Interface.
-var entInterface = reflect.TypeOf(struct{ ent.Interface }{}).Field(0).Type
+var entInterface = reflect.TypeFor[struct{ ent.Interface }]().Field(0).Type
 
 // load the ent/schema info.
 func (c *Config) load() (*SchemaSpec, map[string]string, error) {

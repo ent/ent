@@ -159,7 +159,6 @@ func TestEncodeNative(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(fmt.Sprintf("%T", tc.in), func(t *testing.T) {
 			t.Parallel()
 			got, err := MarshalToString(tc.in)
@@ -205,7 +204,6 @@ func TestDecodeNative(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(fmt.Sprintf("%T", tc.want), func(t *testing.T) {
 			t.Parallel()
 			if tc.want != nil {

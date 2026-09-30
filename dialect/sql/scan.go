@@ -91,7 +91,7 @@ func ScanSlice(rows ColumnScanner, v any) error {
 	}
 	rv := reflect.ValueOf(v)
 	switch {
-	case rv.Kind() != reflect.Ptr:
+	case rv.Kind() != reflect.Pointer:
 		if t := reflect.TypeOf(v); t != nil {
 			return fmt.Errorf("sql/scan: ScanSlice(non-pointer %s)", t)
 		}
@@ -151,7 +151,7 @@ func scanType(typ reflect.Type, columns []string) (*rowScan, error) {
 				return reflect.Indirect(reflect.ValueOf(v[0])), nil
 			},
 		}, nil
-	case k == reflect.Ptr:
+	case k == reflect.Pointer:
 		return scanPtr(typ, columns)
 	case k == reflect.Struct:
 		return scanStruct(typ, columns)
@@ -161,16 +161,16 @@ func scanType(typ reflect.Type, columns []string) (*rowScan, error) {
 }
 
 var (
-	timeType     = reflect.TypeOf(time.Time{})
-	scannerType  = reflect.TypeOf((*sql.Scanner)(nil)).Elem()
-	nullJSONType = reflect.TypeOf((*nullJSON)(nil)).Elem()
+	timeType     = reflect.TypeFor[time.Time]()
+	scannerType  = reflect.TypeFor[sql.Scanner]()
+	nullJSONType = reflect.TypeFor[nullJSON]()
 )
 
 // nullJSON represents a json.RawMessage that may be NULL.
 type nullJSON json.RawMessage
 
 // Scan implements the sql.Scanner interface.
-func (j *nullJSON) Scan(v interface{}) error {
+func (j *nullJSON) Scan(v any) error {
 	if v == nil {
 		return nil
 	}
@@ -238,7 +238,7 @@ func scanStruct(typ reflect.Type, columns []string) (*rowScan, error) {
 		// Create a pointer to the actual reflect
 		// types to accept optional struct fields.
 		case !nillable(rtype):
-			rtype = reflect.PtrTo(rtype)
+			rtype = reflect.PointerTo(rtype)
 		}
 		scan.columns = append(scan.columns, rtype)
 	}
@@ -289,7 +289,7 @@ func columnName(f reflect.StructField) string {
 // nillable reports if the reflect-type can have nil value.
 func nillable(t reflect.Type) bool {
 	switch t.Kind() {
-	case reflect.Interface, reflect.Slice, reflect.Map, reflect.Ptr, reflect.UnsafePointer:
+	case reflect.Interface, reflect.Slice, reflect.Map, reflect.Pointer, reflect.UnsafePointer:
 		return true
 	}
 	return false
@@ -308,7 +308,7 @@ func scanPtr(typ reflect.Type, columns []string) (*rowScan, error) {
 		if err != nil {
 			return reflect.Value{}, err
 		}
-		pt := reflect.PtrTo(v.Type())
+		pt := reflect.PointerTo(v.Type())
 		pv := reflect.New(pt.Elem())
 		pv.Elem().Set(v)
 		return pv, nil
@@ -317,10 +317,10 @@ func scanPtr(typ reflect.Type, columns []string) (*rowScan, error) {
 }
 
 func supportsScan(t reflect.Type) bool {
-	if t.Implements(scannerType) || reflect.PtrTo(t).Implements(scannerType) {
+	if t.Implements(scannerType) || reflect.PointerTo(t).Implements(scannerType) {
 		return true
 	}
-	if t.Kind() == reflect.Ptr {
+	if t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
 	switch t.Kind() {
@@ -329,11 +329,11 @@ func supportsScan(t reflect.Type) bool {
 		reflect.Float32, reflect.Float64, reflect.Pointer, reflect.String:
 		return true
 	case reflect.Slice:
-		return t == reflect.TypeOf(sql.RawBytes(nil)) || t == reflect.TypeOf([]byte(nil))
+		return t == reflect.TypeFor[sql.RawBytes]() || t == reflect.TypeFor[[]byte]()
 	case reflect.Interface:
-		return t == reflect.TypeOf((*any)(nil)).Elem()
+		return t == reflect.TypeFor[any]()
 	default:
-		return t == reflect.TypeOf(time.Time{}) || t.Implements(scannerType)
+		return t == reflect.TypeFor[time.Time]() || t.Implements(scannerType)
 	}
 }
 
@@ -355,17 +355,17 @@ func ScanTypeOf(rows *Rows, i int) any {
 	// Handle NULL values.
 	switch k := rt.Kind(); k {
 	case reflect.Bool:
-		rt = reflect.TypeOf(sql.NullBool{})
+		rt = reflect.TypeFor[sql.NullBool]()
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		rt = reflect.TypeOf(sql.NullInt64{})
+		rt = reflect.TypeFor[sql.NullInt64]()
 	case reflect.Float32, reflect.Float64:
-		rt = reflect.TypeOf(sql.NullFloat64{})
+		rt = reflect.TypeFor[sql.NullFloat64]()
 	case reflect.String:
-		rt = reflect.TypeOf(sql.NullString{})
+		rt = reflect.TypeFor[sql.NullString]()
 	default:
 		if k == reflect.Struct && rt == timeType {
-			rt = reflect.TypeOf(sql.NullTime{})
+			rt = reflect.TypeFor[sql.NullTime]()
 		}
 	}
 	return reflect.New(rt).Interface()

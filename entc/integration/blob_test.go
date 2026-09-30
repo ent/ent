@@ -562,7 +562,7 @@ func TestBlobPrefixBulkCreate(t *testing.T) {
 
 	for i, doc := range docs {
 		got := blobContent(t, doc.ContentReader, ctx)
-		require.Equal(t, []byte(fmt.Sprintf("b%d", i+1)), got)
+		require.Equal(t, fmt.Appendf(nil, "b%d", i+1), got)
 	}
 }
 
@@ -773,7 +773,7 @@ func TestBlobLoadOnScanBulkCreate(t *testing.T) {
 			SetContent(bytes.NewReader([]byte("c"))).
 			SetThumbnail(bytes.NewReader([]byte("t"))).
 			SetAttachment([]byte("att")).
-			SetMetadata([]byte(fmt.Sprintf(`{"i": %d}`, i)))
+			SetMetadata(fmt.Appendf(nil, `{"i": %d}`, i))
 	}
 	docs, err := client.Document.CreateBulk(bulk...).Save(ctx)
 	require.NoError(t, err)
@@ -781,11 +781,11 @@ func TestBlobLoadOnScanBulkCreate(t *testing.T) {
 
 	for i, doc := range docs {
 		// Struct field is populated on bulk create.
-		require.Equal(t, []byte(fmt.Sprintf(`{"i": %d}`, i)), doc.Metadata)
+		require.Equal(t, fmt.Appendf(nil, `{"i": %d}`, i), doc.Metadata)
 
 		// Blob reader also works.
 		got := blobContent(t, doc.MetadataReader, ctx)
-		require.Equal(t, []byte(fmt.Sprintf(`{"i": %d}`, i)), got)
+		require.Equal(t, fmt.Appendf(nil, `{"i": %d}`, i), got)
 	}
 }
 
@@ -799,7 +799,7 @@ func TestBlobLoadOnScanQueryAll(t *testing.T) {
 			SetContent(bytes.NewReader([]byte("c"))).
 			SetThumbnail(bytes.NewReader([]byte("t"))).
 			SetAttachment([]byte("att")).
-			SetMetadata([]byte(fmt.Sprintf(`{"n": %d}`, i))).
+			SetMetadata(fmt.Appendf(nil, `{"n": %d}`, i)).
 			SaveX(ctx)
 	}
 
@@ -809,7 +809,7 @@ func TestBlobLoadOnScanQueryAll(t *testing.T) {
 		AllX(ctx)
 	require.Len(t, docs, 4)
 	for i, doc := range docs {
-		require.Equal(t, []byte(fmt.Sprintf(`{"n": %d}`, i)), doc.Metadata)
+		require.Equal(t, fmt.Appendf(nil, `{"n": %d}`, i), doc.Metadata)
 	}
 }
 
@@ -1128,8 +1128,8 @@ func TestBlobDeleteBulkRemovesBlobs(t *testing.T) {
 	for i := range 3 {
 		doc := client.Document.Create().
 			SetName(fmt.Sprintf("bulk-del-%d", i)).
-			SetContent(bytes.NewReader([]byte(fmt.Sprintf("c%d", i)))).
-			SetThumbnail(bytes.NewReader([]byte(fmt.Sprintf("t%d", i)))).
+			SetContent(bytes.NewReader(fmt.Appendf(nil, "c%d", i))).
+			SetThumbnail(bytes.NewReader(fmt.Appendf(nil, "t%d", i))).
 			SetAttachment([]byte("att")).
 			SaveX(ctx)
 		docs = append(docs, doc)
@@ -1138,7 +1138,7 @@ func TestBlobDeleteBulkRemovesBlobs(t *testing.T) {
 	// Verify blobs are readable.
 	for i, doc := range docs {
 		got := blobContent(t, doc.ContentReader, ctx)
-		require.Equal(t, []byte(fmt.Sprintf("c%d", i)), got)
+		require.Equal(t, fmt.Appendf(nil, "c%d", i), got)
 	}
 
 	// Bulk delete all documents.

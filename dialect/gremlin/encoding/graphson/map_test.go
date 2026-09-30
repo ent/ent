@@ -112,7 +112,6 @@ func TestEncodeMap(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			data, err := Marshal(tc.in)
@@ -205,7 +204,6 @@ func TestDecodeMap(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			typ := reflect2.TypeOf(tc.want).(reflect2.MapType)
@@ -344,7 +342,6 @@ func TestDecodeBadMap(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			var v map[int]int
