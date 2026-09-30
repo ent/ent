@@ -1702,6 +1702,27 @@ func Tx(t *testing.T, client *ent.Client) {
 		require.Error(t, err, "cannot start a transaction within a transaction")
 		require.NoError(t, tx.Rollback())
 	})
+	t.Run("UpdateOne concurrently changed", func(t *testing.T) {
+		// A concurrent writer waits for the transaction's lock in SQLite.
+		skip(t, "SQLite")
+		p := client.Pet.Create().SetName("a").SaveX(ctx)
+		tx, err := client.Tx(ctx)
+		require.NoError(t, err)
+		// The first read takes the snapshot of a REPEATABLE READ transaction.
+		tx.Pet.GetX(ctx, p.ID)
+		client.Pet.UpdateOneID(p.ID).SetName("b").ExecX(ctx)
+		err = tx.Pet.UpdateOneID(p.ID).Where(pet.Name("a")).SetName("c").Exec(ctx)
+		// MariaDB 11.6+ rejects the update itself under innodb_snapshot_isolation.
+		var merr *mysql.MySQLError
+		if errors.As(err, &merr) && merr.Number == 1020 {
+			require.NoError(t, tx.Rollback())
+			return
+		}
+		require.True(t, ent.IsNotFound(err), "the update matched no row: %v", err)
+		// A match that changes nothing is still found.
+		tx.Pet.UpdateOneID(p.ID).Where(pet.Name("b")).SetName("b").ExecX(ctx)
+		require.NoError(t, tx.Rollback())
+	})
 	t.Run("TxOptions Rollback", func(t *testing.T) {
 		skip(t, "SQLite")
 		tx, err := client.BeginTx(ctx, &sql.TxOptions{ReadOnly: true})
