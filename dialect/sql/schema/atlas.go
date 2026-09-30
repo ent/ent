@@ -853,88 +853,109 @@ func (a *Atlas) realm(tables []*Table) (*schema.Realm, error) {
 			sm[et.Schema] = schema.New(et.Schema)
 		}
 		s := sm[et.Schema]
-		if et.View {
-			if et.Annotation == nil || et.Annotation.ViewAs == "" && et.Annotation.ViewFor[a.dialect] == "" {
-				continue // defined externally
+		// The table (and its columns) may be shared between concurrently
+		// running migrations (see setupTables), so its internal state
+		// (e.g. the columns cache, index/foreign-key back-references and
+		// symbol names) must be read while holding its lock, the same way
+		// setupTables holds it while writing that state.
+		if err := func() error {
+			et.mu.Lock()
+			defer et.mu.Unlock()
+			if et.View {
+				if et.Annotation == nil || et.Annotation.ViewAs == "" && et.Annotation.ViewFor[a.dialect] == "" {
+					return nil // defined externally
+				}
+				def := et.Annotation.ViewFor[a.dialect]
+				if def == "" {
+					def = et.Annotation.ViewAs
+				}
+				av := schema.NewView(et.Name, def)
+				if et.Comment != "" {
+					av.SetComment(et.Comment)
+				}
+				if err := a.aVColumns(et, av); err != nil {
+					return err
+				}
+				s.AddViews(av)
+				return nil
 			}
-			def := et.Annotation.ViewFor[a.dialect]
-			if def == "" {
-				def = et.Annotation.ViewAs
-			}
-			av := schema.NewView(et.Name, def)
+			at := schema.NewTable(et.Name)
 			if et.Comment != "" {
-				av.SetComment(et.Comment)
+				at.SetComment(et.Comment)
 			}
-			if err := a.aVColumns(et, av); err != nil {
-				return nil, err
+			a.sqlDialect.atTable(et, at)
+			// universalID is the old implementation of the global unique id, relying on a table in the database.
+			// The new implementation is based on annotations attached to the schema. Only one can be enabled.
+			switch {
+			case a.universalID && et.Annotation != nil && et.Annotation.IncrementStart != nil:
+				return errors.New("universal id and increment start annotation are mutually exclusive")
+			case a.universalID && et.Name != TypeTable && len(et.PrimaryKey) == 1:
+				r, err := a.pkRange(et)
+				if err != nil {
+					return err
+				}
+				a.sqlDialect.atIncrementT(at, r)
+			case et.Annotation != nil && et.Annotation.IncrementStart != nil:
+				a.sqlDialect.atIncrementT(at, int64(*et.Annotation.IncrementStart))
 			}
-			s.AddViews(av)
-			continue
-		}
-		at := schema.NewTable(et.Name)
-		if et.Comment != "" {
-			at.SetComment(et.Comment)
-		}
-		a.sqlDialect.atTable(et, at)
-		// universalID is the old implementation of the global unique id, relying on a table in the database.
-		// The new implementation is based on annotations attached to the schema. Only one can be enabled.
-		switch {
-		case a.universalID && et.Annotation != nil && et.Annotation.IncrementStart != nil:
-			return nil, errors.New("universal id and increment start annotation are mutually exclusive")
-		case a.universalID && et.Name != TypeTable && len(et.PrimaryKey) == 1:
-			r, err := a.pkRange(et)
-			if err != nil {
-				return nil, err
+			if err := a.aColumns(et, at); err != nil {
+				return err
 			}
-			a.sqlDialect.atIncrementT(at, r)
-		case et.Annotation != nil && et.Annotation.IncrementStart != nil:
-			a.sqlDialect.atIncrementT(at, int64(*et.Annotation.IncrementStart))
-		}
-		if err := a.aColumns(et, at); err != nil {
+			if err := a.aIndexes(et, at); err != nil {
+				return err
+			}
+			s.AddTables(at)
+			byT[et] = at
+			return nil
+		}(); err != nil {
 			return nil, err
 		}
-		if err := a.aIndexes(et, at); err != nil {
-			return nil, err
-		}
-		s.AddTables(at)
-		byT[et] = at
 	}
 	for _, t1 := range tables {
 		if t1.View {
 			continue
 		}
-		t2 := byT[t1]
-		for _, fk1 := range t1.ForeignKeys {
-			fk2 := schema.NewForeignKey(fk1.Symbol).
-				SetTable(t2).
-				SetOnUpdate(schema.ReferenceOption(fk1.OnUpdate)).
-				SetOnDelete(schema.ReferenceOption(fk1.OnDelete))
-			for _, c1 := range fk1.Columns {
-				c2, ok := t2.Column(c1.Name)
-				if !ok {
-					return nil, fmt.Errorf("unexpected fk %q column: %q", fk1.Symbol, c1.Name)
+		// See the comment above: fk1.Symbol is written by setupTables under
+		// t1.mu, so it must be read under the same lock here.
+		if err := func() error {
+			t1.mu.Lock()
+			defer t1.mu.Unlock()
+			t2 := byT[t1]
+			for _, fk1 := range t1.ForeignKeys {
+				fk2 := schema.NewForeignKey(fk1.Symbol).
+					SetTable(t2).
+					SetOnUpdate(schema.ReferenceOption(fk1.OnUpdate)).
+					SetOnDelete(schema.ReferenceOption(fk1.OnDelete))
+				for _, c1 := range fk1.Columns {
+					c2, ok := t2.Column(c1.Name)
+					if !ok {
+						return fmt.Errorf("unexpected fk %q column: %q", fk1.Symbol, c1.Name)
+					}
+					fk2.AddColumns(c2)
 				}
-				fk2.AddColumns(c2)
-			}
-			var refT *schema.Table
-			for _, t2 := range sm[fk1.RefTable.Schema].Tables {
-				if t2.Name == fk1.RefTable.Name {
-					refT = t2
-					break
+				var refT *schema.Table
+				for _, t2 := range sm[fk1.RefTable.Schema].Tables {
+					if t2.Name == fk1.RefTable.Name {
+						refT = t2
+						break
+					}
 				}
-			}
-			if refT == nil {
-				return nil, fmt.Errorf("unexpected fk %q ref-table: %q", fk1.Symbol, fk1.RefTable.Name)
-			}
-			fk2.SetRefTable(refT)
-			for _, c1 := range fk1.RefColumns {
-				c2, ok := refT.Column(c1.Name)
-				if !ok {
-					return nil, fmt.Errorf("unexpected fk %q ref-column: %q", fk1.Symbol, c1.Name)
+				if refT == nil {
+					return fmt.Errorf("unexpected fk %q ref-table: %q", fk1.Symbol, fk1.RefTable.Name)
 				}
-				fk2.AddRefColumns(c2)
+				fk2.SetRefTable(refT)
+				for _, c1 := range fk1.RefColumns {
+					c2, ok := refT.Column(c1.Name)
+					if !ok {
+						return fmt.Errorf("unexpected fk %q ref-column: %q", fk1.Symbol, c1.Name)
+					}
+					fk2.AddRefColumns(c2)
+				}
+				t2.AddForeignKeys(fk2)
 			}
-			t2.AddForeignKeys(fk2)
+			return nil
+		}(); err != nil {
+			return nil, err
 		}
 	}
 	ss := slices.SortedFunc(maps.Values(sm), func(a, b *schema.Schema) int {
