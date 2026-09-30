@@ -27,54 +27,55 @@ var (
 	// Funcs are the predefined template
 	// functions used by the codegen.
 	Funcs = template.FuncMap{
-		"ops":           fieldOps,
-		"add":           add,
-		"append":        reflect.Append,
-		"appends":       reflect.AppendSlice,
-		"order":         order,
-		"camel":         camel,
-		"snake":         snake,
-		"pascal":        pascal,
-		"extend":        extend,
-		"xrange":        xrange,
-		"receiver":      receiver,
-		"plural":        plural,
-		"aggregate":     aggregate,
-		"primitives":    primitives,
-		"singular":      rules.Singularize,
-		"quote":         quote,
-		"base":          filepath.Base,
-		"keys":          keys,
-		"indexOf":       indexOf,
-		"join":          join,
-		"joinWords":     joinWords,
-		"json":          jsonString,
-		"isNil":         isNil,
-		"lower":         strings.ToLower,
-		"upper":         strings.ToUpper,
-		"trim":          strings.Trim,
-		"hasField":      hasField,
-		"hasImport":     hasImport,
-		"indirect":      indirect,
-		"hasPrefix":     strings.HasPrefix,
-		"hasSuffix":     strings.HasSuffix,
-		"trimPackage":   trimPackage,
-		"xtemplate":     xtemplate,
-		"hasTemplate":   hasTemplate,
-		"matchTemplate": matchTemplate,
-		"split":         strings.Split,
-		"tagLookup":     tagLookup,
-		"toString":      toString,
-		"dict":          dict,
-		"get":           get,
-		"set":           set,
-		"unset":         unset,
-		"hasKey":        hasKey,
-		"list":          list[any],
-		"slist":         list[string],
-		"fail":          fail,
-		"replace":       strings.ReplaceAll,
-		"allZero":       allZero,
+		"ops":            fieldOps,
+		"add":            add,
+		"append":         reflect.Append,
+		"appends":        reflect.AppendSlice,
+		"order":          order,
+		"camel":          camel,
+		"snake":          snake,
+		"pascal":         pascal,
+		"extend":         extend,
+		"xrange":         xrange,
+		"receiver":       receiver,
+		"plural":         plural,
+		"aggregate":      aggregate,
+		"primitives":     primitives,
+		"singular":       rules.Singularize,
+		"quote":          quote,
+		"base":           filepath.Base,
+		"keys":           keys,
+		"indexOf":        indexOf,
+		"join":           join,
+		"joinWords":      joinWords,
+		"joinWordsDelim": joinWordsDelim,
+		"json":           jsonString,
+		"isNil":          isNil,
+		"lower":          strings.ToLower,
+		"upper":          strings.ToUpper,
+		"trim":           strings.Trim,
+		"hasField":       hasField,
+		"hasImport":      hasImport,
+		"indirect":       indirect,
+		"hasPrefix":      strings.HasPrefix,
+		"hasSuffix":      strings.HasSuffix,
+		"trimPackage":    trimPackage,
+		"xtemplate":      xtemplate,
+		"hasTemplate":    hasTemplate,
+		"matchTemplate":  matchTemplate,
+		"split":          strings.Split,
+		"tagLookup":      tagLookup,
+		"toString":       toString,
+		"dict":           dict,
+		"get":            get,
+		"set":            set,
+		"unset":          unset,
+		"hasKey":         hasKey,
+		"list":           list[any],
+		"slist":          list[string],
+		"fail":           fail,
+		"replace":        strings.ReplaceAll,
+		"allZero":        allZero,
 	}
 	rules    = ruleset()
 	acronyms = make(map[string]struct{})
@@ -82,20 +83,30 @@ var (
 
 // joinWords with spaces and add linebreaks to ensure lines do not exceed the given maxSize.
 func joinWords(words []string, maxSize int) string {
+	return joinWordsDelim(words, " ", maxSize)
+}
+
+// joinWordsDelim with the given delimiter and add linebreaks to ensure lines do not exceed the given maxSize.
+func joinWordsDelim(words []string, delim string, maxSize int) string {
 	if len(words) == 0 {
 		return ""
 	}
 	b := &strings.Builder{}
-	b.WriteString(words[0])
-	n := len(words[0])
-	for _, w := range words[1:] {
-		if n+len(w)+1 > maxSize {
+	n := 0
+	lastIdx := len(words) - 1
+	lenDelim := len(delim)
+	for i, w := range words {
+		b.WriteString(w)
+		n += len(w)
+		if i == lastIdx {
+			break
+		}
+		b.WriteString(delim)
+		n += lenDelim
+		if n > maxSize {
 			b.WriteByte('\n')
 			n = 0
 		}
-		b.WriteString(" ")
-		b.WriteString(w)
-		n += len(w) + 1
 	}
 	return b.String()
 }
