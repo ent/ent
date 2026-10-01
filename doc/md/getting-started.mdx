@@ -63,6 +63,15 @@ func (User) Edges() []ent.Edge {
 
 ```
 
+Update the imports to include `entgo.io/ent/schema/field`:
+
+```go title="entdemo/ent/schema/user.go"
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
+)
+```
+
 Add 2 fields to the `User` schema:
 
 ```go title="entdemo/ent/schema/user.go"
