@@ -228,16 +228,25 @@ func (c Conn) maySetVars(ctx context.Context) (ExecQuerier, func() error, error)
 			return nil, nil, err
 		}
 	}
-	// If there are variables to reset, and we need to return the
-	// connection to the pool, we need to clean up the variables.
-	if cls := cf; cf != nil && len(reset) > 0 {
-		cf = func() error {
+	// If there are variables to reset, execute them before closing.
+	if len(reset) > 0 {
+		resetFunc := func() error {
 			for _, q := range reset {
 				if _, err := ex.ExecContext(ctx, q); err != nil {
-					return errors.Join(err, cls())
+					return err
 				}
 			}
-			return cls()
+			return nil
+		}
+		if cf != nil {
+			cls := cf
+			cf = func() error {
+				return errors.Join(resetFunc(), cls())
+			}
+		} else {
+			// If we are inside a transaction there is no close function but we still
+			// want to reset the variables so return resetFunc.
+			cf = resetFunc
 		}
 	}
 	return ex, cf, nil
