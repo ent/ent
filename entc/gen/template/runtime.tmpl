@@ -67,17 +67,19 @@ backwards-compatibility with previous versions of ent.
 
 {{/* register schema handlers to type packages */}}
 {{ define "runtime/register" }}
+{{- $seen := dict }}
 import (
 	"time"
 	"context"
 
 	{{- with $.Config.Schema }}
 		"{{ . }}"
+		{{- $seen = set $seen . true }}
 	{{- end }}
 	{{- range $n := $.Nodes }}
 		{{ $n.PackageAlias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
 		{{- /* Import external packages */}}
-		{{- template "import/types" $n }}
+		{{- template "import/types" (extend $n "ImportSeen" $seen) }}
 	{{- end }}
 
 	"entgo.io/ent"
