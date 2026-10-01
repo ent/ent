@@ -5,6 +5,7 @@
 package gen
 
 import (
+	"reflect"
 	"testing"
 
 	"entgo.io/ent/entc/load"
@@ -275,6 +276,22 @@ func TestField_DefaultName(t *testing.T) {
 		typ := &Field{Name: tt.name}
 		require.Equal(t, tt.constant, typ.DefaultName())
 	}
+}
+
+func TestField_NativeUUID(t *testing.T) {
+	f := &Field{Type: &field.TypeInfo{
+		Type:    field.TypeUUID,
+		Ident:   "uuid.UUID",
+		PkgPath: "uuid",
+		RType: &field.RType{
+			Name: "UUID", Ident: "uuid.UUID", Kind: reflect.Array, PkgPath: "uuid",
+		},
+	}}
+	require.Equal(t, "sql.Null[uuid.UUID]", f.ScanType())
+	require.Equal(t, "new(sql.Null[uuid.UUID])", f.NewScanType())
+	require.Equal(t, "value.V", f.ScanTypeField("value"))
+	require.Equal(t, "value", f.BasicType("value"))
+	require.Equal(t, numericOps, fieldOps(f))
 }
 
 func TestField_incremental(t *testing.T) {

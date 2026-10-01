@@ -1502,6 +1502,8 @@ func (f Field) ScanType() string {
 	switch f.Type.Type {
 	case field.TypeJSON, field.TypeBytes:
 		return "[]byte"
+	case field.TypeUUID:
+		return fmt.Sprintf("sql.Null[%s]", f.Type)
 	case field.TypeString, field.TypeEnum:
 		return "sql.NullString"
 	case field.TypeBool:
@@ -1646,23 +1648,7 @@ func (f Field) NewScanType() string {
 		}
 		return expr
 	}
-	expr := f.Type.String()
-	switch f.Type.Type {
-	case field.TypeJSON, field.TypeBytes:
-		expr = "[]byte"
-	case field.TypeString, field.TypeEnum:
-		expr = "sql.NullString"
-	case field.TypeBool:
-		expr = "sql.NullBool"
-	case field.TypeTime:
-		expr = "sql.NullTime"
-	case field.TypeInt, field.TypeInt8, field.TypeInt16, field.TypeInt32, field.TypeInt64,
-		field.TypeUint, field.TypeUint8, field.TypeUint16, field.TypeUint32, field.TypeUint64:
-		expr = "sql.NullInt64"
-	case field.TypeFloat32, field.TypeFloat64:
-		expr = "sql.NullFloat64"
-	}
-	return fmt.Sprintf("new(%s)", expr)
+	return fmt.Sprintf("new(%s)", f.ScanType())
 }
 
 // ScanTypeField extracts the nullable type field (if exists) from the given receiver.
@@ -1679,6 +1665,8 @@ func (f Field) ScanTypeField(rec string) string {
 		return expr
 	}
 	switch f.Type.Type {
+	case field.TypeUUID:
+		expr = rec + ".V"
 	case field.TypeEnum:
 		expr = fmt.Sprintf("%s(%s.String)", f.Type, rec)
 	case field.TypeString, field.TypeBool, field.TypeInt64, field.TypeFloat64:
@@ -1961,6 +1949,8 @@ func (f Field) BasicType(ident string) (expr string) {
 	}
 	t, rt := f.Type, f.Type.RType
 	switch t.Type {
+	case field.TypeUUID:
+		expr = ident
 	case field.TypeEnum:
 		expr = ident
 	case field.TypeBool:

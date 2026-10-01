@@ -1,8 +1,6 @@
 module entgo.io/ent/examples
 
-go 1.24
-
-toolchain go1.24.0
+go 1.25.0
 
 replace entgo.io/ent => ../
 
@@ -34,9 +32,9 @@ require (
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/crypto v0.3.0 // indirect
-	golang.org/x/mod v0.24.0 // indirect
+	golang.org/x/mod v0.35.0 // indirect
 	golang.org/x/net v0.6.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/sys v0.43.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/api v0.103.0 // indirect

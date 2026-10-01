@@ -818,6 +818,11 @@ func TestField_UUID(t *testing.T) {
 		Default(uuid.UUID{}).
 		Descriptor()
 	assert.EqualError(t, fd.Err, "expect type (func() uuid.UUID) for uuid default value")
+
+	fd = field.UUID("id", [16]byte{}).Descriptor()
+	assert.EqualError(t, fd.Err, `GoType must be a "field.ValueScanner" type, ValueScanner or provide an external ValueScanner`)
+	fd = field.UUID("id", nil).Descriptor()
+	assert.EqualError(t, fd.Err, "expect a Go value as UUID type but got nil")
 }
 
 type custom struct {

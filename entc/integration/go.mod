@@ -1,6 +1,6 @@
 module entgo.io/ent/entc/integration
 
-go 1.24.0
+go 1.27
 
 replace entgo.io/ent => ../../
 
@@ -14,7 +14,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.28
 	github.com/stretchr/testify v1.10.0
 	gocloud.dev v0.44.0
-	golang.org/x/sync v0.16.0
+	golang.org/x/sync v0.20.0
 )
 
 require (
@@ -44,9 +44,9 @@ require (
 	go.opentelemetry.io/otel/sdk v1.37.0 // indirect
 	go.opentelemetry.io/otel/sdk/metric v1.37.0 // indirect
 	go.opentelemetry.io/otel/trace v1.37.0 // indirect
-	golang.org/x/mod v0.26.0 // indirect
+	golang.org/x/mod v0.35.0 // indirect
 	golang.org/x/net v0.43.0 // indirect
-	golang.org/x/sys v0.35.0 // indirect
+	golang.org/x/sys v0.43.0 // indirect
 	golang.org/x/text v0.28.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/api v0.247.0 // indirect

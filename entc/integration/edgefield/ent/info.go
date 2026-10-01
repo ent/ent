@@ -8,6 +8,7 @@ package ent
 
 import (
 	"encoding/json"
+	"encoding/json/jsontext"
 	"fmt"
 	"strings"
 
@@ -23,7 +24,7 @@ type Info struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Content holds the value of the "content" field.
-	Content json.RawMessage `json:"content,omitempty"`
+	Content jsontext.Value `json:"content,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the InfoQuery when eager-loading is set.
 	Edges        InfoEdges `json:"edges"`

@@ -8,7 +8,7 @@ package ent
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
 	"errors"
 	"fmt"
 	"net/http"
@@ -46,7 +46,7 @@ func (_c *UserCreate) SetURLs(v []*url.URL) *UserCreate {
 }
 
 // SetRaw sets the "raw" field.
-func (_c *UserCreate) SetRaw(v json.RawMessage) *UserCreate {
+func (_c *UserCreate) SetRaw(v jsontext.Value) *UserCreate {
 	_c.mutation.SetRaw(v)
 	return _c
 }

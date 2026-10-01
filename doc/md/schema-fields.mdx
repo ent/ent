@@ -102,6 +102,20 @@ func (User) Fields() []ent.Field {
 }
 ```
 
+In addition to `github.com/google/uuid`, `field.UUID` accepts Go 1.27's standard `uuid.UUID` type
+(and its pointer variant), even though it does not implement `driver.Valuer` or `sql.Scanner`:
+
+```go
+import "uuid"
+
+// Fields of the User.
+func (User) Fields() []ent.Field {
+	return []ent.Field{
+		field.UUID("uuid", uuid.UUID{}),
+	}
+}
+```
+
 To read more about how each type is mapped to its database-type, go to the [Migration](migrate.md) section.
 
 ## ID Field

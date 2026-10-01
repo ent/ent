@@ -8,7 +8,7 @@ package ent
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
 	"errors"
 	"fmt"
 
@@ -35,13 +35,13 @@ func (_u *InfoUpdate) Where(ps ...predicate.Info) *InfoUpdate {
 }
 
 // SetContent sets the "content" field.
-func (_u *InfoUpdate) SetContent(v json.RawMessage) *InfoUpdate {
+func (_u *InfoUpdate) SetContent(v jsontext.Value) *InfoUpdate {
 	_u.mutation.SetContent(v)
 	return _u
 }
 
 // AppendContent appends value to the "content" field.
-func (_u *InfoUpdate) AppendContent(v json.RawMessage) *InfoUpdate {
+func (_u *InfoUpdate) AppendContent(v jsontext.Value) *InfoUpdate {
 	_u.mutation.AppendContent(v)
 	return _u
 }
@@ -170,13 +170,13 @@ type InfoUpdateOne struct {
 }
 
 // SetContent sets the "content" field.
-func (_u *InfoUpdateOne) SetContent(v json.RawMessage) *InfoUpdateOne {
+func (_u *InfoUpdateOne) SetContent(v jsontext.Value) *InfoUpdateOne {
 	_u.mutation.SetContent(v)
 	return _u
 }
 
 // AppendContent appends value to the "content" field.
-func (_u *InfoUpdateOne) AppendContent(v json.RawMessage) *InfoUpdateOne {
+func (_u *InfoUpdateOne) AppendContent(v jsontext.Value) *InfoUpdateOne {
 	_u.mutation.AppendContent(v)
 	return _u
 }

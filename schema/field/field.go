@@ -151,19 +151,21 @@ func Enum(name string) *enumBuilder {
 	}}
 }
 
-// UUID returns a new Field with type UUID. An example for defining UUID field is as follows:
+// UUID returns a new Field with type UUID. The type argument can be a
+// driver.Valuer implementation (e.g. github.com/google/uuid), or, on
+// Go 1.27 and above, the standard uuid.UUID (or its pointer variant).
+// An example for defining UUID field is as follows:
 //
 //	field.UUID("id", uuid.New())
-func UUID(name string, typ driver.Valuer) *uuidBuilder {
-	rt := reflect.TypeOf(typ)
+func UUID(name string, typ any) *uuidBuilder {
 	b := &uuidBuilder{&Descriptor{
 		Name: name,
-		Info: &TypeInfo{
-			Type:    TypeUUID,
-			Ident:   rt.String(),
-			PkgPath: indirect(rt).PkgPath(),
-		},
+		Info: &TypeInfo{Type: TypeUUID},
 	}}
+	if typ == nil {
+		b.desc.Err = errors.New("expect a Go value as UUID type but got nil")
+		return b
+	}
 	b.desc.goType(typ)
 	return b
 }
@@ -1690,7 +1692,9 @@ func (d *Descriptor) checkGoType(expectType reflect.Type) {
 	// No GoType was provided.
 	case d.Info.RType == nil:
 	// A GoType without an external ValueScanner.
-	case pt.Implements(valueScannerType), t.Implements(valueScannerType), t.Kind() == expectType.Kind() && t.ConvertibleTo(expectType):
+	case pt.Implements(valueScannerType), t.Implements(valueScannerType),
+		d.Info.Type == TypeUUID && indirect(t).PkgPath() == "uuid" && indirect(t).Name() == "UUID",
+		t.Kind() == expectType.Kind() && t.ConvertibleTo(expectType):
 	// There is a GoType, but it's not a ValueScanner.
 	default:
 		d.Err = fmt.Errorf("GoType must be a %q type, ValueScanner or provide an external ValueScanner", expectType)
