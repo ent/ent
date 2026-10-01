@@ -135,7 +135,16 @@ type (
 	{{ $func := print "Set" $f.StructField }}
 	// {{ $func }} sets the "{{ $f.Name }}" field.
 	func (u *{{ $upsertSet }}) {{ $func }}(v {{ $f.Type }}) *{{ $upsertSet }} {
-		u.Set({{ $.Package }}.{{ $f.Constant }}, v)
+		{{- if $f.HasJSONOptions }}
+			data, err := jsonv2.Marshal(v, {{ $f.JSONOptions }}...)
+			if err != nil {
+				u.AddError(fmt.Errorf("marshal value for column {{ $f.StorageKey }}: %w", err))
+				return u
+			}
+			u.Set({{ $.Package }}.{{ $f.Constant }}, json.RawMessage(data))
+		{{- else }}
+			u.Set({{ $.Package }}.{{ $f.Constant }}, v)
+		{{- end }}
 		return u
 	}
 

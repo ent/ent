@@ -27,6 +27,11 @@ jobs:
     strategy:
       matrix:
         go: ['1.23', '1.24']
+        include:
+          - go: '1.25'
+            goexperiment: 'jsonv2'
+    env:
+      GOEXPERIMENT: ${{ matrix.goexperiment }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -56,6 +61,39 @@ jobs:
       - name: Run example tests
         working-directory: examples
         run: go test -race ./...
+
+  # Cover JSON runtime behavior independently of the code-generation tooling.
+  # The unit job exercises JSON v2 generation on Go 1.25; main's x/tools version
+  # cannot yet load packages produced by Go 1.27.
+  json-runtime:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - go: '1.25'
+            goexperiment: ''
+          - go: '1.25'
+            goexperiment: 'jsonv2'
+          - go: '1.26'
+            goexperiment: ''
+          - go: '1.26'
+            goexperiment: 'jsonv2'
+          - go: '1.27'
+            goexperiment: ''
+            # stdversion does not account for experiment-gated JSON APIs yet:
+            # https://github.com/golang/go/issues/80691. Keep the other default checks.
+            test_flags: '-vet=atomic,bools,buildtag,directive,errorsas,ifaceassert,nilfunc,printf,slog,stringintconv,tests'
+          - go: '1.27'
+            goexperiment: 'nojsonv2'
+    env:
+      GOEXPERIMENT: ${{ matrix.goexperiment }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+      - name: Run JSON runtime tests
+        run: go test ${{ matrix.test_flags }} -race ./dialect/sql/... ./schema/field
 
   generate:
     runs-on: ubuntu-latest

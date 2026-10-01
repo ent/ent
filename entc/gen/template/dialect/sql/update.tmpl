@@ -101,7 +101,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			{{- if $f.IsBlobNoColumn }}{{ continue }}{{ end }}
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}
 				if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
-					{{- if $f.HasValueScanner }}
+					{{- if $f.HasJSONOptions }}
+						_spec.SetJSONField({{ $.Package }}.{{ $f.Constant }}, value, {{ $f.JSONOptions }}...)
+					{{- else if $f.HasValueScanner }}
 						vv, err := {{ $f.ValueFunc }}(value)
 						if err != nil {
 							return {{ $zero }}, err
@@ -127,7 +129,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 				{{- if $f.SupportsMutationAppend }}
 					if value, ok := {{ $mutation }}.{{ $f.MutationAppended }}(); ok {
 						_spec.AddModifier(func(u *sql.UpdateBuilder) {
-							sqljson.Append(u, {{ $.Package }}.{{ $f.Constant }}, value)
+							sqljson.Append{{ if $f.HasJSONOptions }}WithOptions{{ end }}(u, {{ $.Package }}.{{ $f.Constant }}, value{{ if $f.HasJSONOptions }}, {{ $f.JSONOptions }}{{ end }})
 						})
 					}
 				{{- end }}

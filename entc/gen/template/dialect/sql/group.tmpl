@@ -35,6 +35,6 @@ func ({{ $receiver }} *{{ $builder }}) sqlScan(ctx context.Context, root *{{ $.Q
 		return err
 	}
 	defer rows.Close()
-	return sql.ScanSlice(rows, v)
+	{{ template "dialect/sql/scan" $ }}
 }
 {{ end }}

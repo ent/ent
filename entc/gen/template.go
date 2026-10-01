@@ -93,8 +93,8 @@ var (
 			},
 		},
 		{
-			Name:   "mutation",
-			Cond:   notView,
+			Name: "mutation",
+			Cond: notView,
 			Format: func(t *Type) string {
 				return fmt.Sprintf("%s/mutation.go", t.PackageDir())
 			},
@@ -229,6 +229,7 @@ var (
 		"driver":  "database/sql/driver",
 		"errors":  "errors",
 		"fmt":     "fmt",
+		"jsonv2":  "encoding/json/v2",
 		"math":    "math",
 		"strings": "strings",
 		"time":    "time",

@@ -216,6 +216,24 @@ func TestScanJSON(t *testing.T) {
 	require.EqualError(t, ScanSlice(toRows(mock), &v1), `unmarshal field "V": unexpected end of JSON input`)
 }
 
+func TestScanJSONLegacySemantics(t *testing.T) {
+	var rows []struct {
+		Data struct {
+			Name  string `json:"name"`
+			Items [2]int `json:"items"`
+		}
+	}
+	// Preserve case-insensitive names, duplicate names, short arrays, and
+	// replacement of invalid UTF-8 when no JSON options are configured.
+	mock := sqlmock.NewRows([]string{"data"}).
+		AddRow(`{"NAME":"first","NAME":"last","items":[1]}`).
+		AddRow("{\"name\":\"\xff\"}")
+	require.NoError(t, ScanSlice(toRows(mock), &rows))
+	require.Equal(t, "last", rows[0].Data.Name)
+	require.Equal(t, [2]int{1, 0}, rows[0].Data.Items)
+	require.Equal(t, "\ufffd", rows[1].Data.Name)
+}
+
 func TestScanNestedStruct(t *testing.T) {
 	mock := sqlmock.NewRows([]string{"name", "age"}).
 		AddRow("foo", 1).

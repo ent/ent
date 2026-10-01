@@ -84,11 +84,34 @@ func ScanValue(rows ColumnScanner) (driver.Value, error) {
 }
 
 // ScanSlice scans the given ColumnScanner (basically, sql.Row or sql.Rows) into the given slice.
+// When the jsonv2 experiment is enabled, rows may additionally implement
+// ColumnJSONOptions to supply JSON options for each result column.
 func ScanSlice(rows ColumnScanner, v any) error {
-	columns, err := rows.Columns()
+	names, err := rows.Columns()
 	if err != nil {
 		return fmt.Errorf("sql/scan: failed getting column names: %w", err)
 	}
+	return scanSlice(rows, v, scanColumns(rows, names))
+}
+
+// defaultScanColumns preserves the legacy ScanSlice behavior when rows do not
+// supply column metadata.
+func defaultScanColumns(names []string) []scanColumn {
+	columns := make([]scanColumn, len(names))
+	defaults := defaultJSONScanOptions()
+	for i, name := range names {
+		columns[i] = scanColumn{name: name, opts: defaults}
+	}
+	return columns
+}
+
+// scanColumn holds a result column's name and resolved JSON options.
+type scanColumn struct {
+	name string
+	opts jsonScanOptions
+}
+
+func scanSlice(rows ColumnScanner, v any, columns []scanColumn) error {
 	rv := reflect.ValueOf(v)
 	switch {
 	case rv.Kind() != reflect.Ptr:
@@ -142,7 +165,21 @@ func (r *rowScan) values() []any {
 }
 
 // scanType returns rowScan for the given reflect.Type.
-func scanType(typ reflect.Type, columns []string) (*rowScan, error) {
+func scanType(typ reflect.Type, columns []scanColumn) (*rowScan, error) {
+	if len(columns) == 1 && !assignable(typ) && (typ.Kind() == reflect.Slice || typ.Kind() == reflect.Map) {
+		return &rowScan{
+			columns: []reflect.Type{nullJSONType},
+			value: func(vs ...any) (reflect.Value, error) {
+				value := reflect.New(typ).Elem()
+				if raw := *vs[0].(*nullJSON); raw != nil {
+					if err := columns[0].unmarshal(raw, value.Addr().Interface()); err != nil {
+						return reflect.Value{}, fmt.Errorf("unmarshal column %q: %w", columns[0].name, err)
+					}
+				}
+				return value, nil
+			},
+		}, nil
+	}
 	switch k := typ.Kind(); {
 	case assignable(typ):
 		return &rowScan{
@@ -170,11 +207,17 @@ var (
 type nullJSON json.RawMessage
 
 // Scan implements the sql.Scanner interface.
-func (j *nullJSON) Scan(v interface{}) error {
-	if v == nil {
-		return nil
+func (j *nullJSON) Scan(v any) error {
+	switch v := v.(type) {
+	case nil:
+		*j = nil
+	case []byte:
+		*j = v
+	case string:
+		*j = []byte(v)
+	default:
+		return fmt.Errorf("sql/scan: unexpected JSON type %T", v)
 	}
-	*j = v.([]byte)
 	return nil
 }
 
@@ -192,7 +235,7 @@ func assignable(typ reflect.Type) bool {
 }
 
 // scanStruct returns the configuration for scanning a sql.Row into a struct.
-func scanStruct(typ reflect.Type, columns []string) (*rowScan, error) {
+func scanStruct(typ reflect.Type, columns []scanColumn) (*rowScan, error) {
 	var (
 		scan  = &rowScan{}
 		idxs  = make([][]int, 0, typ.NumField())
@@ -217,13 +260,13 @@ func scanStruct(typ reflect.Type, columns []string) (*rowScan, error) {
 		var idx []int
 		// Normalize columns if necessary,
 		// for example: COUNT(*) => count.
-		switch name := strings.Split(c, "(")[0]; {
+		switch name := strings.Split(c.name, "(")[0]; {
 		case names[name] != nil:
 			idx = names[name]
 		case names[strings.ToLower(name)] != nil:
 			idx = names[strings.ToLower(name)]
 		default:
-			return nil, fmt.Errorf("sql/scan: missing struct field for column: %s (%s)", c, name)
+			return nil, fmt.Errorf("sql/scan: missing struct field for column: %s (%s)", c.name, name)
 		}
 		idxs = append(idxs, idx)
 		rtype := typ.Field(idx[0]).Type
@@ -260,7 +303,7 @@ func scanStruct(typ reflect.Type, columns []string) (*rowScan, error) {
 				if rv = reflect.Indirect(rv); rv.IsNil() {
 					continue
 				}
-				if err := json.Unmarshal(rv.Bytes(), rvalue.Addr().Interface()); err != nil {
+				if err := columns[i].unmarshal(rv.Bytes(), rvalue.Addr().Interface()); err != nil {
 					return reflect.Value{}, fmt.Errorf("unmarshal field %q: %w", ft.Name, err)
 				}
 			case !nillable(rvalue.Type()):
@@ -296,7 +339,7 @@ func nillable(t reflect.Type) bool {
 }
 
 // scanPtr wraps the underlying type with rowScan.
-func scanPtr(typ reflect.Type, columns []string) (*rowScan, error) {
+func scanPtr(typ reflect.Type, columns []scanColumn) (*rowScan, error) {
 	typ = typ.Elem()
 	scan, err := scanType(typ, columns)
 	if err != nil {

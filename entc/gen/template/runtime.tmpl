@@ -70,6 +70,12 @@ backwards-compatibility with previous versions of ent.
 import (
 	"time"
 	"context"
+	{{- range $n := $.Nodes }}
+		{{- if $n.JSONOptionsFields }}
+			jsonv2 "encoding/json/v2"
+			{{- break }}
+		{{- end }}
+	{{- end }}
 
 	{{- with $.Config.Schema }}
 		"{{ . }}"
@@ -151,7 +157,7 @@ func init() {
 			{{- end }}
 		{{- end }}
 	{{- end }}
-	{{- if or $n.HasDefault $n.HasUpdateDefault $n.HasValidators $n.HasValueScanner $n.HasBlobFields }}
+	{{- if or $n.HasDefault $n.HasUpdateDefault $n.HasValidators $n.HasValueScanner $n.HasBlobFields $n.JSONOptionsFields }}
 		{{- with $idx := $n.MixedInFields }}
 			{{- range $i := $idx }}
 				{{ print $pkg "MixinFields" $i }} := {{ $pkg }}Mixin[{{ $i }}].Fields()
@@ -168,13 +174,16 @@ func init() {
 			{{- $desc := print $pkg "Desc" $f.StructField }}
 			{{- $idscan := and $n.HasOneFieldID (eq $f.Name $n.ID.Name) }}
 			{{- /* enum default values handled near their declarations (in type package). */}}
-			{{- if or (and $f.Default (not $f.IsEnum)) $f.UpdateDefault $f.Validators (and $f.HasValueScanner (or (not $idscan) (eq $n.Storage.Name "sql"))) }}
+			{{- if or (and $f.Default (not $f.IsEnum)) $f.UpdateDefault $f.Validators $f.HasJSONOptions (and $f.HasValueScanner (or (not $idscan) (eq $n.Storage.Name "sql"))) }}
 				// {{ $desc }} is the schema descriptor for {{ $f.Name }} field.
 				{{- if $f.Position.MixedIn }}
 					{{ $desc }} := {{ print $pkg "MixinFields" $f.Position.MixinIndex }}[{{ $f.Position.Index }}].Descriptor()
 				{{- else }}
 					{{ $desc }} := {{ $pkg }}Fields[{{ $f.Position.Index }}].Descriptor()
 				{{- end }}
+			{{- end }}
+			{{- if $f.HasJSONOptions }}
+				{{ $f.JSONOptions }} = {{ $desc }}.JSONOptions.([]jsonv2.Options)
 			{{- end }}
 			{{- if and $f.Default (not $f.IsEnum) }}
 				{{- $default := print $pkg "." $f.DefaultName }}

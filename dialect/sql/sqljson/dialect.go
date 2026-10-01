@@ -5,6 +5,7 @@
 package sqljson
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 
@@ -118,7 +119,11 @@ func (d *mysql) Append(u *sql.UpdateBuilder, column string, elems []any, opts ..
 func (d *mysql) marshalArgs(args []any) []any {
 	vs := make([]any, len(args))
 	for i, v := range args {
-		if !isPrimitive(v) {
+		if raw, ok := v.(json.RawMessage); ok {
+			// JSON_ARRAY treats bound strings as JSON strings. Explicitly cast
+			// encoded values so objects, arrays, booleans and null keep their type.
+			v = sql.Expr("CAST(? AS JSON)", string(raw))
+		} else if !isPrimitive(v) {
 			v = marshalArg(v)
 		}
 		vs[i] = v

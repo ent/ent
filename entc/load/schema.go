@@ -43,6 +43,7 @@ type Field struct {
 	Name             string                  `json:"name,omitempty"`
 	Info             *field.TypeInfo         `json:"type,omitempty"`
 	ValueScanner     bool                    `json:"value_scanner,omitempty"`
+	JSONOptions      bool                    `json:"json_options,omitempty"`
 	Tag              string                  `json:"tag,omitempty"`
 	Size             *int64                  `json:"size,omitempty"`
 	Enums            []struct{ N, V string } `json:"enums,omitempty"`
@@ -133,6 +134,7 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 		Name:             fd.Name,
 		Info:             fd.Info,
 		ValueScanner:     fd.ValueScanner != nil,
+		JSONOptions:      fd.JSONOptions != nil,
 		Tag:              fd.Tag,
 		Enums:            fd.Enums,
 		Unique:           fd.Unique,

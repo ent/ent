@@ -628,6 +628,8 @@ type (
 		Column string
 		Type   field.Type
 		Value  driver.Value // value to be stored.
+		// JSONMarshal overrides the encoder for JSON values. If nil, encoding/json.Marshal is used.
+		JSONMarshal func(any) ([]byte, error)
 	}
 
 	// EdgeTarget holds the information for the target nodes
@@ -1886,7 +1888,11 @@ func setTableColumns(fields []*FieldSpec, edges map[Rel][]*EdgeSpec, set func(st
 	for _, fi := range fields {
 		value := fi.Value
 		if fi.Type == field.TypeJSON {
-			buf, err := json.Marshal(value)
+			marshal := fi.JSONMarshal
+			if marshal == nil {
+				marshal = json.Marshal
+			}
+			buf, err := marshal(value)
 			if err != nil {
 				return fmt.Errorf("marshal value for column %s: %w", fi.Column, err)
 			}

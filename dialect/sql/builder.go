@@ -509,6 +509,9 @@ func (i *InsertBuilder) writeConflict(b *Builder) {
 	for _, f := range i.conflict.action.update {
 		f(u)
 	}
+	if err := u.Err(); err != nil {
+		b.AddError(err)
+	}
 	u.writeSetter(b)
 	if p := i.conflict.action.where; p != nil {
 		p.qualifier = i.table
