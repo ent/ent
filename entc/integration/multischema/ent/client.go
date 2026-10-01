@@ -1104,7 +1104,7 @@ func (c *UserClient) QueryParents(_m *User) *UserQuery {
 		)
 		schemaConfig := _m.schemaConfig
 		step.To.Schema = schemaConfig.User
-		step.Edge.Schema = schemaConfig.UserChildren
+		step.Edge.Schema = schemaConfig.Parent
 		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}

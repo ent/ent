@@ -53,11 +53,13 @@ func TestMySQL(t *testing.T) {
 	require.NoError(t, err)
 	_, err = db.ExecContext(ctx, pl)
 	require.NoError(t, err)
-
-	// Default schema for the connection is db1.
-	db1, err := sql.Open("mysql", "root:pass@tcp(localhost:3308)/db1?parseTime=true")
+	_, err = db.ExecContext(ctx, "CREATE DATABASE IF NOT EXISTS `public`")
 	require.NoError(t, err)
-	defer db1.Close()
+
+	// Default schema for the connection is public.
+	public, err := sql.Open("mysql", "root:pass@tcp(localhost:3308)/public?parseTime=true")
+	require.NoError(t, err)
+	defer public.Close()
 
 	cfg := ent.SchemaConfig{
 		// The "users" and the "pets" table reside in the same schema
@@ -74,7 +76,7 @@ func TestMySQL(t *testing.T) {
 		// An edge with the "Through" definition is set on its edge-schema.
 		Friendship: "db2",
 	}
-	client := ent.NewClient(ent.Driver(db1), ent.AlternateSchema(cfg))
+	client := ent.NewClient(ent.Driver(public), ent.AlternateSchema(cfg))
 	pedro := client.Pet.Create().SetName("Pedro").SaveX(ctx)
 	groups := client.Group.CreateBulk(
 		client.Group.Create().SetName("GitHub"),
@@ -166,11 +168,19 @@ func TestMySQL(t *testing.T) {
 	require.True(t, slices.ContainsFunc(sib, func(u *ent.User) bool { return u.Name == jo.Name }))
 
 	// Cross-schema edge predicate: QueryGroups().Where(HasUsersWith(...))
-	// must qualify group_users with db2, since the connection defaults to db1.
+	// must qualify group_users with db2, since the connection defaults to public.
 	got := a8m.QueryGroups().
 		Where(group.HasUsersWith(user.ID(a8m.ID))).
 		CountX(ctx)
 	require.Equal(t, 1, got) // a8m was removed from GitHub above; only GitLab remains
+
+	// Cross-schema order-by-neighbor (M2M Through): ByGroupsCount must qualify
+	// the groups/group_users tables with db2, since the connection defaults to
+	// public. A wrong or missing schema would fail at execution rather than just
+	// mis-render. a8m is the only user still in a group (GitLab), so it sorts
+	// first under descending count.
+	byGroups := client.User.Query().Order(user.ByGroupsCount(sql.OrderDesc())).AllX(ctx)
+	require.Equal(t, a8m.ID, byGroups[0].ID)
 }
 
 func TestVersionedMigration(t *testing.T) {

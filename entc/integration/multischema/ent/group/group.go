@@ -9,6 +9,7 @@ package group
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/multischema/ent/internal"
 )
 
 const (
@@ -72,14 +73,22 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 // ByUsersCount orders the results by users count.
 func ByUsersCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newUsersStep(), opts...)
+		step := newUsersStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.GroupUsers
+		sqlgraph.OrderByNeighborsCount(s, step, opts...)
 	}
 }
 
 // ByUsers orders the results by users terms.
 func ByUsers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newUsersStep(), append([]sql.OrderTerm{term}, terms...)...)
+		step := newUsersStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.GroupUsers
+		sqlgraph.OrderByNeighborTerms(s, step, append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newUsersStep() *sqlgraph.Step {

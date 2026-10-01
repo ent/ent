@@ -169,7 +169,7 @@ func (_q *UserQuery) QueryParents() *UserQuery {
 		)
 		schemaConfig := _q.schemaConfig
 		step.To.Schema = schemaConfig.User
-		step.Edge.Schema = schemaConfig.UserChildren
+		step.Edge.Schema = schemaConfig.Parent
 		fromU = sqlgraph.SetNeighbors(_q.driver.Dialect(), step)
 		return fromU, nil
 	}
@@ -864,7 +864,7 @@ func (_q *UserQuery) loadParents(ctx context.Context, query *UserQuery, nodes []
 	}
 	query.Where(func(s *sql.Selector) {
 		joinT := sql.Table(user.ParentsTable)
-		joinT.Schema(_q.schemaConfig.UserChildren)
+		joinT.Schema(_q.schemaConfig.Parent)
 		s.Join(joinT).On(s.C(user.FieldID), joinT.C(user.ParentsPrimaryKey[0]))
 		s.Where(sql.InValues(joinT.C(user.ParentsPrimaryKey[1]), edgeIDs...))
 		columns := s.SelectedColumns()

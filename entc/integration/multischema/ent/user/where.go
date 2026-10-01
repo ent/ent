@@ -224,7 +224,7 @@ func HasParents() predicate.User {
 		)
 		schemaConfig := internal.SchemaConfigFromContext(s.Context())
 		step.To.Schema = schemaConfig.User
-		step.Edge.Schema = schemaConfig.UserChildren
+		step.Edge.Schema = schemaConfig.Parent
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
@@ -235,7 +235,7 @@ func HasParentsWith(preds ...predicate.User) predicate.User {
 		step := newParentsStep()
 		schemaConfig := internal.SchemaConfigFromContext(s.Context())
 		step.To.Schema = schemaConfig.User
-		step.Edge.Schema = schemaConfig.UserChildren
+		step.Edge.Schema = schemaConfig.Parent
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -33,6 +33,9 @@ var schemaGraph = func() *sqlgraph.Schema {
 		graph.Nodes[{{ $i }}] = &sqlgraph.Node{
 			NodeSpec: sqlgraph.NodeSpec{
 				Table: {{ $n.Package }}.Table,
+				{{- if $.FeatureEnabled "sql/schemaconfig" }}
+					Schema: DefaultSchemaConfig.{{ $n.Name }},
+				{{- end }}
 				Columns: {{ $n.Package }}.Columns,
 				{{- if $n.HasOneFieldID }}
 					ID: &sqlgraph.FieldSpec{
@@ -62,12 +65,19 @@ var schemaGraph = func() *sqlgraph.Schema {
 	{{- end }}
 	{{- range $n := $.Nodes }}
 		{{- range $e := $n.Edges }}
+			{{- $edgeSchema := "" }}
+			{{- if $.FeatureEnabled "sql/schemaconfig" }}
+				{{- $edgeSchema = xtemplate "dialect/sql/edge/schemafield" (extend $ "Edge" $e "Owner" $n.Name) }}
+			{{- end }}
 			graph.MustAddE(
 				"{{ $e.Name }}",
 				&sqlgraph.EdgeSpec{
 					Rel: sqlgraph.{{ $e.Rel.Type }},
 					Inverse: {{ $e.IsInverse }},
 					Table: {{ $n.Package }}.{{ $e.TableConstant }},
+					{{- if $.FeatureEnabled "sql/schemaconfig" }}
+						Schema: DefaultSchemaConfig.{{ $edgeSchema }},
+					{{- end }}
 					Columns: {{ if $e.M2M }}{{ $n.Package }}.{{ $e.PKConstant }}{{ else }}[]string{ {{ $n.Package }}.{{ $e.ColumnConstant }} }{{ end }},
 					Bidi: {{ $e.Bidi }},
 				},

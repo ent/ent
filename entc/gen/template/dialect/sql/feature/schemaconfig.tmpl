@@ -97,24 +97,37 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 	{{- end }}
 {{- end }}
 
+{{/* Resolves the SchemaConfig field name for an edge's join/relation table.
+     Both sides of a Through M2M resolve to the same physical join table, so the
+     inverse side reuses the assoc side's field. Expects scope keys:
+     "Edge" (the edge) and "Owner" (the owning node's type name). */}}
+{{- define "dialect/sql/edge/schemafield" -}}
+	{{- $e := $.Scope.Edge -}}
+	{{- $owner := $.Scope.Owner -}}
+	{{- if $e.OwnFK -}}
+		{{- $owner -}}
+	{{- else if $e.M2M -}}
+		{{- if $e.Through -}}
+			{{- $e.Through.Name -}}
+		{{- else if and $e.Inverse $e.Ref $e.Ref.Through -}}
+			{{- $e.Ref.Through.Name -}}
+		{{- else if $e.Inverse -}}
+			{{- print $e.Type.Name (pascal $e.Inverse) -}}
+		{{- else -}}
+			{{- print $owner $e.StructField -}}
+		{{- end -}}
+	{{- else -}}
+		{{- $e.Type.Name -}}
+	{{- end -}}
+{{- end -}}
+
 {{- define "dialect/sql/defedge/spec/schemaconfig" }}
 	{{- $e := $.Scope.Edge }}
 	{{- $builder := pascal $.Scope.Builder }}
 	{{- $receiver := $.Scope.Receiver }}
 	{{- $ident := "edge" }}{{ with $.Scope.Ident }}{{ $ident = . }}{{ end }}
 	{{- if $.FeatureEnabled "sql/schemaconfig" }}
-		{{- $schema := $e.Type.Name }}
-		{{- if $e.OwnFK }}
-			{{- $schema = $.Name }}
-		{{- else if $e.M2M }}
-			{{- if $e.Through }}
-				{{- $schema = $e.Through.Name }}
-			{{- else if $e.Inverse }}
-				{{- $schema = print $e.Type.Name (pascal $e.Inverse) }}
-			{{- else }}
-				{{- $schema = print $.Name $e.StructField }}
-			{{- end }}
-		{{- end }}
+		{{- $schema := xtemplate "dialect/sql/edge/schemafield" (extend $ "Edge" $e "Owner" $.Name) }}
 		{{- if $.Scope.CallSet }}
 			{{ $ident }}.Schema({{ $receiver }}.schemaConfig.{{ $schema }})
 		{{- else }}
@@ -178,19 +191,7 @@ func NewSchemaConfigContext(parent context.Context, config SchemaConfig) context
 {{- define "dialect/sql/query/step/ctxschemaconfig" -}}
 	{{- $e := $.Scope.Edge }}
 	step.To.Schema = schemaConfig.{{ $e.Type.Name }}
-	{{- $schema := $e.Type.Name }}
-	{{- if $e.OwnFK }}
-		{{- $schema = $.Name }}
-	{{- else if $e.M2M }}
-		{{- if $e.Through }}
-			{{- $schema = $e.Through.Name }}
-		{{- else if $e.Inverse }}
-			{{- $schema = print $e.Type.Name (pascal $e.Inverse) }}
-		{{- else }}
-			{{- $schema = print $.Name $e.StructField }}
-		{{- end }}
-	{{- end }}
-	step.Edge.Schema = schemaConfig.{{ $schema }}
+	step.Edge.Schema = schemaConfig.{{ xtemplate "dialect/sql/edge/schemafield" (extend $ "Edge" $e "Owner" $.Name) }}
 {{- end -}}
 
 {{- define "config/init/fields/multischema" }}
