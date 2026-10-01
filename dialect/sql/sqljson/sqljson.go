@@ -200,6 +200,18 @@ func ValueContains(column string, arg any, opts ...Option) *sql.Predicate {
 	})
 }
 
+// StringEQFold returns a predicate for checking that a JSON string value
+// (returned by the path) is case-insensitively equal to the given argument.
+//
+//	sqljson.StringEQFold("a", "aA", sqljson.Path("b"))
+func StringEQFold(column string, arg string, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		opts = append([]Option{Unquote(true)}, opts...)
+		valuePath(b, column, opts...)
+		b.Join(sql.EqualFold("", arg))
+	})
+}
+
 // StringHasPrefix return a predicate for checking that a JSON string value
 // (returned by the path) has the given substring as prefix
 func StringHasPrefix(column string, prefix string, opts ...Option) *sql.Predicate {
@@ -207,6 +219,16 @@ func StringHasPrefix(column string, prefix string, opts ...Option) *sql.Predicat
 		opts = append([]Option{Unquote(true)}, opts...)
 		valuePath(b, column, opts...)
 		b.Join(sql.HasPrefix("", prefix))
+	})
+}
+
+// StringHasPrefixFold returns a predicate that checks whether a JSON string value
+// (returned by the path) has the given substring as a case-insensitive prefix
+func StringHasPrefixFold(column string, prefix string, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		opts = append([]Option{Unquote(true)}, opts...)
+		valuePath(b, column, opts...)
+		b.Join(sql.HasPrefixFold("", prefix))
 	})
 }
 
@@ -220,6 +242,16 @@ func StringHasSuffix(column string, suffix string, opts ...Option) *sql.Predicat
 	})
 }
 
+// StringHasSuffixFold returns a predicate that checks whether a JSON string value
+// (returned by the path) has the given substring as a case-insensitive suffix
+func StringHasSuffixFold(column string, suffix string, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		opts = append([]Option{Unquote(true)}, opts...)
+		valuePath(b, column, opts...)
+		b.Join(sql.HasSuffixFold("", suffix))
+	})
+}
+
 // StringContains return a predicate for checking that a JSON string value
 // (returned by the path) contains the given substring
 func StringContains(column string, sub string, opts ...Option) *sql.Predicate {
@@ -227,6 +259,19 @@ func StringContains(column string, sub string, opts ...Option) *sql.Predicate {
 		opts = append([]Option{Unquote(true)}, opts...)
 		valuePath(b, column, opts...)
 		b.Join(sql.Contains("", sub))
+	})
+}
+
+// StringContainsFold returns a predicate for checking that a JSON
+// string value (returned by the path) contains the given substring
+// in a case-insensitive manner.
+//
+// sqljson.StringContainsFold("a", "Foo", sqljson.Path("b[2].c"))
+func StringContainsFold(column string, sub string, opts ...Option) *sql.Predicate {
+	return sql.P(func(b *sql.Builder) {
+		opts = append([]Option{Unquote(true)}, opts...)
+		valuePath(b, column, opts...)
+		b.Join(sql.ContainsFold("", sub))
 	})
 }
 
