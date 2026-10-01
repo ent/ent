@@ -29,8 +29,26 @@ func ({{ $receiver }} *{{ $builder }}) sqlScan(ctx context.Context, root *{{ $.Q
 		return err
 	}
 	defer rows.Close()
-	return sql.ScanSlice(rows, v)
+	{{ template "dialect/sql/scan" $ }}
 }
+
+{{- if $.JSONOptionsFields }}
+	// {{ $.Package }}ScanRows supplies schema JSON options for projected columns.
+	type {{ $.Package }}ScanRows struct {
+		sql.ColumnScanner
+	}
+
+	func ({{ $.Package }}ScanRows) JSONOptions(column string) []jsonv2.Options {
+		switch column {
+		{{- range $f := $.JSONOptionsFields }}
+			case {{ $.Package }}.{{ $f.Constant }}:
+				return {{ $f.JSONOptions }}
+		{{- end }}
+		default:
+			return []jsonv2.Options{json.DefaultOptionsV1()}
+		}
+	}
+{{- end }}
 
 {{/* Allow adding methods to the select-builder by ent extensions or user templates.*/}}
 {{ with $tmpls := matchTemplate "dialect/sql/select/additional/*" }}
@@ -39,4 +57,13 @@ func ({{ $receiver }} *{{ $builder }}) sqlScan(ctx context.Context, root *{{ $.Q
 	{{- end }}
 {{ end }}
 
+{{ end }}
+
+{{/* Supply schema options through the optional JSON extension. */}}
+{{ define "dialect/sql/scan" }}
+	{{- if $.JSONOptionsFields }}
+		return sql.ScanSlice({{ $.Package }}ScanRows{rows}, v)
+	{{- else }}
+		return sql.ScanSlice(rows, v)
+	{{- end }}
 {{ end }}

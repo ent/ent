@@ -203,7 +203,9 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 	{{- range $f := $.MutationFields }}
 		{{- if $f.IsBlobNoColumn }}{{ continue }}{{ end }}
 		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
-			{{- if $f.HasValueScanner }}
+			{{- if $f.HasJSONOptions }}
+				_spec.SetJSONField({{ $.Package }}.{{ $f.Constant }}, value, {{ $f.JSONOptions }}...)
+			{{- else if $f.HasValueScanner }}
 				vv, err := {{ $f.ValueFunc }}(value)
 				if err != nil {
 					return nil, nil, err

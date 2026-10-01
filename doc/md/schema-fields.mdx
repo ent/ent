@@ -104,6 +104,53 @@ func (User) Fields() []ent.Field {
 
 To read more about how each type is mapped to its database-type, go to the [Migration](migrate.md) section.
 
+### JSON options
+
+`field.JSON` preserves its existing encoding behavior. When the `jsonv2`
+experiment is enabled, use `JSONOptions` to configure database serialization
+with [`encoding/json/v2`](https://pkg.go.dev/encoding/json/v2) options. The same
+options apply to writes, reads, appends, and `Select`/`GroupBy` scans:
+
+```go
+import jsonv2 "encoding/json/v2"
+
+field.JSON("settings", map[string]any{}).
+	JSONOptions(jsonv2.Deterministic(true)).
+	Optional(),
+field.JSON("info", &Info{}).
+	JSONOptions(jsonv2.RejectUnknownMembers(true)).
+	Optional(),
+```
+
+Options override the field's v1 compatibility defaults. Repeated `JSONOptions`
+calls add options, with later values taking precedence. To select full v2
+semantics, pass `jsonv2.DefaultOptionsV2()`:
+
+```go
+field.JSON("info", &Info{}).
+	JSONOptions(jsonv2.DefaultOptionsV2()).
+	Optional(),
+field.Strings("tags").
+	JSONOptions(jsonv2.DefaultOptionsV2()).
+	Default([]string{}),
+```
+
+V2 defaults include case-sensitive struct field matching, rejection of duplicate
+object names and invalid UTF-8, and encoding nil slices and maps as empty arrays
+and objects. Optional fields that are not set still use SQL NULL. Custom
+`MarshalJSONTo` and `UnmarshalJSONFrom` methods are supported with v2 semantics.
+
+Options from `encoding/json/jsontext`, such as `jsontext.AllowDuplicateNames`,
+are also accepted. `jsonv2.WithMarshalers` and `jsonv2.WithUnmarshalers` retain
+their custom functions through the generated runtime initialization, just like
+field defaults and validators.
+
+`JSONOptions` requires SQL storage and the `jsonv2` experiment, enabled by default
+in Go 1.27. On Go 1.25 and 1.26, set `GOEXPERIMENT=jsonv2` when generating and
+building the client. Plain `field.JSON()` continues to work without the experiment.
+The field configuration controls database serialization; applications choose how
+to marshal whole entities by calling their preferred JSON package.
+
 ## ID Field
 
 The `id` field is builtin in the schema and does not need declaration. In SQL-based

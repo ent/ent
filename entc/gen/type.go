@@ -481,7 +481,7 @@ func (t Type) MixedInFields() []int {
 		fields = append(fields, t.ID)
 	}
 	for _, f := range fields {
-		if f.Position != nil && f.Position.MixedIn && (f.Default || f.UpdateDefault || f.Validators > 0) {
+		if f.Position != nil && f.Position.MixedIn && (f.Default || f.UpdateDefault || f.Validators > 0 || f.HasJSONOptions()) {
 			idx[f.Position.MixinIndex] = struct{}{}
 		}
 	}
@@ -1094,6 +1094,10 @@ func (t *Type) checkField(tf *Field, f *load.Field) (err error) {
 		err = fmt.Errorf("field %q cannot have both default value and default expression annotations", f.Name)
 	case tf.HasValueScanner() && tf.IsJSON():
 		err = fmt.Errorf("json field %q cannot have an external ValueScanner", f.Name)
+	case f.JSONOptions && !tf.IsJSON():
+		err = fmt.Errorf("field %q must be a JSON field to use JSONOptions", f.Name)
+	case f.JSONOptions && t.Storage != nil && t.Storage.Name != "sql":
+		err = fmt.Errorf("JSONOptions for field %q are only supported by SQL storage", f.Name)
 	}
 	return err
 }
@@ -1387,6 +1391,25 @@ func (f Field) IsTime() bool { return f.Type != nil && f.Type.Type == field.Type
 
 // IsJSON returns true if the field is a JSON field.
 func (f Field) IsJSON() bool { return f.Type != nil && f.Type.Type == field.TypeJSON }
+
+// HasJSONOptions reports whether the JSON field has explicit encoding options.
+func (f Field) HasJSONOptions() bool { return f.IsJSON() && f.def != nil && f.def.JSONOptions }
+
+// JSONOptions returns the Go expression for the field's JSON options.
+func (f Field) JSONOptions() string {
+	return fmt.Sprintf("%s.JSONOptions.%s", f.typ.Package(), f.StructField())
+}
+
+// JSONOptionsFields returns all JSON fields with explicit encoding options.
+func (t Type) JSONOptionsFields() []*Field {
+	var fields []*Field
+	for _, f := range t.Fields {
+		if f.HasJSONOptions() {
+			fields = append(fields, f)
+		}
+	}
+	return fields
+}
 
 // IsOther returns true if the field is an Other field.
 func (f Field) IsOther() bool { return f.Type != nil && f.Type.Type == field.TypeOther }

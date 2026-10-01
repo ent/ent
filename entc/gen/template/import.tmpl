@@ -28,6 +28,13 @@ import (
 		{{- end }}
 		{{- /* Import external packages */}}
         {{- template "import/types" $ }}
+		{{- range $f := $.Fields }}
+			{{- if $f.HasJSONOptions }}
+				"encoding/json"
+				jsonv2 "encoding/json/v2"
+				{{- break }}
+			{{- end }}
+		{{- end }}
 	{{- end }}
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"

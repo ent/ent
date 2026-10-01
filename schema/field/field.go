@@ -1618,6 +1618,7 @@ type Descriptor struct {
 	Name             string                                        // field name.
 	Info             *TypeInfo                                     // field type info.
 	ValueScanner     any                                           // custom field codec.
+	JSONOptions      any                                           // explicit []jsonv2.Options, including compatibility defaults.
 	Unique           bool                                          // unique index of field.
 	Nillable         bool                                          // nillable struct field.
 	Optional         bool                                          // nullable field in database.

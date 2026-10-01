@@ -1,0 +1,211 @@
+// Copyright 2019-present Facebook Inc. All rights reserved.
+// This source code is licensed under the Apache 2.0 license found
+// in the LICENSE file in the root directory of this source tree.
+
+package ent_test
+
+import (
+	"context"
+	"database/sql"
+	"encoding/json"
+	"testing"
+
+	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/sql"
+	jsonv2 "entgo.io/ent/entc/gen/testdata/jsonv2/schema"
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/stretchr/testify/require"
+	"jsonv2test/ent"
+	"jsonv2test/ent/configured"
+	"jsonv2test/ent/record"
+)
+
+func TestJSONOptionsV2Defaults(t *testing.T) {
+	ctx := context.Background()
+	db, err := sql.Open("sqlite3", "file:jsonv2?mode=memory&cache=shared&_fk=1")
+	require.NoError(t, err)
+	client := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.SQLite, db)))
+	defer client.Close()
+	require.NoError(t, client.Schema.Create(ctx))
+	stored := func(id int, column string) string {
+		t.Helper()
+		var value string
+		require.NoError(t, db.QueryRow("SELECT "+column+" FROM records WHERE id = ?", id).Scan(&value))
+		return value
+	}
+	setRaw := func(id int, column, value string) {
+		t.Helper()
+		_, err := db.Exec("UPDATE records SET "+column+" = ? WHERE id = ?", []byte(value), id)
+		require.NoError(t, err)
+	}
+	payload := &jsonv2.Payload{Name: "<tag>&"}
+	r := client.Record.Create().SetName("first").SetLegacy(payload).SetModern(payload).
+		SetDictionary(nil).SetStream(&jsonv2.Stream{Value: "hello"}).SaveX(ctx)
+	require.JSONEq(t, `{"name":"<tag>&","items":null}`, stored(r.ID, "legacy"))
+	require.Equal(t, `{"name":"<tag>&","count":0,"items":[]}`, stored(r.ID, "modern_data"))
+	require.Equal(t, `[]`, stored(r.ID, "tags"))
+	require.Equal(t, `{}`, stored(r.ID, "dictionary"))
+	require.Equal(t, `"v2:hello"`, stored(r.ID, "stream"))
+	r = client.Record.GetX(ctx, r.ID)
+	require.Nil(t, r.Legacy.Items)
+	require.NotNil(t, r.Modern.Items)
+	require.NotNil(t, r.Tags)
+	require.NotNil(t, r.Dictionary)
+	require.Equal(t, "hello", r.Stream.Value)
+
+	// Both update builders, appending to NULL and existing arrays, and clearing.
+	r = r.Update().SetModern(&jsonv2.Payload{Name: "updated"}).
+		AppendEntries([]jsonv2.Payload{{Name: "a"}}).SaveX(ctx)
+	require.JSONEq(t, `[{"name":"a","count":0,"items":[]}]`, stored(r.ID, "entries"))
+	client.Record.Update().Where(record.ID(r.ID)).SetModern(&jsonv2.Payload{Name: "many"}).
+		AppendEntries([]jsonv2.Payload{{Name: "b"}}).AppendTags([]string{"tag"}).SaveX(ctx)
+	r = client.Record.GetX(ctx, r.ID)
+	require.Equal(t, "many", r.Modern.Name)
+	require.Len(t, r.Entries, 2)
+	require.NotNil(t, r.Entries[1].Items)
+	require.Equal(t, []string{"tag"}, r.Tags)
+	r.Update().ClearModern().SaveX(ctx)
+	require.Nil(t, client.Record.GetX(ctx, r.ID).Modern)
+
+	// Case-sensitive matching is selected independently for each column.
+	setRaw(r.ID, "legacy", `{"NAME":"legacy"}`)
+	setRaw(r.ID, "modern_data", `{"NAME":"modern"}`)
+	r = client.Record.GetX(ctx, r.ID)
+	require.Equal(t, "legacy", r.Legacy.Name)
+	require.Empty(t, r.Modern.Name)
+	var projected []struct {
+		Legacy *jsonv2.Payload
+		Modern *jsonv2.Payload `sql:"modern_data"`
+	}
+	require.NoError(t, client.Record.Query().Where(record.ID(r.ID)).
+		Select(record.FieldLegacy, record.FieldModern).Scan(ctx, &projected))
+	require.Equal(t, "legacy", projected[0].Legacy.Name)
+	require.Empty(t, projected[0].Modern.Name)
+	projected = nil
+	require.NoError(t, client.Record.Query().Where(record.ID(r.ID)).
+		Select(record.FieldModern, record.FieldLegacy).Scan(ctx, &projected))
+	require.Equal(t, "legacy", projected[0].Legacy.Name)
+	require.Empty(t, projected[0].Modern.Name)
+	projected = nil
+	require.NoError(t, client.Record.Query().Where(record.ID(r.ID)).
+		GroupBy(record.FieldLegacy, record.FieldModern).Scan(ctx, &projected))
+	require.Empty(t, projected[0].Modern.Name)
+
+	// Scalar projections retain their raw database representation.
+	raw, err := client.Record.Query().Where(record.ID(r.ID)).Select(record.FieldLegacy).String(ctx)
+	require.NoError(t, err)
+	require.JSONEq(t, `{"NAME":"legacy"}`, raw)
+	raw, err = client.Record.Query().Where(record.ID(r.ID)).Select(record.FieldModern).String(ctx)
+	require.NoError(t, err)
+	require.JSONEq(t, `{"NAME":"modern"}`, raw)
+
+	// An expression with no schema field retains the standalone scanner's
+	// compatibility behavior for inferred JSON destinations.
+	var expressions []struct {
+		Modern *jsonv2.Payload `sql:"modern_data"`
+		Extra  *jsonv2.Payload
+	}
+	require.NoError(t, client.Record.Query().Where(record.ID(r.ID)).Select(record.FieldModern).
+		Aggregate(func(s *entsql.Selector) string { return entsql.As(s.C(record.FieldLegacy), "extra") }).
+		Scan(ctx, &expressions))
+	require.Empty(t, expressions[0].Modern.Name)
+	require.Equal(t, "legacy", expressions[0].Extra.Name)
+
+	// Invalid documents and encoding failures propagate through the client.
+	for _, raw := range []string{`{"name":"a","name":"b"}`, "{\"name\":\"\xff\"}"} {
+		setRaw(r.ID, "modern_data", raw)
+		_, err := client.Record.Get(ctx, r.ID)
+		require.ErrorContains(t, err, "unmarshal field modern")
+	}
+	setRaw(r.ID, "modern_data", `null`)
+	_, err = client.Record.Create().SetName("invalid").SetModern(&jsonv2.Payload{Name: "\xff"}).Save(ctx)
+	require.ErrorContains(t, err, "marshal value for column modern_data")
+	_, err = r.Update().AppendEntries([]jsonv2.Payload{{Name: "\xff"}}).Save(ctx)
+	require.Error(t, err)
+	_, err = r.Update().SetRaw(json.RawMessage(`{"a":1,"a":2}`)).Save(ctx)
+	require.Error(t, err)
+
+	// Bulk creates and upserts reuse the v2 field encoder.
+	bulk := client.Record.CreateBulk(
+		client.Record.Create().SetName("bulk1").SetModern(payload),
+		client.Record.Create().SetName("bulk2").SetModern(payload),
+	).SaveX(ctx)
+	for _, row := range bulk {
+		require.Equal(t, `{"name":"<tag>&","count":0,"items":[]}`, stored(row.ID, "modern_data"))
+	}
+	require.NoError(t, client.Record.Create().SetName("first").SetModern(payload).
+		OnConflictColumns(record.FieldName).UpdateNewValues().Exec(ctx))
+	require.Equal(t, `{"name":"<tag>&","count":0,"items":[]}`, stored(r.ID, "modern_data"))
+}
+
+func TestJSONOptionsOverrides(t *testing.T) {
+	ctx := context.Background()
+	db, err := sql.Open("sqlite3", "file:jsonv2options?mode=memory&cache=shared&_fk=1")
+	require.NoError(t, err)
+	client := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.SQLite, db)))
+	defer client.Close()
+	require.NoError(t, client.Schema.Create(ctx))
+	stored := func(id int, column string) string {
+		t.Helper()
+		var value string
+		require.NoError(t, db.QueryRow("SELECT "+column+" FROM configureds WHERE id = ?", id).Scan(&value))
+		return value
+	}
+	r := client.Configured.Create().SetPayload(&jsonv2.Payload{Count: 3}).
+		SetOrdered(map[string]int{"z": 1, "a": 2}).SetMixed([]int{1, 2}).
+		SetEntries([]jsonv2.Custom{"first"}).SetRaw(json.RawMessage(`{"a":1,"a":2}`)).SaveX(ctx)
+	require.Equal(t, `{"name":"","count":"3","items":null}`, stored(r.ID, "payload"))
+	require.Equal(t, `{"a":2,"z":1}`, stored(r.ID, "ordered"))
+	require.Equal(t, `["1","2"]`, stored(r.ID, "mixed"))
+	require.Equal(t, `["custom:first"]`, stored(r.ID, "entries"))
+	require.Equal(t, `{"a":1,"a":2}`, stored(r.ID, "raw"))
+	r = client.Configured.GetX(ctx, r.ID)
+	require.Equal(t, []int{1, 2}, r.Mixed)
+	require.Equal(t, 3, r.Payload.Count)
+	require.Equal(t, []jsonv2.Custom{"first"}, r.Entries)
+
+	r.Update().AppendEntries([]jsonv2.Custom{"second"}).AppendMixed([]int{3}).SaveX(ctx)
+	client.Configured.Update().Where(configured.ID(r.ID)).AppendEntries([]jsonv2.Custom{"third"}).SaveX(ctx)
+	require.Equal(t, `["custom:first","custom:second","custom:third"]`, stored(r.ID, "entries"))
+	require.Equal(t, `["1","2","3"]`, stored(r.ID, "mixed"))
+
+	_, err = db.Exec("UPDATE configureds SET payload = ?, mixed_legacy = ? WHERE id = ?",
+		[]byte(`{"NAME":"first","NAME":"case","count":"4"}`), []byte(`{"NAME":"mixin"}`), r.ID)
+	require.NoError(t, err)
+	r = client.Configured.GetX(ctx, r.ID)
+	require.Equal(t, "case", r.Payload.Name)
+	require.Equal(t, 4, r.Payload.Count)
+	var projected []struct {
+		Payload     *jsonv2.Payload
+		Entries     []jsonv2.Custom
+		MixedLegacy *jsonv2.Payload `sql:"mixed_legacy"`
+	}
+	require.NoError(t, client.Configured.Query().Where(configured.ID(r.ID)).
+		Select(configured.FieldPayload, configured.FieldEntries, configured.FieldMixedLegacy).Scan(ctx, &projected))
+	require.Equal(t, "case", projected[0].Payload.Name)
+	require.Equal(t, []jsonv2.Custom{"first", "second", "third"}, projected[0].Entries)
+	require.Equal(t, "mixin", projected[0].MixedLegacy.Name)
+
+	projected = nil
+	require.NoError(t, client.Configured.Query().Where(configured.ID(r.ID)).
+		GroupBy(configured.FieldPayload, configured.FieldEntries, configured.FieldMixedLegacy).Scan(ctx, &projected))
+	require.Equal(t, 4, projected[0].Payload.Count)
+	require.Equal(t, []jsonv2.Custom{"first", "second", "third"}, projected[0].Entries)
+	require.Equal(t, "mixin", projected[0].MixedLegacy.Name)
+
+	require.NoError(t, client.Configured.Create().SetID(r.ID).
+		OnConflictColumns(configured.FieldID).
+		SetPayload(&jsonv2.Payload{Count: 5}).SetEntries([]jsonv2.Custom{"upsert"}).Exec(ctx))
+	require.Equal(t, `{"name":"","count":"5","items":null}`, stored(r.ID, "payload"))
+	require.Equal(t, `["custom:upsert"]`, stored(r.ID, "entries"))
+	err = client.Configured.Create().SetID(r.ID).OnConflictColumns(configured.FieldID).
+		SetStrict(&jsonv2.Payload{Name: "\xff"}).Exec(ctx)
+	require.ErrorContains(t, err, "marshal value for column strict")
+
+	_, err = db.Exec("UPDATE configureds SET strict = ? WHERE id = ?", []byte(`{"unknown":1}`), r.ID)
+	require.NoError(t, err)
+	_, err = client.Configured.Get(ctx, r.ID)
+	require.ErrorContains(t, err, "unmarshal field strict")
+	var strict []struct{ Strict *jsonv2.Payload }
+	require.Error(t, client.Configured.Query().Select(configured.FieldStrict).Scan(ctx, &strict))
+}
