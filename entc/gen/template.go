@@ -225,12 +225,15 @@ var (
 	// importPkg are the import packages used for code generation.
 	// Extended by the function below on generation initialization.
 	importPkg = map[string]string{
+		"bytes":   "bytes",
 		"context": "context",
 		"driver":  "database/sql/driver",
 		"errors":  "errors",
 		"fmt":     "fmt",
+		"io":      "io",
 		"math":    "math",
 		"strings": "strings",
+		"sync":    "sync",
 		"time":    "time",
 		"ent":     "entgo.io/ent",
 		"dialect": "entgo.io/ent/dialect",

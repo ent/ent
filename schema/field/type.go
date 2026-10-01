@@ -90,6 +90,8 @@ type TypeInfo struct {
 	PkgName  string // local package name.
 	Nillable bool   // slices or pointers.
 	RType    *RType
+	// PkgImports maps import paths to local names for types containing generics.
+	PkgImports map[string]string `json:",omitempty"`
 }
 
 // String returns the string representation of a type.

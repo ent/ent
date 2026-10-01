@@ -1644,11 +1644,13 @@ type Descriptor struct {
 func (d *Descriptor) goType(typ any) {
 	t := reflect.TypeOf(typ)
 	tv := indirect(t)
+	ident, imports := typeName(t)
 	info := &TypeInfo{
-		Type:    d.Info.Type,
-		Ident:   t.String(),
-		PkgPath: tv.PkgPath(),
-		PkgName: pkgName(tv.String()),
+		Type:       d.Info.Type,
+		Ident:      ident,
+		PkgPath:    tv.PkgPath(),
+		PkgName:    pkgName(tv),
+		PkgImports: imports,
 		RType: &RType{
 			rtype:   t,
 			Kind:    t.Kind(),
@@ -1697,18 +1699,16 @@ func (d *Descriptor) checkGoType(expectType reflect.Type) {
 	}
 }
 
-// pkgName returns the package name from a Go
-// identifier with a package qualifier.
-func pkgName(ident string) string {
-	i := strings.LastIndexByte(ident, '.')
-	if i == -1 {
-		return ""
+// pkgName returns the package name of a named type or its element type.
+func pkgName(t reflect.Type) string {
+	if t.PkgPath() != "" {
+		return strings.TrimSuffix(t.String(), "."+t.Name())
 	}
-	s := ident[:i]
-	if i := strings.LastIndexAny(s, "]*"); i != -1 {
-		s = s[i+1:]
+	switch t.Kind() {
+	case reflect.Slice, reflect.Array, reflect.Ptr, reflect.Map:
+		return pkgName(t.Elem())
 	}
-	return s
+	return ""
 }
 
 func methods(t reflect.Type, rtype *RType) {
