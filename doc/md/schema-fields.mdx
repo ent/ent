@@ -909,7 +909,8 @@ func (User) Fields() []ent.Field {
 		field.String("last_name"),
 		// Add conversion to and from string
 		field.Enum("level").
-			GoType(property.Level(0)),
+			GoType(property.Level(0)).
+			Default(property.Low.String()),
 	}
 }
 ```

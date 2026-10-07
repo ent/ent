@@ -52,6 +52,7 @@ func Types(t *testing.T, client *ent.Client) {
 	require.Nil(ft.NullLink)
 	require.Nil(ft.NilPair)
 	require.Nil(ft.Deleted)
+	require.Equal(role.Low, ft.Priority)
 
 	ft = client.FieldType.Create().
 		SetInt(1).

@@ -125,7 +125,18 @@ const (
 	{{ $receiver := receiver $f.BuilderField }}
 	{{ if $f.HasGoType }}
 		{{ if $f.Default }}
-			const {{ $f.DefaultName }} {{ $enum }} = "{{ $f.DefaultValue }}"
+			{{- /* A string literal converts only to a string-kinded GoType. Any other kind must be a ValueScanner, so build the default by scanning its stored value. */}}
+			{{- if or (eq $f.Type.RType.Kind.String "string") (not $f.Type.ValueScanner) }}
+				const {{ $f.DefaultName }} {{ $enum }} = "{{ $f.DefaultValue }}"
+			{{- else }}
+				// {{ $f.DefaultName }} holds the default value on creation for the "{{ $f.Name }}" field.
+				var {{ $f.DefaultName }} = func() (v {{ $enum }}) {
+					if err := v.Scan("{{ $f.DefaultValue }}"); err != nil {
+						panic(fmt.Sprintf("{{ $.Package }}: invalid default value for {{ $f.Name }} field: %v", err))
+					}
+					return v
+				}()
+			{{- end }}
 		{{ end }}
 	{{ else }}
 		{{/* Omit the package name from the type. */}}

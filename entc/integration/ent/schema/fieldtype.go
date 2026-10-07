@@ -260,6 +260,7 @@ func (FieldType) Fields() []ent.Field { //nolint:funlen
 			GoType(role.Role("role")),
 		field.Enum("priority").
 			Optional().
+			Default(role.Low.String()).
 			GoType(role.Priority(0)),
 		field.UUID("optional_uuid", uuid.UUID{}).
 			Optional(),
