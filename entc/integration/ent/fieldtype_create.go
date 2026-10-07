@@ -856,6 +856,10 @@ func (_c *FieldTypeCreate) defaults() {
 		v := fieldtype.DefaultRole
 		_c.mutation.SetRole(v)
 	}
+	if _, ok := _c.mutation.Priority(); !ok {
+		v := fieldtype.DefaultPriority
+		_c.mutation.SetPriority(v)
+	}
 	if _, ok := _c.mutation.Pair(); !ok {
 		v := fieldtype.DefaultPair()
 		_c.mutation.SetPair(v)
