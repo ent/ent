@@ -1,22 +1,8 @@
+version: "2"
 run:
-  go: '1.19'
-  timeout: 5m
-
-linters-settings:
-  errcheck:
-    ignore: fmt:.*,Read|Write|Close|Exec,io:Copy
-  dupl:
-    threshold: 100
-  funlen:
-    lines: 200
-    statements: 200
-  goheader:
-    template: |-
-      Copyright 2019-present Facebook Inc. All rights reserved.
-      This source code is licensed under the Apache 2.0 license found
-      in the LICENSE file in the root directory of this source tree.
+  go: "1.19"
 linters:
-  disable-all: true
+  default: none
   enable:
     - asciicheck
     - bodyclose
@@ -25,48 +11,99 @@ linters:
     - errcheck
     - funlen
     - gocritic
-    # - gofmt; Enable back when upgrading CI to Go 1.20.
     - goheader
     - gosec
-    - gosimple
     - govet
     - ineffassign
     - misspell
     - staticcheck
-    - stylecheck
-    - typecheck
     - unconvert
     - unused
     - whitespace
-
-issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - dupl
-        - funlen
-        - gosec
-        - gocritic
-    - linters:
-        - unused
-      source: ent.Schema
-    - path: dialect/sql/schema
-      linters:
-        - dupl
-        - gosec
-    - text: "Expect WriteFile permissions to be 0600 or less"
-      linters:
-        - gosec
-    - path: privacy/privacy.go
-      linters:
-        - stylecheck
-    - path: entc/load/schema.go
-      linters:
-        - staticcheck
-    - path: entc/gen/graph.go
-      linters:
-        - gocritic
-    - path: \.go
-      linters:
-        - staticcheck
-      text: SA1019
+  settings:
+    dupl:
+      threshold: 100
+    errcheck:
+      exclude-functions:
+        - io.WriteString
+        - (*github.com/gorilla/websocket.Conn).SetReadDeadline
+        - (*github.com/gorilla/websocket.Conn).SetWriteDeadline
+    funlen:
+      lines: 200
+      statements: 200
+    goheader:
+      template: |-
+        Copyright 2019-present Facebook Inc. All rights reserved.
+        This source code is licensed under the Apache 2.0 license found
+        in the LICENSE file in the root directory of this source tree.
+    # Checks below were added after golangci-lint v1 and are disabled
+    # to keep the same set of checks used before the migration to v2.
+    gocritic:
+      disabled-checks:
+        - deprecatedComment
+    gosec:
+      excludes:
+        - G115
+        - G602
+        - G703
+    govet:
+      disable:
+        - inline
+    staticcheck:
+      checks:
+        - all
+        - -ST1000
+        - -ST1003
+        - -ST1016
+        - -ST1020
+        - -ST1021
+        - -ST1022
+        - -QF*
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - dupl
+          - funlen
+          - gocritic
+          - gosec
+        path: _test\.go
+      - linters:
+          - unused
+        source: ent.Schema
+      - linters:
+          - dupl
+          - gosec
+        path: dialect/sql/schema
+      - linters:
+          - gosec
+        text: Expect WriteFile permissions to be 0600 or less
+      - linters:
+          - staticcheck
+        path: privacy/privacy.go
+      - linters:
+          - staticcheck
+        path: entc/load/schema.go
+      - linters:
+          - gocritic
+        path: entc/gen/graph.go
+      - linters:
+          - staticcheck
+        path: \.go
+        text: SA1019
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
