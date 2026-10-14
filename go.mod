@@ -1,8 +1,6 @@
 module entgo.io/ent
 
-go 1.24
-
-toolchain go1.24.0
+go 1.26.0
 
 require (
 	ariga.io/atlas v0.36.2-0.20250730182955-2c6300d0a3e1
@@ -19,8 +17,8 @@ require (
 	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.4
 	go.opencensus.io v0.24.0
-	golang.org/x/sync v0.11.0
-	golang.org/x/tools v0.30.0
+	golang.org/x/sync v0.24.0
+	golang.org/x/tools v0.52.0
 )
 
 require (
@@ -52,8 +50,8 @@ require (
 	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/zclconf/go-cty v1.14.4 // indirect
 	github.com/zclconf/go-cty-yaml v1.1.0 // indirect
-	golang.org/x/mod v0.24.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/mod v0.42.0 // indirect
+	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

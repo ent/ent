@@ -5,45 +5,43 @@
 package base
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"golang.org/x/tools/go/packages/packagestest"
+	"golang.org/x/tools/go/packages"
 )
 
-func TestPkgPath(t *testing.T) { packagestest.TestAll(t, testPkgPath) }
-func testPkgPath(t *testing.T, x packagestest.Exporter) {
-	e := packagestest.Export(t, x, []packagestest.Module{
-		{
-			Name: "golang.org/x",
-			Files: map[string]any{
-				"x.go":   "package x",
-				"y/y.go": "package y",
-			},
-		},
-	})
-	defer e.Cleanup()
-
-	e.Config.Dir = filepath.Dir(e.File("golang.org/x", "x.go"))
-	target := filepath.Join(e.Config.Dir, "ent")
-	pkgPath, err := PkgPath(e.Config, target)
+func TestPkgPath(t *testing.T) {
+	root := t.TempDir()
+	for name, content := range map[string]string{
+		"go.mod": "module golang.org/x\n",
+		"x.go":   "package x",
+		"y/y.go": "package y",
+	} {
+		require.NoError(t, os.MkdirAll(filepath.Join(root, filepath.Dir(name)), 0755))
+		require.NoError(t, os.WriteFile(filepath.Join(root, name), []byte(content), 0644))
+	}
+	config := &packages.Config{Mode: packages.NeedName, Dir: root}
+	target := filepath.Join(config.Dir, "ent")
+	pkgPath, err := PkgPath(config, target)
 	require.NoError(t, err)
 	require.Equal(t, "golang.org/x/ent", pkgPath)
 
-	e.Config.Dir = filepath.Dir(e.File("golang.org/x", "y/y.go"))
-	target = filepath.Join(e.Config.Dir, "ent")
-	pkgPath, err = PkgPath(e.Config, target)
+	config.Dir = filepath.Join(root, "y")
+	target = filepath.Join(config.Dir, "ent")
+	pkgPath, err = PkgPath(config, target)
 	require.NoError(t, err)
 	require.Equal(t, "golang.org/x/y/ent", pkgPath)
 
-	target = filepath.Join(e.Config.Dir, "z/ent")
-	pkgPath, err = PkgPath(e.Config, target)
+	target = filepath.Join(config.Dir, "z/ent")
+	pkgPath, err = PkgPath(config, target)
 	require.NoError(t, err)
 	require.Equal(t, "golang.org/x/y/z/ent", pkgPath)
 
-	target = filepath.Join(e.Config.Dir, "z/e/n/t")
-	pkgPath, err = PkgPath(e.Config, target)
+	target = filepath.Join(config.Dir, "z/e/n/t")
+	pkgPath, err = PkgPath(config, target)
 	require.Error(t, err)
 	require.Empty(t, pkgPath)
 }

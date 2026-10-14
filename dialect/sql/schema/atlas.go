@@ -173,7 +173,7 @@ func (a *Atlas) NamedDiff(ctx context.Context, name string, tables ...*Table) er
 	case ModeReplay:
 		plan, err = a.planReplay(ctx, name, tables)
 	default:
-		return fmt.Errorf("unknown migration mode: %q", a.mode)
+		return fmt.Errorf("unknown migration mode: %d", a.mode)
 	}
 	switch {
 	case err != nil:
