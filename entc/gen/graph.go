@@ -477,7 +477,7 @@ func (g *Graph) resolve(t *Type) error {
 				// If the relation is from the same type: User has Friends ([]User),
 				// we give the second column a different name (the relation name).
 				if c1 == c2 {
-					c2 = rules.Singularize(e.Name) + "_id"
+					c2 = Rules.Singularize(e.Name) + "_id"
 				}
 				// Share the same backing array for the relation columns so
 				// that any changes to one will be reflected in both edges.
@@ -496,7 +496,7 @@ func (g *Graph) resolve(t *Type) error {
 				e.Rel.Type = M2M
 				e.Bidi = true
 				e.Rel.Table = t.Label() + "_" + e.Name
-				e.Rel.Columns = []string{e.Owner.Label() + "_id", rules.Singularize(e.Name) + "_id"}
+				e.Rel.Columns = []string{e.Owner.Label() + "_id", Rules.Singularize(e.Name) + "_id"}
 			case e.Unique && e.Type == t:
 				e.Rel.Type = O2O
 				e.Bidi = true

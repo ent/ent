@@ -41,7 +41,7 @@ var (
 		"plural":        plural,
 		"aggregate":     aggregate,
 		"primitives":    primitives,
-		"singular":      rules.Singularize,
+		"singular":      Rules.Singularize,
 		"quote":         quote,
 		"base":          filepath.Base,
 		"keys":          keys,
@@ -76,7 +76,10 @@ var (
 		"replace":       strings.ReplaceAll,
 		"allZero":       allZero,
 	}
-	rules    = ruleset()
+	// Rules is the global inflection ruleset used by the codegen. It is
+	// exposed so that users can extend it with their own custom rules
+	// (e.g. Rules.AddUncountable("chassis")) before running code generation.
+	Rules    = ruleset()
 	acronyms = make(map[string]struct{})
 )
 
@@ -151,7 +154,7 @@ func xrange(n int) (a []int) {
 
 // plural a name.
 func plural(name string) string {
-	p := rules.Pluralize(name)
+	p := Rules.Pluralize(name)
 	if p == name {
 		p += "Slice"
 	}
@@ -168,7 +171,7 @@ func pascalWords(words []string) string {
 		if _, ok := acronyms[upper]; ok {
 			words[i] = upper
 		} else {
-			words[i] = rules.Capitalize(w)
+			words[i] = Rules.Capitalize(w)
 		}
 	}
 	return strings.Join(words, "")
@@ -315,6 +318,9 @@ func add(xs ...int) (n int) {
 func ruleset() *inflect.Ruleset {
 	rules := inflect.NewDefaultRuleset()
 	// Add common initialism from golint and more.
+	// "chassis" is uncountable (its plural is "chassis"), so it is added
+	// explicitly to avoid the default "chasses"/"chassi" results.
+	rules.AddUncountable("chassis")
 	for _, w := range []string{
 		"ACL", "API", "ASCII", "AWS", "CPU", "CSS", "DNS", "EOF", "GB", "GUID",
 		"HCL", "HTML", "HTTP", "HTTPS", "ID", "IP", "JSON", "KB", "LHS", "MAC",
@@ -331,7 +337,7 @@ func ruleset() *inflect.Ruleset {
 // AddAcronym adds initialism to the global ruleset.
 func AddAcronym(word string) {
 	acronyms[word] = struct{}{}
-	rules.AddAcronym(word)
+	Rules.AddAcronym(word)
 }
 
 // order returns a map of sort orders.
