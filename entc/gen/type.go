@@ -1123,9 +1123,14 @@ func aliases(g *Graph) {
 		}
 	}
 	for _, n := range g.Nodes {
-		for _, f := range n.Fields {
-			if !f.HasGoType() {
+		for _, f := range append([]*Field{n.ID}, n.Fields...) {
+			if f == nil || !f.HasGoType() {
 				continue
+			}
+			for _, name := range f.Type.PkgImports {
+				if n, ok := mayAlias[name]; ok {
+					n.alias = path.Base(g.Package) + name
+				}
 			}
 			name := f.Type.PkgName
 			if name == "" && f.Type.PkgPath != "" {
@@ -1497,7 +1502,7 @@ func (f Field) ScanType() string {
 		if f.Nillable && !f.standardNullType() {
 			return "sql.NullScanner"
 		}
-		return f.Type.RType.String()
+		return trimPointer(f.Type.String())
 	}
 	switch f.Type.Type {
 	case field.TypeJSON, field.TypeBytes:
@@ -1515,6 +1520,13 @@ func (f Field) ScanType() string {
 		return "sql.NullFloat64"
 	}
 	return f.Type.String()
+}
+
+// trimPointer removes pointer indirection while preserving rendered import aliases.
+// Use it instead of RType.String() when emitting source: reflection may expand
+// generic type arguments to full import paths. See https://go.dev/issue/55924.
+func trimPointer(typ string) string {
+	return strings.TrimLeft(typ, "*")
 }
 
 // HasValueScanner reports if any of the fields has (an external) ValueScanner.
@@ -1640,7 +1652,7 @@ func (f Field) FromValueFunc() (string, error) {
 // nillable-type supported by the SQL driver (e.g. []byte).
 func (f Field) NewScanType() string {
 	if f.Type.ValueScanner() {
-		expr := fmt.Sprintf("new(%s)", f.Type.RType.String())
+		expr := fmt.Sprintf("new(%s)", trimPointer(f.Type.String()))
 		if f.Nillable && !f.standardNullType() {
 			expr = fmt.Sprintf("&sql.NullScanner{S: %s}", expr)
 		}
@@ -1674,7 +1686,7 @@ func (f Field) ScanTypeField(rec string) string {
 			expr = "*" + expr
 		}
 		if f.Nillable && !f.standardNullType() {
-			return fmt.Sprintf("%s.S.(*%s)", expr, f.Type.RType.String())
+			return fmt.Sprintf("%s.S.(*%s)", expr, trimPointer(f.Type.String()))
 		}
 		return expr
 	}

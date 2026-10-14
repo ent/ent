@@ -187,6 +187,7 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 					ti.Ident = f.Type.Ident
 					ti.PkgPath = f.Type.PkgPath
 					ti.PkgName = f.Type.PkgName
+					ti.PkgImports = f.Type.PkgImports
 					ti.Nillable = f.Type.Nillable
 				}
 				f.Type = ti
@@ -202,6 +203,7 @@ func NewGraph(c *Config, schemas ...*load.Schema) (g *Graph, err error) {
 		g.addIndexes(schemas[i])
 	}
 	check(g.edgeSchemas(), "resolving edges")
+	check(resolveTypeImports(g), "resolve Go type imports")
 	aliases(g)
 	g.defaults()
 	if c.Storage != nil && c.Storage.Init != nil {

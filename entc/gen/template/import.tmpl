@@ -20,12 +20,6 @@ import (
 	{{- /* Ignore generating on graph templates (e.g. config.tmpl, client.tmpl, etc). */}}
 	{{- if ne $.Config.Package $.Package }}
 		"{{ $.Config.Package }}/predicate"
-		{{- if $.HasOneFieldID }}
-			{{- with $.ID.Type.PkgPath }}
-				{{- $name := $.ID.Type.PkgName }}
-				{{ if ne $name (base $.ID.Type.PkgPath) }}{{ $name }} {{ end }}"{{ . }}"
-			{{- end }}
-		{{- end }}
 		{{- /* Import external packages */}}
         {{- template "import/types" $ }}
 	{{- end }}
@@ -49,23 +43,28 @@ import (
 {{/* A template for importing fields with custom types */}}
 {{ define "import/types" -}}
 	{{- $seen := dict }}
+	{{- if and (hasField $ "Scope") $.Scope.ImportSeen }}{{ $seen = $.Scope.ImportSeen }}{{ end }}
 	{{- $selfPkg := "" }}{{ if ne $.Config.Package $.Package }}{{ $selfPkg = print $.Config.Package "/" $.PackageDir }}{{ end }}
-	{{- $fields := $.Fields }}{{ if $.HasOneFieldID }}{{ if $.ID.UserDefined }}{{ $fields = append $fields $.ID }}{{ end }}{{ end }}
-	{{- range $f := $fields }}
-		{{- $pkg := $f.Type.PkgPath }}
-		{{- if and $pkg (not (hasImport (base $pkg))) (not (hasKey $seen $pkg)) (ne $pkg $selfPkg) }}
-			{{- $name := $f.Type.PkgName }}
-			{{ if ne $name (base $pkg) }}{{ $name }} {{ end}}"{{ $pkg }}"
-			{{- $seen = set $seen $pkg true }}
-		{{- end }}
-	{{- end }}
-	{{- /* Import packages for edge target ID types referenced in mutation fields. */}}
-	{{- range $e := $.EdgesWithID }}
-		{{- $pkg := $e.Type.ID.Type.PkgPath }}
-		{{- if and $pkg (not (hasImport (base $pkg))) (not (hasKey $seen $pkg)) (ne $pkg $selfPkg) }}
-			{{- $name := $e.Type.ID.Type.PkgName }}
-			{{ if ne $name (base $pkg) }}{{ $name }} {{ end}}"{{ $pkg }}"
-			{{- $seen = set $seen $pkg true }}
+	{{- $fields := $.Fields }}{{ if $.HasOneFieldID }}{{ $fields = append $fields $.ID }}{{ end }}
+	{{- $types := list }}
+	{{- range $f := $fields }}{{ $types = append $types $f.Type }}{{ end }}
+	{{- /* Include edge target ID types referenced in mutation fields. */}}
+	{{- range $e := $.EdgesWithID }}{{ $types = append $types $e.Type.ID.Type }}{{ end }}
+	{{- range $type := $types }}
+		{{- if $type.PkgImports }}
+			{{- range $pkg, $name := $type.PkgImports }}
+				{{- if and (not (hasImport $name)) (not (hasKey $seen $pkg)) (ne $pkg $selfPkg) }}
+					{{ $name }} "{{ $pkg }}"
+					{{- $seen = set $seen $pkg true }}
+				{{- end }}
+			{{- end }}
+		{{- else }}
+			{{- $pkg := $type.PkgPath }}
+			{{- if and $pkg (not (hasImport (base $pkg))) (not (hasKey $seen $pkg)) (ne $pkg $selfPkg) }}
+				{{- $name := $type.PkgName }}
+				{{ if ne $name (base $pkg) }}{{ $name }} {{ end}}"{{ $pkg }}"
+				{{- $seen = set $seen $pkg true }}
+			{{- end }}
 		{{- end }}
 	{{- end }}
 {{- end }}
