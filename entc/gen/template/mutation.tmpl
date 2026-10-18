@@ -90,6 +90,10 @@ func (m *Mutation) Predicates() []predicate.{{ $.Name }} {
 		{{- if $f.SupportsMutationAppend }}
 			m.append{{ $f.BuilderField }} = nil
 		{{- end }}
+		{{- /* Setting overrides a previous call to Clear, as Clear overrides a previous call to Set. */}}
+		{{- if $f.Optional }}
+			delete(m.clearedFields, {{ $const }})
+		{{- end }}
 	}
 
 	// {{ $f.MutationGet }} returns the value of the "{{ $f.Name }}" field in the mutation.

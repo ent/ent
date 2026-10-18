@@ -87,6 +87,7 @@ func (m *Mutation) ResetName() {
 func (m *Mutation) SetFoods(s []string) {
 	m.foods = &s
 	m.appendfoods = nil
+	delete(m.clearedFields, FieldFoods)
 }
 
 // Foods returns the value of the "foods" field in the mutation.

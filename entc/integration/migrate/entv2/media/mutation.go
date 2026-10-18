@@ -43,6 +43,7 @@ func (m *Mutation) Predicates() []predicate.Media {
 // SetSource sets the "source" field.
 func (m *Mutation) SetSource(s string) {
 	m.source = &s
+	delete(m.clearedFields, FieldSource)
 }
 
 // Source returns the value of the "source" field in the mutation.
@@ -75,6 +76,7 @@ func (m *Mutation) ResetSource() {
 // SetSourceURI sets the "source_uri" field.
 func (m *Mutation) SetSourceURI(s string) {
 	m.source_uri = &s
+	delete(m.clearedFields, FieldSourceURI)
 }
 
 // SourceURI returns the value of the "source_uri" field in the mutation.
@@ -107,6 +109,7 @@ func (m *Mutation) ResetSourceURI() {
 // SetText sets the "text" field.
 func (m *Mutation) SetText(s string) {
 	m.text = &s
+	delete(m.clearedFields, FieldText)
 }
 
 // Text returns the value of the "text" field in the mutation.

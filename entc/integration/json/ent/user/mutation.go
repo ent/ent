@@ -66,6 +66,7 @@ func (m *Mutation) Predicates() []predicate.User {
 // SetT sets the "t" field.
 func (m *Mutation) SetT(s *schema.T) {
 	m.t = &s
+	delete(m.clearedFields, FieldT)
 }
 
 // T returns the value of the "t" field in the mutation.
@@ -98,6 +99,7 @@ func (m *Mutation) ResetT() {
 // SetURL sets the "url" field.
 func (m *Mutation) SetURL(u *url.URL) {
 	m.url = &u
+	delete(m.clearedFields, FieldURL)
 }
 
 // URL returns the value of the "url" field in the mutation.
@@ -131,6 +133,7 @@ func (m *Mutation) ResetURL() {
 func (m *Mutation) SetURLs(u []*url.URL) {
 	m._URLs = &u
 	m.append_URLs = nil
+	delete(m.clearedFields, FieldURLs)
 }
 
 // URLs returns the value of the "URLs" field in the mutation.
@@ -179,6 +182,7 @@ func (m *Mutation) ResetURLs() {
 func (m *Mutation) SetRaw(jm json.RawMessage) {
 	m.raw = &jm
 	m.appendraw = nil
+	delete(m.clearedFields, FieldRaw)
 }
 
 // Raw returns the value of the "raw" field in the mutation.
@@ -261,6 +265,7 @@ func (m *Mutation) ResetDirs() {
 func (m *Mutation) SetInts(i []int) {
 	m.ints = &i
 	m.appendints = nil
+	delete(m.clearedFields, FieldInts)
 }
 
 // Ints returns the value of the "ints" field in the mutation.
@@ -309,6 +314,7 @@ func (m *Mutation) ResetInts() {
 func (m *Mutation) SetFloats(f []float64) {
 	m.floats = &f
 	m.appendfloats = nil
+	delete(m.clearedFields, FieldFloats)
 }
 
 // Floats returns the value of the "floats" field in the mutation.
@@ -357,6 +363,7 @@ func (m *Mutation) ResetFloats() {
 func (m *Mutation) SetStrings(s []string) {
 	m.strings = &s
 	m.appendstrings = nil
+	delete(m.clearedFields, FieldStrings)
 }
 
 // Strings returns the value of the "strings" field in the mutation.
@@ -405,6 +412,7 @@ func (m *Mutation) ResetStrings() {
 func (m *Mutation) SetIntsValidate(i []int) {
 	m.ints_validate = &i
 	m.appendints_validate = nil
+	delete(m.clearedFields, FieldIntsValidate)
 }
 
 // IntsValidate returns the value of the "ints_validate" field in the mutation.
@@ -453,6 +461,7 @@ func (m *Mutation) ResetIntsValidate() {
 func (m *Mutation) SetFloatsValidate(f []float64) {
 	m.floats_validate = &f
 	m.appendfloats_validate = nil
+	delete(m.clearedFields, FieldFloatsValidate)
 }
 
 // FloatsValidate returns the value of the "floats_validate" field in the mutation.
@@ -501,6 +510,7 @@ func (m *Mutation) ResetFloatsValidate() {
 func (m *Mutation) SetStringsValidate(s []string) {
 	m.strings_validate = &s
 	m.appendstrings_validate = nil
+	delete(m.clearedFields, FieldStringsValidate)
 }
 
 // StringsValidate returns the value of the "strings_validate" field in the mutation.
@@ -548,6 +558,7 @@ func (m *Mutation) ResetStringsValidate() {
 // SetAddr sets the "addr" field.
 func (m *Mutation) SetAddr(s schema.Addr) {
 	m.addr = &s
+	delete(m.clearedFields, FieldAddr)
 }
 
 // Addr returns the value of the "addr" field in the mutation.
@@ -580,6 +591,7 @@ func (m *Mutation) ResetAddr() {
 // SetUnknown sets the "unknown" field.
 func (m *Mutation) SetUnknown(a any) {
 	m.unknown = &a
+	delete(m.clearedFields, FieldUnknown)
 }
 
 // Unknown returns the value of the "unknown" field in the mutation.

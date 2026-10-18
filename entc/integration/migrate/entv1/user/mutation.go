@@ -120,6 +120,7 @@ func (m *Mutation) ResetName() {
 // SetDescription sets the "description" field.
 func (m *Mutation) SetDescription(s string) {
 	m.description = &s
+	delete(m.clearedFields, FieldDescription)
 }
 
 // Description returns the value of the "description" field in the mutation.
@@ -171,6 +172,7 @@ func (m *Mutation) ResetNickname() {
 // SetAddress sets the "address" field.
 func (m *Mutation) SetAddress(s string) {
 	m.address = &s
+	delete(m.clearedFields, FieldAddress)
 }
 
 // Address returns the value of the "address" field in the mutation.
@@ -203,6 +205,7 @@ func (m *Mutation) ResetAddress() {
 // SetRenamed sets the "renamed" field.
 func (m *Mutation) SetRenamed(s string) {
 	m.renamed = &s
+	delete(m.clearedFields, FieldRenamed)
 }
 
 // Renamed returns the value of the "renamed" field in the mutation.
@@ -254,6 +257,7 @@ func (m *Mutation) ResetOldToken() {
 // SetBlob sets the "blob" field.
 func (m *Mutation) SetBlob(b []byte) {
 	m.blob = &b
+	delete(m.clearedFields, FieldBlob)
 }
 
 // Blob returns the value of the "blob" field in the mutation.
@@ -286,6 +290,7 @@ func (m *Mutation) ResetBlob() {
 // SetState sets the "state" field.
 func (m *Mutation) SetState(u State) {
 	m.state = &u
+	delete(m.clearedFields, FieldState)
 }
 
 // State returns the value of the "state" field in the mutation.
@@ -318,6 +323,7 @@ func (m *Mutation) ResetState() {
 // SetStatus sets the "status" field.
 func (m *Mutation) SetStatus(s string) {
 	m.status = &s
+	delete(m.clearedFields, FieldStatus)
 }
 
 // Status returns the value of the "status" field in the mutation.
@@ -350,6 +356,7 @@ func (m *Mutation) ResetStatus() {
 // SetWorkplace sets the "workplace" field.
 func (m *Mutation) SetWorkplace(s string) {
 	m.workplace = &s
+	delete(m.clearedFields, FieldWorkplace)
 }
 
 // Workplace returns the value of the "workplace" field in the mutation.
@@ -382,6 +389,7 @@ func (m *Mutation) ResetWorkplace() {
 // SetDropOptional sets the "drop_optional" field.
 func (m *Mutation) SetDropOptional(s string) {
 	m.drop_optional = &s
+	delete(m.clearedFields, FieldDropOptional)
 }
 
 // DropOptional returns the value of the "drop_optional" field in the mutation.

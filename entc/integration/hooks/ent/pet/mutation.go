@@ -45,6 +45,7 @@ func (m *Mutation) Predicates() []predicate.Pet {
 // SetDeleteTime sets the "delete_time" field.
 func (m *Mutation) SetDeleteTime(t time.Time) {
 	m.delete_time = &t
+	delete(m.clearedFields, FieldDeleteTime)
 }
 
 // DeleteTime returns the value of the "delete_time" field in the mutation.
@@ -77,6 +78,7 @@ func (m *Mutation) ResetDeleteTime() {
 // SetName sets the "name" field.
 func (m *Mutation) SetName(s string) {
 	m.name = &s
+	delete(m.clearedFields, FieldName)
 }
 
 // Name returns the value of the "name" field in the mutation.

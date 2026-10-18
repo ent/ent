@@ -85,6 +85,7 @@ func (m *Mutation) ResetAge() {
 // SetLicensedAt sets the "licensed_at" field.
 func (m *Mutation) SetLicensedAt(t time.Time) {
 	m.licensed_at = &t
+	delete(m.clearedFields, FieldLicensedAt)
 }
 
 // LicensedAt returns the value of the "licensed_at" field in the mutation.

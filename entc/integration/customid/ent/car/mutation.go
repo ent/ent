@@ -48,6 +48,7 @@ func (m *Mutation) Predicates() []predicate.Car {
 func (m *Mutation) SetBeforeID(f float64) {
 	m.before_id = &f
 	m.addbefore_id = nil
+	delete(m.clearedFields, FieldBeforeID)
 }
 
 // BeforeID returns the value of the "before_id" field in the mutation.
@@ -101,6 +102,7 @@ func (m *Mutation) ResetBeforeID() {
 func (m *Mutation) SetAfterID(f float64) {
 	m.after_id = &f
 	m.addafter_id = nil
+	delete(m.clearedFields, FieldAfterID)
 }
 
 // AfterID returns the value of the "after_id" field in the mutation.

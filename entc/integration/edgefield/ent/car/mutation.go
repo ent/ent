@@ -44,6 +44,7 @@ func (m *Mutation) Predicates() []predicate.Car {
 // SetNumber sets the "number" field.
 func (m *Mutation) SetNumber(s string) {
 	m.number = &s
+	delete(m.clearedFields, FieldNumber)
 }
 
 // Number returns the value of the "number" field in the mutation.

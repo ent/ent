@@ -62,6 +62,7 @@ func (m *Mutation) ResetName() {
 // SetOwnerID sets the "owner_id" field.
 func (m *Mutation) SetOwnerID(i int) {
 	m.owner = &i
+	delete(m.clearedFields, FieldOwnerID)
 }
 
 // OwnerID returns the value of the "owner_id" field in the mutation.

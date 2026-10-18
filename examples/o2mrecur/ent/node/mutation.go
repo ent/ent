@@ -86,6 +86,7 @@ func (m *Mutation) ResetValue() {
 // SetParentID sets the "parent_id" field.
 func (m *Mutation) SetParentID(i int) {
 	m.parent = &i
+	delete(m.clearedFields, FieldParentID)
 }
 
 // ParentID returns the value of the "parent_id" field in the mutation.

@@ -78,6 +78,7 @@ func (m *Mutation) ResetOperationTime() {
 // SetOldValue sets the "old_value" field.
 func (m *Mutation) SetOldValue(s string) {
 	m.old_value = &s
+	delete(m.clearedFields, FieldOldValue)
 }
 
 // OldValue returns the value of the "old_value" field in the mutation.
@@ -110,6 +111,7 @@ func (m *Mutation) ResetOldValue() {
 // SetNewValue sets the "new_value" field.
 func (m *Mutation) SetNewValue(s string) {
 	m.new_value = &s
+	delete(m.clearedFields, FieldNewValue)
 }
 
 // NewValue returns the value of the "new_value" field in the mutation.

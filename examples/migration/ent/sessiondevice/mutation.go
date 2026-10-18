@@ -126,6 +126,7 @@ func (m *Mutation) ResetCreatedAt() {
 // SetUpdatedAt sets the "updated_at" field.
 func (m *Mutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
+	delete(m.clearedFields, FieldUpdatedAt)
 }
 
 // UpdatedAt returns the value of the "updated_at" field in the mutation.

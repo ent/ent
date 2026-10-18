@@ -49,6 +49,7 @@ func (m *Mutation) Predicates() []predicate.Node {
 func (m *Mutation) SetValue(i int) {
 	m.value = &i
 	m.addvalue = nil
+	delete(m.clearedFields, FieldValue)
 }
 
 // Value returns the value of the "value" field in the mutation.
@@ -101,6 +102,7 @@ func (m *Mutation) ResetValue() {
 // SetUpdatedAt sets the "updated_at" field.
 func (m *Mutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
+	delete(m.clearedFields, FieldUpdatedAt)
 }
 
 // UpdatedAt returns the value of the "updated_at" field in the mutation.

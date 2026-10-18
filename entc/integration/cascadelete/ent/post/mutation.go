@@ -65,6 +65,7 @@ func (m *Mutation) ResetText() {
 // SetAuthorID sets the "author_id" field.
 func (m *Mutation) SetAuthorID(i int) {
 	m.author = &i
+	delete(m.clearedFields, FieldAuthorID)
 }
 
 // AuthorID returns the value of the "author_id" field in the mutation.

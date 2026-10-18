@@ -1444,6 +1444,14 @@ func ClearFields(t *testing.T, client *ent.Client) {
 	t.Log("revert previous set")
 	img = img.Update().SetUser("a8m").ClearUser().SaveX(ctx)
 	require.Nil(t, img.User)
+
+	t.Log("revert previous clear")
+	u := img.Update().ClearUser().SetUser("a8m")
+	require.False(t, u.Mutation().UserCleared())
+	img = u.SaveX(ctx)
+	require.Equal(t, "a8m", *img.User)
+	img = client.File.Query().OnlyX(ctx)
+	require.Equal(t, "a8m", *img.User)
 }
 
 func ClearEdges(t *testing.T, client *ent.Client) {

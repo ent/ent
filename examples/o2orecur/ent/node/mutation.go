@@ -85,6 +85,7 @@ func (m *Mutation) ResetValue() {
 // SetPrevID sets the "prev_id" field.
 func (m *Mutation) SetPrevID(i int) {
 	m.prev = &i
+	delete(m.clearedFields, FieldPrevID)
 }
 
 // PrevID returns the value of the "prev_id" field in the mutation.
