@@ -67,6 +67,7 @@ func (m *Mutation) ResetNumber() {
 // SetName sets the "name" field.
 func (m *Mutation) SetName(s string) {
 	m.name = &s
+	delete(m.clearedFields, FieldName)
 }
 
 // Name returns the value of the "name" field in the mutation.
@@ -137,6 +138,7 @@ func (m *Mutation) ResetInHook() {
 // SetExpiredAt sets the "expired_at" field.
 func (m *Mutation) SetExpiredAt(t time.Time) {
 	m.expired_at = &t
+	delete(m.clearedFields, FieldExpiredAt)
 }
 
 // ExpiredAt returns the value of the "expired_at" field in the mutation.

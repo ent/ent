@@ -117,6 +117,7 @@ func (m *Mutation) ResetName() {
 func (m *Mutation) SetWorth(u uint) {
 	m.worth = &u
 	m.addworth = nil
+	delete(m.clearedFields, FieldWorth)
 }
 
 // Worth returns the value of the "worth" field in the mutation.
@@ -169,6 +170,7 @@ func (m *Mutation) ResetWorth() {
 // SetPassword sets the "password" field.
 func (m *Mutation) SetPassword(s string) {
 	m.password = &s
+	delete(m.clearedFields, FieldPassword)
 }
 
 // Password returns the value of the "password" field in the mutation.

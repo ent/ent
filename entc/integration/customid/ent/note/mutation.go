@@ -47,6 +47,7 @@ func (m *Mutation) Predicates() []predicate.Note {
 // SetText sets the "text" field.
 func (m *Mutation) SetText(s string) {
 	m.text = &s
+	delete(m.clearedFields, FieldText)
 }
 
 // Text returns the value of the "text" field in the mutation.

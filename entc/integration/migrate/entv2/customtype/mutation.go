@@ -44,6 +44,7 @@ func (m *Mutation) Predicates() []predicate.CustomType {
 // SetCustom sets the "custom" field.
 func (m *Mutation) SetCustom(s string) {
 	m.custom = &s
+	delete(m.clearedFields, FieldCustom)
 }
 
 // Custom returns the value of the "custom" field in the mutation.
@@ -76,6 +77,7 @@ func (m *Mutation) ResetCustom() {
 // SetTz0 sets the "tz0" field.
 func (m *Mutation) SetTz0(t time.Time) {
 	m.tz0 = &t
+	delete(m.clearedFields, FieldTz0)
 }
 
 // Tz0 returns the value of the "tz0" field in the mutation.
@@ -108,6 +110,7 @@ func (m *Mutation) ResetTz0() {
 // SetTz3 sets the "tz3" field.
 func (m *Mutation) SetTz3(t time.Time) {
 	m.tz3 = &t
+	delete(m.clearedFields, FieldTz3)
 }
 
 // Tz3 returns the value of the "tz3" field in the mutation.

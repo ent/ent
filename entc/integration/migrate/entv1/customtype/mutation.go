@@ -41,6 +41,7 @@ func (m *Mutation) Predicates() []predicate.CustomType {
 // SetCustom sets the "custom" field.
 func (m *Mutation) SetCustom(s string) {
 	m.custom = &s
+	delete(m.clearedFields, FieldCustom)
 }
 
 // Custom returns the value of the "custom" field in the mutation.

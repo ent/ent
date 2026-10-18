@@ -43,6 +43,7 @@ func (m *Mutation) Predicates() []predicate.User {
 // SetName sets the "name" field.
 func (m *Mutation) SetName(s string) {
 	m.name = &s
+	delete(m.clearedFields, FieldName)
 }
 
 // Name returns the value of the "name" field in the mutation.
@@ -76,6 +77,7 @@ func (m *Mutation) ResetName() {
 func (m *Mutation) SetAge(i int) {
 	m.age = &i
 	m.addage = nil
+	delete(m.clearedFields, FieldAge)
 }
 
 // Age returns the value of the "age" field in the mutation.

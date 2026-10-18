@@ -84,6 +84,7 @@ func (m *Mutation) ResetAttachment() {
 // SetMetadata sets the "metadata" field.
 func (m *Mutation) SetMetadata(b []byte) {
 	m.metadata = &b
+	delete(m.clearedFields, FieldMetadata)
 }
 
 // Metadata returns the value of the "metadata" field in the mutation.
@@ -116,6 +117,7 @@ func (m *Mutation) ResetMetadata() {
 // SetPayload sets the "payload" field.
 func (m *Mutation) SetPayload(sp *schema.DocPayload) {
 	m.payload = &sp
+	delete(m.clearedFields, FieldPayload)
 }
 
 // Payload returns the value of the "payload" field in the mutation.
@@ -148,6 +150,7 @@ func (m *Mutation) ResetPayload() {
 // SetDescription sets the "description" field.
 func (m *Mutation) SetDescription(s string) {
 	m.description = &s
+	delete(m.clearedFields, FieldDescription)
 }
 
 // Description returns the value of the "description" field in the mutation.

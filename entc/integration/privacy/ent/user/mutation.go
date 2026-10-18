@@ -69,6 +69,7 @@ func (m *Mutation) ResetName() {
 func (m *Mutation) SetAge(u uint) {
 	m.age = &u
 	m.addage = nil
+	delete(m.clearedFields, FieldAge)
 }
 
 // Age returns the value of the "age" field in the mutation.
