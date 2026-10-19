@@ -142,6 +142,10 @@ func TestPostgres(t *testing.T) {
 			DefaultExpr(t, drv, `SELECT column_default FROM information_schema.columns WHERE table_name = 'users' AND column_name = $1`, "lower('hello'::text)", "md5('ent'::text)")
 			PKDefault(t, drv, `SELECT column_default FROM information_schema.columns WHERE table_name = 'zoos' AND column_name = $1`, "floor((random() * ((~ (1 << 31)))::double precision))")
 			IndexOpClass(t, drv)
+			ExprIndexes(t, drv, "select indexdef from pg_indexes where indexname=$1",
+				"CREATE INDEX user_title ON public.users USING btree (lower((title)::text))",
+				"CREATE INDEX user_age_workplace ON public.users USING btree (age, lower((workplace)::text))",
+			)
 			ColumnComments(t, drv, `SELECT column_name as name, col_description(table_name::regclass::oid, ordinal_position) as comment FROM information_schema.columns WHERE table_name = 'media' ORDER BY ordinal_position`)
 			TableComment(t, drv, "SELECT obj_description('media'::regclass::oid)")
 			if version != "10" {
@@ -225,6 +229,11 @@ func TestSQLite(t *testing.T) {
 	idRange(t, client.Pet.Create().SaveX(ctx).ID, 6<<32-1, 7<<32)
 	idRange(t, u.ID, 7<<32-1, 8<<32)
 	PartialIndexes(t, drv, "select sql from sqlite_master where name=?", "CREATE INDEX `user_phone` ON `users` (`phone`) WHERE active AND \"phone\" <> ''")
+	// Expressions are ignored outside PostgreSQL.
+	ExprIndexes(t, drv, "select sql from sqlite_master where name=?",
+		"CREATE INDEX `user_title` ON `users` (`title`)",
+		"CREATE INDEX `user_age_workplace` ON `users` (`age`, `workplace`)",
+	)
 	JSONDefault(t, drv, "SELECT `dflt_value` FROM `pragma_table_info`('users') WHERE `name` = ?")
 	DefaultExpr(t, drv, "SELECT `dflt_value` FROM `pragma_table_info`('users') WHERE `name` = ?", "lower('hello')", "hex('ent')")
 	PKDefault(t, drv, "SELECT `dflt_value` FROM `pragma_table_info`('zoos') WHERE `name` = ?", "abs(random())")
@@ -797,6 +806,17 @@ func IndexOpClass(t *testing.T, drv *sql.Driver) {
 	require.NoError(t, err)
 	require.NoError(t, rows.Close())
 	require.Equal(t, d, "CREATE INDEX user_age_phone ON public.users USING btree (age, phone bpchar_pattern_ops)")
+}
+
+func ExprIndexes(t *testing.T, drv *sql.Driver, query, title, ageWorkplace string) {
+	for name, expected := range map[string]string{"user_title": title, "user_age_workplace": ageWorkplace} {
+		rows, err := drv.QueryContext(context.Background(), query, name)
+		require.NoError(t, err)
+		d, err := sql.ScanString(rows)
+		require.NoError(t, err)
+		require.NoError(t, rows.Close())
+		require.Equal(t, expected, d)
+	}
 }
 
 func SerialType(t *testing.T, c *entv2.Client) {

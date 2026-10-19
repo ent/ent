@@ -215,14 +215,33 @@ func indexOpClass(idx *Index) map[string]string {
 	return opc
 }
 
+// indexExprs returns a map holding the column-to-expression mapping if exists.
+func indexExprs(idx *Index) map[string]string {
+	exprs := make(map[string]string)
+	if idx.Annotation == nil {
+		return exprs
+	}
+	if idx.Annotation.Expr != "" && len(idx.Columns) == 1 {
+		exprs[idx.Columns[0].Name] = idx.Annotation.Expr
+	}
+	for column, x := range idx.Annotation.ExprColumns {
+		exprs[column] = x
+	}
+	return exprs
+}
+
 func (d *Postgres) atIndex(idx1 *Index, t2 *schema.Table, idx2 *schema.Index) error {
 	opc := indexOpClass(idx1)
+	exprs := indexExprs(idx1)
 	for _, c1 := range idx1.Columns {
 		c2, ok := t2.Column(c1.Name)
 		if !ok {
 			return fmt.Errorf("unexpected index %q column: %q", idx1.Name, c1.Name)
 		}
 		part := &schema.IndexPart{C: c2}
+		if x, ok := exprs[c1.Name]; ok {
+			part = &schema.IndexPart{X: &schema.RawExpr{X: x}}
+		}
 		if v, ok := opc[c1.Name]; ok {
 			var op postgres.IndexOpClass
 			if err := op.UnmarshalText([]byte(v)); err != nil {

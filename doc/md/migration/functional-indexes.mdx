@@ -4,7 +4,7 @@ id: functional-indexes
 slug: functional-indexes
 ---
 
-import InstallationInstructions from '../components/_installation_instructions.mdx';
+import InstallationInstructions from "../components/_installation_instructions.mdx";
 
 A functional index is an index whose key parts are based on expression values, rather than column values. This index
 type is helpful for indexing the results of functions or expressions that are not stored in the table. Supported by
@@ -14,12 +14,20 @@ and [SQLite](https://atlasgo.io/guides/sqlite/functional-indexes).
 This guide explains how to extend your Ent schema with functional indexes, and configure the schema migration to manage
 both functional indexes and the Ent schema as a single migration unit using Atlas.
 
+:::tip Native Support in PostgreSQL
+For PostgreSQL, functional indexes can also be defined directly in the Ent schema using the `entsql.IndexExpr` and
+`entsql.IndexExprColumn` annotations, without a composite schema. See [Functional Indexes](/docs/schema-indexes#functional-indexes)
+for more details. The approach described in this guide works for all dialects.
+:::
+
 :::info [Atlas Pro Feature](https://atlasgo.io/features#pro-plan)
 Atlas support for [Composite Schema](https://atlasgo.io/atlas-schema/projects#data-source-composite_schema) used in this
 guide is available exclusively to Pro users. To use this feature, run:
+
 ```
 atlas login
 ```
+
 :::
 
 ## Install Atlas
@@ -69,7 +77,7 @@ CREATE UNIQUE INDEX unique_name ON "users" ((lower("name")));
 ```
 
 3\. Create a simple `atlas.hcl` config file with a `composite_schema` that includes both the functional indexes defined in
-   `schema.sql` and your Ent schema:
+`schema.sql` and your Ent schema:
 
 ```hcl title="atlas.hcl"
 data "composite_schema" "app" {

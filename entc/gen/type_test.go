@@ -7,6 +7,7 @@ package gen
 import (
 	"testing"
 
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/entc/load"
 	"entgo.io/ent/schema/field"
 
@@ -245,6 +246,17 @@ func TestType_AddIndex(t *testing.T) {
 
 	err = typ.AddIndex(&load.Index{Unique: true, Fields: []string{"name"}, Edges: []string{"owner"}})
 	require.NoError(t, err, "valid index on M2O relation and field")
+
+	ant := entsql.IndexExpr("lower(name)")
+	err = typ.AddIndex(&load.Index{Fields: []string{"name"}, Annotations: map[string]any{ant.Name(): ant}})
+	require.NoError(t, err, "valid expression index")
+
+	err = typ.AddIndex(&load.Index{Fields: []string{"name", "text"}, Annotations: map[string]any{ant.Name(): ant}})
+	require.Error(t, err, "entsql.IndexExpr on multicolumn index")
+
+	ant = &entsql.IndexAnnotation{Expr: "lower(name)", ExprColumns: map[string]string{"text": "lower(text)"}}
+	err = typ.AddIndex(&load.Index{Fields: []string{"name", "text"}, Annotations: map[string]any{ant.Name(): ant}})
+	require.Error(t, err, "both entsql.IndexExpr and entsql.IndexExprColumn")
 }
 
 func TestField_Constant(t *testing.T) {

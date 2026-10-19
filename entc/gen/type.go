@@ -684,6 +684,10 @@ func (t *Type) AddIndex(idx *load.Index) error {
 		return fmt.Errorf("entsql.Prefix is used in a multicolumn index %q. Use entsql.PrefixColumn instead", index.Name)
 	case len(ant.PrefixColumns) > len(idx.Fields)+len(idx.Fields):
 		return fmt.Errorf("index %q has more entsql.PrefixColumn than column in its definitions", index.Name)
+	case ant.Expr != "" && len(ant.ExprColumns) != 0:
+		return fmt.Errorf("index %q cannot contain both entsql.IndexExpr and entsql.IndexExprColumn in annotation", index.Name)
+	case ant.Expr != "" && len(idx.Fields)+len(idx.Edges) != 1:
+		return fmt.Errorf("entsql.IndexExpr is used in a multicolumn index %q. Use entsql.IndexExprColumn instead", index.Name)
 	}
 	for _, name := range idx.Fields {
 		var f *Field

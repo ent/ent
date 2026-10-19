@@ -180,6 +180,15 @@ func (User) Indexes() []ent.Index {
 			Annotations(
 				entsql.OpClassColumn("phone", "bpchar_pattern_ops"),
 			),
+		// For PostgreSQL, columns can be replaced with expressions (functional indexes).
+		index.Fields("title").
+			Annotations(
+				entsql.IndexExpr("lower((title)::text)"),
+			),
+		index.Fields("age", "workplace").
+			Annotations(
+				entsql.IndexExprColumn("workplace", "lower((workplace)::text)"),
+			),
 	}
 }
 

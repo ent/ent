@@ -239,6 +239,24 @@ var (
 					},
 				},
 			},
+			{
+				Name:    "user_title",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[10]},
+				Annotation: &entsql.IndexAnnotation{
+					Expr: "lower((title)::text)",
+				},
+			},
+			{
+				Name:    "user_age_workplace",
+				Unique:  false,
+				Columns: []*schema.Column{UsersColumns[4], UsersColumns[16]},
+				Annotation: &entsql.IndexAnnotation{
+					ExprColumns: map[string]string{
+						UsersColumns[16].Name: "lower((workplace)::text)",
+					},
+				},
+			},
 		},
 	}
 	// ZoosColumns holds the columns for the "zoos" table.

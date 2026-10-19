@@ -39,8 +39,11 @@ func TestSnapshot_Restore(t *testing.T) {
 			`,
 		}}
 	require.NoError(t, snap.Restore())
-	err = exec.Command("go", "generate", testPackage).Run()
-	require.NoError(t, err)
+	// testPackage belongs to the entc/integration module.
+	cmd := exec.Command("go", "generate", ".")
+	cmd.Dir = testPackage
+	out, err := cmd.CombinedOutput()
+	require.NoError(t, err, string(out))
 }
 
 // addConflicts adds VCS conflicts to the files that match the given patterns.
@@ -51,7 +54,7 @@ func addConflicts(dir string) error {
 		return err
 	}
 	for _, info := range infos {
-		if info.IsDir() || info.Name() == "generate.go" {
+		if info.IsDir() || info.Name() == "generate.go" || info.Name() == "entc.go" {
 			continue
 		}
 		path := filepath.Join(dir, info.Name())

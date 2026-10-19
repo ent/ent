@@ -1066,8 +1066,9 @@ func (a *Atlas) aIndexes(et *Table, at *schema.Table) error {
 			return err
 		}
 		desc := descIndexes(idx1)
-		for _, p := range idx2.Parts {
-			p.Desc = desc[p.C.Name]
+		// Parts are added in the order of the index columns, and may be expressions.
+		for i, p := range idx2.Parts {
+			p.Desc = desc[idx1.Columns[i].Name]
 		}
 		at.AddIndexes(idx2)
 	}

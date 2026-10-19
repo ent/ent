@@ -281,9 +281,39 @@ CREATE INDEX "users_phone" ON "users" ("phone" bpchar_pattern_ops)
 
 ## Functional Indexes
 
-The Ent schema supports defining indexes on fields and edges (foreign-keys), but there is no API for defining index
-parts as expressions, such as function calls. If you are using [Atlas](https://atlasgo.io/docs) for managing schema
-migrations, you can define functional indexes as described in [this guide](/docs/migration/functional-indexes).
+In PostgreSQL, index parts can be defined as expressions (e.g. function calls) using the `entsql.IndexExpr`
+and `entsql.IndexExprColumn` annotations. The expression replaces the column of the annotated field in the index:
+
+```go
+func (User) Indexes() []ent.Index {
+	return []ent.Index{
+		// Single-column index.
+		index.Fields("name").
+			Unique().
+			Annotations(
+				entsql.IndexExpr("lower((name)::text)"),
+			),
+		// Multi-column index.
+		index.Fields("name", "email").
+			Annotations(
+				entsql.IndexExprColumn("email", "lower((email)::text)"),
+			),
+	}
+}
+```
+
+The code above generates the following SQL statements:
+
+```sql
+CREATE UNIQUE INDEX "user_name" ON "users" ((lower((name)::text)))
+
+CREATE INDEX "user_name_email" ON "users" ("name", (lower((email)::text)))
+```
+
+Note that expressions should be defined exactly like they are stored in the database (i.e. normal form) to
+avoid repeated diffs. Read more about this on the [Atlas website](https://atlasgo.io/concepts/dev-database#diffing).
+For other dialects, or if you are using [Atlas](https://atlasgo.io/docs) for managing schema migrations, you can also
+define functional indexes as described in [this guide](/docs/migration/functional-indexes).
 
 ## Storage Key
 

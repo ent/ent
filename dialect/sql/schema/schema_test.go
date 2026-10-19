@@ -388,3 +388,73 @@ CREATE VIEW $pets_without_fur$ ($id$, $name$, $owner_id$) AS SELECT id, name, ow
 		})
 	}
 }
+
+func TestDDL_ExprIndex(t *testing.T) {
+	users := &Table{
+		Name: "users",
+		Columns: []*Column{
+			{Name: "id", Type: field.TypeInt},
+			{Name: "name", Type: field.TypeString},
+			{Name: "email", Type: field.TypeString},
+		},
+	}
+	users.PrimaryKey = users.Columns[:1]
+	users.Indexes = append(users.Indexes,
+		&Index{
+			Name:       "users_name",
+			Unique:     true,
+			Columns:    users.Columns[1:2],
+			Annotation: entsql.IndexExpr("lower(name)"),
+		},
+		&Index{
+			Name:    "users_email_name",
+			Columns: users.Columns[1:3],
+			Annotation: &entsql.IndexAnnotation{
+				ExprColumns: map[string]string{"email": "lower(email)"},
+				DescColumns: map[string]bool{"email": true},
+			},
+		},
+	)
+	for _, tt := range []struct {
+		dialect, version string
+		expected         []string
+	}{
+		{
+			dialect: dialect.Postgres,
+			version: "15",
+			expected: []string{
+				`CREATE UNIQUE INDEX "users_name" ON "users" ((lower(name)));`,
+				`CREATE INDEX "users_email_name" ON "users" ("name", (lower(email)) DESC);`,
+			},
+		},
+		// Expressions are ignored by dialects other than PostgreSQL.
+		{
+			dialect: dialect.MySQL,
+			version: "8",
+			expected: []string{
+				"UNIQUE INDEX `users_name` (`name`)",
+				"INDEX `users_email_name` (`name`, `email` DESC)",
+			},
+		},
+		{
+			dialect: dialect.SQLite,
+			expected: []string{
+				"CREATE UNIQUE INDEX `users_name` ON `users` (`name`);",
+				"CREATE INDEX `users_email_name` ON `users` (`name`, `email` DESC);",
+			},
+		},
+	} {
+		t.Run(tt.dialect, func(t *testing.T) {
+			ac, err := DDL(context.Background(), DDLArgs{
+				Dialect: tt.dialect,
+				Version: tt.version,
+				Tables:  []*Table{users},
+			})
+			require.NoError(t, err)
+			for _, s := range tt.expected {
+				require.Contains(t, ac, s)
+			}
+			require.Equal(t, tt.dialect == dialect.Postgres, strings.Contains(ac, "lower("))
+		})
+	}
+}

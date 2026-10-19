@@ -625,6 +625,30 @@ type IndexAnnotation struct {
 	//		)
 	//	CREATE INDEX "table_a" ON "table"("a") WHERE (b AND c > 0)
 	Where string
+
+	// Expr replaces the column of a single column index with an expression,
+	// making it a functional (expression) index. Works only in PostgreSQL.
+	//
+	//	index.Fields("name").
+	//		Annotations(
+	//			entsql.IndexExpr("lower(name)"),
+	//		)
+	//
+	//	CREATE INDEX "table_name" ON "table" ((lower(name)))
+	//
+	Expr string
+
+	// ExprColumns replaces columns of a multi-column index with expressions.
+	// Works only in PostgreSQL and its definition is as follows:
+	//
+	//	index.Fields("c1", "c2").
+	//		Annotations(
+	//			entsql.IndexExprColumn("c1", "lower(c1)"),
+	//		)
+	//
+	//	CREATE INDEX "table_c1_c2" ON "table" ((lower(c1)), "c2")
+	//
+	ExprColumns map[string]string
 }
 
 // Prefix returns a new index annotation with a single string column index.
@@ -780,6 +804,41 @@ func IndexWhere(pred string) *IndexAnnotation {
 	return &IndexAnnotation{Where: pred}
 }
 
+// IndexExpr replaces the column of a single column index with an expression,
+// making it a functional (expression) index. Works only in PostgreSQL.
+//
+// Note that the expression should be defined exactly like it is stored in
+// the database (i.e. normal form) to avoid repeated diffs. Read more on the
+// Atlas website: https://atlasgo.io/concepts/dev-database#diffing.
+//
+//	index.Fields("name").
+//		Unique().
+//		Annotations(
+//			entsql.IndexExpr("lower((name)::text)"),
+//		)
+//
+//	CREATE UNIQUE INDEX "table_name" ON "table" ((lower((name)::text)))
+func IndexExpr(x string) *IndexAnnotation {
+	return &IndexAnnotation{Expr: x}
+}
+
+// IndexExprColumn returns a new index annotation that replaces the given
+// column of a multi-column index with an expression. Works only in PostgreSQL.
+//
+//	index.Fields("c1", "c2").
+//		Annotations(
+//			entsql.IndexExprColumn("c1", "lower(c1)"),
+//		)
+//
+//	CREATE INDEX "table_c1_c2" ON "table" ((lower(c1)), "c2")
+func IndexExprColumn(name, x string) *IndexAnnotation {
+	return &IndexAnnotation{
+		ExprColumns: map[string]string{
+			name: x,
+		},
+	}
+}
+
 // Name describes the annotation name.
 func (IndexAnnotation) Name() string {
 	return "EntSQLIndexes"
@@ -847,6 +906,17 @@ func (a IndexAnnotation) Merge(other schema.Annotation) schema.Annotation {
 	}
 	if ant.Where != "" {
 		a.Where = ant.Where
+	}
+	if ant.Expr != "" {
+		a.Expr = ant.Expr
+	}
+	if ant.ExprColumns != nil {
+		if a.ExprColumns == nil {
+			a.ExprColumns = make(map[string]string)
+		}
+		for column, x := range ant.ExprColumns {
+			a.ExprColumns[column] = x
+		}
 	}
 	return a
 }
