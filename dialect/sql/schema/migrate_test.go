@@ -462,3 +462,78 @@ func TestAtlas_ParallelCreate(t *testing.T) {
 	}
 	wg.Wait()
 }
+
+// TestAtlas_ParallelCreateForeignKeys reproduces
+// https://github.com/ent/ent/issues/4519: running migrations concurrently
+// against distinct (e.g. unique in-memory) databases, but sharing the same
+// generated *Table/*ForeignKey objects (as generated migrate.Tables does),
+// must not race even though setupTables mutates fields (such as
+// ForeignKey.Symbol and Index.Name) on those shared objects on every call.
+func TestAtlas_ParallelCreateForeignKeys(t *testing.T) {
+	groupCols := []*Column{{Name: "id", Type: field.TypeInt, Increment: true}}
+	groups := &Table{
+		Name:       "parallel_groups",
+		Columns:    groupCols,
+		PrimaryKey: groupCols,
+		Indexes: []*Index{
+			// A name longer than the dialect's identifier length limit
+			// forces setupTables to rewrite Index.Name on every call.
+			{Name: "parallel_groups_" + strings.Repeat("x", 60), Columns: groupCols},
+		},
+	}
+	userCols := []*Column{{Name: "id", Type: field.TypeInt, Increment: true}}
+	users := &Table{
+		Name:       "parallel_users",
+		Columns:    userCols,
+		PrimaryKey: userCols,
+	}
+	memberCols := []*Column{
+		{Name: "user_id", Type: field.TypeInt},
+		{Name: "group_id", Type: field.TypeInt},
+	}
+	members := &Table{
+		Name:       "parallel_members",
+		Columns:    memberCols,
+		PrimaryKey: memberCols,
+		ForeignKeys: []*ForeignKey{
+			{
+				Symbol:     "parallel_members_user_id",
+				Columns:    memberCols[:1],
+				RefTable:   users,
+				RefColumns: userCols,
+				OnDelete:   Cascade,
+			},
+			{
+				Symbol:     "parallel_members_group_id",
+				Columns:    memberCols[1:],
+				RefTable:   groups,
+				RefColumns: groupCols,
+				OnDelete:   Cascade,
+			},
+		},
+	}
+	shared := []*Table{groups, users, members}
+
+	const n = 20
+	var wg sync.WaitGroup
+	wg.Add(n)
+	errs := make([]error, n)
+	for i := 0; i < n; i++ {
+		db, err := sql.Open(dialect.SQLite, fmt.Sprintf("file:test-parallel-fk-%d?mode=memory&_fk=1", i))
+		require.NoError(t, err)
+		m, err := NewMigrate(db)
+		require.NoError(t, err)
+		go func(i int) {
+			defer wg.Done()
+			if err := m.Create(context.Background(), shared...); err != nil {
+				errs[i] = err
+				return
+			}
+			errs[i] = db.Close()
+		}(i)
+	}
+	wg.Wait()
+	for _, err := range errs {
+		require.NoError(t, err)
+	}
+}

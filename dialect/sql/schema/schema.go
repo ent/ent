@@ -37,6 +37,12 @@ const (
 
 // Table schema definition for SQL dialects.
 type Table struct {
+	// mu guards the table's internal, lazily-computed state (the columns
+	// cache, index/foreign-key back-references and symbol names) that is
+	// written by setupTables and read while building the desired schema
+	// state (see Atlas.realm). Tables are commonly shared between
+	// concurrently running migrations (e.g. generated migrate.Tables),
+	// so both sides must hold this lock.
 	mu          sync.Mutex
 	Name        string
 	Schema      string
