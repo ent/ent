@@ -1,5 +1,6 @@
 ---
 title: Custom migrations
+description: "Creating custom SQL/data-seeding migrations and updating Atlas checksums."
 id: custom-migrations
 ---
 :::info Supporting repository

@@ -1,6 +1,7 @@
 ---
 id: generating-ent-schemas 
 title: Generating Schemas
+description: "Using schemast to load, print, mutate, and programmatically generate Ent schemas."
 ---
 
 ## Introduction

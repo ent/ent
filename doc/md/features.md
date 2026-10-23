@@ -1,6 +1,7 @@
 ---
 id: feature-flags
 title: Feature Flags
+description: "Ent code-generation feature flags for privacy, filtering, locks, SQL modifiers, upsert, and globally unique IDs."
 sidebar_label: Feature Flags
 ---
 
@@ -429,7 +430,7 @@ If you have used the `migrate.WithGlobalUniqueID(true)` migration option in the 
 [this guide](globalid-migrate) before you switch your project to use the new globalid feature.
 :::
 
-**How does it work?** `ent` migration allocates a 1<<32 range for the IDs of each entity (table),
+**How does it work?** `ent` migration allocates a `1<<32` range for the IDs of each entity (table),
 and store this information alongside your generated code (`internal/globalid.go`). For example, type `A` will have the 
 range of `[1,4294967296)` for its IDs, and type `B` will have the range of `[4294967296,8589934592)`, etc.
 

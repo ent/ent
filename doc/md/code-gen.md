@@ -1,6 +1,7 @@
 ---
 id: code-gen
 title: Introduction
+description: "Installing and running Ent code generation, CLI options, entc, hooks, dependencies, schema descriptions, and feature flags."
 ---
 
 ## Installation

@@ -1,6 +1,7 @@
 ---
 id: grpc-generating-proto
 title: Generating Protobufs with entproto
+description: "Annotating Ent schemas for entproto and generating protobuf definitions and Go code."
 sidebar_label: Generating Protobufs
 ---
 As Ent and Protobuf schemas are not identical, we must supply some annotations on our schema to help `entproto` figure out exactly how to generate Protobuf definitions (called "Messages" in protobuf terminology).

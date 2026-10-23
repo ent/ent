@@ -1,6 +1,7 @@
 ---
 id: tutorial-todo-gql-mutation-input
 title: Mutation Inputs
+description: "Generating GraphQL mutation input types and applying nested edge mutations transactionally."
 sidebar_label: Mutation Inputs
 ---
 

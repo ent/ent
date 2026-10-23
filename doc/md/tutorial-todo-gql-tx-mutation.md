@@ -1,6 +1,7 @@
 ---
 id: tutorial-todo-gql-tx-mutation
 title: Transactional Mutations
+description: "Wrapping GraphQL mutations in Ent transactions with isolation and skip-operation options."
 sidebar_label: Transactional Mutations
 ---
 

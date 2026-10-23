@@ -1,6 +1,7 @@
 ---
 id: dialects
 title: Supported Dialects
+description: "Supported MySQL, MariaDB, PostgreSQL, CockroachDB, SQLite, Gremlin, and TiDB dialects."
 ---
 
 ## MySQL

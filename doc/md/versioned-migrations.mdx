@@ -1,6 +1,7 @@
 ---
 id: versioned-migrations
 title: Versioned Migrations
+description: "Atlas-backed versioned migrations: generation, application, linting, baselining, tooling, global IDs, and integrity."
 ---
 
 import Tabs from '@theme/Tabs';
@@ -667,7 +668,7 @@ An output of such a run might look as follows:
 
 #### A Word on Global Unique IDs
 
-**This section only applies to MySQL users using the [global unique id](migrate.md/#universal-ids) feature.**
+**This section only applies to MySQL users using the [global unique id](migrate#universal-ids) feature.**
 
 When using the global unique ids, Ent allocates a range of `1<<32` integer values for each table. This is done by giving
 the first table an autoincrement starting value of `1`, the second one the starting value `4294967296`, the third one

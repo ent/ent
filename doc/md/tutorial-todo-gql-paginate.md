@@ -1,6 +1,7 @@
 ---
 id: tutorial-todo-gql-paginate
 title: Relay Cursor Connections (Pagination)
+description: "Adding Relay cursor pagination, ordering, edge counts, edge fields, and multi-order support."
 sidebar_label: Relay Cursor Connections
 ---
 

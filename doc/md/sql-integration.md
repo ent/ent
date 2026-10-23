@@ -1,6 +1,7 @@
 ---
 id: sql-integration
 title: sql.DB Integration
+description: "Integrating custom sql.DB instances and drivers with Ent, including tuning, OpenCensus, and pgx."
 ---
 
 The following examples show how to pass a custom `sql.DB` object to `ent.Client`.

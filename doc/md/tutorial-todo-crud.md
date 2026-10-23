@@ -1,6 +1,7 @@
 ---
 id: tutorial-todo-crud
 title: Query and Mutation
+description: "Extending the Todo app with fields, edges, creates, updates, and graph queries."
 sidebar_label: Query and Mutation
 ---
 

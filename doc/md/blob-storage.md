@@ -1,6 +1,7 @@
 ---
 id: blob-storage
 title: Blob Storage
+description: "External blob storage fields, key strategies, lazy loading, dual writes, cleanup, indexing, and upserts."
 ---
 
 ## Overview
