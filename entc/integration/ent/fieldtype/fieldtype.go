@@ -323,6 +323,14 @@ func RoleValidator(r role.Role) error {
 	}
 }
 
+// DefaultPriority holds the default value on creation for the "priority" field.
+var DefaultPriority = func() (v role.Priority) {
+	if err := v.Scan("LOW"); err != nil {
+		panic(fmt.Sprintf("fieldtype: invalid default value for priority field: %v", err))
+	}
+	return v
+}()
+
 // PriorityValidator is a validator for the "priority" field enum values. It is called by the builders before save.
 func PriorityValidator(pr role.Priority) error {
 	switch pr.String() {
