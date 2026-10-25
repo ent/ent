@@ -538,13 +538,15 @@ The framework provides a few built-in validators for each type:
   - `Positive()`
   - `Negative()`
   - `NonNegative()`
-  - `Min(i)` - Validate that the given value is > i.
-  - `Max(i)` - Validate that the given value is < i.
+  - `Min(i)` - Validate that the given value is >= i.
+  - `Max(i)` - Validate that the given value is <= i.
   - `Range(i, j)` - Validate that the given value is within the range [i, j].
 
 - `string`
   - `MinLen(i)`
   - `MaxLen(i)`
+  - `MinRuneLen(i)` - Validate that the rune(Unicode code point) count of the given value is >= i.
+  - `MaxRuneLen(i)` - Validate that the rune(Unicode code point) count of the given value is <= i.
   - `Match(regexp.Regexp)`
   - `NotEmpty`
 
