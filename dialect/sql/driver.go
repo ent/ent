@@ -221,7 +221,18 @@ func (c Conn) maySetVars(ctx context.Context) (ExecQuerier, func() error, error)
 			}
 			seen[s.k] = struct{}{}
 		}
-		if _, err := ex.ExecContext(ctx, fmt.Sprintf("SET %s = '%s'", s.k, s.v)); err != nil {
+
+		setTemplate := "SET %s = '%s'"
+		if c.dialect == dialect.Postgres {
+			// In Postgres, we can use "SET LOCAL" to scope the variable to the transaction.
+			// Without this, sqlvars set in a transaction will still be set once commit/rollback is called
+			// and connection is returned to the pool.
+			if _, ok := ex.(*sql.Tx); ok {
+				setTemplate = "SET LOCAL %s = '%s'"
+			}
+		}
+
+		if _, err := ex.ExecContext(ctx, fmt.Sprintf(setTemplate, s.k, s.v)); err != nil {
 			if cf != nil {
 				err = errors.Join(err, cf())
 			}
