@@ -9,6 +9,7 @@ package pet
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/multischema/ent/internal"
 )
 
 const (
@@ -76,7 +77,11 @@ func ByOwnerID(opts ...sql.OrderTermOption) OrderOption {
 // ByOwnerField orders the results by owner field.
 func ByOwnerField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newOwnerStep(), sql.OrderByField(field, opts...))
+		step := newOwnerStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Pet
+		sqlgraph.OrderByNeighborTerms(s, step, sql.OrderByField(field, opts...))
 	}
 }
 func newOwnerStep() *sqlgraph.Step {

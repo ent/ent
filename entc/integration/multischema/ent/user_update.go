@@ -520,7 +520,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
-		edge.Schema = _u.schemaConfig.UserChildren
+		edge.Schema = _u.schemaConfig.Parent
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.RemovedParentsIDs(); len(nodes) > 0 && !_u.mutation.ParentsCleared() {
@@ -534,7 +534,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
-		edge.Schema = _u.schemaConfig.UserChildren
+		edge.Schema = _u.schemaConfig.Parent
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
@@ -551,7 +551,7 @@ func (_u *UserUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
-		edge.Schema = _u.schemaConfig.UserChildren
+		edge.Schema = _u.schemaConfig.Parent
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
@@ -1250,7 +1250,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
-		edge.Schema = _u.schemaConfig.UserChildren
+		edge.Schema = _u.schemaConfig.Parent
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := _u.mutation.RemovedParentsIDs(); len(nodes) > 0 && !_u.mutation.ParentsCleared() {
@@ -1264,7 +1264,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
-		edge.Schema = _u.schemaConfig.UserChildren
+		edge.Schema = _u.schemaConfig.Parent
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
@@ -1281,7 +1281,7 @@ func (_u *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
-		edge.Schema = _u.schemaConfig.UserChildren
+		edge.Schema = _u.schemaConfig.Parent
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}

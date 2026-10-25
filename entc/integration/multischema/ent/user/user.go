@@ -9,6 +9,7 @@ package user
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/entc/integration/multischema/ent/internal"
 )
 
 const (
@@ -120,98 +121,154 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 // ByPetsCount orders the results by pets count.
 func ByPetsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPetsStep(), opts...)
+		step := newPetsStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Pet
+		step.Edge.Schema = schemaConfig.Pet
+		sqlgraph.OrderByNeighborsCount(s, step, opts...)
 	}
 }
 
 // ByPets orders the results by pets terms.
 func ByPets(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPetsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		step := newPetsStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Pet
+		step.Edge.Schema = schemaConfig.Pet
+		sqlgraph.OrderByNeighborTerms(s, step, append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByGroupsCount orders the results by groups count.
 func ByGroupsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newGroupsStep(), opts...)
+		step := newGroupsStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Group
+		step.Edge.Schema = schemaConfig.GroupUsers
+		sqlgraph.OrderByNeighborsCount(s, step, opts...)
 	}
 }
 
 // ByGroups orders the results by groups terms.
 func ByGroups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newGroupsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		step := newGroupsStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Group
+		step.Edge.Schema = schemaConfig.GroupUsers
+		sqlgraph.OrderByNeighborTerms(s, step, append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByFriendsCount orders the results by friends count.
 func ByFriendsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newFriendsStep(), opts...)
+		step := newFriendsStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Friendship
+		sqlgraph.OrderByNeighborsCount(s, step, opts...)
 	}
 }
 
 // ByFriends orders the results by friends terms.
 func ByFriends(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newFriendsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		step := newFriendsStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Friendship
+		sqlgraph.OrderByNeighborTerms(s, step, append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByParentsCount orders the results by parents count.
 func ByParentsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newParentsStep(), opts...)
+		step := newParentsStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Parent
+		sqlgraph.OrderByNeighborsCount(s, step, opts...)
 	}
 }
 
 // ByParents orders the results by parents terms.
 func ByParents(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newParentsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		step := newParentsStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Parent
+		sqlgraph.OrderByNeighborTerms(s, step, append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByChildrenCount orders the results by children count.
 func ByChildrenCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newChildrenStep(), opts...)
+		step := newChildrenStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Parent
+		sqlgraph.OrderByNeighborsCount(s, step, opts...)
 	}
 }
 
 // ByChildren orders the results by children terms.
 func ByChildren(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newChildrenStep(), append([]sql.OrderTerm{term}, terms...)...)
+		step := newChildrenStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.User
+		step.Edge.Schema = schemaConfig.Parent
+		sqlgraph.OrderByNeighborTerms(s, step, append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByFriendshipsCount orders the results by friendships count.
 func ByFriendshipsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newFriendshipsStep(), opts...)
+		step := newFriendshipsStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Friendship
+		step.Edge.Schema = schemaConfig.Friendship
+		sqlgraph.OrderByNeighborsCount(s, step, opts...)
 	}
 }
 
 // ByFriendships orders the results by friendships terms.
 func ByFriendships(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newFriendshipsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		step := newFriendshipsStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Friendship
+		step.Edge.Schema = schemaConfig.Friendship
+		sqlgraph.OrderByNeighborTerms(s, step, append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
 // ByParentHoodCount orders the results by parent_hood count.
 func ByParentHoodCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newParentHoodStep(), opts...)
+		step := newParentHoodStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Parent
+		step.Edge.Schema = schemaConfig.Parent
+		sqlgraph.OrderByNeighborsCount(s, step, opts...)
 	}
 }
 
 // ByParentHood orders the results by parent_hood terms.
 func ByParentHood(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newParentHoodStep(), append([]sql.OrderTerm{term}, terms...)...)
+		step := newParentHoodStep()
+		schemaConfig := internal.SchemaConfigFromContext(s.Context())
+		step.To.Schema = schemaConfig.Parent
+		step.Edge.Schema = schemaConfig.Parent
+		sqlgraph.OrderByNeighborTerms(s, step, append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newPetsStep() *sqlgraph.Step {
