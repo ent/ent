@@ -957,9 +957,11 @@ func (a *Atlas) tables(tables []*Table) ([]*schema.Table, error) {
 }
 
 func (a *Atlas) aColumns(et *Table, at *schema.Table) error {
+	at.SetComment(et.Comment)
 	for _, c1 := range et.Columns {
 		c2 := schema.NewColumn(c1.Name).
 			SetNull(c1.Nullable)
+		c2.SetComment(c1.Comment)
 		if c1.Collation != "" {
 			c2.SetCollation(c1.Collation)
 		}
