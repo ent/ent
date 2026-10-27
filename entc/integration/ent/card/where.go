@@ -259,6 +259,11 @@ func NumberHasSuffix(v string) predicate.Card {
 	return predicate.Card(sql.FieldHasSuffix(FieldNumber, v))
 }
 
+// NumberRegex applies the Regex predicate on the "number" field.
+func NumberRegex(v string) predicate.Card {
+	return predicate.Card(sql.FieldRegex(FieldNumber, v))
+}
+
 // NumberEqualFold applies the EqualFold predicate on the "number" field.
 func NumberEqualFold(v string) predicate.Card {
 	return predicate.Card(sql.FieldEqualFold(FieldNumber, v))
@@ -322,6 +327,11 @@ func NameHasPrefix(v string) predicate.Card {
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.Card {
 	return predicate.Card(sql.FieldHasSuffix(FieldName, v))
+}
+
+// NameRegex applies the Regex predicate on the "name" field.
+func NameRegex(v string) predicate.Card {
+	return predicate.Card(sql.FieldRegex(FieldName, v))
 }
 
 // NameIsNil applies the IsNil predicate on the "name" field.

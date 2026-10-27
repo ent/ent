@@ -199,6 +199,11 @@ func MixedStringHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldMixedString, v))
 }
 
+// MixedStringRegex applies the Regex predicate on the "mixed_string" field.
+func MixedStringRegex(v string) predicate.User {
+	return predicate.User(sql.FieldRegex(FieldMixedString, v))
+}
+
 // MixedStringEqualFold applies the EqualFold predicate on the "mixed_string" field.
 func MixedStringEqualFold(v string) predicate.User {
 	return predicate.User(sql.FieldEqualFold(FieldMixedString, v))
@@ -334,6 +339,11 @@ func NameHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldName, v))
 }
 
+// NameRegex applies the Regex predicate on the "name" field.
+func NameRegex(v string) predicate.User {
+	return predicate.User(sql.FieldRegex(FieldName, v))
+}
+
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.User {
 	return predicate.User(sql.FieldEqualFold(FieldName, v))
@@ -397,6 +407,11 @@ func DescriptionHasPrefix(v string) predicate.User {
 // DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
 func DescriptionHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldDescription, v))
+}
+
+// DescriptionRegex applies the Regex predicate on the "description" field.
+func DescriptionRegex(v string) predicate.User {
+	return predicate.User(sql.FieldRegex(FieldDescription, v))
 }
 
 // DescriptionIsNil applies the IsNil predicate on the "description" field.
@@ -474,6 +489,11 @@ func NicknameHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldNickname, v))
 }
 
+// NicknameRegex applies the Regex predicate on the "nickname" field.
+func NicknameRegex(v string) predicate.User {
+	return predicate.User(sql.FieldRegex(FieldNickname, v))
+}
+
 // NicknameEqualFold applies the EqualFold predicate on the "nickname" field.
 func NicknameEqualFold(v string) predicate.User {
 	return predicate.User(sql.FieldEqualFold(FieldNickname, v))
@@ -537,6 +557,11 @@ func PhoneHasPrefix(v string) predicate.User {
 // PhoneHasSuffix applies the HasSuffix predicate on the "phone" field.
 func PhoneHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldPhone, v))
+}
+
+// PhoneRegex applies the Regex predicate on the "phone" field.
+func PhoneRegex(v string) predicate.User {
+	return predicate.User(sql.FieldRegex(FieldPhone, v))
 }
 
 // PhoneEqualFold applies the EqualFold predicate on the "phone" field.
@@ -654,6 +679,11 @@ func TitleHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldTitle, v))
 }
 
+// TitleRegex applies the Regex predicate on the "title" field.
+func TitleRegex(v string) predicate.User {
+	return predicate.User(sql.FieldRegex(FieldTitle, v))
+}
+
 // TitleEqualFold applies the EqualFold predicate on the "title" field.
 func TitleEqualFold(v string) predicate.User {
 	return predicate.User(sql.FieldEqualFold(FieldTitle, v))
@@ -717,6 +747,11 @@ func NewNameHasPrefix(v string) predicate.User {
 // NewNameHasSuffix applies the HasSuffix predicate on the "new_name" field.
 func NewNameHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldNewName, v))
+}
+
+// NewNameRegex applies the Regex predicate on the "new_name" field.
+func NewNameRegex(v string) predicate.User {
+	return predicate.User(sql.FieldRegex(FieldNewName, v))
 }
 
 // NewNameIsNil applies the IsNil predicate on the "new_name" field.
@@ -792,6 +827,11 @@ func NewTokenHasPrefix(v string) predicate.User {
 // NewTokenHasSuffix applies the HasSuffix predicate on the "new_token" field.
 func NewTokenHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldNewToken, v))
+}
+
+// NewTokenRegex applies the Regex predicate on the "new_token" field.
+func NewTokenRegex(v string) predicate.User {
+	return predicate.User(sql.FieldRegex(FieldNewToken, v))
 }
 
 // NewTokenEqualFold applies the EqualFold predicate on the "new_token" field.
@@ -969,6 +1009,11 @@ func WorkplaceHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldWorkplace, v))
 }
 
+// WorkplaceRegex applies the Regex predicate on the "workplace" field.
+func WorkplaceRegex(v string) predicate.User {
+	return predicate.User(sql.FieldRegex(FieldWorkplace, v))
+}
+
 // WorkplaceIsNil applies the IsNil predicate on the "workplace" field.
 func WorkplaceIsNil() predicate.User {
 	return predicate.User(sql.FieldIsNull(FieldWorkplace))
@@ -1054,6 +1099,11 @@ func DefaultExprHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldDefaultExpr, v))
 }
 
+// DefaultExprRegex applies the Regex predicate on the "default_expr" field.
+func DefaultExprRegex(v string) predicate.User {
+	return predicate.User(sql.FieldRegex(FieldDefaultExpr, v))
+}
+
 // DefaultExprIsNil applies the IsNil predicate on the "default_expr" field.
 func DefaultExprIsNil() predicate.User {
 	return predicate.User(sql.FieldIsNull(FieldDefaultExpr))
@@ -1127,6 +1177,11 @@ func DefaultExprsHasPrefix(v string) predicate.User {
 // DefaultExprsHasSuffix applies the HasSuffix predicate on the "default_exprs" field.
 func DefaultExprsHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldDefaultExprs, v))
+}
+
+// DefaultExprsRegex applies the Regex predicate on the "default_exprs" field.
+func DefaultExprsRegex(v string) predicate.User {
+	return predicate.User(sql.FieldRegex(FieldDefaultExprs, v))
 }
 
 // DefaultExprsIsNil applies the IsNil predicate on the "default_exprs" field.
@@ -1242,6 +1297,11 @@ func DropOptionalHasPrefix(v string) predicate.User {
 // DropOptionalHasSuffix applies the HasSuffix predicate on the "drop_optional" field.
 func DropOptionalHasSuffix(v string) predicate.User {
 	return predicate.User(sql.FieldHasSuffix(FieldDropOptional, v))
+}
+
+// DropOptionalRegex applies the Regex predicate on the "drop_optional" field.
+func DropOptionalRegex(v string) predicate.User {
+	return predicate.User(sql.FieldRegex(FieldDropOptional, v))
 }
 
 // DropOptionalEqualFold applies the EqualFold predicate on the "drop_optional" field.

@@ -196,6 +196,16 @@ func BinaryHasSuffix(v *url.URL) predicate.ExValueScan {
 	return predicate.ExValueScanOrErr(sql.FieldHasSuffix(FieldBinary, vcs), err)
 }
 
+// BinaryRegex applies the Regex predicate on the "binary" field.
+func BinaryRegex(v *url.URL) predicate.ExValueScan {
+	vc, err := ValueScanner.Binary.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("binary value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldRegex(FieldBinary, vcs), err)
+}
+
 // BinaryEqualFold applies the EqualFold predicate on the "binary" field.
 func BinaryEqualFold(v *url.URL) predicate.ExValueScan {
 	vc, err := ValueScanner.Binary.Value(v)
@@ -308,6 +318,16 @@ func BinaryOptionalHasSuffix(v *url.URL) predicate.ExValueScan {
 		err = fmt.Errorf("binary_optional value is not a string: %T", vc)
 	}
 	return predicate.ExValueScanOrErr(sql.FieldHasSuffix(FieldBinaryOptional, vcs), err)
+}
+
+// BinaryOptionalRegex applies the Regex predicate on the "binary_optional" field.
+func BinaryOptionalRegex(v *url.URL) predicate.ExValueScan {
+	vc, err := ValueScanner.BinaryOptional.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("binary_optional value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldRegex(FieldBinaryOptional, vcs), err)
 }
 
 // BinaryOptionalIsNil applies the IsNil predicate on the "binary_optional" field.
@@ -434,6 +454,16 @@ func TextHasSuffix(v *big.Int) predicate.ExValueScan {
 	return predicate.ExValueScanOrErr(sql.FieldHasSuffix(FieldText, vcs), err)
 }
 
+// TextRegex applies the Regex predicate on the "text" field.
+func TextRegex(v *big.Int) predicate.ExValueScan {
+	vc, err := ValueScanner.Text.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("text value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldRegex(FieldText, vcs), err)
+}
+
 // TextEqualFold applies the EqualFold predicate on the "text" field.
 func TextEqualFold(v *big.Int) predicate.ExValueScan {
 	vc, err := ValueScanner.Text.Value(v)
@@ -546,6 +576,16 @@ func TextOptionalHasSuffix(v *big.Int) predicate.ExValueScan {
 		err = fmt.Errorf("text_optional value is not a string: %T", vc)
 	}
 	return predicate.ExValueScanOrErr(sql.FieldHasSuffix(FieldTextOptional, vcs), err)
+}
+
+// TextOptionalRegex applies the Regex predicate on the "text_optional" field.
+func TextOptionalRegex(v *big.Int) predicate.ExValueScan {
+	vc, err := ValueScanner.TextOptional.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("text_optional value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldRegex(FieldTextOptional, vcs), err)
 }
 
 // TextOptionalIsNil applies the IsNil predicate on the "text_optional" field.
@@ -672,6 +712,16 @@ func Base64HasSuffix(v string) predicate.ExValueScan {
 	return predicate.ExValueScanOrErr(sql.FieldHasSuffix(FieldBase64, vcs), err)
 }
 
+// Base64Regex applies the Regex predicate on the "base64" field.
+func Base64Regex(v string) predicate.ExValueScan {
+	vc, err := ValueScanner.Base64.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("base64 value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldRegex(FieldBase64, vcs), err)
+}
+
 // Base64EqualFold applies the EqualFold predicate on the "base64" field.
 func Base64EqualFold(v string) predicate.ExValueScan {
 	vc, err := ValueScanner.Base64.Value(v)
@@ -786,6 +836,16 @@ func CustomHasSuffix(v string) predicate.ExValueScan {
 	return predicate.ExValueScanOrErr(sql.FieldHasSuffix(FieldCustom, vcs), err)
 }
 
+// CustomRegex applies the Regex predicate on the "custom" field.
+func CustomRegex(v string) predicate.ExValueScan {
+	vc, err := ValueScanner.Custom.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("custom value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldRegex(FieldCustom, vcs), err)
+}
+
 // CustomEqualFold applies the EqualFold predicate on the "custom" field.
 func CustomEqualFold(v string) predicate.ExValueScan {
 	vc, err := ValueScanner.Custom.Value(v)
@@ -898,6 +958,16 @@ func CustomOptionalHasSuffix(v string) predicate.ExValueScan {
 		err = fmt.Errorf("custom_optional value is not a string: %T", vc)
 	}
 	return predicate.ExValueScanOrErr(sql.FieldHasSuffix(FieldCustomOptional, vcs), err)
+}
+
+// CustomOptionalRegex applies the Regex predicate on the "custom_optional" field.
+func CustomOptionalRegex(v string) predicate.ExValueScan {
+	vc, err := ValueScanner.CustomOptional.Value(v)
+	vcs, ok := vc.(string)
+	if err == nil && !ok {
+		err = fmt.Errorf("custom_optional value is not a string: %T", vc)
+	}
+	return predicate.ExValueScanOrErr(sql.FieldRegex(FieldCustomOptional, vcs), err)
 }
 
 // CustomOptionalIsNil applies the IsNil predicate on the "custom_optional" field.

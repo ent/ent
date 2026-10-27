@@ -71,6 +71,10 @@ func TestPString(t *testing.T) {
 			P: entql.EQ(entql.F("current"), entql.F("total")).Negate(),
 			S: `!(current == total)`,
 		},
+		{
+			P: entql.Regex("field_name", "pattern"),
+			S: `regex(field_name, "pattern")`,
+		},
 	}
 	for i := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {

@@ -239,6 +239,11 @@ func NameHasSuffix(v string) predicate.File {
 	return predicate.File(sql.FieldHasSuffix(FieldName, v))
 }
 
+// NameRegex applies the Regex predicate on the "name" field.
+func NameRegex(v string) predicate.File {
+	return predicate.File(sql.FieldRegex(FieldName, v))
+}
+
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.File {
 	return predicate.File(sql.FieldEqualFold(FieldName, v))
@@ -302,6 +307,11 @@ func UserHasPrefix(v string) predicate.File {
 // UserHasSuffix applies the HasSuffix predicate on the "user" field.
 func UserHasSuffix(v string) predicate.File {
 	return predicate.File(sql.FieldHasSuffix(FieldUser, v))
+}
+
+// UserRegex applies the Regex predicate on the "user" field.
+func UserRegex(v string) predicate.File {
+	return predicate.File(sql.FieldRegex(FieldUser, v))
 }
 
 // UserIsNil applies the IsNil predicate on the "user" field.
@@ -377,6 +387,11 @@ func GroupHasPrefix(v string) predicate.File {
 // GroupHasSuffix applies the HasSuffix predicate on the "group" field.
 func GroupHasSuffix(v string) predicate.File {
 	return predicate.File(sql.FieldHasSuffix(FieldGroup, v))
+}
+
+// GroupRegex applies the Regex predicate on the "group" field.
+func GroupRegex(v string) predicate.File {
+	return predicate.File(sql.FieldRegex(FieldGroup, v))
 }
 
 // GroupIsNil applies the IsNil predicate on the "group" field.

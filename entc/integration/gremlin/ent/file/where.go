@@ -338,6 +338,13 @@ func NameHasSuffix(v string) predicate.File {
 	})
 }
 
+// NameRegex applies the Regex predicate on the "name" field.
+func NameRegex(v string) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.Regex(v))
+	})
+}
+
 // UserEQ applies the EQ predicate on the "user" field.
 func UserEQ(v string) predicate.File {
 	return predicate.File(func(t *dsl.Traversal) {
@@ -412,6 +419,13 @@ func UserHasPrefix(v string) predicate.File {
 func UserHasSuffix(v string) predicate.File {
 	return predicate.File(func(t *dsl.Traversal) {
 		t.Has(Label, FieldUser, p.EndingWith(v))
+	})
+}
+
+// UserRegex applies the Regex predicate on the "user" field.
+func UserRegex(v string) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldUser, p.Regex(v))
 	})
 }
 
@@ -503,6 +517,13 @@ func GroupHasPrefix(v string) predicate.File {
 func GroupHasSuffix(v string) predicate.File {
 	return predicate.File(func(t *dsl.Traversal) {
 		t.Has(Label, FieldGroup, p.EndingWith(v))
+	})
+}
+
+// GroupRegex applies the Regex predicate on the "group" field.
+func GroupRegex(v string) predicate.File {
+	return predicate.File(func(t *dsl.Traversal) {
+		t.Has(Label, FieldGroup, p.Regex(v))
 	})
 }
 

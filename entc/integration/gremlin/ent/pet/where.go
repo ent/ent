@@ -262,6 +262,13 @@ func NameHasSuffix(v string) predicate.Pet {
 	})
 }
 
+// NameRegex applies the Regex predicate on the "name" field.
+func NameRegex(v string) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.Regex(v))
+	})
+}
+
 // UUIDEQ applies the EQ predicate on the "uuid" field.
 func UUIDEQ(v uuid.UUID) predicate.Pet {
 	return predicate.Pet(func(t *dsl.Traversal) {
@@ -406,6 +413,13 @@ func NicknameHasPrefix(v string) predicate.Pet {
 func NicknameHasSuffix(v string) predicate.Pet {
 	return predicate.Pet(func(t *dsl.Traversal) {
 		t.Has(Label, FieldNickname, p.EndingWith(v))
+	})
+}
+
+// NicknameRegex applies the Regex predicate on the "nickname" field.
+func NicknameRegex(v string) predicate.Pet {
+	return predicate.Pet(func(t *dsl.Traversal) {
+		t.Has(Label, FieldNickname, p.Regex(v))
 	})
 }
 

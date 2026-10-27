@@ -175,6 +175,13 @@ func DescHasSuffix(v string) predicate.GroupInfo {
 	})
 }
 
+// DescRegex applies the Regex predicate on the "desc" field.
+func DescRegex(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(func(t *dsl.Traversal) {
+		t.Has(Label, FieldDesc, p.Regex(v))
+	})
+}
+
 // MaxUsersEQ applies the EQ predicate on the "max_users" field.
 func MaxUsersEQ(v int) predicate.GroupInfo {
 	return predicate.GroupInfo(func(t *dsl.Traversal) {

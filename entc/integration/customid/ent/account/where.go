@@ -118,6 +118,11 @@ func EmailHasSuffix(v string) predicate.Account {
 	return predicate.Account(sql.FieldHasSuffix(FieldEmail, v))
 }
 
+// EmailRegex applies the Regex predicate on the "email" field.
+func EmailRegex(v string) predicate.Account {
+	return predicate.Account(sql.FieldRegex(FieldEmail, v))
+}
+
 // EmailEqualFold applies the EqualFold predicate on the "email" field.
 func EmailEqualFold(v string) predicate.Account {
 	return predicate.Account(sql.FieldEqualFold(FieldEmail, v))

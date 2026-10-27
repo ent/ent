@@ -122,6 +122,11 @@ func DescHasSuffix(v string) predicate.GroupInfo {
 	return predicate.GroupInfo(sql.FieldHasSuffix(FieldDesc, v))
 }
 
+// DescRegex applies the Regex predicate on the "desc" field.
+func DescRegex(v string) predicate.GroupInfo {
+	return predicate.GroupInfo(sql.FieldRegex(FieldDesc, v))
+}
+
 // DescEqualFold applies the EqualFold predicate on the "desc" field.
 func DescEqualFold(v string) predicate.GroupInfo {
 	return predicate.GroupInfo(sql.FieldEqualFold(FieldDesc, v))

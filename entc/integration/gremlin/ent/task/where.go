@@ -347,6 +347,13 @@ func NameHasSuffix(v string) predicate.Task {
 	})
 }
 
+// NameRegex applies the Regex predicate on the "name" field.
+func NameRegex(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldName, p.Regex(v))
+	})
+}
+
 // NameIsNil applies the IsNil predicate on the "name" field.
 func NameIsNil() predicate.Task {
 	return predicate.Task(func(t *dsl.Traversal) {
@@ -435,6 +442,13 @@ func OwnerHasPrefix(v string) predicate.Task {
 func OwnerHasSuffix(v string) predicate.Task {
 	return predicate.Task(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOwner, p.EndingWith(v))
+	})
+}
+
+// OwnerRegex applies the Regex predicate on the "owner" field.
+func OwnerRegex(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOwner, p.Regex(v))
 	})
 }
 
@@ -666,6 +680,13 @@ func OpHasPrefix(v string) predicate.Task {
 func OpHasSuffix(v string) predicate.Task {
 	return predicate.Task(func(t *dsl.Traversal) {
 		t.Has(Label, FieldOp, p.EndingWith(v))
+	})
+}
+
+// OpRegex applies the Regex predicate on the "op" field.
+func OpRegex(v string) predicate.Task {
+	return predicate.Task(func(t *dsl.Traversal) {
+		t.Has(Label, FieldOp, p.Regex(v))
 	})
 }
 
