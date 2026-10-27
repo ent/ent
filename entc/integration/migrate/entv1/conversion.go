@@ -156,6 +156,11 @@ func (_m *Conversion) Unwrap() *Conversion {
 	return _m
 }
 
+// TableName returns the table name of the Conversion in the database.
+func (c *Conversion) TableName() string {
+	return conversion.Table
+}
+
 // String implements the fmt.Stringer.
 func (_m *Conversion) String() string {
 	var builder strings.Builder
