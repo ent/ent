@@ -16,6 +16,7 @@ import (
 )
 
 // Comment that appears in both the schema and the generated code
+// Comment can span multiple lines
 type Media struct {
 	config `json:"-"`
 	// ID of the ent.
@@ -25,6 +26,7 @@ type Media struct {
 	// source_ui text
 	SourceURI string `json:"source_uri,omitempty"`
 	// media text
+	// Comment can span multiple lines
 	Text         string `json:"text,omitempty"`
 	selectValues sql.SelectValues
 }
