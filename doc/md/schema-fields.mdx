@@ -87,6 +87,9 @@ func (User) Fields() []ent.Field {
 			Default(false),
 		field.String("name").
 			Unique(),
+		// string field without limitation on the size
+		field.Text("note").
+			Default(""),
 		field.Time("created_at").
 			Default(time.Now),
 		field.JSON("url", &url.URL{}).
