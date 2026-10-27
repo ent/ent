@@ -411,14 +411,30 @@ func OrderByRand() func(*Selector) {
 func (f *OrderFieldTerm) ToFunc() func(*Selector) {
 	return func(s *Selector) {
 		s.OrderExprFunc(func(b *Builder) {
-			b.WriteString(s.C(f.Field))
-			if f.Desc {
-				b.WriteString(" DESC")
-			}
-			if f.NullsFirst {
-				b.WriteString(" NULLS FIRST")
-			} else if f.NullsLast {
-				b.WriteString(" NULLS LAST")
+			if b.Dialect() == dialect.MySQL {
+				// MySQL does not support the NULLS FIRST/LAST functionality.
+				// In MySQL, ordering is represented in ascending order by default.
+				if f.NullsFirst {
+					// If 'f' is null, the result is 0; otherwise 1.
+					b.WriteString(s.C(f.Field)).WriteString(" IS NOT NULL").Comma()
+				} else if f.NullsLast {
+					// If 'f' is null, the result is 1; otherwise 0.
+					b.WriteString(s.C(f.Field)).WriteString(" IS NULL").Comma()
+				}
+				b.WriteString(s.C(f.Field))
+				if f.Desc {
+					b.WriteString(" DESC")
+				}
+			} else {
+				b.WriteString(s.C(f.Field))
+				if f.Desc {
+					b.WriteString(" DESC")
+				}
+				if f.NullsFirst {
+					b.WriteString(" NULLS FIRST")
+				} else if f.NullsLast {
+					b.WriteString(" NULLS LAST")
+				}
 			}
 		})
 	}
