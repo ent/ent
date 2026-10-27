@@ -52,7 +52,7 @@ database schemas. Check out the [multi-schema doc](multischema-migrations.mdx) f
 ## Foreign Keys Configuration
 
 Ent allows to customize the foreign key creation and provide a [referential action](https://dev.mysql.com/doc/refman/8.0/en/create-table-foreign-keys.html#foreign-key-referential-actions)
-for the `ON DELETE` clause:
+for the `ON DELETE` and `ON UPDATE` clause:
 
 ```go title="ent/schema/user.go" {27}
 package schema
@@ -81,12 +81,12 @@ func (User) Fields() []ent.Field {
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("posts", Post.Type).
-			Annotations(entsql.OnDelete(entsql.Cascade)),
+			Annotations(entsql.OnDelete(entsql.Cascade), entsql.OnUpdate(entsql.Cascade)),
 	}
 }
 ```
 
-The example above configures the foreign key to cascade the deletion of rows in the parent table to the matching
+The example above configures the foreign key to cascade the deletion and update of rows in the parent table to the matching
 rows in the child table.
 
 ## Database Comments
