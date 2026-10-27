@@ -290,7 +290,10 @@ func (_q *SessionQuery) Clone() *SessionQuery {
 // WithDevice tells the query-builder to eager-load the nodes that are connected to
 // the "device" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *SessionQuery) WithDevice(opts ...func(*DeviceQuery)) *SessionQuery {
-	query := (&DeviceClient{config: _q.config}).Query()
+	query := _q.withDevice
+	if query == nil {
+		query = (&DeviceClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

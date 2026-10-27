@@ -289,7 +289,10 @@ func (_q *FileQuery) Clone() *FileQuery {
 // WithProcesses tells the query-builder to eager-load the nodes that are connected to
 // the "processes" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *FileQuery) WithProcesses(opts ...func(*ProcessQuery)) *FileQuery {
-	query := (&ProcessClient{config: _q.config}).Query()
+	query := _q.withProcesses
+	if query == nil {
+		query = (&ProcessClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

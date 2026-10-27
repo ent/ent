@@ -465,7 +465,10 @@ func (_q *UserQuery) Clone() *UserQuery {
 // WithPets tells the query-builder to eager-load the nodes that are connected to
 // the "pets" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithPets(opts ...func(*PetQuery)) *UserQuery {
-	query := (&PetClient{config: _q.config}).Query()
+	query := _q.withPets
+	if query == nil {
+		query = (&PetClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -476,7 +479,10 @@ func (_q *UserQuery) WithPets(opts ...func(*PetQuery)) *UserQuery {
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithParent(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withParent
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -487,7 +493,10 @@ func (_q *UserQuery) WithParent(opts ...func(*UserQuery)) *UserQuery {
 // WithChildren tells the query-builder to eager-load the nodes that are connected to
 // the "children" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithChildren(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withChildren
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -498,7 +507,10 @@ func (_q *UserQuery) WithChildren(opts ...func(*UserQuery)) *UserQuery {
 // WithSpouse tells the query-builder to eager-load the nodes that are connected to
 // the "spouse" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithSpouse(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withSpouse
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -509,7 +521,10 @@ func (_q *UserQuery) WithSpouse(opts ...func(*UserQuery)) *UserQuery {
 // WithCard tells the query-builder to eager-load the nodes that are connected to
 // the "card" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithCard(opts ...func(*CardQuery)) *UserQuery {
-	query := (&CardClient{config: _q.config}).Query()
+	query := _q.withCard
+	if query == nil {
+		query = (&CardClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -520,7 +535,10 @@ func (_q *UserQuery) WithCard(opts ...func(*CardQuery)) *UserQuery {
 // WithMetadata tells the query-builder to eager-load the nodes that are connected to
 // the "metadata" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithMetadata(opts ...func(*MetadataQuery)) *UserQuery {
-	query := (&MetadataClient{config: _q.config}).Query()
+	query := _q.withMetadata
+	if query == nil {
+		query = (&MetadataClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -531,7 +549,10 @@ func (_q *UserQuery) WithMetadata(opts ...func(*MetadataQuery)) *UserQuery {
 // WithInfo tells the query-builder to eager-load the nodes that are connected to
 // the "info" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithInfo(opts ...func(*InfoQuery)) *UserQuery {
-	query := (&InfoClient{config: _q.config}).Query()
+	query := _q.withInfo
+	if query == nil {
+		query = (&InfoClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -542,7 +563,10 @@ func (_q *UserQuery) WithInfo(opts ...func(*InfoQuery)) *UserQuery {
 // WithRentals tells the query-builder to eager-load the nodes that are connected to
 // the "rentals" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithRentals(opts ...func(*RentalQuery)) *UserQuery {
-	query := (&RentalClient{config: _q.config}).Query()
+	query := _q.withRentals
+	if query == nil {
+		query = (&RentalClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

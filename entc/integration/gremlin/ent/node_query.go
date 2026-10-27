@@ -296,7 +296,10 @@ func (_q *NodeQuery) Clone() *NodeQuery {
 // WithPrev tells the query-builder to eager-load the nodes that are connected to
 // the "prev" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *NodeQuery) WithPrev(opts ...func(*NodeQuery)) *NodeQuery {
-	query := (&NodeClient{config: _q.config}).Query()
+	query := _q.withPrev
+	if query == nil {
+		query = (&NodeClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -307,7 +310,10 @@ func (_q *NodeQuery) WithPrev(opts ...func(*NodeQuery)) *NodeQuery {
 // WithNext tells the query-builder to eager-load the nodes that are connected to
 // the "next" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *NodeQuery) WithNext(opts ...func(*NodeQuery)) *NodeQuery {
-	query := (&NodeClient{config: _q.config}).Query()
+	query := _q.withNext
+	if query == nil {
+		query = (&NodeClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

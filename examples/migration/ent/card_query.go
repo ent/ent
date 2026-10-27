@@ -314,7 +314,10 @@ func (_q *CardQuery) Clone() *CardQuery {
 // WithOwner tells the query-builder to eager-load the nodes that are connected to
 // the "owner" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *CardQuery) WithOwner(opts ...func(*UserQuery)) *CardQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withOwner
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -325,7 +328,10 @@ func (_q *CardQuery) WithOwner(opts ...func(*UserQuery)) *CardQuery {
 // WithPayments tells the query-builder to eager-load the nodes that are connected to
 // the "payments" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *CardQuery) WithPayments(opts ...func(*PaymentQuery)) *CardQuery {
-	query := (&PaymentClient{config: _q.config}).Query()
+	query := _q.withPayments
+	if query == nil {
+		query = (&PaymentClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

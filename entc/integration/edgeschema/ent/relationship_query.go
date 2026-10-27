@@ -265,7 +265,10 @@ func (_q *RelationshipQuery) Clone() *RelationshipQuery {
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *RelationshipQuery) WithUser(opts ...func(*UserQuery)) *RelationshipQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withUser
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -276,7 +279,10 @@ func (_q *RelationshipQuery) WithUser(opts ...func(*UserQuery)) *RelationshipQue
 // WithRelative tells the query-builder to eager-load the nodes that are connected to
 // the "relative" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *RelationshipQuery) WithRelative(opts ...func(*UserQuery)) *RelationshipQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withRelative
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -287,7 +293,10 @@ func (_q *RelationshipQuery) WithRelative(opts ...func(*UserQuery)) *Relationshi
 // WithInfo tells the query-builder to eager-load the nodes that are connected to
 // the "info" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *RelationshipQuery) WithInfo(opts ...func(*RelationshipInfoQuery)) *RelationshipQuery {
-	query := (&RelationshipInfoClient{config: _q.config}).Query()
+	query := _q.withInfo
+	if query == nil {
+		query = (&RelationshipInfoClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

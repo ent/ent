@@ -314,7 +314,10 @@ func (_q *IntSIDQuery) Clone() *IntSIDQuery {
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *IntSIDQuery) WithParent(opts ...func(*IntSIDQuery)) *IntSIDQuery {
-	query := (&IntSIDClient{config: _q.config}).Query()
+	query := _q.withParent
+	if query == nil {
+		query = (&IntSIDClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -325,7 +328,10 @@ func (_q *IntSIDQuery) WithParent(opts ...func(*IntSIDQuery)) *IntSIDQuery {
 // WithChildren tells the query-builder to eager-load the nodes that are connected to
 // the "children" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *IntSIDQuery) WithChildren(opts ...func(*IntSIDQuery)) *IntSIDQuery {
-	query := (&IntSIDClient{config: _q.config}).Query()
+	query := _q.withChildren
+	if query == nil {
+		query = (&IntSIDClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

@@ -312,7 +312,10 @@ func (_q *FileQuery) Clone() *FileQuery {
 // WithParent tells the query-builder to eager-load the nodes that are connected to
 // the "parent" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *FileQuery) WithParent(opts ...func(*FileQuery)) *FileQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := _q.withParent
+	if query == nil {
+		query = (&FileClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -323,7 +326,10 @@ func (_q *FileQuery) WithParent(opts ...func(*FileQuery)) *FileQuery {
 // WithChildren tells the query-builder to eager-load the nodes that are connected to
 // the "children" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *FileQuery) WithChildren(opts ...func(*FileQuery)) *FileQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := _q.withChildren
+	if query == nil {
+		query = (&FileClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

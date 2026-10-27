@@ -312,7 +312,10 @@ func (_q *FriendshipQuery) Clone() *FriendshipQuery {
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *FriendshipQuery) WithUser(opts ...func(*UserQuery)) *FriendshipQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withUser
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -323,7 +326,10 @@ func (_q *FriendshipQuery) WithUser(opts ...func(*UserQuery)) *FriendshipQuery {
 // WithFriend tells the query-builder to eager-load the nodes that are connected to
 // the "friend" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *FriendshipQuery) WithFriend(opts ...func(*UserQuery)) *FriendshipQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withFriend
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

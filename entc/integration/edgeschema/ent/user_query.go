@@ -562,7 +562,10 @@ func (_q *UserQuery) Clone() *UserQuery {
 // WithGroups tells the query-builder to eager-load the nodes that are connected to
 // the "groups" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithGroups(opts ...func(*GroupQuery)) *UserQuery {
-	query := (&GroupClient{config: _q.config}).Query()
+	query := _q.withGroups
+	if query == nil {
+		query = (&GroupClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -573,7 +576,10 @@ func (_q *UserQuery) WithGroups(opts ...func(*GroupQuery)) *UserQuery {
 // WithFriends tells the query-builder to eager-load the nodes that are connected to
 // the "friends" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithFriends(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withFriends
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -584,7 +590,10 @@ func (_q *UserQuery) WithFriends(opts ...func(*UserQuery)) *UserQuery {
 // WithRelatives tells the query-builder to eager-load the nodes that are connected to
 // the "relatives" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithRelatives(opts ...func(*UserQuery)) *UserQuery {
-	query := (&UserClient{config: _q.config}).Query()
+	query := _q.withRelatives
+	if query == nil {
+		query = (&UserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -595,7 +604,10 @@ func (_q *UserQuery) WithRelatives(opts ...func(*UserQuery)) *UserQuery {
 // WithLikedTweets tells the query-builder to eager-load the nodes that are connected to
 // the "liked_tweets" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithLikedTweets(opts ...func(*TweetQuery)) *UserQuery {
-	query := (&TweetClient{config: _q.config}).Query()
+	query := _q.withLikedTweets
+	if query == nil {
+		query = (&TweetClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -606,7 +618,10 @@ func (_q *UserQuery) WithLikedTweets(opts ...func(*TweetQuery)) *UserQuery {
 // WithTweets tells the query-builder to eager-load the nodes that are connected to
 // the "tweets" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithTweets(opts ...func(*TweetQuery)) *UserQuery {
-	query := (&TweetClient{config: _q.config}).Query()
+	query := _q.withTweets
+	if query == nil {
+		query = (&TweetClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -617,7 +632,10 @@ func (_q *UserQuery) WithTweets(opts ...func(*TweetQuery)) *UserQuery {
 // WithRoles tells the query-builder to eager-load the nodes that are connected to
 // the "roles" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithRoles(opts ...func(*RoleQuery)) *UserQuery {
-	query := (&RoleClient{config: _q.config}).Query()
+	query := _q.withRoles
+	if query == nil {
+		query = (&RoleClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -628,7 +646,10 @@ func (_q *UserQuery) WithRoles(opts ...func(*RoleQuery)) *UserQuery {
 // WithJoinedGroups tells the query-builder to eager-load the nodes that are connected to
 // the "joined_groups" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithJoinedGroups(opts ...func(*UserGroupQuery)) *UserQuery {
-	query := (&UserGroupClient{config: _q.config}).Query()
+	query := _q.withJoinedGroups
+	if query == nil {
+		query = (&UserGroupClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -639,7 +660,10 @@ func (_q *UserQuery) WithJoinedGroups(opts ...func(*UserGroupQuery)) *UserQuery 
 // WithFriendships tells the query-builder to eager-load the nodes that are connected to
 // the "friendships" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithFriendships(opts ...func(*FriendshipQuery)) *UserQuery {
-	query := (&FriendshipClient{config: _q.config}).Query()
+	query := _q.withFriendships
+	if query == nil {
+		query = (&FriendshipClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -650,7 +674,10 @@ func (_q *UserQuery) WithFriendships(opts ...func(*FriendshipQuery)) *UserQuery 
 // WithRelationship tells the query-builder to eager-load the nodes that are connected to
 // the "relationship" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithRelationship(opts ...func(*RelationshipQuery)) *UserQuery {
-	query := (&RelationshipClient{config: _q.config}).Query()
+	query := _q.withRelationship
+	if query == nil {
+		query = (&RelationshipClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -661,7 +688,10 @@ func (_q *UserQuery) WithRelationship(opts ...func(*RelationshipQuery)) *UserQue
 // WithLikes tells the query-builder to eager-load the nodes that are connected to
 // the "likes" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithLikes(opts ...func(*TweetLikeQuery)) *UserQuery {
-	query := (&TweetLikeClient{config: _q.config}).Query()
+	query := _q.withLikes
+	if query == nil {
+		query = (&TweetLikeClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -672,7 +702,10 @@ func (_q *UserQuery) WithLikes(opts ...func(*TweetLikeQuery)) *UserQuery {
 // WithUserTweets tells the query-builder to eager-load the nodes that are connected to
 // the "user_tweets" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithUserTweets(opts ...func(*UserTweetQuery)) *UserQuery {
-	query := (&UserTweetClient{config: _q.config}).Query()
+	query := _q.withUserTweets
+	if query == nil {
+		query = (&UserTweetClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -683,7 +716,10 @@ func (_q *UserQuery) WithUserTweets(opts ...func(*UserTweetQuery)) *UserQuery {
 // WithRolesUsers tells the query-builder to eager-load the nodes that are connected to
 // the "roles_users" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithRolesUsers(opts ...func(*RoleUserQuery)) *UserQuery {
-	query := (&RoleUserClient{config: _q.config}).Query()
+	query := _q.withRolesUsers
+	if query == nil {
+		query = (&RoleUserClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

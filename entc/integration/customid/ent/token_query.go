@@ -290,7 +290,10 @@ func (_q *TokenQuery) Clone() *TokenQuery {
 // WithAccount tells the query-builder to eager-load the nodes that are connected to
 // the "account" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *TokenQuery) WithAccount(opts ...func(*AccountQuery)) *TokenQuery {
-	query := (&AccountClient{config: _q.config}).Query()
+	query := _q.withAccount
+	if query == nil {
+		query = (&AccountClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

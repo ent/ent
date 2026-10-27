@@ -289,7 +289,10 @@ func (_q *UserQuery) Clone() *UserQuery {
 // WithCards tells the query-builder to eager-load the nodes that are connected to
 // the "cards" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *UserQuery) WithCards(opts ...func(*CardQuery)) *UserQuery {
-	query := (&CardClient{config: _q.config}).Query()
+	query := _q.withCards
+	if query == nil {
+		query = (&CardClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}

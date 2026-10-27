@@ -314,7 +314,10 @@ func (_q *ProcessQuery) Clone() *ProcessQuery {
 // WithFiles tells the query-builder to eager-load the nodes that are connected to
 // the "files" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *ProcessQuery) WithFiles(opts ...func(*FileQuery)) *ProcessQuery {
-	query := (&FileClient{config: _q.config}).Query()
+	query := _q.withFiles
+	if query == nil {
+		query = (&FileClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -325,7 +328,10 @@ func (_q *ProcessQuery) WithFiles(opts ...func(*FileQuery)) *ProcessQuery {
 // WithAttachedFiles tells the query-builder to eager-load the nodes that are connected to
 // the "attached_files" edge. The optional arguments are used to configure the query builder of the edge.
 func (_q *ProcessQuery) WithAttachedFiles(opts ...func(*AttachedFileQuery)) *ProcessQuery {
-	query := (&AttachedFileClient{config: _q.config}).Query()
+	query := _q.withAttachedFiles
+	if query == nil {
+		query = (&AttachedFileClient{config: _q.config}).Query()
+	}
 	for _, opt := range opts {
 		opt(query)
 	}
