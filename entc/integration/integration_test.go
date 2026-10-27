@@ -393,6 +393,16 @@ func Upsert(t *testing.T, client *ent.Client) {
 	require.Equal(t, "1111", users[1].Phone)
 	require.Equal(t, "B", users[1].Name)
 
+	// Return error from Exec when nil passed to CreateBulk
+	builders2 := []*ent.UserCreate{
+		nil,
+	}
+	err = client.User.CreateBulk(builders2...).
+		OnConflictColumns(user.FieldPhone).
+		UpdateNewValues().
+		Exec(ctx)
+	require.Error(t, err)
+
 	// Setting primary key manually.
 	a := client.Item.Create().SetID("A").SaveX(ctx)
 	require.Equal(t, "A", a.ID)
