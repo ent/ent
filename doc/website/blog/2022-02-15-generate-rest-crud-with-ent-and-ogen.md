@@ -199,7 +199,7 @@ type Handler interface {
 
 `ogent` adds an implementation for
 that handler in the file `ogent.go`. To see how you can define what routes to generate and what edges to eager load
-please head over to the `entoas` [documentation](https://github.com/ent/contrib/entoas).
+please head over to the `entoas` [documentation](https://github.com/ent/contrib/tree/master/entoas).
 
 The following shows an example for a generated READ route:
 
