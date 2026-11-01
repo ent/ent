@@ -24,7 +24,9 @@ type Driver struct {
 
 // NewDriver creates a new Driver with the given Conn and dialect.
 func NewDriver(dialect string, c Conn) *Driver {
-	return &Driver{dialect: dialect, Conn: c}
+	drv := &Driver{dialect: dialect, Conn: c}
+	drv.Conn.dialect = drv.Dialect()
+	return drv
 }
 
 // Open wraps the database/sql.Open method and returns a dialect.Driver that implements the an ent/dialect.Driver interface.
@@ -69,7 +71,7 @@ func (d *Driver) BeginTx(ctx context.Context, opts *TxOptions) (dialect.Tx, erro
 		return nil, err
 	}
 	return &Tx{
-		Conn: Conn{tx, d.dialect},
+		Conn: Conn{tx, d.Dialect()},
 		Tx:   tx,
 	}, nil
 }
@@ -92,6 +94,7 @@ type sessionVars struct {
 }
 
 // WithVar returns a new context that holds the session variable to be executed before every query.
+// The name must be a trusted SQL variable name.
 func WithVar(ctx context.Context, name, value string) context.Context {
 	sv, _ := ctx.Value(ctxVarsKey{}).(sessionVars)
 	sv.vars = append(sv.vars, struct {
@@ -221,7 +224,11 @@ func (c Conn) maySetVars(ctx context.Context) (ExecQuerier, func() error, error)
 			}
 			seen[s.k] = struct{}{}
 		}
-		if _, err := ex.ExecContext(ctx, fmt.Sprintf("SET %s = '%s'", s.k, s.v)); err != nil {
+		query, args := fmt.Sprintf("SET %s = ?", s.k), []any{s.v}
+		if c.dialect == dialect.Postgres {
+			query, args = "SELECT set_config($1, $2, false)", []any{s.k, s.v}
+		}
+		if _, err := ex.ExecContext(ctx, query, args...); err != nil {
 			if cf != nil {
 				err = errors.Join(err, cf())
 			}
