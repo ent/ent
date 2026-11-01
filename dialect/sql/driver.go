@@ -94,6 +94,8 @@ type sessionVars struct {
 }
 
 // WithVar returns a new context that holds the session variable to be executed before every query.
+// PostgreSQL variables set within a transaction are local to that transaction.
+// Variables set outside a transaction are reset after execution or closing query rows.
 // The name must be a trusted SQL variable name.
 func WithVar(ctx context.Context, name, value string) context.Context {
 	sv, _ := ctx.Value(ctxVarsKey{}).(sessionVars)
@@ -226,7 +228,8 @@ func (c Conn) maySetVars(ctx context.Context) (ExecQuerier, func() error, error)
 		}
 		query, args := fmt.Sprintf("SET %s = ?", s.k), []any{s.v}
 		if c.dialect == dialect.Postgres {
-			query, args = "SELECT set_config($1, $2, false)", []any{s.k, s.v}
+			_, local := ex.(*sql.Tx)
+			query, args = "SELECT set_config($1, $2, $3)", []any{s.k, s.v, local}
 		}
 		if _, err := ex.ExecContext(ctx, query, args...); err != nil {
 			if cf != nil {
