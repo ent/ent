@@ -768,3 +768,48 @@ func TestEdgeFieldCollation(t *testing.T) {
 	require.True(t, ok)
 	require.Equal(t, "utf8mb4_bin", col.Collation)
 }
+
+func TestPruneUnusedImports(t *testing.T) {
+	src := []byte(`package ent
+
+import (
+	"context"
+	"fmt"
+	"strings"
+
+	"entgo.io/ent"
+	"entgo.io/ent/dialect"
+)
+
+func f(ctx context.Context) string { return fmt.Sprint(ctx) }
+`)
+	pruned, complete := pruneUnusedImports("ent.go", src)
+	require.True(t, complete)
+	require.NotContains(t, string(pruned), `"strings"`)
+	require.NotContains(t, string(pruned), `"entgo.io/ent"`)
+	require.NotContains(t, string(pruned), `"entgo.io/ent/dialect"`)
+	require.Contains(t, string(pruned), `"context"`)
+	require.Contains(t, string(pruned), `"fmt"`)
+
+	// A selector on a package that is not imported still needs goimports.
+	src = []byte(`package ent
+
+import "fmt"
+
+func f() string { return fmt.Sprint(json.Valid(nil)) }
+`)
+	pruned, complete = pruneUnusedImports("ent.go", src)
+	require.False(t, complete)
+	require.Equal(t, src, pruned)
+
+	// Named imports are matched by their alias, not the path base.
+	src = []byte(`package ent
+
+import enttask "entgo.io/ent/task"
+
+var _ = enttask.Table
+`)
+	pruned, complete = pruneUnusedImports("ent.go", src)
+	require.True(t, complete)
+	require.Equal(t, src, pruned)
+}

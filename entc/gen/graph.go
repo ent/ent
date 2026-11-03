@@ -9,7 +9,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"go/ast"
 	"go/parser"
+	"go/printer"
 	"go/token"
 	"log"
 	"os"
@@ -25,6 +27,7 @@ import (
 	"entgo.io/ent/schema/field"
 
 	"golang.org/x/sync/errgroup"
+	"golang.org/x/tools/go/ast/astutil"
 	"golang.org/x/tools/imports"
 )
 
@@ -1196,7 +1199,12 @@ func (a assets) format() error {
 	for path, content := range a.files {
 		path, content := path, content
 		wg.Go(func() error {
-			src, err := imports.Process(path, content, nil)
+			// goimports resolves missing imports by parsing every sibling file
+			// in the package, which is quadratic in the number of generated
+			// files. Most files only need their unused imports dropped, so do
+			// that here and let goimports skip the resolution pass for them.
+			pruned, complete := pruneUnusedImports(path, content)
+			src, err := imports.Process(path, pruned, &imports.Options{FormatOnly: complete, Comments: true, TabIndent: true, TabWidth: 8})
 			if err != nil {
 				return fmt.Errorf("format file %s: %w", path, err)
 			}
@@ -1255,4 +1263,54 @@ func extendExisting(name string) bool {
 		}
 	}
 	return false
+}
+
+// pruneUnusedImports drops the imports the file never references and reports
+// whether every package selector in the file is covered by a remaining import.
+// Only files that still reference an unimported package need the goimports
+// resolution pass.
+func pruneUnusedImports(path string, src []byte) ([]byte, bool) {
+	fset := token.NewFileSet()
+	f, err := parser.ParseFile(fset, path, src, parser.ParseComments)
+	if err != nil {
+		return src, false
+	}
+	changed := false
+	for _, imp := range append([]*ast.ImportSpec(nil), f.Imports...) {
+		p := strings.Trim(imp.Path.Value, `"`)
+		if astutil.UsesImport(f, p) {
+			continue
+		}
+		name := ""
+		if imp.Name != nil {
+			name = imp.Name.Name
+		}
+		changed = astutil.DeleteNamedImport(fset, f, name, p) || changed
+	}
+	names := make(map[string]bool, len(f.Imports))
+	for _, imp := range f.Imports {
+		p := strings.Trim(imp.Path.Value, `"`)
+		if imp.Name != nil {
+			names[imp.Name.Name] = true
+		} else {
+			names[p[strings.LastIndex(p, "/")+1:]] = true
+		}
+	}
+	complete := true
+	ast.Inspect(f, func(n ast.Node) bool {
+		if sel, ok := n.(*ast.SelectorExpr); ok {
+			if id, ok := sel.X.(*ast.Ident); ok && id.Obj == nil && !names[id.Name] {
+				complete = false
+			}
+		}
+		return complete
+	})
+	if !changed {
+		return src, complete
+	}
+	var buf bytes.Buffer
+	if err := printer.Fprint(&buf, fset, f); err != nil {
+		return src, false
+	}
+	return buf.Bytes(), complete
 }
