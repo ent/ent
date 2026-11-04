@@ -229,7 +229,7 @@ func (c Conn) maySetVars(ctx context.Context) (ExecQuerier, func() error, error)
 		query, args := fmt.Sprintf("SET %s = ?", s.k), []any{s.v}
 		if c.dialect == dialect.Postgres {
 			_, local := ex.(*sql.Tx)
-			query, args = "SELECT set_config($1, $2, $3)", []any{s.k, s.v, local}
+			query, args = postgresVarQuery, []any{s.k, s.v, local}
 		}
 		if _, err := ex.ExecContext(ctx, query, args...); err != nil {
 			if cf != nil {
@@ -252,6 +252,17 @@ func (c Conn) maySetVars(ctx context.Context) (ExecQuerier, func() error, error)
 	}
 	return ex, cf, nil
 }
+
+// PostgreSQL SET quotes each string value for GUC_LIST_QUOTE settings as one
+// identifier. Preserve that behaviour when passing the value to set_config.
+// parse_ident converts the trusted SQL name without changing the RESET syntax.
+const postgresVarQuery = `SELECT set_config(name,
+	CASE WHEN lower(name) IN (
+		'search_path', 'temp_tablespaces', 'session_preload_libraries',
+		'shared_preload_libraries', 'local_preload_libraries',
+		'unix_socket_directories', 'output_plugin_libraries'
+	) THEN quote_ident($2) ELSE $2 END, $3)
+	FROM (SELECT array_to_string(parse_ident($1), '.') AS name) AS vars`
 
 var _ dialect.Driver = (*Driver)(nil)
 
