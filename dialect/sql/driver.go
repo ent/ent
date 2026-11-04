@@ -228,8 +228,15 @@ func (c Conn) maySetVars(ctx context.Context) (ExecQuerier, func() error, error)
 		}
 		query, args := fmt.Sprintf("SET %s = ?", s.k), []any{s.v}
 		if c.dialect == dialect.Postgres {
+			name, value, err := postgresVar(s.k, s.v)
+			if err != nil {
+				if cf != nil {
+					err = errors.Join(err, cf())
+				}
+				return nil, nil, err
+			}
 			_, local := ex.(*sql.Tx)
-			query, args = postgresVarQuery, []any{s.k, s.v, local}
+			query, args = "SELECT set_config($1, $2, $3)", []any{name, value, local}
 		}
 		if _, err := ex.ExecContext(ctx, query, args...); err != nil {
 			if cf != nil {
@@ -253,16 +260,94 @@ func (c Conn) maySetVars(ctx context.Context) (ExecQuerier, func() error, error)
 	return ex, cf, nil
 }
 
-// PostgreSQL SET quotes each string value for GUC_LIST_QUOTE settings as one
-// identifier. Preserve that behaviour when passing the value to set_config.
-// parse_ident converts the trusted SQL name without changing the RESET syntax.
-const postgresVarQuery = `SELECT set_config(name,
-	CASE WHEN lower(name) IN (
-		'search_path', 'temp_tablespaces', 'session_preload_libraries',
-		'shared_preload_libraries', 'local_preload_libraries',
-		'unix_socket_directories', 'output_plugin_libraries'
-	) THEN quote_ident($2) ELSE $2 END, $3)
-	FROM (SELECT array_to_string(parse_ident($1), '.') AS name) AS vars`
+// postgresVar converts a trusted SQL variable name to a configuration key.
+// Identifier-list settings treat the entire value as one identifier, as SET does.
+func postgresVar(name, value string) (string, string, error) {
+	if strings.ContainsRune(name, 0) {
+		return "", "", fmt.Errorf("dialect/sql: invalid PostgreSQL variable name %q", name)
+	}
+	var key strings.Builder
+	rest := name
+	for {
+		rest = strings.TrimLeft(rest, " \t\n\r\f")
+		part, tail, ok := postgresVarIdent(rest)
+		if !ok {
+			return "", "", fmt.Errorf("dialect/sql: invalid PostgreSQL variable name %q", name)
+		}
+		if key.Len() > 0 {
+			key.WriteByte('.')
+		}
+		key.WriteString(part)
+		rest = strings.TrimLeft(tail, " \t\n\r\f")
+		if rest == "" {
+			break
+		}
+		if rest[0] != '.' {
+			return "", "", fmt.Errorf("dialect/sql: invalid PostgreSQL variable name %q", name)
+		}
+		rest = rest[1:]
+	}
+	name = key.String()
+	switch postgresLower(name) {
+	case "search_path", "temp_tablespaces", "session_preload_libraries",
+		"shared_preload_libraries", "local_preload_libraries",
+		"unix_socket_directories", "output_plugin_libraries":
+		value = `"` + strings.ReplaceAll(value, `"`, `""`) + `"`
+	}
+	return name, value, nil
+}
+
+// postgresVarIdent reads one identifier without folding quoted characters.
+func postgresVarIdent(s string) (part, rest string, ok bool) {
+	if s == "" {
+		return "", "", false
+	}
+	if s[0] == '"' {
+		var quoted strings.Builder
+		rest = s[1:]
+		for {
+			prefix, tail, found := strings.Cut(rest, `"`)
+			if !found {
+				return "", "", false
+			}
+			quoted.WriteString(prefix)
+			if !strings.HasPrefix(tail, `"`) {
+				return quoted.String(), tail, quoted.Len() > 0
+			}
+			quoted.WriteByte('"')
+			rest = tail[1:]
+		}
+	}
+	if !postgresIdentStart(s[0]) {
+		return "", "", false
+	}
+	i := 1
+	for i < len(s) && (postgresIdentStart(s[i]) || s[i] >= '0' && s[i] <= '9' || s[i] == '$') {
+		i++
+	}
+	return postgresLower(s[:i]), s[i:], true
+}
+
+// postgresLower folds ASCII letters without changing non-ASCII identifier bytes.
+func postgresLower(s string) string {
+	for i := 0; i < len(s); i++ {
+		if s[i] < 'A' || s[i] > 'Z' {
+			continue
+		}
+		b := []byte(s)
+		for j := i; j < len(b); j++ {
+			if b[j] >= 'A' && b[j] <= 'Z' {
+				b[j] += 'a' - 'A'
+			}
+		}
+		return string(b)
+	}
+	return s
+}
+
+func postgresIdentStart(c byte) bool {
+	return c == '_' || c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= 0x80
+}
 
 var _ dialect.Driver = (*Driver)(nil)
 
