@@ -7,7 +7,6 @@ package sql
 import (
 	"context"
 	"database/sql"
-	"database/sql/driver"
 	"regexp"
 	"strings"
 	"testing"
@@ -85,52 +84,49 @@ func TestWithVars(t *testing.T) {
 
 func TestWithVarValues(t *testing.T) {
 	const value = "O'Reilly\\team; SELECT 1 --"
-	tests := []struct {
-		name        string
-		key         string
-		open        func(*sql.DB) *Driver
-		query       string
-		args        []driver.Value
-		reset       string
-		transaction bool
+	for _, tt := range []struct {
+		name, key, boundKey string
+		open                func(*sql.DB) *Driver
+		transaction         bool
 	}{
-		{"postgres", "app.user", func(db *sql.DB) *Driver { return OpenDB(dialect.Postgres, db) }, "SELECT set_config($1, $2, $3)", []driver.Value{"app.user", value, false}, "RESET app.user", false},
-		{"mysql", "@user", func(db *sql.DB) *Driver { return OpenDB(dialect.MySQL, db) }, "SET @user = ?", []driver.Value{value}, "SET @user = NULL", false},
-		{"postgres-driver", "app.user", func(db *sql.DB) *Driver { return NewDriver(dialect.Postgres, Conn{ExecQuerier: db}) }, "SELECT set_config($1, $2, $3)", []driver.Value{"app.user", value, false}, "RESET app.user", false},
-		{"postgres-wrapped-driver", "app.user", func(db *sql.DB) *Driver { return NewDriver("postgres-traced", Conn{ExecQuerier: db}) }, "SELECT set_config($1, $2, $3)", []driver.Value{"app.user", value, false}, "RESET app.user", false},
-		{"postgres-wrapped-transaction", "app.user", func(db *sql.DB) *Driver { return NewDriver("postgres-traced", Conn{ExecQuerier: db}) }, "SELECT set_config($1, $2, $3)", []driver.Value{"app.user", value, true}, "", true},
-		{"quoted-name", ` "app" . "User" `, func(db *sql.DB) *Driver { return OpenDB(dialect.Postgres, db) }, "SELECT set_config($1, $2, $3)", []driver.Value{"app.User", value, false}, `RESET  "app" . "User" `, false},
-	}
-	for _, tt := range tests {
+		{"postgres", "app.user", "app.user", func(db *sql.DB) *Driver { return OpenDB(dialect.Postgres, db) }, false},
+		{"mysql", "@user", "@user", func(db *sql.DB) *Driver { return OpenDB(dialect.MySQL, db) }, false},
+		{"postgres-driver", "app.user", "app.user", func(db *sql.DB) *Driver { return NewDriver(dialect.Postgres, Conn{ExecQuerier: db}) }, false},
+		{"postgres-wrapped-driver", "app.user", "app.user", func(db *sql.DB) *Driver { return NewDriver("postgres-traced", Conn{ExecQuerier: db}) }, false},
+		{"postgres-wrapped-transaction", "app.user", "app.user", func(db *sql.DB) *Driver { return NewDriver("postgres-traced", Conn{ExecQuerier: db}) }, true},
+		{"quoted-name", ` "app" . "User" `, "app.User", func(db *sql.DB) *Driver { return OpenDB(dialect.Postgres, db) }, false},
+	} {
 		t.Run(tt.name, func(t *testing.T) {
 			db, mock, err := sqlmock.New()
 			require.NoError(t, err)
 			t.Cleanup(func() { db.Close() })
 			drv := tt.open(db)
 			var ex dialect.ExecQuerier = drv
-			finish := func() {}
+			var tx dialect.Tx
 			if tt.transaction {
 				mock.ExpectBegin()
-				tx, err := drv.Tx(context.Background())
+				tx, err = drv.Tx(context.Background())
 				require.NoError(t, err)
 				ex = tx
-				finish = func() { require.NoError(t, tx.Commit()) }
 			}
-			setting := mock.ExpectExec(regexp.QuoteMeta(tt.query))
-			setting.WithArgs(tt.args...)
-			setting.WillReturnResult(sqlmock.NewResult(0, 0))
-			mock.ExpectExec("SELECT 1").WillReturnResult(sqlmock.NewResult(0, 0))
-			if tt.transaction {
-				mock.ExpectCommit()
+			if drv.Dialect() == dialect.Postgres {
+				mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, $2, $3)")).WithArgs(tt.boundKey, value, tt.transaction).WillReturnResult(sqlmock.NewResult(0, 0))
 			} else {
-				if drv.Dialect() == dialect.Postgres {
-					mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, NULL, false)")).WithArgs(tt.args[0]).WillReturnResult(sqlmock.NewResult(0, 0))
-				} else {
-					mock.ExpectExec(regexp.QuoteMeta(tt.reset)).WillReturnResult(sqlmock.NewResult(0, 0))
-				}
+				mock.ExpectExec(regexp.QuoteMeta("SET @user = ?")).WithArgs(value).WillReturnResult(sqlmock.NewResult(0, 0))
+			}
+			mock.ExpectExec("SELECT 1").WillReturnResult(sqlmock.NewResult(0, 0))
+			switch {
+			case tx != nil:
+				mock.ExpectCommit()
+			case drv.Dialect() == dialect.Postgres:
+				mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, NULL, false)")).WithArgs(tt.boundKey).WillReturnResult(sqlmock.NewResult(0, 0))
+			default:
+				mock.ExpectExec(regexp.QuoteMeta("SET @user = NULL")).WillReturnResult(sqlmock.NewResult(0, 0))
 			}
 			require.NoError(t, ex.Exec(WithVar(context.Background(), tt.key, value), "SELECT 1", []any{}, nil))
-			finish()
+			if tx != nil {
+				require.NoError(t, tx.Commit())
+			}
 			require.NoError(t, mock.ExpectationsWereMet())
 		})
 	}

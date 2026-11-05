@@ -16,10 +16,7 @@ import (
 )
 
 func TestPostgresWithVarNames(t *testing.T) {
-	drv, err := sql.Open("postgres", "host=localhost port=5437 user=postgres dbname=test password=pass sslmode=disable")
-	require.NoError(t, err)
-	t.Cleanup(func() { require.NoError(t, drv.Close()) })
-	drv.DB().SetMaxOpenConns(1)
+	drv := openPostgres(t)
 	ctx := context.Background()
 	for _, name := range []string{`"EntTenantA"`, `"Ent,Comma"`, `"Ent""Quote"`} {
 		_, err := drv.DB().ExecContext(ctx, "CREATE SCHEMA "+name)
@@ -67,10 +64,7 @@ func TestPostgresVarCleanup(t *testing.T) {
 	for _, key := range []string{"app.user", "app." + strings.Repeat("x", 100)} {
 		for _, operation := range []string{"query", "exec"} {
 			t.Run(key+"/"+operation, func(t *testing.T) {
-				drv, err := sql.Open("postgres", "host=localhost port=5437 user=postgres dbname=test password=pass sslmode=disable")
-				require.NoError(t, err)
-				t.Cleanup(func() { require.NoError(t, drv.Close()) })
-				drv.DB().SetMaxOpenConns(1)
+				drv := openPostgres(t)
 				ctx := context.Background()
 				var before int
 				require.NoError(t, drv.DB().QueryRow("SELECT pg_backend_pid()").Scan(&before))
@@ -83,7 +77,7 @@ func TestPostgresVarCleanup(t *testing.T) {
 					require.Equal(t, "alice", value)
 					require.NoError(t, rows.Close())
 				} else {
-					_, err = drv.DB().Exec("CREATE TEMP TABLE effects(id int)")
+					_, err := drv.DB().Exec("CREATE TEMP TABLE effects(id int)")
 					require.NoError(t, err)
 					require.NoError(t, drv.Exec(sql.WithVar(ctx, key, "alice"), "INSERT INTO effects VALUES (1)", []any{}, nil))
 					var count int
@@ -108,10 +102,7 @@ func TestPostgresTransactionVars(t *testing.T) {
 	} {
 		for _, commit := range []bool{false, true} {
 			t.Run(fmt.Sprintf("%s/commit=%t", tt.key, commit), func(t *testing.T) {
-				drv, err := sql.Open("postgres", "host=localhost port=5437 user=postgres dbname=test password=pass sslmode=disable")
-				require.NoError(t, err)
-				t.Cleanup(func() { require.NoError(t, drv.Close()) })
-				drv.DB().SetMaxOpenConns(1)
+				drv := openPostgres(t)
 				var original string
 				require.NoError(t, drv.DB().QueryRow("SELECT current_setting($1)", tt.key).Scan(&original))
 				tx, err := drv.BeginTx(context.Background(), &sql.TxOptions{ReadOnly: tt.key == "transaction_read_only"})
@@ -144,4 +135,13 @@ func TestPostgresTransactionVars(t *testing.T) {
 			})
 		}
 	}
+}
+
+func openPostgres(t *testing.T) *sql.Driver {
+	t.Helper()
+	drv, err := sql.Open("postgres", "host=localhost port=5437 user=postgres dbname=test password=pass sslmode=disable")
+	require.NoError(t, err)
+	t.Cleanup(func() { require.NoError(t, drv.Close()) })
+	drv.DB().SetMaxOpenConns(1)
+	return drv
 }
