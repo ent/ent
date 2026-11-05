@@ -194,18 +194,51 @@ func (c Conn) Query(ctx context.Context, query string, args, v any) error {
 	return nil
 }
 
+type varQuery struct {
+	query string
+	args  []any
+}
+
 // maySetVars sets the session variables before executing a query.
 func (c Conn) maySetVars(ctx context.Context) (ExecQuerier, func() error, error) {
 	sv, _ := ctx.Value(ctxVarsKey{}).(sessionVars)
 	if len(sv.vars) == 0 {
 		return c, nil, nil
 	}
-	var (
-		ex    ExecQuerier  // Underlying ExecQuerier.
-		cf    func() error // Close function.
-		reset []string     // Reset variables.
-		seen  = make(map[string]struct{}, len(sv.vars))
-	)
+	_, local := c.ExecQuerier.(*sql.Tx)
+	var first, queries, reset []varQuery
+	seen := make(map[string]struct{}, len(sv.vars))
+	for _, s := range sv.vars {
+		key := s.k
+		q := varQuery{fmt.Sprintf("SET %s = ?", s.k), []any{s.v}}
+		cleanup := varQuery{fmt.Sprintf("SET %s = NULL", s.k), nil}
+		if c.dialect == dialect.Postgres {
+			name, value, err := postgresVar(s.k, s.v)
+			if err != nil {
+				return nil, nil, err
+			}
+			key = name
+			if local {
+				statement, err := postgresTxVar(name, value)
+				if err != nil {
+					return nil, nil, err
+				}
+				if statement != "" {
+					first = append(first, varQuery{query: statement})
+					continue
+				}
+			}
+			q = varQuery{"SELECT set_config($1, $2, $3)", []any{name, value, local}}
+			cleanup = varQuery{"SELECT set_config($1, NULL, false)", []any{name}}
+		}
+		queries = append(queries, q)
+		if _, ok := seen[key]; !ok {
+			reset = append(reset, cleanup)
+			seen[key] = struct{}{}
+		}
+	}
+	var ex ExecQuerier
+	var cf func() error
 	switch e := c.ExecQuerier.(type) {
 	case *sql.Tx:
 		ex = e
@@ -216,48 +249,59 @@ func (c Conn) maySetVars(ctx context.Context) (ExecQuerier, func() error, error)
 		}
 		ex, cf = conn, conn.Close
 	}
-	for _, s := range sv.vars {
-		if _, ok := seen[s.k]; !ok {
-			switch c.dialect {
-			case dialect.Postgres:
-				reset = append(reset, fmt.Sprintf("RESET %s", s.k))
-			case dialect.MySQL:
-				reset = append(reset, fmt.Sprintf("SET %s = NULL", s.k))
+	if close := cf; close != nil && len(reset) > 0 {
+		cf = func() error {
+			var err error
+			for _, q := range reset {
+				_, e := ex.ExecContext(ctx, q.query, q.args...)
+				err = errors.Join(err, e)
 			}
-			seen[s.k] = struct{}{}
+			return errors.Join(err, close())
 		}
-		query, args := fmt.Sprintf("SET %s = ?", s.k), []any{s.v}
-		if c.dialect == dialect.Postgres {
-			name, value, err := postgresVar(s.k, s.v)
-			if err != nil {
-				if cf != nil {
-					err = errors.Join(err, cf())
-				}
-				return nil, nil, err
-			}
-			_, local := ex.(*sql.Tx)
-			query, args = "SELECT set_config($1, $2, $3)", []any{name, value, local}
-		}
-		if _, err := ex.ExecContext(ctx, query, args...); err != nil {
+	}
+	for _, q := range append(first, queries...) {
+		if _, err := ex.ExecContext(ctx, q.query, q.args...); err != nil {
 			if cf != nil {
 				err = errors.Join(err, cf())
 			}
 			return nil, nil, err
 		}
 	}
-	// If there are variables to reset, and we need to return the
-	// connection to the pool, we need to clean up the variables.
-	if cls := cf; cf != nil && len(reset) > 0 {
-		cf = func() error {
-			for _, q := range reset {
-				if _, err := ex.ExecContext(ctx, q); err != nil {
-					return errors.Join(err, cls())
-				}
-			}
-			return cls()
-		}
-	}
 	return ex, cf, nil
+}
+
+// Transaction characteristics must be set before any SELECT acquires a snapshot.
+// Both the name and value below come from fixed allowlists, not SQL input.
+func postgresTxVar(name, value string) (string, error) {
+	name = postgresLower(name)
+	switch name {
+	case "transaction_isolation":
+		switch value = postgresLower(value); value {
+		case "read uncommitted", "read committed", "repeatable read", "serializable":
+		default:
+			return "", fmt.Errorf("dialect/sql: invalid transaction isolation %q", value)
+		}
+	case "transaction_read_only", "transaction_deferrable":
+		var ok bool
+		value, ok = postgresBool(value)
+		if !ok {
+			return "", fmt.Errorf("dialect/sql: invalid transaction boolean")
+		}
+	default:
+		return "", nil
+	}
+	return fmt.Sprintf("SET LOCAL %s = '%s'", name, value), nil
+}
+
+func postgresBool(value string) (string, bool) {
+	switch postgresLower(strings.TrimSpace(value)) {
+	case "1", "on", "t", "tr", "tru", "true", "y", "ye", "yes":
+		return "on", true
+	case "0", "of", "off", "f", "fa", "fal", "fals", "false", "n", "no":
+		return "off", true
+	default:
+		return "", false
+	}
 }
 
 // postgresVar converts a trusted SQL variable name to a configuration key.

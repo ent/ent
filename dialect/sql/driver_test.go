@@ -25,7 +25,7 @@ func TestWithVars(t *testing.T) {
 	drv := OpenDB(dialect.Postgres, db)
 	mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, $2, $3)")).WithArgs("foo", "bar", false).WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectQuery("SELECT 1").WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
-	mock.ExpectExec("RESET foo").WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, NULL, false)")).WithArgs("foo").WillReturnResult(sqlmock.NewResult(0, 0))
 	rows := &Rows{}
 	err = drv.Query(
 		WithVar(context.Background(), "foo", "bar"),
@@ -40,7 +40,7 @@ func TestWithVars(t *testing.T) {
 	mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, $2, $3)")).WithArgs("foo", "bar", false).WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, $2, $3)")).WithArgs("foo", "baz", false).WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectQuery("SELECT 1").WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
-	mock.ExpectExec("RESET foo").WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, NULL, false)")).WithArgs("foo").WillReturnResult(sqlmock.NewResult(0, 0))
 	err = drv.Query(
 		WithVar(WithVar(context.Background(), "foo", "bar"), "foo", "baz"),
 		"SELECT 1",
@@ -71,7 +71,7 @@ func TestWithVars(t *testing.T) {
 
 	mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, $2, $3)")).WithArgs("foo", "qux", false).WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectExec("INSERT INTO users DEFAULT VALUES").WillReturnResult(sqlmock.NewResult(0, 0))
-	mock.ExpectExec("RESET foo").WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, NULL, false)")).WithArgs("foo").WillReturnResult(sqlmock.NewResult(0, 0))
 	err = drv.Exec(
 		WithVar(context.Background(), "foo", "qux"),
 		"INSERT INTO users DEFAULT VALUES",
@@ -123,7 +123,11 @@ func TestWithVarValues(t *testing.T) {
 			if tt.transaction {
 				mock.ExpectCommit()
 			} else {
-				mock.ExpectExec(regexp.QuoteMeta(tt.reset)).WillReturnResult(sqlmock.NewResult(0, 0))
+				if drv.Dialect() == dialect.Postgres {
+					mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, NULL, false)")).WithArgs(tt.args[0]).WillReturnResult(sqlmock.NewResult(0, 0))
+				} else {
+					mock.ExpectExec(regexp.QuoteMeta(tt.reset)).WillReturnResult(sqlmock.NewResult(0, 0))
+				}
 			}
 			require.NoError(t, ex.Exec(WithVar(context.Background(), tt.key, value), "SELECT 1", []any{}, nil))
 			finish()
@@ -177,6 +181,36 @@ func TestPostgresVar(t *testing.T) {
 		t.Run("invalid/"+name, func(t *testing.T) {
 			_, _, err := postgresVar(name, "value")
 			require.ErrorContains(t, err, "invalid PostgreSQL variable name")
+		})
+	}
+}
+
+func TestPostgresTxVar(t *testing.T) {
+	for _, tt := range []struct {
+		name, value, want string
+		invalid           bool
+	}{
+		{"transaction_isolation", "SERIALIZABLE", "SET LOCAL transaction_isolation = 'serializable'", false},
+		{"transaction_isolation", "repeatable read", "SET LOCAL transaction_isolation = 'repeatable read'", false},
+		{"transaction_read_only", "YES", "SET LOCAL transaction_read_only = 'on'", false},
+		{"transaction_read_only", "0", "SET LOCAL transaction_read_only = 'off'", false},
+		{"transaction_deferrable", "of", "SET LOCAL transaction_deferrable = 'off'", false},
+		{"transaction_deferrable", "1", "SET LOCAL transaction_deferrable = 'on'", false},
+		{"app.user", "alice", "", false},
+		{"transaction_isolation", "serializable'; SELECT 1 --", "", true},
+		{"transaction_read_only", "on'; SELECT 1 --", "", true},
+		{"transaction_deferrable", "o", "", true},
+		{"transaction_deferrable", "", "", true},
+	} {
+		t.Run(tt.name+"/"+tt.value, func(t *testing.T) {
+			query, err := postgresTxVar(tt.name, tt.value)
+			if tt.invalid {
+				require.Error(t, err)
+				require.Empty(t, query)
+				return
+			}
+			require.NoError(t, err)
+			require.Equal(t, tt.want, query)
 		})
 	}
 }

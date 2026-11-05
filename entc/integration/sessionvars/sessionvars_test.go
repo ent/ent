@@ -6,6 +6,8 @@ package sessionvars
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"testing"
 
 	"entgo.io/ent/dialect/sql"
@@ -58,5 +60,88 @@ func TestPostgresWithVarNames(t *testing.T) {
 			require.NoError(t, drv.DB().QueryRowContext(ctx, "SHOW search_path").Scan(&restored))
 			require.Equal(t, original, restored)
 		})
+	}
+}
+
+func TestPostgresVarCleanup(t *testing.T) {
+	for _, key := range []string{"app.user", "app." + strings.Repeat("x", 100)} {
+		for _, operation := range []string{"query", "exec"} {
+			t.Run(key+"/"+operation, func(t *testing.T) {
+				drv, err := sql.Open("postgres", "host=localhost port=5437 user=postgres dbname=test password=pass sslmode=disable")
+				require.NoError(t, err)
+				t.Cleanup(func() { require.NoError(t, drv.Close()) })
+				drv.DB().SetMaxOpenConns(1)
+				ctx := context.Background()
+				var before int
+				require.NoError(t, drv.DB().QueryRow("SELECT pg_backend_pid()").Scan(&before))
+				if operation == "query" {
+					var rows sql.Rows
+					require.NoError(t, drv.Query(sql.WithVar(ctx, key, "alice"), "SELECT current_setting($1)", []any{key}, &rows))
+					require.True(t, rows.Next())
+					var value string
+					require.NoError(t, rows.Scan(&value))
+					require.Equal(t, "alice", value)
+					require.NoError(t, rows.Close())
+				} else {
+					_, err = drv.DB().Exec("CREATE TEMP TABLE effects(id int)")
+					require.NoError(t, err)
+					require.NoError(t, drv.Exec(sql.WithVar(ctx, key, "alice"), "INSERT INTO effects VALUES (1)", []any{}, nil))
+					var count int
+					require.NoError(t, drv.DB().QueryRow("SELECT count(*) FROM effects").Scan(&count))
+					require.Equal(t, 1, count)
+				}
+				var after int
+				var value string
+				require.NoError(t, drv.DB().QueryRow("SELECT pg_backend_pid(), current_setting($1)", key).Scan(&after, &value))
+				require.Equal(t, before, after)
+				require.Empty(t, value)
+			})
+		}
+	}
+}
+
+func TestPostgresTransactionVars(t *testing.T) {
+	for _, tt := range []struct{ key, value string }{
+		{"transaction_isolation", "serializable"},
+		{"transaction_read_only", "off"},
+		{"transaction_deferrable", "on"},
+	} {
+		for _, commit := range []bool{false, true} {
+			t.Run(fmt.Sprintf("%s/commit=%t", tt.key, commit), func(t *testing.T) {
+				drv, err := sql.Open("postgres", "host=localhost port=5437 user=postgres dbname=test password=pass sslmode=disable")
+				require.NoError(t, err)
+				t.Cleanup(func() { require.NoError(t, drv.Close()) })
+				drv.DB().SetMaxOpenConns(1)
+				var original string
+				require.NoError(t, drv.DB().QueryRow("SELECT current_setting($1)", tt.key).Scan(&original))
+				tx, err := drv.BeginTx(context.Background(), &sql.TxOptions{ReadOnly: tt.key == "transaction_read_only"})
+				require.NoError(t, err)
+				t.Cleanup(func() { tx.Rollback() })
+				ctx := sql.WithVar(context.Background(), "app.actor", "alice")
+				ctx = sql.WithVar(ctx, tt.key, tt.value)
+				var rows sql.Rows
+				require.NoError(t, tx.Query(ctx, "SELECT current_setting($1)", []any{tt.key}, &rows))
+				require.True(t, rows.Next())
+				var value string
+				require.NoError(t, rows.Scan(&value))
+				require.Equal(t, tt.value, value)
+				require.NoError(t, rows.Close())
+				if tt.key != "transaction_deferrable" {
+					// Reapplying the same context must remain valid after a query has run.
+					require.NoError(t, tx.Query(ctx, "SELECT current_setting($1)", []any{tt.key}, &rows))
+					require.True(t, rows.Next())
+					require.NoError(t, rows.Scan(&value))
+					require.Equal(t, tt.value, value)
+					require.NoError(t, rows.Close())
+				}
+				if commit {
+					require.NoError(t, tx.Commit())
+				} else {
+					require.NoError(t, tx.Rollback())
+				}
+				require.NoError(t, drv.DB().QueryRow("SELECT current_setting($1)", tt.key).Scan(&value))
+				require.Equal(t, original, value)
+			})
+		}
 	}
 }
