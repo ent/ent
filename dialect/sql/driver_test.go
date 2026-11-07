@@ -22,9 +22,9 @@ func TestWithVars(t *testing.T) {
 	require.NoError(t, err)
 	db.SetMaxOpenConns(1)
 	drv := OpenDB(dialect.Postgres, db)
-	mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, $2, $3)")).WithArgs("foo", "bar", false).WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, $2, $3)")).WithArgs("foo", "bar", false).WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectQuery("SELECT 1").WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
-	mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, NULL, false)")).WithArgs("foo").WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, NULL, false)")).WithArgs("foo").WillReturnResult(sqlmock.NewResult(0, 0))
 	rows := &Rows{}
 	err = drv.Query(
 		WithVar(context.Background(), "foo", "bar"),
@@ -36,10 +36,10 @@ func TestWithVars(t *testing.T) {
 	require.NoError(t, rows.Close(), "rows should be closed to release the connection")
 	require.NoError(t, mock.ExpectationsWereMet())
 
-	mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, $2, $3)")).WithArgs("foo", "bar", false).WillReturnResult(sqlmock.NewResult(0, 0))
-	mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, $2, $3)")).WithArgs("foo", "baz", false).WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, $2, $3)")).WithArgs("foo", "bar", false).WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, $2, $3)")).WithArgs("foo", "baz", false).WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectQuery("SELECT 1").WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
-	mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, NULL, false)")).WithArgs("foo").WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, NULL, false)")).WithArgs("foo").WillReturnResult(sqlmock.NewResult(0, 0))
 	err = drv.Query(
 		WithVar(WithVar(context.Background(), "foo", "bar"), "foo", "baz"),
 		"SELECT 1",
@@ -51,7 +51,7 @@ func TestWithVars(t *testing.T) {
 	require.NoError(t, mock.ExpectationsWereMet())
 
 	mock.ExpectBegin()
-	mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, $2, $3)")).WithArgs("foo", "bar", true).WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, $2, $3)")).WithArgs("foo", "bar", true).WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectQuery("SELECT 1").WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
 	mock.ExpectCommit()
 	tx, err := drv.Tx(context.Background())
@@ -68,9 +68,9 @@ func TestWithVars(t *testing.T) {
 	// Rows should not be closed to release the session,
 	// as a transaction is always scoped to a single connection.
 
-	mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, $2, $3)")).WithArgs("foo", "qux", false).WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, $2, $3)")).WithArgs("foo", "qux", false).WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectExec("INSERT INTO users DEFAULT VALUES").WillReturnResult(sqlmock.NewResult(0, 0))
-	mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, NULL, false)")).WithArgs("foo").WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, NULL, false)")).WithArgs("foo").WillReturnResult(sqlmock.NewResult(0, 0))
 	err = drv.Exec(
 		WithVar(context.Background(), "foo", "qux"),
 		"INSERT INTO users DEFAULT VALUES",
@@ -110,7 +110,7 @@ func TestWithVarValues(t *testing.T) {
 				ex = tx
 			}
 			if drv.Dialect() == dialect.Postgres {
-				mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, $2, $3)")).WithArgs(tt.boundKey, value, tt.transaction).WillReturnResult(sqlmock.NewResult(0, 0))
+				mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, $2, $3)")).WithArgs(tt.boundKey, value, tt.transaction).WillReturnResult(sqlmock.NewResult(0, 0))
 			} else {
 				mock.ExpectExec(regexp.QuoteMeta("SET @user = ?")).WithArgs(value).WillReturnResult(sqlmock.NewResult(0, 0))
 			}
@@ -119,7 +119,7 @@ func TestWithVarValues(t *testing.T) {
 			case tx != nil:
 				mock.ExpectCommit()
 			case drv.Dialect() == dialect.Postgres:
-				mock.ExpectExec(regexp.QuoteMeta("SELECT set_config($1, NULL, false)")).WithArgs(tt.boundKey).WillReturnResult(sqlmock.NewResult(0, 0))
+				mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, NULL, false)")).WithArgs(tt.boundKey).WillReturnResult(sqlmock.NewResult(0, 0))
 			default:
 				mock.ExpectExec(regexp.QuoteMeta("SET @user = NULL")).WillReturnResult(sqlmock.NewResult(0, 0))
 			}

@@ -145,3 +145,39 @@ func openPostgres(t *testing.T) *sql.Driver {
 	drv.DB().SetMaxOpenConns(1)
 	return drv
 }
+
+func TestPostgresBuiltinConfig(t *testing.T) {
+	drv := openPostgres(t)
+	db := drv.DB()
+	_, err := db.Exec(`CREATE SCHEMA ent_vars_untrusted`)
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		_, err := db.Exec(`RESET search_path; DROP SCHEMA ent_vars_untrusted CASCADE`)
+		require.NoError(t, err)
+	})
+	_, err = db.Exec(`
+		CREATE FUNCTION ent_vars_untrusted.set_config(text, text, text) RETURNS text
+		LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'untrusted set_config called'; END $$;
+		CREATE FUNCTION ent_vars_untrusted.set_config(text, text, boolean) RETURNS text
+		LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'untrusted set_config called'; END $$;
+		SET search_path = ent_vars_untrusted, pg_catalog;
+	`)
+	require.NoError(t, err)
+	ctx := sql.WithVar(context.Background(), "app.current_tenant", "expected")
+	var rows sql.Rows
+	require.NoError(t, drv.Query(ctx, "SELECT pg_catalog.current_setting($1)", []any{"app.current_tenant"}, &rows))
+	closed := false
+	t.Cleanup(func() {
+		if !closed {
+			require.NoError(t, rows.Close())
+		}
+	})
+	require.True(t, rows.Next())
+	var tenant string
+	require.NoError(t, rows.Scan(&tenant))
+	require.Equal(t, "expected", tenant)
+	require.NoError(t, rows.Close())
+	closed = true
+	require.NoError(t, db.QueryRow("SELECT pg_catalog.current_setting($1)", "app.current_tenant").Scan(&tenant))
+	require.Empty(t, tenant)
+}

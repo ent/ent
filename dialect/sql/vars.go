@@ -81,8 +81,8 @@ func (s sessionVars) queries(driver string, local bool) ([]varQuery, []varQuery,
 		}
 		var query, cleanup varQuery
 		if postgres {
-			query = varQuery{"SELECT set_config($1, $2, $3)", []any{name, value, local}}
-			cleanup = varQuery{"SELECT set_config($1, NULL, false)", []any{name}}
+			query = varQuery{"SELECT pg_catalog.set_config($1, $2, $3)", []any{name, value, local}}
+			cleanup = varQuery{"SELECT pg_catalog.set_config($1, NULL, false)", []any{name}}
 		} else {
 			query = varQuery{fmt.Sprintf("SET %s = ?", name), []any{value}}
 			cleanup = varQuery{query: fmt.Sprintf("SET %s = NULL", name)}
