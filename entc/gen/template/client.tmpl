@@ -581,7 +581,7 @@ type (
 	{{- range $n := $.Nodes }}
 		{{- if $n.HasOneFieldID }}
 			{{- $pkg := $n.ID.Type.PkgPath }}
-			{{- if and $pkg (not (hasImport (base $pkg))) (not (hasKey $seen $pkg)) }}
+			{{- if and $pkg (not (hasImportFor $.Storage (base $pkg))) (not (hasKey $seen $pkg)) }}
 				{{- $name := $n.ID.Type.PkgName }}
 				{{ if ne $name (base $pkg) }}{{ $name }} {{ end }}"{{ $pkg }}"
 				{{- $seen = set $seen $pkg true }}

@@ -12,6 +12,7 @@ import (
 	"go/token"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -55,6 +56,7 @@ var (
 		"trim":          strings.Trim,
 		"hasField":      hasField,
 		"hasImport":     hasImport,
+		"hasImportFor":  hasImportFor,
 		"indirect":      indirect,
 		"hasPrefix":     strings.HasPrefix,
 		"hasSuffix":     strings.HasSuffix,
@@ -430,6 +432,24 @@ func hasField(v any, name string) bool {
 func hasImport(name string) bool {
 	_, ok := importPkg[name]
 	return ok
+}
+
+// hasImportFor reports if a package with the given name is imported by the
+// generated code of the given storage driver. Unlike hasImport, it ignores
+// packages that only other storage drivers import, so a field type whose
+// package name matches one of them (e.g. database/sql under Gremlin) is
+// still declared.
+func hasImportFor(s *Storage, name string) bool {
+	path, ok := importPkg[name]
+	if !ok || s == nil || sharedImports[path] || slices.Contains(s.Imports, path) {
+		return ok
+	}
+	for _, d := range drivers {
+		if slices.Contains(d.Imports, path) {
+			return false
+		}
+	}
+	return true
 }
 
 // trimPackage trims the package name from the given identifier.
