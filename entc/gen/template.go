@@ -236,6 +236,9 @@ var (
 		"dialect": "entgo.io/ent/dialect",
 		"field":   "entgo.io/ent/schema/field",
 	}
+	// sharedImports are the import paths of the shared "import" template,
+	// which every generated file renders regardless of the storage driver.
+	sharedImports = make(map[string]bool)
 )
 
 // notView reports if the given type is not a view.
@@ -252,6 +255,7 @@ func initTemplates() {
 		path, err := strconv.Unquote(spec.Path.Value)
 		check(err, "unquote import path")
 		importPkg[filepath.Base(path)] = path
+		sharedImports[path] = true
 	}
 	for _, s := range drivers {
 		for _, path := range s.Imports {

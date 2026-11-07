@@ -53,14 +53,28 @@ func (c *Client) init() {
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"log"
+	{{- if eq $.Storage.Name "gremlin" }}
+		"net/url"
+	{{- end }}
+	"reflect"
 
-	"{{ $.Config.Package }}/migrate"
+	{{- if $.SupportMigrate }}
+		"entgo.io/ent"
+		"{{ $.Config.Package }}/migrate"
+		{{- template "client/import/idtypes" $ }}
+	{{- end }}
 	{{ range $n := $.Nodes }}
 		{{ $n.PackageAlias }} "{{ $n.Config.Package }}/{{ $n.PackageDir }}"
 	{{- end }}
 	{{- range $dep := $deps }}
 		{{ $dep.Type.PkgName }} "{{ $dep.Type.PkgPath }}"
+	{{- end }}
+	{{- if not $.SupportMigrate }}
+		"entgo.io/ent"
+		{{- template "client/import/idtypes" $ }}
 	{{- end }}
 	"entgo.io/ent/dialect"
 	{{- $hasBlobNodes := false }}{{ $blobSupported := hasTemplate (printf "dialect/%s/model/fields" $.Storage) }}{{ if $blobSupported }}{{ range $n := $.Nodes }}{{ if $n.HasBlobFields }}{{ $hasBlobNodes = true }}{{ end }}{{ end }}{{ end }}
@@ -559,3 +573,19 @@ type (
 
 {{/* A template that can be overridden in order to add additional fields to the client.*/}}
 {{ define "client/fields/additional" }}{{ end }}
+
+{{/* client/import/idtypes imports the packages of user-defined ID types,
+     which the client's Get, UpdateOneID and DeleteOneID methods reference. */}}
+{{ define "client/import/idtypes" }}
+	{{- $seen := dict }}
+	{{- range $n := $.Nodes }}
+		{{- if $n.HasOneFieldID }}
+			{{- $pkg := $n.ID.Type.PkgPath }}
+			{{- if and $pkg (not (hasImportFor $.Storage (base $pkg))) (not (hasKey $seen $pkg)) }}
+				{{- $name := $n.ID.Type.PkgName }}
+				{{ if ne $name (base $pkg) }}{{ $name }} {{ end }}"{{ $pkg }}"
+				{{- $seen = set $seen $pkg true }}
+			{{- end }}
+		{{- end }}
+	{{- end }}
+{{- end }}

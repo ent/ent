@@ -266,11 +266,18 @@ func (g *Graph) Gen() error {
 
 // generate is the default Generator implementation.
 func generate(g *Graph) error {
-	var (
-		assets   assets
-		external []GraphTemplate
-	)
-	templates, external = g.templates()
+	assets, err := g.assets()
+	if err != nil {
+		return err
+	}
+	return g.writeAssets(assets)
+}
+
+// assets executes the templates and returns the generated
+// files and directories, before they are written or formatted.
+func (g *Graph) assets() (assets, error) {
+	var assets assets
+	templates, external := g.templates()
 	for _, n := range g.Nodes {
 		assets.addDir(filepath.Join(g.Config.Target, n.PackageDir()))
 		for _, tmpl := range Templates {
@@ -279,7 +286,7 @@ func generate(g *Graph) error {
 			}
 			b := bytes.NewBuffer(nil)
 			if err := templates.ExecuteTemplate(b, tmpl.Name, n); err != nil {
-				return fmt.Errorf("execute template %q: %w", tmpl.Name, err)
+				return assets, fmt.Errorf("execute template %q: %w", tmpl.Name, err)
 			}
 			assets.add(filepath.Join(g.Config.Target, tmpl.Format(n)), b.Bytes())
 		}
@@ -293,10 +300,15 @@ func generate(g *Graph) error {
 		}
 		b := bytes.NewBuffer(nil)
 		if err := templates.ExecuteTemplate(b, tmpl.Name, g); err != nil {
-			return fmt.Errorf("execute template %q: %w", tmpl.Name, err)
+			return assets, fmt.Errorf("execute template %q: %w", tmpl.Name, err)
 		}
 		assets.add(filepath.Join(g.Config.Target, tmpl.Format), b.Bytes())
 	}
+	return assets, nil
+}
+
+// cleanupFeatures removes the assets of features that are not enabled.
+func (g *Graph) cleanupFeatures() error {
 	for _, f := range allFeatures {
 		if f.cleanup == nil || g.featureEnabled(f) {
 			continue
@@ -304,6 +316,14 @@ func generate(g *Graph) error {
 		if err := f.cleanup(g.Config); err != nil {
 			return fmt.Errorf("cleanup %q feature assets: %w", f.Name, err)
 		}
+	}
+	return nil
+}
+
+// writeAssets writes and formats the generated assets.
+func (g *Graph) writeAssets(assets assets) error {
+	if err := g.cleanupFeatures(); err != nil {
+		return err
 	}
 	// Write and format assets only if template execution
 	// finished successfully.

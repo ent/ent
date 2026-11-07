@@ -13,9 +13,11 @@ in the LICENSE file in the root directory of this source tree.
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
 	{{- range $n := $.Nodes }}
 		{{ $n.PackageAlias }} "{{ $.Config.Package }}/{{ $n.PackageDir }}"
@@ -23,6 +25,11 @@ import (
 	{{- end }}
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
+	{{- with $.Storage }}
+		{{- range $import := .Imports }}
+			"{{ $import }}"
+		{{- end }}
+	{{- end }}
 )
 
 const (
