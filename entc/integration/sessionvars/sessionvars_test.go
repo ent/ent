@@ -258,3 +258,71 @@ func TestPostgresVarValues(t *testing.T) {
 		})
 	}
 }
+
+func TestPostgresVarPreparation(t *testing.T) {
+	drv := openPostgres(t)
+	_, err := drv.DB().Exec("SET app.actor = 'session'")
+	require.NoError(t, err)
+	ctx := sql.WithVar(context.Background(), "app.actor", "transaction")
+	ctx = sql.WithVar(ctx, "app..invalid", "value")
+	require.ErrorContains(t, drv.Exec(ctx, "SELECT 1", []any{}, nil), "invalid PostgreSQL variable name")
+	var value string
+	require.NoError(t, drv.DB().QueryRow("SELECT current_setting('app.actor')").Scan(&value))
+	require.Equal(t, "session", value)
+}
+
+func TestPostgresVarTransactions(t *testing.T) {
+	for _, operation := range []string{"query", "exec"} {
+		for _, commit := range []bool{false, true} {
+			t.Run(fmt.Sprintf("%s/commit=%t", operation, commit), func(t *testing.T) {
+				drv := openPostgres(t)
+				ctx := context.Background()
+				_, err := drv.DB().Exec("CREATE TEMP TABLE effects (actor text); SET app.actor = 'session'")
+				require.NoError(t, err)
+				var before int
+				require.NoError(t, drv.DB().QueryRow("SELECT pg_backend_pid()").Scan(&before))
+				tx, err := drv.Tx(ctx)
+				require.NoError(t, err)
+				t.Cleanup(func() { _ = tx.Rollback() })
+				local := sql.WithVar(ctx, "app.actor", "transaction")
+				const insert = "INSERT INTO effects VALUES (current_setting('app.actor'))"
+				if operation == "query" {
+					var rows sql.Rows
+					require.NoError(t, tx.Query(local, insert+" RETURNING actor", []any{}, &rows))
+					require.True(t, rows.Next())
+					var actor string
+					require.NoError(t, rows.Scan(&actor))
+					require.Equal(t, "transaction", actor)
+					require.NoError(t, rows.Close())
+				} else {
+					require.NoError(t, tx.Exec(local, insert, []any{}, nil))
+				}
+				var rows sql.Rows
+				require.NoError(t, tx.Query(ctx, "SELECT pg_backend_pid(), current_setting('app.actor')", []any{}, &rows))
+				require.True(t, rows.Next())
+				var during int
+				var actor string
+				require.NoError(t, rows.Scan(&during, &actor))
+				require.NoError(t, rows.Close())
+				require.Equal(t, before, during)
+				require.Equal(t, "transaction", actor)
+				if commit {
+					require.NoError(t, tx.Commit())
+				} else {
+					require.NoError(t, tx.Rollback())
+				}
+				var after, count int
+				require.NoError(t, drv.DB().QueryRow("SELECT pg_backend_pid(), current_setting('app.actor'), (SELECT count(*) FROM effects)").Scan(&after, &actor, &count))
+				require.Equal(t, before, after)
+				require.Equal(t, "session", actor)
+				if commit {
+					require.Equal(t, 1, count)
+					require.NoError(t, drv.DB().QueryRow("SELECT actor FROM effects").Scan(&actor))
+					require.Equal(t, "transaction", actor)
+				} else {
+					require.Zero(t, count)
+				}
+			})
+		}
+	}
+}
