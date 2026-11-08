@@ -10,7 +10,6 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"entgo.io/ent/dialect"
@@ -24,7 +23,9 @@ type Driver struct {
 
 // NewDriver creates a new Driver with the given Conn and dialect.
 func NewDriver(dialect string, c Conn) *Driver {
-	return &Driver{dialect: dialect, Conn: c}
+	drv := &Driver{dialect: dialect, Conn: c}
+	drv.Conn.dialect = drv.Dialect()
+	return drv
 }
 
 // Open wraps the database/sql.Open method and returns a dialect.Driver that implements the an ent/dialect.Driver interface.
@@ -69,7 +70,7 @@ func (d *Driver) BeginTx(ctx context.Context, opts *TxOptions) (dialect.Tx, erro
 		return nil, err
 	}
 	return &Tx{
-		Conn: Conn{tx, d.dialect},
+		Conn: Conn{tx, d.Dialect()},
 		Tx:   tx,
 	}, nil
 }
@@ -81,42 +82,6 @@ func (d *Driver) Close() error { return d.DB().Close() }
 type Tx struct {
 	Conn
 	driver.Tx
-}
-
-// ctyVarsKey is the key used for attaching and reading the context variables.
-type ctxVarsKey struct{}
-
-// sessionVars holds sessions/transactions variables to set before every statement.
-type sessionVars struct {
-	vars []struct{ k, v string }
-}
-
-// WithVar returns a new context that holds the session variable to be executed before every query.
-func WithVar(ctx context.Context, name, value string) context.Context {
-	sv, _ := ctx.Value(ctxVarsKey{}).(sessionVars)
-	sv.vars = append(sv.vars, struct {
-		k, v string
-	}{
-		k: name,
-		v: value,
-	})
-	return context.WithValue(ctx, ctxVarsKey{}, sv)
-}
-
-// VarFromContext returns the session variable value from the context.
-func VarFromContext(ctx context.Context, name string) (string, bool) {
-	sv, _ := ctx.Value(ctxVarsKey{}).(sessionVars)
-	for _, s := range sv.vars {
-		if s.k == name {
-			return s.v, true
-		}
-	}
-	return "", false
-}
-
-// WithIntVar calls WithVar with the string representation of the value.
-func WithIntVar(ctx context.Context, name string, value int) context.Context {
-	return WithVar(ctx, name, strconv.Itoa(value))
 }
 
 // ExecQuerier wraps the standard Exec and Query methods.
@@ -195,12 +160,13 @@ func (c Conn) maySetVars(ctx context.Context) (ExecQuerier, func() error, error)
 	if len(sv.vars) == 0 {
 		return c, nil, nil
 	}
-	var (
-		ex    ExecQuerier  // Underlying ExecQuerier.
-		cf    func() error // Close function.
-		reset []string     // Reset variables.
-		seen  = make(map[string]struct{}, len(sv.vars))
-	)
+	_, local := c.ExecQuerier.(*sql.Tx)
+	queries, reset, err := sv.queries(c.dialect, local)
+	if err != nil {
+		return nil, nil, err
+	}
+	var ex ExecQuerier
+	var cf func() error
 	switch e := c.ExecQuerier.(type) {
 	case *sql.Tx:
 		ex = e
@@ -211,33 +177,22 @@ func (c Conn) maySetVars(ctx context.Context) (ExecQuerier, func() error, error)
 		}
 		ex, cf = conn, conn.Close
 	}
-	for _, s := range sv.vars {
-		if _, ok := seen[s.k]; !ok {
-			switch c.dialect {
-			case dialect.Postgres:
-				reset = append(reset, fmt.Sprintf("RESET %s", s.k))
-			case dialect.MySQL:
-				reset = append(reset, fmt.Sprintf("SET %s = NULL", s.k))
+	if close := cf; close != nil && len(reset) > 0 {
+		cf = func() error {
+			var err error
+			for _, q := range reset {
+				_, e := ex.ExecContext(ctx, q.query, q.args...)
+				err = errors.Join(err, e)
 			}
-			seen[s.k] = struct{}{}
+			return errors.Join(err, close())
 		}
-		if _, err := ex.ExecContext(ctx, fmt.Sprintf("SET %s = '%s'", s.k, s.v)); err != nil {
+	}
+	for _, q := range queries {
+		if _, err := ex.ExecContext(ctx, q.query, q.args...); err != nil {
 			if cf != nil {
 				err = errors.Join(err, cf())
 			}
 			return nil, nil, err
-		}
-	}
-	// If there are variables to reset, and we need to return the
-	// connection to the pool, we need to clean up the variables.
-	if cls := cf; cf != nil && len(reset) > 0 {
-		cf = func() error {
-			for _, q := range reset {
-				if _, err := ex.ExecContext(ctx, q); err != nil {
-					return errors.Join(err, cls())
-				}
-			}
-			return cls()
 		}
 	}
 	return ex, cf, nil
