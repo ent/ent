@@ -537,6 +537,10 @@ func Paging(t *testing.T, client *ent.Client) {
 	require.Equal(10, client.User.Query().CountX(ctx))
 	require.Len(client.User.Query().Offset(5).AllX(ctx), 5)
 	require.Len(client.User.Query().Offset(6).AllX(ctx), 4)
+	require.Equal(3, client.User.Query().Limit(3).CountX(ctx))
+	require.Equal(4, client.User.Query().Offset(6).CountX(ctx))
+	require.Equal(2, client.User.Query().Offset(6).Limit(2).CountX(ctx))
+	require.Zero(client.User.Query().Offset(10).CountX(ctx))
 	require.Equal(
 		[]int{7, 8},
 		client.User.Query().

@@ -1049,10 +1049,17 @@ func (q *query) count(ctx context.Context, drv dialect.Driver) (int, error) {
 	for i, c := range columns {
 		columns[i] = selector.C(c)
 	}
-	if q.Unique {
+	switch {
+	case q.Limit != 0 || q.Offset != 0:
+		// LIMIT and OFFSET apply to the rows of the query and not to
+		// the single row returned by COUNT. Hence, count the rows of the
+		// limited query using a subquery.
+		selector.Select(columns...)
+		selector = q.builder.Select().Count().From(selector.As("t1")).WithContext(ctx)
+	case q.Unique:
 		selector.SetDistinct(false)
 		selector.Count(sql.Distinct(columns...))
-	} else {
+	default:
 		selector.Count(columns...)
 	}
 	query, args := selector.Query()
