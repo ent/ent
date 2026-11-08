@@ -57,34 +57,28 @@ type varQuery struct {
 }
 
 func (s sessionVars) queries(driver string, local bool) ([]varQuery, []varQuery, error) {
-	var first, queries, reset []varQuery
+	var queries, reset []varQuery
 	seen := make(map[string]struct{}, len(s.vars))
-	postgres := driver == dialect.Postgres
 	for _, v := range s.vars {
-		name, value := v.name, v.value
-		if postgres {
-			var err error
-			name, value, err = postgresVar(name, value)
-			if err != nil {
-				return nil, nil, err
-			}
-		}
-		if postgres && local {
-			statement, err := postgresTxVar(name, value)
-			if err != nil {
-				return nil, nil, err
-			}
-			if statement != "" {
-				first = append(first, varQuery{query: statement})
-				continue
-			}
-		}
+		name := v.name
 		var query, cleanup varQuery
-		if postgres {
-			query = varQuery{"SELECT pg_catalog.set_config($1, $2, $3)", []any{name, value, local}}
-			cleanup = varQuery{"SELECT pg_catalog.set_config($1, NULL, false)", []any{name}}
+		if driver == dialect.Postgres {
+			var err error
+			name, err = postgresVarName(name)
+			if err != nil {
+				return nil, nil, err
+			}
+			command := "SET"
+			if local {
+				command = "SET LOCAL"
+			}
+			// Escape strings explicitly so SET does not depend on standard_conforming_strings.
+			value := strings.ReplaceAll(v.value, `\`, `\\`)
+			value = strings.ReplaceAll(value, `'`, `''`)
+			query = varQuery{query: fmt.Sprintf("%s %s = E'%s'", command, name, value)}
+			cleanup = varQuery{query: fmt.Sprintf("SET %s = DEFAULT", name)}
 		} else {
-			query = varQuery{fmt.Sprintf("SET %s = ?", name), []any{value}}
+			query = varQuery{fmt.Sprintf("SET %s = ?", name), []any{v.value}}
 			cleanup = varQuery{query: fmt.Sprintf("SET %s = NULL", name)}
 		}
 		queries = append(queries, query)
@@ -94,48 +88,13 @@ func (s sessionVars) queries(driver string, local bool) ([]varQuery, []varQuery,
 		reset = append(reset, cleanup)
 		seen[name] = struct{}{}
 	}
-	return append(first, queries...), reset, nil
+	return queries, reset, nil
 }
 
-// Transaction characteristics must be set before any SELECT acquires a snapshot.
-// Both the name and value below come from fixed allowlists, not SQL input.
-func postgresTxVar(name, value string) (string, error) {
-	name = postgresLower(name)
-	switch name {
-	case "transaction_isolation":
-		switch value = postgresLower(value); value {
-		case "read uncommitted", "read committed", "repeatable read", "serializable":
-		default:
-			return "", fmt.Errorf("dialect/sql: invalid transaction isolation %q", value)
-		}
-	case "transaction_read_only", "transaction_deferrable":
-		var ok bool
-		value, ok = postgresBool(value)
-		if !ok {
-			return "", fmt.Errorf("dialect/sql: invalid transaction boolean")
-		}
-	default:
-		return "", nil
-	}
-	return fmt.Sprintf("SET LOCAL %s = '%s'", name, value), nil
-}
-
-func postgresBool(value string) (string, bool) {
-	switch postgresLower(strings.TrimSpace(value)) {
-	case "1", "on", "t", "tr", "tru", "true", "y", "ye", "yes":
-		return "on", true
-	case "0", "of", "off", "f", "fa", "fal", "fals", "false", "n", "no":
-		return "off", true
-	default:
-		return "", false
-	}
-}
-
-// postgresVar converts a trusted SQL variable name to a configuration key.
-// Identifier-list settings treat the entire value as one identifier, as SET does.
-func postgresVar(name, value string) (string, string, error) {
+// postgresVarName quotes each component of a trusted SQL variable name.
+func postgresVarName(name string) (string, error) {
 	if strings.ContainsRune(name, 0) {
-		return "", "", fmt.Errorf("dialect/sql: invalid PostgreSQL variable name %q", name)
+		return "", fmt.Errorf("dialect/sql: invalid PostgreSQL variable name %q", name)
 	}
 	var key strings.Builder
 	rest := name
@@ -143,29 +102,24 @@ func postgresVar(name, value string) (string, string, error) {
 		rest = strings.TrimLeft(rest, " \t\n\r\f")
 		part, tail, ok := postgresVarIdent(rest)
 		if !ok {
-			return "", "", fmt.Errorf("dialect/sql: invalid PostgreSQL variable name %q", name)
+			return "", fmt.Errorf("dialect/sql: invalid PostgreSQL variable name %q", name)
 		}
 		if key.Len() > 0 {
 			key.WriteByte('.')
 		}
-		key.WriteString(part)
+		key.WriteByte('"')
+		key.WriteString(strings.ReplaceAll(part, `"`, `""`))
+		key.WriteByte('"')
 		rest = strings.TrimLeft(tail, " \t\n\r\f")
 		if rest == "" {
 			break
 		}
 		if rest[0] != '.' {
-			return "", "", fmt.Errorf("dialect/sql: invalid PostgreSQL variable name %q", name)
+			return "", fmt.Errorf("dialect/sql: invalid PostgreSQL variable name %q", name)
 		}
 		rest = rest[1:]
 	}
-	name = key.String()
-	switch postgresLower(name) {
-	case "search_path", "temp_tablespaces", "session_preload_libraries",
-		"shared_preload_libraries", "local_preload_libraries",
-		"unix_socket_directories", "output_plugin_libraries":
-		value = `"` + strings.ReplaceAll(value, `"`, `""`) + `"`
-	}
-	return name, value, nil
+	return key.String(), nil
 }
 
 // postgresVarIdent reads one identifier without folding quoted characters.

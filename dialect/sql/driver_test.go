@@ -22,9 +22,9 @@ func TestWithVars(t *testing.T) {
 	require.NoError(t, err)
 	db.SetMaxOpenConns(1)
 	drv := OpenDB(dialect.Postgres, db)
-	mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, $2, $3)")).WithArgs("foo", "bar", false).WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta(`SET "foo" = E'bar'`)).WithArgs().WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectQuery("SELECT 1").WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
-	mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, NULL, false)")).WithArgs("foo").WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta(`SET "foo" = DEFAULT`)).WithArgs().WillReturnResult(sqlmock.NewResult(0, 0))
 	rows := &Rows{}
 	err = drv.Query(
 		WithVar(context.Background(), "foo", "bar"),
@@ -36,10 +36,10 @@ func TestWithVars(t *testing.T) {
 	require.NoError(t, rows.Close(), "rows should be closed to release the connection")
 	require.NoError(t, mock.ExpectationsWereMet())
 
-	mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, $2, $3)")).WithArgs("foo", "bar", false).WillReturnResult(sqlmock.NewResult(0, 0))
-	mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, $2, $3)")).WithArgs("foo", "baz", false).WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta(`SET "foo" = E'bar'`)).WithArgs().WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta(`SET "foo" = E'baz'`)).WithArgs().WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectQuery("SELECT 1").WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
-	mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, NULL, false)")).WithArgs("foo").WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta(`SET "foo" = DEFAULT`)).WithArgs().WillReturnResult(sqlmock.NewResult(0, 0))
 	err = drv.Query(
 		WithVar(WithVar(context.Background(), "foo", "bar"), "foo", "baz"),
 		"SELECT 1",
@@ -51,7 +51,7 @@ func TestWithVars(t *testing.T) {
 	require.NoError(t, mock.ExpectationsWereMet())
 
 	mock.ExpectBegin()
-	mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, $2, $3)")).WithArgs("foo", "bar", true).WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta(`SET LOCAL "foo" = E'bar'`)).WithArgs().WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectQuery("SELECT 1").WillReturnRows(sqlmock.NewRows([]string{"1"}).AddRow(1))
 	mock.ExpectCommit()
 	tx, err := drv.Tx(context.Background())
@@ -68,9 +68,9 @@ func TestWithVars(t *testing.T) {
 	// Rows should not be closed to release the session,
 	// as a transaction is always scoped to a single connection.
 
-	mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, $2, $3)")).WithArgs("foo", "qux", false).WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta(`SET "foo" = E'qux'`)).WithArgs().WillReturnResult(sqlmock.NewResult(0, 0))
 	mock.ExpectExec("INSERT INTO users DEFAULT VALUES").WillReturnResult(sqlmock.NewResult(0, 0))
-	mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, NULL, false)")).WithArgs("foo").WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectExec(regexp.QuoteMeta(`SET "foo" = DEFAULT`)).WithArgs().WillReturnResult(sqlmock.NewResult(0, 0))
 	err = drv.Exec(
 		WithVar(context.Background(), "foo", "qux"),
 		"INSERT INTO users DEFAULT VALUES",
@@ -85,16 +85,16 @@ func TestWithVars(t *testing.T) {
 func TestWithVarValues(t *testing.T) {
 	const value = "O'Reilly\\team; SELECT 1 --"
 	for _, tt := range []struct {
-		name, key, boundKey string
-		open                func(*sql.DB) *Driver
-		transaction         bool
+		name, key, sqlName string
+		open               func(*sql.DB) *Driver
+		transaction        bool
 	}{
-		{"postgres", "app.user", "app.user", func(db *sql.DB) *Driver { return OpenDB(dialect.Postgres, db) }, false},
-		{"mysql", "@user", "@user", func(db *sql.DB) *Driver { return OpenDB(dialect.MySQL, db) }, false},
-		{"postgres-driver", "app.user", "app.user", func(db *sql.DB) *Driver { return NewDriver(dialect.Postgres, Conn{ExecQuerier: db}) }, false},
-		{"postgres-wrapped-driver", "app.user", "app.user", func(db *sql.DB) *Driver { return NewDriver("postgres-traced", Conn{ExecQuerier: db}) }, false},
-		{"postgres-wrapped-transaction", "app.user", "app.user", func(db *sql.DB) *Driver { return NewDriver("postgres-traced", Conn{ExecQuerier: db}) }, true},
-		{"quoted-name", ` "app" . "User" `, "app.User", func(db *sql.DB) *Driver { return OpenDB(dialect.Postgres, db) }, false},
+		{"postgres", "app.user", `"app"."user"`, func(db *sql.DB) *Driver { return OpenDB(dialect.Postgres, db) }, false},
+		{"mysql", "@user", "", func(db *sql.DB) *Driver { return OpenDB(dialect.MySQL, db) }, false},
+		{"postgres-driver", "app.user", `"app"."user"`, func(db *sql.DB) *Driver { return NewDriver(dialect.Postgres, Conn{ExecQuerier: db}) }, false},
+		{"postgres-wrapped-driver", "app.user", `"app"."user"`, func(db *sql.DB) *Driver { return NewDriver("postgres-traced", Conn{ExecQuerier: db}) }, false},
+		{"postgres-wrapped-transaction", "app.user", `"app"."user"`, func(db *sql.DB) *Driver { return NewDriver("postgres-traced", Conn{ExecQuerier: db}) }, true},
+		{"quoted-name", ` "app" . "User" `, `"app"."User"`, func(db *sql.DB) *Driver { return OpenDB(dialect.Postgres, db) }, false},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			db, mock, err := sqlmock.New()
@@ -110,7 +110,11 @@ func TestWithVarValues(t *testing.T) {
 				ex = tx
 			}
 			if drv.Dialect() == dialect.Postgres {
-				mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, $2, $3)")).WithArgs(tt.boundKey, value, tt.transaction).WillReturnResult(sqlmock.NewResult(0, 0))
+				command := "SET "
+				if tt.transaction {
+					command = "SET LOCAL "
+				}
+				mock.ExpectExec(regexp.QuoteMeta(command + tt.sqlName + ` = E'O''Reilly\\team; SELECT 1 --'`)).WithArgs().WillReturnResult(sqlmock.NewResult(0, 0))
 			} else {
 				mock.ExpectExec(regexp.QuoteMeta("SET @user = ?")).WithArgs(value).WillReturnResult(sqlmock.NewResult(0, 0))
 			}
@@ -119,7 +123,7 @@ func TestWithVarValues(t *testing.T) {
 			case tx != nil:
 				mock.ExpectCommit()
 			case drv.Dialect() == dialect.Postgres:
-				mock.ExpectExec(regexp.QuoteMeta("SELECT pg_catalog.set_config($1, NULL, false)")).WithArgs(tt.boundKey).WillReturnResult(sqlmock.NewResult(0, 0))
+				mock.ExpectExec(regexp.QuoteMeta("SET " + tt.sqlName + " = DEFAULT")).WithArgs().WillReturnResult(sqlmock.NewResult(0, 0))
 			default:
 				mock.ExpectExec(regexp.QuoteMeta("SET @user = NULL")).WillReturnResult(sqlmock.NewResult(0, 0))
 			}
@@ -132,81 +136,29 @@ func TestWithVarValues(t *testing.T) {
 	}
 }
 
-func TestPostgresVar(t *testing.T) {
-	for _, tt := range []struct {
-		name, key, value, wantKey, wantValue string
-	}{
-		{"plain", "app.user", "O'Reilly", "app.user", "O'Reilly"},
-		{"unquoted-case", "APP.USER", "value", "app.user", "value"},
-		{"quoted-case", `"app"."User"`, "value", "app.User", "value"},
-		{"escaped-quote", `"app"."us""er"`, "value", `app.us"er`, "value"},
-		{"quoted-dot", `"app.user"`, "value", "app.user", "value"},
-		{"quoted-space", `"app"."some user"`, "value", "app.some user", "value"},
-		{"whitespace", " \f APP \n.\t USER \r", "value", "app.user", "value"},
-		{"unicode", "ÄPP.USER", "value", "Äpp.user", "value"},
-		{"identifier-suffix", "App_1.User$2", "value", "app_1.user$2", "value"},
-		{"long-name", "app." + strings.Repeat("x", 100), "value", "app." + strings.Repeat("x", 100), "value"},
-		{"mixed-schema", "search_path", "TenantA", "search_path", `"TenantA"`},
-		{"comma-schema", "search_path", "a,b", "search_path", `"a,b"`},
-		{"quoted-schema", `"SEARCH_PATH"`, `a"b`, "SEARCH_PATH", `"a""b"`},
-		{"empty-schema", "search_path", "", "search_path", `""`},
+func TestPostgresVarName(t *testing.T) {
+	for _, tt := range []struct{ name, want string }{
+		{"app.user", `"app"."user"`},
+		{"APP.USER", `"app"."user"`},
+		{` "app" . "User" `, `"app"."User"`},
+		{`"app"."us""er"`, `"app"."us""er"`},
+		{`"app.user"`, `"app.user"`},
+		{`"app"."some user"`, `"app"."some user"`},
+		{" \f APP \n.\t USER \r", `"app"."user"`},
+		{"ÄPP.USER", `"Äpp"."user"`},
+		{"App_1.User$2", `"app_1"."user$2"`},
+		{"app." + strings.Repeat("x", 100), `"app"."` + strings.Repeat("x", 100) + `"`},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			key, value, err := postgresVar(tt.key, tt.value)
+			name, err := postgresVarName(tt.name)
 			require.NoError(t, err)
-			require.Equal(t, tt.wantKey, key)
-			require.Equal(t, tt.wantValue, value)
+			require.Equal(t, tt.want, name)
 		})
 	}
-	for _, name := range []string{
-		"temp_tablespaces", "session_preload_libraries", "shared_preload_libraries",
-		"local_preload_libraries", "unix_socket_directories", "output_plugin_libraries",
-	} {
-		t.Run(name, func(t *testing.T) {
-			key, value, err := postgresVar(name, `One,Two`)
-			require.NoError(t, err)
-			require.Equal(t, name, key)
-			require.Equal(t, `"One,Two"`, value)
-		})
-	}
-	for _, name := range []string{
-		"", " ", ".app", "app.", "app..user", "1app.user", "app.user name",
-		`""`, `"app`, `"app"user`, "app.user; SELECT 1", "app.user--comment",
-		"app.\vuser", "app.\x00user", "\"app\x00\".user",
-	} {
+	for _, name := range []string{"", " ", ".app", "app.", "app..user", "1app.user", "app.user name", `""`, `"app`, `"app"user`, "app.user; SELECT 1", "app.user--comment", "app.\vuser", "app.\x00user", "\"app\x00\".user"} {
 		t.Run("invalid/"+name, func(t *testing.T) {
-			_, _, err := postgresVar(name, "value")
+			_, err := postgresVarName(name)
 			require.ErrorContains(t, err, "invalid PostgreSQL variable name")
-		})
-	}
-}
-
-func TestPostgresTxVar(t *testing.T) {
-	for _, tt := range []struct {
-		name, value, want string
-		invalid           bool
-	}{
-		{"transaction_isolation", "SERIALIZABLE", "SET LOCAL transaction_isolation = 'serializable'", false},
-		{"transaction_isolation", "repeatable read", "SET LOCAL transaction_isolation = 'repeatable read'", false},
-		{"transaction_read_only", "YES", "SET LOCAL transaction_read_only = 'on'", false},
-		{"transaction_read_only", "0", "SET LOCAL transaction_read_only = 'off'", false},
-		{"transaction_deferrable", "of", "SET LOCAL transaction_deferrable = 'off'", false},
-		{"transaction_deferrable", "1", "SET LOCAL transaction_deferrable = 'on'", false},
-		{"app.user", "alice", "", false},
-		{"transaction_isolation", "serializable'; SELECT 1 --", "", true},
-		{"transaction_read_only", "on'; SELECT 1 --", "", true},
-		{"transaction_deferrable", "o", "", true},
-		{"transaction_deferrable", "", "", true},
-	} {
-		t.Run(tt.name+"/"+tt.value, func(t *testing.T) {
-			query, err := postgresTxVar(tt.name, tt.value)
-			if tt.invalid {
-				require.Error(t, err)
-				require.Empty(t, query)
-				return
-			}
-			require.NoError(t, err)
-			require.Equal(t, tt.want, query)
 		})
 	}
 }
