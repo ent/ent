@@ -120,53 +120,21 @@ func ({{ $receiver }} *{{ $builder }}) loadBlobFields(ctx context.Context, nodes
 	for _, n := range nodes {
 		{{- range $f := $.LoadOnScanFields }}
 		if n.{{ $f.BlobKeyColumn }} != nil && *n.{{ $f.BlobKeyColumn }} != "" {
-			{{- if $f.IsBlobNoColumn }}
-			{{- /* Non-DualWrite: blob is the only source of data. */}}
-			data, err := _blobs.Read(ctx, {{ $.Package }}.{{ $f.Constant }}, *n.{{ $f.BlobKeyColumn }})
-			if err != nil {
-				return errors.Join(fmt.Errorf("loading {{ $f.Name }}: %w", err), _blobs.Close())
-			}
-			if data == nil {
-				return errors.Join(fmt.Errorf("loading {{ $f.Name }}: object %q not found in blob storage", *n.{{ $f.BlobKeyColumn }}), _blobs.Close())
-			}
-			{{- if $f.HasValueScanner }}
-			sv := {{ $f.ScanValueFunc }}()
-			if err := sv.Scan(data); err != nil {
-				return errors.Join(fmt.Errorf("scanning {{ $f.Name }}: %w", err), _blobs.Close())
-			}
-			v, err := {{ $f.FromValueFunc }}(sv)
-			if err != nil {
-				return errors.Join(fmt.Errorf("scanning {{ $f.Name }}: %w", err), _blobs.Close())
-			}
-			n.{{ $f.StructField }} = v
-			{{- else if $f.IsBlobGoString }}
-			n.{{ $f.StructField }} = {{ $f.Type }}(data)
-			{{- else }}
-			n.{{ $f.StructField }} = data
-			{{- end }}
-			{{- else }}
-			{{- /* DualWrite: prefer blob value, but preserve the column value when blob is missing. */}}
 			switch data, err := _blobs.Read(ctx, {{ $.Package }}.{{ $f.Constant }}, *n.{{ $f.BlobKeyColumn }}); {
 			case err != nil:
 				return errors.Join(fmt.Errorf("loading {{ $f.Name }}: %w", err), _blobs.Close())
+			{{- if not $f.HasDataColumn }}
+			case data == nil:
+				return errors.Join(fmt.Errorf("loading {{ $f.Name }}: object %q not found in blob storage", *n.{{ $f.BlobKeyColumn }}), _blobs.Close())
+			default:
+			{{- else }}
+			{{- /* DualWrite: prefer blob value, but preserve the column value when blob is missing. */}}
 			case data != nil:
-				{{- if $f.HasValueScanner }}
-				sv := {{ $f.ScanValueFunc }}()
-				if err := sv.Scan(data); err != nil {
-					return errors.Join(fmt.Errorf("scanning {{ $f.Name }}: %w", err), _blobs.Close())
-				}
-				v, err := {{ $f.FromValueFunc }}(sv)
-				if err != nil {
-					return errors.Join(fmt.Errorf("scanning {{ $f.Name }}: %w", err), _blobs.Close())
-				}
-				n.{{ $f.StructField }} = v
-				{{- else if $f.IsBlobGoString }}
-				n.{{ $f.StructField }} = {{ $f.Type }}(data)
-				{{- else }}
-				n.{{ $f.StructField }} = data
+			{{- end }}
+				{{- with extend $ "BlobField" $f "BlobNode" "n" "BlobStore" "_blobs" "BlobReturn" "" "BlobSuffix" "" }}
+					{{- template "dialect/sql/blob/assign" . }}
 				{{- end }}
 			}
-			{{- end }}
 		}
 		{{- end }}
 	}
@@ -598,4 +566,24 @@ func ({{ $receiver }} *{{ $builder }}) sqlQuery(ctx context.Context) *sql.Select
 			return &ValidationError{Name: f, err: fmt.Errorf("{{ $pkg }}: invalid field %q for query", f)}
 		}
 	}
+{{- end }}
+
+{{/* dialect/sql/blob/assign assigns the blob data, read into the "data" variable, to the struct field of the node. */}}
+{{ define "dialect/sql/blob/assign" }}
+	{{- $f := $.Scope.BlobField }}{{ $n := $.Scope.BlobNode }}{{ $store := $.Scope.BlobStore }}{{ $ret := $.Scope.BlobReturn }}{{ $suffix := $.Scope.BlobSuffix }}
+	{{- if $f.HasValueScanner }}
+		sv := {{ $f.ScanValueFunc }}()
+		if err := sv.Scan(data); err != nil {
+			return {{ $ret }}errors.Join(fmt.Errorf("scanning {{ $f.Name }}{{ $suffix }}: %w", err), {{ $store }}.Close())
+		}
+		v, err := {{ $f.FromValueFunc }}(sv)
+		if err != nil {
+			return {{ $ret }}errors.Join(fmt.Errorf("scanning {{ $f.Name }}{{ $suffix }}: %w", err), {{ $store }}.Close())
+		}
+		{{ $n }}.{{ $f.StructField }} = v
+	{{- else if $f.IsBlobGoString }}
+		{{ $n }}.{{ $f.StructField }} = {{ $f.Type }}(data)
+	{{- else }}
+		{{ $n }}.{{ $f.StructField }} = data
+	{{- end }}
 {{- end }}

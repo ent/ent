@@ -464,3 +464,20 @@ func TestField_BlobCheckRefs(t *testing.T) {
 	require.False(typ2.HasBlobRefCheckedFields())
 	require.Empty(typ2.BlobRefCheckedFields())
 }
+
+func TestField_BlobSingleRead(t *testing.T) {
+	require := require.New(t)
+	typ, err := NewType(&Config{Package: "entc/gen"}, &load.Schema{Name: "Doc", Fields: []*load.Field{
+		{Name: "dual", Info: &field.TypeInfo{Type: field.TypeBlob}, BlobDualWrite: true},
+		{Name: "single", Info: &field.TypeInfo{Type: field.TypeBlob}, BlobSingleRead: true},
+		{Name: "blob", Info: &field.TypeInfo{Type: field.TypeBlob}},
+		{Name: "title", Info: &field.TypeInfo{Type: field.TypeString}},
+	}})
+	require.NoError(err)
+	// A SingleRead field keeps its data column in the table, but the code no longer uses it.
+	for name, has := range map[string]bool{"dual": true, "single": false, "blob": false, "title": true} {
+		require.Equal(has, typ.fields[name].HasDataColumn(), name)
+	}
+	require.True(typ.fields["single"].IsBlobSingleRead())
+	require.False(typ.fields["single"].IsBlobNoColumn())
+}

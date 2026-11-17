@@ -88,6 +88,30 @@ func (_u *DocumentUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Docum
 }
 
 func (_u *DocumentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if _, ok := _u.mutation.Content(); ok {
+		return 0, &ValidationError{Name: "content", err: errors.New(`ent: blob field "Document.content" can only be updated using UpdateOne`)}
+	}
+	if _, ok := _u.mutation.Thumbnail(); ok {
+		return 0, &ValidationError{Name: "thumbnail", err: errors.New(`ent: blob field "Document.thumbnail" can only be updated using UpdateOne`)}
+	}
+	if _, ok := _u.mutation.Attachment(); ok {
+		return 0, &ValidationError{Name: "attachment", err: errors.New(`ent: blob field "Document.attachment" can only be updated using UpdateOne`)}
+	}
+	if _, ok := _u.mutation.Metadata(); ok || _u.mutation.MetadataCleared() {
+		return 0, &ValidationError{Name: "metadata", err: errors.New(`ent: blob field "Document.metadata" can only be updated using UpdateOne`)}
+	}
+	if _, ok := _u.mutation.Payload(); ok || _u.mutation.PayloadCleared() {
+		return 0, &ValidationError{Name: "payload", err: errors.New(`ent: blob field "Document.payload" can only be updated using UpdateOne`)}
+	}
+	if _, ok := _u.mutation.Description(); ok || _u.mutation.DescriptionCleared() {
+		return 0, &ValidationError{Name: "description", err: errors.New(`ent: blob field "Document.description" can only be updated using UpdateOne`)}
+	}
+	if _, ok := _u.mutation.Archive(); ok || _u.mutation.ArchiveCleared() {
+		return 0, &ValidationError{Name: "archive", err: errors.New(`ent: blob field "Document.archive" can only be updated using UpdateOne`)}
+	}
+	if _, ok := _u.mutation.Details(); ok || _u.mutation.DetailsCleared() {
+		return 0, &ValidationError{Name: "details", err: errors.New(`ent: blob field "Document.details" can only be updated using UpdateOne`)}
+	}
 	_spec := sqlgraph.NewUpdateSpec(document.Table, document.Columns, sqlgraph.NewFieldSpec(document.FieldID, field.TypeInt))
 	if ps := _u.mutation.Predicates(); len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -98,19 +122,6 @@ func (_u *DocumentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(document.FieldName, field.TypeString, value)
-	}
-	if value, ok := _u.mutation.Attachment(); ok {
-		_spec.SetField(document.FieldAttachment, field.TypeBytes, value)
-	}
-	if value, ok := _u.mutation.Payload(); ok {
-		vv, err := document.ValueScanner.Payload.Value(value)
-		if err != nil {
-			return 0, err
-		}
-		_spec.SetField(document.FieldPayload, field.TypeBytes, vv)
-	}
-	if _u.mutation.PayloadCleared() {
-		_spec.ClearField(document.FieldPayload, field.TypeBytes)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -211,6 +222,18 @@ func (_u *DocumentUpdateOne) SetNillableDescription(v *string) *DocumentUpdateOn
 // ClearDescription clears the value of the "description" field.
 func (_u *DocumentUpdateOne) ClearDescription() *DocumentUpdateOne {
 	_u.mutation.ClearDescription()
+	return _u
+}
+
+// SetDetails sets the "details" field.
+func (_u *DocumentUpdateOne) SetDetails(v *schema.DocPayload) *DocumentUpdateOne {
+	_u.mutation.SetDetails(v)
+	return _u
+}
+
+// ClearDetails clears the value of the "details" field.
+func (_u *DocumentUpdateOne) ClearDetails() *DocumentUpdateOne {
+	_u.mutation.ClearDetails()
 	return _u
 }
 
@@ -434,6 +457,32 @@ func (_u *DocumentUpdateOne) sqlSave(ctx context.Context) (_node *Document, err 
 			_spec.ClearField("archive_key", field.TypeString)
 		})
 	}
+	if value, ok := _u.mutation.Details(); ok {
+		_blobDV, err := document.ValueScanner.Details.Value(value)
+		if err != nil {
+			return nil, fmt.Errorf("ent: encoding details: %w", err)
+		}
+		var _blobData []byte
+		switch v := _blobDV.(type) {
+		case []byte:
+			_blobData = v
+		case string:
+			_blobData = []byte(v)
+		default:
+			return nil, fmt.Errorf("ent: encoding details: expected []byte or string, got %T", _blobDV)
+		}
+		_blobs.Set(document.FieldDetails, _blobData,
+			defaultBlobKey,
+			func(k string) {
+				_spec.SetField("details_key", field.TypeString, k)
+			},
+		)
+	}
+	if _u.mutation.DetailsCleared() {
+		_blobs.SetCleared(document.FieldDetails, func() {
+			_spec.ClearField("details_key", field.TypeString)
+		})
+	}
 	_blobResult, err := _blobs.Update(ctx, &sqlgraph.BlobSpec{
 		Driver: _u.driver,
 		Table:  document.Table,
@@ -445,6 +494,7 @@ func (_u *DocumentUpdateOne) sqlSave(ctx context.Context) (_node *Document, err 
 			document.FieldPayload:     "payload_key",
 			document.FieldDescription: "description_key",
 			document.FieldArchive:     "archive_key",
+			document.FieldDetails:     "details_key",
 		},
 		CheckRefs: map[string]bool{
 			document.FieldContent:    true,
@@ -520,6 +570,23 @@ func (_u *DocumentUpdateOne) sqlSave(ctx context.Context) (_node *Document, err 
 			return nil, errors.Join(fmt.Errorf("loading description after update: %w", err), _blobReader.Close())
 		}
 		_node.Description = string(data)
+	}
+	if value, ok := _u.mutation.Details(); ok {
+		_node.Details = value
+	} else if _node.details_key != nil && *_node.details_key != "" {
+		data, err := _blobReader.Read(ctx, document.FieldDetails, *_node.details_key)
+		if err != nil {
+			return nil, errors.Join(fmt.Errorf("loading details after update: %w", err), _blobReader.Close())
+		}
+		sv := document.ValueScanner.Details.ScanValue()
+		if err := sv.Scan(data); err != nil {
+			return nil, errors.Join(fmt.Errorf("scanning details after update: %w", err), _blobReader.Close())
+		}
+		v, err := document.ValueScanner.Details.FromValue(sv)
+		if err != nil {
+			return nil, errors.Join(fmt.Errorf("scanning details after update: %w", err), _blobReader.Close())
+		}
+		_node.Details = v
 	}
 	if err := _blobReader.Close(); err != nil {
 		return nil, err

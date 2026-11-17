@@ -20,7 +20,7 @@ in the LICENSE file in the root directory of this source tree.
 	{{- if $f.HasValueScanner }}
 		{{- continue }}
 	{{- end }}
-	{{- if or $f.IsBlobNoColumn $f.IsBlobLazy }}
+	{{- if not $f.HasDataColumn }}
 		{{- continue }}
 	{{- end }}
 	{{ $names := list }}
@@ -45,7 +45,7 @@ func (*{{ $.Name }}) scanValues(columns []string) ([]any, error) {
 					values[i] = {{ $type }}
 			{{- end }}
 			{{- range $f := $.Fields }}
-				{{- if $f.IsBlobNoColumn }}{{ continue }}{{ end }}
+				{{- if not $f.HasDataColumn }}{{ continue }}{{ end }}
 				{{- if $f.HasValueScanner }}
 					case {{ $.Package }}.{{ $f.Constant }}:
 						values[i] = {{ $f.ScanValueFunc }}()
@@ -91,7 +91,7 @@ func ({{ $receiver }} *{{ $.Name }}) assignValues(columns []string, values []any
 				{{- end }}
 		{{- end }}
 		{{- range  $f := $.Fields }}
-			{{- if or $f.IsBlobNoColumn $f.IsBlobLazy }}
+			{{- if not $f.HasDataColumn }}
 				{{- continue }}
 			{{- end }}
 			case {{ $.Package }}.{{ $f.Constant }}:

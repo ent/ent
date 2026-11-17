@@ -381,14 +381,14 @@ func (_q *DocumentQuery) loadBlobFields(ctx context.Context, nodes []*Document) 
 			}
 		}
 		if n.metadata_key != nil && *n.metadata_key != "" {
-			data, err := _blobs.Read(ctx, document.FieldMetadata, *n.metadata_key)
-			if err != nil {
+			switch data, err := _blobs.Read(ctx, document.FieldMetadata, *n.metadata_key); {
+			case err != nil:
 				return errors.Join(fmt.Errorf("loading metadata: %w", err), _blobs.Close())
-			}
-			if data == nil {
+			case data == nil:
 				return errors.Join(fmt.Errorf("loading metadata: object %q not found in blob storage", *n.metadata_key), _blobs.Close())
+			default:
+				n.Metadata = data
 			}
-			n.Metadata = data
 		}
 		if n.payload_key != nil && *n.payload_key != "" {
 			switch data, err := _blobs.Read(ctx, document.FieldPayload, *n.payload_key); {
@@ -407,14 +407,32 @@ func (_q *DocumentQuery) loadBlobFields(ctx context.Context, nodes []*Document) 
 			}
 		}
 		if n.description_key != nil && *n.description_key != "" {
-			data, err := _blobs.Read(ctx, document.FieldDescription, *n.description_key)
-			if err != nil {
+			switch data, err := _blobs.Read(ctx, document.FieldDescription, *n.description_key); {
+			case err != nil:
 				return errors.Join(fmt.Errorf("loading description: %w", err), _blobs.Close())
-			}
-			if data == nil {
+			case data == nil:
 				return errors.Join(fmt.Errorf("loading description: object %q not found in blob storage", *n.description_key), _blobs.Close())
+			default:
+				n.Description = string(data)
 			}
-			n.Description = string(data)
+		}
+		if n.details_key != nil && *n.details_key != "" {
+			switch data, err := _blobs.Read(ctx, document.FieldDetails, *n.details_key); {
+			case err != nil:
+				return errors.Join(fmt.Errorf("loading details: %w", err), _blobs.Close())
+			case data == nil:
+				return errors.Join(fmt.Errorf("loading details: object %q not found in blob storage", *n.details_key), _blobs.Close())
+			default:
+				sv := document.ValueScanner.Details.ScanValue()
+				if err := sv.Scan(data); err != nil {
+					return errors.Join(fmt.Errorf("scanning details: %w", err), _blobs.Close())
+				}
+				v, err := document.ValueScanner.Details.FromValue(sv)
+				if err != nil {
+					return errors.Join(fmt.Errorf("scanning details: %w", err), _blobs.Close())
+				}
+				n.Details = v
+			}
 		}
 	}
 	return _blobs.Close()

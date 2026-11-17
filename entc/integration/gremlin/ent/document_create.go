@@ -72,6 +72,12 @@ func (_c *DocumentCreate) SetNillableDescription(v *string) *DocumentCreate {
 	return _c
 }
 
+// SetDetails sets the "details" field.
+func (_c *DocumentCreate) SetDetails(v *schema.DocPayload) *DocumentCreate {
+	_c.mutation.SetDetails(v)
+	return _c
+}
+
 // Mutation returns the DocumentMutation object of the builder.
 func (_c *DocumentCreate) Mutation() *DocumentMutation {
 	return _c.mutation

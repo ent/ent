@@ -69,6 +69,9 @@ func init() {
 	// documentDescPayload is the schema descriptor for payload field.
 	documentDescPayload := documentFields[5].Descriptor()
 	document.ValueScanner.Payload = documentDescPayload.ValueScanner.(field.TypeValueScanner[*schema.DocPayload])
+	// documentDescDetails is the schema descriptor for details field.
+	documentDescDetails := documentFields[8].Descriptor()
+	document.ValueScanner.Details = documentDescDetails.ValueScanner.(field.TypeValueScanner[*schema.DocPayload])
 	exvaluescanFields := schema.ExValueScan{}.Fields()
 	_ = exvaluescanFields
 	// exvaluescanDescBinary is the schema descriptor for binary field.

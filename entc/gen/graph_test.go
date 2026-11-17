@@ -6,12 +6,16 @@ package gen
 
 import (
 	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"os"
 	"path/filepath"
 	"reflect"
 	"slices"
 	"testing"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/load"
@@ -384,6 +388,85 @@ func TestBlobDualWriteGoType(t *testing.T) {
 	require.Equal("example.com/app", f.Type.PkgPath)
 	require.NotNil(f.Type.RType)
 	require.Equal("Config", f.Type.RType.Name)
+}
+
+// TestBlobSingleReadTables follows the steps of moving a required column to blob storage:
+// the data column is kept, made nullable with SingleRead (keeping its type), then dropped.
+func TestBlobSingleReadTables(t *testing.T) {
+	jsonb := map[string]string{dialect.Postgres: "jsonb"}
+	for _, tt := range []struct {
+		name                  string
+		dualWrite, singleRead bool
+		columns               []string // with their Postgres type, if set, and " NULL" if nullable
+	}{
+		{name: "DualWrite", dualWrite: true, columns: []string{"id", "data jsonb", "data_key"}},
+		{name: "SingleRead", singleRead: true, columns: []string{"id", "data jsonb NULL", "data_key"}},
+		{name: "Blob", columns: []string{"id", "data_key"}},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			g, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, &load.Schema{
+				Name: "Doc",
+				Fields: []*load.Field{
+					{Name: "data", Info: &field.TypeInfo{Type: field.TypeBlob}, BlobDualWrite: tt.dualWrite, BlobSingleRead: tt.singleRead, BlobDWSchemaType: jsonb},
+				},
+			})
+			require.NoError(t, err)
+			tables, err := g.Tables()
+			require.NoError(t, err)
+			require.Len(t, tables, 1)
+			columns := make([]string, 0, len(tables[0].Columns))
+			for _, c := range tables[0].Columns {
+				column := c.Name
+				if typ := c.SchemaType[dialect.Postgres]; typ != "" {
+					column += " " + typ
+				}
+				if c.Nullable {
+					column += " NULL"
+				}
+				columns = append(columns, column)
+			}
+			require.Equal(t, tt.columns, columns)
+		})
+	}
+}
+
+// TestGraph_GenDeprecatedReason checks the struct field comments of deprecated fields,
+// including a reason that spans multiple lines.
+func TestGraph_GenDeprecatedReason(t *testing.T) {
+	require := require.New(t)
+	target := filepath.Join(t.TempDir(), "ent")
+	graph, err := NewGraph(&Config{
+		Package: "entc/gen",
+		Schema:  "entc/gen/schema",
+		Target:  target,
+		Storage: drivers[0],
+		IDType:  &field.TypeInfo{Type: field.TypeInt},
+	}, &load.Schema{
+		Name: "Doc",
+		Fields: []*load.Field{
+			{Name: "title", Info: &field.TypeInfo{Type: field.TypeString}},
+			{Name: "title_deprecated", Info: &field.TypeInfo{Type: field.TypeString}, Deprecated: true},
+			{Name: "title_reason", Info: &field.TypeInfo{Type: field.TypeString}, Deprecated: true, DeprecatedReason: "use name instead\nsee the changelog"},
+		},
+	})
+	require.NoError(err)
+	require.NoError(graph.Gen())
+	file, err := parser.ParseFile(token.NewFileSet(), filepath.Join(target, "doc.go"), nil, parser.ParseComments)
+	require.NoError(err)
+	comments := make(map[string]string)
+	ast.Inspect(file, func(n ast.Node) bool {
+		if f, ok := n.(*ast.Field); ok && len(f.Names) == 1 && f.Doc != nil {
+			comments[f.Names[0].Name] = f.Doc.Text()
+		}
+		return true
+	})
+	for name, comment := range map[string]string{
+		"Title":           "Title holds the value of the \"title\" field.\n",
+		"TitleDeprecated": "TitleDeprecated holds the value of the \"title_deprecated\" field.\n\nDeprecated: Field \"title_deprecated\" was marked as deprecated in the schema.\n",
+		"TitleReason":     "TitleReason holds the value of the \"title_reason\" field.\n\nDeprecated: use name instead\nsee the changelog\n",
+	} {
+		require.Equal(comment, comments[name], name)
+	}
 }
 
 func TestAbortDuplicateFK(t *testing.T) {

@@ -693,9 +693,8 @@ func (t *Type) AddIndex(idx *load.Index) error {
 			return fmt.Errorf("unknown index field %q", name)
 		}
 		switch {
-		case f.IsBlobNoColumn() || f.IsBlobLazy():
-			// Non-dual-write blob fields have no data column; translate
-			// the index to the generated blob key column instead.
+		case f.IsBlobNoColumn():
+			// Blob fields without a data column index their key column instead.
 			index.Columns = append(index.Columns, f.BlobKeyColumn())
 		default:
 			index.Columns = append(index.Columns, f.StorageKey())
@@ -1416,10 +1415,21 @@ func (f Field) IsBlobLazy() bool {
 	return f.IsBlob() && f.def.BlobLazy
 }
 
-// IsBlobNoColumn reports whether this blob field has no SQL data column.
-// True for all blob fields except DualWrite.
+// IsBlobNoColumn reports whether this blob field has no data column in its table.
+// Only non-lazy DualWrite and SingleRead fields keep one.
 func (f Field) IsBlobNoColumn() bool {
-	return f.IsBlob() && !f.def.BlobDualWrite
+	return f.IsBlob() && (f.def.BlobLazy || !f.def.BlobDualWrite && !f.def.BlobSingleRead)
+}
+
+// IsBlobSingleRead reports whether this blob field moved from DualWrite to blob storage only.
+// Its data column stays in the table, unused, until it is dropped.
+func (f Field) IsBlobSingleRead() bool {
+	return f.IsBlob() && f.def.BlobSingleRead
+}
+
+// HasDataColumn reports whether the generated code reads and writes the field value in a column.
+func (f Field) HasDataColumn() bool {
+	return !f.IsBlobNoColumn() && !f.IsBlobSingleRead()
 }
 
 // IsBlobRefChecked reports whether cleanup must verify that no row still holds
@@ -1721,10 +1731,12 @@ func (f Field) standardNullType() bool {
 // in case of ID field, unless stated otherwise.
 func (f Field) Column() *schema.Column {
 	c := &schema.Column{
-		Name:     f.StorageKey(),
-		Type:     f.Type.Type,
-		Unique:   f.Unique,
-		Nullable: f.Optional,
+		Name:   f.StorageKey(),
+		Type:   f.Type.Type,
+		Unique: f.Unique,
+		// The code no longer writes the data column of a SingleRead field,
+		// so it must allow NULL values until it is dropped.
+		Nullable: f.Optional || f.IsBlobSingleRead(),
 		Size:     f.size(),
 		Enums:    f.EnumValues(),
 		Comment:  f.sqlComment(),

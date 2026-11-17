@@ -98,6 +98,7 @@ doc = doc.Update().
 | `UUIDKey()` | Random UUID v7 key per write. |
 | `CheckRefs()` | Verify no row still holds a key before deleting the object. Use with `HashKey`. |
 | `DualWrite(...)` | Migration mode: write to both blob storage and database column. |
+| `SingleRead(...)` | Replaces `DualWrite`: use blob storage only, keeping the database column until it is dropped. |
 | `GoType(typ)` | Override the default `[]byte` Go type. |
 | `ValueScanner(vs)` | Custom codec between Go type and raw bytes (required for non-`[]byte`/`string` GoType). |
 | `StorageKey(key)` | Override the database column name. |
@@ -190,6 +191,89 @@ In DualWrite mode:
 
 The optional `columnType` argument overrides the database column type per dialect to prevent
 schema drift when migrating from an existing column definition.
+
+### Migrating a column to blob storage
+
+Moving an existing column to blob storage takes three schema changes, each deployed on its own.
+Starting from a regular field:
+
+```go
+field.Bytes("payload")
+```
+
+**1. Write to both.** Change the field to a `DualWrite` blob field. The data column is kept and a
+`payload_key` column is added. New writes go to both, and reads prefer blob storage and fall back
+to the column for rows that have no blob key yet.
+
+```go
+field.Blob("payload").
+  DualWrite().
+  CheckRefs()
+```
+
+While the change rolls out, instances of the previous version still write only the column, which
+can leave a row with a blob that is older than its column, or with the key of a value they cleared.
+Once none of them is running, copy every row to blob storage: read the column with
+`Select(document.FieldPayload)`, which does not load the blob, and set the field to that value. Where
+the column is `NULL`, clear the field instead (`ClearPayload()`) to remove such a key, as setting it
+to a nil value would store an empty object. Read and write each row in a transaction that locks it
+(`ForUpdate()`, with the `sql/lock` feature), or pause other writes to the field while copying:
+otherwise an update made between the read and the write is overwritten with the older value.
+
+The key column of a required field is `NOT NULL` without a default. Instances of the previous version
+do not write it, so their inserts fail while the change rolls out (and SQLite and PostgreSQL reject
+adding it to a table that already has rows). Mark a required field as `Optional()` for the duration
+of the migration, and make it required again in a later change, once the data column is dropped.
+
+Do not mark the field as `Lazy()` during the migration. Lazy fields have no data column, so the
+original column would not be kept, and a migration that drops columns would remove it along with
+the data that was not copied yet.
+
+The snippets use the default content-addressed keys, so they add [`CheckRefs`](#shared-objects-and-checkrefs).
+Without it, cleanup can remove an object that another row with the same content still points at,
+and the fallback to the column hides it until the next step. [Index](#index-the-key-columns) the
+`payload_key` column as well.
+
+**2. Stop using the column.** Replace `DualWrite` with `SingleRead`, passing it the same column type
+(if any), so the column is not altered:
+
+```go
+field.Blob("payload").
+  SingleRead().
+  CheckRefs()
+```
+
+- The generated code no longer reads or writes the data column, as it will be once the column is
+  dropped. The column is not selected and cannot be selected explicitly, the field predicates on it
+  (such as `PayloadEQ`) are no longer generated, and creates, updates and upserts write only blob
+  storage and the key column. The column is made nullable, as rows inserted from now on leave it empty,
+  so apply this step's migration before deploying it.
+- The field is read from blob storage only. Rows without a blob key read as empty, and queries
+  report a missing blob as an error instead of falling back to the column. The column still holds
+  the values written before this step, so resolve such rows before the next step drops it: read the
+  value with plain SQL, or go back to step 1, where `Select(document.FieldPayload)` returns it. With
+  content-addressed keys, setting the same value again does not restore a missing object: the key
+  does not change, so the write is skipped. Clear the field (or set a different value) in one
+  update, and set the value in another. Run them as separate updates: within one transaction, the
+  cleanup of the first update removes the object that the second one writes.
+- Going back to `DualWrite` returns to step 1. Values set in this step are kept, as step 1 reads blob
+  storage first. A value cleared in this step leaves no blob key, so step 1 falls back to the column
+  and reads the value from before this step again. The same holds for instances of step 1 that are
+  still running while this step rolls out.
+
+**3. Drop the column.** Remove `SingleRead`. The field is now stored only in blob storage, and the data
+column is no longer part of the schema.
+
+```go
+field.Blob("payload").
+  CheckRefs()
+```
+
+The previous version no longer uses the data column, so the migration that drops it can run while
+that version is still running, before or after this change is deployed. Plan it as a
+[versioned migration](versioned-migrations.mdx) with `atlas migrate diff`. Automatic migration and
+`migrate.NamedDiff` drop columns only when `migrate.WithDropColumn(true)` is passed (see
+[Drop Resources](migrate.md#drop-resources)).
 
 ## Custom GoType
 
@@ -285,9 +369,9 @@ func (Document) Indexes() []ent.Index {
 
 Leave them non-unique — rows sharing content share a key, which is the whole point.
 
-One exception: a `DualWrite` field that is not also `Lazy()` keeps a real data column, and
-`index.Fields` targets *that* column rather than the key column. For those fields, create the
-index on `<field>_key` outside the schema.
+One exception: a `DualWrite` field that is not also `Lazy()`, or a `SingleRead` field, keeps a real
+data column, and `index.Fields` targets *that* column rather than the key column. For those fields,
+create the index on `<field>_key` outside the schema.
 
 Fields without `CheckRefs` need no such index — they never run the lookup.
 
@@ -307,6 +391,15 @@ On update:
 4. On SQL failure, newly-written blobs are rolled back (deleted) under the same rule.
 
 When using `HashKey`, if the content hasn't changed (same hash), the write is skipped entirely.
+
+Blob fields are written along with their key column, so they can be set or cleared only using
+`UpdateOne`. A multi-row `Update` whose mutation sets or clears a blob field (for example, in a
+hook) fails with a validation error.
+
+After the update, `UpdateOne` loads the blob fields it did not set: `DualWrite` fields from their
+data column, and other fields from blob storage. If reading an object fails, it returns an error,
+although the update was already applied. Run it in a transaction to roll the update back in that
+case. Unlike queries, it does not check that the objects exist.
 
 ### Delete
 

@@ -245,7 +245,9 @@ type {{ $slice }} []*{{ $.Name }}
 	{{- end }}
 	{{- if $.IsDeprecated }}
 		//
-		// Deprecated: {{ with $.DeprecationReason }}{{ . }}{{ else }}Field "{{ $.Name }}" was marked as deprecated in the schema.{{ end }}
+		{{- range $line := split (print "Deprecated: " (or $.DeprecationReason (printf "Field %q was marked as deprecated in the schema." $.Name))) "\n" }}
+			// {{ $line }}
+		{{- end }}
 	{{- end }}
 {{- end }}
 

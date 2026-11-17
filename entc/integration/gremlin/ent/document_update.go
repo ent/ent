@@ -222,6 +222,18 @@ func (_u *DocumentUpdateOne) ClearDescription() *DocumentUpdateOne {
 	return _u
 }
 
+// SetDetails sets the "details" field.
+func (_u *DocumentUpdateOne) SetDetails(v *schema.DocPayload) *DocumentUpdateOne {
+	_u.mutation.SetDetails(v)
+	return _u
+}
+
+// ClearDetails clears the value of the "details" field.
+func (_u *DocumentUpdateOne) ClearDetails() *DocumentUpdateOne {
+	_u.mutation.ClearDetails()
+	return _u
+}
+
 // Mutation returns the DocumentMutation object of the builder.
 func (_u *DocumentUpdateOne) Mutation() *DocumentMutation {
 	return _u.mutation

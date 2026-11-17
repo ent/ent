@@ -113,7 +113,7 @@ type (
 	{{ $func := print "Update" $f.StructField }}
 	// {{ $func }} sets the "{{ $f.Name }}" field to the value that was provided on create.
 	func (u *{{ $upsertSet }}) {{ $func }}() *{{ $upsertSet }} {
-		{{- if not $f.IsBlobNoColumn }}
+		{{- if $f.HasDataColumn }}
 		u.SetExcluded({{ $.Package }}.{{ $f.Constant }})
 		{{- end }}
 		u.SetExcluded("{{ $f.BlobKeyColumn }}")
@@ -124,7 +124,7 @@ type (
 		{{ $func := print "Clear" $f.StructField }}
 		// {{ $func }} clears the value of the "{{ $f.Name }}" field.
 		func (u *{{ $upsertSet }}) {{ $func }}() *{{ $upsertSet }} {
-			{{- if not $f.IsBlobNoColumn }}
+			{{- if $f.HasDataColumn }}
 			u.SetNull({{ $.Package }}.{{ $f.Constant }})
 			{{- end }}
 			u.SetNull("{{ $f.BlobKeyColumn }}")
