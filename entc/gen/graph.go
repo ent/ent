@@ -680,7 +680,7 @@ func (g *Graph) Tables() (all []*schema.Table, err error) {
 			if a := f.EntSQL(); a != nil && a.Skip {
 				continue
 			}
-			if f.IsBlobNoColumn() || f.IsBlobLazy() {
+			if f.IsBlobNoColumn() {
 				continue
 			}
 			if !f.IsEdgeField() {

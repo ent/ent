@@ -201,7 +201,7 @@ func ({{ $receiver }} *{{ $builder }}) createSpec() (*{{ $.Name }}, *sqlgraph.Cr
 		}
 	{{- end }}
 	{{- range $f := $.MutationFields }}
-		{{- if $f.IsBlobNoColumn }}{{ continue }}{{ end }}
+		{{- if not $f.HasDataColumn }}{{ continue }}{{ end }}
 		if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 			{{- if $f.HasValueScanner }}
 				vv, err := {{ $f.ValueFunc }}(value)

@@ -36,6 +36,15 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 			return _node, err
 		}
 	{{- end }}
+	{{- if not $one }}
+		{{- /* Blob storage and blob keys are written by UpdateOne only. A multi-row update would
+				write only the data column of a DualWrite field, or nothing at all. */}}
+		{{- range $f := $.BlobFields }}
+			if _, ok := {{ $mutation }}.{{ if $f.IsBlobLazy }}{{ $f.StructField }}{{ else }}{{ $f.MutationGet }}{{ end }}(); ok{{ if $f.Optional }} || {{ $mutation }}.{{ $f.MutationCleared }}(){{ end }} {
+				return {{ $zero }}, &ValidationError{Name: "{{ $f.Name }}", err: errors.New(`{{ $pkg }}: blob field "{{ $.Name }}.{{ $f.Name }}" can only be updated using UpdateOne`)}
+			}
+		{{- end }}
+	{{- end }}
 	_spec := sqlgraph.NewUpdateSpec({{ $.Package }}.Table, {{ $.Package }}.Columns,
 		{{- if $.HasOneFieldID -}}
 			sqlgraph.NewFieldSpec({{ $.Package }}.{{ $.ID.Constant }}, field.{{ $.ID.Type.ConstName }})
@@ -98,7 +107,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 		}
 	}
 	{{- range $f := $.MutationFields }}
-			{{- if $f.IsBlobNoColumn }}{{ continue }}{{ end }}
+			{{- /* Multi-row updates of blob fields are rejected above. */}}
+			{{- if or (not $f.HasDataColumn) (and $f.IsBlob (not $one)) }}{{ continue }}{{ end }}
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}
 				if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 					{{- if $f.HasValueScanner }}
@@ -314,34 +324,20 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 	}
 	{{- end }}
 	{{- if and $one $.HasLoadOnScanFields }}
-	{{- /* Blob values are consistent after write — use mutation value for mutated fields
-				instead of re-reading from storage. For DualWrite fields, assignValues already
-				populated the value from the SQL column. For non-DualWrite fields not mutated,
-				read from blob storage. */}}
+	{{- /* Blob values are consistent after write: mutated fields take the mutation value. Others keep
+				the value assignValues read from the data column, or are read from blob storage when there is none. */}}
 	_blobReader := ent.NewBlobStore({{ $mutation }}.blobOpeners.{{ $.Name }})
 	{{- range $f := $.LoadOnScanFields }}
 	if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 		_node.{{ $f.StructField }} = value
 	}
-	{{- if $f.IsBlobNoColumn }} else if _node.{{ $f.BlobKeyColumn }} != nil && *_node.{{ $f.BlobKeyColumn }} != "" {
+	{{- if not $f.HasDataColumn }} else if _node.{{ $f.BlobKeyColumn }} != nil && *_node.{{ $f.BlobKeyColumn }} != "" {
 		data, err := _blobReader.Read(ctx, {{ $.Package }}.{{ $f.Constant }}, *_node.{{ $f.BlobKeyColumn }})
 		if err != nil {
 			return nil, errors.Join(fmt.Errorf("loading {{ $f.Name }} after update: %w", err), _blobReader.Close())
 		}
-		{{- if $f.HasValueScanner }}
-		sv := {{ $f.ScanValueFunc }}()
-		if err := sv.Scan(data); err != nil {
-			return nil, errors.Join(fmt.Errorf("scanning {{ $f.Name }} after update: %w", err), _blobReader.Close())
-		}
-		v, err := {{ $f.FromValueFunc }}(sv)
-		if err != nil {
-			return nil, errors.Join(fmt.Errorf("scanning {{ $f.Name }} after update: %w", err), _blobReader.Close())
-		}
-		_node.{{ $f.StructField }} = v
-		{{- else if $f.IsBlobGoString }}
-		_node.{{ $f.StructField }} = {{ $f.Type }}(data)
-		{{- else }}
-		_node.{{ $f.StructField }} = data
+		{{- with extend $ "BlobField" $f "BlobNode" "_node" "BlobStore" "_blobReader" "BlobReturn" "nil, " "BlobSuffix" " after update" }}
+			{{- template "dialect/sql/blob/assign" . }}
 		{{- end }}
 	}
 	{{- end }}

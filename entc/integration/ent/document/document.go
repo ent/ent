@@ -34,6 +34,8 @@ const (
 	FieldDescription = "description"
 	// FieldArchive holds the string denoting the archive field in the database.
 	FieldArchive = "archive"
+	// FieldDetails holds the string denoting the details field in the database.
+	FieldDetails = "details"
 	// Table holds the table name of the document in the database.
 	Table = "documents"
 )
@@ -51,6 +53,7 @@ var Columns = []string{
 	"payload_key",
 	"description_key",
 	"archive_key",
+	"details_key",
 }
 
 // BlobKeys holds the SQL columns for blob storage keys.
@@ -62,6 +65,7 @@ var BlobKeys = []string{
 	"payload_key",
 	"description_key",
 	"archive_key",
+	"details_key",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -85,6 +89,7 @@ var (
 	// ValueScanner of all Document fields.
 	ValueScanner struct {
 		Payload field.TypeValueScanner[*schema.DocPayload]
+		Details field.TypeValueScanner[*schema.DocPayload]
 	}
 )
 

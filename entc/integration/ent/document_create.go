@@ -74,6 +74,12 @@ func (_c *DocumentCreate) SetNillableDescription(v *string) *DocumentCreate {
 	return _c
 }
 
+// SetDetails sets the "details" field.
+func (_c *DocumentCreate) SetDetails(v *schema.DocPayload) *DocumentCreate {
+	_c.mutation.SetDetails(v)
+	return _c
+}
+
 // SetContent sets the "content" field.
 func (_c *DocumentCreate) SetContent(v io.Reader) *DocumentCreate {
 	_c.mutation.SetContent(v)
@@ -241,6 +247,29 @@ func (_c *DocumentCreate) sqlSave(ctx context.Context) (*Document, error) {
 				_spec.SetField("archive_key", field.TypeString, k)
 			},
 		)
+	}
+	if value, ok := _c.mutation.Details(); ok {
+		_blobDV, err := document.ValueScanner.Details.Value(value)
+		if err != nil {
+			return nil, fmt.Errorf("ent: encoding details: %w", err)
+		}
+		var _blobData []byte
+		switch v := _blobDV.(type) {
+		case []byte:
+			_blobData = v
+		case string:
+			_blobData = []byte(v)
+		default:
+			return nil, fmt.Errorf("ent: encoding details: expected []byte or string, got %T", _blobDV)
+		}
+		_blobs.Set(document.FieldDetails, _blobData,
+			defaultBlobKey,
+			func(k string) {
+				_node.details_key = &k
+				_spec.SetField("details_key", field.TypeString, k)
+			},
+		)
+		_node.Details = value
 	}
 	_blobCleanup, err := _blobs.Create(ctx, &sqlgraph.BlobSpec{
 		Driver: _c.driver,
@@ -413,6 +442,18 @@ func (u *DocumentUpsert) ClearDescription() *DocumentUpsert {
 	return u
 }
 
+// UpdateDetails sets the "details" field to the value that was provided on create.
+func (u *DocumentUpsert) UpdateDetails() *DocumentUpsert {
+	u.SetExcluded("details_key")
+	return u
+}
+
+// ClearDetails clears the value of the "details" field.
+func (u *DocumentUpsert) ClearDetails() *DocumentUpsert {
+	u.SetNull("details_key")
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -513,6 +554,20 @@ func (u *DocumentUpsertOne) UpdateDescription() *DocumentUpsertOne {
 func (u *DocumentUpsertOne) ClearDescription() *DocumentUpsertOne {
 	return u.Update(func(s *DocumentUpsert) {
 		s.ClearDescription()
+	})
+}
+
+// UpdateDetails sets the "details" field to the value that was provided on create.
+func (u *DocumentUpsertOne) UpdateDetails() *DocumentUpsertOne {
+	return u.Update(func(s *DocumentUpsert) {
+		s.UpdateDetails()
+	})
+}
+
+// ClearDetails clears the value of the "details" field.
+func (u *DocumentUpsertOne) ClearDetails() *DocumentUpsertOne {
+	return u.Update(func(s *DocumentUpsert) {
+		s.ClearDetails()
 	})
 }
 
@@ -674,6 +729,29 @@ func (_c *DocumentCreateBulk) Save(ctx context.Context) ([]*Document, error) {
 							specs[i].SetField("archive_key", field.TypeString, k)
 						},
 					)
+				}
+				if value, ok := mutation.Details(); ok {
+					_blobDV, err := document.ValueScanner.Details.Value(value)
+					if err != nil {
+						return nil, fmt.Errorf("ent: encoding details: %w", err)
+					}
+					var _blobData []byte
+					switch v := _blobDV.(type) {
+					case []byte:
+						_blobData = v
+					case string:
+						_blobData = []byte(v)
+					default:
+						return nil, fmt.Errorf("ent: encoding details: expected []byte or string, got %T", _blobDV)
+					}
+					_blobs.Set(document.FieldDetails, _blobData,
+						defaultBlobKey,
+						func(k string) {
+							nodes[i].details_key = &k
+							specs[i].SetField("details_key", field.TypeString, k)
+						},
+					)
+					nodes[i].Details = value
 				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
@@ -904,6 +982,20 @@ func (u *DocumentUpsertBulk) UpdateDescription() *DocumentUpsertBulk {
 func (u *DocumentUpsertBulk) ClearDescription() *DocumentUpsertBulk {
 	return u.Update(func(s *DocumentUpsert) {
 		s.ClearDescription()
+	})
+}
+
+// UpdateDetails sets the "details" field to the value that was provided on create.
+func (u *DocumentUpsertBulk) UpdateDetails() *DocumentUpsertBulk {
+	return u.Update(func(s *DocumentUpsert) {
+		s.UpdateDetails()
+	})
+}
+
+// ClearDetails clears the value of the "details" field.
+func (u *DocumentUpsertBulk) ClearDetails() *DocumentUpsertBulk {
+	return u.Update(func(s *DocumentUpsert) {
+		s.ClearDetails()
 	})
 }
 

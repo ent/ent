@@ -32,7 +32,9 @@ type Document struct {
 	// Payload holds the value of the "payload" field.
 	Payload *schema.DocPayload `json:"payload,omitempty"`
 	// Description holds the value of the "description" field.
-	Description     string `json:"description,omitempty"`
+	Description string `json:"description,omitempty"`
+	// Details holds the value of the "details" field.
+	Details         *schema.DocPayload `json:"details,omitempty"`
 	content_key     *string
 	thumbnail_key   *string
 	attachment_key  *string
@@ -40,6 +42,7 @@ type Document struct {
 	payload_key     *string
 	description_key *string
 	archive_key     *string
+	details_key     *string
 	selectValues    sql.SelectValues
 }
 
@@ -69,6 +72,8 @@ func (*Document) scanValues(columns []string) ([]any, error) {
 		case document.BlobKeys[5]: // description_key
 			values[i] = new(sql.NullString)
 		case document.BlobKeys[6]: // archive_key
+			values[i] = new(sql.NullString)
+		case document.BlobKeys[7]: // details_key
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -150,6 +155,12 @@ func (_m *Document) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field archive_key", values[i])
 			} else if value.Valid {
 				_m.archive_key = &value.String
+			}
+		case document.BlobKeys[7]:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field details_key", values[i])
+			} else if value.Valid {
+				_m.details_key = &value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -276,6 +287,22 @@ func (_m *Document) ArchiveReader(ctx context.Context) (io.ReadCloser, error) {
 	return ent.BlobReader(ctx, b, *_m.archive_key)
 }
 
+// DetailsReader opens a reader for the "details" field from blob storage.
+// The caller must close the returned reader when done.
+func (_m *Document) DetailsReader(ctx context.Context) (io.ReadCloser, error) {
+	if _m.details_key == nil || *_m.details_key == "" {
+		return nil, fmt.Errorf("ent: Document.details_key is nil or empty")
+	}
+	if _m.blobOpeners.Document == nil {
+		return nil, fmt.Errorf("ent: blob storage not configured (missing WithBlobOpeners)")
+	}
+	b, err := _m.blobOpeners.Document(ctx, document.FieldDetails)
+	if err != nil {
+		return nil, err
+	}
+	return ent.BlobReader(ctx, b, *_m.details_key)
+}
+
 // Update returns a builder for updating this Document.
 // Note that you need to call Document.Unwrap() before calling this method if this Document
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -313,6 +340,9 @@ func (_m *Document) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Description))
+	builder.WriteString(", ")
+	builder.WriteString("details=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Details))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -33,12 +33,15 @@ const (
 	FieldDescription = "description"
 	// FieldArchive holds the string denoting the archive field in the database.
 	FieldArchive = "archive"
+	// FieldDetails holds the string denoting the details field in the database.
+	FieldDetails = "details"
 )
 
 var (
 	// ValueScanner of all Document fields.
 	ValueScanner struct {
 		Payload field.TypeValueScanner[*schema.DocPayload]
+		Details field.TypeValueScanner[*schema.DocPayload]
 	}
 )
 

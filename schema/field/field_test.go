@@ -1015,3 +1015,10 @@ func TestString_MaxRuneLen(t *testing.T) {
 	err = fd.Validators[0].(func(string) error)("")
 	assert.NoError(t, err)
 }
+
+func TestBlob_SingleRead(t *testing.T) {
+	assert.NoError(t, field.Blob("data").SingleRead().Descriptor().Err)
+	const msg = "SingleRead replaces DualWrite, and cannot be used with it or with Lazy"
+	assert.EqualError(t, field.Blob("data").DualWrite().SingleRead().Descriptor().Err, msg)
+	assert.EqualError(t, field.Blob("data").SingleRead().Lazy().Descriptor().Err, msg)
+}

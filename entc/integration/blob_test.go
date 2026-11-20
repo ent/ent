@@ -61,6 +61,7 @@ func blobDir(t *testing.T) string {
 	require.NoError(t, os.MkdirAll(filepath.Join(dir, "payloads"), 0o755))
 	require.NoError(t, os.MkdirAll(filepath.Join(dir, "descriptions"), 0o755))
 	require.NoError(t, os.MkdirAll(filepath.Join(dir, "archives"), 0o755))
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, "details"), 0o755))
 	return dir
 }
 
@@ -84,6 +85,8 @@ func newBlobOpeners(dir string) ent.BlobOpeners {
 				return blob.OpenBucket(ctx, "file://"+filepath.Join(dir, "descriptions"))
 			case document.FieldArchive:
 				return blob.OpenBucket(ctx, "file://"+filepath.Join(dir, "archives"))
+			case document.FieldDetails:
+				return blob.OpenBucket(ctx, "file://"+filepath.Join(dir, "details"))
 			default:
 				return nil, fmt.Errorf("unknown blob field: %s", field)
 			}
@@ -1389,6 +1392,10 @@ func TestBlobDualWritePayloadReadsFromBlob(t *testing.T) {
 	require.NotNil(t, queried.Payload)
 	require.Equal(t, "from-blob", queried.Payload.Title)
 	require.Equal(t, "overwritten", queried.Payload.Body)
+
+	// Selecting only the column reads it without loading the blob.
+	queried = client.Document.Query().Where(document.ID(doc.ID)).Select(document.FieldPayload).OnlyX(ctx)
+	require.Equal(t, p, queried.Payload)
 }
 
 // TestBlobDualWritePayloadFallbackToColumn verifies that when a DualWrite+ValueScanner
@@ -2022,17 +2029,10 @@ func TestBlobDualWriteFallbackOnMissingBlob(t *testing.T) {
 
 	// Manually delete the attachment blob file from storage to simulate
 	// a missing blob (e.g., data written to column before blob migration).
-	attDir := filepath.Join(dir, "attachments")
-	entries, err := os.ReadDir(attDir)
-	require.NoError(t, err)
-	for _, e := range entries {
-		if !strings.HasSuffix(e.Name(), ".attrs") {
-			require.NoError(t, os.Remove(filepath.Join(attDir, e.Name())))
-		}
-	}
+	removeBlobFiles(t, filepath.Join(dir, "attachments"))
 
 	// Also update the column directly to simulate a value that only exists in SQL.
-	_, err = db.ExecContext(ctx, `UPDATE documents SET attachment = ? WHERE id = ?`, []byte("sql-only-value"), doc.ID)
+	_, err := db.ExecContext(ctx, `UPDATE documents SET attachment = ? WHERE id = ?`, []byte("sql-only-value"), doc.ID)
 	require.NoError(t, err)
 
 	// Query the document — the DualWrite field should fall back to the SQL column value.
@@ -2215,6 +2215,19 @@ func countBlobFiles(t *testing.T, dir string) int {
 	})
 	require.NoError(t, err)
 	return count
+}
+
+// removeBlobFiles removes the blob objects stored in dir, simulating objects
+// that are missing from storage. The fileblob attribute files are kept.
+func removeBlobFiles(t *testing.T, dir string) {
+	t.Helper()
+	entries, err := os.ReadDir(dir)
+	require.NoError(t, err)
+	for _, e := range entries {
+		if !e.IsDir() && !strings.HasSuffix(e.Name(), ".attrs") {
+			require.NoError(t, os.Remove(filepath.Join(dir, e.Name())))
+		}
+	}
 }
 
 func TestBlobUpdateSkipsWriteWhenUnchanged(t *testing.T) {
@@ -2430,4 +2443,238 @@ func TestBlobCheckRefsIsPerField(t *testing.T) {
 	require.Equal(t, []byte(sharedContent), blobContent(t, keep.ContentReader, ctx))
 	// "metadata" did not, so its shared object is gone.
 	require.Equal(t, 0, countBlobFiles(t, metaDir))
+}
+
+// TestBlobSingleRead covers a field that moved from DualWrite to blob storage only ("details").
+// The code no longer reads or writes its data column, which stays in the table.
+func TestBlobSingleRead(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+
+	// The data column can no longer be selected. The key column is still selected by default.
+	require.Equal(t, []string{
+		document.FieldID, document.FieldName, document.FieldAttachment, document.FieldPayload,
+		"content_key", "thumbnail_key", "attachment_key", "metadata_key", "payload_key", "description_key", "archive_key", "details_key",
+	}, document.Columns)
+	require.False(t, document.ValidColumn(document.FieldDetails))
+
+	v1 := &schema.DocPayload{Title: "t1", Body: "b1"}
+	doc := client.Document.Create().
+		SetName("single-read").
+		SetContent(bytes.NewReader([]byte("content"))).
+		SetThumbnail(bytes.NewReader([]byte("thumb"))).
+		SetAttachment([]byte("att")).
+		SetDetails(v1).
+		SaveX(ctx)
+	require.Equal(t, v1, doc.Details)
+
+	// Writes go to blob storage only.
+	column, key := detailsColumns(ctx, t, client, doc.ID)
+	require.False(t, column.Valid)
+	require.NotEmpty(t, key.String)
+	require.JSONEq(t, `{"title":"t1","body":"b1"}`, string(blobContent(t, doc.DetailsReader, ctx)))
+
+	_, err := client.Document.Query().Where(document.ID(doc.ID)).Select(document.FieldDetails).Only(ctx)
+	require.EqualError(t, err, `ent: invalid field "details" for query`)
+	_, err = client.Document.UpdateOneID(doc.ID).SetName("renamed").Select(document.FieldDetails).Save(ctx)
+	require.EqualError(t, err, `ent: invalid field "details" for query`)
+}
+
+// TestBlobSingleReadLegacyRow verifies that values held only by the data column of a SingleRead
+// field (rows without a blob key) are no longer read.
+func TestBlobSingleReadLegacyRow(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+	db := client.Driver().(*entsql.Driver).DB()
+	_, err := db.ExecContext(ctx,
+		`INSERT INTO documents (name, content_key, thumbnail_key, attachment_key, attachment, details) VALUES (?, ?, ?, ?, ?, ?)`,
+		"legacy-doc", "", "", "", []byte("att"), `{"title":"column","body":"legacy"}`,
+	)
+	require.NoError(t, err)
+	require.Nil(t, client.Document.Query().Where(document.Name("legacy-doc")).OnlyX(ctx).Details)
+}
+
+// TestBlobSingleReadMissingBlob verifies that a SingleRead field reports a missing blob,
+// instead of falling back to the column value.
+func TestBlobSingleReadMissingBlob(t *testing.T) {
+	client, ctx, dir := setupBlob(t)
+	v := &schema.DocPayload{Title: "t1"}
+	doc := client.Document.Create().
+		SetName("missing-blob").
+		SetContent(bytes.NewReader([]byte("content"))).
+		SetThumbnail(bytes.NewReader([]byte("thumb"))).
+		SetAttachment([]byte("att")).
+		SetDetails(v).
+		SaveX(ctx)
+
+	removeBlobFiles(t, filepath.Join(dir, "details"))
+	_, key := detailsColumns(ctx, t, client, doc.ID)
+	notFound := fmt.Sprintf("loading details: object %q not found in blob storage", key.String)
+	_, err := client.Document.Get(ctx, doc.ID)
+	require.EqualError(t, err, notFound)
+
+	// Setting the value again does not restore the object, as the content-addressed
+	// key is unchanged and the write is skipped. Clearing the field first does.
+	client.Document.UpdateOneID(doc.ID).SetDetails(v).ExecX(ctx)
+	_, err = client.Document.Get(ctx, doc.ID)
+	require.EqualError(t, err, notFound)
+	client.Document.UpdateOneID(doc.ID).ClearDetails().ExecX(ctx)
+	client.Document.UpdateOneID(doc.ID).SetDetails(v).ExecX(ctx)
+	require.Equal(t, v, client.Document.GetX(ctx, doc.ID).Details)
+}
+
+// TestBlobSingleReadUpdate verifies that UpdateOne leaves the data column of a SingleRead field
+// untouched, and loads the returned field from blob storage, also when it was not updated.
+func TestBlobSingleReadUpdate(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+	db := client.Driver().(*entsql.Driver).DB()
+	v1 := &schema.DocPayload{Title: "t1", Body: "b1"}
+	doc := client.Document.Create().
+		SetName("update-single-read").
+		SetContent(bytes.NewReader([]byte("content"))).
+		SetThumbnail(bytes.NewReader([]byte("thumb"))).
+		SetAttachment([]byte("att")).
+		SetDetails(v1).
+		SaveX(ctx)
+	stale := `{"title":"column","body":"stale"}`
+	_, err := db.ExecContext(ctx, `UPDATE documents SET details = ? WHERE id = ?`, stale, doc.ID)
+	require.NoError(t, err)
+
+	doc = doc.Update().SetMetadata([]byte("meta")).SaveX(ctx)
+	require.Equal(t, v1, doc.Details)
+	v2 := &schema.DocPayload{Title: "t2", Body: "b2"}
+	doc = doc.Update().SetDetails(v2).SaveX(ctx)
+	require.Equal(t, v2, doc.Details)
+	require.Equal(t, v2, client.Document.GetX(ctx, doc.ID).Details)
+
+	// Clearing the field clears the key column only.
+	doc = doc.Update().ClearDetails().SaveX(ctx)
+	require.Nil(t, doc.Details)
+	column, key := detailsColumns(ctx, t, client, doc.ID)
+	require.JSONEq(t, stale, column.String)
+	require.False(t, key.Valid)
+	require.Nil(t, client.Document.GetX(ctx, doc.ID).Details)
+}
+
+// TestBlobSingleReadBulkAndUpsert verifies that bulk creation and upserts write blob
+// storage only, and leave the data column of a SingleRead field untouched.
+func TestBlobSingleReadBulkAndUpsert(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+	db := client.Driver().(*entsql.Driver).DB()
+	docs := client.Document.CreateBulk(
+		client.Document.Create().
+			SetName("bulk-1").
+			SetContent(bytes.NewReader([]byte("content"))).
+			SetThumbnail(bytes.NewReader([]byte("thumb"))).
+			SetAttachment([]byte("att")).
+			SetDetails(&schema.DocPayload{Title: "bulk-1"}),
+		client.Document.Create().
+			SetName("bulk-2").
+			SetContent(bytes.NewReader([]byte("content"))).
+			SetThumbnail(bytes.NewReader([]byte("thumb"))).
+			SetAttachment([]byte("att")).
+			SetDetails(&schema.DocPayload{Title: "bulk-2"}),
+	).SaveX(ctx)
+	require.Len(t, docs, 2)
+	for _, doc := range docs {
+		require.Equal(t, doc.Name, doc.Details.Title)
+		column, key := detailsColumns(ctx, t, client, doc.ID)
+		require.False(t, column.Valid)
+		require.NotEmpty(t, key.String)
+		require.JSONEq(t, fmt.Sprintf(`{"title":%q,"body":""}`, doc.Name), string(blobContent(t, doc.DetailsReader, ctx)))
+	}
+
+	stale := `{"title":"column","body":"stale"}`
+	_, err := db.ExecContext(ctx, `UPDATE documents SET details = ? WHERE id = ?`, stale, docs[0].ID)
+	require.NoError(t, err)
+	v2 := &schema.DocPayload{Title: "upsert", Body: "b2"}
+	id := client.Document.Create().
+		SetName("bulk-1").
+		SetContent(bytes.NewReader([]byte("content"))).
+		SetThumbnail(bytes.NewReader([]byte("thumb"))).
+		SetAttachment([]byte("att")).
+		SetDetails(v2).
+		OnConflictColumns(document.FieldName).
+		UpdateDetails().
+		IDX(ctx)
+	require.Equal(t, docs[0].ID, id)
+	column, _ := detailsColumns(ctx, t, client, id)
+	require.JSONEq(t, stale, column.String)
+	require.Equal(t, v2, client.Document.GetX(ctx, id).Details)
+}
+
+// TestBlobSingleReadColumnDropped verifies that the code works without the data column of a
+// SingleRead field, so the next step can drop it while this version is still running.
+func TestBlobSingleReadColumnDropped(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+	db := client.Driver().(*entsql.Driver).DB()
+	_, err := db.ExecContext(ctx, `ALTER TABLE documents DROP COLUMN details`)
+	require.NoError(t, err)
+
+	v1, v2 := &schema.DocPayload{Title: "t1"}, &schema.DocPayload{Title: "t2"}
+	docs := client.Document.CreateBulk(
+		client.Document.Create().
+			SetName("dropped").
+			SetContent(bytes.NewReader([]byte("content"))).
+			SetThumbnail(bytes.NewReader([]byte("thumb"))).
+			SetAttachment([]byte("att")).
+			SetDetails(v1),
+	).SaveX(ctx)
+	require.Equal(t, v1, client.Document.GetX(ctx, docs[0].ID).Details)
+	doc := docs[0].Update().SetDetails(v2).SaveX(ctx)
+	require.Equal(t, v2, client.Document.GetX(ctx, doc.ID).Details)
+	client.Document.Create().
+		SetName("dropped").
+		SetContent(bytes.NewReader([]byte("content"))).
+		SetThumbnail(bytes.NewReader([]byte("thumb"))).
+		SetAttachment([]byte("att")).
+		SetDetails(v1).
+		OnConflictColumns(document.FieldName).
+		UpdateDetails().
+		ExecX(ctx)
+	require.Equal(t, v1, client.Document.GetX(ctx, doc.ID).Details)
+	doc.Update().ClearDetails().ExecX(ctx)
+	require.Nil(t, client.Document.GetX(ctx, doc.ID).Details)
+}
+
+// TestBlobUpdateManyRejectsBlobFields verifies that setting or clearing a blob field on a
+// multi-row update fails, as only UpdateOne writes blob storage and keys.
+func TestBlobUpdateManyRejectsBlobFields(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+	v1 := &schema.DocPayload{Title: "t1"}
+	doc := client.Document.Create().
+		SetName("update-many").
+		SetContent(bytes.NewReader([]byte("content"))).
+		SetThumbnail(bytes.NewReader([]byte("thumb"))).
+		SetAttachment([]byte("att")).
+		SetDetails(v1).
+		SaveX(ctx)
+
+	for _, tt := range []struct {
+		name, field string
+		mutate      func(*ent.DocumentMutation)
+	}{
+		{"set single-read", document.FieldDetails, func(m *ent.DocumentMutation) { m.SetDetails(&schema.DocPayload{Title: "t2"}) }},
+		{"clear single-read", document.FieldDetails, func(m *ent.DocumentMutation) { m.ClearDetails() }},
+		{"set dual-write", document.FieldPayload, func(m *ent.DocumentMutation) { m.SetPayload(&schema.DocPayload{Title: "t2"}) }},
+		{"clear blob", document.FieldMetadata, func(m *ent.DocumentMutation) { m.ClearMetadata() }},
+		{"set lazy blob", document.FieldArchive, func(m *ent.DocumentMutation) { m.SetArchive(strings.NewReader("archive")) }},
+	} {
+		u := client.Document.Update().Where(document.ID(doc.ID)).SetName("renamed")
+		tt.mutate(u.Mutation())
+		_, err := u.Save(ctx)
+		require.True(t, ent.IsValidationError(err), tt.name)
+		require.EqualError(t, err, fmt.Sprintf(`ent: blob field "Document.%s" can only be updated using UpdateOne`, tt.field), tt.name)
+	}
+	require.Equal(t, "update-many", client.Document.GetX(ctx, doc.ID).Name)
+
+	// Multi-row updates that leave the blob fields untouched are not affected.
+	client.Document.Update().Where(document.ID(doc.ID)).SetName("renamed").ExecX(ctx)
+	require.Equal(t, v1, client.Document.Query().Where(document.Name("renamed")).OnlyX(ctx).Details)
+}
+
+// detailsColumns returns the values stored in the "details" data column and its key column.
+func detailsColumns(ctx context.Context, t *testing.T, client *ent.Client, id int) (column, key sql.NullString) {
+	t.Helper()
+	db := client.Driver().(*entsql.Driver).DB()
+	require.NoError(t, db.QueryRowContext(ctx, `SELECT details, details_key FROM documents WHERE id = ?`, id).Scan(&column, &key))
+	return column, key
 }

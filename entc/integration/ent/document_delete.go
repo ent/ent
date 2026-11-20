@@ -66,6 +66,7 @@ func (_d *DocumentDelete) sqlExec(ctx context.Context) (int, error) {
 			document.FieldPayload:     "payload_key",
 			document.FieldDescription: "description_key",
 			document.FieldArchive:     "archive_key",
+			document.FieldDetails:     "details_key",
 		},
 		CheckRefs: map[string]bool{
 			document.FieldContent:    true,

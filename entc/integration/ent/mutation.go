@@ -928,6 +928,23 @@ func (m *DocumentMutation) OldDescription(ctx context.Context) (v string, err er
 	return oldValue.Description, nil
 }
 
+// OldDetails returns the old "details" field's value of the Document entity.
+// If the Document object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DocumentMutation) OldDetails(ctx context.Context) (v *schema.DocPayload, err error) {
+	if !m.Op().Is(OpUpdateOne) {
+		return v, errors.New("OldDetails is only allowed on UpdateOne operations")
+	}
+	if _, exists := m.ID(); !exists || m.oldValue == nil {
+		return v, errors.New("OldDetails requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDetails: %w", err)
+	}
+	return oldValue.Details, nil
+}
+
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
@@ -943,6 +960,8 @@ func (m *DocumentMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldPayload(ctx)
 	case document.FieldDescription:
 		return m.OldDescription(ctx)
+	case document.FieldDetails:
+		return m.OldDetails(ctx)
 	}
 	return nil, fmt.Errorf("unknown Document field %s", name)
 }
