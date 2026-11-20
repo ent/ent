@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+
+	"entgo.io/ent/internal/methodset"
 )
 
 // A Type represents a field type.
@@ -225,28 +227,39 @@ func (r *RType) IsPtr() bool {
 
 // Implements reports whether the RType ~implements the given interface type.
 func (r *RType) Implements(typ reflect.Type) bool {
-	if r == nil {
+	switch {
+	case r == nil:
+		return false
+	case r.rtype != nil:
+		return r.implements(typ)
+	case methodset.Implements != nil:
+		// RTypes decoded from JSON (e.g. in entc/gen) are checked
+		// against their Methods. entc/load installs this check.
+		return methodset.Implements(r, typ)
+	default:
 		return false
 	}
-	n := typ.NumMethod()
-	for i := 0; i < n; i++ {
-		m0 := typ.Method(i)
-		m1, ok := r.Methods[m0.Name]
-		if !ok || len(m1.In) != m0.Type.NumIn() || len(m1.Out) != m0.Type.NumOut() {
-			return false
-		}
-		in := m0.Type.NumIn()
-		for j := 0; j < in; j++ {
-			if !m1.In[j].TypeEqual(m0.Type.In(j)) {
-				return false
-			}
-		}
-		out := m0.Type.NumOut()
-		for j := 0; j < out; j++ {
-			if !m1.Out[j].TypeEqual(m0.Type.Out(j)) {
-				return false
-			}
-		}
+}
+
+// implements reports whether the underlying Go type, or a pointer to it,
+// implements the given interface type.
+func (r *RType) implements(typ reflect.Type) bool {
+	return r.rtype.Implements(typ) || reflect.PointerTo(r.rtype).Implements(typ)
+}
+
+// LoadMethods records in r.Methods the method set of the Go type that r was
+// created from (see GoType), including the methods of its pointer type.
+// It is a no-op for an RType that was not created from a Go type.
+//
+// entc/load calls it before encoding a schema for the code generator. Runtime
+// code doesn't need it: it iterates methods with reflect.Type.Method, and the
+// linker keeps all exported methods of reachable types when that is reachable.
+func LoadMethods(r *RType) {
+	if r == nil || r.rtype == nil {
+		return
 	}
-	return true
+	if r.Methods == nil {
+		r.Methods = make(map[string]struct{ In, Out []*RType })
+	}
+	methods(r.rtype, r)
 }
