@@ -161,6 +161,8 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 	if sf.Info == nil {
 		return nil, fmt.Errorf("missing type info for field %q", sf.Name)
 	}
+	// The code generator checks GoTypes against interfaces by their method sets.
+	field.LoadMethods(sf.Info.RType)
 	if size := int64(fd.Size); size != 0 {
 		sf.Size = &size
 	}

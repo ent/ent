@@ -1192,7 +1192,7 @@ func (b *enumBuilder) Descriptor() *Descriptor {
 	if b.desc.Info.RType != nil {
 		// If an error already exists, let that be returned instead.
 		// Otherwise, check that the underlying type is either a string or implements Stringer.
-		if b.desc.Err == nil && b.desc.Info.RType.rtype.Kind() != reflect.String && !b.desc.Info.Stringer() {
+		if b.desc.Err == nil && b.desc.Info.RType.rtype.Kind() != reflect.String && !b.desc.Info.RType.implements(stringerType) {
 			b.desc.Err = errors.New("enum values which implement ValueScanner must also implement Stringer")
 		}
 		b.desc.checkGoType(stringType)
@@ -1658,7 +1658,6 @@ func (d *Descriptor) goType(typ any) {
 			Methods: make(map[string]struct{ In, Out []*RType }, t.NumMethod()),
 		},
 	}
-	methods(t, info.RType)
 	switch t.Kind() {
 	case reflect.Slice, reflect.Ptr, reflect.Map:
 		info.Nillable = true
