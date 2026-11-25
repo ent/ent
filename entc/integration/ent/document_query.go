@@ -416,6 +416,22 @@ func (_q *DocumentQuery) loadBlobFields(ctx context.Context, nodes []*Document) 
 			}
 			n.Description = string(data)
 		}
+		if n.report_key != nil && *n.report_key != "" {
+			switch data, err := _blobs.Read(ctx, document.FieldReport, *n.report_key); {
+			case err != nil:
+				return errors.Join(fmt.Errorf("loading report: %w", err), _blobs.Close())
+			case data != nil:
+				sv := document.ValueScanner.Report.ScanValue()
+				if err := sv.Scan(data); err != nil {
+					return errors.Join(fmt.Errorf("scanning report: %w", err), _blobs.Close())
+				}
+				v, err := document.ValueScanner.Report.FromValue(sv)
+				if err != nil {
+					return errors.Join(fmt.Errorf("scanning report: %w", err), _blobs.Close())
+				}
+				n.Report = v
+			}
+		}
 	}
 	return _blobs.Close()
 }

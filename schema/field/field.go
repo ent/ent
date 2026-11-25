@@ -1560,6 +1560,8 @@ func (b *blobBuilder) Lazy() *blobBuilder {
 // go to both blob storage and the bytes column, while reads prefer blob
 // storage (if a key exists) and fall back to the bytes column.
 //
+// Replace it with BlobPreferred to stop writing the bytes column.
+//
 // The optional columnType argument overrides the default database column type
 // (per dialect) to avoid schema drift when migrating from an existing column.
 // For example, when migrating a JSON column to blob storage:
@@ -1572,6 +1574,18 @@ func (b *blobBuilder) Lazy() *blobBuilder {
 //		})
 func (b *blobBuilder) DualWrite(columnType ...map[string]string) *blobBuilder {
 	b.desc.BlobDualWrite = true
+	if len(columnType) > 0 {
+		b.desc.BlobDWSchemaType = columnType[0]
+	}
+	return b
+}
+
+// BlobPreferred replaces DualWrite to stop writing the bytes column. Writes go to blob storage
+// only and set the column, made nullable, to NULL. Reads are as with DualWrite, so rows without
+// a blob key are still read from the column. Pass it the same columnType as DualWrite, so the
+// column is not altered.
+func (b *blobBuilder) BlobPreferred(columnType ...map[string]string) *blobBuilder {
+	b.desc.BlobPreferred = true
 	if len(columnType) > 0 {
 		b.desc.BlobDWSchemaType = columnType[0]
 	}
@@ -1608,6 +1622,9 @@ func (b *blobBuilder) Nillable() *blobBuilder {
 
 // Descriptor implements the ent.Field interface by returning its descriptor.
 func (b *blobBuilder) Descriptor() *Descriptor {
+	if b.desc.BlobPreferred && (b.desc.BlobDualWrite || b.desc.BlobLazy) {
+		b.desc.Err = errors.New("BlobPreferred replaces DualWrite, and cannot be used with it or with Lazy")
+	}
 	return b.desc
 }
 
@@ -1635,9 +1652,10 @@ type Descriptor struct {
 	DeprecatedReason string                                        // deprecation reason.
 	BlobKey          func(context.Context, []byte) (string, error) // blob key generation function.
 	BlobDualWrite    bool                                          // dual-write mode: write to both blob storage and bytes column.
+	BlobPreferred    bool                                          // blob-preferred mode: write blob storage only, reads fall back to the bytes column.
 	BlobLazy         bool                                          // lazy loading: don't auto-load blob data on scan.
 	BlobCheckRefs    bool                                          // check for rows still holding a key before deleting the object.
-	BlobDWSchemaType map[string]string                             // override the schema type for the dual-write column.
+	BlobDWSchemaType map[string]string                             // override the schema type for the dual-write or blob-preferred column.
 	Err              error
 }
 

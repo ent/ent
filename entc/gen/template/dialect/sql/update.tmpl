@@ -98,7 +98,7 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 		}
 	}
 	{{- range $f := $.MutationFields }}
-			{{- if $f.IsBlobNoColumn }}{{ continue }}{{ end }}
+			{{- if or $f.IsBlobNoColumn $f.IsBlobPreferred }}{{ continue }}{{ end }}
 			{{- if or (not $f.Immutable) $f.UpdateDefault }}
 				if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {
 					{{- if $f.HasValueScanner }}
@@ -213,6 +213,9 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 		}
 		{{- if $f.Optional }}
 		if {{ $mutation }}.{{ $f.StructField }}Cleared() {
+			{{- if $f.IsBlobPreferred }}
+			_spec.ClearField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }})
+			{{- end }}
 			_blobs.SetCleared({{ $.Package }}.{{ $f.Constant }}, func() {
 				_spec.ClearField("{{ $f.BlobKeyColumn }}", field.TypeString)
 			})
@@ -262,6 +265,14 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 	if err != nil {
 		return {{ $zero }}, err
 	}
+	{{- range $f := $.BlobFields }}
+		{{- if $f.IsBlobPreferred }}
+	{{- /* With an unchanged key no object is written, and the data column may hold the only copy. */}}
+	if _blobResult.Written({{ $.Package }}.{{ $f.Constant }}) {
+		_spec.ClearField({{ $.Package }}.{{ $f.Constant }}, field.{{ $f.Type.ConstName }})
+	}
+		{{- end }}
+	{{- end }}
 	{{- end }}
 	{{- if $one }}
 		_node = &{{ $.Name }}{config: {{ $receiver }}.config}
@@ -314,10 +325,8 @@ func ({{ $receiver }} *{{ $builder }}) sqlSave(ctx context.Context) (_node {{ if
 	}
 	{{- end }}
 	{{- if and $one $.HasLoadOnScanFields }}
-	{{- /* Blob values are consistent after write — use mutation value for mutated fields
-				instead of re-reading from storage. For DualWrite fields, assignValues already
-				populated the value from the SQL column. For non-DualWrite fields not mutated,
-				read from blob storage. */}}
+	{{- /* Mutated fields take the mutation value, and fields with a data column keep what assignValues scanned.
+				The others are read from blob storage. */}}
 	_blobReader := ent.NewBlobStore({{ $mutation }}.blobOpeners.{{ $.Name }})
 	{{- range $f := $.LoadOnScanFields }}
 	if value, ok := {{ $mutation }}.{{ $f.MutationGet }}(); ok {

@@ -32,7 +32,9 @@ type Document struct {
 	// Payload holds the value of the "payload" field.
 	Payload *schema.DocPayload `json:"payload,omitempty"`
 	// Description holds the value of the "description" field.
-	Description     string `json:"description,omitempty"`
+	Description string `json:"description,omitempty"`
+	// Report holds the value of the "report" field.
+	Report          *schema.DocPayload `json:"report,omitempty"`
 	content_key     *string
 	thumbnail_key   *string
 	attachment_key  *string
@@ -40,6 +42,7 @@ type Document struct {
 	payload_key     *string
 	description_key *string
 	archive_key     *string
+	report_key      *string
 	selectValues    sql.SelectValues
 }
 
@@ -56,6 +59,8 @@ func (*Document) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case document.FieldPayload:
 			values[i] = document.ValueScanner.Payload.ScanValue()
+		case document.FieldReport:
+			values[i] = document.ValueScanner.Report.ScanValue()
 		case document.BlobKeys[0]: // content_key
 			values[i] = new(sql.NullString)
 		case document.BlobKeys[1]: // thumbnail_key
@@ -69,6 +74,8 @@ func (*Document) scanValues(columns []string) ([]any, error) {
 		case document.BlobKeys[5]: // description_key
 			values[i] = new(sql.NullString)
 		case document.BlobKeys[6]: // archive_key
+			values[i] = new(sql.NullString)
+		case document.BlobKeys[7]: // report_key
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -108,6 +115,12 @@ func (_m *Document) assignValues(columns []string, values []any) error {
 				return err
 			} else {
 				_m.Payload = value
+			}
+		case document.FieldReport:
+			if value, err := document.ValueScanner.Report.FromValue(values[i]); err != nil {
+				return err
+			} else {
+				_m.Report = value
 			}
 		case document.BlobKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -150,6 +163,12 @@ func (_m *Document) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field archive_key", values[i])
 			} else if value.Valid {
 				_m.archive_key = &value.String
+			}
+		case document.BlobKeys[7]:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field report_key", values[i])
+			} else if value.Valid {
+				_m.report_key = &value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -276,6 +295,22 @@ func (_m *Document) ArchiveReader(ctx context.Context) (io.ReadCloser, error) {
 	return ent.BlobReader(ctx, b, *_m.archive_key)
 }
 
+// ReportReader opens a reader for the "report" field from blob storage.
+// The caller must close the returned reader when done.
+func (_m *Document) ReportReader(ctx context.Context) (io.ReadCloser, error) {
+	if _m.report_key == nil || *_m.report_key == "" {
+		return nil, fmt.Errorf("ent: Document.report_key is nil or empty")
+	}
+	if _m.blobOpeners.Document == nil {
+		return nil, fmt.Errorf("ent: blob storage not configured (missing WithBlobOpeners)")
+	}
+	b, err := _m.blobOpeners.Document(ctx, document.FieldReport)
+	if err != nil {
+		return nil, err
+	}
+	return ent.BlobReader(ctx, b, *_m.report_key)
+}
+
 // Update returns a builder for updating this Document.
 // Note that you need to call Document.Unwrap() before calling this method if this Document
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -313,6 +348,9 @@ func (_m *Document) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Description))
+	builder.WriteString(", ")
+	builder.WriteString("report=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Report))
 	builder.WriteByte(')')
 	return builder.String()
 }

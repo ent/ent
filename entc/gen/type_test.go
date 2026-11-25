@@ -464,3 +464,20 @@ func TestField_BlobCheckRefs(t *testing.T) {
 	require.False(typ2.HasBlobRefCheckedFields())
 	require.Empty(typ2.BlobRefCheckedFields())
 }
+
+func TestField_BlobPreferred(t *testing.T) {
+	require := require.New(t)
+	typ, err := NewType(&Config{Package: "entc/gen"}, &load.Schema{Name: "Doc", Fields: []*load.Field{
+		{Name: "dual", Info: &field.TypeInfo{Type: field.TypeBlob}, BlobDualWrite: true},
+		{Name: "preferred", Info: &field.TypeInfo{Type: field.TypeBlob}, BlobPreferred: true},
+		{Name: "blob", Info: &field.TypeInfo{Type: field.TypeBlob}},
+		{Name: "title", Info: &field.TypeInfo{Type: field.TypeString}},
+	}})
+	require.NoError(err)
+	// A BlobPreferred field keeps reading its data column, but gets no predicates on it.
+	require.True(typ.fields["preferred"].IsBlobPreferred())
+	require.False(typ.fields["preferred"].IsBlobNoColumn())
+	for name, has := range map[string]bool{"dual": true, "preferred": false, "blob": false, "title": true} {
+		require.Equal(has, typ.fields[name].HasPredicates(), name)
+	}
+}

@@ -74,6 +74,12 @@ func (_c *DocumentCreate) SetNillableDescription(v *string) *DocumentCreate {
 	return _c
 }
 
+// SetReport sets the "report" field.
+func (_c *DocumentCreate) SetReport(v *schema.DocPayload) *DocumentCreate {
+	_c.mutation.SetReport(v)
+	return _c
+}
+
 // SetContent sets the "content" field.
 func (_c *DocumentCreate) SetContent(v io.Reader) *DocumentCreate {
 	_c.mutation.SetContent(v)
@@ -242,6 +248,29 @@ func (_c *DocumentCreate) sqlSave(ctx context.Context) (*Document, error) {
 			},
 		)
 	}
+	if value, ok := _c.mutation.Report(); ok {
+		_blobDV, err := document.ValueScanner.Report.Value(value)
+		if err != nil {
+			return nil, fmt.Errorf("ent: encoding report: %w", err)
+		}
+		var _blobData []byte
+		switch v := _blobDV.(type) {
+		case []byte:
+			_blobData = v
+		case string:
+			_blobData = []byte(v)
+		default:
+			return nil, fmt.Errorf("ent: encoding report: expected []byte or string, got %T", _blobDV)
+		}
+		_blobs.Set(document.FieldReport, _blobData,
+			defaultBlobKey,
+			func(k string) {
+				_node.report_key = &k
+				_spec.SetField("report_key", field.TypeString, k)
+			},
+		)
+		_node.Report = value
+	}
 	_blobCleanup, err := _blobs.Create(ctx, &sqlgraph.BlobSpec{
 		Driver: _c.driver,
 		Table:  document.Table,
@@ -303,6 +332,10 @@ func (_c *DocumentCreate) createSpec() (*Document, *sqlgraph.CreateSpec, error) 
 		}
 		_spec.SetField(document.FieldPayload, field.TypeBytes, vv)
 		_node.Payload = value
+	}
+	if value, ok := _c.mutation.Report(); ok {
+		_spec.SetField(document.FieldReport, field.TypeBytes, nil)
+		_node.Report = value
 	}
 	return _node, _spec, nil
 }
@@ -413,6 +446,20 @@ func (u *DocumentUpsert) ClearDescription() *DocumentUpsert {
 	return u
 }
 
+// UpdateReport sets the "report" field to the value that was provided on create.
+func (u *DocumentUpsert) UpdateReport() *DocumentUpsert {
+	u.SetExcluded(document.FieldReport)
+	u.SetExcluded("report_key")
+	return u
+}
+
+// ClearReport clears the value of the "report" field.
+func (u *DocumentUpsert) ClearReport() *DocumentUpsert {
+	u.SetNull(document.FieldReport)
+	u.SetNull("report_key")
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -513,6 +560,20 @@ func (u *DocumentUpsertOne) UpdateDescription() *DocumentUpsertOne {
 func (u *DocumentUpsertOne) ClearDescription() *DocumentUpsertOne {
 	return u.Update(func(s *DocumentUpsert) {
 		s.ClearDescription()
+	})
+}
+
+// UpdateReport sets the "report" field to the value that was provided on create.
+func (u *DocumentUpsertOne) UpdateReport() *DocumentUpsertOne {
+	return u.Update(func(s *DocumentUpsert) {
+		s.UpdateReport()
+	})
+}
+
+// ClearReport clears the value of the "report" field.
+func (u *DocumentUpsertOne) ClearReport() *DocumentUpsertOne {
+	return u.Update(func(s *DocumentUpsert) {
+		s.ClearReport()
 	})
 }
 
@@ -674,6 +735,29 @@ func (_c *DocumentCreateBulk) Save(ctx context.Context) ([]*Document, error) {
 							specs[i].SetField("archive_key", field.TypeString, k)
 						},
 					)
+				}
+				if value, ok := mutation.Report(); ok {
+					_blobDV, err := document.ValueScanner.Report.Value(value)
+					if err != nil {
+						return nil, fmt.Errorf("ent: encoding report: %w", err)
+					}
+					var _blobData []byte
+					switch v := _blobDV.(type) {
+					case []byte:
+						_blobData = v
+					case string:
+						_blobData = []byte(v)
+					default:
+						return nil, fmt.Errorf("ent: encoding report: expected []byte or string, got %T", _blobDV)
+					}
+					_blobs.Set(document.FieldReport, _blobData,
+						defaultBlobKey,
+						func(k string) {
+							nodes[i].report_key = &k
+							specs[i].SetField("report_key", field.TypeString, k)
+						},
+					)
+					nodes[i].Report = value
 				}
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
@@ -904,6 +988,20 @@ func (u *DocumentUpsertBulk) UpdateDescription() *DocumentUpsertBulk {
 func (u *DocumentUpsertBulk) ClearDescription() *DocumentUpsertBulk {
 	return u.Update(func(s *DocumentUpsert) {
 		s.ClearDescription()
+	})
+}
+
+// UpdateReport sets the "report" field to the value that was provided on create.
+func (u *DocumentUpsertBulk) UpdateReport() *DocumentUpsertBulk {
+	return u.Update(func(s *DocumentUpsert) {
+		s.UpdateReport()
+	})
+}
+
+// ClearReport clears the value of the "report" field.
+func (u *DocumentUpsertBulk) ClearReport() *DocumentUpsertBulk {
+	return u.Update(func(s *DocumentUpsert) {
+		s.ClearReport()
 	})
 }
 

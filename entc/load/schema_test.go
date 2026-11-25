@@ -354,6 +354,8 @@ func (BlobDoc) Fields() []ent.Field {
 		field.Blob("content").
 			Comment("blob content"),
 		field.Blob("thumbnail"),
+		field.Blob("payload").
+			BlobPreferred(),
 	}
 }
 
@@ -369,7 +371,7 @@ func TestMarshalBlobSchema(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, "BlobDoc", s.Name)
-	require.Len(t, s.Fields, 2)
+	require.Len(t, s.Fields, 3)
 
 	// First blob field: content.
 	f0 := s.Fields[0]
@@ -381,6 +383,8 @@ func TestMarshalBlobSchema(t *testing.T) {
 	f1 := s.Fields[1]
 	require.Equal(t, "thumbnail", f1.Name)
 	require.Equal(t, field.TypeBlob, f1.Info.Type)
+
+	require.True(t, s.Fields[2].BlobPreferred)
 
 	// Verify JSON roundtrip preserves type.
 	buf2, err := json.Marshal(s)

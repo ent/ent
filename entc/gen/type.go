@@ -1417,9 +1417,21 @@ func (f Field) IsBlobLazy() bool {
 }
 
 // IsBlobNoColumn reports whether this blob field has no SQL data column.
-// True for all blob fields except DualWrite.
+// True for all blob fields except DualWrite and BlobPreferred.
 func (f Field) IsBlobNoColumn() bool {
-	return f.IsBlob() && !f.def.BlobDualWrite
+	return f.IsBlob() && !f.def.BlobDualWrite && !f.def.BlobPreferred
+}
+
+// IsBlobPreferred reports whether this blob field moved from DualWrite to writing blob storage only.
+// Its data column is still read, for rows with no blob key, and set to NULL on every write.
+func (f Field) IsBlobPreferred() bool {
+	return f.IsBlob() && f.def.BlobPreferred
+}
+
+// HasPredicates reports whether predicates on the field's column are generated. Among blob
+// fields, only non-lazy DualWrite fields hold their value in a column.
+func (f Field) HasPredicates() bool {
+	return !f.IsBlob() || f.def.BlobDualWrite && !f.def.BlobLazy
 }
 
 // IsBlobRefChecked reports whether cleanup must verify that no row still holds
@@ -1585,7 +1597,7 @@ func (t Type) HasBlobRefCheckedFields() bool {
 }
 
 // LoadOnScanFields returns non-lazy blob fields that auto-load from blob storage on scan.
-// For DualWrite fields, the blob value is preferred when a key exists; otherwise the column value is used.
+// For DualWrite and BlobPreferred fields, the blob value is preferred when a key exists; otherwise the column value is used.
 func (t Type) LoadOnScanFields() []*Field {
 	var fs []*Field
 	for _, f := range t.Fields {
@@ -1721,10 +1733,12 @@ func (f Field) standardNullType() bool {
 // in case of ID field, unless stated otherwise.
 func (f Field) Column() *schema.Column {
 	c := &schema.Column{
-		Name:     f.StorageKey(),
-		Type:     f.Type.Type,
-		Unique:   f.Unique,
-		Nullable: f.Optional,
+		Name:   f.StorageKey(),
+		Type:   f.Type.Type,
+		Unique: f.Unique,
+		// The code no longer writes values to the data column of a BlobPreferred
+		// field, so it must allow NULL values until it is dropped.
+		Nullable: f.Optional || f.IsBlobPreferred(),
 		Size:     f.size(),
 		Enums:    f.EnumValues(),
 		Comment:  f.sqlComment(),

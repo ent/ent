@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"slices"
 )
 
 // Blob defines the interface for blob storage operations.
@@ -81,6 +82,7 @@ type BlobUpdateResult struct {
 
 	blobs    *Blobs
 	orphaned []BlobKey
+	written  []string
 }
 
 // Cleanup reports which of the blobs the update replaced no row holds any more, and
@@ -94,6 +96,12 @@ func (r *BlobUpdateResult) Cleanup(ctx context.Context) (BlobOp, error) {
 		return noOp, nil
 	}
 	return r.blobs.deleteOp(ctx, r.orphaned)
+}
+
+// Written reports whether the update writes a new object for the field. It does not when
+// the row already holds the field's key, as with unchanged content-addressed data.
+func (r *BlobUpdateResult) Written(f string) bool {
+	return slices.Contains(r.written, f)
 }
 
 // BlobDeleteResult holds the blob keys of the rows a delete mutation removes.
@@ -199,11 +207,13 @@ func (b *Blobs) Update(ctx context.Context, q BlobQuerier) (*BlobUpdateResult, e
 	// Filter out writes where the key is unchanged (same content). Keep this in
 	// its own slice — the orphan collection below reads the unfiltered writes.
 	filtered := make([]blobWrite, 0, len(writes))
+	var written []string
 	for _, wr := range writes {
 		if oldKeys[wr.Field] == wr.Key {
 			continue
 		}
 		filtered = append(filtered, wr)
+		written = append(written, wr.Field)
 	}
 	rollback, err := b.write(ctx, filtered)
 	if err != nil {
@@ -229,6 +239,7 @@ func (b *Blobs) Update(ctx context.Context, q BlobQuerier) (*BlobUpdateResult, e
 		Rollback: rollback,
 		blobs:    b,
 		orphaned: orphaned,
+		written:  written,
 	}, nil
 }
 

@@ -98,6 +98,7 @@ doc = doc.Update().
 | `UUIDKey()` | Random UUID v7 key per write. |
 | `CheckRefs()` | Verify no row still holds a key before deleting the object. Use with `HashKey`. |
 | `DualWrite(...)` | Migration mode: write to both blob storage and database column. |
+| `BlobPreferred(...)` | Replaces `DualWrite`: write only blob storage, setting the database column to `NULL`; reads still fall back to it. |
 | `GoType(typ)` | Override the default `[]byte` Go type. |
 | `ValueScanner(vs)` | Custom codec between Go type and raw bytes (required for non-`[]byte`/`string` GoType). |
 | `StorageKey(key)` | Override the database column name. |
@@ -190,6 +191,45 @@ In DualWrite mode:
 
 The optional `columnType` argument overrides the database column type per dialect to prevent
 schema drift when migrating from an existing column definition.
+
+## BlobPreferred
+
+`BlobPreferred()` replaces `DualWrite` to stop writing the database column. Pass it the same column
+type (if any), so the column is not altered:
+
+```go
+field.Blob("payload").
+  BlobPreferred(map[string]string{
+    dialect.MySQL:    "json",
+    dialect.Postgres: "jsonb",
+    dialect.SQLite:   "json",
+  })
+```
+
+In BlobPreferred mode:
+- **Writes** go to blob storage and the key column, and set the database column to `NULL`.
+  Clearing the field sets both to `NULL`, and an update whose content-addressed key is unchanged
+  leaves the row as it is. The column is made nullable, so apply the migration before deploying
+  the change. Every version that reads the column, `DualWrite` included, then passes `NULL` to the
+  field's `ValueScanner`. One written for a required column (for example, reading
+  `sql.NullString.String` without checking `Valid`) must accept `NULL` first, in a deploy of its
+  own while still on `DualWrite`.
+- **Reads** are as in DualWrite mode: blob storage for rows with a blob key, and the database
+  column for the others. `Select(document.FieldPayload)`, like the entity `UpdateOne` returns for
+  a field it does not set, still reads the column alone, which is empty for rows written in this
+  mode. The field predicates on the column (such as `PayloadEQ`) are no longer generated.
+
+Deploy it once the `DualWrite` change is fully deployed: instances of the version before it read
+only the column, so they would read the rows written in this mode as empty. Going back to
+`DualWrite` reads the same values, as it reads blob storage first, but its field predicates do
+not match the rows written in this mode. For a required field, its migration restores `NOT NULL`
+on the column, which fails while rows written in this mode hold `NULL`.
+
+This query returns a row that has no blob key but still holds a value in the column, if any is left:
+
+```sql
+SELECT id FROM documents WHERE (payload_key IS NULL OR payload_key = '') AND payload IS NOT NULL LIMIT 1
+```
 
 ## Custom GoType
 
@@ -285,9 +325,10 @@ func (Document) Indexes() []ent.Index {
 
 Leave them non-unique — rows sharing content share a key, which is the whole point.
 
-One exception: a `DualWrite` field that is not also `Lazy()` keeps a real data column, and
-`index.Fields` targets *that* column rather than the key column. For those fields, create the
-index on `<field>_key` outside the schema.
+One exception: a `DualWrite` field that is not also `Lazy()`, or a `BlobPreferred` field, keeps a
+real data column, and `index.Fields` targets *that* column rather than the key column. For those
+fields, create the index on `<field>_key` outside the schema. A `BlobPreferred` field sets that
+column to `NULL` in the rows it writes, so an index on it, unique or not, does not cover them.
 
 Fields without `CheckRefs` need no such index — they never run the lookup.
 
@@ -323,11 +364,11 @@ If there is a conflict, behavior depends on the conflict action and key strategy
 The following per-field methods are generated on the upsert builder:
 
 - **`Update<Field>()`** — Sets the blob key column (and data column for DualWrite fields) to
-  the value provided on create.
-- **`Clear<Field>()`** — Nulls the blob key column (and data column for DualWrite). Only
-  generated for optional fields. **Note:** this does not delete the old blob from storage —
-  the previously-referenced blob becomes orphaned. Use a regular Update with `Clear<Field>()`
-  if you need storage cleanup.
+  the value provided on create. The data column of BlobPreferred fields is set to `NULL`.
+- **`Clear<Field>()`** — Nulls the blob key column (and data column for DualWrite and
+  BlobPreferred). Only generated for optional fields. **Note:** this does not delete the old
+  blob from storage — the previously-referenced blob becomes orphaned. Use a regular Update
+  with `Clear<Field>()` if you need storage cleanup.
 
 ```go
 client.Document.Create().

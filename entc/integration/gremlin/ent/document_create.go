@@ -72,6 +72,12 @@ func (_c *DocumentCreate) SetNillableDescription(v *string) *DocumentCreate {
 	return _c
 }
 
+// SetReport sets the "report" field.
+func (_c *DocumentCreate) SetReport(v *schema.DocPayload) *DocumentCreate {
+	_c.mutation.SetReport(v)
+	return _c
+}
+
 // Mutation returns the DocumentMutation object of the builder.
 func (_c *DocumentCreate) Mutation() *DocumentMutation {
 	return _c.mutation

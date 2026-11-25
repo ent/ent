@@ -222,6 +222,18 @@ func (_u *DocumentUpdateOne) ClearDescription() *DocumentUpdateOne {
 	return _u
 }
 
+// SetReport sets the "report" field.
+func (_u *DocumentUpdateOne) SetReport(v *schema.DocPayload) *DocumentUpdateOne {
+	_u.mutation.SetReport(v)
+	return _u
+}
+
+// ClearReport clears the value of the "report" field.
+func (_u *DocumentUpdateOne) ClearReport() *DocumentUpdateOne {
+	_u.mutation.ClearReport()
+	return _u
+}
+
 // Mutation returns the DocumentMutation object of the builder.
 func (_u *DocumentUpdateOne) Mutation() *DocumentMutation {
 	return _u.mutation
