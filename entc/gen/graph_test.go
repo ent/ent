@@ -12,6 +12,7 @@ import (
 	"slices"
 	"testing"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/load"
@@ -384,6 +385,28 @@ func TestBlobDualWriteGoType(t *testing.T) {
 	require.Equal("example.com/app", f.Type.PkgPath)
 	require.NotNil(f.Type.RType)
 	require.Equal("Config", f.Type.RType.Name)
+}
+
+// TestBlobPreferredColumn checks that BlobPreferred keeps the data column of a required
+// DualWrite field, with its type, and makes it nullable.
+func TestBlobPreferredColumn(t *testing.T) {
+	jsonb := map[string]string{dialect.Postgres: "jsonb"}
+	g, err := NewGraph(&Config{Package: "entc/gen", Storage: drivers[0]}, &load.Schema{
+		Name: "Doc",
+		Fields: []*load.Field{
+			{Name: "dual", Info: &field.TypeInfo{Type: field.TypeBlob}, BlobDualWrite: true, BlobDWSchemaType: jsonb},
+			{Name: "preferred", Info: &field.TypeInfo{Type: field.TypeBlob}, BlobPreferred: true, BlobDWSchemaType: jsonb},
+		},
+	})
+	require.NoError(t, err)
+	tables, err := g.Tables()
+	require.NoError(t, err)
+	for name, nullable := range map[string]bool{"dual": false, "preferred": true} {
+		c, ok := tables[0].Column(name)
+		require.True(t, ok, name)
+		require.Equal(t, jsonb, c.SchemaType, name)
+		require.Equal(t, nullable, c.Nullable, name)
+	}
 }
 
 func TestAbortDuplicateFK(t *testing.T) {

@@ -25,6 +25,7 @@ type Mutation struct {
 	metadata      *[]byte
 	payload       **schema.DocPayload
 	description   *string
+	report        **schema.DocPayload
 	clearedFields map[string]struct{}
 	predicates    []predicate.Document
 }
@@ -177,6 +178,38 @@ func (m *Mutation) ResetDescription() {
 	delete(m.clearedFields, FieldDescription)
 }
 
+// SetReport sets the "report" field.
+func (m *Mutation) SetReport(sp *schema.DocPayload) {
+	m.report = &sp
+}
+
+// Report returns the value of the "report" field in the mutation.
+func (m *Mutation) Report() (r *schema.DocPayload, exists bool) {
+	v := m.report
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearReport clears the value of the "report" field.
+func (m *Mutation) ClearReport() {
+	m.report = nil
+	m.clearedFields[FieldReport] = struct{}{}
+}
+
+// ReportCleared returns if the "report" field was cleared in this mutation.
+func (m *Mutation) ReportCleared() bool {
+	_, ok := m.clearedFields[FieldReport]
+	return ok
+}
+
+// ResetReport resets all changes to the "report" field.
+func (m *Mutation) ResetReport() {
+	m.report = nil
+	delete(m.clearedFields, FieldReport)
+}
+
 // Where appends a list predicates to the Mutation builder.
 func (m *Mutation) Where(ps ...predicate.Document) {
 	m.predicates = append(m.predicates, ps...)
@@ -211,7 +244,7 @@ func (m *Mutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *Mutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.name != nil {
 		fields = append(fields, FieldName)
 	}
@@ -226,6 +259,9 @@ func (m *Mutation) Fields() []string {
 	}
 	if m.description != nil {
 		fields = append(fields, FieldDescription)
+	}
+	if m.report != nil {
+		fields = append(fields, FieldReport)
 	}
 	return fields
 }
@@ -245,6 +281,8 @@ func (m *Mutation) Field(name string) (ent.Value, bool) {
 		return m.Payload()
 	case FieldDescription:
 		return m.Description()
+	case FieldReport:
+		return m.Report()
 	}
 	return nil, false
 }
@@ -296,6 +334,13 @@ func (m *Mutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetDescription(v)
 		return nil
+	case FieldReport:
+		v, ok := value.(*schema.DocPayload)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetReport(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Document field %s", name)
 }
@@ -338,6 +383,9 @@ func (m *Mutation) ClearedFields() []string {
 	if m.FieldCleared(FieldArchive) {
 		fields = append(fields, FieldArchive)
 	}
+	if m.FieldCleared(FieldReport) {
+		fields = append(fields, FieldReport)
+	}
 	return fields
 }
 
@@ -361,6 +409,9 @@ func (m *Mutation) ClearField(name string) error {
 	case FieldDescription:
 		m.ClearDescription()
 		return nil
+	case FieldReport:
+		m.ClearReport()
+		return nil
 	}
 	return fmt.Errorf("unknown Document nullable field %s", name)
 }
@@ -383,6 +434,9 @@ func (m *Mutation) ResetField(name string) error {
 		return nil
 	case FieldDescription:
 		m.ResetDescription()
+		return nil
+	case FieldReport:
+		m.ResetReport()
 		return nil
 	}
 	return fmt.Errorf("unknown Document field %s", name)

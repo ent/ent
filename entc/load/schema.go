@@ -65,6 +65,7 @@ type Field struct {
 	DeprecatedReason string                  `json:"deprecated_reason,omitempty"`
 	BlobKey          bool                    `json:"blob_key,omitempty"`
 	BlobDualWrite    bool                    `json:"blob_dual_write,omitempty"`
+	BlobPreferred    bool                    `json:"blob_preferred,omitempty"`
 	BlobDWSchemaType map[string]string       `json:"blob_dw_schema_type,omitempty"`
 	BlobLazy         bool                    `json:"blob_lazy,omitempty"`
 	BlobCheckRefs    bool                    `json:"blob_check_refs,omitempty"`
@@ -151,6 +152,7 @@ func NewField(fd *field.Descriptor) (*Field, error) {
 		DeprecatedReason: fd.DeprecatedReason,
 		BlobKey:          fd.BlobKey != nil,
 		BlobDualWrite:    fd.BlobDualWrite,
+		BlobPreferred:    fd.BlobPreferred,
 		BlobLazy:         fd.BlobLazy,
 		BlobCheckRefs:    fd.BlobCheckRefs,
 		BlobDWSchemaType: fd.BlobDWSchemaType,

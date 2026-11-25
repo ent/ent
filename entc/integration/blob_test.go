@@ -61,6 +61,7 @@ func blobDir(t *testing.T) string {
 	require.NoError(t, os.MkdirAll(filepath.Join(dir, "payloads"), 0o755))
 	require.NoError(t, os.MkdirAll(filepath.Join(dir, "descriptions"), 0o755))
 	require.NoError(t, os.MkdirAll(filepath.Join(dir, "archives"), 0o755))
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, "reports"), 0o755))
 	return dir
 }
 
@@ -84,6 +85,8 @@ func newBlobOpeners(dir string) ent.BlobOpeners {
 				return blob.OpenBucket(ctx, "file://"+filepath.Join(dir, "descriptions"))
 			case document.FieldArchive:
 				return blob.OpenBucket(ctx, "file://"+filepath.Join(dir, "archives"))
+			case document.FieldReport:
+				return blob.OpenBucket(ctx, "file://"+filepath.Join(dir, "reports"))
 			default:
 				return nil, fmt.Errorf("unknown blob field: %s", field)
 			}
@@ -2022,17 +2025,10 @@ func TestBlobDualWriteFallbackOnMissingBlob(t *testing.T) {
 
 	// Manually delete the attachment blob file from storage to simulate
 	// a missing blob (e.g., data written to column before blob migration).
-	attDir := filepath.Join(dir, "attachments")
-	entries, err := os.ReadDir(attDir)
-	require.NoError(t, err)
-	for _, e := range entries {
-		if !strings.HasSuffix(e.Name(), ".attrs") {
-			require.NoError(t, os.Remove(filepath.Join(attDir, e.Name())))
-		}
-	}
+	removeBlobFiles(t, filepath.Join(dir, "attachments"))
 
 	// Also update the column directly to simulate a value that only exists in SQL.
-	_, err = db.ExecContext(ctx, `UPDATE documents SET attachment = ? WHERE id = ?`, []byte("sql-only-value"), doc.ID)
+	_, err := db.ExecContext(ctx, `UPDATE documents SET attachment = ? WHERE id = ?`, []byte("sql-only-value"), doc.ID)
 	require.NoError(t, err)
 
 	// Query the document — the DualWrite field should fall back to the SQL column value.
@@ -2215,6 +2211,19 @@ func countBlobFiles(t *testing.T, dir string) int {
 	})
 	require.NoError(t, err)
 	return count
+}
+
+// removeBlobFiles removes the blob objects stored in dir, simulating objects
+// that are missing from storage. The fileblob attribute files are kept.
+func removeBlobFiles(t *testing.T, dir string) {
+	t.Helper()
+	entries, err := os.ReadDir(dir)
+	require.NoError(t, err)
+	for _, e := range entries {
+		if !strings.HasSuffix(e.Name(), ".attrs") {
+			require.NoError(t, os.Remove(filepath.Join(dir, e.Name())))
+		}
+	}
 }
 
 func TestBlobUpdateSkipsWriteWhenUnchanged(t *testing.T) {
@@ -2430,4 +2439,193 @@ func TestBlobCheckRefsIsPerField(t *testing.T) {
 	require.Equal(t, []byte(sharedContent), blobContent(t, keep.ContentReader, ctx))
 	// "metadata" did not, so its shared object is gone.
 	require.Equal(t, 0, countBlobFiles(t, metaDir))
+}
+
+// TestBlobPreferred covers a field that moved from DualWrite to writing blob storage only ("report").
+// Writes set its data column to NULL, and reads fall back to the column for rows without a blob key.
+func TestBlobPreferred(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+	v1 := &schema.DocPayload{Title: "t1", Body: "b1"}
+	doc := client.Document.Create().
+		SetName("blob-preferred").
+		SetContent(bytes.NewReader([]byte("content"))).
+		SetThumbnail(bytes.NewReader([]byte("thumb"))).
+		SetAttachment([]byte("att")).
+		SetReport(v1).
+		SaveX(ctx)
+	require.Equal(t, v1, doc.Report)
+	key := reportKey(ctx, t, client, doc.ID)
+	require.NotEmpty(t, key.String)
+	require.JSONEq(t, `{"title":"t1","body":"b1"}`, string(blobContent(t, doc.ReportReader, ctx)))
+	require.Equal(t, v1, client.Document.GetX(ctx, doc.ID).Report)
+	// Selecting only the column reads it without loading the blob.
+	require.Nil(t, client.Document.Query().Where(document.ID(doc.ID)).Select(document.FieldReport).OnlyX(ctx).Report)
+
+	v2 := &schema.DocPayload{Title: "t2", Body: "b2"}
+	doc = doc.Update().SetReport(v2).SaveX(ctx)
+	require.Equal(t, v2, doc.Report)
+	key2 := reportKey(ctx, t, client, doc.ID)
+	require.NotEqual(t, key.String, key2.String)
+	// UpdateOne does not read blob storage for fields it does not set: they hold the column's value.
+	require.Nil(t, doc.Update().SetName("renamed").SaveX(ctx).Report)
+
+	// Clearing the field clears both columns.
+	doc = doc.Update().ClearReport().SaveX(ctx)
+	require.Nil(t, doc.Report)
+	key = reportKey(ctx, t, client, doc.ID)
+	require.False(t, key.Valid)
+	require.Nil(t, client.Document.GetX(ctx, doc.ID).Report)
+}
+
+// TestBlobPreferredLegacyRow verifies that a BlobPreferred field reads the data column of rows without
+// a blob key, and that writing or clearing such a row sets the column to NULL.
+func TestBlobPreferredLegacyRow(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+	db := client.Driver().(*entsql.Driver).DB()
+	for _, name := range []string{"legacy-set", "legacy-clear"} {
+		_, err := db.ExecContext(ctx,
+			`INSERT INTO documents (name, content_key, thumbnail_key, attachment_key, attachment, report) VALUES (?, ?, ?, ?, ?, ?)`,
+			name, "", "", "", []byte("att"), `{"title":"column","body":"legacy"}`,
+		)
+		require.NoError(t, err)
+	}
+	legacy := &schema.DocPayload{Title: "column", Body: "legacy"}
+	doc := client.Document.Query().Where(document.Name("legacy-set")).OnlyX(ctx)
+	require.Equal(t, legacy, doc.Report)
+	require.Equal(t, legacy, doc.Update().SetMetadata([]byte("meta")).SaveX(ctx).Report)
+
+	v2 := &schema.DocPayload{Title: "t2"}
+	doc.Update().SetReport(v2).ExecX(ctx)
+	key := reportKey(ctx, t, client, doc.ID)
+	require.NotEmpty(t, key.String)
+	require.Equal(t, v2, client.Document.GetX(ctx, doc.ID).Report)
+
+	doc = client.Document.Query().Where(document.Name("legacy-clear")).OnlyX(ctx)
+	doc.Update().ClearReport().ExecX(ctx)
+	reportKey(ctx, t, client, doc.ID)
+	require.Nil(t, client.Document.GetX(ctx, doc.ID).Report)
+}
+
+// TestBlobPreferredMissingBlob verifies that a BlobPreferred field falls back to the data column
+// when the object is missing, as DualWrite does, for a row DualWrite wrote.
+func TestBlobPreferredMissingBlob(t *testing.T) {
+	client, ctx, dir := setupBlob(t)
+	db := client.Driver().(*entsql.Driver).DB()
+	v1 := &schema.DocPayload{Title: "t1"}
+	doc := client.Document.Create().
+		SetName("missing-blob").
+		SetContent(bytes.NewReader([]byte("content"))).
+		SetThumbnail(bytes.NewReader([]byte("thumb"))).
+		SetAttachment([]byte("att")).
+		SetReport(v1).
+		SaveX(ctx)
+	_, err := db.ExecContext(ctx, `UPDATE documents SET report = ? WHERE id = ?`, `{"title":"column","body":"dual-write"}`, doc.ID)
+	require.NoError(t, err)
+	require.Equal(t, v1, client.Document.GetX(ctx, doc.ID).Report)
+
+	removeBlobFiles(t, filepath.Join(dir, "reports"))
+	column := &schema.DocPayload{Title: "column", Body: "dual-write"}
+	require.Equal(t, column, client.Document.GetX(ctx, doc.ID).Report)
+	require.Equal(t, column, doc.Update().SetName("renamed").SaveX(ctx).Report)
+	// Setting the value the key already holds skips the write, so the column keeps the only copy.
+	doc.Update().SetReport(v1).ExecX(ctx)
+	require.Equal(t, column, client.Document.GetX(ctx, doc.ID).Report)
+}
+
+// TestBlobPreferredBulkAndUpsert verifies that bulk creation and upserts of a BlobPreferred field
+// write blob storage and set its data column to NULL.
+func TestBlobPreferredBulkAndUpsert(t *testing.T) {
+	client, ctx, _ := setupBlob(t)
+	db := client.Driver().(*entsql.Driver).DB()
+	create := func(name string) *ent.DocumentCreate {
+		return client.Document.Create().
+			SetName(name).
+			SetContent(bytes.NewReader([]byte("content"))).
+			SetThumbnail(bytes.NewReader([]byte("thumb"))).
+			SetAttachment([]byte("att"))
+	}
+	docs := client.Document.CreateBulk(
+		create("bulk-1").SetReport(&schema.DocPayload{Title: "bulk-1"}),
+		create("bulk-2").SetReport(&schema.DocPayload{Title: "bulk-2"}),
+	).SaveX(ctx)
+	require.Len(t, docs, 2)
+	for _, doc := range docs {
+		require.Equal(t, doc.Name, doc.Report.Title)
+		key := reportKey(ctx, t, client, doc.ID)
+		require.NotEmpty(t, key.String)
+		require.Equal(t, doc.Report, client.Document.GetX(ctx, doc.ID).Report)
+	}
+
+	// Upserts set the column of a row DualWrite wrote to NULL, with UpdateReport or UpdateNewValues.
+	id := docs[0].ID
+	for i, upsert := range []func(*ent.DocumentUpsertOne) *ent.DocumentUpsertOne{
+		(*ent.DocumentUpsertOne).UpdateReport,
+		(*ent.DocumentUpsertOne).UpdateNewValues,
+	} {
+		_, err := db.ExecContext(ctx, `UPDATE documents SET report = ? WHERE id = ?`, `{"title":"column","body":"dual-write"}`, id)
+		require.NoError(t, err)
+		v := &schema.DocPayload{Title: fmt.Sprintf("upsert-%d", i)}
+		require.Equal(t, id, upsert(create("bulk-1").SetReport(v).OnConflictColumns(document.FieldName)).IDX(ctx))
+		reportKey(ctx, t, client, id)
+		require.Equal(t, v, client.Document.GetX(ctx, id).Report)
+	}
+
+	create("bulk-1").OnConflictColumns(document.FieldName).ClearReport().ExecX(ctx)
+	key := reportKey(ctx, t, client, id)
+	require.False(t, key.Valid)
+	require.Nil(t, client.Document.GetX(ctx, id).Report)
+}
+
+// TestBlobPreferredRollout checks that DualWrite and BlobPreferred read the rows the other writes. "payload" and
+// "report" stand for the two versions of one field: they share a bucket, and sync copies the writer's columns to the reader.
+func TestBlobPreferredRollout(t *testing.T) {
+	openers := newBlobOpeners(blobDir(t))
+	client, ctx, _ := setupBlob(t, ent.WithBlobOpeners(ent.BlobOpeners{
+		Document: func(ctx context.Context, field string) (ent.Blob, error) {
+			if field == document.FieldReport {
+				field = document.FieldPayload
+			}
+			return openers.Document(ctx, field)
+		},
+	}))
+	db := client.Driver().(*entsql.Driver).DB()
+	doc := client.Document.Create().
+		SetName("rollout").
+		SetContent(bytes.NewReader([]byte("content"))).
+		SetThumbnail(bytes.NewReader([]byte("thumb"))).
+		SetAttachment([]byte("att")).
+		SaveX(ctx)
+	sync := func(from, to string) {
+		t.Helper()
+		_, err := db.ExecContext(ctx, fmt.Sprintf(`UPDATE documents SET %[2]s = %[1]s, %[2]s_key = %[1]s_key WHERE id = ?`, from, to), doc.ID)
+		require.NoError(t, err)
+	}
+	v1, v2 := &schema.DocPayload{Title: "v1"}, &schema.DocPayload{Title: "v2"}
+
+	doc.Update().SetPayload(v1).ExecX(ctx)
+	sync(document.FieldPayload, document.FieldReport)
+	require.Equal(t, v1, client.Document.GetX(ctx, doc.ID).Report)
+
+	doc.Update().SetReport(v2).ExecX(ctx)
+	sync(document.FieldReport, document.FieldPayload)
+	require.Equal(t, v2, client.Document.GetX(ctx, doc.ID).Payload)
+
+	// A value cleared by either step does not come back from the column in the other.
+	doc.Update().ClearReport().ExecX(ctx)
+	sync(document.FieldReport, document.FieldPayload)
+	require.Nil(t, client.Document.GetX(ctx, doc.ID).Payload)
+	doc.Update().SetPayload(v1).ExecX(ctx)
+	doc.Update().ClearPayload().ExecX(ctx)
+	sync(document.FieldPayload, document.FieldReport)
+	require.Nil(t, client.Document.GetX(ctx, doc.ID).Report)
+}
+
+// reportKey returns the blob key of the "report" field, and checks that its data column is NULL.
+func reportKey(ctx context.Context, t *testing.T, client *ent.Client, id int) sql.NullString {
+	t.Helper()
+	var column, key sql.NullString
+	db := client.Driver().(*entsql.Driver).DB()
+	require.NoError(t, db.QueryRowContext(ctx, `SELECT report, report_key FROM documents WHERE id = ?`, id).Scan(&column, &key))
+	require.False(t, column.Valid)
+	return key
 }

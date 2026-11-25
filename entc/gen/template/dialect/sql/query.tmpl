@@ -121,7 +121,7 @@ func ({{ $receiver }} *{{ $builder }}) loadBlobFields(ctx context.Context, nodes
 		{{- range $f := $.LoadOnScanFields }}
 		if n.{{ $f.BlobKeyColumn }} != nil && *n.{{ $f.BlobKeyColumn }} != "" {
 			{{- if $f.IsBlobNoColumn }}
-			{{- /* Non-DualWrite: blob is the only source of data. */}}
+			{{- /* No data column: blob is the only source of data. */}}
 			data, err := _blobs.Read(ctx, {{ $.Package }}.{{ $f.Constant }}, *n.{{ $f.BlobKeyColumn }})
 			if err != nil {
 				return errors.Join(fmt.Errorf("loading {{ $f.Name }}: %w", err), _blobs.Close())
@@ -145,7 +145,7 @@ func ({{ $receiver }} *{{ $builder }}) loadBlobFields(ctx context.Context, nodes
 			n.{{ $f.StructField }} = data
 			{{- end }}
 			{{- else }}
-			{{- /* DualWrite: prefer blob value, but preserve the column value when blob is missing. */}}
+			{{- /* DualWrite and BlobPreferred: prefer blob value, but preserve the column value when blob is missing. */}}
 			switch data, err := _blobs.Read(ctx, {{ $.Package }}.{{ $f.Constant }}, *n.{{ $f.BlobKeyColumn }}); {
 			case err != nil:
 				return errors.Join(fmt.Errorf("loading {{ $f.Name }}: %w", err), _blobs.Close())

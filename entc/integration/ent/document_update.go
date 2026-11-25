@@ -214,6 +214,18 @@ func (_u *DocumentUpdateOne) ClearDescription() *DocumentUpdateOne {
 	return _u
 }
 
+// SetReport sets the "report" field.
+func (_u *DocumentUpdateOne) SetReport(v *schema.DocPayload) *DocumentUpdateOne {
+	_u.mutation.SetReport(v)
+	return _u
+}
+
+// ClearReport clears the value of the "report" field.
+func (_u *DocumentUpdateOne) ClearReport() *DocumentUpdateOne {
+	_u.mutation.ClearReport()
+	return _u
+}
+
 // SetContent sets the "content" field.
 func (_u *DocumentUpdateOne) SetContent(v io.Reader) *DocumentUpdateOne {
 	_u.mutation.SetContent(v)
@@ -434,6 +446,33 @@ func (_u *DocumentUpdateOne) sqlSave(ctx context.Context) (_node *Document, err 
 			_spec.ClearField("archive_key", field.TypeString)
 		})
 	}
+	if value, ok := _u.mutation.Report(); ok {
+		_blobDV, err := document.ValueScanner.Report.Value(value)
+		if err != nil {
+			return nil, fmt.Errorf("ent: encoding report: %w", err)
+		}
+		var _blobData []byte
+		switch v := _blobDV.(type) {
+		case []byte:
+			_blobData = v
+		case string:
+			_blobData = []byte(v)
+		default:
+			return nil, fmt.Errorf("ent: encoding report: expected []byte or string, got %T", _blobDV)
+		}
+		_blobs.Set(document.FieldReport, _blobData,
+			defaultBlobKey,
+			func(k string) {
+				_spec.SetField("report_key", field.TypeString, k)
+			},
+		)
+	}
+	if _u.mutation.ReportCleared() {
+		_spec.ClearField(document.FieldReport, field.TypeBytes)
+		_blobs.SetCleared(document.FieldReport, func() {
+			_spec.ClearField("report_key", field.TypeString)
+		})
+	}
 	_blobResult, err := _blobs.Update(ctx, &sqlgraph.BlobSpec{
 		Driver: _u.driver,
 		Table:  document.Table,
@@ -445,6 +484,7 @@ func (_u *DocumentUpdateOne) sqlSave(ctx context.Context) (_node *Document, err 
 			document.FieldPayload:     "payload_key",
 			document.FieldDescription: "description_key",
 			document.FieldArchive:     "archive_key",
+			document.FieldReport:      "report_key",
 		},
 		CheckRefs: map[string]bool{
 			document.FieldContent:    true,
@@ -457,6 +497,9 @@ func (_u *DocumentUpdateOne) sqlSave(ctx context.Context) (_node *Document, err 
 	})
 	if err != nil {
 		return nil, err
+	}
+	if _blobResult.Written(document.FieldReport) {
+		_spec.ClearField(document.FieldReport, field.TypeBytes)
 	}
 	_node = &Document{config: _u.config}
 	_spec.Assign = _node.assignValues
@@ -520,6 +563,9 @@ func (_u *DocumentUpdateOne) sqlSave(ctx context.Context) (_node *Document, err 
 			return nil, errors.Join(fmt.Errorf("loading description after update: %w", err), _blobReader.Close())
 		}
 		_node.Description = string(data)
+	}
+	if value, ok := _u.mutation.Report(); ok {
+		_node.Report = value
 	}
 	if err := _blobReader.Close(); err != nil {
 		return nil, err

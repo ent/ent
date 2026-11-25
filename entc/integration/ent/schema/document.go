@@ -21,6 +21,23 @@ type DocPayload struct {
 	Body  string `json:"body"`
 }
 
+// docPayloadScanner encodes DocPayload values as JSON.
+var docPayloadScanner = field.ValueScannerFunc[*DocPayload, *sql.NullString]{
+	V: func(v *DocPayload) (driver.Value, error) {
+		return json.Marshal(v)
+	},
+	S: func(s *sql.NullString) (*DocPayload, error) {
+		if !s.Valid {
+			return nil, nil
+		}
+		var p DocPayload
+		if err := json.Unmarshal([]byte(s.String), &p); err != nil {
+			return nil, err
+		}
+		return &p, nil
+	},
+}
+
 // Document holds the schema definition for the Document entity.
 type Document struct {
 	ent.Schema
@@ -52,21 +69,7 @@ func (Document) Fields() []ent.Field {
 				dialect.SQLite:   "json",
 			}).
 			GoType(&DocPayload{}).
-			ValueScanner(field.ValueScannerFunc[*DocPayload, *sql.NullString]{
-				V: func(v *DocPayload) (driver.Value, error) {
-					return json.Marshal(v)
-				},
-				S: func(s *sql.NullString) (*DocPayload, error) {
-					if !s.Valid {
-						return nil, nil
-					}
-					var p DocPayload
-					if err := json.Unmarshal([]byte(s.String), &p); err != nil {
-						return nil, err
-					}
-					return &p, nil
-				},
-			}).
+			ValueScanner(docPayloadScanner).
 			Optional(),
 		field.Blob("description").
 			GoType("").
@@ -74,6 +77,16 @@ func (Document) Fields() []ent.Field {
 		field.Blob("archive").
 			Lazy().
 			DualWrite().
+			Optional(),
+		// "report" moved from DualWrite to writing blob storage only, and still reads its data column.
+		field.Blob("report").
+			BlobPreferred(map[string]string{
+				dialect.MySQL:    "longblob",
+				dialect.Postgres: "jsonb",
+				dialect.SQLite:   "json",
+			}).
+			GoType(&DocPayload{}).
+			ValueScanner(docPayloadScanner).
 			Optional(),
 	}
 }

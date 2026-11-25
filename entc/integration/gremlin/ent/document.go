@@ -29,6 +29,8 @@ type Document struct {
 	Payload *schema.DocPayload `json:"payload,omitempty"`
 	// Description holds the value of the "description" field.
 	Description string `json:"description,omitempty"`
+	// Report holds the value of the "report" field.
+	Report *schema.DocPayload `json:"report,omitempty"`
 }
 
 // FromResponse scans the gremlin response data into Document.
@@ -86,6 +88,9 @@ func (_m *Document) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("description=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Description))
+	builder.WriteString(", ")
+	builder.WriteString("report=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Report))
 	builder.WriteByte(')')
 	return builder.String()
 }

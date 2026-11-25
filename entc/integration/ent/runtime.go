@@ -70,6 +70,9 @@ func init() {
 	// documentDescPayload is the schema descriptor for payload field.
 	documentDescPayload := documentFields[5].Descriptor()
 	document.ValueScanner.Payload = documentDescPayload.ValueScanner.(field.TypeValueScanner[*schema.DocPayload])
+	// documentDescReport is the schema descriptor for report field.
+	documentDescReport := documentFields[8].Descriptor()
+	document.ValueScanner.Report = documentDescReport.ValueScanner.(field.TypeValueScanner[*schema.DocPayload])
 	// documentBlobDescContent is the schema descriptor for content blob field.
 	documentBlobDescContent := documentFields[1].Descriptor()
 	// document.NewContentKey generates the blob storage key for the content field.

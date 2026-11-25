@@ -1015,3 +1015,10 @@ func TestString_MaxRuneLen(t *testing.T) {
 	err = fd.Validators[0].(func(string) error)("")
 	assert.NoError(t, err)
 }
+
+func TestBlob_BlobPreferred(t *testing.T) {
+	assert.NoError(t, field.Blob("data").BlobPreferred().Descriptor().Err)
+	const msg = "BlobPreferred replaces DualWrite, and cannot be used with it or with Lazy"
+	assert.EqualError(t, field.Blob("data").DualWrite().BlobPreferred().Descriptor().Err, msg)
+	assert.EqualError(t, field.Blob("data").BlobPreferred().Lazy().Descriptor().Err, msg)
+}
